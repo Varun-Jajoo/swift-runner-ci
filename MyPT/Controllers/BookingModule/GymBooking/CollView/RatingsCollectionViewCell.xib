@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="RatingsCollectionViewCell" id="gTV-IL-0wX" customClass="RatingsCollectionViewCell" customModule="MyPT" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="526" height="251"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="526" height="251"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="FJr-Fk-bMI">
+                        <rect key="frame" x="1" y="1" width="524" height="249"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="SaM-eM-Ji5" customClass="CosmosView" customModule="Cosmos">
+                                <rect key="frame" x="20" y="24" width="201.66666666666666" height="15"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="15" id="hZX-bq-zDC"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="rating">
+                                        <real key="value" value="2"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="totalStars">
+                                        <integer key="value" value="5"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="color" keyPath="filledColor">
+                                        <color key="value" name="appRatingYellow"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="color" keyPath="emptyColor">
+                                        <color key="value" name="appDarkGray"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="color" keyPath="emptyBorderColor">
+                                        <color key="value" name="appDarkGray"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="color" keyPath="filledBorderColor">
+                                        <color key="value" name="appRatingYellow"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="starMargin">
+                                        <real key="value" value="2"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" text="1 weak ago" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OfQ-8J-TAV">
+                                <rect key="frame" x="233.66666666666666" y="12" width="270.33333333333337" height="39"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="txtDarkGray"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="One of the best Gym in Dubai and Amazing atmosphere for athletes and gym lover." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Bto-no-kn9">
+                                <rect key="frame" x="20" y="59" width="484" height="40.666666666666657"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="appLightGray"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_femaleplaceholder" translatesAutoresizingMaskIntoConstraints="NO" id="G0p-0t-DMT">
+                                <rect key="frame" x="20" y="168" width="56" height="56"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="G0p-0t-DMT" secondAttribute="height" id="EGq-rj-kO3"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Kabir Khan" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bMW-kU-ch1">
+                                <rect key="frame" x="88" y="168" width="416" height="56"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="appWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" name="appCard"/>
+                        <constraints>
+                            <constraint firstItem="SaM-eM-Ji5" firstAttribute="width" secondItem="FJr-Fk-bMI" secondAttribute="width" multiplier="100:260" id="1aK-xt-WmD"/>
+                            <constraint firstItem="Bto-no-kn9" firstAttribute="trailing" secondItem="OfQ-8J-TAV" secondAttribute="trailing" id="7Zi-Qs-CwH"/>
+                            <constraint firstItem="Bto-no-kn9" firstAttribute="leading" secondItem="SaM-eM-Ji5" secondAttribute="leading" id="BL9-hM-hJP"/>
+                            <constraint firstItem="Bto-no-kn9" firstAttribute="top" secondItem="SaM-eM-Ji5" secondAttribute="bottom" constant="20" id="Bqz-ym-kyi"/>
+                            <constraint firstItem="G0p-0t-DMT" firstAttribute="top" relation="greaterThanOrEqual" secondItem="Bto-no-kn9" secondAttribute="bottom" constant="20" id="Gm0-GV-RdQ"/>
+                            <constraint firstItem="bMW-kU-ch1" firstAttribute="trailing" secondItem="Bto-no-kn9" secondAttribute="trailing" id="HUO-Ju-oz0"/>
+                            <constraint firstAttribute="bottom" secondItem="bMW-kU-ch1" secondAttribute="bottom" constant="25" id="Ver-PR-XsK"/>
+                            <constraint firstItem="SaM-eM-Ji5" firstAttribute="leading" secondItem="FJr-Fk-bMI" secondAttribute="leading" constant="20" id="WaI-wR-VJ7"/>
+                            <constraint firstAttribute="trailing" secondItem="OfQ-8J-TAV" secondAttribute="trailing" constant="20" id="Yq2-NY-1wv"/>
+                            <constraint firstItem="G0p-0t-DMT" firstAttribute="leading" secondItem="Bto-no-kn9" secondAttribute="leading" id="ZWS-wh-cyg"/>
+                            <constraint firstItem="bMW-kU-ch1" firstAttribute="leading" secondItem="G0p-0t-DMT" secondAttribute="trailing" constant="12" id="atp-i2-MYW"/>
+                            <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="G0p-0t-DMT" secondAttribute="bottom" constant="20" id="dUm-Y8-ehZ"/>
+                            <constraint firstItem="G0p-0t-DMT" firstAttribute="width" secondItem="FJr-Fk-bMI" secondAttribute="width" multiplier="40:375" id="f8r-kV-bKD"/>
+                            <constraint firstItem="bMW-kU-ch1" firstAttribute="top" secondItem="G0p-0t-DMT" secondAttribute="top" id="n6j-og-8FV"/>
+                            <constraint firstItem="SaM-eM-Ji5" firstAttribute="top" secondItem="FJr-Fk-bMI" secondAttribute="top" constant="24" id="nli-Yg-ogv"/>
+                            <constraint firstItem="bMW-kU-ch1" firstAttribute="centerY" relation="greaterThanOrEqual" secondItem="G0p-0t-DMT" secondAttribute="centerY" id="pb6-hO-39A"/>
+                            <constraint firstItem="OfQ-8J-TAV" firstAttribute="centerY" relation="greaterThanOrEqual" secondItem="SaM-eM-Ji5" secondAttribute="centerY" id="vnK-KD-g3m"/>
+                            <constraint firstItem="OfQ-8J-TAV" firstAttribute="top" secondItem="FJr-Fk-bMI" secondAttribute="top" constant="12" id="wyC-28-IqF"/>
+                            <constraint firstItem="OfQ-8J-TAV" firstAttribute="leading" secondItem="SaM-eM-Ji5" secondAttribute="trailing" constant="12" id="yd7-a9-6Ot"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="FJr-Fk-bMI" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="1" id="B9E-75-nmG"/>
+                <constraint firstItem="FJr-Fk-bMI" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="1" id="J4G-7d-gxI"/>
+                <constraint firstAttribute="trailing" secondItem="FJr-Fk-bMI" secondAttribute="trailing" constant="1" id="Q8I-8l-xlt"/>
+                <constraint firstAttribute="bottom" secondItem="FJr-Fk-bMI" secondAttribute="bottom" constant="1" id="nyI-jE-hKV"/>
+            </constraints>
+            <size key="customSize" width="526" height="251"/>
+            <connections>
+                <outlet property="celMBV" destination="FJr-Fk-bMI" id="eAE-mi-cYO"/>
+                <outlet property="dayLbl" destination="OfQ-8J-TAV" id="ifV-Pn-r2c"/>
+                <outlet property="ratingMBV" destination="SaM-eM-Ji5" id="31r-XH-RvG"/>
+                <outlet property="reviewMsgLbl" destination="Bto-no-kn9" id="ZCq-jF-G1r"/>
+                <outlet property="userImgView" destination="G0p-0t-DMT" id="Jmu-rM-jY6"/>
+                <outlet property="userNameLbl" destination="bMW-kU-ch1" id="cPG-xc-f5J"/>
+            </connections>
+            <point key="canvasLocation" x="341.98473282442745" y="90.492957746478879"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="ic_femaleplaceholder" width="180" height="144"/>
+        <namedColor name="appCard">
+            <color red="0.27843137254901962" green="0.30196078431372547" blue="0.37647058823529411" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appDarkGray">
+            <color red="0.37647058823529411" green="0.37647058823529411" blue="0.37647058823529411" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appLightGray">
+            <color red="0.83137254901960789" green="0.83137254901960789" blue="0.83137254901960789" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appRatingYellow">
+            <color red="1" green="0.77647058823529413" blue="0.023529411764705882" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appWhite">
+            <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="txtDarkGray">
+            <color red="0.58431372549019611" green="0.58431372549019611" blue="0.58431372549019611" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="PointsTableViewCell" rowHeight="31" id="KGk-i7-Jjw" customClass="PointsTableViewCell" customModule="MyPT" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="390" height="31"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="390" height="31"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hHI-qE-pjb">
+                        <rect key="frame" x="1" y="2" width="388" height="21"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_dashboardCircle" translatesAutoresizingMaskIntoConstraints="NO" id="FoQ-e2-LMV">
+                                <rect key="frame" x="1.0000000000000002" y="6.9999999999999991" width="3.3333333333333339" height="3.333333333333333"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="15" id="BMm-f1-ljL"/>
+                                    <constraint firstAttribute="width" secondItem="FoQ-e2-LMV" secondAttribute="height" id="GV3-dU-zaP"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Treadmills  " lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DgH-UQ-s84">
+                                <rect key="frame" x="9.3333333333333428" y="2" width="377.66666666666663" height="17"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <color key="textColor" name="appWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="FoQ-e2-LMV" firstAttribute="centerY" relation="lessThanOrEqual" secondItem="DgH-UQ-s84" secondAttribute="centerY" id="5iF-15-mMy"/>
+                            <constraint firstAttribute="bottom" secondItem="DgH-UQ-s84" secondAttribute="bottom" constant="2" id="8FC-5U-2lV"/>
+                            <constraint firstAttribute="trailing" secondItem="DgH-UQ-s84" secondAttribute="trailing" constant="1" id="Exe-za-j2g"/>
+                            <constraint firstItem="DgH-UQ-s84" firstAttribute="leading" secondItem="FoQ-e2-LMV" secondAttribute="trailing" constant="5" id="JGD-sb-4sI"/>
+                            <constraint firstItem="FoQ-e2-LMV" firstAttribute="leading" secondItem="hHI-qE-pjb" secondAttribute="leading" constant="1" id="XSf-Tl-rkL"/>
+                            <constraint firstItem="FoQ-e2-LMV" firstAttribute="top" secondItem="DgH-UQ-s84" secondAttribute="top" constant="5" id="kdH-cR-QjZ"/>
+                            <constraint firstItem="DgH-UQ-s84" firstAttribute="top" secondItem="hHI-qE-pjb" secondAttribute="top" constant="2" id="wVL-yI-aGd"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                <constraints>
+                    <constraint firstItem="hHI-qE-pjb" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="2" id="LJQ-zj-wEZ"/>
+                    <constraint firstAttribute="trailing" secondItem="hHI-qE-pjb" secondAttribute="trailing" constant="1" id="dX4-P6-jMR"/>
+                    <constraint firstAttribute="bottom" secondItem="hHI-qE-pjb" secondAttribute="bottom" constant="4" id="gAV-SB-USA"/>
+                    <constraint firstItem="hHI-qE-pjb" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="1" id="q0F-ER-NEN"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <connections>
+                <outlet property="cellMBV" destination="hHI-qE-pjb" id="J9d-Gm-X4M"/>
+                <outlet property="cellMBVBottomConstrnt" destination="gAV-SB-USA" id="MGi-Dd-jEY"/>
+                <outlet property="leftIgViewTrailingConstrnt" destination="JGD-sb-4sI" id="XIP-R9-ovw"/>
+                <outlet property="leftImgView" destination="FoQ-e2-LMV" id="rvY-h4-oXc"/>
+                <outlet property="titleLbl" destination="DgH-UQ-s84" id="yQ3-Ts-sgk"/>
+                <outlet property="widthImgViewConstrnt" destination="BMm-f1-ljL" id="BiK-rJ-h3z"/>
+            </connections>
+            <point key="canvasLocation" x="-169.46564885496181" y="-6.6901408450704229"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="ic_dashboardCircle" width="3" height="3.3333332538604736"/>
+        <namedColor name="appWhite">
+            <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

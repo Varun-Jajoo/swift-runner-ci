@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="UpcomingMealsCollectionViewCell" id="gTV-IL-0wX" customClass="UpcomingMealsCollectionViewCell" customModule="MyPT" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="350" height="304"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="350" height="304"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ENl-VW-i6M">
+                        <rect key="frame" x="1" y="1" width="348" height="302"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Salad &amp; Egg" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nFa-ob-YKb">
+                                <rect key="frame" x="20" y="20" width="213" height="20.333333333333329"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="appWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1aC-ff-reO">
+                                <rect key="frame" x="20" y="48.333333333333336" width="213" height="21.000000000000007"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="251 kcal" image="ic_Solid_fire">
+                                    <color key="titleColor" name="appWhite"/>
+                                </state>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NJS-60-ImE">
+                                <rect key="frame" x="253" y="20" width="30" height="25"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="30" id="8Im-Js-gRC"/>
+                                </constraints>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" image="ic_share">
+                                    <color key="titleColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HBr-iV-omX">
+                                <rect key="frame" x="293" y="20" width="30" height="25"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="30" id="YDE-Cg-rAT"/>
+                                </constraints>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" image="ic_heart">
+                                    <color key="titleColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4P2-35-Q5B">
+                                <rect key="frame" x="20" y="231" width="167" height="22"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="25g Protein" image="ic_Solid_barbell_diagonal">
+                                    <color key="titleColor" name="appWhite"/>
+                                </state>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TXg-Ec-zAl">
+                                <rect key="frame" x="20" y="261" width="167" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="17g Fat" image="ic_Solid_fire_light">
+                                    <color key="titleColor" name="appWhite"/>
+                                </state>
+                            </button>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="252" verticalHuggingPriority="251" image="ic_forknspoon" translatesAutoresizingMaskIntoConstraints="NO" id="9Oj-fr-lKC">
+                                <rect key="frame" x="192" y="146" width="156" height="156"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="9Oj-fr-lKC" secondAttribute="height" id="I1k-7M-PGN"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
+                        <color key="backgroundColor" name="appCard"/>
+                        <constraints>
+                            <constraint firstItem="NJS-60-ImE" firstAttribute="leading" secondItem="nFa-ob-YKb" secondAttribute="trailing" constant="20" id="0c7-sH-cLd"/>
+                            <constraint firstAttribute="bottom" secondItem="9Oj-fr-lKC" secondAttribute="bottom" id="CZy-bK-5BQ"/>
+                            <constraint firstItem="9Oj-fr-lKC" firstAttribute="leading" secondItem="TXg-Ec-zAl" secondAttribute="trailing" constant="5" id="E4U-Bc-zmn"/>
+                            <constraint firstItem="9Oj-fr-lKC" firstAttribute="width" secondItem="ENl-VW-i6M" secondAttribute="width" multiplier="130:290" id="EmV-ep-gt7"/>
+                            <constraint firstItem="HBr-iV-omX" firstAttribute="leading" secondItem="NJS-60-ImE" secondAttribute="trailing" constant="10" id="Fz5-Rb-ZMG"/>
+                            <constraint firstItem="4P2-35-Q5B" firstAttribute="leading" secondItem="TXg-Ec-zAl" secondAttribute="leading" id="GhA-3N-kwg"/>
+                            <constraint firstItem="TXg-Ec-zAl" firstAttribute="leading" secondItem="nFa-ob-YKb" secondAttribute="leading" id="H2X-hm-eqB"/>
+                            <constraint firstItem="HBr-iV-omX" firstAttribute="top" secondItem="nFa-ob-YKb" secondAttribute="top" id="I2h-3L-5WH"/>
+                            <constraint firstAttribute="trailing" secondItem="HBr-iV-omX" secondAttribute="trailing" constant="25" id="Kxr-Rr-Z3W"/>
+                            <constraint firstItem="1aC-ff-reO" firstAttribute="top" secondItem="nFa-ob-YKb" secondAttribute="bottom" constant="8" id="SH9-Vd-g64"/>
+                            <constraint firstItem="nFa-ob-YKb" firstAttribute="top" secondItem="ENl-VW-i6M" secondAttribute="top" constant="20" id="WiD-vL-Hep"/>
+                            <constraint firstAttribute="bottom" secondItem="TXg-Ec-zAl" secondAttribute="bottom" constant="20" id="YG3-hr-Q2C"/>
+                            <constraint firstItem="1aC-ff-reO" firstAttribute="trailing" secondItem="nFa-ob-YKb" secondAttribute="trailing" id="ZJ0-cM-Yaj"/>
+                            <constraint firstItem="TXg-Ec-zAl" firstAttribute="top" secondItem="4P2-35-Q5B" secondAttribute="bottom" constant="8" id="bWL-Wf-N5O"/>
+                            <constraint firstItem="1aC-ff-reO" firstAttribute="leading" secondItem="nFa-ob-YKb" secondAttribute="leading" id="cO8-Za-dQt"/>
+                            <constraint firstItem="4P2-35-Q5B" firstAttribute="top" relation="greaterThanOrEqual" secondItem="1aC-ff-reO" secondAttribute="bottom" constant="20" id="cfE-sF-Nbm"/>
+                            <constraint firstAttribute="trailing" secondItem="9Oj-fr-lKC" secondAttribute="trailing" id="kOJ-gf-aep"/>
+                            <constraint firstItem="4P2-35-Q5B" firstAttribute="trailing" secondItem="TXg-Ec-zAl" secondAttribute="trailing" id="kxm-Dv-PEP"/>
+                            <constraint firstItem="NJS-60-ImE" firstAttribute="centerY" secondItem="HBr-iV-omX" secondAttribute="centerY" id="l0B-r9-6VL"/>
+                            <constraint firstItem="nFa-ob-YKb" firstAttribute="leading" secondItem="ENl-VW-i6M" secondAttribute="leading" constant="20" id="mS6-Fe-sk7"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="ENl-VW-i6M" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="1" id="cL0-dr-JXz"/>
+                <constraint firstAttribute="bottom" secondItem="ENl-VW-i6M" secondAttribute="bottom" constant="1" id="hLz-ig-jLF"/>
+                <constraint firstAttribute="trailing" secondItem="ENl-VW-i6M" secondAttribute="trailing" constant="1" id="vTp-jp-9fl"/>
+                <constraint firstItem="ENl-VW-i6M" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="1" id="zvs-AK-BKs"/>
+            </constraints>
+            <size key="customSize" width="350" height="304"/>
+            <connections>
+                <outlet property="cellMBV" destination="ENl-VW-i6M" id="4Oc-ig-JSc"/>
+                <outlet property="fatBtn" destination="TXg-Ec-zAl" id="kId-BA-7ZE"/>
+                <outlet property="kcalBtn" destination="1aC-ff-reO" id="UX1-bh-rBn"/>
+                <outlet property="likeBtn" destination="HBr-iV-omX" id="Evh-yh-HSy"/>
+                <outlet property="proteinBtn" destination="4P2-35-Q5B" id="axW-Gh-Ikk"/>
+                <outlet property="shareBtn" destination="NJS-60-ImE" id="CzY-jH-9bb"/>
+                <outlet property="titleLbl" destination="nFa-ob-YKb" id="7Ss-uj-Kb0"/>
+            </connections>
+            <point key="canvasLocation" x="193.89312977099235" y="-28.87323943661972"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="ic_Solid_barbell_diagonal" width="20" height="20.333333969116211"/>
+        <image name="ic_Solid_fire" width="20" height="20.333333969116211"/>
+        <image name="ic_Solid_fire_light" width="20" height="20.333333969116211"/>
+        <image name="ic_forknspoon" width="146" height="128"/>
+        <image name="ic_heart" width="24" height="24.333333969116211"/>
+        <image name="ic_share" width="24" height="24.333333969116211"/>
+        <namedColor name="appCard">
+            <color red="0.27843137254901962" green="0.30196078431372547" blue="0.37647058823529411" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appWhite">
+            <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

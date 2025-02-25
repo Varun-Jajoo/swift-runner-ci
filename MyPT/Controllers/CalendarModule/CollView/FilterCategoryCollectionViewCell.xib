@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="FilterCategoryCollectionViewCell" id="gTV-IL-0wX" customClass="FilterCategoryCollectionViewCell" customModule="MyPT" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="523" height="103"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="523" height="103"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Tl8-3s-SUy">
+                        <rect key="frame" x="2" y="2" width="519" height="99"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_running_ jogging" translatesAutoresizingMaskIntoConstraints="NO" id="rWp-Hj-US3">
+                                <rect key="frame" x="8" y="39.666666666666664" width="20" height="20"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="rWp-Hj-US3" secondAttribute="height" id="n8D-18-NO9"/>
+                                    <constraint firstAttribute="width" constant="20" id="vPx-6J-xzW"/>
+                                </constraints>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_downArrow" translatesAutoresizingMaskIntoConstraints="NO" id="SlI-Pj-kYH">
+                                <rect key="frame" x="491" y="39.666666666666664" width="20" height="20"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="20" id="aLt-ld-pyy"/>
+                                    <constraint firstAttribute="width" secondItem="SlI-Pj-kYH" secondAttribute="height" id="kQh-zc-QX4"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="All muscles" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9Xk-xA-4KP">
+                                <rect key="frame" x="32" y="12" width="455" height="75"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="appWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" name="appCard2"/>
+                        <constraints>
+                            <constraint firstItem="9Xk-xA-4KP" firstAttribute="top" secondItem="Tl8-3s-SUy" secondAttribute="top" constant="12" id="HKb-8G-Up2"/>
+                            <constraint firstAttribute="trailing" secondItem="SlI-Pj-kYH" secondAttribute="trailing" constant="8" id="LRl-Fn-QSN"/>
+                            <constraint firstItem="rWp-Hj-US3" firstAttribute="leading" secondItem="Tl8-3s-SUy" secondAttribute="leading" constant="8" id="OR6-eV-j9i"/>
+                            <constraint firstItem="9Xk-xA-4KP" firstAttribute="leading" secondItem="rWp-Hj-US3" secondAttribute="trailing" constant="4" id="R3V-D3-aqb"/>
+                            <constraint firstItem="SlI-Pj-kYH" firstAttribute="centerY" secondItem="rWp-Hj-US3" secondAttribute="centerY" id="qGf-Is-2KS"/>
+                            <constraint firstItem="SlI-Pj-kYH" firstAttribute="leading" secondItem="9Xk-xA-4KP" secondAttribute="trailing" constant="4" id="rkK-My-f1z"/>
+                            <constraint firstItem="rWp-Hj-US3" firstAttribute="centerY" secondItem="9Xk-xA-4KP" secondAttribute="centerY" id="sbC-ON-b1F"/>
+                            <constraint firstAttribute="bottom" secondItem="9Xk-xA-4KP" secondAttribute="bottom" constant="12" id="upN-YA-Dxb"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="Tl8-3s-SUy" secondAttribute="bottom" constant="2" id="5Hr-zo-van"/>
+                <constraint firstAttribute="trailing" secondItem="Tl8-3s-SUy" secondAttribute="trailing" constant="2" id="ITz-kX-0jb"/>
+                <constraint firstItem="Tl8-3s-SUy" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="2" id="o43-Zf-ssT"/>
+                <constraint firstItem="Tl8-3s-SUy" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="2" id="twX-Ke-L33"/>
+            </constraints>
+            <size key="customSize" width="523" height="103"/>
+            <connections>
+                <outlet property="cellMBV" destination="Tl8-3s-SUy" id="e2n-O7-YqE"/>
+                <outlet property="gymCategoryImgView" destination="rWp-Hj-US3" id="KnS-p9-Kj5"/>
+                <outlet property="gymCategoryImgWidthConstrnt" destination="vPx-6J-xzW" id="4as-Xk-E3K"/>
+                <outlet property="gymCategoryNameLbl" destination="9Xk-xA-4KP" id="lEV-kE-gVH"/>
+                <outlet property="selectionImgView" destination="SlI-Pj-kYH" id="cMJ-iI-Hfr"/>
+            </connections>
+            <point key="canvasLocation" x="362.59541984732823" y="38.380281690140848"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="ic_downArrow" width="20" height="20"/>
+        <image name="ic_running_ jogging" width="20" height="20.333333969116211"/>
+        <namedColor name="appCard2">
+            <color red="0.062745098039215685" green="0.066666666666666666" blue="0.074509803921568626" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appWhite">
+            <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

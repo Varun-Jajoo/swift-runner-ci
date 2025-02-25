@@ -1,0 +1,39 @@
+PODS:
+  - Alamofire (5.9.1)
+  - AlamofireImage (4.3.0):
+    - Alamofire (~> 5.8)
+  - Cosmos (25.0.1)
+  - FSCalendar (2.8.4)
+  - IQKeyboardManagerSwift (7.1.1)
+  - SVProgressHUD (2.3.1):
+    - SVProgressHUD/Core (= 2.3.1)
+  - SVProgressHUD/Core (2.3.1)
+
+DEPENDENCIES:
+  - Alamofire
+  - AlamofireImage
+  - Cosmos (~> 25.0)
+  - FSCalendar
+  - IQKeyboardManagerSwift
+  - SVProgressHUD
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+    - AlamofireImage
+    - Cosmos
+    - FSCalendar
+    - IQKeyboardManagerSwift
+    - SVProgressHUD
+
+SPEC CHECKSUMS:
+  Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
+  AlamofireImage: 843953fa97bee5f561cf05d83abd759e590b068d
+  Cosmos: 02db0a1c953107049bfd2d7af19ceef55ecb7e98
+  FSCalendar: 2d1d0d9398f12d439f55c1fe0f01525b151b8260
+  IQKeyboardManagerSwift: d7f3d3a562c237a0e7335e657cd598c452f57f1b
+  SVProgressHUD: 4837c74bdfe2e51e8821c397825996a8d7de6e22
+
+PODFILE CHECKSUM: 369dcef5a0fc2d6b2331707ecb3c574becd460b9
+
+COCOAPODS: 1.15.2

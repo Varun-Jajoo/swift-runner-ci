@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="ExclusiveDealCollectionViewCell" id="gTV-IL-0wX" customClass="ExclusiveDealCollectionViewCell" customModule="MyPT" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="267" height="351"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="267" height="351"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UJM-s9-znn">
+                        <rect key="frame" x="1" y="1" width="265" height="349"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="245" verticalHuggingPriority="245" image="ic_shopBanner" translatesAutoresizingMaskIntoConstraints="NO" id="Gd2-i6-KvD">
+                                <rect key="frame" x="1" y="0.0" width="263" height="212"/>
+                            </imageView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fq8-U9-bKX" userLabel="offerMBV">
+                                <rect key="frame" x="1" y="171" width="263" height="41"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="40% OFF" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UHM-6g-a2L">
+                                        <rect key="frame" x="12" y="9" width="239" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" name="appWhite"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" red="0.0" green="0.019607843137254902" blue="0.0078431372549019607" alpha="0.20000000000000001" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="UHM-6g-a2L" secondAttribute="trailing" constant="12" id="41g-cx-YBZ"/>
+                                    <constraint firstItem="UHM-6g-a2L" firstAttribute="leading" secondItem="fq8-U9-bKX" secondAttribute="leading" constant="12" id="DD6-gr-uEu"/>
+                                    <constraint firstItem="UHM-6g-a2L" firstAttribute="top" secondItem="fq8-U9-bKX" secondAttribute="top" constant="9" id="dG7-9W-uOG"/>
+                                    <constraint firstAttribute="bottom" secondItem="UHM-6g-a2L" secondAttribute="bottom" constant="11" id="kqb-49-a89"/>
+                                </constraints>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4bu-T0-CG6" userLabel="detailsMBV">
+                                <rect key="frame" x="0.0" y="212" width="265" height="137"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nitro Tech Ultra Whey Protein" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cwl-WD-fd9">
+                                        <rect key="frame" x="18" y="24.999999999999996" width="172" height="40.666666666666657"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" name="appWhite"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="255" verticalHuggingPriority="255" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KRx-6x-Bed">
+                                        <rect key="frame" x="202" y="0.0" width="43" height="39"/>
+                                        <color key="backgroundColor" name="MainBgColor"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="43" id="c99-yN-pJR"/>
+                                            <constraint firstAttribute="height" constant="39" id="lO4-bK-zxm"/>
+                                        </constraints>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" image="ic_addWhite">
+                                            <color key="titleColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        </state>
+                                    </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="299AED" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7ku-DL-alU">
+                                        <rect key="frame" x="18" y="89.333333333333314" width="227" height="20.333333333333329"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" name="appWhite"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" name="appCard"/>
+                                <constraints>
+                                    <constraint firstItem="7ku-DL-alU" firstAttribute="leading" secondItem="cwl-WD-fd9" secondAttribute="leading" id="04I-Ox-vfq"/>
+                                    <constraint firstAttribute="bottom" secondItem="7ku-DL-alU" secondAttribute="bottom" constant="27.5" id="EZg-zw-I8X"/>
+                                    <constraint firstItem="KRx-6x-Bed" firstAttribute="leading" secondItem="cwl-WD-fd9" secondAttribute="trailing" constant="12" id="P1g-QW-PCi"/>
+                                    <constraint firstItem="7ku-DL-alU" firstAttribute="trailing" secondItem="KRx-6x-Bed" secondAttribute="trailing" id="RpO-OX-uk7"/>
+                                    <constraint firstItem="cwl-WD-fd9" firstAttribute="leading" secondItem="4bu-T0-CG6" secondAttribute="leading" constant="18" id="VlR-UN-y30"/>
+                                    <constraint firstItem="cwl-WD-fd9" firstAttribute="top" secondItem="4bu-T0-CG6" secondAttribute="top" constant="25" id="XZ8-8l-HKc"/>
+                                    <constraint firstItem="7ku-DL-alU" firstAttribute="top" secondItem="cwl-WD-fd9" secondAttribute="bottom" constant="23.5" id="Zdy-zf-ZEd"/>
+                                    <constraint firstAttribute="trailing" secondItem="KRx-6x-Bed" secondAttribute="trailing" constant="20" id="h4U-CG-c0z"/>
+                                    <constraint firstItem="KRx-6x-Bed" firstAttribute="top" secondItem="4bu-T0-CG6" secondAttribute="top" id="hBe-Yz-i4x"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" name="appCard"/>
+                        <constraints>
+                            <constraint firstItem="4bu-T0-CG6" firstAttribute="leading" secondItem="UJM-s9-znn" secondAttribute="leading" id="0F0-cl-0c9"/>
+                            <constraint firstItem="4bu-T0-CG6" firstAttribute="top" secondItem="Gd2-i6-KvD" secondAttribute="bottom" id="542-cr-cVu"/>
+                            <constraint firstItem="fq8-U9-bKX" firstAttribute="bottom" secondItem="Gd2-i6-KvD" secondAttribute="bottom" id="JsV-EG-aWc"/>
+                            <constraint firstAttribute="trailing" secondItem="4bu-T0-CG6" secondAttribute="trailing" id="Klc-Dd-qDi"/>
+                            <constraint firstAttribute="bottom" secondItem="4bu-T0-CG6" secondAttribute="bottom" id="SvH-Sa-dnp"/>
+                            <constraint firstItem="Gd2-i6-KvD" firstAttribute="leading" secondItem="UJM-s9-znn" secondAttribute="leading" constant="1" id="VAe-ji-kXk"/>
+                            <constraint firstItem="fq8-U9-bKX" firstAttribute="trailing" secondItem="Gd2-i6-KvD" secondAttribute="trailing" id="hcA-57-PLI"/>
+                            <constraint firstItem="Gd2-i6-KvD" firstAttribute="top" secondItem="UJM-s9-znn" secondAttribute="top" id="iRP-M6-g7Y"/>
+                            <constraint firstAttribute="trailing" secondItem="Gd2-i6-KvD" secondAttribute="trailing" constant="1" id="rA2-Rh-mb3"/>
+                            <constraint firstItem="fq8-U9-bKX" firstAttribute="leading" secondItem="Gd2-i6-KvD" secondAttribute="leading" id="rqo-RV-PyJ"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="UJM-s9-znn" secondAttribute="trailing" constant="1" id="2Ig-UA-8kR"/>
+                <constraint firstAttribute="bottom" secondItem="UJM-s9-znn" secondAttribute="bottom" constant="1" id="ORp-uc-VmZ"/>
+                <constraint firstItem="UJM-s9-znn" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="1" id="TQI-Qo-W5W"/>
+                <constraint firstItem="UJM-s9-znn" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="1" id="Zs5-dq-lyr"/>
+            </constraints>
+            <size key="customSize" width="267" height="351"/>
+            <connections>
+                <outlet property="addBtn" destination="KRx-6x-Bed" id="UH2-yC-DK1"/>
+                <outlet property="cellMBV" destination="UJM-s9-znn" id="HW9-Iu-xUx"/>
+                <outlet property="detailsMBV" destination="4bu-T0-CG6" id="cAn-26-tCR"/>
+                <outlet property="offerLbl" destination="UHM-6g-a2L" id="LLS-S3-B9o"/>
+                <outlet property="offerMBV" destination="fq8-U9-bKX" id="VPA-IU-bjw"/>
+                <outlet property="productImgView" destination="Gd2-i6-KvD" id="Jta-jU-toP"/>
+                <outlet property="productNameLbl" destination="cwl-WD-fd9" id="WGa-Hj-0uV"/>
+                <outlet property="productPriceLbl" destination="7ku-DL-alU" id="Gry-wv-x7U"/>
+            </connections>
+            <point key="canvasLocation" x="78.625954198473281" y="123.59154929577466"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="ic_addWhite" width="24" height="24.333333969116211"/>
+        <image name="ic_shopBanner" width="382" height="174.33332824707031"/>
+        <namedColor name="MainBgColor">
+            <color red="0.0" green="0.019607843137254902" blue="0.0078431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appCard">
+            <color red="0.27843137254901962" green="0.30196078431372547" blue="0.37647058823529411" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appWhite">
+            <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

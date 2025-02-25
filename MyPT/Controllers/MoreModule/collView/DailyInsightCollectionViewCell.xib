@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="DailyInsightCollectionViewCell" id="gTV-IL-0wX" customClass="DailyInsightCollectionViewCell" customModule="MyPT" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="352" height="194"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="352" height="194"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="x4X-oN-LpS">
+                        <rect key="frame" x="1" y="1" width="350" height="192"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eG0-zK-HV0">
+                                <rect key="frame" x="20" y="18" width="285" height="22"/>
+                                <inset key="contentEdgeInsets" minX="0.0" minY="0.0" maxX="6" maxY="0.0"/>
+                                <inset key="titleEdgeInsets" minX="5" minY="0.0" maxX="-5" maxY="0.0"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="Light Sleep" image="ic_Available">
+                                    <color key="titleColor" name="txtDarkGray"/>
+                                </state>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ww0-9I-Ueo">
+                                <rect key="frame" x="310" y="19" width="20" height="20"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="ww0-9I-Ueo" secondAttribute="height" id="Hlw-rd-Zd8"/>
+                                    <constraint firstAttribute="width" constant="20" id="dmd-SG-JVK"/>
+                                </constraints>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" image="ic_info_gray">
+                                    <color key="titleColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="x6m-eC-AfF">
+                                <rect key="frame" x="20" y="92" width="310" height="22"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <inset key="titleEdgeInsets" minX="5" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="in range" image="ic_tick_circle">
+                                    <color key="titleColor" name="txtDarkGray"/>
+                                </state>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="5 h 11 min" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Wtv-wd-trE">
+                                <rect key="frame" x="20" y="62" width="310" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="appWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" name="appCard"/>
+                        <constraints>
+                            <constraint firstItem="x6m-eC-AfF" firstAttribute="top" secondItem="Wtv-wd-trE" secondAttribute="bottom" constant="9" id="02E-6R-uby"/>
+                            <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="x6m-eC-AfF" secondAttribute="bottom" constant="21" id="1YR-Lm-byh"/>
+                            <constraint firstItem="ww0-9I-Ueo" firstAttribute="centerY" secondItem="eG0-zK-HV0" secondAttribute="centerY" id="BFq-bc-wCo"/>
+                            <constraint firstItem="ww0-9I-Ueo" firstAttribute="leading" secondItem="eG0-zK-HV0" secondAttribute="trailing" constant="5" id="CKv-zn-JeS"/>
+                            <constraint firstAttribute="trailing" secondItem="ww0-9I-Ueo" secondAttribute="trailing" constant="20" id="KzY-2e-2KN"/>
+                            <constraint firstItem="x6m-eC-AfF" firstAttribute="trailing" secondItem="Wtv-wd-trE" secondAttribute="trailing" id="Qdw-QU-qPz"/>
+                            <constraint firstItem="Wtv-wd-trE" firstAttribute="top" secondItem="eG0-zK-HV0" secondAttribute="bottom" constant="22" id="VGa-B8-7sa"/>
+                            <constraint firstItem="Wtv-wd-trE" firstAttribute="leading" secondItem="eG0-zK-HV0" secondAttribute="leading" id="fEq-kc-1uO"/>
+                            <constraint firstItem="x6m-eC-AfF" firstAttribute="leading" secondItem="Wtv-wd-trE" secondAttribute="leading" id="i8P-0m-axS"/>
+                            <constraint firstItem="Wtv-wd-trE" firstAttribute="trailing" secondItem="ww0-9I-Ueo" secondAttribute="trailing" id="wJS-jj-iRN"/>
+                            <constraint firstItem="eG0-zK-HV0" firstAttribute="top" secondItem="x4X-oN-LpS" secondAttribute="top" constant="18" id="wff-5A-bQb"/>
+                            <constraint firstItem="eG0-zK-HV0" firstAttribute="leading" secondItem="x4X-oN-LpS" secondAttribute="leading" constant="20" id="z7y-Oi-cRW"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="x4X-oN-LpS" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="1" id="H2x-tU-zp8"/>
+                <constraint firstItem="x4X-oN-LpS" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="1" id="O4S-bL-eCm"/>
+                <constraint firstAttribute="trailing" secondItem="x4X-oN-LpS" secondAttribute="trailing" constant="1" id="YlL-a3-q1U"/>
+                <constraint firstAttribute="bottom" secondItem="x4X-oN-LpS" secondAttribute="bottom" constant="1" id="uOb-Hh-dJ8"/>
+            </constraints>
+            <size key="customSize" width="352" height="194"/>
+            <connections>
+                <outlet property="cellMBV" destination="x4X-oN-LpS" id="LI2-TV-qb4"/>
+                <outlet property="infoBtn" destination="ww0-9I-Ueo" id="kD8-yM-atW"/>
+                <outlet property="insightModeBtn" destination="eG0-zK-HV0" id="NIh-hu-LJZ"/>
+                <outlet property="rangeBtn" destination="x6m-eC-AfF" id="ZUh-ad-RiU"/>
+                <outlet property="timeLbl" destination="Wtv-wd-trE" id="2Tt-Nr-tKl"/>
+            </connections>
+            <point key="canvasLocation" x="192.36641221374046" y="70.422535211267615"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="ic_Available" width="14.333333015441895" height="14.333333015441895"/>
+        <image name="ic_info_gray" width="16" height="16.333333969116211"/>
+        <image name="ic_tick_circle" width="16" height="16.333333969116211"/>
+        <namedColor name="appCard">
+            <color red="0.27843137254901962" green="0.30196078431372547" blue="0.37647058823529411" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appWhite">
+            <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="txtDarkGray">
+            <color red="0.58431372549019611" green="0.58431372549019611" blue="0.58431372549019611" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

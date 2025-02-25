@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="GymWorkoutTableViewCell" rowHeight="543" id="KGk-i7-Jjw" customClass="GymWorkoutTableViewCell" customModule="MyPT" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="442" height="543"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="442" height="543"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DEq-52-TYN">
+                        <rect key="frame" x="19" y="1" width="404" height="522"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_studioMembership" translatesAutoresizingMaskIntoConstraints="NO" id="r5r-YH-w6o">
+                                <rect key="frame" x="0.0" y="0.0" width="404" height="395"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="r5r-YH-w6o" secondAttribute="height" multiplier="442:432" id="TKo-xv-gir"/>
+                                </constraints>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_bckShadow" translatesAutoresizingMaskIntoConstraints="NO" id="Gcf-er-tGx">
+                                <rect key="frame" x="0.0" y="0.0" width="404" height="436"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_myStudio" translatesAutoresizingMaskIntoConstraints="NO" id="lIN-tS-7zo">
+                                <rect key="frame" x="111" y="-1" width="182" height="47.333333333333336"/>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="MyPT Studio Dubai" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="4" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="o6i-jR-DLc">
+                                <rect key="frame" x="18" y="308.66666666666669" width="366" height="24"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
+                                <color key="textColor" name="appWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" translatesAutoresizingMaskIntoConstraints="NO" id="Fso-9n-MPR">
+                                <rect key="frame" x="18" y="344.66666666666669" width="273" height="26.333333333333314"/>
+                                <subviews>
+                                    <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YIe-ol-a8H">
+                                        <rect key="frame" x="0.0" y="0.0" width="68.666666666666671" height="26.333333333333332"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="9"/>
+                                        <inset key="contentEdgeInsets" minX="0.0" minY="10" maxX="5" maxY="0.0"/>
+                                        <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-4" maxY="0.0"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" title="4.2km" image="ic_chooseLocation">
+                                            <color key="titleColor" name="appWhite"/>
+                                        </state>
+                                    </button>
+                                    <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bzc-uj-RPL">
+                                        <rect key="frame" x="68.666666666666686" y="0.0" width="111.33333333333331" height="26.333333333333332"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="9"/>
+                                        <inset key="contentEdgeInsets" minX="0.0" minY="10" maxX="5" maxY="0.0"/>
+                                        <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-4" maxY="0.0"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" title="Near Dubai Mall" image="ic_dashboardCircle">
+                                            <color key="titleColor" name="appWhite"/>
+                                        </state>
+                                    </button>
+                                    <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="U50-0C-Ht6">
+                                        <rect key="frame" x="180" y="0.0" width="93" height="26.333333333333332"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="9"/>
+                                        <inset key="contentEdgeInsets" minX="0.0" minY="10" maxX="5" maxY="0.0"/>
+                                        <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-4" maxY="0.0"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" title="6:00 - 23:00" image="ic_dashboardCircle">
+                                            <color key="titleColor" name="appWhite"/>
+                                        </state>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                            <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="c0b-qv-OMc">
+                                <rect key="frame" x="303" y="354.66666666666669" width="81" height="16.333333333333314"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                <inset key="contentEdgeInsets" minX="5" minY="0.0" maxX="8" maxY="0.0"/>
+                                <inset key="titleEdgeInsets" minX="5" minY="0.0" maxX="-7" maxY="0.0"/>
+                                <state key="normal" title="4.2 ratings" image="ic_star"/>
+                            </button>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="SDZ-k1-jVX">
+                                <rect key="frame" x="1" y="396" width="402" height="40"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="40" id="5Ks-S9-eDl"/>
+                                </constraints>
+                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="vYj-mN-hDO">
+                                    <size key="itemSize" width="128" height="128"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                                <connections>
+                                    <outlet property="dataSource" destination="KGk-i7-Jjw" id="Uzj-Gp-6mK"/>
+                                    <outlet property="delegate" destination="KGk-i7-Jjw" id="yhU-3p-y7o"/>
+                                </connections>
+                            </collectionView>
+                            <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="RbZ-6N-RAo">
+                                <rect key="frame" x="0.0" y="461" width="404" height="60"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kVt-Gt-V0l">
+                                        <rect key="frame" x="0.0" y="0.0" width="194" height="60"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                        <inset key="contentEdgeInsets" minX="0.0" minY="17" maxX="0.0" maxY="17"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" title="VIEW DETAILS">
+                                            <color key="titleColor" name="appWhite"/>
+                                        </state>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vbN-yK-gc7">
+                                        <rect key="frame" x="210" y="0.0" width="194" height="60"/>
+                                        <color key="backgroundColor" name="appWhite"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                        <inset key="contentEdgeInsets" minX="0.0" minY="17" maxX="0.0" maxY="17"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" title="SELECT GYM">
+                                            <color key="titleColor" name="MainBgColor"/>
+                                        </state>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="Gcf-er-tGx" firstAttribute="bottom" secondItem="SDZ-k1-jVX" secondAttribute="bottom" id="25c-oa-TXZ"/>
+                            <constraint firstItem="RbZ-6N-RAo" firstAttribute="top" secondItem="SDZ-k1-jVX" secondAttribute="bottom" constant="25" id="2XI-1d-fhE"/>
+                            <constraint firstItem="RbZ-6N-RAo" firstAttribute="leading" secondItem="DEq-52-TYN" secondAttribute="leading" id="2XX-3A-093"/>
+                            <constraint firstItem="SDZ-k1-jVX" firstAttribute="top" secondItem="r5r-YH-w6o" secondAttribute="bottom" constant="1" id="7l4-4e-nAn"/>
+                            <constraint firstItem="o6i-jR-DLc" firstAttribute="top" relation="greaterThanOrEqual" secondItem="r5r-YH-w6o" secondAttribute="top" constant="70" id="841-yR-e3T"/>
+                            <constraint firstItem="c0b-qv-OMc" firstAttribute="trailing" secondItem="r5r-YH-w6o" secondAttribute="trailing" constant="-20" id="8J5-qH-HFN"/>
+                            <constraint firstItem="lIN-tS-7zo" firstAttribute="top" secondItem="r5r-YH-w6o" secondAttribute="top" constant="-1" id="BqY-35-SJR"/>
+                            <constraint firstAttribute="bottom" secondItem="RbZ-6N-RAo" secondAttribute="bottom" constant="1" id="CIi-OW-M6S"/>
+                            <constraint firstAttribute="trailing" secondItem="SDZ-k1-jVX" secondAttribute="trailing" constant="1" id="D6V-eY-vei"/>
+                            <constraint firstItem="SDZ-k1-jVX" firstAttribute="leading" secondItem="DEq-52-TYN" secondAttribute="leading" constant="1" id="DdP-HB-rzH"/>
+                            <constraint firstItem="Gcf-er-tGx" firstAttribute="leading" secondItem="r5r-YH-w6o" secondAttribute="leading" id="Ext-rj-oBZ"/>
+                            <constraint firstItem="o6i-jR-DLc" firstAttribute="trailing" secondItem="c0b-qv-OMc" secondAttribute="trailing" id="LXB-LL-1Cj"/>
+                            <constraint firstItem="Fso-9n-MPR" firstAttribute="leading" secondItem="DEq-52-TYN" secondAttribute="leading" constant="18" id="POf-si-Nh6"/>
+                            <constraint firstItem="Fso-9n-MPR" firstAttribute="top" secondItem="o6i-jR-DLc" secondAttribute="bottom" constant="12" id="S0H-Zz-9z3"/>
+                            <constraint firstItem="r5r-YH-w6o" firstAttribute="top" secondItem="DEq-52-TYN" secondAttribute="top" id="VM2-g0-0Q0"/>
+                            <constraint firstAttribute="trailing" secondItem="RbZ-6N-RAo" secondAttribute="trailing" id="Vbr-CY-NO4"/>
+                            <constraint firstItem="Gcf-er-tGx" firstAttribute="trailing" secondItem="r5r-YH-w6o" secondAttribute="trailing" id="Vjh-T1-fya"/>
+                            <constraint firstItem="lIN-tS-7zo" firstAttribute="centerX" secondItem="r5r-YH-w6o" secondAttribute="centerX" id="Wx1-0F-W5k"/>
+                            <constraint firstItem="r5r-YH-w6o" firstAttribute="leading" secondItem="DEq-52-TYN" secondAttribute="leading" id="WyA-dT-he0"/>
+                            <constraint firstItem="lIN-tS-7zo" firstAttribute="width" secondItem="r5r-YH-w6o" secondAttribute="width" multiplier="0.45" id="ZYj-eb-ixo"/>
+                            <constraint firstAttribute="trailing" secondItem="r5r-YH-w6o" secondAttribute="trailing" id="b43-Z6-dMg"/>
+                            <constraint firstItem="c0b-qv-OMc" firstAttribute="bottom" secondItem="r5r-YH-w6o" secondAttribute="bottom" constant="-24" id="h8f-c1-A3f"/>
+                            <constraint firstItem="c0b-qv-OMc" firstAttribute="leading" secondItem="Fso-9n-MPR" secondAttribute="trailing" constant="12" id="kae-Lh-btb"/>
+                            <constraint firstItem="Fso-9n-MPR" firstAttribute="bottom" secondItem="c0b-qv-OMc" secondAttribute="bottom" id="ron-2g-Z12"/>
+                            <constraint firstItem="o6i-jR-DLc" firstAttribute="leading" secondItem="Fso-9n-MPR" secondAttribute="leading" id="uqR-Ta-6oZ"/>
+                            <constraint firstItem="Gcf-er-tGx" firstAttribute="top" secondItem="r5r-YH-w6o" secondAttribute="top" id="wT9-83-jlV"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                <constraints>
+                    <constraint firstItem="DEq-52-TYN" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="19" id="H4l-ff-bvH"/>
+                    <constraint firstAttribute="bottom" secondItem="DEq-52-TYN" secondAttribute="bottom" constant="20" id="Uwq-c1-KZq"/>
+                    <constraint firstItem="DEq-52-TYN" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="1" id="e92-ce-BQO"/>
+                    <constraint firstAttribute="trailing" secondItem="DEq-52-TYN" secondAttribute="trailing" constant="19" id="n4X-9A-LE6"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <connections>
+                <outlet property="categoryCollView" destination="SDZ-k1-jVX" id="Buf-QM-PCM"/>
+                <outlet property="cellMBV" destination="DEq-52-TYN" id="FSH-GF-Dis"/>
+                <outlet property="distanceBtn" destination="YIe-ol-a8H" id="AZX-EZ-tPx"/>
+                <outlet property="gymMainImgV" destination="r5r-YH-w6o" id="SmI-jD-qx8"/>
+                <outlet property="gymNameLbl" destination="o6i-jR-DLc" id="S32-lt-qfK"/>
+                <outlet property="landMarkBtn" destination="bzc-uj-RPL" id="L2u-DI-cTP"/>
+                <outlet property="ratingBtn" destination="c0b-qv-OMc" id="xk8-zp-GDW"/>
+                <outlet property="selectViewBtn" destination="vbN-yK-gc7" id="D8V-qM-cFT"/>
+                <outlet property="shadowImgView" destination="Gcf-er-tGx" id="193-It-MnG"/>
+                <outlet property="timeBtn" destination="U50-0C-Ht6" id="yyz-VD-JQc"/>
+                <outlet property="topStudioImgView" destination="lIN-tS-7zo" id="Bra-MY-IHY"/>
+                <outlet property="viewDetailsBtn" destination="kVt-Gt-V0l" id="EYt-Pk-7Nz"/>
+            </connections>
+            <point key="canvasLocation" x="-48.854961832061065" y="192.60563380281693"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="ic_bckShadow" width="630.33331298828125" height="1134.3333740234375"/>
+        <image name="ic_chooseLocation" width="16" height="16.333333969116211"/>
+        <image name="ic_dashboardCircle" width="3" height="3.3333332538604736"/>
+        <image name="ic_myStudio" width="145.66667175292969" height="47.333332061767578"/>
+        <image name="ic_star" width="16" height="16.333333969116211"/>
+        <image name="ic_studioMembership" width="336" height="192"/>
+        <namedColor name="MainBgColor">
+            <color red="0.0" green="0.019607843137254902" blue="0.0078431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appWhite">
+            <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

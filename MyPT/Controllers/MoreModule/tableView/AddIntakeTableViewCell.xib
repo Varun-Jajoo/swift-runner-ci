@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="AddIntakeTableViewCell" rowHeight="97" id="KGk-i7-Jjw" customClass="AddIntakeTableViewCell" customModule="MyPT" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="97"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="97"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="E8R-iK-0Wg">
+                        <rect key="frame" x="19" y="10" width="282" height="77"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_studioMembership" translatesAutoresizingMaskIntoConstraints="NO" id="aTK-GW-GWI">
+                                <rect key="frame" x="1" y="1" width="280" height="75"/>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="snb-cX-JN1">
+                                <rect key="frame" x="0.0" y="0.0" width="282" height="77"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <inset key="contentEdgeInsets" minX="0.0" minY="29" maxX="0.0" maxY="29"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="Calories" image="ic_addWhite">
+                                    <color key="titleColor" name="appWhite"/>
+                                </state>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gZP-cE-FGA">
+                                <rect key="frame" x="21" y="31" width="151" height="15"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="Meal" image="ic_meals">
+                                    <color key="titleColor" name="appWhite"/>
+                                </state>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" semanticContentAttribute="forceRightToLeft" horizontalHuggingPriority="255" verticalHuggingPriority="255" contentHorizontalAlignment="right" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CSf-NZ-rMg">
+                                <rect key="frame" x="187" y="27.666666666666664" width="74" height="22"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="150cal" image="ic_moreSettings">
+                                    <color key="titleColor" name="appWhite"/>
+                                </state>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" name="MainBgColor"/>
+                        <constraints>
+                            <constraint firstItem="gZP-cE-FGA" firstAttribute="top" secondItem="aTK-GW-GWI" secondAttribute="top" constant="30" id="9jR-HP-k3U"/>
+                            <constraint firstAttribute="trailing" secondItem="snb-cX-JN1" secondAttribute="trailing" id="AHK-n4-oRx"/>
+                            <constraint firstAttribute="trailing" secondItem="aTK-GW-GWI" secondAttribute="trailing" constant="1" id="BgE-2U-KLS"/>
+                            <constraint firstItem="gZP-cE-FGA" firstAttribute="bottom" secondItem="aTK-GW-GWI" secondAttribute="bottom" constant="-30" id="DQr-dE-3g8"/>
+                            <constraint firstItem="gZP-cE-FGA" firstAttribute="leading" secondItem="aTK-GW-GWI" secondAttribute="leading" constant="20" id="FXv-c3-ePg"/>
+                            <constraint firstItem="CSf-NZ-rMg" firstAttribute="trailing" secondItem="aTK-GW-GWI" secondAttribute="trailing" constant="-20" id="UFf-b8-eOQ"/>
+                            <constraint firstItem="CSf-NZ-rMg" firstAttribute="leading" secondItem="gZP-cE-FGA" secondAttribute="trailing" constant="15" id="UsL-nI-wNb"/>
+                            <constraint firstItem="aTK-GW-GWI" firstAttribute="top" secondItem="E8R-iK-0Wg" secondAttribute="top" constant="1" id="gzb-dt-0ca"/>
+                            <constraint firstAttribute="bottom" secondItem="aTK-GW-GWI" secondAttribute="bottom" constant="1" id="hvu-Cd-zc4"/>
+                            <constraint firstItem="snb-cX-JN1" firstAttribute="top" secondItem="E8R-iK-0Wg" secondAttribute="top" id="m2V-lf-qjy"/>
+                            <constraint firstItem="CSf-NZ-rMg" firstAttribute="centerY" secondItem="gZP-cE-FGA" secondAttribute="centerY" id="o3Z-b3-UCy"/>
+                            <constraint firstItem="aTK-GW-GWI" firstAttribute="leading" secondItem="E8R-iK-0Wg" secondAttribute="leading" constant="1" id="qa2-4H-5dW"/>
+                            <constraint firstAttribute="bottom" secondItem="snb-cX-JN1" secondAttribute="bottom" id="xJC-5x-fCE"/>
+                            <constraint firstItem="snb-cX-JN1" firstAttribute="leading" secondItem="E8R-iK-0Wg" secondAttribute="leading" id="xmS-H2-vm6"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="trailing" secondItem="E8R-iK-0Wg" secondAttribute="trailing" constant="19" id="Gbk-ex-klT"/>
+                    <constraint firstAttribute="bottom" secondItem="E8R-iK-0Wg" secondAttribute="bottom" constant="10" id="TFx-Mr-yp8"/>
+                    <constraint firstItem="E8R-iK-0Wg" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="10" id="rKC-Lp-8bK"/>
+                    <constraint firstItem="E8R-iK-0Wg" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="19" id="w3C-pG-Gfr"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <connections>
+                <outlet property="addBtn" destination="snb-cX-JN1" id="9m2-kQ-QSK"/>
+                <outlet property="bgImgView" destination="aTK-GW-GWI" id="8xx-ob-ahz"/>
+                <outlet property="cellMBV" destination="E8R-iK-0Wg" id="xSX-Dc-LOz"/>
+                <outlet property="kcalBtn" destination="CSf-NZ-rMg" id="Rlr-c8-0AB"/>
+                <outlet property="mealBtn" destination="gZP-cE-FGA" id="ue4-sb-5N0"/>
+            </connections>
+            <point key="canvasLocation" x="32.061068702290072" y="39.08450704225352"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="ic_addWhite" width="24" height="24.333333969116211"/>
+        <image name="ic_meals" width="20" height="20.333333969116211"/>
+        <image name="ic_moreSettings" width="20.333333969116211" height="20"/>
+        <image name="ic_studioMembership" width="336" height="192"/>
+        <namedColor name="MainBgColor">
+            <color red="0.0" green="0.019607843137254902" blue="0.0078431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appWhite">
+            <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>
