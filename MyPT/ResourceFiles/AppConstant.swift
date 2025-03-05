@@ -30,10 +30,12 @@ enum AssetsMultiColor {
     case stepsDiconnect
     case blueGradient
     case lineVGradient
+    case lineVGradient2
     case lightGreen
     case magentaGradient
     case topBottomGradient
     case cynGradient
+    case greenGradient
 }
 
 
@@ -81,6 +83,9 @@ extension UIColor {
        
         case .lineVGradient:
             return [UIColor(red: 36/255.0, green: 45/255.0, blue: 50/255.0, alpha: 0),UIColor(red: 56/255.0, green: 71/255.0, blue: 81/255.0, alpha: 1),UIColor(red: 36/255.0, green: 45/255.0, blue: 50/255.0, alpha: 0)]
+        case .lineVGradient2:
+            return [UIColor(red: 42.0/255.0, green: 45.0/255.0, blue: 47.0/255.0, alpha: 0.2), UIColor(red: 190.0/255.0, green: 204.0/255.0, blue: 212.0/255.0, alpha: 1.0), UIColor(red: 42.0/255.0, green: 45.0/255.0, blue: 47.0/255.0, alpha: 0.2)]
+            
         case .lightGreen:
             return [UIColor(red: 153.0/255.0, green: 219.0/255.0, blue: 122.0/255.0, alpha: 1),UIColor(red: 56/255.0, green: 71/255.0, blue: 81/255.0, alpha: 1),UIColor(red: 16.0/255.0, green: 23.0/255.0, blue: 14.0/255.0, alpha: 1.0)]
         case .magentaGradient:
@@ -89,7 +94,11 @@ extension UIColor {
             return [UIColor(red: 153.0/255.0, green: 153.0/255.0, blue: 153.0/255.0, alpha: 0.0),UIColor(red: 255.0/255.0, green: 255.0/255.0, blue: 255.0/255.0, alpha: 1.0), UIColor(red: 153.0/255.0, green: 153.0/255.0, blue: 153.0/255.0, alpha: 0.0)]
         case .cynGradient:
             return [UIColor(red: 29.0/255.0, green: 80.0/255.0, blue: 169.0/255.0, alpha: 1.0),UIColor(red: 125.0/255.0, green: 176.0/255.0, blue: 248.0/255.0, alpha: 1.0), UIColor(red: 26.0/255.0, green: 77.0/255.0, blue: 166.0/255.0, alpha: 0.0)]
+       
+        case .greenGradient:
+            return [UIColor(red: 29.0/255.0, green: 215.0/255.0, blue: 148.0/255.0, alpha: 1.0), UIColor(red: 9.0/255.0, green: 46.0/255.0, blue: 46.0/255.0, alpha: 1.0)]
         }
+    
     }
 }
 
@@ -236,6 +245,8 @@ public struct AppImages {
     public static let find_trainer = UIImage(named: "ic_find_trainer")
     public static let trainer_more = UIImage(named: "ic_trainer_more")
     public static let meals_more = UIImage(named: "ic_meals_more")
+    public static let filterChecked = UIImage(named: "ic_filterChecked")
+    public static let filterUncheck = UIImage(named: "ic_filterUncheck")
     
 }
 

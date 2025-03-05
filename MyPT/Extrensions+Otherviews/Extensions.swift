@@ -170,6 +170,61 @@ extension UIView{
         self.layer.mask = shape
     }
     
+    
+    func roundSideCornersWithBorder(radius: CGFloat, cornerSide: UIRectCorner, borderColor: UIColor? = UIColor.clear, borderWidth: CGFloat? = 0, borderSides: UIRectEdge? = nil) {
+        // Create rounded corners mask
+        let maskPath = UIBezierPath(roundedRect: self.bounds, byRoundingCorners: cornerSide, cornerRadii: CGSize(width: radius, height: radius))
+        
+        let maskLayer = CAShapeLayer()
+        // Remove existing shadow layers if needed to avoid duplications
+         layer.sublayers?
+            .filter { $0.name == "round_corner" }.forEach({$0.removeFromSuperlayer()})
+        
+        maskLayer.name = "round_corner"
+        maskLayer.path = maskPath.cgPath
+        self.layer.mask = maskLayer
+        
+        // Create border layer
+        let borderLayer = CAShapeLayer()
+        layer.sublayers?
+           .filter { $0.name == "round_cornerSub" }.forEach({$0.removeFromSuperlayer()})
+        
+        maskLayer.name = "round_cornerSub"
+        borderLayer.path = maskPath.cgPath
+        borderLayer.fillColor = UIColor.clear.cgColor
+        borderLayer.strokeColor = borderColor?.cgColor
+        borderLayer.lineWidth = borderWidth ?? 0
+        borderLayer.frame = self.bounds
+        
+        // Add border to specific sides
+        if let borderSides = borderSides {
+            if borderSides != .all {
+                let borderPath = UIBezierPath()
+                
+                if borderSides.contains(.top) {
+                    borderPath.move(to: CGPoint(x: 0, y: 0))
+                    borderPath.addLine(to: CGPoint(x: self.bounds.width, y: 0))
+                }
+                if borderSides.contains(.left) {
+                    borderPath.move(to: CGPoint(x: 0, y: 0))
+                    borderPath.addLine(to: CGPoint(x: 0, y: self.bounds.height))
+                }
+                if borderSides.contains(.right) {
+                    borderPath.move(to: CGPoint(x: self.bounds.width, y: 0))
+                    borderPath.addLine(to: CGPoint(x: self.bounds.width, y: self.bounds.height))
+                }
+                if borderSides.contains(.bottom) {
+                    borderPath.move(to: CGPoint(x: 0, y: self.bounds.height))
+                    borderPath.addLine(to: CGPoint(x: self.bounds.width, y: self.bounds.height))
+                }
+                
+                borderLayer.path = borderPath.cgPath
+            }
+        }
+
+        self.layer.addSublayer(borderLayer)
+    }
+    
     func setCornerRadius(borderWidth:CGFloat = 0.0, borderColor:UIColor? = nil, cornerRadious:CGFloat = 0.0){
         self.layer.borderWidth = borderWidth
         self.layer.borderColor = borderColor?.cgColor
@@ -406,6 +461,7 @@ extension UIView{
         }
     }
     */
+    
     
     func addGradient(
         colors: [UIColor] = [.blue, .white],

@@ -6,12 +6,14 @@
 //
 
 import UIKit
+import AVFoundation
 
 class ShopViewController: CommonViewController {
 
     //MARK: -------------------VARIABLE
 //    var shopCatData:[HydrationDataModel]?
     var shopCatData:[[String:Any]]?
+    var player: LoopingPlayer?
     
     
     //MARK :-------------------IBOUTLET
@@ -28,6 +30,7 @@ class ShopViewController: CommonViewController {
     @IBOutlet weak var hoursMBV: UIView!
     @IBOutlet weak var minutesMBV: UIView!
     @IBOutlet weak var secMBV: UIView!
+    @IBOutlet weak var bottomVideoMBV: UIView!
 
     @IBOutlet weak var shopCategoryTitleLbl: UILabel!
     @IBOutlet weak var trendingProductsTitleLbl: UILabel!
@@ -63,6 +66,7 @@ class ShopViewController: CommonViewController {
         self.setUISearchbar()
         self.setUpCustomPageControl()
         self.setupInputData()
+        self.setUpVideo()
     }
     
     deinit {
@@ -88,6 +92,33 @@ class ShopViewController: CommonViewController {
 //            self.view.layoutIfNeeded()
 //        }
     }
+    
+    //MARK: -----------------COMMON BTN ACTN
+    enum btnTag: Int {
+    case shopCategory = 801, trendingProducts, featuredProducts, purchasedItems, exploreMoreProducts
+    }
+    
+    @IBAction func commonBtnActn(_ sender: UIButton) {
+        
+        switch sender.tag {
+        case btnTag.shopCategory.rawValue:
+            print("shop category btn clicked")
+        case btnTag.trendingProducts.rawValue:
+            print("trending products")
+        case btnTag.featuredProducts.rawValue:
+            print("featured products clicked.")
+            let vc: ProductsViewController = ProductsViewController.instantiate(appStoryboard: .shop)
+            self.navigationController?.pushViewController(vc, animated: true)
+        case btnTag.purchasedItems.rawValue:
+            print("purchaseed items")
+        case btnTag.exploreMoreProducts.rawValue:
+            print("Explore more products")
+            
+        default:
+            break
+        }
+    }
+    
     
     func setNavUI(){
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [AppStrings.shop], setTintColor: .black, setTitleColor: UIColor.appWhite)
@@ -146,6 +177,7 @@ class ShopViewController: CommonViewController {
         
         self.shopCatPageControl.numberOfPages = 3  // Set the total number of pages
         self.shopCatPageControl.currentPage = 0    // Set the initial page
+       
         self.trendingProductsPageControl.numberOfPages = 3  // Set the total number of pages
         self.trendingProductsPageControl.currentPage = 0    // Set the initial page
         self.featuredProductsPageControl.numberOfPages = 3  // Set the total number of pages
@@ -179,6 +211,41 @@ class ShopViewController: CommonViewController {
 
     }
     
+    //MARK: --------------FOR VIDEO PLAHY
+    func setUpVideo(){
+        //MyPTGems.mp4 //shopBottom.mov
+        if let filePath = Bundle.main.path(forResource: "shopBottom", ofType: "mov") {
+            let fileURL = URL(fileURLWithPath: filePath)
+            
+            // Initialize LoopingPlayer
+            player = LoopingPlayer(url: fileURL)
+            player?.progressDelegate = self
+            
+            // Add video layer
+            if let player = player {
+                let playerLayer = AVPlayerLayer(player: player)
+                DispatchQueue.main.async {
+                    playerLayer.frame = self.bottomVideoMBV.bounds
+                    playerLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
+                    playerLayer.zPosition = -1
+                    self.bottomVideoMBV.layer.addSublayer(playerLayer)
+                }
+                
+                // Start playback
+                player.play()
+            }
+        } else {
+            
+            // from url
+            //                if let videoURL = URL(string: "path") {
+            //                    player = LoopingPlayer(url: videoURL)
+            //                    player?.progressDelegate = self
+            //                    player?.play()
+            //                }
+            print("Video file not found")
+        }
+        
+    }
  
     func setupUI(){
         self.shopSubCatoryCollView.register(UINib(nibName: "WithMeCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WithMeCollectionViewCell")
@@ -291,6 +358,7 @@ extension ShopViewController: UICollectionViewDelegate, UICollectionViewDataSour
             let cell: ProductsListCollViewCell = trendingProductsCollView.dequeueReusableCell(withReuseIdentifier: "ProductsListCollViewCell", for: indexPath) as! ProductsListCollViewCell
             DispatchQueue.main.async {
                 cell.cellMBV.setCornerRadius(borderWidth: 0.5, borderColor: UIColor.appBorder, cornerRadious: 12.0)
+                cell.cellMBV.setGradientBorder(cornerRadious: 12.0, width: 1.0, colors: UIColor.appMultiColor(.borderGradientColor), startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1))
             }
             
             cell.ratingBtn.isHidden = true
@@ -300,6 +368,7 @@ extension ShopViewController: UICollectionViewDelegate, UICollectionViewDataSour
             let cell: ProductsListCollViewCell = featuredProductsCollView.dequeueReusableCell(withReuseIdentifier: "ProductsListCollViewCell", for: indexPath) as! ProductsListCollViewCell
             DispatchQueue.main.async {
                 cell.cellMBV.setCornerRadius(borderWidth: 0.5, borderColor: UIColor.appBorder, cornerRadious: 12.0)
+                cell.cellMBV.setGradientBorder(cornerRadious: 12.0, width: 1.0, colors: UIColor.appMultiColor(.borderGradientColor), startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1))
             }
             
             cell.ratingBtn.isHidden = true
@@ -323,6 +392,7 @@ extension ShopViewController: UICollectionViewDelegate, UICollectionViewDataSour
             let cell: ProductsListCollViewCell = purchasedItemsCollView.dequeueReusableCell(withReuseIdentifier: "ProductsListCollViewCell", for: indexPath) as! ProductsListCollViewCell
             DispatchQueue.main.async {
                 cell.cellMBV.setCornerRadius(borderWidth: 0.5, borderColor: UIColor.appBorder, cornerRadious: 12.0)
+                cell.cellMBV.setGradientBorder(cornerRadious: 12.0, width: 1.0, colors: UIColor.appMultiColor(.borderGradientColor), startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1))
             }
             
             cell.ratingBtn.isHidden = true
@@ -346,6 +416,12 @@ extension ShopViewController: UICollectionViewDelegate, UICollectionViewDataSour
         else{
             return UICollectionViewCell()
         }
+        
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let vc: ReviewInformationViewController = ReviewInformationViewController.instantiate(appStoryboard: .shop)
+        self.navigationController?.pushViewController(vc, animated: true)
         
     }
     
@@ -391,59 +467,74 @@ extension ShopViewController: UICollectionViewDelegate, UICollectionViewDataSour
     //MARK: -----------------USED FOR MAKE CENTER ANUIMATED CELL OF UICOLLECION VIEW
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         // Simulate "Page" Function
-        let pageWidth: Float = Float(self.exclusiveDealCollView.frame.width * 0.63)
-        let currentOffset: Float = Float(scrollView.contentOffset.x)
-        let targetOffset: Float = Float(targetContentOffset.pointee.x)
-        var newTargetOffset: Float = 0
-        if targetOffset > currentOffset {
-            newTargetOffset = ceilf(currentOffset / pageWidth) * pageWidth
-        }
-        else {
-            newTargetOffset = floorf(currentOffset / pageWidth) * pageWidth
-        }
-        if newTargetOffset < 0 {
-            newTargetOffset = 0
-        }
-        else if (newTargetOffset > Float(scrollView.contentSize.width)){
-            newTargetOffset = Float(Float(scrollView.contentSize.width))
-        }
-        
-        targetContentOffset.pointee.x = CGFloat(currentOffset)
-        scrollView.setContentOffset(CGPoint(x: CGFloat(newTargetOffset), y: scrollView.contentOffset.y), animated: true)
-        
-        // Make Transition Effects for cells
-        let duration = 0.2
-        var index = newTargetOffset / pageWidth;
-        var cell:UICollectionViewCell = self.exclusiveDealCollView.cellForItem(at: IndexPath(row: Int(index), section: 0)) ?? UICollectionViewCell()
-        if (index == 0) { // If first index
-            UIView.animate(withDuration: duration, delay: 0.0, options: [ .curveEaseOut], animations: {
-                cell.transform = CGAffineTransform.identity
-            }, completion: nil)
-            index += 1
-            cell = self.exclusiveDealCollView.cellForItem(at: IndexPath(row: Int(index), section: 0))!
-            UIView.animate(withDuration: duration, delay: 0.0, options: [ .curveEaseOut], animations: {
-                cell.transform = CGAffineTransform(scaleX: 1.0, y: 0.8)
-            }, completion: nil)
-        }else{
-            UIView.animate(withDuration: duration, delay: 0.0, options: [ .curveEaseOut], animations: {
-                cell.transform = CGAffineTransform.identity;
-            }, completion: nil)
-            
-            index -= 1 // left
-            if let cell = self.exclusiveDealCollView.cellForItem(at: IndexPath(row: Int(index), section: 0)) {
-                UIView.animate(withDuration: duration, delay: 0.0, options: [ .curveEaseOut], animations: {
-                    cell.transform = CGAffineTransform(scaleX: 1.0, y: 0.8);
-                }, completion: nil)
+        if scrollView == self.exclusiveDealCollView {
+            let pageWidth: Float = Float(self.exclusiveDealCollView.frame.width * 0.63)
+            let currentOffset: Float = Float(scrollView.contentOffset.x)
+            let targetOffset: Float = Float(targetContentOffset.pointee.x)
+            var newTargetOffset: Float = 0
+            if targetOffset > currentOffset {
+                newTargetOffset = ceilf(currentOffset / pageWidth) * pageWidth
+            }
+            else {
+                newTargetOffset = floorf(currentOffset / pageWidth) * pageWidth
+            }
+            if newTargetOffset < 0 {
+                newTargetOffset = 0
+            }
+            else if (newTargetOffset > Float(scrollView.contentSize.width)){
+                newTargetOffset = Float(Float(scrollView.contentSize.width))
             }
             
-            index += 1
-            index += 1 // right
-            if let cell = self.exclusiveDealCollView.cellForItem(at: IndexPath(row: Int(index), section: 0)) {
+            targetContentOffset.pointee.x = CGFloat(currentOffset)
+            scrollView.setContentOffset(CGPoint(x: CGFloat(newTargetOffset), y: scrollView.contentOffset.y), animated: true)
+            
+            // Make Transition Effects for cells
+            let duration = 0.2
+            var index = newTargetOffset / pageWidth;
+            var cell:UICollectionViewCell = self.exclusiveDealCollView.cellForItem(at: IndexPath(row: Int(index), section: 0)) ?? UICollectionViewCell()
+            if (index == 0) { // If first index
                 UIView.animate(withDuration: duration, delay: 0.0, options: [ .curveEaseOut], animations: {
-                    cell.transform = CGAffineTransform(scaleX: 1.0, y: 0.8);
+                    cell.transform = CGAffineTransform.identity
                 }, completion: nil)
+                index += 1
+                cell = self.exclusiveDealCollView.cellForItem(at: IndexPath(row: Int(index), section: 0))!
+                UIView.animate(withDuration: duration, delay: 0.0, options: [ .curveEaseOut], animations: {
+                    cell.transform = CGAffineTransform(scaleX: 1.0, y: 0.8)
+                }, completion: nil)
+            }else{
+                UIView.animate(withDuration: duration, delay: 0.0, options: [ .curveEaseOut], animations: {
+                    cell.transform = CGAffineTransform.identity;
+                }, completion: nil)
+                
+                index -= 1 // left
+                if let cell = self.exclusiveDealCollView.cellForItem(at: IndexPath(row: Int(index), section: 0)) {
+                    UIView.animate(withDuration: duration, delay: 0.0, options: [ .curveEaseOut], animations: {
+                        cell.transform = CGAffineTransform(scaleX: 1.0, y: 0.8);
+                    }, completion: nil)
+                }
+                
+                index += 1
+                index += 1 // right
+                if let cell = self.exclusiveDealCollView.cellForItem(at: IndexPath(row: Int(index), section: 0)) {
+                    UIView.animate(withDuration: duration, delay: 0.0, options: [ .curveEaseOut], animations: {
+                        cell.transform = CGAffineTransform(scaleX: 1.0, y: 0.8);
+                    }, completion: nil)
+                }
             }
         }
+
     }
     
+}
+
+
+extension ShopViewController: LoopingPlayerProgressDelegate{
+    //MARK: -------------- VIDEO PLAYER DELEAGTE
+    func loopingPlayer(loopingPlayer: LoopingPlayer, didLoad percentage: Float) {
+        print("Loading progress: \(percentage * 100)%")
+    }
+    
+    func loopingPlayer(loopingPlayer: LoopingPlayer, didFinishLoading succeeded: Bool) {
+        print(succeeded ? "Video loaded successfully!" : "Failed to load video.")
+    }
 }

@@ -11,6 +11,7 @@ enum PlanPopupFlow {
     case planselect
     case remind
     case checkListActiveSession
+    case productSortBy
     case planpopupDefault
 }
 
@@ -51,6 +52,8 @@ class PlanPopupViewController: UIViewController {
 //            self.view.applyTransition(type: .moveIn, subtype: .fromRight, duration: 0.5, timingFunction: .easeInEaseOut, completion: {
 //                print("Animation done.")
 //            })
+        case .productSortBy:
+            print("Product sort by")
         case .planpopupDefault:
             print("planpopupDefault")
         case .checkListActiveSession:
@@ -125,6 +128,25 @@ class PlanPopupViewController: UIViewController {
                 ["title":"Space","trainerImg":""],
                 ["title":"Space","trainerImg":""],
                 ["title":"Space","trainerImg":""]
+            ]
+            self.planListTbl.reloadData()
+            
+        case .productSortBy:
+            
+            self.enableContinueBtn(isSelected: true, btn: doneBtn)
+            self.doneBtn.isHidden = false
+            
+            self.planListTblLeadingConstrnt.constant = 19.0
+            self.planListTblTrailingConstrnt.constant = 19.0
+            self.popTitleLbl.text = "Sort By"
+            self.planListTbl.register(UINib(nibName: "PointsTableViewCell", bundle: nil), forCellReuseIdentifier: "PointsTableViewCell")
+           
+            self.planListData = [
+                ["title":"Price (Highest First)","trainerImg":""],
+                ["title":"Price (Lowest First)","trainerImg":""],
+                ["title":"Discount","trainerImg":""],
+                ["title":"Ratings","trainerImg":""],
+                ["title":"Relevance","trainerImg":""]
             ]
             self.planListTbl.reloadData()
             
@@ -216,6 +238,14 @@ extension PlanPopupViewController: UITableViewDataSource, UITableViewDelegate{
             
             return checkListCell
             
+        case .productSortBy:
+            let cell:PointsTableViewCell = planListTbl.dequeueReusableCell(withIdentifier: "PointsTableViewCell", for: indexPath) as! PointsTableViewCell
+            cell.titleLbl.text =  planListData?[indexPath.row]["title"] as? String
+           
+            cell.leftImgView.image = AppImages.filterUncheck
+            
+            return cell
+            
         case .planpopupDefault:
             print("planpopupDefault")
             let cell:PlanListTableViewCell = planListTbl.dequeueReusableCell(withIdentifier: "PlanListTableViewCell", for: indexPath) as! PlanListTableViewCell
@@ -257,6 +287,11 @@ extension PlanPopupViewController: UITableViewDataSource, UITableViewDelegate{
         case .checkListActiveSession:
             print("checkListActiveSession")
             
+        case .productSortBy:
+            print("product sort by")
+            let deselectedCell = tableView.cellForRow(at: indexPath) as! PointsTableViewCell
+            deselectedCell.leftImgView.image = AppImages.filterChecked
+            
         case .planpopupDefault:
             print("planpopupDefault")
             if indexPath.row == 0 {
@@ -297,6 +332,10 @@ extension PlanPopupViewController: UITableViewDataSource, UITableViewDelegate{
             
         case .checkListActiveSession:
             print("checkListActiveSession")
+            
+        case .productSortBy:
+            let deselectedCell = tableView.cellForRow(at: indexPath) as! PointsTableViewCell
+            deselectedCell.leftImgView.image = AppImages.filterUncheck
             
         case .planpopupDefault:
             print("planpopupDefault")

@@ -43,6 +43,7 @@ struct AppStrings {
     public static let active_str = "Active"
     public static let my_Goals = "My Goals"
     public static let glass_Size = "Glass Size"
+    public static let checkout_Str = "Checkout"
     
     
     //-------************Bottom Tabbar
@@ -71,6 +72,9 @@ struct AppStrings {
     public static let shop = "Shop"
     public static let my_orders = "My Orders"
     public static let cart = "Cart"
+    public static let myPT_Products = "MyPT Products"
+    public static let product = "Product"
+    public static let add_Address = "Add Address"
     
     
     

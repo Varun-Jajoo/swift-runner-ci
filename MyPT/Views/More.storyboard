@@ -883,7 +883,7 @@
         <!--Meals View Controller-->
         <scene sceneID="V6r-57-8zi">
             <objects>
-                <viewController storyboardIdentifier="MealsViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="xgJ-wh-iI8" customClass="MealsViewController" customModule="MyPT" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="MealsViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="xgJ-wh-iI8" customClass="MealsViewController" customModule="MyPT" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="BcG-Uz-RzO">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

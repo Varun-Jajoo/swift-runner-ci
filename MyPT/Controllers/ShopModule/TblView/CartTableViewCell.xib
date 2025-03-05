@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="CartTableViewCell" rowHeight="191" id="KGk-i7-Jjw" customClass="CartTableViewCell" customModule="MyPT" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="508" height="191"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="508" height="191"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="OV4-gH-S3m">
+                        <rect key="frame" x="19" y="1" width="470" height="178"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LCh-TN-OT9">
+                                <rect key="frame" x="0.0" y="0.0" width="117.66666666666667" height="178"/>
+                                <color key="backgroundColor" name="appCard2"/>
+                            </view>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_bicycling" translatesAutoresizingMaskIntoConstraints="NO" id="SOx-qA-aex">
+                                <rect key="frame" x="0.0" y="0.0" width="117.66666666666667" height="178"/>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="HandGripper - Green 5kg to 60kg" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I8Y-pv-MSb">
+                                <rect key="frame" x="137.66666666666666" y="15.000000000000007" width="320.33333333333337" height="101.66666666666669"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="appWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="255" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="755" text="299AED" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DDu-oY-CxN">
+                                <rect key="frame" x="137.66666666666669" y="132.66666666666666" width="197.66666666666669" height="20.333333333333343"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="appWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <stackView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="260" verticalHuggingPriority="260" horizontalCompressionResistancePriority="760" verticalCompressionResistancePriority="760" translatesAutoresizingMaskIntoConstraints="NO" id="MyU-T1-k72">
+                                <rect key="frame" x="347.33333333333331" y="126.66666666666667" width="110.66666666666669" height="39.333333333333329"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="260" verticalHuggingPriority="260" horizontalCompressionResistancePriority="760" verticalCompressionResistancePriority="760" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tgY-f5-46b">
+                                        <rect key="frame" x="0.0" y="0.0" width="39.333333333333336" height="39.333333333333336"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" image="ic_minusBlackBg">
+                                            <color key="titleColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        </state>
+                                    </button>
+                                    <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="255" verticalHuggingPriority="255" horizontalCompressionResistancePriority="755" verticalCompressionResistancePriority="755" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qE1-SF-bAH">
+                                        <rect key="frame" x="39.333333333333371" y="0.0" width="32" height="39.333333333333336"/>
+                                        <inset key="contentEdgeInsets" minX="12" minY="0.0" maxX="12" maxY="0.0"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" title="1">
+                                            <color key="titleColor" name="appWhite"/>
+                                        </state>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="255" verticalHuggingPriority="255" horizontalCompressionResistancePriority="755" verticalCompressionResistancePriority="755" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VUj-Q6-NTf">
+                                        <rect key="frame" x="71.333333333333371" y="0.0" width="39.333333333333343" height="39.333333333333336"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" image="ic_pluseBlackBg">
+                                            <color key="titleColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        </state>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" name="appCard2"/>
+                        <constraints>
+                            <constraint firstItem="LCh-TN-OT9" firstAttribute="leading" secondItem="SOx-qA-aex" secondAttribute="leading" id="0y3-jl-sLK"/>
+                            <constraint firstItem="LCh-TN-OT9" firstAttribute="top" secondItem="SOx-qA-aex" secondAttribute="top" id="14f-PW-VPo"/>
+                            <constraint firstItem="SOx-qA-aex" firstAttribute="leading" secondItem="OV4-gH-S3m" secondAttribute="leading" id="2wX-EB-5Zg"/>
+                            <constraint firstAttribute="bottom" secondItem="SOx-qA-aex" secondAttribute="bottom" id="6Tm-sV-OzD"/>
+                            <constraint firstItem="DDu-oY-CxN" firstAttribute="top" secondItem="I8Y-pv-MSb" secondAttribute="bottom" constant="16" id="Ok1-sV-1XO"/>
+                            <constraint firstItem="SOx-qA-aex" firstAttribute="width" secondItem="OV4-gH-S3m" secondAttribute="width" multiplier="0.25" id="PmE-lP-gQg"/>
+                            <constraint firstItem="I8Y-pv-MSb" firstAttribute="leading" secondItem="SOx-qA-aex" secondAttribute="trailing" constant="20" id="QWR-wt-yya"/>
+                            <constraint firstItem="DDu-oY-CxN" firstAttribute="leading" secondItem="I8Y-pv-MSb" secondAttribute="leading" id="Zzt-9B-m60"/>
+                            <constraint firstItem="LCh-TN-OT9" firstAttribute="bottom" secondItem="SOx-qA-aex" secondAttribute="bottom" id="bGg-f8-1TA"/>
+                            <constraint firstItem="SOx-qA-aex" firstAttribute="top" secondItem="OV4-gH-S3m" secondAttribute="top" id="dko-lq-2Un"/>
+                            <constraint firstAttribute="bottom" secondItem="DDu-oY-CxN" secondAttribute="bottom" constant="25" id="fEH-Cm-AcV"/>
+                            <constraint firstAttribute="trailing" secondItem="I8Y-pv-MSb" secondAttribute="trailing" constant="12" id="nFa-EX-gfo"/>
+                            <constraint firstAttribute="trailing" secondItem="MyU-T1-k72" secondAttribute="trailing" constant="12" id="nzZ-b1-MWr"/>
+                            <constraint firstItem="MyU-T1-k72" firstAttribute="leading" secondItem="DDu-oY-CxN" secondAttribute="trailing" constant="12" id="qWi-bO-beU"/>
+                            <constraint firstAttribute="bottom" secondItem="MyU-T1-k72" secondAttribute="bottom" constant="12" id="s9E-tG-Cr8"/>
+                            <constraint firstItem="I8Y-pv-MSb" firstAttribute="top" secondItem="SOx-qA-aex" secondAttribute="top" constant="15" id="yYL-2R-SFJ"/>
+                            <constraint firstItem="LCh-TN-OT9" firstAttribute="trailing" secondItem="SOx-qA-aex" secondAttribute="trailing" id="zQd-Tl-YrV"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                <constraints>
+                    <constraint firstAttribute="trailing" secondItem="OV4-gH-S3m" secondAttribute="trailing" constant="19" id="FcG-7C-1pE"/>
+                    <constraint firstItem="OV4-gH-S3m" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="19" id="SlO-La-7Wz"/>
+                    <constraint firstAttribute="bottom" secondItem="OV4-gH-S3m" secondAttribute="bottom" constant="12" id="fCl-Ak-IBd"/>
+                    <constraint firstItem="OV4-gH-S3m" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="1" id="pho-K7-oUE"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <connections>
+                <outlet property="addBtn" destination="VUj-Q6-NTf" id="SnT-aw-odn"/>
+                <outlet property="cellMBV" destination="OV4-gH-S3m" id="osF-wb-4aU"/>
+                <outlet property="itemsCount" destination="qE1-SF-bAH" id="CCs-fl-47G"/>
+                <outlet property="minusBtn" destination="tgY-f5-46b" id="EgB-Le-jXo"/>
+                <outlet property="productImgMBV" destination="LCh-TN-OT9" id="Xki-cz-5ct"/>
+                <outlet property="productImgView" destination="SOx-qA-aex" id="8gG-7R-qLH"/>
+                <outlet property="productNameLbl" destination="I8Y-pv-MSb" id="Jai-z3-Khu"/>
+                <outlet property="productPriceLbl" destination="DDu-oY-CxN" id="Ugg-WB-QoP"/>
+            </connections>
+            <point key="canvasLocation" x="114.50381679389312" y="71.478873239436624"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="ic_bicycling" width="60" height="68"/>
+        <image name="ic_minusBlackBg" width="39.333332061767578" height="39.333332061767578"/>
+        <image name="ic_pluseBlackBg" width="39.333332061767578" height="39.333332061767578"/>
+        <namedColor name="appCard2">
+            <color red="0.062745098039215685" green="0.066666666666666666" blue="0.074509803921568626" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appWhite">
+            <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

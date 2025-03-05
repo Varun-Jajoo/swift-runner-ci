@@ -35,6 +35,7 @@ class ExclusiveDealCollectionViewCell: UICollectionViewCell {
             
             self.productImgView.roundSideCorners(radius: 13.5, cornerSide: [.topLeft, .topRight])
             self.addBtn.roundSideCorners(radius: 8.0, cornerSide: [.bottomLeft, .bottomRight])
+            
             self.offerMBV.addGradient(colors: UIColor.appMultiColor(.cynGradient), locations: [0, 0.3, 1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0)
         }
     }
