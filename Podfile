@@ -6,7 +6,7 @@ target 'MyPT' do
   use_frameworks!
 
   # Pods for MyPT
-pod 'IQKeyboardManagerSwift'
+
 pod 'FSCalendar'
 pod 'Cosmos', '~> 25.0'
 pod 'Alamofire'

@@ -980,7 +980,7 @@ extension UILabel {
         completion: (() -> Void)? = nil
     ) {
         guard !strings.isEmpty else { return }
-        var currentIndex = selectedIndex % strings.count
+        let currentIndex = selectedIndex % strings.count
         
         self.center.y = 0
         self.isHidden = true
@@ -995,11 +995,72 @@ extension UILabel {
         })
         
     }
+    
+    func applyGradientWith(startColor: UIColor, endColor: UIColor) {
+            guard let text = self.text, let font = self.font else { return  }
+
+            let textSize = text.size(withAttributes: [.font: font])
+            let width = textSize.width
+            let height = textSize.height
+
+            UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), false, 0)
+
+            guard let context = UIGraphicsGetCurrentContext(),
+                  let rgbColorspace = CGColorSpaceCreateDeviceRGB() as CGColorSpace? else {
+                UIGraphicsEndImageContext()
+                return
+            }
+
+            let locations: [CGFloat] = [0.0, 1.0]
+            let colors = [startColor.cgColor, endColor.cgColor] as CFArray
+
+            guard let glossGradient = CGGradient(colorsSpace: rgbColorspace, colors: colors, locations: locations) else {
+                UIGraphicsEndImageContext()
+                return
+            }
+
+            let topCenter = CGPoint(x: 0, y: 0)
+            let bottomCenter = CGPoint(x: 0, y: height)
+            context.drawLinearGradient(glossGradient, start: topCenter, end: bottomCenter, options: [])
+
+            guard let gradientImage = UIGraphicsGetImageFromCurrentImageContext() else {
+                UIGraphicsEndImageContext()
+                return
+            }
+
+            UIGraphicsEndImageContext()
+
+            self.textColor = UIColor(patternImage: gradientImage)
+        }
+    
 }
 
 
 //MARK: --------- Extension UIImageView
 extension UIImageView {
+    
+    /// Adds a gradient overlay to the image view
+    func addGradientImgV(colors: [UIColor], locations: [NSNumber] = [0, 1], startPoint: CGPoint = CGPoint(x: 0, y: 0), endPoint: CGPoint = CGPoint(x: 1, y: 1)){
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.colors = colors.map { $0.cgColor }
+        gradientLayer.locations = locations
+        gradientLayer.startPoint = startPoint
+        gradientLayer.endPoint = endPoint
+        gradientLayer.name = "gradientLayerImgV" // Prevent duplicates
+        gradientLayer.contents = self.image?.cgImage
+
+        // Ensure gradient frame updates correctly
+        DispatchQueue.main.async {
+            gradientLayer.frame = self.bounds
+
+            // Remove any existing gradient layers
+            self.layer.sublayers?.removeAll(where: { $0.name == "gradientLayerImgV" })
+
+            // Insert gradient **above** image layer but below other content
+            self.layer.insertSublayer(gradientLayer, at: 0)
+        }
+    }
+    
     
     //MARK: ---------------IMAGE GETTING FROM URL
     func loadImage(urlString: String?, placeholder: UIImage?) {

@@ -105,6 +105,10 @@ class ShopViewController: CommonViewController {
             print("shop category btn clicked")
         case btnTag.trendingProducts.rawValue:
             print("trending products")
+            let vc: OrderRefundViewController = OrderRefundViewController.instantiate(appStoryboard: .shop) // only for testing
+//            let vc: ReturnRequestViewController = ReturnRequestViewController.instantiate(appStoryboard: .shop)
+            self.navigationController?.pushViewController(vc, animated: true)
+            
         case btnTag.featuredProducts.rawValue:
             print("featured products clicked.")
             let vc: ProductsViewController = ProductsViewController.instantiate(appStoryboard: .shop)
@@ -420,7 +424,8 @@ extension ShopViewController: UICollectionViewDelegate, UICollectionViewDataSour
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let vc: ReviewInformationViewController = ReviewInformationViewController.instantiate(appStoryboard: .shop)
+        
+        let vc: ProductsViewController = ProductsViewController.instantiate(appStoryboard: .shop)
         self.navigationController?.pushViewController(vc, animated: true)
         
     }

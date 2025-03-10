@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -27,6 +27,9 @@
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="E64-Pm-shD" secondAttribute="height" id="pA5-Zl-pmK"/>
                                 </constraints>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_bckShadow" translatesAutoresizingMaskIntoConstraints="NO" id="9Bp-6x-9Hf">
+                                <rect key="frame" x="2" y="229" width="454" height="227"/>
                             </imageView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="VOU-rJ-cTE">
                                 <rect key="frame" x="1" y="384.66666666666669" width="454" height="71.333333333333314"/>
@@ -146,13 +149,17 @@
                             <constraint firstItem="Fdq-36-bzx" firstAttribute="leading" secondItem="6I2-vM-DNo" secondAttribute="leading" id="Ef7-nb-Ogh"/>
                             <constraint firstItem="VOU-rJ-cTE" firstAttribute="trailing" secondItem="E64-Pm-shD" secondAttribute="trailing" id="EvO-Md-46A"/>
                             <constraint firstAttribute="bottom" secondItem="1bK-UL-g5b" secondAttribute="bottom" constant="1" id="Fib-B5-19u"/>
+                            <constraint firstItem="9Bp-6x-9Hf" firstAttribute="leading" secondItem="E64-Pm-shD" secondAttribute="leading" constant="1" id="IBs-2V-1ll"/>
                             <constraint firstAttribute="trailing" secondItem="1bK-UL-g5b" secondAttribute="trailing" constant="20" id="Mc8-PF-tvm"/>
                             <constraint firstAttribute="bottom" secondItem="Fdq-36-bzx" secondAttribute="bottom" constant="1" id="PQ8-Tx-gaE"/>
                             <constraint firstItem="VOU-rJ-cTE" firstAttribute="bottom" secondItem="E64-Pm-shD" secondAttribute="bottom" constant="1" id="Qa7-hn-4ck"/>
                             <constraint firstItem="E64-Pm-shD" firstAttribute="top" secondItem="6I2-vM-DNo" secondAttribute="top" constant="1" id="ShR-bG-pec"/>
+                            <constraint firstItem="9Bp-6x-9Hf" firstAttribute="height" secondItem="E64-Pm-shD" secondAttribute="height" multiplier="0.5" id="anM-oD-mTx"/>
                             <constraint firstItem="dbo-8j-enJ" firstAttribute="trailing" secondItem="E64-Pm-shD" secondAttribute="trailing" id="aoX-Eo-pMQ"/>
                             <constraint firstItem="dbo-8j-enJ" firstAttribute="top" secondItem="E64-Pm-shD" secondAttribute="bottom" constant="10" id="c2Y-12-WrD"/>
+                            <constraint firstItem="9Bp-6x-9Hf" firstAttribute="bottom" secondItem="E64-Pm-shD" secondAttribute="bottom" constant="1" id="dLI-SQ-vZn"/>
                             <constraint firstItem="1bK-UL-g5b" firstAttribute="leading" secondItem="Fdq-36-bzx" secondAttribute="trailing" constant="12" id="hqh-Jk-lWl"/>
+                            <constraint firstItem="9Bp-6x-9Hf" firstAttribute="trailing" secondItem="E64-Pm-shD" secondAttribute="trailing" constant="1" id="iyS-Ws-mmQ"/>
                             <constraint firstItem="VOU-rJ-cTE" firstAttribute="leading" secondItem="E64-Pm-shD" secondAttribute="leading" id="pDP-HA-Pff"/>
                             <constraint firstItem="dbo-8j-enJ" firstAttribute="leading" secondItem="E64-Pm-shD" secondAttribute="leading" id="pKd-dq-Igi"/>
                         </constraints>
@@ -187,6 +194,7 @@
         </tableViewCell>
     </objects>
     <resources>
+        <image name="ic_bckShadow" width="630.33331298828125" height="1134.3333740234375"/>
         <image name="ic_chooseLocation" width="16" height="16.333333969116211"/>
         <image name="ic_grayDot" width="3" height="3.3333332538604736"/>
         <image name="ic_star" width="16" height="16.333333969116211"/>

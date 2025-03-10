@@ -148,6 +148,17 @@ extension MoreViewController:UICollectionViewDataSource, UICollectionViewDelegat
             let vc: ShopViewController = ShopViewController.instantiate(appStoryboard: .shop)
             self.navigationController?.pushViewController(vc, animated: true)
         }
+        else if (moreSectionData?[indexPath.section].items[indexPath.row].subTitle as? String)?.uppercased() == AppStrings.my_orders.uppercased() {
+            
+            let vc: OrderHistoryViewController = OrderHistoryViewController.instantiate(appStoryboard: .shop)
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+        else if (moreSectionData?[indexPath.section].items[indexPath.row].subTitle as? String)?.uppercased() == AppStrings.cart.uppercased() {
+            
+            let vc: CheckoutCartViewController = CheckoutCartViewController.instantiate(appStoryboard: .shop)
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+            
         
         //        let vc: MyGoalsViewController = MyGoalsViewController.instantiate(appStoryboard: .more)
         //

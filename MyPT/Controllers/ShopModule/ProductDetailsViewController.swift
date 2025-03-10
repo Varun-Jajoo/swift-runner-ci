@@ -57,6 +57,13 @@ class ProductDetailsViewController: CommonViewController {
         Utility.shared.shareSocial(viewController: self, textToShare: "Share to social", imageToShare: AppImages.navLeft ?? UIImage(), urlShareStr: "https://www.google.com/")
     }
     
+    @IBAction func checkDelivaryDateBtnActn(_ sender: Any) {
+        let vc: SelectAddressPopupViewController = SelectAddressPopupViewController.instantiate(appStoryboard: .shop)
+        vc.modalPresentationStyle = .automatic
+        self.present(vc, animated: true)
+    }
+    
+    
     @IBAction func addToCartBtnActn(_ sender: Any) {
         let vc: CheckoutCartViewController = CheckoutCartViewController.instantiate(appStoryboard: .shop)
         self.navigationController?.pushViewController(vc, animated: true)

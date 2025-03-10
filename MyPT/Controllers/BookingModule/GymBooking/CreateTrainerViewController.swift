@@ -75,6 +75,7 @@ class CreateTrainerViewController: CommonViewController {
         if let titleStr = trainerData?.first?["title"] as? String , self.continueBtn.accessibilityHint == titleStr {
             let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
             vc.flowSlot = calendarFlow.bookTrainer
+            vc.inputType = "home"
             self.navigationController?.pushViewController(vc, animated: true)
         }else{
             let vc:GymWorkoutViewController = GymWorkoutViewController.instantiate(appStoryboard: .booking)

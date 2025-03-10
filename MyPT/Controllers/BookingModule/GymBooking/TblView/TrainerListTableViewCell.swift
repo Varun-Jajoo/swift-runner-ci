@@ -10,6 +10,15 @@ import UIKit
 class TrainerListTableViewCell: UITableViewCell {
 
     //MARK: -------------VARIABLE
+    var trainerTagsData:[TrainerTagModel]? = [] {
+        didSet{
+            if let trainerTagsData = trainerTagsData {
+                restrictedRange = [0...trainerTagsData.count - 1]
+                self.gymCategoryCollView.reloadData()
+            }
+        }
+    }
+    
     // Indexes of restricted items
     var restrictedRange: [ClosedRange<Int>] = [0...4]  // These cells can't be selected
     
@@ -65,13 +74,14 @@ class TrainerListTableViewCell: UITableViewCell {
 //MARK: ------------UICOLLECIONVIEW DATASOURCE/DELEGATE
 extension TrainerListTableViewCell: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 4
+        return trainerTagsData?.count ?? 0 //4
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell:ProductCategoryCollViewCell = gymCategoryCollView.dequeueReusableCell(withReuseIdentifier: "ProductCategoryCollViewCell", for: indexPath) as! ProductCategoryCollViewCell
         cell.cellMBV.backgroundColor = UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1)
-     
+        
+        cell.titleLbl.text = trainerTagsData?[indexPath.row].name as? String
         
         return cell
     }

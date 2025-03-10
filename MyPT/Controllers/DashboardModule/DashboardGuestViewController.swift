@@ -301,12 +301,12 @@ extension DashboardGuestViewController{
      1=>for home 2=>for gym
      */
     
-    func getTrainerApi(){
-        DashboardVM.gerTrainerApi(viewController: self, inputType: "gym", completion: { [weak self] getDataResult in
-            guard let self = self else { return  }
-            
-            print(getDataResult as Any)
-            
-        })
-    }
+//    func getTrainerApi(){
+//        DashboardVM.gerTrainerApi(viewController: self, inputType: "gym", completion: { [weak self] getDataResult in
+//            guard let self = self else { return  }
+//            
+//            print(getDataResult as Any)
+//            
+//        })
+//    }
 }

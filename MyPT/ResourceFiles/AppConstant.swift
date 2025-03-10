@@ -109,6 +109,8 @@ public struct AppImages {
     public static let navLeft = UIImage(named: "ic_navLeft")
     public static let backarrow = UIImage(named: "ic_back_arrow")
     public static let arrow_right = UIImage(named: "ic_arrow_right")
+    public static let arrow_rightWhite = UIImage(named: "ic_arrow_rightWhite")
+    public static let arrow_right_black = UIImage(named: "ic_arrow_right_black")
     public static let editOtp = UIImage(named: "ic_editOtp")
     public static let help = UIImage(named: "ic_help")
     public static let follow = UIImage(named: "ic_follow")

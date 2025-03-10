@@ -44,6 +44,9 @@ struct AppStrings {
     public static let my_Goals = "My Goals"
     public static let glass_Size = "Glass Size"
     public static let checkout_Str = "Checkout"
+    public static let your_Workout_Gear_is_Waiting = "Your Workout Gear is Waiting!"
+    public static let empty_MyOrders_Msg = "Once you place an order, it’ll appear here, ready to power up your fitness journey"
+    
     
     
     //-------************Bottom Tabbar
@@ -75,6 +78,7 @@ struct AppStrings {
     public static let myPT_Products = "MyPT Products"
     public static let product = "Product"
     public static let add_Address = "Add Address"
+    public static let order_Refund = "Order Refund"
     
     
     

@@ -56,7 +56,7 @@ class CheckoutCartViewController: CommonViewController {
     
     func setNavUI(){
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [AppStrings.cart], setTintColor: .black, setTitleColor: UIColor.appWhite)
-        self.setRighMenu(rightImgs: [AppImages.moreSettings], setTitle: [nil], setTintColor: UIColor.black, setTitleColor: UIColor.black)
+//        self.setRighMenu(rightImgs: [AppImages.moreSettings], setTitle: [nil], setTintColor: UIColor.black, setTitleColor: UIColor.black)
     }
     
     @IBAction func viewCouponBtnActn(_ sender: Any) {
@@ -138,7 +138,7 @@ class CheckoutCartViewController: CommonViewController {
 //MARK: -----------------------UITABLEVIEW DELEGATE/DATASOURCE
 extension CheckoutCartViewController: UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 4
+        return 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

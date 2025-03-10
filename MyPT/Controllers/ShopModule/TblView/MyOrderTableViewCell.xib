@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="MyOrderTableViewCell" rowHeight="228" id="KGk-i7-Jjw" customClass="MyOrderTableViewCell" customModule="MyPT" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="678" height="228"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="678" height="228"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gng-OU-aq4">
+                        <rect key="frame" x="2" y="10" width="674" height="208"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_MasterGrip" translatesAutoresizingMaskIntoConstraints="NO" id="I0R-rJ-ZYl">
+                                <rect key="frame" x="10" y="10" width="100" height="188"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="100" id="SxI-WH-NKP"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Confirmed" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2zo-xN-2Zl">
+                                <rect key="frame" x="130" y="20" width="534" height="20.333333333333329"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="appWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Estimated Delivery Sat, 31 Aug" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YXw-v1-33y">
+                                <rect key="frame" x="130" y="52.333333333333336" width="534" height="20.333333333333336"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="txtDarkGray"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Cash on Delivery" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YG3-v8-ISd">
+                                <rect key="frame" x="130" y="84.666666666666671" width="534" height="20.333333333333329"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="txtDarkGray"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="255" verticalCompressionResistancePriority="755" text="Order ID : 56597856597" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3vm-kL-4W2">
+                                <rect key="frame" x="130" y="123.99999999999999" width="534" height="20.333333333333329"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="appWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" name="appCard2"/>
+                        <constraints>
+                            <constraint firstItem="YXw-v1-33y" firstAttribute="leading" secondItem="2zo-xN-2Zl" secondAttribute="leading" id="1cr-5M-jsU"/>
+                            <constraint firstItem="YG3-v8-ISd" firstAttribute="top" secondItem="YXw-v1-33y" secondAttribute="bottom" constant="12" id="2fJ-lO-7sT"/>
+                            <constraint firstItem="3vm-kL-4W2" firstAttribute="bottom" relation="lessThanOrEqual" secondItem="I0R-rJ-ZYl" secondAttribute="bottom" constant="10" id="6xG-qu-vud"/>
+                            <constraint firstItem="YXw-v1-33y" firstAttribute="trailing" secondItem="2zo-xN-2Zl" secondAttribute="trailing" id="BmU-KW-DY5"/>
+                            <constraint firstItem="3vm-kL-4W2" firstAttribute="leading" secondItem="YG3-v8-ISd" secondAttribute="leading" id="JDc-Ar-Tsv"/>
+                            <constraint firstItem="I0R-rJ-ZYl" firstAttribute="leading" secondItem="gng-OU-aq4" secondAttribute="leading" constant="10" id="JNj-5e-eOv"/>
+                            <constraint firstAttribute="trailing" secondItem="2zo-xN-2Zl" secondAttribute="trailing" constant="10" id="Jau-jo-pgJ"/>
+                            <constraint firstItem="3vm-kL-4W2" firstAttribute="top" secondItem="YG3-v8-ISd" secondAttribute="bottom" constant="19" id="SKj-Un-t6r"/>
+                            <constraint firstItem="YG3-v8-ISd" firstAttribute="trailing" secondItem="YXw-v1-33y" secondAttribute="trailing" id="TqB-eS-U4k"/>
+                            <constraint firstItem="2zo-xN-2Zl" firstAttribute="leading" secondItem="I0R-rJ-ZYl" secondAttribute="trailing" constant="20" id="VHA-uQ-uS6"/>
+                            <constraint firstItem="YG3-v8-ISd" firstAttribute="leading" secondItem="YXw-v1-33y" secondAttribute="leading" id="caH-QT-vnA"/>
+                            <constraint firstItem="YXw-v1-33y" firstAttribute="top" secondItem="2zo-xN-2Zl" secondAttribute="bottom" constant="12" id="cgX-BW-EZa"/>
+                            <constraint firstItem="2zo-xN-2Zl" firstAttribute="top" secondItem="I0R-rJ-ZYl" secondAttribute="top" constant="10" id="nsB-7t-rY8"/>
+                            <constraint firstItem="3vm-kL-4W2" firstAttribute="trailing" secondItem="YG3-v8-ISd" secondAttribute="trailing" id="sTc-pl-HJ8"/>
+                            <constraint firstItem="I0R-rJ-ZYl" firstAttribute="top" secondItem="gng-OU-aq4" secondAttribute="top" constant="10" id="wVu-oc-ttS"/>
+                            <constraint firstAttribute="bottom" secondItem="I0R-rJ-ZYl" secondAttribute="bottom" constant="10" id="zWl-XO-VhE"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                <constraints>
+                    <constraint firstItem="gng-OU-aq4" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="10" id="2uk-lf-4Ld"/>
+                    <constraint firstItem="gng-OU-aq4" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="2" id="CfG-hm-FA1"/>
+                    <constraint firstAttribute="bottom" secondItem="gng-OU-aq4" secondAttribute="bottom" constant="10" id="eEy-kg-r5J"/>
+                    <constraint firstAttribute="trailing" secondItem="gng-OU-aq4" secondAttribute="trailing" constant="2" id="wFy-zk-eRm"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <connections>
+                <outlet property="cellMBV" destination="gng-OU-aq4" id="AY6-vv-Khr"/>
+                <outlet property="estimatedDelDateLbl" destination="YXw-v1-33y" id="MKj-t9-kaC"/>
+                <outlet property="orderIdLbl" destination="3vm-kL-4W2" id="8dg-lU-iE6"/>
+                <outlet property="paymentModeLbl" destination="YG3-v8-ISd" id="ZfD-HE-G28"/>
+                <outlet property="productImgView" destination="I0R-rJ-ZYl" id="Ute-CL-ARE"/>
+                <outlet property="stutusTitleLbl" destination="2zo-xN-2Zl" id="odD-ob-qWs"/>
+            </connections>
+            <point key="canvasLocation" x="309.92366412213738" y="-32.394366197183103"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="ic_MasterGrip" width="129" height="129.33332824707031"/>
+        <namedColor name="appCard2">
+            <color red="0.062745098039215685" green="0.066666666666666666" blue="0.074509803921568626" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appWhite">
+            <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="txtDarkGray">
+            <color red="0.58431372549019611" green="0.58431372549019611" blue="0.58431372549019611" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

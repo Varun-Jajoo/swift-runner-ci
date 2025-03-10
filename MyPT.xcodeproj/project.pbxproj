@@ -10,6 +10,9 @@
 		32AC66B811E4E987000C43C0 /* Pods_MyPT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF3D5368393FBAC5F3CF9AD2 /* Pods_MyPT.framework */; };
 		B8037FFF2D5B450600F978E1 /* ExploreWorkoutModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8037FFE2D5B450600F978E1 /* ExploreWorkoutModel.swift */; };
 		B80380012D5B4AE200F978E1 /* DashboardVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80380002D5B4AE200F978E1 /* DashboardVM.swift */; };
+		B80571422D796E2C00B7BF93 /* SelectAddressPopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80571412D796E2C00B7BF93 /* SelectAddressPopupViewController.swift */; };
+		B80571442D79C62300B7BF93 /* ProductCancelPopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80571432D79C62300B7BF93 /* ProductCancelPopupViewController.swift */; };
+		B807A2A12D7ABCA5009B1222 /* OrderRefundViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B807A2A02D7ABCA5009B1222 /* OrderRefundViewController.swift */; };
 		B80A44622CEDAFE400E3A11E /* VideoLoopingPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80A44612CEDAFE400E3A11E /* VideoLoopingPlayer.swift */; };
 		B80A44642CEDB8C700E3A11E /* MyPTGems.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = B80A44632CEDB8C700E3A11E /* MyPTGems.mp4 */; };
 		B80A44682CEDD73800E3A11E /* TrainerTypeTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B80A44672CEDD73800E3A11E /* TrainerTypeTableViewCell.xib */; };
@@ -18,10 +21,13 @@
 		B80A446D2CEDF43A00E3A11E /* TrainerListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80A446C2CEDF43A00E3A11E /* TrainerListViewController.swift */; };
 		B80A44702CEDF4F300E3A11E /* TrainerListTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B80A446F2CEDF4F300E3A11E /* TrainerListTableViewCell.xib */; };
 		B80A44712CEDF4F300E3A11E /* TrainerListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80A446E2CEDF4F300E3A11E /* TrainerListTableViewCell.swift */; };
+		B80FB21B2D7AEF5B0082FB93 /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = B80FB21A2D7AEF5B0082FB93 /* IQKeyboardManagerSwift */; };
 		B812067A2D5DCBA40026B65F /* StepCountViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81206792D5DCBA40026B65F /* StepCountViewController.swift */; };
 		B812067C2D5DDC600026B65F /* SleepGoalsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B812067B2D5DDC600026B65F /* SleepGoalsViewController.swift */; };
 		B812067F2D5DF42B0026B65F /* DailyInsightCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B812067D2D5DF42B0026B65F /* DailyInsightCollectionViewCell.swift */; };
 		B81206802D5DF42B0026B65F /* DailyInsightCollectionViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B812067E2D5DF42B0026B65F /* DailyInsightCollectionViewCell.xib */; };
+		B81357B52D7EB4E300D0BF1A /* ReturnRequestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81357B42D7EB4E300D0BF1A /* ReturnRequestViewController.swift */; };
+		B81357B72D7ECB7800D0BF1A /* OrderRefundDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81357B62D7ECB7800D0BF1A /* OrderRefundDetailsViewController.swift */; };
 		B8136EF82D041CAE00545F7F /* BillingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8136EF72D041CAE00545F7F /* BillingView.swift */; };
 		B81622982D2BD67800849A2E /* WorkoutGymCategoryCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81622962D2BD67800849A2E /* WorkoutGymCategoryCollectionViewCell.swift */; };
 		B81622992D2BD67800849A2E /* WorkoutGymCategoryCollectionViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B81622972D2BD67800849A2E /* WorkoutGymCategoryCollectionViewCell.xib */; };
@@ -140,6 +146,7 @@
 		B8C50D3D2D2D3F14000635FD /* SearchWorkoutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C50D3C2D2D3F14000635FD /* SearchWorkoutViewController.swift */; };
 		B8C50D412D2D4909000635FD /* SearchWorkoutTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C50D3F2D2D4909000635FD /* SearchWorkoutTableViewCell.swift */; };
 		B8C50D422D2D4909000635FD /* SearchWorkoutTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B8C50D402D2D4909000635FD /* SearchWorkoutTableViewCell.xib */; };
+		B8C5AC242D7B15F7006DF31A /* GetTrainerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C5AC232D7B15F7006DF31A /* GetTrainerModel.swift */; };
 		B8C730352CE768FB00030B18 /* MyWorkoutsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C730332CE768FB00030B18 /* MyWorkoutsTableViewCell.swift */; };
 		B8C730362CE768FB00030B18 /* MyWorkoutsTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B8C730342CE768FB00030B18 /* MyWorkoutsTableViewCell.xib */; };
 		B8C791172CDA21E100F4E6BD /* WeightViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C791162CDA21E100F4E6BD /* WeightViewController.swift */; };
@@ -150,7 +157,7 @@
 		B8C791842CDA432400F4E6BD /* RangePickerView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B8C7917E2CDA432400F4E6BD /* RangePickerView.xib */; };
 		B8C791852CDA432400F4E6BD /* RangePickerViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C7917F2CDA432400F4E6BD /* RangePickerViewDataSource.swift */; };
 		B8C791862CDA432400F4E6BD /* RangePickerViewNib.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C791802CDA432400F4E6BD /* RangePickerViewNib.swift */; };
-		B8C97A2E2D77143C009F31AC /* ReviewInformationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C97A2D2D77143C009F31AC /* ReviewInformationViewController.swift */; };
+		B8C97A2E2D77143C009F31AC /* CheckoutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C97A2D2D77143C009F31AC /* CheckoutViewController.swift */; };
 		B8CCAF2B2D6D9718009D66A3 /* ProductsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8CCAF2A2D6D9718009D66A3 /* ProductsViewController.swift */; };
 		B8CCAF2D2D6D983C009D66A3 /* FooterProductsCollectionReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8CCAF2C2D6D983C009D66A3 /* FooterProductsCollectionReusableView.swift */; };
 		B8CCAF2F2D6DBA90009D66A3 /* ProductDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8CCAF2E2D6DBA90009D66A3 /* ProductDetailsViewController.swift */; };
@@ -177,6 +184,12 @@
 		B8D2160F2CEEF96B00017930 /* WorkoutCategoryCollectionViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B8D2160D2CEEF96B00017930 /* WorkoutCategoryCollectionViewCell.xib */; };
 		B8D216122CEF11BA00017930 /* GridTrainerCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8D216102CEF11BA00017930 /* GridTrainerCollectionViewCell.swift */; };
 		B8D216132CEF11BA00017930 /* GridTrainerCollectionViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B8D216112CEF11BA00017930 /* GridTrainerCollectionViewCell.xib */; };
+		B8D31A482D78323100A17EB0 /* OrderConfirmedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8D31A472D78323100A17EB0 /* OrderConfirmedViewController.swift */; };
+		B8D31A4A2D78376900A17EB0 /* MyOrderStatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8D31A492D78376900A17EB0 /* MyOrderStatusViewController.swift */; };
+		B8D31A4E2D78456900A17EB0 /* OrderHistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8D31A4D2D78456900A17EB0 /* OrderHistoryViewController.swift */; };
+		B8D31A512D7857F300A17EB0 /* MyOrderTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8D31A4F2D7857F300A17EB0 /* MyOrderTableViewCell.swift */; };
+		B8D31A522D7857F300A17EB0 /* MyOrderTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B8D31A502D7857F300A17EB0 /* MyOrderTableViewCell.xib */; };
+		B8D31A542D78894D00A17EB0 /* OrderStatusCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8D31A532D78894D00A17EB0 /* OrderStatusCell.swift */; };
 		B8D3E85A2D4B5918008981F7 /* PersonalizedModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8D3E8592D4B5918008981F7 /* PersonalizedModel.swift */; };
 		B8D3F9602D031DFD00534254 /* billing-paper-ticket-machine.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = B8D3F95F2D031DFD00534254 /* billing-paper-ticket-machine.mp4 */; };
 		B8D62F032D688F6A00C5BB75 /* ShopViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8D62F022D688F6A00C5BB75 /* ShopViewController.swift */; };
@@ -294,6 +307,9 @@
 		621A430C4C8976DEFFCF2411 /* Pods-MyPT.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MyPT.release.xcconfig"; path = "Target Support Files/Pods-MyPT/Pods-MyPT.release.xcconfig"; sourceTree = "<group>"; };
 		B8037FFE2D5B450600F978E1 /* ExploreWorkoutModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreWorkoutModel.swift; sourceTree = "<group>"; };
 		B80380002D5B4AE200F978E1 /* DashboardVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardVM.swift; sourceTree = "<group>"; };
+		B80571412D796E2C00B7BF93 /* SelectAddressPopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectAddressPopupViewController.swift; sourceTree = "<group>"; };
+		B80571432D79C62300B7BF93 /* ProductCancelPopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductCancelPopupViewController.swift; sourceTree = "<group>"; };
+		B807A2A02D7ABCA5009B1222 /* OrderRefundViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderRefundViewController.swift; sourceTree = "<group>"; };
 		B80A44612CEDAFE400E3A11E /* VideoLoopingPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoLoopingPlayer.swift; sourceTree = "<group>"; };
 		B80A44632CEDB8C700E3A11E /* MyPTGems.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = MyPTGems.mp4; sourceTree = "<group>"; };
 		B80A44662CEDD73800E3A11E /* TrainerTypeTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainerTypeTableViewCell.swift; sourceTree = "<group>"; };
@@ -336,6 +352,8 @@
 		B812067B2D5DDC600026B65F /* SleepGoalsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepGoalsViewController.swift; sourceTree = "<group>"; };
 		B812067D2D5DF42B0026B65F /* DailyInsightCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyInsightCollectionViewCell.swift; sourceTree = "<group>"; };
 		B812067E2D5DF42B0026B65F /* DailyInsightCollectionViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DailyInsightCollectionViewCell.xib; sourceTree = "<group>"; };
+		B81357B42D7EB4E300D0BF1A /* ReturnRequestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReturnRequestViewController.swift; sourceTree = "<group>"; };
+		B81357B62D7ECB7800D0BF1A /* OrderRefundDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderRefundDetailsViewController.swift; sourceTree = "<group>"; };
 		B8136EF72D041CAE00545F7F /* BillingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillingView.swift; sourceTree = "<group>"; };
 		B81622962D2BD67800849A2E /* WorkoutGymCategoryCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutGymCategoryCollectionViewCell.swift; sourceTree = "<group>"; };
 		B81622972D2BD67800849A2E /* WorkoutGymCategoryCollectionViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = WorkoutGymCategoryCollectionViewCell.xib; sourceTree = "<group>"; };
@@ -442,6 +460,7 @@
 		B8C50D3C2D2D3F14000635FD /* SearchWorkoutViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchWorkoutViewController.swift; sourceTree = "<group>"; };
 		B8C50D3F2D2D4909000635FD /* SearchWorkoutTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchWorkoutTableViewCell.swift; sourceTree = "<group>"; };
 		B8C50D402D2D4909000635FD /* SearchWorkoutTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SearchWorkoutTableViewCell.xib; sourceTree = "<group>"; };
+		B8C5AC232D7B15F7006DF31A /* GetTrainerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetTrainerModel.swift; sourceTree = "<group>"; };
 		B8C730332CE768FB00030B18 /* MyWorkoutsTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyWorkoutsTableViewCell.swift; sourceTree = "<group>"; };
 		B8C730342CE768FB00030B18 /* MyWorkoutsTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MyWorkoutsTableViewCell.xib; sourceTree = "<group>"; };
 		B8C791162CDA21E100F4E6BD /* WeightViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightViewController.swift; sourceTree = "<group>"; };
@@ -452,7 +471,7 @@
 		B8C7917E2CDA432400F4E6BD /* RangePickerView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RangePickerView.xib; sourceTree = "<group>"; };
 		B8C7917F2CDA432400F4E6BD /* RangePickerViewDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RangePickerViewDataSource.swift; sourceTree = "<group>"; };
 		B8C791802CDA432400F4E6BD /* RangePickerViewNib.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RangePickerViewNib.swift; sourceTree = "<group>"; };
-		B8C97A2D2D77143C009F31AC /* ReviewInformationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewInformationViewController.swift; sourceTree = "<group>"; };
+		B8C97A2D2D77143C009F31AC /* CheckoutViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutViewController.swift; sourceTree = "<group>"; };
 		B8CCAF2A2D6D9718009D66A3 /* ProductsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductsViewController.swift; sourceTree = "<group>"; };
 		B8CCAF2C2D6D983C009D66A3 /* FooterProductsCollectionReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FooterProductsCollectionReusableView.swift; sourceTree = "<group>"; };
 		B8CCAF2E2D6DBA90009D66A3 /* ProductDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductDetailsViewController.swift; sourceTree = "<group>"; };
@@ -479,6 +498,12 @@
 		B8D2160D2CEEF96B00017930 /* WorkoutCategoryCollectionViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = WorkoutCategoryCollectionViewCell.xib; sourceTree = "<group>"; };
 		B8D216102CEF11BA00017930 /* GridTrainerCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridTrainerCollectionViewCell.swift; sourceTree = "<group>"; };
 		B8D216112CEF11BA00017930 /* GridTrainerCollectionViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GridTrainerCollectionViewCell.xib; sourceTree = "<group>"; };
+		B8D31A472D78323100A17EB0 /* OrderConfirmedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderConfirmedViewController.swift; sourceTree = "<group>"; };
+		B8D31A492D78376900A17EB0 /* MyOrderStatusViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyOrderStatusViewController.swift; sourceTree = "<group>"; };
+		B8D31A4D2D78456900A17EB0 /* OrderHistoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderHistoryViewController.swift; sourceTree = "<group>"; };
+		B8D31A4F2D7857F300A17EB0 /* MyOrderTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyOrderTableViewCell.swift; sourceTree = "<group>"; };
+		B8D31A502D7857F300A17EB0 /* MyOrderTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MyOrderTableViewCell.xib; sourceTree = "<group>"; };
+		B8D31A532D78894D00A17EB0 /* OrderStatusCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderStatusCell.swift; sourceTree = "<group>"; };
 		B8D3E8592D4B5918008981F7 /* PersonalizedModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalizedModel.swift; sourceTree = "<group>"; };
 		B8D3F95F2D031DFD00534254 /* billing-paper-ticket-machine.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "billing-paper-ticket-machine.mp4"; sourceTree = "<group>"; };
 		B8D62F022D688F6A00C5BB75 /* ShopViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopViewController.swift; sourceTree = "<group>"; };
@@ -582,6 +607,7 @@
 			files = (
 				B8ACB6E82CDCEAB200042BC5 /* GoogleMaps in Frameworks */,
 				32AC66B811E4E987000C43C0 /* Pods_MyPT.framework in Frameworks */,
+				B80FB21B2D7AEF5B0082FB93 /* IQKeyboardManagerSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -844,6 +870,9 @@
 			children = (
 				B89FCAF32D706E6300C2C2D9 /* CartTableViewCell.swift */,
 				B89FCAF42D706E6300C2C2D9 /* CartTableViewCell.xib */,
+				B8D31A4F2D7857F300A17EB0 /* MyOrderTableViewCell.swift */,
+				B8D31A502D7857F300A17EB0 /* MyOrderTableViewCell.xib */,
+				B8D31A532D78894D00A17EB0 /* OrderStatusCell.swift */,
 			);
 			path = TblView;
 			sourceTree = "<group>";
@@ -1035,7 +1064,15 @@
 				B8931B6E2D6EDB7000EA1FC3 /* CheckoutCartViewController.swift */,
 				B8931B702D6EEBBD00EA1FC3 /* ProductsFilterViewController.swift */,
 				B89FCAF72D70880C00C2C2D9 /* AddAddressViewController.swift */,
-				B8C97A2D2D77143C009F31AC /* ReviewInformationViewController.swift */,
+				B8C97A2D2D77143C009F31AC /* CheckoutViewController.swift */,
+				B8D31A472D78323100A17EB0 /* OrderConfirmedViewController.swift */,
+				B8D31A492D78376900A17EB0 /* MyOrderStatusViewController.swift */,
+				B8D31A4D2D78456900A17EB0 /* OrderHistoryViewController.swift */,
+				B80571412D796E2C00B7BF93 /* SelectAddressPopupViewController.swift */,
+				B80571432D79C62300B7BF93 /* ProductCancelPopupViewController.swift */,
+				B807A2A02D7ABCA5009B1222 /* OrderRefundViewController.swift */,
+				B81357B62D7ECB7800D0BF1A /* OrderRefundDetailsViewController.swift */,
+				B81357B42D7EB4E300D0BF1A /* ReturnRequestViewController.swift */,
 			);
 			path = ShopModule;
 			sourceTree = "<group>";
@@ -1266,6 +1303,7 @@
 				B8D3E8592D4B5918008981F7 /* PersonalizedModel.swift */,
 				B8037FFE2D5B450600F978E1 /* ExploreWorkoutModel.swift */,
 				B8D62F062D68BAF700C5BB75 /* CommonModel.swift */,
+				B8C5AC232D7B15F7006DF31A /* GetTrainerModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -1369,6 +1407,7 @@
 			name = MyPT;
 			packageProductDependencies = (
 				B8ACB6E72CDCEAB200042BC5 /* GoogleMaps */,
+				B80FB21A2D7AEF5B0082FB93 /* IQKeyboardManagerSwift */,
 			);
 			productName = MyPT;
 			productReference = B8FDEEBF2CC8CAD00061639F /* MyPT.app */;
@@ -1382,7 +1421,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1540;
-				LastUpgradeCheck = 1540;
+				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					B8FDEEBE2CC8CAD00061639F = {
 						CreatedOnToolsVersion = 15.4;
@@ -1400,6 +1439,7 @@
 			mainGroup = B8FDEEB62CC8CAD00061639F;
 			packageReferences = (
 				B8ACB6E62CDCEAB200042BC5 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */,
+				B80FB2192D7AEF5B0082FB93 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
 			);
 			productRefGroup = B8FDEEC02CC8CAD00061639F /* Products */;
 			projectDirPath = "";
@@ -1499,6 +1539,7 @@
 				B8C791842CDA432400F4E6BD /* RangePickerView.xib in Resources */,
 				B8E7887E2D2FA82500F1D5D6 /* WorkoutTableViewCell.xib in Resources */,
 				B8E55F982CCA420500AAFAE5 /* ClashDisplay-Medium.otf in Resources */,
+				B8D31A522D7857F300A17EB0 /* MyOrderTableViewCell.xib in Resources */,
 				B8E55F9C2CCA420500AAFAE5 /* ClashDisplay-Extralight.otf in Resources */,
 				B8E55F9D2CCA420500AAFAE5 /* ClashDisplay-Semibold.otf in Resources */,
 				B816229D2D2BD98400849A2E /* WorkoutsCollectionViewCell.xib in Resources */,
@@ -1563,8 +1604,12 @@
 				B8FDEEE92CC8D2370061639F /* CommonViewController.swift in Sources */,
 				B8ED0EED2CCB7D68006279B8 /* GenderViewController.swift in Sources */,
 				B8335C462D38F27700B52EAF /* ChooseWorkoutViewController.swift in Sources */,
+				B81357B72D7ECB7800D0BF1A /* OrderRefundDetailsViewController.swift in Sources */,
+				B8D31A482D78323100A17EB0 /* OrderConfirmedViewController.swift in Sources */,
+				B8D31A4A2D78376900A17EB0 /* MyOrderStatusViewController.swift in Sources */,
 				B85B4ACE2D019E5D00E8AC5E /* CouponsOffersViewController.swift in Sources */,
 				B8BABE7A2D0AF5C500CA8E27 /* PointsTableViewCell.swift in Sources */,
+				B80571422D796E2C00B7BF93 /* SelectAddressPopupViewController.swift in Sources */,
 				B85B4AD22D01A5BE00E8AC5E /* CouponsOffersTableViewCell.swift in Sources */,
 				B8BD0BC32D365BF2005F19CA /* SessionCompleteViewController.swift in Sources */,
 				B8ED38752D2E9AE700312116 /* WorkoutDetailsViewController.swift in Sources */,
@@ -1604,7 +1649,7 @@
 				B8CF3BFB2D478E2B0005CDCB /* NetworkManager.swift in Sources */,
 				B8EAA0D52D6318A2005CC6B7 /* HydrationDataTableViewCell.swift in Sources */,
 				B8FE31822CF6FD7100B25860 /* PaymentSuccessViewController.swift in Sources */,
-				B8C97A2E2D77143C009F31AC /* ReviewInformationViewController.swift in Sources */,
+				B8C97A2E2D77143C009F31AC /* CheckoutViewController.swift in Sources */,
 				B8ACB6E52CDCC54600042BC5 /* LoadingViewController.swift in Sources */,
 				B8BD0BCE2D367B3B005F19CA /* WorkoutSummaryTableViewCell.swift in Sources */,
 				B8037FFF2D5B450600F978E1 /* ExploreWorkoutModel.swift in Sources */,
@@ -1624,6 +1669,7 @@
 				B89FCAF52D706E6300C2C2D9 /* CartTableViewCell.swift in Sources */,
 				B812067F2D5DF42B0026B65F /* DailyInsightCollectionViewCell.swift in Sources */,
 				B8D176832D2262F700981042 /* RepeatFrequencyPopupViewController.swift in Sources */,
+				B80571442D79C62300B7BF93 /* ProductCancelPopupViewController.swift in Sources */,
 				B819589E2D40B172000FBA16 /* ArrivingViewController.swift in Sources */,
 				B8FE31842CF702AA00B25860 /* BillShape.swift in Sources */,
 				B81743452D37AE950039A7B7 /* BadgeEarnedViewController.swift in Sources */,
@@ -1637,6 +1683,7 @@
 				B8DFFC882D1C0C5A00EFF09C /* PlanListTableViewCell.swift in Sources */,
 				B8FC90F52D10091D00C7A222 /* BookingListViewController.swift in Sources */,
 				B8CF94732D37C96F00842B1B /* ActiveChallengeViewController.swift in Sources */,
+				B81357B52D7EB4E300D0BF1A /* ReturnRequestViewController.swift in Sources */,
 				B86589F72D646C6F00C00603 /* UnitPopupViewController.swift in Sources */,
 				B87526942D5F50A100BDB642 /* MealsTypeTableViewCell.swift in Sources */,
 				B8C4E3522CEC85BE0002FCCB /* MoreExploreCollectionViewCell.swift in Sources */,
@@ -1646,6 +1693,7 @@
 				B8ED38732D2E731D00312116 /* WorkoutFilterViewController.swift in Sources */,
 				B8AE86B12D12B8260028166D /* BookingDetailsViewController.swift in Sources */,
 				B8FDEEF22CC8D6000061639F /* ShowAlertMessage.swift in Sources */,
+				B8C5AC242D7B15F7006DF31A /* GetTrainerModel.swift in Sources */,
 				B80A44692CEDD73800E3A11E /* TrainerTypeTableViewCell.swift in Sources */,
 				B8DFFC852D1C076A00EFF09C /* PlanPopupViewController.swift in Sources */,
 				B86EB28F2D5CAE2500894922 /* AddIntakeViewController.swift in Sources */,
@@ -1654,6 +1702,7 @@
 				B8DD37712CFD803500276F1F /* ChooseSessionViewController.swift in Sources */,
 				B8F719AF2D34F620006A8925 /* CenterRangeSlider.swift in Sources */,
 				B8F030342D54BACB00BE59C2 /* Constant.swift in Sources */,
+				B8D31A542D78894D00A17EB0 /* OrderStatusCell.swift in Sources */,
 				B8FBFE312D26A4C5001041E5 /* MyScheduleTableViewCell.swift in Sources */,
 				B84F788B2CEB18D000FF7D52 /* MoreViewController.swift in Sources */,
 				B8FD7D1B2D65A8F0004C4AFF /* DummyRulerViewController.swift in Sources */,
@@ -1681,6 +1730,7 @@
 				B842FAA22D60988A00E46E2B /* MealsViewController.swift in Sources */,
 				B8FBFE2D2D267ED3001041E5 /* InnerTableViewCell.swift in Sources */,
 				B89EC81F2D0036BE00FF5814 /* ReviewPackageViewController.swift in Sources */,
+				B807A2A12D7ABCA5009B1222 /* OrderRefundViewController.swift in Sources */,
 				B8E7887F2D2FA82500F1D5D6 /* WorkoutTableViewCell.swift in Sources */,
 				B8AC75CF2CF596A900520A2E /* SlotDurationViewController.swift in Sources */,
 				B89D01722D1D657000834FB7 /* TimeSlotPopupViewController.swift in Sources */,
@@ -1699,6 +1749,8 @@
 				B84AA9A02D426B2200F36EA6 /* CheckListTableViewCell.swift in Sources */,
 				B8ED0EF42CCB9459006279B8 /* PersonalizedCollectionViewCell.swift in Sources */,
 				B8FDEEC52CC8CAD00061639F /* SceneDelegate.swift in Sources */,
+				B8D31A512D7857F300A17EB0 /* MyOrderTableViewCell.swift in Sources */,
+				B8D31A4E2D78456900A17EB0 /* OrderHistoryViewController.swift in Sources */,
 				B82622992CE38573000DFF7E /* UpcomingMealsCollectionViewCell.swift in Sources */,
 				B81958A02D40DB51000FBA16 /* ArrivingLoddingViewController.swift in Sources */,
 				B8FDEEE32CC8D0620061639F /* StoryboardView.swift in Sources */,
@@ -1995,6 +2047,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		B80FB2192D7AEF5B0082FB93 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hackiftekhar/IQKeyboardManager.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
 		B8ACB6E62CDCEAB200042BC5 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/googlemaps/ios-maps-sdk";
@@ -2006,6 +2066,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		B80FB21A2D7AEF5B0082FB93 /* IQKeyboardManagerSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B80FB2192D7AEF5B0082FB93 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */;
+			productName = IQKeyboardManagerSwift;
+		};
 		B8ACB6E72CDCEAB200042BC5 /* GoogleMaps */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B8ACB6E62CDCEAB200042BC5 /* XCRemoteSwiftPackageReference "ios-maps-sdk" */;

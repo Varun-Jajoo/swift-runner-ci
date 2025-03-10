@@ -66,7 +66,7 @@ class AddAddressViewController: CommonViewController {
     
     private func setNavUI(){
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [AppStrings.add_Address], setTintColor: .black, setTitleColor: UIColor.appWhite)
-        self.setRighMenu(rightImgs: [AppImages.moreSettings], setTitle: [nil], setTintColor: UIColor.black, setTitleColor: UIColor.black)
+//        self.setRighMenu(rightImgs: [AppImages.moreSettings], setTitle: [nil], setTintColor: UIColor.black, setTitleColor: UIColor.black)
     }
     
     enum BtnTag: Int {
@@ -75,10 +75,14 @@ class AddAddressViewController: CommonViewController {
     }
     
     @IBAction func commonBtnActn(_ sender: UIButton) {
-        self.setSelectionAddr(sender: sender)
         
         if sender.tag == BtnTag.saveAddr.rawValue {
             print("save addrs btn clicked")
+            let vc: CheckoutViewController = CheckoutViewController.instantiate(appStoryboard: .shop)
+            self.navigationController?.pushViewController(vc, animated: true)
+            
+        }else{
+            self.setSelectionAddr(sender: sender)
         }
     }
     

@@ -8,6 +8,8 @@
 import UIKit
 import IQKeyboardManagerSwift
 import GoogleMaps
+import IQKeyboardToolbarManager
+
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,10 +18,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         
         GMSServices.provideAPIKey("AIzaSyAVUPi_nxwfDShp4Oifg1foIAfvDy-ePZw")
-        IQKeyboardManager.shared.enable = true
+  
+        IQKeyboardManager.shared.isEnabled = true
+        IQKeyboardManager.shared.resignOnTouchOutside = true
+        IQKeyboardToolbarManager.shared.isEnabled = true
         
         return true
     }
+    
     
     func applicationDidBecomeActive(_ application: UIApplication) {
            // App has become active, Restart any paused tasks

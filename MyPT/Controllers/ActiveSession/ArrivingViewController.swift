@@ -8,6 +8,7 @@
 import UIKit
 import IQKeyboardManagerSwift
 import GoogleMaps
+import IQTextView
 
 class ArrivingViewController: CommonViewController, UITextFieldDelegate {
     

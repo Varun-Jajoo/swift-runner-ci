@@ -7,7 +7,7 @@
 
 import UIKit
 import Cosmos
-import IQKeyboardManagerSwift
+import IQTextView
 
 class ReviewRatePopupViewController: UIViewController {
     
