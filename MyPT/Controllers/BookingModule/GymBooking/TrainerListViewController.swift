@@ -10,51 +10,38 @@ import UIKit
 class TrainerListViewController: CommonViewController {
 
     //MARK: --------------VARIBALE
-//    var trainerListData:[Any]?
-    var trainerGridData:[Any]?
+    var isFromHome:Bool?
+    var categorySelectedIndex:IndexPath?
     var flowSlot:calendarFlow = .defaultFlow
     var inputType:String?
     var inputIs_filter:String?
-    var inputTag_id:String?
     var inputLat:String?
     var inputLong:String?
+    var studioId:String?
+    
     var tagData:[TagModel]? = []
     var trainerData:[TrainerModel]? = []
+    var gymTrainerData:[GymTrainerModel]? = []
+    var isGridShow:Bool?
     
-   
     //MARK: ----------------IBOUTLET
     @IBOutlet weak var workoutCategoryCollView: UICollectionView!
     @IBOutlet weak var trainerListTblView: UITableView!
     @IBOutlet weak var trainerGridCollView: UICollectionView!
-    
     @IBOutlet weak var tblMBV: UIView!
-    
     @IBOutlet weak var collMBV: UIView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        self.inputType = "home"
-        self.inputIs_filter = ""
-        self.inputTag_id = ""
-        self.inputLat = " 77.391029"
-        self.inputLong = "28.535517"
+        self.categorySelectedIndex = IndexPath(row: 0, section: 0)
+        self.setupUI()
         
-        self.getTrainerApi()
-        
-        workoutCategoryCollView.register(UINib(nibName: "WorkoutCategoryCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WorkoutCategoryCollectionViewCell")
-        
-        trainerGridCollView.register(UINib(nibName: "GridTrainerCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "GridTrainerCollectionViewCell")
-        
-        trainerListTblView.register(UINib(nibName: "TrainerListTableViewCell", bundle: nil), forCellReuseIdentifier: "TrainerListTableViewCell")
-        
-//        trainerListData = ["1","2","3","4"]
-        
-        trainerGridData = []
-        tblMBV.isHidden = false
-        collMBV.isHidden = true
-        trainerGridCollView.reloadData()
-        trainerListTblView.reloadData()
+        if let isFromHome = isFromHome, isFromHome {
+            self.getTrainerApi(inputFilter: "0", inpuntTagId: 0)
+        }else{
+            self.getSelectGymList(inputFilter: "0", inpuntTagId: 0)
+        }
     }
     
     deinit {
@@ -64,16 +51,16 @@ class TrainerListViewController: CommonViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if let tagData = tagData?.count, tagData > 0 {
-            // Automatically select the first cell
-            let firstIndexPath = IndexPath(item: 0, section: 0)
-            DispatchQueue.main.async {
-                self.workoutCategoryCollView.selectItem(at: firstIndexPath, animated: true, scrollPosition: .top)
-                // Optional: perform any additional setup for the selected cell
-                self.workoutCategoryCollView.delegate?.collectionView?(self.workoutCategoryCollView, didSelectItemAt: firstIndexPath)
-                self.view.layoutIfNeeded()
-            }
-        }
+//        if let tagData = tagData?.count, tagData > 0 {
+//            // Automatically select the first cell
+//            let firstIndexPath = IndexPath(item: 0, section: 0)
+//            DispatchQueue.main.async {
+//                self.workoutCategoryCollView.selectItem(at: firstIndexPath, animated: true, scrollPosition: .top)
+//                // Optional: perform any additional setup for the selected cell
+//                self.workoutCategoryCollView.delegate?.collectionView?(self.workoutCategoryCollView, didSelectItemAt: firstIndexPath)
+//                self.view.layoutIfNeeded()
+//            }
+//        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -91,26 +78,50 @@ class TrainerListViewController: CommonViewController {
     override func rightBtnActn(sender: UIButton) {
         if sender.tag == 0 {
             print("Gridlayout")
-//            trainerListData = []
-            trainerGridData = ["1","2","3","4"]
+            self.isGridShow = true
             trainerGridCollView.reloadData()
-            trainerListTblView.reloadData()
             tblMBV.isHidden = true
             collMBV.isHidden = false
             
         }else if sender.tag == 1{
             print("show list view")
-//            trainerListData = ["1","2","3","4"]
-            trainerGridData = []
-            trainerGridCollView.reloadData()
+            self.isGridShow = false
             trainerListTblView.reloadData()
             tblMBV.isHidden = false
             collMBV.isHidden = true
             
         }else{
             print("cliecked at search...")
+            let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
+            vc.searchStr = "Trainers"
+            self.navigationController?.pushViewController(vc, animated: true)
         }
     }
+    
+    
+    private func setupUI(){
+        workoutCategoryCollView.register(UINib(nibName: "WorkoutCategoryCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WorkoutCategoryCollectionViewCell")
+        
+        trainerGridCollView.register(UINib(nibName: "GridTrainerCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "GridTrainerCollectionViewCell")
+        
+        trainerListTblView.register(UINib(nibName: "TrainerListTableViewCell", bundle: nil), forCellReuseIdentifier: "TrainerListTableViewCell")
+        
+        tblMBV.isHidden = false
+        collMBV.isHidden = true
+        trainerListTblView.reloadData()
+    }
+    
+    
+//    private func firstCellSelect(getCount: Int?){
+//        if let tagData = getCount, tagData > 0 {
+//            let firstIndexPath = IndexPath(item: 0, section: 0)
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+//                self.workoutCategoryCollView.selectItem(at: firstIndexPath, animated: true, scrollPosition: .top)
+//                self.workoutCategoryCollView.delegate?.collectionView?(self.workoutCategoryCollView, didSelectItemAt: firstIndexPath)
+//                self.view.layoutIfNeeded()
+//            }
+//        }
+//    }
     
 }
 
@@ -119,7 +130,12 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
        
         if collectionView == trainerGridCollView {
-            return trainerGridData?.count ?? 0
+            if let isFromHome = isFromHome, isFromHome {
+                return collectionView.numberOfRows(count: self.trainerData?.count, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult, messageImageHeight: 200.0, fromTop: 50)
+            }else{
+                return collectionView.numberOfRows(count: self.gymTrainerData?.count, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult, messageImageHeight: 200.0, fromTop: 50)
+            }
+            
         }else{
             return tagData?.count ?? 0
         }
@@ -134,25 +150,77 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
             cell.distanceBtn.titleLabel?.numberOfLines = 2
             cell.landMarkBtn.titleLabel?.lineBreakMode = .byClipping
             cell.distanceBtn.titleLabel?.lineBreakMode = .byClipping
+//            cell.trainerTagsData = self.trainerData?[indexPath.row].tags
+//            cell.setupCellData(trainerData: self.trainerData?[indexPath.row])
+            
+            if let isFromHome = isFromHome, isFromHome {
+                cell.trainerTagsData = self.trainerData?[indexPath.row].tags
+                cell.setupCellData(trainerData: self.trainerData?[indexPath.row])
+            }else{
+                cell.trainerTagsData = self.gymTrainerData?[indexPath.row].tags
+                cell.setGymCellData(trainerData: self.gymTrainerData?[indexPath.row])
+            }
+         
             return cell
         }else{
             let cell:WorkoutCategoryCollectionViewCell = workoutCategoryCollView.dequeueReusableCell(withReuseIdentifier: "WorkoutCategoryCollectionViewCell", for: indexPath) as! WorkoutCategoryCollectionViewCell
-            cell.categoryImgView.loadImage(urlString: self.tagData?[indexPath.row].image as? String, placeholder: AppImages.navLeft)
-            cell.categoryTitleLbl.text = self.tagData?[indexPath.row].name as? String
             
+            DispatchQueue.main.async {
+                if self.categorySelectedIndex?.row == indexPath.row {
+                    cell.cellMBV.backgroundColor = UIColor.clear
+                    cell.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), cornerRadious: 12.0)
+                }else{
+                    cell.cellMBV.backgroundColor = UIColor.clear
+                    cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+                }
+            }
+            
+            cell.categoryImgView.loadImage(urlString: self.tagData?[indexPath.row].image as? String, placeholder: UIImage(named: "ic_barbell_ diagonal"))
+            cell.categoryTitleLbl.text = self.tagData?[indexPath.row].name as? String
+        
             return cell
         }
     }
     
-    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if collectionView == trainerGridCollView {
-            let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
-            self.navigationController?.pushViewController(vc, animated: true)
+            
+            if let isFromHome = isFromHome, isFromHome {
+                
+                let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+                vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.trainerData?[indexPath.row].id ?? 0)", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+                self.navigationController?.pushViewController(vc, animated: true)
+                
+            }else{
+                
+                let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+                vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "0")", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+                self.navigationController?.pushViewController(vc, animated: true)
+                
+            }
+            
+            
+        }else if collectionView == workoutCategoryCollView{
+            
+            if let isFromHome = isFromHome, isFromHome {
+                if indexPath.row > 0 {
+                    self.getTrainerApi(inputFilter: "1", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+                }else{
+                    self.getTrainerApi(inputFilter: "0", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+                }
+            }else{
+                if indexPath.row > 0 {
+                    self.getSelectGymList(inputFilter: "1", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+                }else{
+                    self.getSelectGymList(inputFilter: "0", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+                }
+            }
+           
+            self.categorySelectedIndex = indexPath
+            collectionView.reloadData()
         }
         
     }
-    
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if collectionView == trainerGridCollView {
@@ -167,31 +235,60 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
 //MARK: --------------UITABLEVIEW DELEGATE/DATASOURCE
 extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.trainerData?.count ?? 00
+        if let isFromHome = isFromHome, isFromHome {
+            return tableView.numberOfRows(count: self.trainerData?.count, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult, messageImageHeight: 200.0, fromTop: 50)
+        }else{
+            return tableView.numberOfRows(count: self.gymTrainerData?.count, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult, messageImageHeight: 200.0, fromTop: 50)
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell:TrainerListTableViewCell = trainerListTblView.dequeueReusableCell(withIdentifier: "TrainerListTableViewCell", for: indexPath) as! TrainerListTableViewCell
+        if let isFromHome = isFromHome, isFromHome {
+            cell.trainerTagsData = self.trainerData?[indexPath.row].tags
+            cell.setCellData(trainerData: self.trainerData?[indexPath.row])
+        }else{
+            cell.trainerTagsData = self.gymTrainerData?[indexPath.row].tags
+            cell.setGymCellData(trainerData: self.gymTrainerData?[indexPath.row])
+        }
         
-        cell.trainerImgView.loadImage(urlString: self.trainerData?[indexPath.row].profile as? String, placeholder: AppImages.navLeft)
-        cell.gymNameLbl.text = self.trainerData?[indexPath.row].name as? String
-//        cell.setupSelection()
         cell.bookSlotBtn.addTarget(self, action: #selector(bookSlotBtnActn(sender: )), for: .touchUpInside)
-        cell.trainerTagsData = self.trainerData?[indexPath.row].tags
+        
+//        cell.bookSlotBtn.addTarget(self, action: #selector(bookSlotBtnActn(sender: )), for: .touchUpInside)
+//        cell.trainerTagsData = self.trainerData?[indexPath.row].tags
+//        cell.setCellData(trainerData: self.trainerData?[indexPath.row])
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
-        self.navigationController?.pushViewController(vc, animated: true)
+        
+        if let isFromHome = isFromHome, isFromHome {
+            let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+            vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.trainerData?[indexPath.row].id ?? 0)", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+            self.navigationController?.pushViewController(vc, animated: true)
+        }else{
+            let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+            vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "")", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+        
+//        let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+//        vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.trainerData?[indexPath.row].id ?? 0)", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+//        self.navigationController?.pushViewController(vc, animated: true)
         
     }
     
     @objc func bookSlotBtnActn(sender:UIButton) {
+        
+        let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
+        self.navigationController?.pushViewController(vc, animated: true)
+        
+        /*
         let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
         vc.slotBookFlow = flowSlot
         self.navigationController?.pushViewController(vc, animated: true)
+        */
     }
     
 }
@@ -200,16 +297,17 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
 //MARK: -----------------------EXTENSION FOR API
 extension TrainerListViewController {
     
-    private func getTrainerApi(){
+    //MARK: --------------------GET TRAINER LIST API
+    private func getTrainerApi(inputFilter: String?, inpuntTagId: Int?){
         let params:[String:String] = [
             "type": self.inputType ?? "",
-            "is_filter": self.inputIs_filter ?? "",
-            "tag_id": self.inputTag_id ?? "",
+            "is_filter": inputFilter ?? "",
+            "tag_id": "\(inpuntTagId ?? 0)" ,
             "long": self.inputLong ?? "",
             "lat": self.inputLat ?? ""
         ]
         
-        DashboardVM.gerTrainerApi(viewController: self, inputParms: params, completion: { [weak self] getResultData in
+        TrainerVM.gerTrainerApi(viewController: self, inputParms: params, completion: { [weak self] getResultData in
             guard let self = self, let getResultData = getResultData else { return  }
             print("get trainer list result data: ", getResultData as Any)
             
@@ -217,26 +315,64 @@ extension TrainerListViewController {
             self.trainerData?.removeAll()
             self.tagData?.append(contentsOf: getResultData.data?.tags ?? [])
             self.trainerData?.append(contentsOf: getResultData.data?.trainers ?? [])
+            
+            //-------------------Reload to set data
+            let tagModelData = TagModel(id: 1, name: "All Workouts", description: "", icon: "", image: "")
+            self.tagData?.insert(tagModelData, at: 0)
             self.workoutCategoryCollView.reloadData()
-            self.trainerListTblView.reloadData()
+            
+            if let isGridshow = isGridShow, isGridshow {
+                self.trainerGridCollView.reloadData()
+            }else{
+                self.trainerListTblView.reloadData()
+            }
         })
     }
     
-    //        let params:[String:String] = [
-    //            "type": "home",
-    //            "is_filter": "",
-    //            "tag_id": "",
-    //            "long": " 77.391029",
-    //            "lat": "28.535517"
-    //        ]
+    //MARK: -------------SELECT GYM
+    /*
+     id = 5 , this is studio id , for get studio trainers
+     long = 77.391029, this is always required for current location
+     lat = 28.535517, this is always required for current location
+     is_filter = 1, if select tag based trainer
+     tag_id = 4, required if is_filter is 1
+     */
+    
+    private func getSelectGymList(inputFilter: String?, inpuntTagId: Int?){
+        
+        let params:[String:String] = [
+            "id": self.studioId ?? "",
+            "long": self.inputLong ?? "",
+            "lat": self.inputLat ?? "",
+            "is_filter": inputFilter ?? "",
+            "tag_id": "\(inpuntTagId ?? 0)"
+        ]
+        
+        TrainerVM.selectGymApi(viewController: self, inputParms: params, completion: { [weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return }
+            
+            print(getResultData)
+            
+            self.gymTrainerData?.removeAll()
+            self.tagData?.removeAll()
+            self.trainerData?.removeAll()
+            self.tagData?.append(contentsOf: getResultData.data?.tags ?? [])
+            self.gymTrainerData?.append(contentsOf: getResultData.data?.trainers ?? [])
+            
+            //-------------------Reload to set data
+            let tagModelData = TagModel(id: 1, name: "All Workouts", description: "", icon: "", image: "")
+            self.tagData?.insert(tagModelData, at: 0)
+            self.workoutCategoryCollView.reloadData()
+//            self.trainerListTblView.reloadData()
+            
+            if let isGridshow = isGridShow, isGridshow {
+                self.trainerGridCollView.reloadData()
+            }else{
+                self.trainerListTblView.reloadData()
+            }
+        })
+        
+    }
 }
-
-
-
-////MARK: --------------UICOLLECTIOVIEW DELEGATE/DATASOURCE
-//
-//extension TrainerListViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout{
-//    
-//}
 
 

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -31,9 +31,9 @@
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="ZuI-X9-NZ2" firstAttribute="top" secondItem="Ydv-iN-kKy" secondAttribute="top" constant="12" id="5Qj-rk-P9i"/>
-                            <constraint firstAttribute="bottom" secondItem="ZuI-X9-NZ2" secondAttribute="bottom" constant="12" id="ARD-OJ-t0T"/>
+                            <constraint firstItem="ZuI-X9-NZ2" firstAttribute="centerY" secondItem="Ydv-iN-kKy" secondAttribute="centerY" id="HdN-JY-HMJ"/>
                             <constraint firstItem="ZuI-X9-NZ2" firstAttribute="leading" secondItem="Ydv-iN-kKy" secondAttribute="leading" constant="12" id="OJj-AQ-otF"/>
-                            <constraint firstAttribute="trailing" secondItem="ZuI-X9-NZ2" secondAttribute="trailing" constant="12" id="rpI-Ot-mgA"/>
+                            <constraint firstItem="ZuI-X9-NZ2" firstAttribute="centerX" secondItem="Ydv-iN-kKy" secondAttribute="centerX" id="ffA-4r-uYc"/>
                         </constraints>
                     </view>
                 </subviews>
@@ -50,6 +50,8 @@
             <connections>
                 <outlet property="cellMBV" destination="Ydv-iN-kKy" id="1UU-nH-z5a"/>
                 <outlet property="titleLbl" destination="ZuI-X9-NZ2" id="IPY-Jh-6uW"/>
+                <outlet property="titleLblLeading" destination="OJj-AQ-otF" id="0Em-xN-ojQ"/>
+                <outlet property="titleLblTopConstrnt" destination="5Qj-rk-P9i" id="sD3-EB-16t"/>
             </connections>
             <point key="canvasLocation" x="220.61068702290075" y="43.309859154929576"/>
         </collectionViewCell>

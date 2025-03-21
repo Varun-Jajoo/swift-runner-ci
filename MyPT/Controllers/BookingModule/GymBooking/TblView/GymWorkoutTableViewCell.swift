@@ -10,6 +10,14 @@ import UIKit
 class GymWorkoutTableViewCell: UITableViewCell {
 
     //MARK: -------------VARIABLE
+    var trainerTagsData:[TrainerTagModel]? = [] {
+        didSet{
+            if let trainerTagsData = trainerTagsData {
+                restrictedRange = [0...trainerTagsData.count - 1]
+                self.categoryCollView.reloadData()
+            }
+        }
+    }
     // Indexes of restricted items
     var restrictedRange: [ClosedRange<Int>] = [0...4]  // These cells can't be selected
     
@@ -50,12 +58,36 @@ class GymWorkoutTableViewCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
+    func setupCellData(studioData: TrainerModel?){
+        guard let studioData = studioData else { return }
+        
+        DispatchQueue.main.async {
+            self.gymMainImgV.loadImage(urlString: studioData.profile, placeholder: AppImages.navLeft)
+            self.gymNameLbl.text = studioData.name
+            self.distanceBtn.setTitle(studioData.distance, for: .normal)
+            self.landMarkBtn.setTitle(studioData.location, for: .normal)
+            self.timeBtn.setTitle(studioData.timing, for: .normal)
+            self.ratingBtn.setTitle(studioData.noOfRating, for: .normal)
+        }
+//        self.gymMainImgV.loadImage(urlString: studioData.profile, placeholder: AppImages.navLeft)
+//        self.gymNameLbl.text = studioData.name
+//        self.distanceBtn.setTitle(studioData.distance, for: .normal)
+//        self.landMarkBtn.setTitle(studioData.location, for: .normal)
+//        self.timeBtn.setTitle(studioData.timing, for: .normal)
+//        self.ratingBtn.setTitle(studioData.noOfRating, for: .normal)
+    }
+    
 }
 
 //MARK: ---------------EXTENSION FOR DATASOURCE/DELEGATE
 extension GymWorkoutTableViewCell: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 4
+        
+        if let totalCount = trainerTagsData?.count, totalCount > 3 {
+            return 4
+        }else{
+            return trainerTagsData?.count ?? 0
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -63,6 +95,11 @@ extension GymWorkoutTableViewCell: UICollectionViewDataSource, UICollectionViewD
         let cell:ProductCategoryCollViewCell = categoryCollView.dequeueReusableCell(withReuseIdentifier: "ProductCategoryCollViewCell", for: indexPath) as! ProductCategoryCollViewCell
         cell.cellMBV.backgroundColor = UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1)
      
+        if let lastCell = collectionView.isLastCell(), let totalCount = trainerTagsData?.count,( lastCell == indexPath.row && totalCount > 3) {
+            cell.titleLbl.text = "+3"
+        }else{
+            cell.titleLbl.text = trainerTagsData?[indexPath.row].name as? String
+        }
         
         return cell
     }

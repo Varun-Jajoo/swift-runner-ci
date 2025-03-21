@@ -11,6 +11,9 @@ class CreateTrainerViewController: CommonViewController {
 
     //MARK: --------------VARIABLE
     var trainerData:[[String:Any]]?
+    let locManager = GetLocationManager()
+    var getLat:Double?
+    var getLong:Double?
     
     
     //MARK: -------------IBOUTLET
@@ -22,6 +25,7 @@ class CreateTrainerViewController: CommonViewController {
         super.viewDidLoad()
         setUpFont()
         setupUI()
+        self.getLocation()
         
 //        trainerData = [["title":"Home Workout","trainerImg":AppImages.homeWorkout as Any],
 //                       ["title":"Gym Workout","trainerImg":AppImages.gymWorkout as Any]
@@ -53,18 +57,28 @@ class CreateTrainerViewController: CommonViewController {
         self.setProgress(0.2)
         
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
-        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite)
+//        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite)
+    }
+    
+    //MARK: -------------GET Lat long
+    private func getLocation(){
+        locManager.requestLocation(completion: { [weak self] getLocation in
+            guard let self = self, let getLocation = getLocation else { return  }
+
+            self.getLat = getLocation.coordinate.latitude
+            self.getLong = getLocation.coordinate.longitude
+        })
     }
     
     //MARK: ---------- SET UI
-    func setupUI(){
+    private func setupUI(){
         DispatchQueue.main.async {
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
         }
     }
     
     //------------------************Font
-    func setUpFont(){
+    private func setUpFont(){
         self.topTitleLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
         self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
     }
@@ -72,20 +86,45 @@ class CreateTrainerViewController: CommonViewController {
     @IBAction func continueBtnActn(_ sender: Any) {
         print("Continue btn actn.....")
         
+        if let getLat = getLat, let getLong = getLong {
+            if let titleStr = trainerData?.first?["title"] as? String , self.continueBtn.accessibilityHint == titleStr {
+                let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
+                vc.flowSlot = calendarFlow.bookTrainer
+                vc.inputType = "home"
+                vc.inputLat = "\(getLat)"
+                vc.inputLong = "\(getLong)"
+                vc.isFromHome = true
+                self.navigationController?.pushViewController(vc, animated: true)
+            }else{
+                let vc:GymWorkoutViewController = GymWorkoutViewController.instantiate(appStoryboard: .booking)
+                //        vc.flowSlot = calendarFlow.bookTrainer
+                vc.inputType = "gym"
+                vc.inputLat = "\(getLat)"
+                vc.inputLong = "\(getLong)"
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+        }else{
+            self.getLocation()
+        }
+                
+        /*
         if let titleStr = trainerData?.first?["title"] as? String , self.continueBtn.accessibilityHint == titleStr {
             let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
             vc.flowSlot = calendarFlow.bookTrainer
             vc.inputType = "home"
+            vc.inputLat = "75.39102"
+            vc.inputLong = "28.535517"
             self.navigationController?.pushViewController(vc, animated: true)
         }else{
             let vc:GymWorkoutViewController = GymWorkoutViewController.instantiate(appStoryboard: .booking)
             //        vc.flowSlot = calendarFlow.bookTrainer
             self.navigationController?.pushViewController(vc, animated: true)
         }
+        */
         
     }
     
-    
+        
     //MARK: -------------- ENABLE CONTINUE
     func enableContinueBtn(isSelected:Bool = false){
         if isSelected {

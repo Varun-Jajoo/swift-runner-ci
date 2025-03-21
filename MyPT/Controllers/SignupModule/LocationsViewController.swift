@@ -8,9 +8,17 @@
 import UIKit
 import GoogleMaps
 
+
+enum LocationFlow {
+    case addAdress
+    case defaultLoc
+}
+
 class LocationsViewController: CommonViewController {
     
     //MARK: ----------- VARIABLE
+    var flowLocation:LocationFlow = .defaultLoc
+    
     var mapView: GMSMapView!
     var locationManager: CLLocationManager?
     
@@ -55,16 +63,31 @@ class LocationsViewController: CommonViewController {
     
     
     func setNavUI(){
-        self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
-        self.setProgress(1.0)
-        
-        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
-        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite)
-        //        self.setNavigationTitle(title: AppStrings.select_plan, color: UIColor.black, font: AppFont.Bold.size(22.0))
+     
+        switch flowLocation {
+        case .addAdress:
+            
+            self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
+            //        self.setNavigationTitle(title: AppStrings.select_plan, color: UIColor.black, font: AppFont.Bold.size(22.0))
+            
+        case .defaultLoc:
+            self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
+            self.setProgress(1.0)
+            
+            self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
+            self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite)
+            //        self.setNavigationTitle(title: AppStrings.select_plan, color: UIColor.black, font: AppFont.Bold.size(22.0))
+        }
     }
     
     override func rightBtnActn(sender: UIButton) {
-        appSceneDelegate?.goToGuestDashboard()
+       
+        switch flowLocation {
+        case .addAdress:
+            print("address....")
+        case .defaultLoc:
+            appSceneDelegate?.goToGuestDashboard()
+        }
     }
     
     //MARK: ---------- SET UI
@@ -184,7 +207,51 @@ class LocationsViewController: CommonViewController {
     
     @IBAction func continueBtnActn(_ sender: Any) {
         print("Continue btn actn...")
-       
+        
+        switch flowLocation {
+        case .addAdress:
+            
+            if let mainAddrLbl = self.mainAddrLbl.text , !mainAddrLbl.isEmpty, let subAddrLbl = self.subAddrLbl.text, !subAddrLbl.isEmpty, let lat = showmapCamera?.latitude as? Double, let long = showmapCamera?.longitude as? Double {
+                print(mainAddrLbl, subAddrLbl, lat, long)
+                let fullAddr = mainAddrLbl + " " + subAddrLbl
+                print(fullAddr)
+                
+                let vc:BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
+                vc.modalPresentationStyle = .automatic
+                vc.bookingAddressFlow = .addAddress
+                self.present(vc, animated: true)
+                
+            }else{
+                AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.enter_Location)
+            }
+            
+        case .defaultLoc:
+            
+            if let mainAddrLbl = self.mainAddrLbl.text , !mainAddrLbl.isEmpty, let subAddrLbl = self.subAddrLbl.text, !subAddrLbl.isEmpty, let lat = showmapCamera?.latitude as? Double, let long = showmapCamera?.longitude as? Double {
+                print(mainAddrLbl, subAddrLbl, lat, long)
+                let fullAddr = mainAddrLbl + " " + subAddrLbl
+                
+                print(fullAddr)
+                
+                RegistrationVM.addLocationApi(viewController: self, inputLat: "\(lat)", inputLong: "\(long)", inputAddress: fullAddr, completion: { [weak self] getResultData in
+                    guard let self = self, let getResultData = getResultData else { return  }
+                    
+                    if getResultData.status == true {
+                        if let detailsData = getResultData.data {
+                            appUserDefaults.saveUserToUserDefaults(detailsData)
+                        }
+                        
+                        let vc:GetStartViewController = GetStartViewController.instantiate(appStoryboard: .main)
+                        self.navigationController?.pushViewController(vc, animated: true)
+                    }
+                })
+                
+            }else{
+                AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.enter_Location)
+            }
+        }
+        
+       /*
         if let mainAddrLbl = self.mainAddrLbl.text , !mainAddrLbl.isEmpty, let subAddrLbl = self.subAddrLbl.text, !subAddrLbl.isEmpty, let lat = showmapCamera?.latitude as? Double, let long = showmapCamera?.longitude as? Double {
             print(mainAddrLbl, subAddrLbl, lat, long)
             let fullAddr = mainAddrLbl + " " + subAddrLbl
@@ -207,6 +274,7 @@ class LocationsViewController: CommonViewController {
         }else{
             AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.enter_Location)
         }
+        */
     }
     
     @IBAction func rightSearchBtnActn(_ sender: Any) {
@@ -309,7 +377,6 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
         
         getCurrentAddr(location: location)
         
-
         
         /*
         // Get user's current location name
@@ -397,6 +464,7 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
     }
     
     //MARK: ------------GET CURRENT ADDRESS
+    
     func getCurrentAddr(location:CLLocation?){
         if let getLcation = location {
             let geocoder = GMSGeocoder()
@@ -452,6 +520,51 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
             self.currentLocMap.addSubview(self.mapView)
         }
     }
+    
+    //    func getAddressFromLatLon(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
+    //        let geocoder = CLGeocoder()
+    //        let location = CLLocation(latitude: latitude, longitude: longitude)
+    //
+    //        geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
+    //            if let error = error {
+    //                print("Reverse geocoding failed: \(error.localizedDescription)")
+    //                return
+    //            }
+    //
+    //            if let placemark = placemarks?.first {
+    //
+    //                let buildingNumber = placemark.subThoroughfare ?? "N/A" // House/Building Number
+    //                let streetName = placemark.thoroughfare ?? "N/A"       // Street Name
+    //                let landmark = placemark.locality ?? "N/A"             // City or Area
+    //
+    //                print("Building Number: \(buildingNumber)")
+    //                print("Street Name: \(streetName)")
+    //                print("Landmark: \(landmark)")
+    //                print("Full Address: \(placemark.name ?? "N/A")")
+    //            }
+    //        }
+    //    }
+        
+        /* Using Google Places API for Autocomplete
+        func fetchPlaceDetails(placeID: String) {
+            let placesClient = GMSPlacesClient.shared()
+            placesClient.lookUpPlaceID(placeID) { (place, error) in
+                if let error = error {
+                    print("Error fetching place details: \(error.localizedDescription)")
+                    return
+                }
+                if let place = place {
+                    let buildingNumber = place.addressComponents?.first(where: { $0.types.contains("street_number") })?.name ?? "N/A"
+                    let streetName = place.addressComponents?.first(where: { $0.types.contains("route") })?.name ?? "N/A"
+                    let landmark = place.addressComponents?.first(where: { $0.types.contains("sublocality_level_1") })?.name ?? "N/A"
+                    
+                    print("Building Number: \(buildingNumber)")
+                    print("Street Name: \(streetName)")
+                    print("Landmark: \(landmark)")
+                }
+            }
+        }
+        */
 }
 
 struct MarkerModel {

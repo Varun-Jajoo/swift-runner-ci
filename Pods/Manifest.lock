@@ -1,35 +1,16 @@
 PODS:
-  - Alamofire (5.9.1)
-  - AlamofireImage (4.3.0):
-    - Alamofire (~> 5.8)
-  - Cosmos (25.0.1)
   - FSCalendar (2.8.4)
-  - SVProgressHUD (2.3.1):
-    - SVProgressHUD/Core (= 2.3.1)
-  - SVProgressHUD/Core (2.3.1)
 
 DEPENDENCIES:
-  - Alamofire
-  - AlamofireImage
-  - Cosmos (~> 25.0)
   - FSCalendar
-  - SVProgressHUD
 
 SPEC REPOS:
   trunk:
-    - Alamofire
-    - AlamofireImage
-    - Cosmos
     - FSCalendar
-    - SVProgressHUD
 
 SPEC CHECKSUMS:
-  Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
-  AlamofireImage: 843953fa97bee5f561cf05d83abd759e590b068d
-  Cosmos: 02db0a1c953107049bfd2d7af19ceef55ecb7e98
   FSCalendar: 2d1d0d9398f12d439f55c1fe0f01525b151b8260
-  SVProgressHUD: 4837c74bdfe2e51e8821c397825996a8d7de6e22
 
-PODFILE CHECKSUM: cb4245b6843547d4775c7888af1d616b74e26df2
+PODFILE CHECKSUM: 060f887be66934774c5771d09df872084db1393b
 
 COCOAPODS: 1.15.2

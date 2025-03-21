@@ -5,7 +5,7 @@
 //  Created by techsaga corp on 20/11/24.
 //
 
-import Foundation
+import UIKit
 import AVFoundation
 
 protocol LoopingPlayerProgressDelegate: AnyObject {
@@ -128,6 +128,31 @@ class LoopingPlayer: AVPlayer {
         if keyPath == "currentItem" {
             self.timer?.invalidate()
             self.timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(getter: loadingProgress), userInfo: nil, repeats: true)
+        }
+    }
+}
+
+//MARK: -----------------FOR CREATING THUMBNAIL OF VIDEO
+func getThumbnailImageFromVideoUrl(url: URL, completion: @escaping (UIImage?) -> Void) {
+    DispatchQueue.global(qos: .userInitiated).async {
+        let asset = AVAsset(url: url)
+        let imageGenerator = AVAssetImageGenerator(asset: asset)
+        imageGenerator.appliesPreferredTrackTransform = true
+        imageGenerator.maximumSize = CGSize(width: 300, height: 300) // Optimize size
+        
+        let thumbnailTime = CMTime(seconds: 2.0, preferredTimescale: 600)
+        
+        do {
+            let cgImage = try imageGenerator.copyCGImage(at: thumbnailTime, actualTime: nil)
+            let image = UIImage(cgImage: cgImage)
+            DispatchQueue.main.async {
+                completion(image)
+            }
+        } catch {
+            print("Failed to generate thumbnail: \(error.localizedDescription)")
+            DispatchQueue.main.async {
+                completion(nil)
+            }
         }
     }
 }

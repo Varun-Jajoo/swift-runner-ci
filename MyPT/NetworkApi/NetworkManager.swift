@@ -178,7 +178,14 @@ class NetworkManager {
     }
     
     private func handle401StatusCode(_ serviceEndPoint: ApiEndPoint){
-        AlertHelper.shared.showCustomeAlert(message: "Session expired, please login again", actions: ["Ok"])
+//        AlertHelper.shared.showCustomeAlert(message: "Session expired, please login again", actions: ["Ok"])
+        AlertHelper.shared.showCustomeAlert(message: "Session expired, please login again", actions: ["Ok"], completion: { [weak self] getTag in
+            
+            guard self != nil else {
+                return
+            }
+            self?.logoutOnExpiredSession()
+        })
     }
     
     private func logoutOnExpiredSession(){

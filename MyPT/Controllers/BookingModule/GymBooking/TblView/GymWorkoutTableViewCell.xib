@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -39,11 +39,11 @@
                                 <color key="textColor" name="appWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" translatesAutoresizingMaskIntoConstraints="NO" id="Fso-9n-MPR">
-                                <rect key="frame" x="18" y="344.66666666666669" width="273" height="26.333333333333314"/>
+                            <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="Fso-9n-MPR">
+                                <rect key="frame" x="18" y="344.66666666666669" width="201" height="26.333333333333314"/>
                                 <subviews>
                                     <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YIe-ol-a8H">
-                                        <rect key="frame" x="0.0" y="0.0" width="68.666666666666671" height="26.333333333333332"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="48" height="26.333333333333332"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="9"/>
                                         <inset key="contentEdgeInsets" minX="0.0" minY="10" maxX="5" maxY="0.0"/>
                                         <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-4" maxY="0.0"/>
@@ -52,8 +52,8 @@
                                             <color key="titleColor" name="appWhite"/>
                                         </state>
                                     </button>
-                                    <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bzc-uj-RPL">
-                                        <rect key="frame" x="68.666666666666686" y="0.0" width="111.33333333333331" height="26.333333333333332"/>
+                                    <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="245" horizontalCompressionResistancePriority="745" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bzc-uj-RPL">
+                                        <rect key="frame" x="53" y="0.0" width="78" height="26.333333333333332"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="9"/>
                                         <inset key="contentEdgeInsets" minX="0.0" minY="10" maxX="5" maxY="0.0"/>
                                         <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-4" maxY="0.0"/>
@@ -63,7 +63,7 @@
                                         </state>
                                     </button>
                                     <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="U50-0C-Ht6">
-                                        <rect key="frame" x="180" y="0.0" width="93" height="26.333333333333332"/>
+                                        <rect key="frame" x="136" y="0.0" width="65" height="26.333333333333332"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="9"/>
                                         <inset key="contentEdgeInsets" minX="0.0" minY="10" maxX="5" maxY="0.0"/>
                                         <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-4" maxY="0.0"/>
@@ -147,7 +147,7 @@
                             <constraint firstItem="lIN-tS-7zo" firstAttribute="width" secondItem="r5r-YH-w6o" secondAttribute="width" multiplier="0.45" id="ZYj-eb-ixo"/>
                             <constraint firstAttribute="trailing" secondItem="r5r-YH-w6o" secondAttribute="trailing" id="b43-Z6-dMg"/>
                             <constraint firstItem="c0b-qv-OMc" firstAttribute="bottom" secondItem="r5r-YH-w6o" secondAttribute="bottom" constant="-24" id="h8f-c1-A3f"/>
-                            <constraint firstItem="c0b-qv-OMc" firstAttribute="leading" secondItem="Fso-9n-MPR" secondAttribute="trailing" constant="12" id="kae-Lh-btb"/>
+                            <constraint firstItem="c0b-qv-OMc" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Fso-9n-MPR" secondAttribute="trailing" constant="12" id="kae-Lh-btb"/>
                             <constraint firstItem="Fso-9n-MPR" firstAttribute="bottom" secondItem="c0b-qv-OMc" secondAttribute="bottom" id="ron-2g-Z12"/>
                             <constraint firstItem="o6i-jR-DLc" firstAttribute="leading" secondItem="Fso-9n-MPR" secondAttribute="leading" id="uqR-Ta-6oZ"/>
                             <constraint firstItem="Gcf-er-tGx" firstAttribute="top" secondItem="r5r-YH-w6o" secondAttribute="top" id="wT9-83-jlV"/>

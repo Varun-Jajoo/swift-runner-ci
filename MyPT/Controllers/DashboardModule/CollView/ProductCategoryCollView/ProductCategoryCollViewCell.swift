@@ -11,6 +11,8 @@ class ProductCategoryCollViewCell: UICollectionViewCell {
 
     @IBOutlet weak var cellMBV: UIView!
     @IBOutlet weak var titleLbl: UILabel!
+    @IBOutlet weak var titleLblTopConstrnt: NSLayoutConstraint!
+    @IBOutlet weak var titleLblLeading: NSLayoutConstraint!
     
     override func awakeFromNib() {
         super.awakeFromNib()

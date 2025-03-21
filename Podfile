@@ -8,10 +8,6 @@ target 'MyPT' do
   # Pods for MyPT
 
 pod 'FSCalendar'
-pod 'Cosmos', '~> 25.0'
-pod 'Alamofire'
-pod 'AlamofireImage'
-pod 'SVProgressHUD'
 
 
 end

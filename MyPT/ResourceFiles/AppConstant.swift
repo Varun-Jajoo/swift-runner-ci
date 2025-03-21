@@ -207,6 +207,7 @@ public struct AppImages {
     public static let Navigation = UIImage(named: "ic_Navigation")
     public static let Radius = UIImage(named: "ic_Radius")
     public static let search_normal = UIImage(named: "ic_search_normal")
+    public static let noAddress = UIImage(named: "ic_noAddress")
     
     //------------------ *********************Dashboard
     public static let book_Trainer = UIImage(named: "ic_Book_Trainer")
@@ -249,6 +250,7 @@ public struct AppImages {
     public static let meals_more = UIImage(named: "ic_meals_more")
     public static let filterChecked = UIImage(named: "ic_filterChecked")
     public static let filterUncheck = UIImage(named: "ic_filterUncheck")
+    public static let search_NoResult = UIImage(named: "ic_search_NoResult")
     
 }
 

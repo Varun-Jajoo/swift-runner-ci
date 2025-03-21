@@ -100,6 +100,17 @@ func addGradientBackgroundToImage(image: UIImage, colors: [CGColor], locations: 
 
 //MARK: ----------------------- Extension for UIView
 extension UIView{
+    //-------for getting superview
+    func findSuperview<T: UIView>(of type: T.Type) -> T? {
+         var superview = self.superview
+         while let view = superview {
+             if let matchingView = view as? T {
+                 return matchingView
+             }
+             superview = view.superview
+         }
+         return nil
+     }
     
 //    func addTopShadow(to view: UIView) {
 //        view.layer.masksToBounds = false
@@ -966,6 +977,20 @@ extension UITextField {
 }
 
 //MARK: --------- Extension UILabel
+
+enum TrailingContent {
+    case readmore
+    case readless
+
+    var text: String {
+        switch self {
+        case .readmore: return " Read More"
+        case .readless: return " Read Less"
+        }
+    }
+}
+
+
 extension UILabel {
     /// Animates the label to scroll through an array of strings.
     /// - Parameters:
@@ -997,42 +1022,136 @@ extension UILabel {
     }
     
     func applyGradientWith(startColor: UIColor, endColor: UIColor) {
-            guard let text = self.text, let font = self.font else { return  }
-
-            let textSize = text.size(withAttributes: [.font: font])
-            let width = textSize.width
-            let height = textSize.height
-
-            UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), false, 0)
-
-            guard let context = UIGraphicsGetCurrentContext(),
-                  let rgbColorspace = CGColorSpaceCreateDeviceRGB() as CGColorSpace? else {
-                UIGraphicsEndImageContext()
-                return
-            }
-
-            let locations: [CGFloat] = [0.0, 1.0]
-            let colors = [startColor.cgColor, endColor.cgColor] as CFArray
-
-            guard let glossGradient = CGGradient(colorsSpace: rgbColorspace, colors: colors, locations: locations) else {
-                UIGraphicsEndImageContext()
-                return
-            }
-
-            let topCenter = CGPoint(x: 0, y: 0)
-            let bottomCenter = CGPoint(x: 0, y: height)
-            context.drawLinearGradient(glossGradient, start: topCenter, end: bottomCenter, options: [])
-
-            guard let gradientImage = UIGraphicsGetImageFromCurrentImageContext() else {
-                UIGraphicsEndImageContext()
-                return
-            }
-
+        guard let text = self.text, let font = self.font else { return  }
+        
+        let textSize = text.size(withAttributes: [.font: font])
+        let width = textSize.width
+        let height = textSize.height
+        
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), false, 0)
+        
+        guard let context = UIGraphicsGetCurrentContext(),
+              let rgbColorspace = CGColorSpaceCreateDeviceRGB() as CGColorSpace? else {
             UIGraphicsEndImageContext()
-
-            self.textColor = UIColor(patternImage: gradientImage)
+            return
         }
+        
+        let locations: [CGFloat] = [0.0, 1.0]
+        let colors = [startColor.cgColor, endColor.cgColor] as CFArray
+        
+        guard let glossGradient = CGGradient(colorsSpace: rgbColorspace, colors: colors, locations: locations) else {
+            UIGraphicsEndImageContext()
+            return
+        }
+        
+        let topCenter = CGPoint(x: 0, y: 0)
+        let bottomCenter = CGPoint(x: 0, y: height)
+        context.drawLinearGradient(glossGradient, start: topCenter, end: bottomCenter, options: [])
+        
+        guard let gradientImage = UIGraphicsGetImageFromCurrentImageContext() else {
+            UIGraphicsEndImageContext()
+            return
+        }
+        
+        UIGraphicsEndImageContext()
+        
+        self.textColor = UIColor(patternImage: gradientImage)
+    }
     
+    //---------------------
+    
+    private var minimumLines: Int { return 3 }
+    private var highlightColor: UIColor { return UIColor(red: 246.0/255.0, green: 170.0/255.0, blue: 84.0/255.0, alpha: 1.0) }
+    
+    private var attributes: [NSAttributedString.Key: Any] {
+        return [.font: self.font ?? .systemFont(ofSize: 15)]
+    }
+    
+    public func requiredHeight(for text: String) -> CGFloat {
+        let label = UILabel(frame: CGRect(x: 0, y: 0, width: frame.width, height: CGFloat.greatestFiniteMagnitude))
+        label.numberOfLines = minimumLines
+        label.lineBreakMode = .byTruncatingTail
+        label.font = font
+        label.text = text
+        label.sizeToFit()
+        return label.frame.height
+    }
+    
+    func appendReadmore(after text: String, trailingContent: TrailingContent) {
+        self.numberOfLines = minimumLines
+        let truncatedText = truncateText(text, trailingContent: trailingContent)
+        setAttributedText(truncatedText, trailingText: trailingContent.text)
+    }
+    
+    func appendReadLess(after text: String, trailingContent: TrailingContent) {
+        self.numberOfLines = 0
+        let fullText = text + trailingContent.text
+        setAttributedText(fullText, trailingText: trailingContent.text)
+    }
+    
+    private func setAttributedText(_ text: String, trailingText: String) {
+        let attributedString = NSMutableAttributedString(string: text)
+        
+        if let range = text.range(of: trailingText) {
+            let nsRange = NSRange(range, in: text)
+            attributedString.addAttribute(.foregroundColor, value: highlightColor, range: nsRange)
+            attributedString.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: nsRange)
+        }
+        
+        self.attributedText = attributedString
+    }
+    
+    private func truncateText(_ text: String, trailingContent: TrailingContent) -> String {
+        let twoLineText = "\n" //"\n\n\n"
+        let fourlineHeight = requiredHeight(for: twoLineText)
+        
+        let sentenceText = NSString(string: text)
+        var endIndex = sentenceText.length
+        var truncatedSentence = sentenceText
+        
+        let size = CGSize(width: self.bounds.width, height: CGFloat.greatestFiniteMagnitude)
+        
+        while truncatedSentence.boundingRect(with: size, options: .usesLineFragmentOrigin, attributes: attributes, context: nil).size.height >= fourlineHeight {
+            if endIndex == 0 { break }
+            endIndex -= 1
+            truncatedSentence = NSString(string: sentenceText.substring(to: endIndex))
+            truncatedSentence = (truncatedSentence as String + "... " + trailingContent.text) as NSString
+        }
+        
+        return truncatedSentence as String
+    }
+    
+    func addReadMoreTapGesture(target: Any, action: Selector) {
+        let tapGesture = UITapGestureRecognizer(target: target, action: action)
+        self.isUserInteractionEnabled = true
+        self.addGestureRecognizer(tapGesture)
+    }
+    
+    func getTappedTextIndex(_ tapLocation: CGPoint) -> Int? {
+        guard let attributedText = self.attributedText else { return nil }
+        let textStorage = NSTextStorage(attributedString: attributedText)
+        let layoutManager = NSLayoutManager()
+        let textContainer = NSTextContainer(size: self.bounds.size)
+        
+        layoutManager.addTextContainer(textContainer)
+        textStorage.addLayoutManager(layoutManager)
+        
+        textContainer.lineFragmentPadding = 0.0
+        textContainer.lineBreakMode = self.lineBreakMode
+        textContainer.maximumNumberOfLines = self.numberOfLines
+        
+        let locationOfTouchInLabel = tapLocation
+        let textBoundingBox = layoutManager.usedRect(for: textContainer)
+        let textOffset = CGPoint(x: (bounds.width - textBoundingBox.width) * 0.5 - textBoundingBox.origin.x,
+                                 y: (bounds.height - textBoundingBox.height) * 0.5 - textBoundingBox.origin.y)
+        let locationOfTouchInTextContainer = CGPoint(x: locationOfTouchInLabel.x - textOffset.x,
+                                                     y: locationOfTouchInLabel.y - textOffset.y)
+        let characterIndex = layoutManager.characterIndex(for: locationOfTouchInTextContainer,
+                                                          in: textContainer,
+                                                          fractionOfDistanceBetweenInsertionPoints: nil)
+        
+        return characterIndex
+    }
 }
 
 
@@ -1460,24 +1579,17 @@ extension UIImage {
     
 }
 
-//MARK: --------- Extension UITableView
-extension UITableView {
-    func isLastRow() -> Int? {
-        
-        let lastSectionIndex = self.numberOfSections - 1 // last section
-        let lastRowIndex = self.numberOfRows(inSection: lastSectionIndex) - 1
+extension UICollectionView{
+    //MARK: -------------GET LAST CELL
+    func isLastCell() -> Int? {
+        let lastSectionIndex = self.numberOfSections - 1
+        let lastRowIndex = self.numberOfItems(inSection: lastSectionIndex) - 1
         return lastRowIndex
     }
-    //        let lastSectionIndex = self.numberOfSections - 1 // last section
-    //        let lastRowIndex = self.numberOfRows(inSection: lastSectionIndex) - 1 // last row
-    //        self.scrollToRow(at: IndexPath(row: lastRowIndex, section: lastSectionIndex), at: .bottom, animated: animated)
-    //    }
-    
     
     //MARK: ------------- TO SHOW EMPTY ALERT
-    func numberOfRows(count: Int? = 0, title: String? = nil, message: String? = nil, messageImage: UIImage? = nil, messageImageHeight: CGFloat? = nil, reloadBtnBgColor: UIColor? = UIColor.appWhite, reloadBtnTitleColor: UIColor? = UIColor.mainBg, reloadSetTitle: String? = nil,  target: Any?, action: Selector?, fromCenter: CGFloat? = -20, fromTop: CGFloat? = nil) -> Int {
+    func numberOfRows(count: Int? = 0, title: String? = nil, message: String? = nil, messageImage: UIImage? = nil, messageImageHeight: CGFloat? = nil, reloadBtnBgColor: UIColor? = UIColor.appWhite, reloadBtnTitleColor: UIColor? = UIColor.mainBg, reloadSetTitle: String? = nil,  target: Any? = nil, action: Selector? = nil, fromCenter: CGFloat? = -20, fromTop: CGFloat? = nil) -> Int {
         self.backgroundView = nil
-        self.separatorStyle = .none
         
         if count == 0 || count == nil {
             let imgMsgHeight: CGFloat = messageImageHeight ?? messageImage?.size.height ?? 80
@@ -1519,6 +1631,137 @@ extension UITableView {
                 reloadBtn.backgroundColor = reloadBtnBgColor
                 reloadBtn.titleLabel?.font = AppFont.bold.size(16, familyName: familyManrope)
                 reloadBtn.contentEdgeInsets = UIEdgeInsets(top: 17, left: 56, bottom: 17, right: 56)
+                
+                // Add target for reload button
+                if let target = target , let action = action {
+                    reloadBtn.addTarget(target, action: action, for: .touchUpInside)
+                }
+            }
+            
+            // Add subviews to the emptyView
+            emptyView.addSubview(messageImageView)
+            emptyView.addSubview(titleLabel)
+            emptyView.addSubview(messageLabel)
+            emptyView.addSubview(reloadBtn)
+            
+            // Initialize an array to hold constraints
+            var constraints: [NSLayoutConstraint] = []
+            
+            // Add conditional constraints for messageImageView
+            if let fromTop = fromTop {
+                constraints.append(messageImageView.topAnchor.constraint(equalTo: emptyView.topAnchor, constant: fromTop))
+            } else {
+                constraints.append(messageImageView.centerYAnchor.constraint(equalTo: emptyView.centerYAnchor, constant: fromCenter ?? -20))
+            }
+            
+            // Add common constraints
+            constraints.append(contentsOf: [
+                messageImageView.centerXAnchor.constraint(equalTo: emptyView.centerXAnchor),
+                messageImageView.heightAnchor.constraint(equalToConstant: imgMsgHeight),
+                
+                // Title label constraints
+                titleLabel.topAnchor.constraint(equalTo: messageImageView.bottomAnchor, constant: 12),
+                titleLabel.leadingAnchor.constraint(equalTo: emptyView.leadingAnchor, constant: 20),
+                titleLabel.trailingAnchor.constraint(equalTo: emptyView.trailingAnchor, constant: -20),
+                
+                // Message label constraints
+                messageLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
+                messageLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
+                messageLabel.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
+                
+                // Reload button constraints
+                reloadBtn.topAnchor.constraint(equalTo: messageLabel.bottomAnchor, constant: 12),
+                reloadBtn.bottomAnchor.constraint(lessThanOrEqualTo: emptyView.bottomAnchor, constant: -12),
+                reloadBtn.centerXAnchor.constraint(equalTo: emptyView.centerXAnchor, constant: 1),
+                reloadBtn.heightAnchor.constraint(equalToConstant: 45)
+            ])
+            
+            // Activate all constraints
+            NSLayoutConstraint.activate(constraints)
+            
+            DispatchQueue.main.async {
+                reloadBtn.layoutIfNeeded()
+                reloadBtn.layer.cornerRadius = 12.0
+                reloadBtn.layer.masksToBounds = true
+                
+            }
+            
+            // Set the empty view as the table view's background view
+            self.backgroundView = emptyView
+        } else {
+            // Reset the background view and separator style
+            self.backgroundView = nil
+        }
+        
+        return count ?? 0
+    }
+}
+
+//MARK: --------- Extension UITableView
+extension UITableView {
+    func isLastRow() -> Int? {
+        
+        let lastSectionIndex = self.numberOfSections - 1 // last section
+        let lastRowIndex = self.numberOfRows(inSection: lastSectionIndex) - 1
+        return lastRowIndex
+    }
+    //        let lastSectionIndex = self.numberOfSections - 1 // last section
+    //        let lastRowIndex = self.numberOfRows(inSection: lastSectionIndex) - 1 // last row
+    //        self.scrollToRow(at: IndexPath(row: lastRowIndex, section: lastSectionIndex), at: .bottom, animated: animated)
+    //    }
+    
+    
+    //MARK: ------------- TO SHOW EMPTY ALERT
+    func numberOfRows(count: Int? = 0, title: String? = nil, message: String? = nil, messageImage: UIImage? = nil, messageImageHeight: CGFloat? = nil, reloadBtnBgColor: UIColor? = UIColor.appWhite, reloadBtnTitleColor: UIColor? = UIColor.mainBg, reloadSetTitle: String? = nil, reloadBtnImg: UIImage? = nil , target: Any? = nil, action: Selector? = nil, fromCenter: CGFloat? = -20, fromTop: CGFloat? = nil) -> Int {
+        self.backgroundView = nil
+        self.separatorStyle = .none
+        
+        if count == 0 || count == nil {
+            let imgMsgHeight: CGFloat = messageImageHeight ?? messageImage?.size.height ?? 80
+            
+            // Create the empty view
+            let emptyView = UIView(frame: CGRect(x: 0, y: 0, width: self.bounds.size.width, height: self.bounds.size.height))
+            emptyView.backgroundColor = UIColor.clear
+            
+            let messageImageView = UIImageView()
+            let titleLabel = UILabel()
+            let messageLabel = UILabel()
+            let reloadBtn = UIButton()
+            
+            // Configure the subviews
+            messageImageView.translatesAutoresizingMaskIntoConstraints = false
+            titleLabel.translatesAutoresizingMaskIntoConstraints = false
+            messageLabel.translatesAutoresizingMaskIntoConstraints = false
+            reloadBtn.translatesAutoresizingMaskIntoConstraints = false
+            
+            messageImageView.backgroundColor = .clear
+            messageImageView.image = messageImage
+            messageImageView.contentMode = .scaleAspectFill
+            
+            titleLabel.text = title
+            titleLabel.textColor = UIColor.appWhite
+            titleLabel.font = AppFont.medium.size(24, familyName: familyClashDisplay)
+            titleLabel.numberOfLines = 0
+            titleLabel.textAlignment = .center
+            
+            messageLabel.text = message
+            messageLabel.textColor = UIColor.txtDarkGray
+            messageLabel.font = AppFont.semibold.size(14, familyName: familyManrope)
+            messageLabel.numberOfLines = 0
+            messageLabel.textAlignment = .center
+            
+            if let reloadSetTitle = reloadSetTitle {
+                reloadBtn.setTitle(reloadSetTitle, for: .normal)
+//                reloadBtn.setImage(reloadBtnImg, for: .normal)
+                reloadBtn.setTitleColor(reloadBtnTitleColor, for: .normal)
+                reloadBtn.backgroundColor = reloadBtnBgColor
+                reloadBtn.titleLabel?.font = AppFont.bold.size(16, familyName: familyManrope)
+                reloadBtn.contentEdgeInsets = UIEdgeInsets(top: 17, left: 56, bottom: 17, right: 56)
+                
+                if let reloadBtnImg = reloadBtnImg {
+                    reloadBtn.imageEdgeInsets = UIEdgeInsets(top: 1, left: 0, bottom: 1, right: 10)
+                    reloadBtn.setImage(reloadBtnImg, for: .normal)
+                }
                 
                 // Add target for reload button
                 if let target = target , let action = action {

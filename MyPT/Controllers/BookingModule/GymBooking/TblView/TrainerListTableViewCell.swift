@@ -31,6 +31,7 @@ class TrainerListTableViewCell: UITableViewCell {
     @IBOutlet weak var distanceBtn: UIButton!
     @IBOutlet weak var landMarkBtn: UIButton!
     @IBOutlet weak var ratingBtn: UIButton!
+    @IBOutlet weak var avgRatingBtn: UIButton!
     @IBOutlet weak var bookSlotBtn: UIButton!
     @IBOutlet weak var gymCategoryCollView: UICollectionView!
     @IBOutlet weak var noteLbl: UILabel!
@@ -47,8 +48,55 @@ class TrainerListTableViewCell: UITableViewCell {
             self.bookSlotBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
         }
         
+        self.setupFont()
     }
     
+    //MARK: -------------SET CELL INPUTDATA
+    func setCellData(trainerData: TrainerModel?){
+        guard let trainerData = trainerData else { return  }
+        DispatchQueue.main.async {
+            self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: AppImages.navLeft)
+            self.gymNameLbl.text = trainerData.name
+            self.distanceBtn.setTitle(trainerData.distance, for: .normal)
+            self.ratingBtn.setTitle("\(trainerData.averageRating?.doubleValue ?? 0.0)", for: .normal)
+            self.avgRatingBtn.setTitle(trainerData.noOfRating ?? "", for: .normal)
+            self.landMarkBtn.setTitle(trainerData.location, for: .normal)
+            self.numberSlotLbl.text = "Only \(trainerData.slot ?? "") slots available"
+        }
+    }
+    
+    //MARK: -------------SET CELL INPUTDATA
+    func setGymCellData(trainerData: GymTrainerModel?){
+        guard let trainerData = trainerData else { return  }
+        
+        DispatchQueue.main.async {
+            self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: AppImages.navLeft)
+            self.gymNameLbl.text = trainerData.name
+            self.distanceBtn.setTitle(trainerData.distance, for: .normal)
+            self.ratingBtn.setTitle("\(trainerData.averageRating ?? 0)", for: .normal)
+            self.avgRatingBtn.setTitle(trainerData.noOfRating ?? "", for: .normal)
+            self.landMarkBtn.setTitle(trainerData.location, for: .normal)
+            self.numberSlotLbl.text = "Only \(trainerData.slot ?? "") slots available"
+        }
+    }
+    
+    
+    func setupFont(){
+        
+        self.bookSlotBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
+        self.noteLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
+        self.numberSlotLbl.font = AppFont.regular.size(14.0, familyName: familyManrope)
+        self.gymNameLbl.font = AppFont.semibold.size(20.0, familyName: familyClashDisplay)
+         
+        [
+            self.avgRatingBtn.titleLabel,
+            self.distanceBtn.titleLabel,
+            self.landMarkBtn.titleLabel,
+            self.ratingBtn.titleLabel
+        ].forEach({
+            $0?.font = AppFont.semibold.size(12.0, familyName: familyManrope)
+        })
+    }
   
     
 //    func setupSelection(){
@@ -74,14 +122,23 @@ class TrainerListTableViewCell: UITableViewCell {
 //MARK: ------------UICOLLECIONVIEW DATASOURCE/DELEGATE
 extension TrainerListTableViewCell: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return trainerTagsData?.count ?? 0 //4
+
+        if let totalCount = trainerTagsData?.count, totalCount > 3 {
+            return 4
+        }else{
+            return trainerTagsData?.count ?? 0
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell:ProductCategoryCollViewCell = gymCategoryCollView.dequeueReusableCell(withReuseIdentifier: "ProductCategoryCollViewCell", for: indexPath) as! ProductCategoryCollViewCell
         cell.cellMBV.backgroundColor = UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1)
         
-        cell.titleLbl.text = trainerTagsData?[indexPath.row].name as? String
+        if let lastCell = collectionView.isLastCell(), let totalCount = trainerTagsData?.count,( lastCell == indexPath.row && totalCount > 3) {
+            cell.titleLbl.text = "+3"
+        }else{
+            cell.titleLbl.text = trainerTagsData?[indexPath.row].name as? String
+        }
         
         return cell
     }

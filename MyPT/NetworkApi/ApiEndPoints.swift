@@ -47,8 +47,15 @@ enum ApiEndPoint: String{
     case add_location         =  "api/add/location"
     case workouts             =  "api/workouts"
     case get_trainer          =  "api/get-trainer"
-    
-    
+    case trainer_details      =  "api/trainer-details"
+    case select_gym           =  "api/select/gym"
+    case studio_details       =  "api/studio-details"
+    case get_availability     =  "api/get-availability"
+    case add_address          =  "api/add-address"
+    case get_cities           =  "api/get-cities"
+    case get_address          =  "api/get-address"
+   
+  
     case authLoginOTP = "authLoginOTP"
     case refreshAccessToken = "refreshToken"
     

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="CertificatesCollectionViewCell" id="gTV-IL-0wX" customClass="CertificatesCollectionViewCell" customModule="MyPT" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="318" height="245"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="318" height="245"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4RA-fg-9la">
+                        <rect key="frame" x="1" y="61" width="316" height="148"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="CyC-jY-UgM" userLabel="subView">
+                                <rect key="frame" x="0.0" y="18.666666666666671" width="316" height="128.33333333333331"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="255" verticalHuggingPriority="255" horizontalCompressionResistancePriority="755" verticalCompressionResistancePriority="755" text="Lvl. 2" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9on-Wg-Y5h">
+                                        <rect key="frame" x="11" y="26.333333333333329" width="294" height="30"/>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="25"/>
+                                        <color key="textColor" name="appWhite"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="248" text="Personal Training " textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cBb-aq-MYu">
+                                        <rect key="frame" x="11" y="58.333333333333329" width="294" height="40"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                        <color key="textColor" name="appLightGray"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" name="appCard"/>
+                                <constraints>
+                                    <constraint firstItem="cBb-aq-MYu" firstAttribute="leading" secondItem="9on-Wg-Y5h" secondAttribute="leading" id="95I-nS-hwI"/>
+                                    <constraint firstAttribute="trailing" secondItem="9on-Wg-Y5h" secondAttribute="trailing" constant="11" id="9CO-aC-Mq2"/>
+                                    <constraint firstItem="9on-Wg-Y5h" firstAttribute="leading" secondItem="CyC-jY-UgM" secondAttribute="leading" constant="11" id="ee4-Zz-P4t"/>
+                                    <constraint firstAttribute="bottom" relation="lessThanOrEqual" secondItem="cBb-aq-MYu" secondAttribute="bottom" constant="30" id="jK5-HZ-7F6"/>
+                                    <constraint firstItem="cBb-aq-MYu" firstAttribute="top" secondItem="9on-Wg-Y5h" secondAttribute="bottom" constant="2" id="nRO-mJ-LPn"/>
+                                    <constraint firstItem="cBb-aq-MYu" firstAttribute="trailing" secondItem="9on-Wg-Y5h" secondAttribute="trailing" id="vdb-nf-FKk"/>
+                                </constraints>
+                            </view>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_trainerCertificate" translatesAutoresizingMaskIntoConstraints="NO" id="cKl-rN-KqJ">
+                                <rect key="frame" x="141.66666666666666" y="2" width="33" height="33"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="cKl-rN-KqJ" secondAttribute="height" id="uQd-3u-698"/>
+                                    <constraint firstAttribute="height" constant="33" id="xfe-eA-AeO"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstAttribute="bottom" secondItem="CyC-jY-UgM" secondAttribute="bottom" constant="1" id="3U7-hQ-ZN7"/>
+                            <constraint firstItem="CyC-jY-UgM" firstAttribute="leading" secondItem="4RA-fg-9la" secondAttribute="leading" id="LPg-OL-25J"/>
+                            <constraint firstItem="cKl-rN-KqJ" firstAttribute="centerX" secondItem="CyC-jY-UgM" secondAttribute="centerX" id="fvx-h9-W0G"/>
+                            <constraint firstAttribute="trailing" secondItem="CyC-jY-UgM" secondAttribute="trailing" id="iIi-My-b2l"/>
+                            <constraint firstItem="9on-Wg-Y5h" firstAttribute="top" secondItem="cKl-rN-KqJ" secondAttribute="bottom" constant="10" id="pMT-rI-ofj"/>
+                            <constraint firstItem="cKl-rN-KqJ" firstAttribute="centerY" secondItem="CyC-jY-UgM" secondAttribute="top" id="w9F-aX-mYs"/>
+                            <constraint firstItem="cKl-rN-KqJ" firstAttribute="top" secondItem="4RA-fg-9la" secondAttribute="top" constant="2" id="yzS-YN-WWA"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="4RA-fg-9la" firstAttribute="leading" secondItem="ZTg-uK-7eu" secondAttribute="leading" constant="1" id="1vd-v0-Qjc"/>
+                <constraint firstItem="4RA-fg-9la" firstAttribute="top" secondItem="ZTg-uK-7eu" secondAttribute="top" constant="2" id="S3E-ck-459"/>
+                <constraint firstItem="ZTg-uK-7eu" firstAttribute="trailing" secondItem="4RA-fg-9la" secondAttribute="trailing" constant="1" id="bB9-pe-Kxa"/>
+                <constraint firstItem="ZTg-uK-7eu" firstAttribute="bottom" secondItem="4RA-fg-9la" secondAttribute="bottom" constant="2" id="g5A-Mb-46q"/>
+            </constraints>
+            <size key="customSize" width="318" height="245"/>
+            <connections>
+                <outlet property="achivementImgView" destination="cKl-rN-KqJ" id="Nxe-Cl-yg4"/>
+                <outlet property="cellMBV" destination="4RA-fg-9la" id="Gw2-Oc-Sq8"/>
+                <outlet property="certificateNameLbl" destination="cBb-aq-MYu" id="e67-xe-Hzp"/>
+                <outlet property="lavelTitleLbl" destination="9on-Wg-Y5h" id="cgE-Cv-nQD"/>
+                <outlet property="subView" destination="CyC-jY-UgM" id="faa-N3-ldy"/>
+            </connections>
+            <point key="canvasLocation" x="192.36641221374046" y="65.140845070422543"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="ic_trainerCertificate" width="36.333332061767578" height="40.333332061767578"/>
+        <namedColor name="appCard">
+            <color red="0.27843137254901962" green="0.30196078431372547" blue="0.37647058823529411" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appLightGray">
+            <color red="0.83137254901960789" green="0.83137254901960789" blue="0.83137254901960789" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appWhite">
+            <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

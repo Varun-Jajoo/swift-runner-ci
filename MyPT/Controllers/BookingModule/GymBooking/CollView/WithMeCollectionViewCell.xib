@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -20,22 +20,23 @@
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XsA-8h-pNu">
                         <rect key="frame" x="1" y="1" width="486" height="475"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_thumbnailVideo" translatesAutoresizingMaskIntoConstraints="NO" id="rF2-M5-Hsj">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_not_allowed" translatesAutoresizingMaskIntoConstraints="NO" id="rF2-M5-Hsj">
                                 <rect key="frame" x="1" y="1" width="484" height="473"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </imageView>
-                            <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="KHX-ep-zCx">
-                                <rect key="frame" x="10" y="10" width="466" height="455"/>
+                            <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_play_white" translatesAutoresizingMaskIntoConstraints="NO" id="KHX-ep-zCx">
+                                <rect key="frame" x="215" y="209.33333333333334" width="56.333333333333314" height="56.333333333333343"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
+                            <constraint firstItem="KHX-ep-zCx" firstAttribute="centerX" secondItem="XsA-8h-pNu" secondAttribute="centerX" id="20w-z5-8id"/>
                             <constraint firstAttribute="bottom" secondItem="rF2-M5-Hsj" secondAttribute="bottom" constant="1" id="8Np-AT-HKq"/>
-                            <constraint firstAttribute="bottom" secondItem="KHX-ep-zCx" secondAttribute="bottom" constant="10" id="Wrb-cg-pDW"/>
-                            <constraint firstItem="KHX-ep-zCx" firstAttribute="top" secondItem="XsA-8h-pNu" secondAttribute="top" constant="10" id="d3U-b1-mVs"/>
-                            <constraint firstAttribute="trailing" secondItem="KHX-ep-zCx" secondAttribute="trailing" constant="10" id="jux-qV-7ob"/>
+                            <constraint firstItem="KHX-ep-zCx" firstAttribute="top" relation="greaterThanOrEqual" secondItem="XsA-8h-pNu" secondAttribute="top" constant="10" id="d3U-b1-mVs"/>
                             <constraint firstItem="rF2-M5-Hsj" firstAttribute="top" secondItem="XsA-8h-pNu" secondAttribute="top" constant="1" id="kJT-Cj-fyB"/>
-                            <constraint firstItem="KHX-ep-zCx" firstAttribute="leading" secondItem="XsA-8h-pNu" secondAttribute="leading" constant="10" id="nCi-Xc-KUc"/>
+                            <constraint firstItem="KHX-ep-zCx" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="XsA-8h-pNu" secondAttribute="leading" constant="10" id="nCi-Xc-KUc"/>
+                            <constraint firstItem="KHX-ep-zCx" firstAttribute="centerY" secondItem="XsA-8h-pNu" secondAttribute="centerY" id="p1U-ga-bx3"/>
                             <constraint firstItem="rF2-M5-Hsj" firstAttribute="leading" secondItem="XsA-8h-pNu" secondAttribute="leading" constant="1" id="qFT-Lx-Cdw"/>
                             <constraint firstAttribute="trailing" secondItem="rF2-M5-Hsj" secondAttribute="trailing" constant="1" id="r6d-qS-gSf"/>
                         </constraints>
@@ -60,6 +61,7 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <image name="ic_thumbnailVideo" width="392.33334350585938" height="478"/>
+        <image name="ic_not_allowed" width="430" height="482.33334350585938"/>
+        <image name="ic_play_white" width="56.333332061767578" height="56.333332061767578"/>
     </resources>
 </document>
