@@ -54,6 +54,10 @@ enum ApiEndPoint: String{
     case add_address          =  "api/add-address"
     case get_cities           =  "api/get-cities"
     case get_address          =  "api/get-address"
+    case get_slots            =  "/api/get-slots"
+    case book_slot            =  "api/book-slot"
+    
+    
    
   
     case authLoginOTP = "authLoginOTP"

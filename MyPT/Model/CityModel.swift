@@ -127,24 +127,3 @@ struct CityModel: Codable {
 }
 
 
-/*
- {
-   "status": true,
-   "data": {
-     "user_id": 4,
-     "building_name": "xyz",
-     "street": "xyz1",
-     "city_id": "2",
-     "country_id": "2",
-     "landmark": "xyz",
-     "type": "home",
-     "mobile_no": "7676767687",
-     "lat": "12.687878",
-     "long": "1.67878787",
-     "updated_at": "2025-03-20T11:33:33.000000Z",
-     "created_at": "2025-03-20T11:33:33.000000Z",
-     "id": 1
-   },
-   "msg": "Saved Successfully"
- }
- */

@@ -14,11 +14,32 @@ enum calendarFlow {
     case defaultFlow
 }
 
+struct AvailParmsModel {
+    var type: String?
+    var trainer_id: String?
+    var studio_id: String?
+    var month: String?
+    var address_id: String?
+    
+    func getParams() -> [String: String] {
+          var dict: [String: String] = [:]
+
+          if let type = type { dict["type"] = type }
+          if let trainer_id = trainer_id { dict["trainer_id"] = trainer_id }
+          if let studio_id = studio_id { dict["studio_id"] = studio_id }
+          if let month = month { dict["month"] = month }
+          if let address_id = address_id { dict["address_id"] = address_id }
+
+          return dict
+      }
+}
 
 class BookingCalendarViewController: CommonViewController {
 
     //MARK: -------------- VARIABLE
     var slotBookFlow:calendarFlow = .defaultFlow
+    
+    var params:AvailParmsModel?
     
     fileprivate let gregorian: Calendar = Calendar(identifier: .indian)
     fileprivate lazy var dateFormatter1: DateFormatter = {
@@ -27,6 +48,7 @@ class BookingCalendarViewController: CommonViewController {
         formatter.dateFormat = "yyyy/MM/dd"
         return formatter
     }()
+    
     fileprivate lazy var dateFormatter2: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
@@ -34,6 +56,12 @@ class BookingCalendarViewController: CommonViewController {
         return formatter
     }()
     
+    let statusColorMap: [String: UIColor] = [
+        "CLOSED".uppercased(): UIColor.txtDarkGray,
+        "AVAILABLE".uppercased(): UIColor.appGreen,
+        "FAST FILLING".uppercased(): UIColor.appLightYellow,
+        "FULLY BOOKED".uppercased(): UIColor.appOrangeRed
+    ]
     
     let fillSelectionColors = ["2024/11/30": UIColor.clear] // This is used for set selected of multiple date with multiple colors
     
@@ -57,7 +85,11 @@ class BookingCalendarViewController: CommonViewController {
     
     var datesWithEvent = ["2024-11-03":UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), "2024-11-06":UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), "2024-11-12":UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), "2024-11-25":UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0)]
     
-    var datesWithMultipleEvents = ["2024-11-05":UIColor.appColor(.appOrange)!, "2024-11-06":UIColor.appColor(.appOrange)!, "2024-11-08":UIColor.appLightYellow, "2024-11-09":UIColor.appLightYellow,"2024-11-10":UIColor.appLightYellow, "2024-11-11":UIColor.appLightYellow, "2024-11-12":UIColor.appColor(.appGreen)!,"2024-11-16":UIColor.appColor(.appGreen)!, "2024-11-20":UIColor.appDarkGray, "2024-11-22":UIColor.appDarkGray, "2024-11-23":UIColor.appDarkGray, "2024-11-28":UIColor.txtDarkGray]
+    var disabledDates: [String] = [] //Dates to disable "yyyy-MM-dd"
+    
+    //"yyyy-MM-dd"
+    lazy var datesWithMultipleEvents: [String:UIColor]? = [:]
+
     
 //    var datesWithEvent = ["2024-11-03", "2024-11-06", "2024-11-12", "2024-11-25"]
 //    var datesWithMultipleEvents = ["2024-11-08", "2024-11-16", "2024-11-20", "2024-11-28"]
@@ -107,6 +139,9 @@ class BookingCalendarViewController: CommonViewController {
         self.statusBarColor(setColor: .clear)
         setNavUI()
         bookingCalendar.headerHeight = 0.0
+        
+        //-------------------------Api
+        self.getAvailableSlots(inputParams: self.params?.getParams() ?? ["":""])
     }
     
     func setNavUI(){
@@ -270,7 +305,7 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-        dateFormatter.dateFormat = "yyyy-MM-dd" // Customize the format as needed
+        dateFormatter.dateFormat = "dd-MM-yyyy" // "yyyy-MM-dd" // Customize the format as needed
         let selectedDate = dateFormatter.string(from: date)
         print("Selected date: \(selectedDate)")
         
@@ -278,17 +313,18 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
         
         switch slotBookFlow {
         case .bookTrainer:
+            
+            dateFormatter.dateFormat = "yyyy-MM-dd"
+            let getSlotDate = dateFormatter.string(from: date)
+            
             let vc:SlotDurationViewController = SlotDurationViewController.instantiate(appStoryboard: .booking)
             vc.slotDurationFlow = .bookTrainer
-            let transition = CATransition()
+            vc.selectedDate = "\(selectedDate)"
+            vc.showCalView.datesWithMultipleEvents = self.datesWithMultipleEvents
+            vc.showCalView.disabledDates = self.disabledDates
+            vc.showCalView.isCellSelected = false
+            vc.inputGetSlotParams = GetSlotParamsModel(trainer_id: self.params?.trainer_id, type: self.params?.type, date: "\(getSlotDate)", timing: "morning", studio_id: self.params?.studio_id, address_id: self.params?.address_id)
             
-            /*
-            transition.duration = 0.8
-            transition.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
-            transition.type = CATransitionType.moveIn
-            transition.subtype = CATransitionSubtype.fromTop
-            self.navigationController?.view.layer.add(transition, forKey: nil)
-            */
             self.navigationController?.pushViewController(vc, animated: true)
         case .createPackage:
             print("for create packeg")
@@ -317,10 +353,10 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
 //            return 3
 //        }
         
-        if (self.datesWithMultipleEvents[dateString] != nil){
+        if (self.datesWithMultipleEvents?[dateString] != nil){
             return 1
         }
-        if (self.datesWithMultipleEvents[dateString] != nil) {
+        if (self.datesWithMultipleEvents?[dateString] != nil) {
             return 3
         }
         return 0
@@ -329,7 +365,7 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventDefaultColorsFor date: Date) -> [UIColor]? {
         
         let key = self.dateFormatter2.string(from: date)
-        if let colors = self.datesWithMultipleEvents[key] {
+        if let colors = self.datesWithMultipleEvents?[key] as? UIColor {
             return [colors]
         }
         return nil
@@ -370,6 +406,7 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
         if let color = self.borderSelectionColors[key] {
             return color
         }
+        
         return appearance.borderSelectionColor
     }
     
@@ -380,4 +417,54 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
         return 0.4
     }
     
+    
+    // MARK: - FSCalendarDelegate
+       func calendar(_ calendar: FSCalendar, shouldSelect date: Date, at monthPosition: FSCalendarMonthPosition) -> Bool {
+           let dateString =  self.dateFormatter2.string(from: date) //formatDate(date)
+          
+           return disabledDates.contains(dateString) // Return false to disable selection
+       }
+}
+
+
+//MARK: -------------------------EXTENSION FOR API
+extension BookingCalendarViewController {
+    
+    /*
+     let params:[String:String] = [
+     "type": "",
+     "trainer_id": "",
+     "studio_id": "",
+     "month": ""
+     "address_id: ""
+     ]
+     */
+
+    private func getAvailableSlots(inputParams: [String : String]){
+        print(inputParams)
+        TrainerVM.calendarAvailabilityApi(viewController: self, inputParms: inputParams, completion: {[weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return  }
+            
+            if let getData = getResultData.data {
+                
+                getData.forEach({[weak self] in
+                    guard let self = self else { return  }
+                    if let getDate = $0.date, let status = $0.status?.uppercased(), let color = self.statusColorMap[status] {
+                        self.datesWithMultipleEvents?[getDate] = color
+                        
+//                        if status.uppercased() == "CLOSED".uppercased() || status.uppercased() == "FULLY BOOKED".uppercased() {
+//                            self.disabledDates.append(getDate)
+//                        }
+                        
+                        if status.uppercased() == "AVAILABLE".uppercased() || status.uppercased() == "FAST FILLING".uppercased() {
+                            self.disabledDates.append(getDate)
+                        }
+                      
+                    }
+                })
+            }
+            
+            self.bookingCalendar.reloadData()
+        })
+    }
 }

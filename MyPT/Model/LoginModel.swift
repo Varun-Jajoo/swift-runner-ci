@@ -131,8 +131,13 @@ struct InformationModel: Codable {
  print(model.isActive?.value)     // "true"
  print(model.isActive?.boolValue) // true
  */
+
 struct FlexibleValue: Codable {
-    let value: String?
+    var value: String?
+    
+    init(value: String?) {
+          self.value = value
+      }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
@@ -161,5 +166,6 @@ struct FlexibleValue: Codable {
     var intValue: Int? { return Int(value ?? "") }
     var doubleValue: Double? { return Double(value ?? "") }
     var boolValue: Bool? { return Bool(value ?? "") }
+
 }
 

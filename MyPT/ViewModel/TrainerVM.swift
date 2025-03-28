@@ -212,10 +212,12 @@ class TrainerVM {
      trainer_id = 1, trainer id is required
      studio_id = 1, studio id required if selecting from gym
      month = 03
+     address_id = 1
      */
     
+   
     //MARK: ------------------------- api/get-availability
-    class func calendarAvailabilityApi(viewController: UIViewController, inputParms: [String:String]?, isShowLoader:Bool = true, completion: @escaping(_ resultData:AvailabilityBaseModel?) -> Void){
+    class func calendarAvailabilityApi(viewController: UIViewController, inputParms: [String:String]?, isShowLoader:Bool = true, completion: @escaping(_ resultData:CalendarAvailabilityBaseModel?) -> Void){
         guard let inputParms = inputParms else { return  }
         let params:[String:String] = inputParms
        
@@ -225,13 +227,14 @@ class TrainerVM {
          "trainer_id": "",
          "studio_id": "",
          "month": ""
+         "address_id: ""
          ]
        */
         
         NetworkManager.shared.genericAPICall(serviceEndPoint: .get_availability, method: .get , queries: params, parameters:  nil, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
             do{
                 if let responceData = getResponce {
-                    let getResult = try JSONDecoder().decode(AvailabilityBaseModel.self, from: responceData)
+                    let getResult = try JSONDecoder().decode(CalendarAvailabilityBaseModel.self, from: responceData)
                     if (getResult.status == true)  {
                         completion(getResult)
                     }
@@ -366,4 +369,97 @@ class TrainerVM {
             
         })
     }
+    
+    
+    //MARK: ------------------------- api/get-slots
+    /*
+     trainer_id: 2, trainer id required if selecting from gym
+     type: home, gym=>trainer from gym, home=>home trainer
+     date: 2025-03-25, date is required
+     timing: night, morning or evening(required)
+     studio_id: 5, studio id is required if selecting from gym
+     address_id: 1, address id is required if type is gym
+     */
+    
+    class func getSlotsApi(viewController: UIViewController, inputParms: [String:String]?, isShowLoader:Bool = true, completion: @escaping(_ resultData:SlotsBaseModel?) -> Void){
+        guard let inputParms = inputParms else { return  }
+        let params:[String:String] = inputParms
+        
+        /*
+         let params:[String:String] = [
+         "trainer_id": "",
+         "type": "",
+         "date": "",
+         "timing": "",
+         "studio_id": "",
+         "address_id: ""
+         ]
+       */
+       
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .get_slots, method: .get , queries: params, parameters:  nil, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
+            do{
+                if let responceData = getResponce {
+                    let getResult = try JSONDecoder().decode(SlotsBaseModel.self, from: responceData)
+                    
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    }
+                    else{
+                        let errorMsg = getResult.msg
+                        AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg ?? "")
+                    }
+                }
+            }catch {
+                print(error)
+            }
+        })
+    }
+    
+    
+    //MARK: --------------------- api/book-slot
+    /*
+     studio_id: 5, Studio id field is required if selecting from gym
+     type: gym, type will be home , gym
+     trainer_id: 1, trainer id filed is required
+     slot_id: 23, slot id field is required
+     address_id: 1, address id is required if type is gym
+     */
+    
+    class  func bookSlotApi(viewController: UIViewController, inputParams: [String:Any], completion: @escaping(_ resultData:BookedSlotBaseModel?) -> Void){
+       
+        /*
+        let params:[String:Any] = [
+            "studio_id": "",
+            "type": "" ,
+            "trainer_id": "",
+            "slot_id": "",
+            "address_id": ""
+        ]
+        */
+        
+        print("inputParams = ", inputParams)
+        
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .book_slot, method: .post , parameters: inputParams, isShowLoading: true, completion: {  (getResponce, error) in
+            do{
+                print(getResponce as Any)
+                if let responceData = getResponce {
+                    
+                    let getResult = try JSONDecoder().decode(BookedSlotBaseModel.self, from: responceData)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    }
+                    else{
+                        
+                        let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+                        AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg ?? "")
+                    }
+                }
+                
+            }catch {
+                print(error)
+            }
+            
+        })
+    }
+   
 }

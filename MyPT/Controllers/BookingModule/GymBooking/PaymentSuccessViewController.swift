@@ -12,152 +12,160 @@ import AVFoundation
 class PaymentSuccessViewController: UIViewController {
     
     //MARK: ------------- VARIABLE
-    
+    var bookedDataModel:BookedSlotData?
     var player: AVAudioPlayer?
-    
-    @IBOutlet weak var bckViewHeightContsntrnt: NSLayoutConstraint!
     
     //MARK: --------------IBOUTLET
     @IBOutlet weak var mainStckView: UIStackView!
     @IBOutlet weak var confirmationMBV: UIView!
     @IBOutlet weak var shoBillMBV: UIView!
-//    @IBOutlet weak var billTopShadowV: UIView!
     @IBOutlet weak var successImgView: UIImageView!
     @IBOutlet weak var confirmationTitleLbl: UILabel!
     @IBOutlet weak var descLbl: UILabel!
     @IBOutlet weak var backToHomeBtn: UIButton!
+    @IBOutlet weak var shoBillMBVHeightConstrnt: NSLayoutConstraint!
+    @IBOutlet weak var billMBV: UIView!
+    @IBOutlet weak var billMBVHeightConstnt: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-       
-        confirmationMBV.isHidden = true
-        self.shoBillMBV.isHidden = false
-        self.billView()
-//        self.billingTestView()
+        confirmationMBV.isHidden = false
+        self.shoBillMBV.isHidden = true
         setUpUI()
         
         self.navigationItem.hidesBackButton = true
         self.backToHomeBtn.isHidden = true
     }
     
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        self.navigationItem.hidesBackButton = false
+    }
+    
     func setUpUI(){
-    
-        DispatchQueue.main.async {
         
-            self.backToHomeBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-                       
-//            self.confirmationMBV.applyShadow(fillColor: UIColor.mainBg, shadowColor: UIColor.white.withAlphaComponent(0.2), shadowRadius: 5, opacity: 0.7, offset: CGSize(width: 0, height: 20), cornerRadius: 12)
-        }
-    }
-    
-    func billingTestView(){
-              
         DispatchQueue.main.async {
-            let shapeView = BillingView()
-            shapeView.frame = CGRect(x: 0, y: 0, width: self.shoBillMBV.bounds.width, height: 550)//self.shoBillMBV.bounds.height //550
-//            shapeView.circleYPosition = (shapeView.bounds.height) / 2.0 + 30.0  // Adjust as needed
-            shapeView.layer.shadowColor = UIColor.black.cgColor
-            shapeView.layer.shadowOpacity = 0.3
-            shapeView.layer.shadowOffset = CGSize(width: 0, height: 2)
-            shapeView.layer.shadowRadius = 4
-            shapeView.backgroundColor = .clear
-//            shapeView.billBackgroundColor = UIColor.appWhite
-//            shapeView.lineBgColor = UIColor.appDarkGray
-            self.shoBillMBV.addSubview(shapeView)
-//            shapeView.cornerSize = CGSize(width: 24, height: 24)
-//            shapeView.cornerSide = [.bottomLeft, .bottomRight]
-//            shapeView.packageLabel.text = "test"
-//            shapeView.trainerTags = ["Cardio", "Pilates", "+3",]
-//            shapeView.startDate = (title: "Start Date", value: "06/24")
-//            shapeView.validUptoDate = (title: "Valid Upto", value: "06/25")
-//            shapeView.timingTxt = (title: "Timing", value: "10:00 to 11:00")
-//            shapeView.locationTxt = (title: "Location", value: "MyPT Dubai")
-//            
             
-//            shapeView.startAnimation()
-//            shapeView.startAnimation(){
-////                shapeView.animTopBottom(duration: 0.8, delay: 0.1) {
-////                    print("animted done..")
-////                }
-//               print("animation done. ")
-//                self.loadVideo()
-//                self.backToHomeBtn.isHidden = false
-//                
-////                shapeView.frame = CGRect(x: 0, y: 0, width: self.shoBillMBV.bounds.width, height: 750)
-//            }
-            
-//            shapeView.configure(title: "Booking Confirmed", description: "You have received a confirmation email.", imageName: "ic_success")
+            self.backToHomeBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+            self.confirmationMBV.roundSideCorners(radius: 12, cornerSide: [.bottomLeft, .bottomRight])
+            self.mainStckView.roundSideCorners(radius: 12, cornerSide: [.bottomLeft, .bottomRight])
         }
+        
+        //------------------*************************
+        self.confirmationMBV.applyTransition(type: .moveIn, subtype: .fromTop, duration: 1, timingFunction: .easeInEaseOut, completion: {
+            //----
+            self.shoBillMBVHeightConstrnt.constant = 0
+            self.shoBillMBV.isHidden = false
+            self.backToHomeBtn.isHidden = false
+            
+            self.confirmationMBV.applyShadow(fillColor: UIColor.mainBg, shadowColor: UIColor.white.withAlphaComponent(0.7), shadowRadius: 5, opacity: 0.7, offset: CGSize(width: 0, height: 30), cornerRadius: 12)
+            self.confirmationMBV.roundSideCorners(radius: 20, cornerSide: [.bottomLeft, .bottomRight])
+            
+            self.mainStckView.applyShadow(fillColor: UIColor.mainBg, shadowColor: UIColor.white.withAlphaComponent(0.7), shadowRadius: 5, opacity: 0.7, offset: CGSize(width: 0, height: 30), cornerRadius: 12)
+            
+            self.loadVideo()
+            
+            self.billView()
+        })
     }
-    
     
     func billView(){
         
+//        guard let bookedDataModel = bookedDataModel else { return }
         
-        // Create and configure ShapeView
-//        self.shoBillMBV.isHidden = false
-        
-//        // Optionally rearrange or shift existing views (if necessary)
-//           DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-//               UIView.animate(withDuration: 0.5) {
-//                   self.shoBillMBV.isHidden = false
-//                   self.shoBillMBV.frame.size.height = 450
-//                   
-////                   self.stackView.arrangedSubviews.forEach { view in
-////                       view.transform = CGAffineTransform(translationX: 0, y: -50)
-////                   }
-//               }
-//           }
-        
-      
         DispatchQueue.main.async {
+//            guard let bookedDataModel = self.bookedDataModel else { return }
+            
             let shapeView = BillShape()
-            shapeView.frame = CGRect(x: 0, y: 0, width: self.shoBillMBV.bounds.width, height: 550)//self.shoBillMBV.bounds.height //550
-            shapeView.circleYPosition = (shapeView.bounds.height) / 2.0 + 30.0  // Adjust as needed
             shapeView.layer.shadowColor = UIColor.black.cgColor
             shapeView.layer.shadowOpacity = 0.3
             shapeView.layer.shadowOffset = CGSize(width: 0, height: 2)
             shapeView.layer.shadowRadius = 4
             shapeView.backgroundColor = .clear
-            shapeView.billBackgroundColor = UIColor.appWhite
-            shapeView.lineBgColor = UIColor.appDarkGray
-            self.shoBillMBV.addSubview(shapeView)
+            //     only for testign       shapeView.billBackgroundColor = UIColor.appWhite
+            //     only for testign        shapeView.lineBgColor = UIColor.appDarkGray
+            self.billMBV.addSubview(shapeView)
+            
+            self.billMBVHeightConstnt.constant = 700
+            
+            //----------------------
+            shapeView.translatesAutoresizingMaskIntoConstraints = false
+            shapeView.scrollView.isScrollEnabled = true // Disable internal scrolling
+            
+            // Get a reference to the contentView within billShape
+            let contentView = shapeView.contentView
+            
+            NSLayoutConstraint.activate([
+                shapeView.topAnchor.constraint(equalTo: self.billMBV.topAnchor, constant: 30),
+                shapeView.leadingAnchor.constraint(equalTo: self.billMBV.leadingAnchor, constant: 19),
+                shapeView.trailingAnchor.constraint(equalTo: self.billMBV.trailingAnchor, constant: -19),
+                shapeView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: 20) // Tie billShape's bottom to its internal contentView's bottom
+            ])
+            
+            //--------------------
             shapeView.cornerSize = CGSize(width: 24, height: 24)
             shapeView.cornerSide = [.bottomLeft, .bottomRight]
-            shapeView.packageLabel.text = "test"
-            shapeView.trainerTags = ["Cardio", "Pilates", "+3",]
-            shapeView.startDate = (title: "Start Date", value: "06/24")
-            shapeView.validUptoDate = (title: "Valid Upto", value: "06/25")
-            shapeView.timingTxt = (title: "Timing", value: "10:00 to 11:00")
-            shapeView.locationTxt = (title: "Location", value: "MyPT Dubai")
             
+            shapeView.packageTitleLabel.text = "Package"
+            shapeView.packageLabel.text = self.bookedDataModel?.package ?? ""
+//            shapeView.trainerTags = self.bookedDataModel?.trainer?.tags ?? []
+            shapeView.startDate = (title: "Start Date", value: self.bookedDataModel?.date?.startDate ?? "")
+            shapeView.validUptoDate = (title: "Valid Upto", value: self.bookedDataModel?.date?.validTill ?? "")
+            shapeView.timingTxt = (title: "Timing", value: self.bookedDataModel?.timing ?? "")
+            shapeView.locationTxt = (title: "Location", value: self.bookedDataModel?.location ?? "")
+            shapeView.trainerDetailTitleLabel.text = "Trainer Details"
+            shapeView.trainerNameLabel.text = self.bookedDataModel?.trainer?.name ?? ""
+            shapeView.footerLabel.text = "Scan the QR code to access the gym premises."
             
-//            shapeView.startAnimation()
-            shapeView.startAnimation(){
-//                shapeView.animTopBottom(duration: 0.8, delay: 0.1) {
-//                    print("animted done..")
-//                }
-               print("animation done. ")
-                self.loadVideo()
-                self.backToHomeBtn.isHidden = false
-                
-//                shapeView.frame = CGRect(x: 0, y: 0, width: self.shoBillMBV.bounds.width, height: 750)
+            shapeView.trainerImageView.loadImage(urlString: self.bookedDataModel?.trainer?.image ?? "", placeholder: AppImages.navLeft)
+            shapeView.qrCodeImageView.loadImage(urlString: self.bookedDataModel?.qr ?? "", placeholder:  UIImage(named: ""))
+            
+            if self.bookedDataModel?.trainer?.isVerified == true {
+                shapeView.trainerBadgeImageView.isHidden = false
+            }else{
+                shapeView.trainerBadgeImageView.isHidden = true
             }
             
-            shapeView.configure(title: "Booking Confirmed", description: "You have received a confirmation email.", imageName: "ic_success")
+            if (self.bookedDataModel?.trainer?.tags?.count ?? 0) > 3 {
+                var tags:[String] = []
+                
+                for i in 0...1 {
+                    tags.append(self.bookedDataModel?.trainer?.tags?[i] ?? "")
+                }
+                tags.append("+3")
+                
+                shapeView.trainerTags = tags
+            }else{
+                shapeView.trainerTags = self.bookedDataModel?.trainer?.tags ?? []
+            }
+            
+//            shapeView.trainerImageView.image = UIImage(named: "ic_trainer")
+            
+//            shapeView.packageTitleLabel.text = "Package"
+//            shapeView.packageLabel.text = "12 months, Elite Gym Membership"
+//            shapeView.trainerTags = ["Cardio", "t2", "+5",]
+//            shapeView.startDate = (title: "Start Date", value: "06/24")
+//            shapeView.validUptoDate = (title: "Valid Upto", value: "06/25")
+//            shapeView.timingTxt = (title: "Timing", value: "10:00 to 11:00")
+//            shapeView.locationTxt = (title: "Location", value: "Dubia Location")
+//            shapeView.trainerDetailTitleLabel.text = "Trainer Details"
+//            shapeView.trainerNameLabel.text = "Christene De Koning"
+//            shapeView.qrCodeImageView.image = UIImage(named: "ic_QR_Code")
+//            shapeView.footerLabel.text = "Scan the QR code to access the gym premises."
+//            shapeView.trainerImageView.image = UIImage(named: "ic_trainer")
             
             
-
-            
-//            let topView = UIView(frame: CGRect(x: 0, y: 0, width: self.shoBillMBV.bounds.width, height: 40))
-//            topView.backgroundColor = UIColor.mainBg
-//            shapeView.addSubview(topView)
-           
-//            shapeView.topView.roundSideCorners(radius: 12.0, cornerSide: [.bottomLeft, .bottomRight])
-//            shapeView.topView.applyShadow(fillColor: UIColor.mainBg, shadowColor: UIColor.red, shadowRadius: 5, opacity: 1.0, offset: CGSize(width: 0, height: 10), cornerRadius: 10)
-          
+            self.view.setNeedsLayout()
         }
+        
+        self.billMBV.applyTransition(type: .moveIn, subtype: .fromBottom, duration: 1.5, timingFunction: .easeInEaseOut, completion: {
+            //----
+            print("Bottom animation is done.....")
+        })
+        
     }
+    
     
     @IBAction func backToHomeBtnActn(_ sender: Any) {
         print("clicked at back to home btn")
@@ -181,7 +189,7 @@ class PaymentSuccessViewController: UIViewController {
         
         let asset = AVAsset(url: NSURL(fileURLWithPath: path) as URL)
         let playerItem = AVPlayerItem(asset: asset)
-
+        
         // Disable all audio tracks in the player item
         for itemTrack in playerItem.tracks {
             if itemTrack.assetTrack?.mediaType == .audio {
@@ -201,33 +209,33 @@ class PaymentSuccessViewController: UIViewController {
         player.seek(to: .zero)
         player.play()
     }
-
     
     
-//    func applyMaskAndShadow(to myView: UIView) {
-//           let mask = CAShapeLayer()
-//           
-//           // Create rounded corner path
-//           let shadowpath = UIBezierPath(roundedRect: CGRect(x: 0, y: 0, width: myView.frame.width, height: myView.frame.height),
-//                                         byRoundingCorners: [.topRight, .bottomRight],
-//                                         cornerRadii: CGSize(width: 58.0, height: 58.0))
-//           
-//           // Apply mask
-//           mask.path = shadowpath.cgPath
-//           myView.layer.mask = mask
-//           
-//           // Create shadow layer
-//           let shadowLayer = CAShapeLayer()
-//           shadowLayer.frame = myView.bounds
-//           shadowLayer.path = shadowpath.cgPath
-//           shadowLayer.shadowOpacity = 0.5
-//           shadowLayer.shadowRadius = 5
-//           shadowLayer.shadowColor = UIColor(red: 0.2, green: 0.5, blue: 1.0, alpha: 1.0).cgColor
-//           shadowLayer.masksToBounds = false
-//           shadowLayer.shadowOffset = CGSize(width: 5.0, height: 1.0)
-//           
-//           // Add shadow layer to myView
-//           myView.layer.addSublayer(shadowLayer)
-//       }
+    
+    //    func applyMaskAndShadow(to myView: UIView) {
+    //           let mask = CAShapeLayer()
+    //
+    //           // Create rounded corner path
+    //           let shadowpath = UIBezierPath(roundedRect: CGRect(x: 0, y: 0, width: myView.frame.width, height: myView.frame.height),
+    //                                         byRoundingCorners: [.topRight, .bottomRight],
+    //                                         cornerRadii: CGSize(width: 58.0, height: 58.0))
+    //
+    //           // Apply mask
+    //           mask.path = shadowpath.cgPath
+    //           myView.layer.mask = mask
+    //
+    //           // Create shadow layer
+    //           let shadowLayer = CAShapeLayer()
+    //           shadowLayer.frame = myView.bounds
+    //           shadowLayer.path = shadowpath.cgPath
+    //           shadowLayer.shadowOpacity = 0.5
+    //           shadowLayer.shadowRadius = 5
+    //           shadowLayer.shadowColor = UIColor(red: 0.2, green: 0.5, blue: 1.0, alpha: 1.0).cgColor
+    //           shadowLayer.masksToBounds = false
+    //           shadowLayer.shadowOffset = CGSize(width: 5.0, height: 1.0)
+    //
+    //           // Add shadow layer to myView
+    //           myView.layer.addSublayer(shadowLayer)
+    //       }
     
 }

@@ -32,6 +32,7 @@ class BookingAddressViewController: UIViewController {
     var inputLat: String?
     var inputLong: String?
     var addressData:AddressDataModel?
+    var navCtrnl:UINavigationController?
     
 
     //MARK: --------------IBOUTLET
@@ -162,8 +163,8 @@ class BookingAddressViewController: UIViewController {
             "lat": self.inputLat ?? "28.584125",
             "long": self.inputLong ?? "77.2753162"
         ]
-       
         
+   
         if TrainerVM.isValideAddres(inputParams: params) {
             print("api is called..")
            
@@ -171,10 +172,16 @@ class BookingAddressViewController: UIViewController {
                 guard let self = self, let getResultData = getResultData else { return  }
                 
                 print("Add Adrress successfully: ",getResultData)
+                
+                NotificationCenter.default.post(name: NSNotification.Name("UpdateAddress"), object: nil, userInfo: ["newValue": "True"])
+                
                 self.delegate?.onDismiss(isDismiss: true)
-                dismiss(animated: true, completion: nil)
+                dismiss(animated: true, completion: {
+                    self.navCtrnl?.popToViewController(ofClass: SelectYourLocationViewController.self, animated: true)
+                })
             })
         }
+        
         
         
 //        dismiss(animated: true, completion: nil)
@@ -202,6 +209,7 @@ class BookingAddressViewController: UIViewController {
     
     //--------------------SETUP INPUT DATA
     private func setInputData(data: AddressDataModel){
+        
         
         let textFields: [(UITextField, String)] = [
             (buildingNumTxt, data.building_name?.value ?? ""),
@@ -275,25 +283,15 @@ class BookingAddressViewController: UIViewController {
             //----------------------Text fields
             self.setupTxtField()
             
-            /*
-            [
-                buildingNumTxt: "Building/Villa Name or Number",
-                streetNameTxt: "Street Name & Number",
-                landmarkTxt: "Landmark (Optional)",
-                mobileTxt: "Mobile",
-                cityTxt: "City",
-                countryTxt: "Country"
-            ].forEach({[weak self] (key, value) in
-                guard let self = self, let key = key else {
-                    return
-                }
+            //-----------------setup input data
+            if let addressData = addressData {
+                self.setInputData(data: addressData)
+                self.inputLat = "\(addressData.lat?.value ?? "0.0")"
+                self.inputLat = "\(addressData.lat?.value ?? "0.0")"
                 
-                key.placeholderSet(placeHolder: value, color: UIColor.txtDarkGray)
-                key.font = AppFont.semibold.size(16.0, familyName: familyManrope)
-                key.delegate = self
-                key.addTarget(self, action: #selector(textFieldDidChange(textField:)), for: UIControl.Event.editingChanged)
-            })
-            */
+            }
+            
+            self.setupTxtField()
             
         case .editAddress:
             self.topTitleLbl.text = "Edit Address"
@@ -301,6 +299,9 @@ class BookingAddressViewController: UIViewController {
                 self.idStr = addressData.id?.value
                 self.setInputData(data: addressData)
                 
+                //-----------------setup input data
+                self.inputLat = "\(addressData.lat?.value ?? "0.0")"
+                self.inputLat = "\(addressData.lat?.value ?? "0.0")"
             }
             
             self.setupTxtField()

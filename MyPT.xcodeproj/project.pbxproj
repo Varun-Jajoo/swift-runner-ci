@@ -56,6 +56,7 @@
 		B82622992CE38573000DFF7E /* UpcomingMealsCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B82622962CE38573000DFF7E /* UpcomingMealsCollectionViewCell.swift */; };
 		B8335C462D38F27700B52EAF /* ChooseWorkoutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8335C452D38F27700B52EAF /* ChooseWorkoutViewController.swift */; };
 		B8335C482D3930AC00B52EAF /* BodyPartName.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8335C472D3930AB00B52EAF /* BodyPartName.swift */; };
+		B83364682D91860400EF5C82 /* AvailabilityCalendarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B83364672D91860400EF5C82 /* AvailabilityCalendarModel.swift */; };
 		B842FAA22D60988A00E46E2B /* MealsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B842FAA12D60988A00E46E2B /* MealsViewController.swift */; };
 		B842FAA62D60BDB800E46E2B /* FrostedGlassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B842FAA52D60BDB800E46E2B /* FrostedGlassView.swift */; };
 		B842FAA82D60BE5200E46E2B /* HydrationViewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B842FAA72D60BE5200E46E2B /* HydrationViewViewController.swift */; };
@@ -138,6 +139,7 @@
 		B8BD0BCA2D365EDD005F19CA /* PolygonChartDraw.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8BD0BC92D365EDD005F19CA /* PolygonChartDraw.swift */; };
 		B8BD0BCD2D367B3B005F19CA /* WorkoutSummaryTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B8BD0BCC2D367B3B005F19CA /* WorkoutSummaryTableViewCell.xib */; };
 		B8BD0BCE2D367B3B005F19CA /* WorkoutSummaryTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8BD0BCB2D367B3B005F19CA /* WorkoutSummaryTableViewCell.swift */; };
+		B8BF06142D93D3E0009CC173 /* BookedSlotModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8BF06132D93D3E0009CC173 /* BookedSlotModel.swift */; };
 		B8C0A83C2D5C88F40053A153 /* CaloriesIntakeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C0A83B2D5C88F40053A153 /* CaloriesIntakeViewController.swift */; };
 		B8C0A83F2D5C95690053A153 /* AddIntakeTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B8C0A83E2D5C95690053A153 /* AddIntakeTableViewCell.xib */; };
 		B8C0A8402D5C95690053A153 /* AddIntakeTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C0A83D2D5C95690053A153 /* AddIntakeTableViewCell.swift */; };
@@ -404,6 +406,7 @@
 		B82622972CE38573000DFF7E /* UpcomingMealsCollectionViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = UpcomingMealsCollectionViewCell.xib; sourceTree = "<group>"; };
 		B8335C452D38F27700B52EAF /* ChooseWorkoutViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseWorkoutViewController.swift; sourceTree = "<group>"; };
 		B8335C472D3930AB00B52EAF /* BodyPartName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyPartName.swift; sourceTree = "<group>"; };
+		B83364672D91860400EF5C82 /* AvailabilityCalendarModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailabilityCalendarModel.swift; sourceTree = "<group>"; };
 		B842FAA12D60988A00E46E2B /* MealsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealsViewController.swift; sourceTree = "<group>"; };
 		B842FAA52D60BDB800E46E2B /* FrostedGlassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrostedGlassView.swift; sourceTree = "<group>"; };
 		B842FAA72D60BE5200E46E2B /* HydrationViewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HydrationViewViewController.swift; sourceTree = "<group>"; };
@@ -475,6 +478,7 @@
 		B8BD0BC92D365EDD005F19CA /* PolygonChartDraw.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolygonChartDraw.swift; sourceTree = "<group>"; };
 		B8BD0BCB2D367B3B005F19CA /* WorkoutSummaryTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutSummaryTableViewCell.swift; sourceTree = "<group>"; };
 		B8BD0BCC2D367B3B005F19CA /* WorkoutSummaryTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = WorkoutSummaryTableViewCell.xib; sourceTree = "<group>"; };
+		B8BF06132D93D3E0009CC173 /* BookedSlotModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookedSlotModel.swift; sourceTree = "<group>"; };
 		B8C0A83B2D5C88F40053A153 /* CaloriesIntakeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaloriesIntakeViewController.swift; sourceTree = "<group>"; };
 		B8C0A83D2D5C95690053A153 /* AddIntakeTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddIntakeTableViewCell.swift; sourceTree = "<group>"; };
 		B8C0A83E2D5C95690053A153 /* AddIntakeTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AddIntakeTableViewCell.xib; sourceTree = "<group>"; };
@@ -1366,6 +1370,8 @@
 				B8DCEA6E2D8993B000E16596 /* SelectGymModel.swift */,
 				B80038AD2D8A94A900245123 /* StudioDetailsModel.swift */,
 				B814428D2D8C114500B29DED /* CityModel.swift */,
+				B83364672D91860400EF5C82 /* AvailabilityCalendarModel.swift */,
+				B8BF06132D93D3E0009CC173 /* BookedSlotModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -1694,6 +1700,7 @@
 				B8ED38752D2E9AE700312116 /* WorkoutDetailsViewController.swift in Sources */,
 				B819BFC82D6C6EB0001D62E9 /* ZoomInOutFlowLayout.swift in Sources */,
 				B8CD00022CE1EFC6005DEA1C /* GymsNearbyCollViewCell.swift in Sources */,
+				B83364682D91860400EF5C82 /* AvailabilityCalendarModel.swift in Sources */,
 				B8F719B22D34F80C006A8925 /* CenterRangeSliderDelegate.swift in Sources */,
 				B826228F2CE36A34000DFF7E /* GradientView.swift in Sources */,
 				B818F4322D119A0600EA2A4F /* FilterViewController.swift in Sources */,
@@ -1745,6 +1752,7 @@
 				B8A540DB2CF08290007FECB3 /* WithMeCollectionViewCell.swift in Sources */,
 				B8CCAF2B2D6D9718009D66A3 /* ProductsViewController.swift in Sources */,
 				B8CF94712D37C8DF00842B1B /* RoundProgressView.swift in Sources */,
+				B8BF06142D93D3E0009CC173 /* BookedSlotModel.swift in Sources */,
 				B80038AE2D8A94A900245123 /* StudioDetailsModel.swift in Sources */,
 				B80380012D5B4AE200F978E1 /* DashboardVM.swift in Sources */,
 				B84F788D2CEB18DE00FF7D52 /* LibraryViewController.swift in Sources */,
@@ -2042,7 +2050,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = LW7P5S9K9P;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -2083,7 +2091,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = LW7P5S9K9P;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;

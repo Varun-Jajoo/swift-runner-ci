@@ -11,7 +11,11 @@ class SelectYourLocationViewController: CommonViewController {
 
     //MARK: -------------- VARIABLE
     var addressData:[AddressDataModel]? = []
+    var addressDetails: AddressDataModel?
     var selectedIdStr:String?
+    var trainerIdStr:String?
+    var studioIdStr:String?
+    var inputType:String?
     
     
     //MARK: --------------IBOUTLET
@@ -25,6 +29,8 @@ class SelectYourLocationViewController: CommonViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        NotificationCenter.default.addObserver(self, selector: #selector(updateAddress(_:)), name: NSNotification.Name("UpdateAddress"), object: nil)
+        
         setupUI()
         
         self.selectAddrTblView.contentInset = UIEdgeInsets(top: -50, left: 0, bottom: 0, right: 0)
@@ -35,9 +41,11 @@ class SelectYourLocationViewController: CommonViewController {
     
     
     deinit {
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("UpdateAddress"), object: nil)
         print("------\(#function)------\(String(describing: Self.self))------" )
     }
    
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.setNavigationColor(setColor: .clear)
@@ -52,15 +60,47 @@ class SelectYourLocationViewController: CommonViewController {
     
     
     @IBAction func dateNtimeBtnActn(_ sender: Any) {
+        
         print("select Date & Time..")
+        
         if let selectedIdStr = self.selectedIdStr , !selectedIdStr.isEmpty {
-            let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
-            vc.slotBookFlow = .bookTrainer
-            self.navigationController?.pushViewController(vc, animated: true)
+            
+            let getIndx = self.addressData?.firstIndex(where: {
+                $0.id?.value == selectedIdStr
+            })
+            
+            if let getIndx = getIndx {
+                let addressDetails = self.addressData?[getIndx]
+                let currentMonth = Calendar.current.component(.month, from: Date())
+                
+                let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
+                vc.slotBookFlow = .bookTrainer
+                vc.params = AvailParmsModel(type: self.inputType, trainer_id: trainerIdStr, studio_id: studioIdStr, month: "\(currentMonth)", address_id: addressDetails?.id?.value)
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+            
+//            
+//            let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
+//            vc.slotBookFlow = .bookTrainer
+//            vc.params = AvailParmsModel(type: "home", trainer_id: "2", studio_id: "", month: "03", address_id: "6")
+//            self.navigationController?.pushViewController(vc, animated: true)
         }else{
             AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.select_Address)
         }
+        
+        
+        
+//        if let selectedIdStr = self.selectedIdStr , !selectedIdStr.isEmpty {
+//            let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
+//            vc.slotBookFlow = .bookTrainer
+//            vc.params = AvailParmsModel(type: "home", trainer_id: "2", studio_id: "", month: "03", address_id: "6")
+//            self.navigationController?.pushViewController(vc, animated: true)
+//        }else{
+//            AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.select_Address)
+//        }
 
+        //selectedIdStr
+        
         
 //        let vc:BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
 //        vc.modalPresentationStyle = .automatic
@@ -72,7 +112,8 @@ class SelectYourLocationViewController: CommonViewController {
         print("addNewAddrBtnAtcn clicked...")
         
         let vc:LocationsViewController = LocationsViewController.instantiate(appStoryboard: .main)
-        vc.flowLocation = .addAdress
+        vc.flowLocation = .addAddress
+        vc.isFromEditAddress = false
         self.navigationController?.pushViewController(vc, animated: true)
         
         /* only for testing
@@ -83,6 +124,12 @@ class SelectYourLocationViewController: CommonViewController {
         self.present(vc, animated: true)
         
         */
+    }
+    
+    @objc func updateAddress(_ notification: Notification) {
+        if let _ = notification.userInfo?["newValue"] as? String {
+            self.getAddressListApi()
+        }
     }
     
     
@@ -207,17 +254,29 @@ extension SelectYourLocationViewController: UITableViewDelegate, UITableViewData
             let addData = addressData?[indx]
             print("addData: ",addData as Any)
             
-            let vc:BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
-            vc.modalPresentationStyle = .automatic
-            vc.bookingAddressFlow = .editAddress
-            vc.addressData = addData
-            vc.delegate = self
-            self.present(vc, animated: true)
+            let vc:LocationsViewController = LocationsViewController.instantiate(appStoryboard: .main)
+            vc.flowLocation = .editAddress
+            vc.getAddressData = addData
+            vc.isFromEditAddress = true
+            self.navigationController?.pushViewController(vc, animated: true)
+            
+//            let vc:BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
+//            vc.modalPresentationStyle = .automatic
+//            vc.bookingAddressFlow = .editAddress
+//            vc.addressData = addData
+//            vc.delegate = self
+//            self.present(vc, animated: true)
         }
     }
     
     @objc func addAddressBtnActn(sender: UIButton){
         print("No add ADD ADDRESS NOW clicked...")
+        let vc:LocationsViewController = LocationsViewController.instantiate(appStoryboard: .main)
+        vc.flowLocation = .addAddress
+        vc.isFromEditAddress = false
+        self.navigationController?.pushViewController(vc, animated: true)
+       
+        
         /*   only test
         let vc:BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
         vc.modalPresentationStyle = .automatic
@@ -226,9 +285,6 @@ extension SelectYourLocationViewController: UITableViewDelegate, UITableViewData
         self.present(vc, animated: true)
         */
         
-        let vc:LocationsViewController = LocationsViewController.instantiate(appStoryboard: .main)
-        vc.flowLocation = .addAdress
-        self.navigationController?.pushViewController(vc, animated: true)
     }
     
 }

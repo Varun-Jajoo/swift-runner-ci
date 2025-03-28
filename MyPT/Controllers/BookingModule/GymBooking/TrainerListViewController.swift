@@ -156,6 +156,7 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
             if let isFromHome = isFromHome, isFromHome {
                 cell.trainerTagsData = self.trainerData?[indexPath.row].tags
                 cell.setupCellData(trainerData: self.trainerData?[indexPath.row])
+                
             }else{
                 cell.trainerTagsData = self.gymTrainerData?[indexPath.row].tags
                 cell.setGymCellData(trainerData: self.gymTrainerData?[indexPath.row])
@@ -247,11 +248,16 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
         if let isFromHome = isFromHome, isFromHome {
             cell.trainerTagsData = self.trainerData?[indexPath.row].tags
             cell.setCellData(trainerData: self.trainerData?[indexPath.row])
+            
+            cell.bookSlotBtn.accessibilityHint = "\(self.trainerData?[indexPath.row].id ?? 0)"
         }else{
             cell.trainerTagsData = self.gymTrainerData?[indexPath.row].tags
             cell.setGymCellData(trainerData: self.gymTrainerData?[indexPath.row])
+           
+            cell.bookSlotBtn.accessibilityHint = "\(self.gymTrainerData?[indexPath.row].id ?? 0)"
         }
         
+       
         cell.bookSlotBtn.addTarget(self, action: #selector(bookSlotBtnActn(sender: )), for: .touchUpInside)
         
 //        cell.bookSlotBtn.addTarget(self, action: #selector(bookSlotBtnActn(sender: )), for: .touchUpInside)
@@ -281,8 +287,42 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
     
     @objc func bookSlotBtnActn(sender:UIButton) {
         
-        let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
-        self.navigationController?.pushViewController(vc, animated: true)
+        if let isFromHome = isFromHome, isFromHome {
+            let getIndx = self.trainerData?.firstIndex(where: {
+                $0.id == Int(sender.accessibilityHint ?? "0")
+            })
+            
+            if let getIndx = getIndx {
+                let trainerDetails = self.trainerData?[getIndx]
+                
+                let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
+                vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
+                vc.studioIdStr = studioId
+                vc.inputType = self.inputType
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+        }else{
+            
+            let getIndx = self.gymTrainerData?.firstIndex(where: {
+                $0.id == Int(sender.accessibilityHint ?? "0")
+            })
+            
+            if let getIndx = getIndx {
+                let trainerDetails = self.gymTrainerData?[getIndx]
+                
+                let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
+                vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
+                vc.studioIdStr = studioId
+                vc.inputType = self.inputType
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+        }
+        
+ 
+        
+//        let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
+//        
+//        self.navigationController?.pushViewController(vc, animated: true)
         
         /*
         let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)

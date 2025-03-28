@@ -307,6 +307,9 @@ class TrainerDescriptionViewController: CommonViewController {
     @IBAction func bookSlotBtnActn(_ sender: Any) {
         
         let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
+        vc.trainerIdStr = inputParam?.trainer_id
+        vc.studioIdStr = inputParam?.studio_id
+        vc.inputType = inputParam?.type
         self.navigationController?.pushViewController(vc, animated: true)
         
         /*

@@ -39,16 +39,3 @@ struct GymReviewModel: Codable {
     var image: String?
     var rating: String?
 }
- 
-//MARK: --------------- AvailabilityBaseModel
-struct AvailabilityBaseModel: Codable {
-    var status: Bool?
-    var data: [AvailabilityDataModel]?
-    var msg: String?
-}
-
-//MARK: ---------------- AvailabilityDataModel
-struct AvailabilityDataModel: Codable {
-    var date: String?
-    var status: String?
-}

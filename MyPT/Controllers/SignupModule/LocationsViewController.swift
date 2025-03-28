@@ -10,7 +10,8 @@ import GoogleMaps
 
 
 enum LocationFlow {
-    case addAdress
+    case addAddress
+    case editAddress
     case defaultLoc
 }
 
@@ -21,18 +22,22 @@ class LocationsViewController: CommonViewController {
     
     var mapView: GMSMapView!
     var locationManager: CLLocationManager?
-    
     var showmapCamera: CLLocationCoordinate2D? = nil {
         didSet{
             if let latitude = showmapCamera?.latitude , let longitude = showmapCamera?.longitude {
                 let camera = GMSCameraPosition.camera(withLatitude: latitude, longitude: longitude, zoom: 10.0)
                 DispatchQueue.main.async {
                     self.mapView?.camera = camera
+                    self.addMarkers(marker: MarkerModel(latitude: latitude, longitude: longitude, title: self.getAddressData?.building_name?.value ?? "", snippet: self.getAddressData?.city_name ?? "", iconImageName: AppImages.Radius))
+                    
                     self.locationManager?.stopUpdatingLocation()
                 }
             }
         }
     }
+    
+    var isFromEditAddress:Bool? = false
+    var getAddressData:AddressDataModel? = AddressDataModel()
     
     //MARK: -------------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
@@ -61,11 +66,35 @@ class LocationsViewController: CommonViewController {
         setNavUI()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        switch flowLocation {
+        case .addAddress:
+            print("add Address..")
+            
+        case .editAddress:
+            if let lat = getAddressData?.lat, let long = getAddressData?.long {
+                print("from edit: ", lat, long, Double(lat.value ?? "0.0") ?? 0.0, Double(long.value ?? "0.0") ?? 0.0)
+                
+                self.locationManager?.stopUpdatingLocation()
+                self.showmapCamera = CLLocationCoordinate2D(latitude: Double(lat.value ?? "0.0") ?? 0.0, longitude: Double(long.value ?? "0.0") ?? 0.0)
+                
+                self.getCurrentAddr(location: CLLocation(latitude: Double(lat.value ?? "0.0") ?? 0.0, longitude: Double(long.value ?? "0.0") ?? 0.0))
+                
+            }else{
+                print("New add address...")
+            }
+        case .defaultLoc:
+            print("none.....")
+        }
+    }
+    
     
     func setNavUI(){
      
         switch flowLocation {
-        case .addAdress:
+        case .addAddress, .editAddress:
             
             self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
             //        self.setNavigationTitle(title: AppStrings.select_plan, color: UIColor.black, font: AppFont.Bold.size(22.0))
@@ -83,7 +112,7 @@ class LocationsViewController: CommonViewController {
     override func rightBtnActn(sender: UIButton) {
        
         switch flowLocation {
-        case .addAdress:
+        case .addAddress, .editAddress:
             print("address....")
         case .defaultLoc:
             appSceneDelegate?.goToGuestDashboard()
@@ -154,6 +183,7 @@ class LocationsViewController: CommonViewController {
     func setMapShowData(){
 
 //        let camera = GMSCameraPosition.camera(withLatitude: 28.5854355, longitude: 77.3087411, zoom: 10.0)
+        
         let camera = GMSCameraPosition.camera(withLatitude: 0.0, longitude: 0.0, zoom: 10.0)
                 
         DispatchQueue.main.async {
@@ -209,16 +239,30 @@ class LocationsViewController: CommonViewController {
         print("Continue btn actn...")
         
         switch flowLocation {
-        case .addAdress:
+        case .addAddress:
             
-            if let mainAddrLbl = self.mainAddrLbl.text , !mainAddrLbl.isEmpty, let subAddrLbl = self.subAddrLbl.text, !subAddrLbl.isEmpty, let lat = showmapCamera?.latitude as? Double, let long = showmapCamera?.longitude as? Double {
-                print(mainAddrLbl, subAddrLbl, lat, long)
-                let fullAddr = mainAddrLbl + " " + subAddrLbl
-                print(fullAddr)
+            if let getAddressData = getAddressData {
+                print(getAddressData)
                 
                 let vc:BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
                 vc.modalPresentationStyle = .automatic
                 vc.bookingAddressFlow = .addAddress
+                vc.addressData = self.getAddressData
+                vc.navCtrnl = self.navigationController
+                self.present(vc, animated: true)
+                
+            }else{
+                AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.enter_Location)
+            }
+        case .editAddress:
+            if let getAddressData = getAddressData {
+                print(getAddressData)
+                
+                let vc:BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
+                vc.modalPresentationStyle = .automatic
+                vc.bookingAddressFlow = .editAddress
+                vc.addressData = self.getAddressData
+                vc.navCtrnl = self.navigationController
                 self.present(vc, animated: true)
                 
             }else{
@@ -230,7 +274,6 @@ class LocationsViewController: CommonViewController {
             if let mainAddrLbl = self.mainAddrLbl.text , !mainAddrLbl.isEmpty, let subAddrLbl = self.subAddrLbl.text, !subAddrLbl.isEmpty, let lat = showmapCamera?.latitude as? Double, let long = showmapCamera?.longitude as? Double {
                 print(mainAddrLbl, subAddrLbl, lat, long)
                 let fullAddr = mainAddrLbl + " " + subAddrLbl
-                
                 print(fullAddr)
                 
                 RegistrationVM.addLocationApi(viewController: self, inputLat: "\(lat)", inputLong: "\(long)", inputAddress: fullAddr, completion: { [weak self] getResultData in
@@ -339,6 +382,8 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
     func mapView(_ mapView: GMSMapView, didTapAt coordinate: CLLocationCoordinate2D) {
         print("You tapped at \(coordinate.latitude), \(coordinate.longitude)")
         
+        self.isFromEditAddress = false
+        
         addMarkers(marker: MarkerModel(latitude: coordinate.latitude, longitude: coordinate.longitude, title: "title", snippet: self.mainAddrLbl.text, iconImageName: AppImages.Radius))
         
         self.getCurrentAddr(location: CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude))
@@ -371,80 +416,20 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
         self.showmapCamera = location.coordinate
         self.locationManager?.stopUpdatingLocation()
         self.locationManager = nil
-        
-        
-        addMarkers(marker: MarkerModel(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, title: title, snippet: self.mainAddrLbl.text, iconImageName: AppImages.Radius))
-        
-        getCurrentAddr(location: location)
-        
-        
-        /*
-        // Get user's current location name
-        let geocoder = CLGeocoder()
-        geocoder.reverseGeocodeLocation(location) { (placemarksArray, error) in
+    
+        if let isFromEditAddress = self.isFromEditAddress, !isFromEditAddress {
+            addMarkers(marker: MarkerModel(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, title: title, snippet: self.mainAddrLbl.text, iconImageName: AppImages.Radius))
             
-            
-            if (placemarksArray?.count)! > 0 {
-                
-                var locality =  ""
-                var postalCode =  ""
-                var administrativeArea = ""
-                var country = ""
-                var sublocality = ""
-                var throughfare = ""
-//                var name = ""
-                
-                if let containsPlacemark = placemarksArray?.first {
-                    locality = (containsPlacemark.locality != nil) ? containsPlacemark.locality! : ""
-                    postalCode = (containsPlacemark.postalCode != nil) ? containsPlacemark.postalCode! : ""
-                    administrativeArea = (containsPlacemark.administrativeArea != nil) ? containsPlacemark.administrativeArea! : ""
-                    country = (containsPlacemark.country != nil) ? containsPlacemark.country! : ""
-                    sublocality = (containsPlacemark.subLocality != nil) ? containsPlacemark.subLocality! : ""
-                    throughfare = (containsPlacemark.thoroughfare != nil) ? containsPlacemark.thoroughfare! : ""
-                    
-                }
-                
-                var adr: String  = ""
-                
-                if throughfare != "" {
-                    
-                    adr = throughfare + ", "
-                    
-                }
-                if sublocality != "" {
-                    
-                    adr = adr + sublocality + ", "
-                    
-                }
-                if locality != "" {
-                    
-                    adr = adr + locality + ", "
-                    
-                }
-                if administrativeArea != "" {
-                    
-                    adr = adr + administrativeArea + ", "
-                    
-                }
-                if postalCode != "" {
-                    
-                    adr = adr + postalCode + ", "
-                    
-                }
-                if country != "" {
-                    
-                    adr = adr + country
-                }
-                
-                self.mainAddrLbl.text = adr
-            
-            }
+            getCurrentAddr(location: location)
+            locationManager?.stopUpdatingLocation()
+        }else{
+            locationManager?.stopUpdatingLocation()
         }
-        */
         
-       
-        
-        locationManager?.stopUpdatingLocation()
+//        addMarkers(marker: MarkerModel(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, title: title, snippet: self.mainAddrLbl.text, iconImageName: AppImages.Radius))
+//        
+//        getCurrentAddr(location: location)
+//        locationManager?.stopUpdatingLocation()
         
         self.setUpMapHeigth()
     }
@@ -501,6 +486,42 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
                                 }
                                 
                                 self.subAddrLbl.text = subAddrStr
+                                
+                                //----------------Get Address
+                                
+                                // Extract different parts from lines
+                                let addressComponents = lines.joined(separator: ", ").components(separatedBy: ", ")
+                                
+                                let buildingName = addressComponents.count > 0 ? addressComponents[0] : ""
+                                let streetName = addressComponents.count > 1 ? addressComponents[1] : ""
+                                let landmark = addressComponents.count > 2 ? addressComponents[2] : ""
+                                
+                                self.getAddressData?.landmark = landmark
+                                
+                                if self.getAddressData?.building_name == nil {
+                                    self.getAddressData?.building_name = FlexibleValue(value: buildingName)
+                                } else {
+                                    self.getAddressData?.building_name?.value = buildingName
+                                }
+                                
+                                if self.getAddressData?.street == nil {
+                                    self.getAddressData?.street = FlexibleValue(value: streetName)
+                                } else {
+                                    self.getAddressData?.street?.value = streetName
+                                }
+                                
+                                if self.getAddressData?.lat == nil {
+                                    self.getAddressData?.lat = FlexibleValue(value: "\(getLcation.coordinate.latitude)")
+                                } else {
+                                    self.getAddressData?.lat?.value = "\(getLcation.coordinate.latitude)"
+                                }
+                                
+                                if self.getAddressData?.long == nil {
+                                    self.getAddressData?.long = FlexibleValue(value: "\(getLcation.coordinate.longitude)")
+                                } else {
+                                    self.getAddressData?.long?.value = "\(getLcation.coordinate.longitude)"
+                                }
+                                
                             }
                             
                         } else {

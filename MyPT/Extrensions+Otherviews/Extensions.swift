@@ -836,7 +836,11 @@ extension UIView{
      */
     
     func addDashedLine(strokeColor: UIColor, lineWidth: CGFloat, dashPattern: [NSNumber]) {
-            let dashedLayer = CAShapeLayer()
+        self.layer.sublayers?
+            .filter { $0.name == "dash_line" }.forEach({$0.removeFromSuperlayer()})
+       
+        let dashedLayer = CAShapeLayer()
+        dashedLayer.name = "dash_line"
             dashedLayer.strokeColor = strokeColor.cgColor
             dashedLayer.lineWidth = lineWidth
             dashedLayer.lineDashPattern = dashPattern
@@ -850,7 +854,7 @@ extension UIView{
             dashedLayer.frame = self.bounds
             
             // Remove old dashed layers if needed
-            self.layer.sublayers?.removeAll(where: { $0 is CAShapeLayer })
+//            self.layer.sublayers?.removeAll(where: { $0 is CAShapeLayer })
             
             self.layer.addSublayer(dashedLayer)
         }

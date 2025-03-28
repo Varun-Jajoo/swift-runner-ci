@@ -37,6 +37,27 @@ class CalendarView: UIView {
             }
         }
     }
+    
+    var datesWithMultipleEvents: [String:UIColor]? = [:] {
+        didSet{
+            self.collectionView.reloadData()
+        }
+    }
+    
+    //"yyyy-MM-dd"
+    var disabledDates: [String]? = [] {
+        didSet{
+            self.collectionView.reloadData()
+        }
+    }
+    
+    var isCellSelected: Bool? = true {
+        didSet{
+            self.collectionView.reloadData()
+        }
+    }
+    
+    
     private var currentMonth: Date = Date()
     private var daysInCurrentMonth: Int = 0
     private var firstDayOfMonth: Date?
@@ -216,19 +237,13 @@ extension CalendarView: UICollectionViewDataSource, UICollectionViewDelegate, UI
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection
                         section: Int) -> Int {
-        //        guard let firstDayOfMonth = firstDayOfMonth else { return 0 }
-        //
-        //        let numberOfItemsBeforeFirstDayOfMonth = Calendar.current.component(.weekday, from: firstDayOfMonth) - 1
-        //        let totalItems = daysInCurrentMonth + numberOfItemsBeforeFirstDayOfMonth
-        //        return totalItems
-        //        print("daysInCurrentMonth",self.getAllDaysOfCurrentMonth().count)
         
         return self.getAllDaysOfCurrentMonth().count //daysInCurrentMonth
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CalendarCell", for: indexPath) as! CalendarCell
-        
+                
         if getSelectedInd.row == indexPath.row {
             DispatchQueue.main.async {
                 cell.dotMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: cell.dotMBV.frame.size.height/3.0)
@@ -259,7 +274,10 @@ extension CalendarView: UICollectionViewDataSource, UICollectionViewDelegate, UI
         cell.dateLabel.textColor = UIColor.appWhite
         cell.dateLabel.textAlignment = .center
         
-        cell.dotMBV.backgroundColor = UIColor.appLightYellow
+        let key = self.dateFormatter.string(from: allDays[indexPath.row])
+        if let colors = self.datesWithMultipleEvents?[key] as? UIColor {
+            cell.dotMBV.backgroundColor = colors
+        }
         
         return cell
         
@@ -291,7 +309,16 @@ extension CalendarView: UICollectionViewDataSource, UICollectionViewDelegate, UI
                 delegate?.didDeselecteed?(withValue: "\(getAllDaysOfCurrentMonth()[indexPath.row])")
             }
         }
-//                print("get deselected date",getAllDaysOfCurrentMonth()[indexPath.row])
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
+       
+        let allDays = getAllDaysOfCurrentMonth()
+        let dateString =  self.dateFormatter.string(from: allDays[indexPath.row])
+        guard let isSelection = disabledDates?.contains(dateString) else { return true}
+        guard let isCellSelected = isCellSelected else { return true }
+                
+        return isCellSelected ? !isSelection : isCellSelected
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
