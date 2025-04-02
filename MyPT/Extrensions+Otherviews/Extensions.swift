@@ -352,6 +352,34 @@ extension UIView{
     
     //MARK: --------------- MAKE GRADIENT BORDER
     
+    func setGradientMultiBorder(cornerRadius: CGFloat, width: CGFloat,
+                           colors: [UIColor], startPoint: CGPoint = CGPoint(x: 0.5, y: 0),
+                           endPoint: CGPoint = CGPoint(x: 0.5, y: 1)) {
+        
+        let borderLayerName = "gradientBorderLayer_MultiLayer"
+        // Remove the last added gradient border (if it exists)
+        layer.sublayers?.removeAll(where: { $0.name == borderLayerName })
+
+        // Create a new gradient border layer
+        let border = CAGradientLayer()
+        border.name = borderLayerName
+        border.frame = bounds
+        border.colors = colors.map { $0.cgColor }
+        border.startPoint = startPoint
+        border.endPoint = endPoint
+        
+        let mask = CAShapeLayer()
+        mask.path = UIBezierPath(roundedRect: bounds, cornerRadius: cornerRadius).cgPath
+        mask.fillColor = UIColor.clear.cgColor
+        mask.strokeColor = UIColor.red.cgColor
+        mask.lineWidth = width
+        
+        border.mask = mask
+        
+        // Add the new gradient border
+        layer.addSublayer(border)
+    }
+    
     private static let kLayerNameGradientBorder = "GradientBorderLayer"
     
     func setGradientBorder(cornerRadious:CGFloat, width: CGFloat,
@@ -1025,7 +1053,10 @@ extension UILabel {
         
     }
     
-    func applyGradientWith(startColor: UIColor, endColor: UIColor) {
+    //MARK: -------------FOR GRADIENT TEXT OF LABEL
+//    func applyGradientLabel(startColor: UIColor, endColor: UIColor) {
+    
+    func applyGradientLabel(colors: [UIColor] = [.blue, .white], locations: [CGFloat] = [0, 1]) {
         guard let text = self.text, let font = self.font else { return  }
         
         let textSize = text.size(withAttributes: [.font: font])
@@ -1040,10 +1071,10 @@ extension UILabel {
             return
         }
         
-        let locations: [CGFloat] = [0.0, 1.0]
-        let colors = [startColor.cgColor, endColor.cgColor] as CFArray
+        let locations: [CGFloat] = locations // [0.0, 0.3, 1.0]
+        let colors = colors.map { $0.cgColor } // [startColor.cgColor, startColor.cgColor, endColor.cgColor] as CFArray
         
-        guard let glossGradient = CGGradient(colorsSpace: rgbColorspace, colors: colors, locations: locations) else {
+        guard let glossGradient = CGGradient(colorsSpace: rgbColorspace, colors: colors as CFArray, locations: locations) else {
             UIGraphicsEndImageContext()
             return
         }

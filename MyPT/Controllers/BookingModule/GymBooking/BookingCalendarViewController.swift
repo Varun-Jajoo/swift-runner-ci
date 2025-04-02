@@ -38,8 +38,14 @@ class BookingCalendarViewController: CommonViewController {
 
     //MARK: -------------- VARIABLE
     var slotBookFlow:calendarFlow = .defaultFlow
-    
     var params:AvailParmsModel?
+    var totalDays:Int?
+    
+    var packageTypeStr: String?
+    var sessionsStr: String?
+    var startDateStr: String?
+    var endDateStr: String?
+    
     
     fileprivate let gregorian: Calendar = Calendar(identifier: .indian)
     fileprivate lazy var dateFormatter1: DateFormatter = {
@@ -123,10 +129,14 @@ class BookingCalendarViewController: CommonViewController {
         
         bookingCalendar.headerHeight = 0.0
         bookingCalendar.delegate = self
+//        calendar.allowsMultipleSelection = false
+        bookingCalendar.allowsMultipleSelection = false
         bookingCalendar.appearance.titleFont = UIFont.boldSystemFont(ofSize: 15.0)
         self.enableContinueBtn(isSelected: false)
+        self.startDateBtn.setTitle("--", for: .normal)
+        self.endBtn.setTitle("--", for: .normal)
         
-        self.flowSetup()
+//        self.flowSetup()
     }
     
     
@@ -140,8 +150,7 @@ class BookingCalendarViewController: CommonViewController {
         setNavUI()
         bookingCalendar.headerHeight = 0.0
         
-        //-------------------------Api
-        self.getAvailableSlots(inputParams: self.params?.getParams() ?? ["":""])
+        self.flowSetup()
     }
     
     func setNavUI(){
@@ -201,6 +210,9 @@ class BookingCalendarViewController: CommonViewController {
             self.statu2sMBV.isHidden = false
             self.monthTitleLbl.text = getMonthName(from: bookingCalendar)
             self.enableContinueBtn(isSelected: false)
+            
+            //-------------------------Api
+            self.getAvailableSlots(inputParams: self.params?.getParams() ?? ["":""])
                        
         case .createPackage:
             self.topTitleMBV.isHidden = false
@@ -215,6 +227,9 @@ class BookingCalendarViewController: CommonViewController {
             self.endBtn.isUserInteractionEnabled = false
             updateUI(selectedView: [startDateBtn, endBtn])
             
+            //-------------------------Api
+            self.getAvailableSlots(inputParams: self.params?.getParams() ?? ["":""])
+            
         case .defaultFlow:
             print("default is called..")
         }
@@ -224,7 +239,10 @@ class BookingCalendarViewController: CommonViewController {
         print("continue btn actn.....")
         let vc:SlotDurationViewController = SlotDurationViewController.instantiate(appStoryboard: .booking)
         vc.slotDurationFlow = .createPackage
+        vc.inputSetDateParams = SetDateParams(package_type: self.packageTypeStr, sessions: self.sessionsStr, type: self.params?.type, trainer_id: self.params?.trainer_id, studio_id: self.params?.studio_id, date: self.startDateStr, end_date: self.endDateStr, timing: "morning", address_id: self.params?.address_id)
+        
         self.navigationController?.pushViewController(vc, animated: true)
+        
     }
     
     @IBAction func showDateBtnActn(_ sender: UIButton) {
@@ -297,6 +315,15 @@ class BookingCalendarViewController: CommonViewController {
         return dateFormatter.string(from: calendar.currentPage)
     }
 
+    //---------------------**********
+    func isFutureOrCurrentMonth(year: Int, month: Int) -> Bool {
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date())
+        let currentMonth = calendar.component(.month, from: Date())
+
+        // Check if the given year is greater OR it's the same year but a future or current month
+        return (year > currentYear) || (year == currentYear && month >= currentMonth)
+    }
 }
 
 
@@ -324,10 +351,31 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
             vc.showCalView.disabledDates = self.disabledDates
             vc.showCalView.isCellSelected = false
             vc.inputGetSlotParams = GetSlotParamsModel(trainer_id: self.params?.trainer_id, type: self.params?.type, date: "\(getSlotDate)", timing: "morning", studio_id: self.params?.studio_id, address_id: self.params?.address_id)
+            vc.avialCalanderparams = self.params
             
             self.navigationController?.pushViewController(vc, animated: true)
         case .createPackage:
             print("for create packeg")
+            
+             dateFormatter.dateFormat = "yyyy-MM-dd"
+            let startDate = dateFormatter.string(from: date)
+            self.startDateStr = startDate
+            
+            let outputFormatter = DateFormatter()
+            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+            outputFormatter.dateFormat = "dd, MMM • EEE"
+            let startDay = outputFormatter.string(from: date)
+            
+            self.startDateBtn.setTitle(startDay, for: .normal)
+            
+            if let getTotalDays = self.totalDays, let totalDays = self.getTotalDays(to: selectedDate, daysToAdd: getTotalDays, format: "dd-MM-yyyy") {
+                self.endBtn.setTitle(totalDays.0, for: .normal)
+               
+                dateFormatter.dateFormat = "yyyy-MM-dd"
+                let endDate = dateFormatter.string(from: totalDays.1)
+                self.endDateStr = endDate
+            }
+            
             //            let vc:SlotDurationViewController = SlotDurationViewController.instantiate(appStoryboard: .booking)
             //            vc.slotDurationFlow = .createPackage
             //            self.navigationController?.pushViewController(vc, animated: true)
@@ -342,6 +390,19 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
            print("Current page changed to: \(monthName)")
         
         self.monthTitleLbl.text = getMonthName(from: bookingCalendar)
+        
+        let calendarInstance = Calendar.current
+        let currentPage = calendar.currentPage // This gets the first day of the visible month
+        let year = calendarInstance.component(.year, from: currentPage)
+        let month = calendarInstance.component(.month, from: currentPage)
+        
+        //--------------------*************For getting next month Availibility
+        if isFutureOrCurrentMonth(year: year, month: month) {
+            //-------------------------Api
+            self.params?.month = "\(month)"
+            self.getAvailableSlots(inputParams: self.params?.getParams() ?? ["":""])
+        }
+        
        }
     
     func calendar(_ calendar: FSCalendar, numberOfEventsFor date: Date) -> Int {
@@ -424,6 +485,37 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
           
            return disabledDates.contains(dateString) // Return false to disable selection
        }
+    
+    //-------------
+    func getTotalDays(to dateString: String, daysToAdd: Int, format: String = "dd-MM-yyyy") -> (String, Date)? {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = format
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX") // Ensures correct parsing
+        
+        if let date = dateFormatter.date(from: dateString) {
+            if let futureDate = Calendar.current.date(byAdding: .day, value: daysToAdd, to: date) {
+                let outputFormatter = DateFormatter()
+                outputFormatter.dateFormat = "dd, MMM • EEE"
+                return (outputFormatter.string(from: futureDate), futureDate)
+            }
+        }
+        return nil
+    }
+    
+    /*
+     func convertDateFormat(from dateString: String) -> String? {
+         let inputFormatter = DateFormatter()
+         inputFormatter.dateFormat = "dd-MM-yyyy"
+         inputFormatter.locale = Locale(identifier: "en_US_POSIX") // Ensures correct parsing
+
+         if let date = inputFormatter.date(from: dateString) {
+             let outputFormatter = DateFormatter()
+             outputFormatter.dateFormat = "d, MMM, EEE"
+             return outputFormatter.string(from: date)
+         }
+         return nil
+     }
+     */
 }
 
 
@@ -442,6 +534,7 @@ extension BookingCalendarViewController {
 
     private func getAvailableSlots(inputParams: [String : String]){
         print(inputParams)
+        
         TrainerVM.calendarAvailabilityApi(viewController: self, inputParms: inputParams, completion: {[weak self] getResultData in
             guard let self = self, let getResultData = getResultData else { return  }
             

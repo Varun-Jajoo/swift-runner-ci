@@ -140,8 +140,10 @@ class BookingAddressViewController: UIViewController {
     @IBAction func addMemebersBtnActn(_ sender: UIButton) {
         if sender.tag == 801 {
             print("save & next btn clicked")
+            
         }else{
             print("save members btn clicked.")
+            self.dismiss(animated: true)
         }
     }
     
@@ -176,7 +178,7 @@ class BookingAddressViewController: UIViewController {
                 NotificationCenter.default.post(name: NSNotification.Name("UpdateAddress"), object: nil, userInfo: ["newValue": "True"])
                 
                 self.delegate?.onDismiss(isDismiss: true)
-                dismiss(animated: true, completion: {
+                self.dismiss(animated: true, completion: {
                     self.navCtrnl?.popToViewController(ofClass: SelectYourLocationViewController.self, animated: true)
                 })
             })
@@ -194,7 +196,7 @@ class BookingAddressViewController: UIViewController {
     @IBAction func commonBtnActn(_ sender: UIButton) {
         switch sender.tag {
         case btnTag.dismiss.rawValue:
-            dismiss(animated: true, completion: nil)
+            self.dismiss(animated: true, completion: nil)
         case btnTag.home.rawValue, btnTag.office.rawValue, btnTag.other.rawValue:
             self.setAddrType(sender: sender)
         case btnTag.selectCity.rawValue:
@@ -337,6 +339,7 @@ class BookingAddressViewController: UIViewController {
                 landmarkMBV,
                 cityMBV,
                 countryMBV,
+                mobilMBV,
                 typeAddressMBV,
                 saveUpdateBtn
             ].forEach({
@@ -353,6 +356,11 @@ class BookingAddressViewController: UIViewController {
             self.otherBtn.setTitle("Others", for: .normal)
             
             //----------------------Text fields
+            
+            self.streetNameTxt.keyboardType = .decimalPad
+//            self.mobileTxt.isHidden = true
+//            self.mobilMBV.isHidden = true
+            
             [
                 buildingNumTxt: "Enter Full Name",
                 streetNameTxt: "Enter Age",

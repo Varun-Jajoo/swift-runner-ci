@@ -22,6 +22,9 @@
 		B80A446D2CEDF43A00E3A11E /* TrainerListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80A446C2CEDF43A00E3A11E /* TrainerListViewController.swift */; };
 		B80A44702CEDF4F300E3A11E /* TrainerListTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B80A446F2CEDF4F300E3A11E /* TrainerListTableViewCell.xib */; };
 		B80A44712CEDF4F300E3A11E /* TrainerListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80A446E2CEDF4F300E3A11E /* TrainerListTableViewCell.swift */; };
+		B80BA8652D9D24BA008E1E94 /* AddMemberTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B80BA8642D9D24BA008E1E94 /* AddMemberTableViewCell.xib */; };
+		B80BA8662D9D24BA008E1E94 /* AddMemberTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80BA8632D9D24BA008E1E94 /* AddMemberTableViewCell.swift */; };
+		B80BA8682D9D342D008E1E94 /* AddMemberViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80BA8672D9D342D008E1E94 /* AddMemberViewController.swift */; };
 		B80FB21B2D7AEF5B0082FB93 /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = B80FB21A2D7AEF5B0082FB93 /* IQKeyboardManagerSwift */; };
 		B812067A2D5DCBA40026B65F /* StepCountViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81206792D5DCBA40026B65F /* StepCountViewController.swift */; };
 		B812067C2D5DDC600026B65F /* SleepGoalsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B812067B2D5DDC600026B65F /* SleepGoalsViewController.swift */; };
@@ -72,6 +75,8 @@
 		B84F78942CEB193300FF7D52 /* Calendar.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B84F78932CEB193300FF7D52 /* Calendar.storyboard */; };
 		B84F78962CEB194200FF7D52 /* Library.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B84F78952CEB194200FF7D52 /* Library.storyboard */; };
 		B84F78982CEB195200FF7D52 /* More.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B84F78972CEB195200FF7D52 /* More.storyboard */; };
+		B854EDCA2D97D7C0004D048F /* CreatePackageVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = B854EDC92D97D7C0004D048F /* CreatePackageVM.swift */; };
+		B854EDCC2D97E93F004D048F /* CreatePackageModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B854EDCB2D97E93F004D048F /* CreatePackageModel.swift */; };
 		B857F90F2D4E08AD005C0CDD /* DemmyAgeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B857F90E2D4E08AD005C0CDD /* DemmyAgeViewController.swift */; };
 		B85B4ACE2D019E5D00E8AC5E /* CouponsOffersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B85B4ACD2D019E5D00E8AC5E /* CouponsOffersViewController.swift */; };
 		B85B4AD12D01A5BE00E8AC5E /* CouponsOffersTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B85B4AD02D01A5BE00E8AC5E /* CouponsOffersTableViewCell.xib */; };
@@ -284,6 +289,7 @@
 		B8F719AF2D34F620006A8925 /* CenterRangeSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F719AE2D34F620006A8925 /* CenterRangeSlider.swift */; };
 		B8F719B22D34F80C006A8925 /* CenterRangeSliderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F719B12D34F80C006A8925 /* CenterRangeSliderDelegate.swift */; };
 		B8F719B42D350EDE006A8925 /* ThumbTextSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F719B32D350EDE006A8925 /* ThumbTextSlider.swift */; };
+		B8F747A92D9BECBD0014C5A8 /* DateFormatterHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F747A82D9BECBD0014C5A8 /* DateFormatterHelper.swift */; };
 		B8F84D492D883363006C98EF /* SelectYourLocationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F84D482D883363006C98EF /* SelectYourLocationViewController.swift */; };
 		B8F84D4C2D883EF5006C98EF /* SelectLocationTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B8F84D4B2D883EF5006C98EF /* SelectLocationTableViewCell.xib */; };
 		B8F84D4D2D883EF5006C98EF /* SelectLocationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F84D4A2D883EF5006C98EF /* SelectLocationTableViewCell.swift */; };
@@ -374,6 +380,9 @@
 		B80B88552CCA1BB300FC798B /* overpass-semibold-italic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "overpass-semibold-italic.otf"; sourceTree = "<group>"; };
 		B80B88562CCA1BB300FC798B /* overpass-light.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "overpass-light.otf"; sourceTree = "<group>"; };
 		B80B88572CCA1BB300FC798B /* overpass-semibold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "overpass-semibold.otf"; sourceTree = "<group>"; };
+		B80BA8632D9D24BA008E1E94 /* AddMemberTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMemberTableViewCell.swift; sourceTree = "<group>"; };
+		B80BA8642D9D24BA008E1E94 /* AddMemberTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AddMemberTableViewCell.xib; sourceTree = "<group>"; };
+		B80BA8672D9D342D008E1E94 /* AddMemberViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMemberViewController.swift; sourceTree = "<group>"; };
 		B81206792D5DCBA40026B65F /* StepCountViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepCountViewController.swift; sourceTree = "<group>"; };
 		B812067B2D5DDC600026B65F /* SleepGoalsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepGoalsViewController.swift; sourceTree = "<group>"; };
 		B812067D2D5DF42B0026B65F /* DailyInsightCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyInsightCollectionViewCell.swift; sourceTree = "<group>"; };
@@ -422,6 +431,8 @@
 		B84F78932CEB193300FF7D52 /* Calendar.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Calendar.storyboard; sourceTree = "<group>"; };
 		B84F78952CEB194200FF7D52 /* Library.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Library.storyboard; sourceTree = "<group>"; };
 		B84F78972CEB195200FF7D52 /* More.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = More.storyboard; sourceTree = "<group>"; };
+		B854EDC92D97D7C0004D048F /* CreatePackageVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePackageVM.swift; sourceTree = "<group>"; };
+		B854EDCB2D97E93F004D048F /* CreatePackageModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePackageModel.swift; sourceTree = "<group>"; };
 		B857F90E2D4E08AD005C0CDD /* DemmyAgeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemmyAgeViewController.swift; sourceTree = "<group>"; };
 		B85B4ACD2D019E5D00E8AC5E /* CouponsOffersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CouponsOffersViewController.swift; sourceTree = "<group>"; };
 		B85B4ACF2D01A5BE00E8AC5E /* CouponsOffersTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CouponsOffersTableViewCell.swift; sourceTree = "<group>"; };
@@ -600,6 +611,7 @@
 		B8F719AE2D34F620006A8925 /* CenterRangeSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CenterRangeSlider.swift; sourceTree = "<group>"; };
 		B8F719B12D34F80C006A8925 /* CenterRangeSliderDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CenterRangeSliderDelegate.swift; sourceTree = "<group>"; };
 		B8F719B32D350EDE006A8925 /* ThumbTextSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbTextSlider.swift; sourceTree = "<group>"; };
+		B8F747A82D9BECBD0014C5A8 /* DateFormatterHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatterHelper.swift; sourceTree = "<group>"; };
 		B8F84D482D883363006C98EF /* SelectYourLocationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectYourLocationViewController.swift; sourceTree = "<group>"; };
 		B8F84D4A2D883EF5006C98EF /* SelectLocationTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectLocationTableViewCell.swift; sourceTree = "<group>"; };
 		B8F84D4B2D883EF5006C98EF /* SelectLocationTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SelectLocationTableViewCell.xib; sourceTree = "<group>"; };
@@ -1281,6 +1293,7 @@
 				B81676A22D85ABD600EDB6EF /* BookingAddressViewController.swift */,
 				B8F84D482D883363006C98EF /* SelectYourLocationViewController.swift */,
 				B814428F2D8C164A00B29DED /* CityDropDownViewController.swift */,
+				B80BA8672D9D342D008E1E94 /* AddMemberViewController.swift */,
 			);
 			path = GymBooking;
 			sourceTree = "<group>";
@@ -1308,6 +1321,8 @@
 			children = (
 				B8FC90F72D100F5E00C7A222 /* BookingListTableViewCell.swift */,
 				B8FC90F82D100F5E00C7A222 /* BookingListTableViewCell.xib */,
+				B80BA8632D9D24BA008E1E94 /* AddMemberTableViewCell.swift */,
+				B80BA8642D9D24BA008E1E94 /* AddMemberTableViewCell.xib */,
 			);
 			path = TblView;
 			sourceTree = "<group>";
@@ -1372,6 +1387,7 @@
 				B814428D2D8C114500B29DED /* CityModel.swift */,
 				B83364672D91860400EF5C82 /* AvailabilityCalendarModel.swift */,
 				B8BF06132D93D3E0009CC173 /* BookedSlotModel.swift */,
+				B854EDCB2D97E93F004D048F /* CreatePackageModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -1396,6 +1412,7 @@
 				B8CF3BFC2D47917B0005CDCB /* RegistrationVM.swift */,
 				B80380002D5B4AE200F978E1 /* DashboardVM.swift */,
 				B8FA82FE2D81835600239592 /* TrainerVM.swift */,
+				B854EDC92D97D7C0004D048F /* CreatePackageVM.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -1446,6 +1463,7 @@
 				B8335C472D3930AB00B52EAF /* BodyPartName.swift */,
 				B8C35FA82D800E5B00A11A2C /* GetLocationManager.swift */,
 				B81676A02D855F7F00EDB6EF /* VideoPlayerView.swift */,
+				B8F747A82D9BECBD0014C5A8 /* DateFormatterHelper.swift */,
 			);
 			path = ResourceFiles;
 			sourceTree = "<group>";
@@ -1581,6 +1599,7 @@
 				B8E55F8A2CCA41FC00AAFAE5 /* overpass-light.otf in Resources */,
 				B8F499CC2D71E2290081B166 /* shopBottom.mov in Resources */,
 				B8CDFFF42CE1E1E7005DEA1C /* UpcomingClassCollViewCell.xib in Resources */,
+				B80BA8652D9D24BA008E1E94 /* AddMemberTableViewCell.xib in Resources */,
 				B8E55F8B2CCA41FC00AAFAE5 /* overpass-bold-italic.otf in Resources */,
 				B8EAA0DA2D631F22005CC6B7 /* HydrationDataInnerTableViewCell.xib in Resources */,
 				B8E55F8C2CCA41FC00AAFAE5 /* overpass-light-italic.otf in Resources */,
@@ -1681,6 +1700,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B8F747A92D9BECBD0014C5A8 /* DateFormatterHelper.swift in Sources */,
 				B8FBFE292D2673EB001041E5 /* AddSetsTableViewCell.swift in Sources */,
 				B8F719A42D34DD64006A8925 /* SessionSummaryViewController.swift in Sources */,
 				B8D216122CEF11BA00017930 /* GridTrainerCollectionViewCell.swift in Sources */,
@@ -1731,6 +1751,7 @@
 				B8ED0EFA2CCBC258006279B8 /* GetStartViewController.swift in Sources */,
 				B8F0303C2D54BB4B00BE59C2 /* RulerRangeScrollView.swift in Sources */,
 				B8D2160E2CEEF96B00017930 /* WorkoutCategoryCollectionViewCell.swift in Sources */,
+				B80BA8662D9D24BA008E1E94 /* AddMemberTableViewCell.swift in Sources */,
 				B8C473E52CD8993E00F5FCC4 /* LocationsViewController.swift in Sources */,
 				B8F84D4D2D883EF5006C98EF /* SelectLocationTableViewCell.swift in Sources */,
 				B8BD0BCA2D365EDD005F19CA /* PolygonChartDraw.swift in Sources */,
@@ -1751,6 +1772,7 @@
 				B8C4E34E2CEC602C0002FCCB /* CustomViewController.swift in Sources */,
 				B8A540DB2CF08290007FECB3 /* WithMeCollectionViewCell.swift in Sources */,
 				B8CCAF2B2D6D9718009D66A3 /* ProductsViewController.swift in Sources */,
+				B854EDCC2D97E93F004D048F /* CreatePackageModel.swift in Sources */,
 				B8CF94712D37C8DF00842B1B /* RoundProgressView.swift in Sources */,
 				B8BF06142D93D3E0009CC173 /* BookedSlotModel.swift in Sources */,
 				B80038AE2D8A94A900245123 /* StudioDetailsModel.swift in Sources */,
@@ -1792,6 +1814,7 @@
 				B86EB28F2D5CAE2500894922 /* AddIntakeViewController.swift in Sources */,
 				B8A8587D2CF4506F00CCE64D /* BookingCalendarViewController.swift in Sources */,
 				B80A446D2CEDF43A00E3A11E /* TrainerListViewController.swift in Sources */,
+				B80BA8682D9D342D008E1E94 /* AddMemberViewController.swift in Sources */,
 				B8DD37712CFD803500276F1F /* ChooseSessionViewController.swift in Sources */,
 				B8F719AF2D34F620006A8925 /* CenterRangeSlider.swift in Sources */,
 				B8F030342D54BACB00BE59C2 /* Constant.swift in Sources */,
@@ -1815,6 +1838,7 @@
 				B81676A72D85B4FF00EDB6EF /* TxtFieldTableViewCell.swift in Sources */,
 				B80A446B2CEDDC6900E3A11E /* CreateTrainerViewController.swift in Sources */,
 				B8CCAF2D2D6D983C009D66A3 /* FooterProductsCollectionReusableView.swift in Sources */,
+				B854EDCA2D97D7C0004D048F /* CreatePackageVM.swift in Sources */,
 				B8EAA0D92D631F22005CC6B7 /* HydrationDataInnerTableViewCell.swift in Sources */,
 				B8F0303E2D54BB6500BE59C2 /* RulerRangeTextView.swift in Sources */,
 				B8FDEEC32CC8CAD00061639F /* AppDelegate.swift in Sources */,

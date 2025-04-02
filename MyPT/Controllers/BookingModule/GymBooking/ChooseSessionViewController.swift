@@ -10,6 +10,19 @@ import UIKit
 class ChooseSessionViewController: CommonViewController {
         
     //MARK: -------------VARIABLE
+    var availParams:AvailParmsModel?
+    var inputParams:CreatePackageParamsModel?
+    var packageDetails: CreatePackageDataModel?
+    var tagsData: [TrainerTagModel]? = []
+    var sessionCost:[String] = ["0.0"]
+    
+    var isShowTotalCost:Bool = false{
+        didSet{
+            self.setTotalCost(isTotalCost: isShowTotalCost)
+        }
+    }
+    
+
     private let tooltipView: UIView = {
         let vv = UIView()
         let label = UILabel()
@@ -30,9 +43,8 @@ class ChooseSessionViewController: CommonViewController {
 
     // Indexes of restricted items
     var restrictedRange: [ClosedRange<Int>] = [0...4]  // These cells can't be selected
-    var categoryData:[String]?
     
-    let noteStrings = ["Increase session count for lower per session cost", "The validity of the package also determines the access period for the trainer"]
+    var noteStrings = ["Increase session count for lower per session cost", "The validity of the package also determines the access period for the trainer"]
     var noteStringsCount:Int = -1
    
     //MARK: -----------IBOUTLET
@@ -59,17 +71,24 @@ class ChooseSessionViewController: CommonViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        categoryData = ["Cardio","Pilates","+3"]
-        
+            
         setupUI()
         setUpFont()
         setUpTotalCost()
+        
+        self.startMonthLbl.text = "3 sessions"
+        
+        //---------------
+        inputParams?.sessions = "1"
+        self.createPackageApi(parms: inputParams?.getParams())
+        self.setInputData()
+        
     }
     
     deinit {
         print("------\(#function)------\(String(describing: Self.self))------" )
     }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.setNavigationColor(setColor: .clear)
@@ -86,6 +105,22 @@ class ChooseSessionViewController: CommonViewController {
         scrollText(indx: 0)
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        DispatchQueue.main.async {
+            self.sessionSliderMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+            self.sessionSliderMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 1, y: 1), endPoint: CGPoint(x: 0, y: 0), cornerRadius: 12.0)
+            self.sessionSliderMBV.setGradientMultiBorder(cornerRadius: 12, width: 2.0, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)])
+        }
+        
+        if let thumbImage = UIImage(named: "ic_Slider")?.resized(to: CGSize(width: 80, height: 80)) {
+            self.costSlider.setThumbImage(thumbImage, for: .normal)
+        }
+                        
+        view.layoutIfNeeded()
+    }
+    
     //MARK: -------------------MAKE SCROLLABLE TEXT
     func scrollText(indx:Int){
         
@@ -98,8 +133,7 @@ class ChooseSessionViewController: CommonViewController {
         }
     }
    
-    
-    func setNavUI(){
+    private func setNavUI(){
         
         self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
         self.setProgress(0.2)
@@ -108,13 +142,65 @@ class ChooseSessionViewController: CommonViewController {
 //        self.setRighMenu(rightImgs: [AppImages.moreSettings], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
     
-    func setUpTotalCost(){
+    //MARK: ---------------SETUP DATA
+    private func setInputData(){
+        self.trainerProfileImgView.loadImage(urlString: packageDetails?.trainer?.image, placeholder: AppImages.navLeft)
+        self.trainerNameLbl.text = packageDetails?.trainer?.name
+        self.noteStrings.removeAll()
+        self.noteStrings.append("Increase session count for lower per session cost")
+        
+        self.setTotalCost(isTotalCost: isShowTotalCost)
+    }
+    
+    private func setTotalCost(isTotalCost:Bool){
+        
+        //-------------------- Cost
+        let costAmt:String = isShowTotalCost ? "\(self.packageDetails?.totalPrice ?? 0.0)" : "\(self.packageDetails?.pricePerSession ?? 0.0)"
+        
+        self.sessionCost.removeAll()
+        self.sessionCost.append(costAmt)
+        totalCostAmtPicker.items = sessionCost //items
+        totalCostAmtPicker.layoutIfNeeded()
+        
+        //-------------------- Attributed Text for Discount Price
+        let totalPrice = "" //"\(packageDetails?.totalPrice ?? 0.0)"
+        
+        let defaultAttributes = [
+            .font: AppFont.semibold.size(25.0, familyName: familyClashDisplay),
+            .foregroundColor: UIColor.appWhite
+        ] as [NSAttributedString.Key : Any]
+        
+        let makeAttributes = [
+            .font: AppFont.semibold.size(20.0, familyName: familyClashDisplay),
+            .foregroundColor: UIColor.appWhite
+        ] as [NSAttributedString.Key : Any]
+        
+        let attrStrCost:String = isShowTotalCost ? "AED" : "AED / Session"
+        
+        let attributedNickName = [
+            "",
+            totalPrice.strikeThrough(with: AppFont.medium.size(20.0, familyName: familyClashDisplay), color: UIColor.txtDarkGray),
+            NSAttributedString(string: attrStrCost,
+                               attributes: makeAttributes),
+        ] as [AttributedStringComponent]
+        
+        self.sessionCostLbl.attributedText = NSAttributedString(from: attributedNickName, defaultAttributes: defaultAttributes)
+        
+        self.sessionCostLbl.applyGradientLabel(colors: [UIColor.appWhite, UIColor.appWhite, UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0)], locations: [0, 0.3, 1.0])
+        
+        //---------------------***********
+        self.updateContainerWidth()
+        
+    }
+    
+    private func setUpTotalCost(){
         // Define items for the picker
-        let items = ["50", "80", "100", "150", "200", "250", "300"]
+//        let items = ["50", "80", "100", "150", "200", "250", "300"]
         // Set the items for the picker
-        totalCostAmtPicker.items = items
+        
+        totalCostAmtPicker.items = sessionCost //items
         costSlider.minimumValue = 0
-        costSlider.maximumValue = Float(items.count - 1)
+        costSlider.maximumValue = 12 //Float(sessionCost.count - 1) //Float(items.count - 1)
         // Initially center the picker at the first item
         totalCostAmtPicker.scrollToRow(0)
     }
@@ -127,16 +213,20 @@ class ChooseSessionViewController: CommonViewController {
       }
     
     //MARK: -----------SETUI
-    func setupUI(){
+    private func setupUI(){
+        
+//        CustomSlider
         
         categoryCollView.register(UINib(nibName: "ProductCategoryCollViewCell", bundle: nil), forCellWithReuseIdentifier: "ProductCategoryCollViewCell")
         self.consultExpertBtn.titleLabel?.numberOfLines = 2
+        
+        costSlider.addTarget(self, action: #selector(sliderTouchEnded(_:)), for: [.touchUpInside, .touchUpOutside])
         
         DispatchQueue.main.async {
             
             self.sliderTopMBV.addSubview(self.tooltipView)
             self.updateTooltipPosition()
-                        
+            
             //--------Apply Gradient color
             self.costSlider.setSlider(gradientColors: [
                 UIColor(red: 61.0/255.0, green: 215.0/255.0, blue: 114.0/255.0, alpha: 1.0).cgColor,
@@ -145,29 +235,30 @@ class ChooseSessionViewController: CommonViewController {
                 UIColor(red: 73/255.0, green: 129/255.0, blue: 242/255.0, alpha: 1.0).cgColor
             ]
             )
-                 
+            
             //----------------Gradient view
             
-//            self.sessionSliderMBV.layerGradient(startPoint: .topLeft, endPoint: .bottomRight, colorArray: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 019.0/255.0, alpha: 1.0).cgColor, UIColor(red: 71/255.0, green: 77/255.0, blue: 96/255.0, alpha: 1).cgColor,UIColor.mainBg.cgColor], type: .conic)
-           
-            self.sessionSliderMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            
-            self.sessionSliderMBV.layerGradient(startPoint: .topLeft, endPoint: .bottomRight, colorArray: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 019.0/255.0, alpha: 1.0).cgColor, UIColor(red: 71/255.0, green: 77/255.0, blue: 96/255.0, alpha: 1).cgColor, UIColor.mainBg.cgColor], type: .conic)
-            
-            self.sessionSliderMBV.setGradientBorder(cornerRadious:12,width: 1.0, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)])
-            
+            self.trainerProfileImgView.setCornerRadius(borderWidth: 0.5, borderColor: UIColor.appBorder, cornerRadious: self.trainerProfileImgView.frame.height/2.0)
             self.sessionNoteMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appBorder, cornerRadious: 8.0)
             self.consultExpertMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             
             self.consultExpertBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             
+            /*
+             self.sessionSliderMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+             
+             self.sessionSliderMBV.layerGradient(startPoint: .topLeft, endPoint: .bottomRight, colorArray: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 019.0/255.0, alpha: 1.0).cgColor, UIColor(red: 71/255.0, green: 77/255.0, blue: 96/255.0, alpha: 1).cgColor, UIColor.mainBg.cgColor], type: .conic)
+             
+             self.sessionSliderMBV.setGradientBorder(cornerRadious:12,width: 1.0, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)])
+             */
+            
         }
     }
     
     //MARK: ------------FONT SETUP
     //------------------************Font
-    func setUpFont(){
+    private func setUpFont(){
         self.perSessionCostLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
         self.trainerNameLbl.font = AppFont.bold.size(14.0, familyName: familyManrope)
         self.perSessionCostLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
@@ -179,33 +270,46 @@ class ChooseSessionViewController: CommonViewController {
         
 //        self.sessionCostLbl.font = AppFont.semibold.size(44.0, familyName: familyClashDisplay)
         
-        //-------------------- Attributed Text for Price
-        let defaultAttributes = [
-            .font: AppFont.semibold.size(25.0, familyName: familyClashDisplay),
-            .foregroundColor: UIColor.appWhite
-        ] as [NSAttributedString.Key : Any]
-        
-        let makeAttributes = [
-            .font: AppFont.semibold.size(20.0, familyName: familyClashDisplay),
-            .foregroundColor: UIColor.appWhite
-        ] as [NSAttributedString.Key : Any]
-        
-        let attributedNickName = [
-            "",
-            "400".strikeThrough(with: AppFont.medium.size(20.0, familyName: familyClashDisplay), color: UIColor.txtDarkGray),
-            NSAttributedString(string: "AED / Session",
-                               attributes: makeAttributes),
-        ] as [AttributedStringComponent]
-        
-        self.sessionCostLbl.attributedText = NSAttributedString(from: attributedNickName, defaultAttributes: defaultAttributes)
+//        //-------------------- Attributed Text for Price
+//        let defaultAttributes = [
+//            .font: AppFont.semibold.size(25.0, familyName: familyClashDisplay),
+//            .foregroundColor: UIColor.appWhite
+//        ] as [NSAttributedString.Key : Any]
+//        
+//        let makeAttributes = [
+//            .font: AppFont.semibold.size(20.0, familyName: familyClashDisplay),
+//            .foregroundColor: UIColor.appWhite
+//        ] as [NSAttributedString.Key : Any]
+//        
+//        let attributedNickName = [
+//            "",
+//            "400".strikeThrough(with: AppFont.medium.size(20.0, familyName: familyClashDisplay), color: UIColor.txtDarkGray),
+//            NSAttributedString(string: "AED / Session",
+//                               attributes: makeAttributes),
+//        ] as [AttributedStringComponent]
+//        
+//        self.sessionCostLbl.attributedText = NSAttributedString(from: attributedNickName, defaultAttributes: defaultAttributes)
     }
     
     
     //MARK: -----------COST SLIDER ACTN
     
+    @objc func sliderTouchEnded(_ sender: UISlider) {
+          print("Final Value on Scroll End: \(Int(sender.value))") // Value when user lifts finger
+        let row = Int(sender.value)
+        inputParams?.sessions = "\(row+1)"
+        self.createPackageApi(parms: inputParams?.getParams())
+      }
+    
     @IBAction func costSliderActn(_ sender: UISlider) {
         let row = Int(sender.value)
-        totalCostAmtPicker.scrollToRow(row, animated: true)
+        guard sender.maximumValue > 1 else { return }
+        
+        print("Scroll slider Row value : ", row)
+        
+        if sessionCost.count > 1 && row < sessionCost.count {
+            totalCostAmtPicker.scrollToRow(row, animated: true)
+        }
 
         self.updateContainerWidth()
         
@@ -219,7 +323,8 @@ class ChooseSessionViewController: CommonViewController {
         }
         
         if percentage > 60 {
-            self.startMonthLbl.text = "12 month"
+//            self.startMonthLbl.text = "12 month"
+            self.startMonthLbl.text = "12 sessions"
             self.startMonthLbl.textAlignment = .right
             self.startScrolling()
             
@@ -228,7 +333,8 @@ class ChooseSessionViewController: CommonViewController {
             }
             
         }else{
-            self.startMonthLbl.text = "3 month"
+//            self.startMonthLbl.text = "3 month"
+            self.startMonthLbl.text = "3 sessions"
             self.startMonthLbl.textAlignment = .left
             self.startScrolling()
             
@@ -268,12 +374,18 @@ class ChooseSessionViewController: CommonViewController {
             print("edit btn clicked.")
         case btnTag.sessionToggle.rawValue:
             print("sessionToggle btn clicked.")
+            sender.isSelected.toggle()
+            self.isShowTotalCost = sender.isSelected
         case btnTag.consultExpert.rawValue:
             print("consultExpert btn clicked.")
         case btnTag.continueBtn.rawValue:
             print("continueBtn btn clicked.")
             let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
             vc.slotBookFlow = .createPackage
+            vc.params = availParams
+            vc.totalDays = packageDetails?.totalDays
+            vc.packageTypeStr = "\(packageDetails?.details?.packageType ?? 1)"
+            vc.sessionsStr = packageDetails?.details?.sessions
             self.navigationController?.pushViewController(vc, animated: true)
             
         default:
@@ -324,15 +436,41 @@ class ChooseSessionViewController: CommonViewController {
 
 
 extension ChooseSessionViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
-    
+        
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return categoryData?.count ?? 0
+       
+        if let totalCount = tagsData?.count, totalCount > 2 {
+            return 3
+        }else{
+            return tagsData?.count ?? 0
+        }
+        
+//        return tagsData?.count ?? 0 //categoryData?.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell:ProductCategoryCollViewCell = categoryCollView.dequeueReusableCell(withReuseIdentifier: "ProductCategoryCollViewCell", for: indexPath) as! ProductCategoryCollViewCell
-        cell.cellMBV.backgroundColor = UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1)
-        cell.titleLbl.text = categoryData?[indexPath.row] as? String
+        
+        DispatchQueue.main.async {
+            cell.cellMBV.backgroundColor = UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1)
+            cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: 9.0)
+            cell.layoutIfNeeded()
+        }
+        
+        //        cell.titleLbl.text = tagsData?[indexPath.row].name
+        cell.titleLblLeading.constant = 8.0
+        cell.titleLblTopConstrnt.constant = 5.0
+        cell.layoutIfNeeded()
+        
+        if let lastCell = collectionView.isLastCell(), let totalCount = tagsData?.count,( lastCell == indexPath.row && totalCount > 2) {
+            cell.titleLbl.text = "+3"
+           
+            cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: 2.0)
+            cell.layoutIfNeeded()
+        }
+        else{
+            cell.titleLbl.text = tagsData?[indexPath.row].name
+        }
         
         return cell
     }
@@ -348,4 +486,197 @@ extension ChooseSessionViewController: UICollectionViewDelegate, UICollectionVie
     }
 }
 
+//MARK: --------------------EXTENSION FOR API
+extension ChooseSessionViewController{
+    
+    func createPackageApi(parms:[String:String]?){
+        CreatePackageVM.createPackageApi(viewController: self, inputParms: parms, completion: {[weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return  }
+            
+            print("getResultData", getResultData)
+            if getResultData.status == true {
+                self.packageDetails = getResultData.data
+               
+                self.setInputData()
+                self.tagsData?.removeAll()
+                self.tagsData?.append(contentsOf: self.packageDetails?.trainer?.tags ?? [])
+                print(self.tagsData?.count ?? 0)
+                self.categoryCollView.reloadData()
+                
+//                self.sessionCost.removeAll()
+//                self.sessionCost.append("\(self.packageDetails?.pricePerSession ?? 0.0)")
+//                totalCostAmtPicker.items = sessionCost //items
+//                totalCostAmtPicker.layoutIfNeeded()
+                self.updateContainerWidth()
+                
+            }
+        })
+    }
+}
 
+//MARK: ----------------- CreatePackageParamsModel
+struct CreatePackageParamsModel {
+    
+    var package_type: String?
+    var sessions: String?
+    var type: String?
+    var timing: String?
+    var trainer_id: String?
+    var studio_id: String?
+    var month: String?
+    var address_id: String?
+    
+    func getParams() -> [String: String] {
+        var dict: [String: String] = [:]
+        
+        if let package_type = package_type { dict["package_type"] = package_type }
+        if let sessions = sessions { dict["sessions"] = sessions }
+        if let type = type { dict["type"] = type }
+        if let timing = timing { dict["timing"] = timing }
+        if let trainer_id = trainer_id { dict["trainer_id"] = trainer_id }
+        if let studio_id = studio_id { dict["studio_id"] = studio_id }
+        if let month = month { dict["month"] = month }
+        if let address_id = address_id { dict["address_id"] = address_id }
+        
+        return dict
+    }
+}
+
+
+
+/*    for making slide label text
+ class MySliderView: UIView {
+     
+     private var discreteSlider = UISlider()
+
+     override init(frame: CGRect) {
+         super.init(frame: frame)
+         commonInit()
+     }
+     required init?(coder: NSCoder) {
+         super.init(coder: coder)
+         commonInit()
+     }
+     func commonInit() -> Void {
+         
+         let minVal: Int = 1
+         let maxVal: Int = 5
+         
+         // slider properties
+         discreteSlider.minimumValue = Float(minVal)
+         discreteSlider.maximumValue = Float(maxVal)
+         discreteSlider.isContinuous = true
+         discreteSlider.tintColor = UIColor.purple
+
+         let stepStack = UIStackView()
+         stepStack.distribution = .equalSpacing
+         
+         for i in minVal...maxVal {
+             let v = UILabel()
+             v.text = "\(i)"
+             v.textAlignment = .center
+             v.textColor = .systemRed
+             stepStack.addArrangedSubview(v)
+         }
+         
+         // references to first and last step label
+         guard let firstLabel = stepStack.arrangedSubviews.first,
+               let lastLabel = stepStack.arrangedSubviews.last
+         else {
+             // this will never happen, but we want to
+             //  properly unwrap the labels
+             return
+         }
+         
+         // make all step labels the same width
+         stepStack.arrangedSubviews.dropFirst().forEach { v in
+             v.widthAnchor.constraint(equalTo: firstLabel.widthAnchor).isActive = true
+         }
+         
+         let minLabel = UILabel()
+         minLabel.text = "Min"
+         minLabel.textAlignment = .center
+         minLabel.textColor = .systemRed
+
+         let maxLabel = UILabel()
+         maxLabel.text = "Max"
+         maxLabel.textAlignment = .center
+         maxLabel.textColor = .systemRed
+         
+         // add the labels and the slider to self
+         [minLabel, maxLabel, discreteSlider, stepStack].forEach { v in
+             v.translatesAutoresizingMaskIntoConstraints = false
+             addSubview(v)
+         }
+
+         // now we setup the layout
+
+         NSLayoutConstraint.activate([
+             
+             // start with the step labels stackView
+             
+             // we'll give it 40-pts leading and trailing "padding"
+             stepStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 40.0),
+             stepStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -40.0),
+             
+             // and 20-pts from the bottom
+             stepStack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -20.0),
+
+             // now constrain the slider leading and trailing to the
+             //  horizontal center of first and last step labels
+             //  accounting for width of thumb (assuming a default UISlider)
+             discreteSlider.leadingAnchor.constraint(equalTo: firstLabel.centerXAnchor, constant: -14.0),
+             discreteSlider.trailingAnchor.constraint(equalTo: lastLabel.centerXAnchor, constant: 14.0),
+             
+             // and 20-pts above the steps stackView
+             discreteSlider.bottomAnchor.constraint(equalTo: stepStack.topAnchor, constant: -20.0),
+             
+             // constrain Min and Max labels centered to first and last step labels
+             minLabel.centerXAnchor.constraint(equalTo: firstLabel.centerXAnchor, constant: 0.0),
+             maxLabel.centerXAnchor.constraint(equalTo: lastLabel.centerXAnchor, constant: 0.0),
+             
+             // and 20-pts above the steps slider
+             minLabel.bottomAnchor.constraint(equalTo: discreteSlider.topAnchor, constant: -20.0),
+             maxLabel.bottomAnchor.constraint(equalTo: discreteSlider.topAnchor, constant: -20.0),
+
+             // and 20-pts top "padding"
+             minLabel.topAnchor.constraint(equalTo: topAnchor, constant: 20.0),
+         ])
+
+         // add behavior
+         discreteSlider.addTarget(self, action: #selector(self.sliderValueDidChange(_:)), for: .valueChanged)
+         discreteSlider.addTarget(self, action: #selector(self.sliderThumbReleased(_:)), for: .touchUpInside)
+
+     }
+     
+     // so we can set the slider value from the controller
+     public func setSliderValue(_ val: Float) -> Void {
+         discreteSlider.setValue(val, animated: true)
+     }
+     
+     @objc func sliderValueDidChange(_ sender: UISlider) -> Void {
+         print("Slider dragging value:", sender.value)
+     }
+     @objc func sliderThumbReleased(_ sender: UISlider) -> Void {
+         // "snap" to discreet step position
+         sender.setValue(Float(lroundf(sender.value)), animated: true)
+         print("Slider dragging end value:", sender.value)
+     }
+     
+ }
+ */
+
+
+class CustomSlider: UISlider {
+    
+    // Adjust thumb position
+    override func thumbRect(forBounds bounds: CGRect, trackRect rect: CGRect, value: Float) -> CGRect {
+        let thumbSize = CGSize(width: 40, height: 40) // Adjust based on your image
+        let newThumbRect = super.thumbRect(forBounds: bounds, trackRect: rect, value: value)
+        
+        let adjustedX = newThumbRect.origin.x - (thumbSize.width - newThumbRect.width) / 2
+        let adjustedY = newThumbRect.origin.y - (thumbSize.height - newThumbRect.height) / 2
+        
+        return CGRect(x: adjustedX, y: adjustedY, width: thumbSize.width, height: thumbSize.height)
+    }
+}

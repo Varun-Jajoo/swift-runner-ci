@@ -7,15 +7,23 @@
 
 import UIKit
 
+enum SelectAddressFlow {
+    case reviewPackage
+    case defaultAddr
+}
+
 class SelectYourLocationViewController: CommonViewController {
 
     //MARK: -------------- VARIABLE
+    var selectAddFlow: SelectAddressFlow = .defaultAddr
+    
     var addressData:[AddressDataModel]? = []
     var addressDetails: AddressDataModel?
     var selectedIdStr:String?
     var trainerIdStr:String?
     var studioIdStr:String?
     var inputType:String?
+    var sentAddressDetails : ((AddressDataModel?) -> Void)?
     
     
     //MARK: --------------IBOUTLET
@@ -71,19 +79,31 @@ class SelectYourLocationViewController: CommonViewController {
             
             if let getIndx = getIndx {
                 let addressDetails = self.addressData?[getIndx]
-                let currentMonth = Calendar.current.component(.month, from: Date())
                 
-                let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
-                vc.slotBookFlow = .bookTrainer
-                vc.params = AvailParmsModel(type: self.inputType, trainer_id: trainerIdStr, studio_id: studioIdStr, month: "\(currentMonth)", address_id: addressDetails?.id?.value)
-                self.navigationController?.pushViewController(vc, animated: true)
+                switch selectAddFlow {
+                case .reviewPackage:
+                    
+                    self.sentAddressDetails?(addressDetails)
+                    self.navigationController?.popViewController(animated: true)
+                    
+                case .defaultAddr:
+                    
+                    let currentMonth = Calendar.current.component(.month, from: Date())
+                    
+                    let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
+                    vc.slotBookFlow = .bookTrainer
+                    vc.params = AvailParmsModel(type: self.inputType, trainer_id: trainerIdStr, studio_id: studioIdStr, month: "\(currentMonth)", address_id: addressDetails?.id?.value)
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
+                
+//                let currentMonth = Calendar.current.component(.month, from: Date())
+//                
+//                let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
+//                vc.slotBookFlow = .bookTrainer
+//                vc.params = AvailParmsModel(type: self.inputType, trainer_id: trainerIdStr, studio_id: studioIdStr, month: "\(currentMonth)", address_id: addressDetails?.id?.value)
+//                self.navigationController?.pushViewController(vc, animated: true)
             }
             
-//            
-//            let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
-//            vc.slotBookFlow = .bookTrainer
-//            vc.params = AvailParmsModel(type: "home", trainer_id: "2", studio_id: "", month: "03", address_id: "6")
-//            self.navigationController?.pushViewController(vc, animated: true)
         }else{
             AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.select_Address)
         }

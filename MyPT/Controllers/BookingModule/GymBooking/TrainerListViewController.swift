@@ -279,6 +279,8 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
             self.navigationController?.pushViewController(vc, animated: true)
         }
         
+        
+        
 //        let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
 //        vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.trainerData?[indexPath.row].id ?? 0)", type: self.inputType, long: self.inputLat, lat: self.inputLong)
 //        self.navigationController?.pushViewController(vc, animated: true)

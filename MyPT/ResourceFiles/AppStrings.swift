@@ -115,6 +115,7 @@ struct AppStrings {
      public static let pswd_confirm_match = "Password and confirm password do not match."
      public static let no_results_found = "No results found!"
      public static let no_Address_Added = "No Address Added"
+     public static let no_Memebr_Added = "No Member Added"
      public static let no_Address_Added_desc = "Add your home address to book a trainer and start your workouts hassle-free."
      public static let no_Match_alterMsg = "No match, but your next challenge is just a search away!"
      public static let select_dob = "Please select dob."

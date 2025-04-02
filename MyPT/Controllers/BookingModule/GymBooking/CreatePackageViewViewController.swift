@@ -11,6 +11,10 @@ class CreatePackageViewViewController: CommonViewController {
 
     //MARK: --------------VARIABLE
     var packageData:[[String:Any]]?
+    var createParams: CreatePackageParamsModel?
+    var avialCalanderparams:AvailParmsModel?
+    var isFirst:Bool? = true
+    
    
     //MARK: -------------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
@@ -20,6 +24,8 @@ class CreatePackageViewViewController: CommonViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        createParams?.package_type = "1"
         
         packageData = [["title":"One on One","trainerImg":AppImages.one_to_one as Any, "trainerImg_selected":AppImages.one_to_one_Selected as Any],
                        ["title":"With Buddy","trainerImg":AppImages.withBuddy as Any, "trainerImg_selected":AppImages.withBuddy_selected as Any],
@@ -38,8 +44,27 @@ class CreatePackageViewViewController: CommonViewController {
     
     @IBAction func continueBtnActn(_ sender: Any) {
         print("continue btn clicked..")
+        
+        if let  package_type =  createParams?.package_type, package_type == "3" {
+            
+            let vc: AddMemberViewController = AddMemberViewController.instantiate(appStoryboard: .booking)
+            vc.getMemberParams = MemberParamsModel(package_type: package_type, type: self.createParams?.type, trainer_id: self.createParams?.trainer_id, studio_id: self.createParams?.studio_id)
+            self.navigationController?.pushViewController(vc, animated: true)
+            
+        }else{
+            let vc:ChooseSessionViewController = ChooseSessionViewController.instantiate(appStoryboard: .booking)
+            vc.inputParams = self.createParams
+            vc.availParams = self.avialCalanderparams
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+        
+        
+        /*
         let vc:ChooseSessionViewController = ChooseSessionViewController.instantiate(appStoryboard: .booking)
+        vc.inputParams = self.createParams
+        vc.availParams = self.avialCalanderparams
         self.navigationController?.pushViewController(vc, animated: true)
+        */
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -52,16 +77,19 @@ class CreatePackageViewViewController: CommonViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        // Automatically select the first cell
-        let firstIndexPath = IndexPath(item: 0, section: 0)
-        DispatchQueue.main.async {
-            //packageList
-            
-            self.packageList.selectRow(at: firstIndexPath, animated: true, scrollPosition: .top)
-            // Optional: perform any additional setup for the selected cell
-            self.packageList.delegate?.tableView?(self.packageList, didSelectRowAt: firstIndexPath)
-            self.view.layoutIfNeeded()
+        if let isFirst = isFirst, isFirst {
+            // Automatically select the first cell
+            let firstIndexPath = IndexPath(item: 0, section: 0)
+            DispatchQueue.main.async {
+                //packageList
+                
+                self.packageList.selectRow(at: firstIndexPath, animated: true, scrollPosition: .top)
+                // Optional: perform any additional setup for the selected cell
+                self.packageList.delegate?.tableView?(self.packageList, didSelectRowAt: firstIndexPath)
+                self.view.layoutIfNeeded()
+            }
         }
+
     }
     
     func setNavUI(){
@@ -120,9 +148,11 @@ extension CreatePackageViewViewController:UITableViewDelegate, UITableViewDataSo
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        isFirst = false
         
         let selectedCell = tableView.cellForRow(at: indexPath) as! TrainerTypeTableViewCell
         
+        createParams?.package_type = "\(indexPath.row + 1)"
         selectedCell.setSelectdBGCell(packageData?[indexPath.row]["trainerImg"] as? UIImage, selectedImg: packageData?[indexPath.row]["trainerImg_selected"] as? UIImage, isSelectedCell: true)
     }
     

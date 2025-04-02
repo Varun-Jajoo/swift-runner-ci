@@ -19,36 +19,12 @@ struct DetailsParam {
 class TrainerVM {
     
     //MARK: --------------------- get-trainer
-
      /*
-      "type":"gym"
-      type=>home, gym
-      http://mypt.test/api/get-trainer?is_filter=1&tag_id=1&type=gym&long=77.391029&lat=28.535517
-      is_filter
-      1
-
-      if filter then 1 define request basic of filter
-
-      tag_id
-      1
-
-      tag id is required when is filter 1
-
-      type
-      gym
-
-      if filter 1 then tag id required, trainers or studio
-
-      long
-      77.391029
-
-      this is current location always required
-
-      lat
-      28.535517
-
-      this is current location always required
-      
+      is_filter: 1, if filter 1 then tag id required, trainers or studio
+      tag_id: 1, tag id is required when is filter 1
+      type: gym, home, gym based on selection
+      long: 77.391029, this is current location always required
+      lat: 28.535517, this is current location always required
      */
     
     class func gerTrainerApi(viewController: UIViewController, inputParms: [String:String]?, isShowLoader:Bool = true, completion: @escaping(_ resultData:GetTrainerBaseModel?) -> Void){
@@ -423,18 +399,33 @@ class TrainerVM {
      trainer_id: 1, trainer id filed is required
      slot_id: 23, slot id field is required
      address_id: 1, address id is required if type is gym
+     
+     is_package: 1, if hit through using package then 1 else blank
+     package_type: 3, package type is required
+     date: 2025-03-28, start date is required
+     end_date: 2025-04-25, end date is required
+     sessions: 12, no of sessions
+     price: 320, price field is required
+     days: 30, no of days
      */
     
     class  func bookSlotApi(viewController: UIViewController, inputParams: [String:Any], completion: @escaping(_ resultData:BookedSlotBaseModel?) -> Void){
        
         /*
-        let params:[String:Any] = [
-            "studio_id": "",
-            "type": "" ,
-            "trainer_id": "",
-            "slot_id": "",
-            "address_id": ""
-        ]
+         let params:[String:Any] = [
+         "studio_id": "",
+         "type": "" ,
+         "trainer_id": "",
+         "slot_id": "",
+         "address_id": "",
+         "is_package": "",
+         "package_type": "",
+         "date": "",
+         "end_date": "",
+         "sessions": "",
+         "price": "",
+         "days": ""
+         ]
         */
         
         print("inputParams = ", inputParams)

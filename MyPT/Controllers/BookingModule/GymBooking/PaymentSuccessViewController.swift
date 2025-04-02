@@ -71,12 +71,8 @@ class PaymentSuccessViewController: UIViewController {
     }
     
     func billView(){
-        
-//        guard let bookedDataModel = bookedDataModel else { return }
-        
+                
         DispatchQueue.main.async {
-//            guard let bookedDataModel = self.bookedDataModel else { return }
-            
             let shapeView = BillShape()
             shapeView.layer.shadowColor = UIColor.black.cgColor
             shapeView.layer.shadowOpacity = 0.3
@@ -109,7 +105,6 @@ class PaymentSuccessViewController: UIViewController {
             
             shapeView.packageTitleLabel.text = "Package"
             shapeView.packageLabel.text = self.bookedDataModel?.package ?? ""
-//            shapeView.trainerTags = self.bookedDataModel?.trainer?.tags ?? []
             shapeView.startDate = (title: "Start Date", value: self.bookedDataModel?.date?.startDate ?? "")
             shapeView.validUptoDate = (title: "Valid Upto", value: self.bookedDataModel?.date?.validTill ?? "")
             shapeView.timingTxt = (title: "Timing", value: self.bookedDataModel?.timing ?? "")

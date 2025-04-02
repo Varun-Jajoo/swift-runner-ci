@@ -7,61 +7,21 @@
 
 import UIKit
 
-struct GetSlotParamsModel {
-    
-    var trainer_id: String?
-    var type: String?
-    var date: String?
-    var timing: String?
-    var studio_id: String?
-    var address_id: String?
-    
-    func getParams() -> [String: String] {
-        var dict: [String: String] = [:]
-        
-        if let trainer_id = trainer_id { dict["trainer_id"] = trainer_id }
-        if let type = type { dict["type"] = type }
-        if let date = date { dict["date"] = date }
-        if let timing = timing { dict["timing"] = timing }
-        if let studio_id = studio_id { dict["studio_id"] = studio_id }
-        if let address_id = address_id { dict["address_id"] = address_id }
-        
-        return dict
-    }
-}
-
-struct BookSlotParamsModel {
-    
-    var studio_id: String?
-    var type: String?
-    var trainer_id: String?
-    var slot_id: String?
-    var address_id: String?
-    
-    func getParams() -> [String: String] {
-        var dict: [String: String] = [:]
-        
-        if let trainer_id = trainer_id { dict["trainer_id"] = trainer_id }
-        if let type = type { dict["type"] = type }
-        if let studio_id = studio_id { dict["studio_id"] = studio_id }
-        if let slot_id = slot_id { dict["slot_id"] = slot_id }
-        if let address_id = address_id { dict["address_id"] = address_id }
-        
-        return dict
-    }
-}
-
 
 class SlotDurationViewController: CommonViewController {
 
     //MARK: ------------------VARIABLE
     var inputGetSlotParams:GetSlotParamsModel?
     var inputBookSlotParams:BookSlotParamsModel? = nil
+    var avialCalanderparams:AvailParmsModel?
+    var inputSetDateParams:SetDateParams?
+    
     
     var slotDurationFlow:calendarFlow = .defaultFlow
     let showCalView = CalendarView()
     var selectedDate:String?
     var slotsData: AvailabilityDataModel?
+    var dateSlotsData: SetDateModel?
     var slotTimes:[SlotModel]? = []
     var disabledTimes: [String] = [] 
     
@@ -81,7 +41,6 @@ class SlotDurationViewController: CommonViewController {
     
     //    @IBOutlet weak var slotDate: FSCalendar!
     @IBOutlet weak var selectTimeTitleLbl: UILabel!
-    @IBOutlet weak var modeSeg: UISegmentedControl!
     @IBOutlet weak var dateListCollView: UICollectionView!
     @IBOutlet weak var bottomStck: UIStackView!
     @IBOutlet weak var packageMBV: UIView!
@@ -92,17 +51,22 @@ class SlotDurationViewController: CommonViewController {
     @IBOutlet weak var paymentBtn: UIButton!
     @IBOutlet weak var continueBtn: UIButton!
     
+    @IBOutlet weak var modeStckView: UIStackView!
+    @IBOutlet weak var nightModeBtn: UIButton!
+    @IBOutlet weak var morningModeBtn: UIButton!
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.setUpSegment()
         self.setUPUI()
         setupCalendarView()
         setUPFont()
         flowSetup()
         
-        self.getSlot(params: inputGetSlotParams?.getParams() ?? [:])
+//        self.getSlot(params: inputGetSlotParams?.getParams() ?? [:])
         self.setInputData()
+        self.setModeTime(isNight: false)
     }
 
     deinit {
@@ -121,7 +85,9 @@ class SlotDurationViewController: CommonViewController {
         self.bottomPriceMBV.isHidden = true
         self.packageMBV.isHidden = true
         self.paymentBtn.isHidden = true
-        self.dateListCollView.reloadData()
+//        self.dateListCollView.reloadData()
+                
+        flowSetup()
     }
     
     private func setInputData(){
@@ -176,6 +142,9 @@ class SlotDurationViewController: CommonViewController {
         self.startDateBtn.titleLabel?.font = AppFont.semibold.size(16.0, familyName: familyManrope)
         self.endDateBtn.titleLabel?.font = AppFont.semibold.size(16.0, familyName: familyManrope)
         self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
+        
+        self.nightModeBtn.titleLabel?.font = AppFont.semibold.size(10.0, familyName: familyManrope)
+        self.morningModeBtn.titleLabel?.font = AppFont.semibold.size(10.0, familyName: familyManrope)
     }
     
     private func setUPUI(){
@@ -186,6 +155,10 @@ class SlotDurationViewController: CommonViewController {
             self.packageMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             self.paymentBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+            
+            self.modeStckView.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 7.63)
+            self.nightModeBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 7.63)
+            self.morningModeBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 7.63)
         }
         
         
@@ -268,66 +241,80 @@ class SlotDurationViewController: CommonViewController {
         }
         return ("","")
     }
-
-    func setUpSegment(){
-//        modeSeg.tintColor = UIColor.appWhite // Set the tint color
-        modeSeg.backgroundColor = UIColor.mainBg.withAlphaComponent(0.6)
-        modeSeg.selectedSegmentIndex = 1
+    
+    @IBAction func modeSelectionBtnActn(_ sender: UIButton) {
         
-        modeSeg.setImage(UIImage.textEmbededImage(image: AppImages.night_mode!, string: "", color: UIColor.mainBg, segFont: AppFont.semibold.size(10.0, familyName: familyManrope)), forSegmentAt: 0)
-        modeSeg.setImage(UIImage.textEmbededImage(image: AppImages.sunny_mode!, string: "Morning", color: UIColor.mainBg, segFont: AppFont.semibold.size(10.0, familyName: familyManrope)), forSegmentAt: 1)
-        
-        modeSeg.setTitleTextAttributes([.foregroundColor: UIColor.mainBg, .font : AppFont.semibold.size(10.0, familyName: familyManrope)], for: .selected)
-        modeSeg.setTitleTextAttributes([.foregroundColor: UIColor.appWhite, .font: AppFont.semibold.size(10.0, familyName: familyManrope)], for: .normal)
+        if sender.tag == 101 {
+            self.setModeTime(isNight: true)
+        }else{
+            self.setModeTime(isNight: false)
+        }
     }
     
-    @IBAction func selectModeActn(_ sender: UISegmentedControl) {
-       
+    private func setModeTime(isNight:Bool = false){
+        
+        if isNight {
+            self.nightModeBtn.setTitle("Night", for: .normal)
+            self.nightModeBtn.setImage(AppImages.night_mode?.withRenderingMode(.alwaysTemplate), for: .normal)
+            self.nightModeBtn.tintColor = UIColor.mainBg
+            
+            self.morningModeBtn.setTitle(nil, for: .normal)
+            self.morningModeBtn.setImage(AppImages.sunny_mode?.withRenderingMode(.alwaysTemplate), for: .normal)
+            self.morningModeBtn.tintColor = UIColor.appWhite
+            
+            self.nightModeBtn.backgroundColor = UIColor.appWhite
+            self.morningModeBtn.backgroundColor = UIColor.clear
+            
+            //------------------***************
+            self.bottomPriceMBV.isHidden = true
+            self.packageMBV.isHidden = true
+           
+            self.getSlotTimes(timeStr: "night")
+            
+        }else{
+            self.nightModeBtn.setTitle(nil, for: .normal)
+            self.nightModeBtn.setImage(AppImages.night_mode?.withRenderingMode(.alwaysTemplate), for: .normal)
+            self.nightModeBtn.tintColor = UIColor.white
+            
+            self.morningModeBtn.setTitle("Morning", for: .normal)
+            self.morningModeBtn.setImage(AppImages.sunny_mode?.withRenderingMode(.alwaysTemplate), for: .normal)
+            self.morningModeBtn.tintColor = UIColor.mainBg
+            
+            self.nightModeBtn.backgroundColor = UIColor.clear
+            self.morningModeBtn.backgroundColor = UIColor.appWhite
+            
+            //------------------------------*************
+            self.bottomPriceMBV.isHidden = true
+            self.packageMBV.isHidden = true
+            
+            self.getSlotTimes(timeStr: "morning")
+        }
+        
+    }
+    
+    
+    //MARK: ---------------SLOT DURATIONS
+    private func getSlotTimes(timeStr:String){
+        
         self.enableContinueBtn(isSelected: false)
         
-        let selectedIndex = sender.selectedSegmentIndex
-            switch selectedIndex {
-            case 0:
-                // Handle Option 1
-                print("Night mode", selectedIndex)
-//                modeSeg.setWidth((UIImage.textEmbededImage(image: AppImages.night_mode!, string: "Night", color: UIColor.mainBg, segFont: AppFont.semibold.size(10.0, familyName: familyManrope))?.size.width ?? 60) + 15, forSegmentAt: 0)
-//                modeSeg.setWidth(40, forSegmentAt: 1)
-               
-                modeSeg.setImage(UIImage.textEmbededImage(image: AppImages.night_mode!, string: "Night", color: UIColor.mainBg, segFont: AppFont.semibold.size(10.0, familyName: familyManrope)), forSegmentAt: 0)
-                modeSeg.setImage(UIImage.textEmbededImage(image: AppImages.sunny_mode!, string: "", color: UIColor.mainBg, segFont: AppFont.semibold.size(10.0, familyName: familyManrope)), forSegmentAt: 1)
-                
-                //------------------***************
-                self.bottomPriceMBV.isHidden = true
-                self.packageMBV.isHidden = true
-               
-                self.inputBookSlotParams = nil
-                inputGetSlotParams?.timing = "night"
-                self.getSlot(params: inputGetSlotParams?.getParams() ?? [:])
-                
-                
-                break
-            case 1:
-                print("Morning mode", selectedIndex)
-//                modeSeg.setWidth((UIImage.textEmbededImage(image: AppImages.sunny_mode!, string: "Morning", color: UIColor.mainBg, segFont: AppFont.semibold.size(10.0, familyName: familyManrope))?.size.width ?? 60) + 15, forSegmentAt: 1)
-//                modeSeg.setWidth(40, forSegmentAt: 0)
-                
-                modeSeg.setImage(UIImage.textEmbededImage(image: AppImages.night_mode!, string: "", color: UIColor.mainBg, segFont: AppFont.semibold.size(10.0, familyName: familyManrope)), forSegmentAt: 0)
-                modeSeg.setImage(UIImage.textEmbededImage(image: AppImages.sunny_mode!, string: "Morning", color: UIColor.mainBg, segFont: AppFont.semibold.size(10.0, familyName: familyManrope)), forSegmentAt: 1)
-               
-                //------------------------------*************
-                self.bottomPriceMBV.isHidden = true
-                self.packageMBV.isHidden = true
-                
-                self.inputBookSlotParams = nil
-                inputGetSlotParams?.timing = "morning"
-                self.getSlot(params: inputGetSlotParams?.getParams() ?? [:])
-                
-                break
-            default:
-                break
-            }
+        switch slotDurationFlow {
+        case .bookTrainer:
+           
+            //----------------Api
+            self.inputBookSlotParams = nil
+            inputGetSlotParams?.timing = timeStr
+            self.getSlot(params: inputGetSlotParams?.getParams() ?? [:])
+            
+        case .createPackage:
+            //----------------Api
+            inputSetDateParams?.timing = timeStr
+            self.packageSetDate(setParams: inputSetDateParams?.getParams())
+            
+        case .defaultFlow:
+            print("default is called..")
+        }
     }
-    
     
     //MARK: -------------FLOW SETUP
     func flowSetup(){
@@ -341,6 +328,9 @@ class SlotDurationViewController: CommonViewController {
             self.packageMBV.isHidden = true
             self.startEndMBV.isHidden = true
             self.continueBtn.isHidden = true
+            
+            //----------------Api
+            self.getSlot(params: inputGetSlotParams?.getParams() ?? [:])
           
         case .createPackage:
             self.calendarView.isHidden = true
@@ -354,9 +344,31 @@ class SlotDurationViewController: CommonViewController {
             self.startDateBtn.isSelected = true
             updateUI(selectedView: [startDateBtn, endDateBtn])
             
+            //inputSetDateParams
+            self.startDateBtn.setTitle(getStartEndDays(to: self.inputSetDateParams?.date ?? ""), for: .normal)
+            self.endDateBtn.setTitle(getStartEndDays(to: self.inputSetDateParams?.end_date ?? ""), for: .normal)
+            
+            //----------------Api
+            self.packageSetDate(setParams: inputSetDateParams?.getParams())
+            
         case .defaultFlow:
             print("default is called..")
         }
+    }
+    
+    //-------------------Get start and ends
+    
+    private func getStartEndDays(to dateString: String, format: String = "yyyy-MM-dd") -> (String)? {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = format
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX") // Ensures correct parsing
+        
+        if let date = dateFormatter.date(from: dateString) {
+            let outputFormatter = DateFormatter()
+            outputFormatter.dateFormat = "dd, MMM • EEE"
+            return outputFormatter.string(from: date)
+        }
+        return nil
     }
     
     //MARK: -------------- ENABLE CONTINUE
@@ -371,7 +383,6 @@ class SlotDurationViewController: CommonViewController {
             self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
         }
     }
-    
     
     //MARK: ------------SHOW DATE START/END
         func updateUI(selectedView:[UIButton]){
@@ -391,7 +402,11 @@ class SlotDurationViewController: CommonViewController {
     @IBAction func createPackageBtnActn(_ sender: Any) {
         print("clicked at createPackageBtn")
         let vc:CreatePackageViewViewController = CreatePackageViewViewController.instantiate(appStoryboard: .booking)
+        vc.createParams = CreatePackageParamsModel(package_type: "", sessions: "", type: inputGetSlotParams?.type, timing: inputGetSlotParams?.timing, trainer_id: inputGetSlotParams?.trainer_id, studio_id: inputGetSlotParams?.studio_id, month: "\(Int(self.getMonth(inputDateStr: selectedDate ?? "").0) ?? 0)", address_id: inputGetSlotParams?.address_id)
+        vc.avialCalanderparams = self.avialCalanderparams
+        
         self.navigationController?.pushViewController(vc, animated: true)
+        
     }
     
     
@@ -414,7 +429,9 @@ class SlotDurationViewController: CommonViewController {
     
     @IBAction func continueBtnActn(_ sender: Any) {
         print("continue btn clicked.")
+        
         let vc:ReviewPackageViewController = ReviewPackageViewController.instantiate(appStoryboard: .booking)
+        vc.inputCheckoutParams = self.inputSetDateParams
         self.navigationController?.pushViewController(vc, animated: true)
     }
     
@@ -422,6 +439,7 @@ class SlotDurationViewController: CommonViewController {
 
 //MARK: ------------UICOLLECIONVIEW DATASOURCE/DELEGATE
 extension SlotDurationViewController:UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout{
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
         return collectionView.numberOfRows(count: slotTimes?.count ?? 0, title: AppAlertStrings.no_results_found, message: "", messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 150, height: 150)), messageImageHeight: nil, target: nil, fromCenter: -100, fromTop: nil)
@@ -480,6 +498,8 @@ extension SlotDurationViewController:UICollectionViewDataSource, UICollectionVie
          
         case .createPackage:
             self.enableContinueBtn(isSelected: true)
+            self.inputSetDateParams?.slot_id = "\(slotTimes?[indexPath.row].id ?? 0)"
+            
         case .defaultFlow:
             print("default is called..")
         }
@@ -527,6 +547,10 @@ extension SlotDurationViewController{
             }
             self.setInputData()
             self.dateListCollView.reloadData()
+            
+            if self.slotTimes?.count ?? 0 == 1 {
+                self.dateListCollView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .left, animated: true)
+            }
         })
     }
     
@@ -546,5 +570,152 @@ extension SlotDurationViewController{
           
         })
     }
+    
+    //MARK: -----------------------PACKAGE SET DATE API
+    private func packageSetDate(setParams:[String:Any]?){
+        
+        CreatePackageVM.packageSetDateApi(viewController: self, inputParams: setParams, completion: {[weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return }
+            
+            print("Get slots according to start date", getResultData)
+            if getResultData.status == true {
+                self.dateSlotsData = getResultData.data
+               
+                self.slotTimes?.removeAll()
+                self.slotTimes?.append(contentsOf: self.dateSlotsData?.slots ?? [])
+                print("total slots: ",self.slotTimes?.count ?? 0)
+                
+                if let getData = getResultData.data?.slots {
+                    self.disabledTimes.removeAll()
+                    getData.forEach({[weak self] in
+                        guard let self = self else { return  }
+                        if let getTime = $0.time, let isBooked = $0.isBooked, isBooked {
+                            self.disabledTimes.append(getTime)
+                        }
+                    })
+                }
+                
+                self.setInputData()
+                self.dateListCollView.reloadData()
+               
+                if self.slotTimes?.count ?? 0 == 1 {
+                    self.dateListCollView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .left, animated: true)
+//                    self.dateListCollView.contentInset = .init(top: 1, left: 19, bottom: 1, right: 19)
+//                    self.dateListCollView.scrollIndicatorInsets = .init(top: 1, left: 1, bottom: 1, right: 1)
+//                    self.dateListCollView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .left, animated: true)
+                }
+            }
+        })
+    }
+    
 }
+
+
+
+//MARK: -------------------------PARAMETERS MODEL (SetDateParams / PackageCheckoutParams)
+struct SetDateParams {
+    var package_type: String?
+    var sessions: String?
+    var type: String?
+    var trainer_id: String?
+    var studio_id: String?
+    var date: String?
+    var end_date: String?
+    var timing: String?
+    var address_id: String?
+    var slot_id: String? //only its use in packagecheckout api
+    
+    
+    func getParams() -> [String: Any] {
+        var dict: [String: String] = [:]
+       
+        if let package_type = package_type { dict["package_type"] = package_type }
+        if let sessions = sessions { dict["sessions"] = sessions }
+        if let type = type { dict["type"] = type }
+        if let trainer_id = trainer_id { dict["trainer_id"] = trainer_id }
+        if let studio_id = studio_id { dict["studio_id"] = studio_id }
+        if let date = date { dict["date"] = date }
+        if let end_date = end_date { dict["end_date"] = end_date }
+        if let timing = timing { dict["timing"] = timing }
+        if let address_id = address_id { dict["address_id"] = address_id }
+        
+        return dict
+    }
+    
+    func getPackageCheckoutParams() -> [String: Any] {
+        var dict: [String: Any] = [:]
+        
+        if let package_type = package_type { dict["package_type"] = package_type }
+        if let sessions = sessions { dict["sessions"] = sessions }
+        if let type = type { dict["type"] = type }
+        if let trainer_id = trainer_id { dict["trainer_id"] = trainer_id }
+        if let studio_id = studio_id { dict["studio_id"] = studio_id }
+        if let date = date { dict["date"] = date }
+        if let end_date = end_date { dict["end_date"] = end_date }
+        if let address_id = address_id { dict["address_id"] = address_id }
+        if let slot_id = slot_id { dict["slot_id"] = slot_id }
+        
+        return dict
+    }
+}
+
+
+struct GetSlotParamsModel {
+    
+    var trainer_id: String?
+    var type: String?
+    var date: String?
+    var timing: String?
+    var studio_id: String?
+    var address_id: String?
+    
+    func getParams() -> [String: String] {
+        var dict: [String: String] = [:]
+        
+        if let trainer_id = trainer_id { dict["trainer_id"] = trainer_id }
+        if let type = type { dict["type"] = type }
+        if let date = date { dict["date"] = date }
+        if let timing = timing { dict["timing"] = timing }
+        if let studio_id = studio_id { dict["studio_id"] = studio_id }
+        if let address_id = address_id { dict["address_id"] = address_id }
+        
+        return dict
+    }
+}
+
+struct BookSlotParamsModel {
+    
+    var studio_id: String?
+    var type: String?
+    var trainer_id: String?
+    var slot_id: String?
+    var address_id: String?
+    var is_package: String?
+    var package_type: String?
+    var date: String?
+    var end_date: String?
+    var sessions: String?
+    var price: String?
+    var days: String?
+    
+    func getParams() -> [String: String] {
+        var dict: [String: String] = [:]
+        
+        if let trainer_id = trainer_id { dict["trainer_id"] = trainer_id }
+        if let type = type { dict["type"] = type }
+        if let studio_id = studio_id { dict["studio_id"] = studio_id }
+        if let slot_id = slot_id { dict["slot_id"] = slot_id }
+        if let address_id = address_id { dict["address_id"] = address_id }
+        if let is_package = is_package { dict["is_package"] = is_package }
+        if let package_type = package_type { dict["package_type"] = package_type }
+        if let date = date { dict["date"] = date }
+        if let end_date = end_date { dict["end_date"] = end_date }
+        if let sessions = sessions { dict["sessions"] = sessions }
+        if let price = price { dict["price"] = price }
+        if let days = days { dict["days"] = days }
+        
+        return dict
+    }
+}
+
 

@@ -85,7 +85,7 @@ class CustomPickerView: UIView {
         
     // Animate scrolling to a specific row
     func scrollToRow(_ row: Int, animated: Bool = true) {
-        guard !isAnimating else { return }
+        guard !isAnimating , row < items.count  else { return }
         isAnimating = true
         
         calculatedWidth = calculateMaxLabelWidth(labelStr: items[row])
