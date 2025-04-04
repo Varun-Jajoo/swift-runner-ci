@@ -7,7 +7,7 @@
 
 import UIKit
 
-enum BookingAddressFlow {
+enum BookingAddressFlow: CaseIterable {
     case addAddress
     case editAddress
     case addMember
@@ -18,12 +18,17 @@ protocol BookingAddressProtocol {
     func onDismiss(isDismiss: Bool?)
 }
 
+protocol AddMemberProtocol {
+    func memberAdd(isDismiss: Bool?)
+}
+
 class BookingAddressViewController: UIViewController {
 
     //MARK: ------------VARIABLE
     var hintTxt:[String] = []
     var bookingAddressFlow: BookingAddressFlow = .defaultBooing
     var delegate:BookingAddressProtocol?
+    var addMemberDelegate: AddMemberProtocol?
     
     var idStr: String?
     var city_idStr: String?
@@ -33,6 +38,7 @@ class BookingAddressViewController: UIViewController {
     var inputLong: String?
     var addressData:AddressDataModel?
     var navCtrnl:UINavigationController?
+    var addMemberData:MemberModel?
     
 
     //MARK: --------------IBOUTLET
@@ -109,8 +115,8 @@ class BookingAddressViewController: UIViewController {
                   // Adjust the scroll view's content inset
 //                  popupScrollV.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardHeight, right: 0)
 //                  popupScrollV.scrollIndicatorInsets = popupScrollV.contentInset
-                  
-                  popupMBVHeightConstrnt.constant = keyboardHeight + 50
+                                    
+                  popupMBVHeightConstrnt.constant = keyboardHeight + view.frame.size.height * 0.2
                   view.layoutIfNeeded()
                   
               case .defaultBooing:
@@ -143,7 +149,22 @@ class BookingAddressViewController: UIViewController {
             
         }else{
             print("save members btn clicked.")
-            self.dismiss(animated: true)
+            let memberParams = AddMemberParams(name: self.buildingNumTxt.text, age: self.streetNameTxt.text, gender: self.typeStr ?? "", id: "\(addMemberData?.id ?? -1)")
+            
+            //id is getting then meber will be edit ohterwise new member added
+            if CreatePackageVM.isValidMember(inputParams: memberParams) {
+                
+                CreatePackageVM.addMemberApi(viewController: self, inputParams: memberParams.getParams(), completion: { [weak self] getResultData in
+                    guard let self = self, let getResultData = getResultData else { return  }
+                    
+                    if getResultData.status == true{
+                        self.dismiss(animated: true, completion: {
+                            self.addMemberDelegate?.memberAdd(isDismiss: true)
+                        })
+                    }
+                })
+            }
+            
         }
     }
     
@@ -184,9 +205,6 @@ class BookingAddressViewController: UIViewController {
             })
         }
         
-        
-        
-//        dismiss(animated: true, completion: nil)
     }
     
     enum btnTag: Int {
@@ -333,33 +351,35 @@ class BookingAddressViewController: UIViewController {
                         
         case .addMember:
             
-            popupMBVHeightConstrnt.constant = view.frame.size.height * 0.45
+            popupMBVHeightConstrnt.constant = view.frame.size.height * 0.6
+            
+            DispatchQueue.main.async {
+                self.typeAddressMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+            }
             
             [
                 landmarkMBV,
                 cityMBV,
                 countryMBV,
                 mobilMBV,
-                typeAddressMBV,
                 saveUpdateBtn
             ].forEach({
                 $0?.isHidden = true
             })
             
+            typeAddressMBV.isHidden = false
             saveAddMemberMBV.isHidden = false
             saveUpdateBtnHeightConstrnt.constant = 0.0
             saveUpdateBtnBottomConstrnt.constant = 1.0
             
             self.topTitleLbl.text = "Add Members"
+            self.typeAddrTitleLbl.text = "Select Gender"
             self.homeBtn.setTitle("Male", for: .normal)
             self.officeBtn.setTitle("Female", for: .normal)
             self.otherBtn.setTitle("Others", for: .normal)
             
             //----------------------Text fields
-            
             self.streetNameTxt.keyboardType = .decimalPad
-//            self.mobileTxt.isHidden = true
-//            self.mobilMBV.isHidden = true
             
             [
                 buildingNumTxt: "Enter Full Name",
@@ -374,6 +394,29 @@ class BookingAddressViewController: UIViewController {
                 key.delegate = self
                 key.addTarget(self, action: #selector(textFieldDidChange(textField:)), for: UIControl.Event.editingChanged)
             })
+            
+            //---------------------- SETUP INPUT DATA
+            if let addMemberData = addMemberData, let memberId = addMemberData.id, memberId != 0  {
+                self.buildingNumTxt.text = addMemberData.name
+                self.streetNameTxt.text = addMemberData.age?.value
+                self.buildingNumTxt.sendActions(for: .editingChanged)
+                self.streetNameTxt.sendActions(for: .editingChanged)
+                
+                
+                //----------------*************Button selection
+                if let type = addMemberData.gender {
+                    self.typeStr = type
+                    
+                    if type.uppercased() == "Male".uppercased() {
+                        self.homeBtn.isSelected = true
+                    }else  if type.uppercased() == "Female".uppercased() {
+                        self.officeBtn.isSelected = true
+                    }else  if type.uppercased() == "Others".uppercased() {
+                        self.otherBtn.isSelected = true
+                    }
+                }
+                
+            }
             
         case .defaultBooing:
             break
@@ -472,8 +515,19 @@ class BookingAddressViewController: UIViewController {
                 $0.setCornerRadius(borderWidth: 0.5, borderColor: UIColor.appWhite, cornerRadious: 12.0)
             })
             
+            //---------------------------**************
+            if self.getEnumCaseName(self.bookingAddressFlow).uppercased() == "addMember".uppercased() {
+                self.typeAddressMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+            }
         }
         view.layoutIfNeeded()
+        
+//        let hh = bookingAddressFlow.hashValue
+        
+    }
+    
+    private func getEnumCaseName(_ flow: BookingAddressFlow) -> String {
+        return String(describing: flow)
     }
     
     private func setupFont(){
@@ -660,4 +714,25 @@ extension BookingAddressViewController: UIPopoverPresentationControllerDelegate 
     func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
         return .none  // Keeps it as a popover on iPhone instead of full-screen
     }
+}
+
+
+//MARK: ------------------ADD MEMBER PARAMS
+struct AddMemberParams {
+    var name: String?
+    var age: String?
+    var gender: String?
+    var id: String?
+    
+    func getParams() -> [String:Any] {
+        var dictVar: [String:Any] =  [:]
+        
+        if let name = name { dictVar["name"] = name }
+        if let age = age { dictVar["age"] = age }
+        if let gender = gender { dictVar["gender"] = gender }
+        if let id = id { dictVar["id"] = id }
+        
+        return dictVar
+    }
+    
 }

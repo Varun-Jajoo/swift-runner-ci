@@ -41,7 +41,7 @@ class AddMemberTableViewCell: UITableViewCell {
     func setupCell(data: MemberModel?){
         self.memberNameLbl.text = data?.name
         self.ageLbl.text = data?.age?.value
-        self.genderLbl.text = data?.gender
+        self.genderLbl.text = data?.gender?.localizedCapitalized
     }
     
     private func setupFont(){

@@ -13,6 +13,8 @@
 		B80380012D5B4AE200F978E1 /* DashboardVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80380002D5B4AE200F978E1 /* DashboardVM.swift */; };
 		B80571422D796E2C00B7BF93 /* SelectAddressPopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80571412D796E2C00B7BF93 /* SelectAddressPopupViewController.swift */; };
 		B80571442D79C62300B7BF93 /* ProductCancelPopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80571432D79C62300B7BF93 /* ProductCancelPopupViewController.swift */; };
+		B80691172D9EAF3D0060364F /* ReviewProfileTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80691152D9EAF3D0060364F /* ReviewProfileTableViewCell.swift */; };
+		B80691182D9EAF3D0060364F /* ReviewProfileTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B80691162D9EAF3D0060364F /* ReviewProfileTableViewCell.xib */; };
 		B807A2A12D7ABCA5009B1222 /* OrderRefundViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B807A2A02D7ABCA5009B1222 /* OrderRefundViewController.swift */; };
 		B80A44622CEDAFE400E3A11E /* VideoLoopingPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80A44612CEDAFE400E3A11E /* VideoLoopingPlayer.swift */; };
 		B80A44642CEDB8C700E3A11E /* MyPTGems.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = B80A44632CEDB8C700E3A11E /* MyPTGems.mp4 */; };
@@ -341,6 +343,8 @@
 		B80380002D5B4AE200F978E1 /* DashboardVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardVM.swift; sourceTree = "<group>"; };
 		B80571412D796E2C00B7BF93 /* SelectAddressPopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectAddressPopupViewController.swift; sourceTree = "<group>"; };
 		B80571432D79C62300B7BF93 /* ProductCancelPopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductCancelPopupViewController.swift; sourceTree = "<group>"; };
+		B80691152D9EAF3D0060364F /* ReviewProfileTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewProfileTableViewCell.swift; sourceTree = "<group>"; };
+		B80691162D9EAF3D0060364F /* ReviewProfileTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ReviewProfileTableViewCell.xib; sourceTree = "<group>"; };
 		B807A2A02D7ABCA5009B1222 /* OrderRefundViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderRefundViewController.swift; sourceTree = "<group>"; };
 		B80A44612CEDAFE400E3A11E /* VideoLoopingPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoLoopingPlayer.swift; sourceTree = "<group>"; };
 		B80A44632CEDB8C700E3A11E /* MyPTGems.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = MyPTGems.mp4; sourceTree = "<group>"; };
@@ -1323,6 +1327,8 @@
 				B8FC90F82D100F5E00C7A222 /* BookingListTableViewCell.xib */,
 				B80BA8632D9D24BA008E1E94 /* AddMemberTableViewCell.swift */,
 				B80BA8642D9D24BA008E1E94 /* AddMemberTableViewCell.xib */,
+				B80691152D9EAF3D0060364F /* ReviewProfileTableViewCell.swift */,
+				B80691162D9EAF3D0060364F /* ReviewProfileTableViewCell.xib */,
 			);
 			path = TblView;
 			sourceTree = "<group>";
@@ -1626,6 +1632,7 @@
 				B8E55F932CCA41FC00AAFAE5 /* overpass-extrabold.otf in Resources */,
 				B8DFFC892D1C0C5A00EFF09C /* PlanListTableViewCell.xib in Resources */,
 				B8E55F942CCA41FC00AAFAE5 /* overpass-extralight-italic.otf in Resources */,
+				B80691182D9EAF3D0060364F /* ReviewProfileTableViewCell.xib in Resources */,
 				B8E55F952CCA41FC00AAFAE5 /* overpass-regular.otf in Resources */,
 				B8BABE7F2D0B143F00CA8E27 /* RatingsCollectionViewCell.xib in Resources */,
 				B8DFFC832D1BE97E00EFF09C /* FilterCategoryCollectionViewCell.xib in Resources */,
@@ -1918,6 +1925,7 @@
 				B8C23BBB2CFF2BD3004A98FA /* CustomPickerView.swift in Sources */,
 				B8A648262D5364A600FBA942 /* CustomCircularDOB2.swift in Sources */,
 				B8C791172CDA21E100F4E6BD /* WeightViewController.swift in Sources */,
+				B80691172D9EAF3D0060364F /* ReviewProfileTableViewCell.swift in Sources */,
 				B86589F52D646C2900C00603 /* DailyGoalsPopupViewController.swift in Sources */,
 				B8FDEEE52CC8D0BC0061639F /* Extensions.swift in Sources */,
 				B89EC8232D00620A00FF5814 /* PackageDetailsTableViewCell.swift in Sources */,
@@ -2074,7 +2082,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = LW7P5S9K9P;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -2102,7 +2110,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -2115,7 +2123,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = LW7P5S9K9P;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -2143,7 +2151,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

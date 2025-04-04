@@ -548,8 +548,16 @@ extension SlotDurationViewController{
             self.setInputData()
             self.dateListCollView.reloadData()
             
+            //----------------For left align of cell when data is 1
             if self.slotTimes?.count ?? 0 == 1 {
                 self.dateListCollView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .left, animated: true)
+                if let flowLayout = dateListCollView.collectionViewLayout as? UICollectionViewFlowLayout {
+                    flowLayout.sectionInset = UIEdgeInsets(top: 0, left: 19, bottom: 0, right: dateListCollView.bounds.width)
+                }
+            }else{
+                if let flowLayout = dateListCollView.collectionViewLayout as? UICollectionViewFlowLayout {
+                    flowLayout.sectionInset = UIEdgeInsets(top: 0, left: 19, bottom: 0, right: 19)
+                }
             }
         })
     }
@@ -600,9 +608,14 @@ extension SlotDurationViewController{
                
                 if self.slotTimes?.count ?? 0 == 1 {
                     self.dateListCollView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .left, animated: true)
-//                    self.dateListCollView.contentInset = .init(top: 1, left: 19, bottom: 1, right: 19)
-//                    self.dateListCollView.scrollIndicatorInsets = .init(top: 1, left: 1, bottom: 1, right: 1)
-//                    self.dateListCollView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .left, animated: true)
+                    
+                    if let flowLayout = dateListCollView.collectionViewLayout as? UICollectionViewFlowLayout {
+                        flowLayout.sectionInset = UIEdgeInsets(top: 0, left: 19, bottom: 0, right: dateListCollView.bounds.width)
+                    }
+                }else{
+                    if let flowLayout = dateListCollView.collectionViewLayout as? UICollectionViewFlowLayout {
+                        flowLayout.sectionInset = UIEdgeInsets(top: 0, left: 19, bottom: 0, right: 19)
+                    }
                 }
             }
         })

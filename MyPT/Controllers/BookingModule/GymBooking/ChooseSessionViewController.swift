@@ -7,9 +7,17 @@
 
 import UIKit
 
+enum SesionFlow {
+    case session
+    case validity
+    case defaultSession
+}
+
 class ChooseSessionViewController: CommonViewController {
         
     //MARK: -------------VARIABLE
+    var flowSession:SesionFlow = .defaultSession
+    
     var availParams:AvailParmsModel?
     var inputParams:CreatePackageParamsModel?
     var packageDetails: CreatePackageDataModel?
@@ -22,7 +30,7 @@ class ChooseSessionViewController: CommonViewController {
         }
     }
     
-
+    
     private let tooltipView: UIView = {
         let vv = UIView()
         let label = UILabel()
@@ -63,6 +71,8 @@ class ChooseSessionViewController: CommonViewController {
     @IBOutlet weak var costSlider: UISlider!
     @IBOutlet weak var startMonthLbl: UILabel!
     @IBOutlet weak var sessionCostLbl: UILabel!
+    @IBOutlet weak var startPointLbl: UILabel!
+    @IBOutlet weak var endPointLbl: UILabel!
     @IBOutlet weak var sessionNoteMBV: UIView!
     @IBOutlet weak var sessionNote: UILabel!
     @IBOutlet weak var consultExpertMBV: UIView!
@@ -76,7 +86,7 @@ class ChooseSessionViewController: CommonViewController {
         setUpFont()
         setUpTotalCost()
         
-        self.startMonthLbl.text = "3 sessions"
+        self.startMonthLbl.text = "1 sessions"
         
         //---------------
         inputParams?.sessions = "1"
@@ -142,14 +152,61 @@ class ChooseSessionViewController: CommonViewController {
 //        self.setRighMenu(rightImgs: [AppImages.moreSettings], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
     
+    override func leftBtnActn(sender: UIButton) {
+        switch flowSession {
+        case .session:
+            //------------ session is set default
+            break
+        case .validity:
+            flowSession = .defaultSession
+            self.setInputData()
+        case .defaultSession:
+            
+            self.navigationController?.popViewController(animated: true)
+        }
+    }
+    
+    
     //MARK: ---------------SETUP DATA
     private func setInputData(){
         self.trainerProfileImgView.loadImage(urlString: packageDetails?.trainer?.image, placeholder: AppImages.navLeft)
         self.trainerNameLbl.text = packageDetails?.trainer?.name
-        self.noteStrings.removeAll()
-        self.noteStrings.append("Increase session count for lower per session cost")
+//        self.noteStrings.removeAll()
+//        self.noteStrings.append("Increase session count for lower per session cost")
         
         self.setTotalCost(isTotalCost: isShowTotalCost)
+        
+        switch flowSession {
+        case .session:
+            //--------session is default set
+            break
+        case .validity:
+
+            self.costSlider.isUserInteractionEnabled = false
+            self.topTitleLbl.text = "Validity of the package?"
+            self.noteStrings.removeAll()
+            self.noteStrings.append("The validity of the package also determines the access period for the trainer")
+            scrollText(indx: 1)
+            
+            self.startMonthLbl.text = packageDetails?.validity
+            
+            self.endPointLbl.text = "12"
+            
+//            let percentage = Int(sender.value / sender.maximumValue * 100)
+//            if percentage > 60 {
+//            }else{
+//            }
+            
+        case .defaultSession:
+            self.costSlider.isUserInteractionEnabled = true
+            self.topTitleLbl.text = "Choose total sessions"
+            self.noteStrings.removeAll()
+            self.noteStrings.append("Increase session count for lower per session cost")
+            scrollText(indx: 0)
+            
+            self.costSlider.sendActions(for: .valueChanged)
+            self.endPointLbl.text = "\(Int(costSlider.maximumValue))"
+        }
     }
     
     private func setTotalCost(isTotalCost:Bool){
@@ -199,10 +256,18 @@ class ChooseSessionViewController: CommonViewController {
         // Set the items for the picker
         
         totalCostAmtPicker.items = sessionCost //items
-        costSlider.minimumValue = 0
-        costSlider.maximumValue = 12 //Float(sessionCost.count - 1) //Float(items.count - 1)
+        costSlider.minimumValue = 1
+        costSlider.maximumValue = 100 //Float(sessionCost.count - 1) //Float(items.count - 1)
         // Initially center the picker at the first item
         totalCostAmtPicker.scrollToRow(0)
+        
+        //--------------
+        self.startPointLbl.text = "0"
+        self.endPointLbl.text = "\(Int(costSlider.maximumValue))"
+        
+        if let label = tooltipView.viewWithTag(100) as? UILabel {
+            label.text = "Save \(1)%"
+        }
     }
     
     func updateContainerWidth() {
@@ -267,6 +332,8 @@ class ChooseSessionViewController: CommonViewController {
         self.startMonthLbl.font = AppFont.regular.size(14.0, familyName: familyOverpass)
         self.consultExpertBtn.titleLabel?.font = AppFont.semibold.size(16.0, familyName: familyManrope)
         self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
+        self.startPointLbl.font = AppFont.semibold.size(10.0, familyName: familyManrope)
+        self.endPointLbl.font = AppFont.semibold.size(10.0, familyName: familyManrope)
         
 //        self.sessionCostLbl.font = AppFont.semibold.size(44.0, familyName: familyClashDisplay)
         
@@ -297,7 +364,8 @@ class ChooseSessionViewController: CommonViewController {
     @objc func sliderTouchEnded(_ sender: UISlider) {
           print("Final Value on Scroll End: \(Int(sender.value))") // Value when user lifts finger
         let row = Int(sender.value)
-        inputParams?.sessions = "\(row+1)"
+//        inputParams?.sessions = "\(row+1)"
+        inputParams?.sessions = "\(row)"
         self.createPackageApi(parms: inputParams?.getParams())
       }
     
@@ -324,7 +392,7 @@ class ChooseSessionViewController: CommonViewController {
         
         if percentage > 60 {
 //            self.startMonthLbl.text = "12 month"
-            self.startMonthLbl.text = "12 sessions"
+            self.startMonthLbl.text = "\(row) sessions" //"100 sessions"
             self.startMonthLbl.textAlignment = .right
             self.startScrolling()
             
@@ -334,7 +402,7 @@ class ChooseSessionViewController: CommonViewController {
             
         }else{
 //            self.startMonthLbl.text = "3 month"
-            self.startMonthLbl.text = "3 sessions"
+            self.startMonthLbl.text = "\(row) sessions" //"3 sessions"
             self.startMonthLbl.textAlignment = .left
             self.startScrolling()
             
@@ -372,6 +440,8 @@ class ChooseSessionViewController: CommonViewController {
         switch sender.tag {
         case btnTag.edit.rawValue:
             print("edit btn clicked.")
+            self.navigationController?.popToViewController(ofClass: TrainerListViewController.self, animated: true)
+            
         case btnTag.sessionToggle.rawValue:
             print("sessionToggle btn clicked.")
             sender.isSelected.toggle()
@@ -380,6 +450,27 @@ class ChooseSessionViewController: CommonViewController {
             print("consultExpert btn clicked.")
         case btnTag.continueBtn.rawValue:
             print("continueBtn btn clicked.")
+            
+            switch flowSession {
+            case .session:
+                //------------ session is set default
+                break
+            case .validity:
+                let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
+                vc.slotBookFlow = .createPackage
+                vc.params = availParams
+                vc.totalDays = packageDetails?.totalDays
+                vc.packageTypeStr = "\(packageDetails?.details?.packageType ?? 1)"
+                vc.sessionsStr = packageDetails?.details?.sessions
+                self.navigationController?.pushViewController(vc, animated: true)
+                
+            case .defaultSession:
+                flowSession = .validity
+                self.setInputData()
+            }
+            
+            
+            /*
             let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
             vc.slotBookFlow = .createPackage
             vc.params = availParams
@@ -387,6 +478,8 @@ class ChooseSessionViewController: CommonViewController {
             vc.packageTypeStr = "\(packageDetails?.details?.packageType ?? 1)"
             vc.sessionsStr = packageDetails?.details?.sessions
             self.navigationController?.pushViewController(vc, animated: true)
+            
+            */
             
         default:
             print("non...........")

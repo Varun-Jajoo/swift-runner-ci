@@ -42,19 +42,23 @@ class TrainerListTableViewCell: UITableViewCell {
         super.awakeFromNib()
         
         gymCategoryCollView.register(UINib(nibName: "ProductCategoryCollViewCell", bundle: nil), forCellWithReuseIdentifier: "ProductCategoryCollViewCell")
-        
+    
+        self.setupUI()
+        self.setupFont()
+    }
+    
+    private func setupUI(){
         DispatchQueue.main.async {
             self.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             self.bookSlotBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+            self.contentView.setNeedsLayout()
+            self.contentView.layoutIfNeeded()
         }
-        
-        self.setupFont()
     }
     
     //MARK: -------------SET CELL INPUTDATA
     func setCellData(trainerData: TrainerModel?){
         guard let trainerData = trainerData else { return  }
-        DispatchQueue.main.async {
             self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: AppImages.navLeft)
             self.gymNameLbl.text = trainerData.name
             self.distanceBtn.setTitle(trainerData.distance, for: .normal)
@@ -62,14 +66,17 @@ class TrainerListTableViewCell: UITableViewCell {
             self.avgRatingBtn.setTitle(trainerData.noOfRating ?? "", for: .normal)
             self.landMarkBtn.setTitle(trainerData.location, for: .normal)
             self.numberSlotLbl.text = "Only \(trainerData.slot ?? "") slots available"
-        }
+        
+        self.contentView.setNeedsLayout()
+        self.contentView.layoutIfNeeded()
+        self.setupUI()
+        
     }
     
     //MARK: -------------SET CELL INPUTDATA
     func setGymCellData(trainerData: GymTrainerModel?){
         guard let trainerData = trainerData else { return  }
         
-        DispatchQueue.main.async {
             self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: AppImages.navLeft)
             self.gymNameLbl.text = trainerData.name
             self.distanceBtn.setTitle(trainerData.distance, for: .normal)
@@ -77,11 +84,14 @@ class TrainerListTableViewCell: UITableViewCell {
             self.avgRatingBtn.setTitle(trainerData.noOfRating ?? "", for: .normal)
             self.landMarkBtn.setTitle(trainerData.location, for: .normal)
             self.numberSlotLbl.text = "Only \(trainerData.slot ?? "") slots available"
-        }
+            
+            self.contentView.setNeedsLayout()
+            self.contentView.layoutIfNeeded()
+            self.setupUI()
     }
     
     
-    func setupFont(){
+    private func setupFont(){
         
         self.bookSlotBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
         self.noteLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)

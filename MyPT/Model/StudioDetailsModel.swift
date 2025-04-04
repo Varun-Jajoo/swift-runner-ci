@@ -39,3 +39,4 @@ struct GymReviewModel: Codable {
     var image: String?
     var rating: String?
 }
+

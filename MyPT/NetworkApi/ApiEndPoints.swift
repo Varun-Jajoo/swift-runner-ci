@@ -61,9 +61,8 @@ enum ApiEndPoint: String{
     case package_checkout               =  "api/package-checkout"
     case get_maember_package_group      =  "api/package-group"
     case add_member                     =  "api/add-member"
+    case delete_member                  =  "api/delete-member"
     
-    
-    //http://mypt.test/api/package-group?package_type=3&type=gym&trainer_id=1&studio_id=1
     
     case authLoginOTP = "authLoginOTP"
     case refreshAccessToken = "refreshToken"

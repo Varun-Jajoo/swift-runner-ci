@@ -86,36 +86,22 @@ struct SetDateModel: Codable {
  struct PackageCheckoutDataModel: Codable {
      var trainer: PackageCheckoutTrainerModel?
      var packageDetail: PackageDetailModel?
+     var userMembers: [MemberModel]?
      var trainingPreference, slotTime: String?
      var slotID: Int?
      var address: AddressDataModel?
+     var studio: PackageCheckoutStudioModel?
      
      enum CodingKeys: String, CodingKey {
          case trainer, packageDetail
          case trainingPreference = "training_preference"
          case slotTime = "slot_time"
          case slotID = "slot_id"
-         case address
+         case address, studio
+         case userMembers
      }
  }
 
-/*
- address =     {
-     "building_name" = "building 22";
-     "city_id" = 19;
-     "city_name" = "Al Dhafra";
-     "country_id" = 231;
-     "country_name" = "United Arab Emirates";
-     id = 7;
-     landmark = shop;
-     lat = "28.584125";
-     long = "77.2753162";
-     "mobile_no" = 7676767687;
-     street = "s 444";
-     type = office;
-     "user_id" = 17;
- };
- */
 
  //MARK: -------------- PackageDetailModel
  struct PackageDetailModel: Codable {
@@ -139,6 +125,17 @@ struct SetDateModel: Codable {
      var noOfRating, averageRating: String?
      var tags: [String]?
  }
+
+
+//MARK: ------------- PackageCheckoutStudioModel
+struct PackageCheckoutStudioModel: Codable {
+    var id: Int?
+    var name: String?
+    var image: String?
+    var noOfRating, averageRating, distance, location: String?
+    var tags: [String]?
+}
+
 
 
 //MARK: ------------- GET MEMBERS FLOW

@@ -7,13 +7,15 @@
 
 import UIKit
 
+
 class AddMemberViewController: CommonViewController {
     
     //MARK: -------------VARIABLE
     var getMemberParams: MemberParamsModel?
     var memberData: MemberDataModel?
     var memberList:[MemberModel]? = []
-    
+    var createPackageParamsAddMember: CreatePackageParamsModel?
+    var avialCalanderparamsAddMember:AvailParmsModel?
     
     //MARK: --------------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
@@ -31,7 +33,7 @@ class AddMemberViewController: CommonViewController {
         
         //------------------------******************
         self.setupInputData()
-        self.getMemberApi(params: getMemberParams?.getParams() ?? [:])
+        self.enableContinueBtn(isSelected: false)
     }
     
     deinit {
@@ -43,21 +45,45 @@ class AddMemberViewController: CommonViewController {
         self.setNavigationColor(setColor: .clear)
         self.statusBarColor(setColor: .clear)
         setNavUI()
+        
+        //-----------------------*************
+        self.getMemberApi(params: getMemberParams?.getParams() ?? [:])
     }
     
     
     @IBAction func continueBtnActn(_ sender: Any) {
         print("Continue btn clicked...")
+        
+        if let minMember = memberData?.minMember, let maxMember = memberData?.maxMember, let totalAddMember =  self.memberList?.count,(Int(minMember) ?? 0) <= totalAddMember, (Int(maxMember) ?? 0) >= totalAddMember {
+            let vc:ChooseSessionViewController = ChooseSessionViewController.instantiate(appStoryboard: .booking)
+            vc.inputParams = self.createPackageParamsAddMember
+            vc.availParams = self.avialCalanderparamsAddMember
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+        else{
+            AlertHelper.shared.alertMesssage(view: self, title: "", message: memberData?.limit ?? "")
+        }
+        
+        /*
+        if let memberList = self.memberList, memberList.contains(where: { $0.id != 17  || $0.id == 0}) {
+            let vc:ChooseSessionViewController = ChooseSessionViewController.instantiate(appStoryboard: .booking)
+            vc.inputParams = self.createPackageParamsAddMember
+            vc.availParams = self.avialCalanderparamsAddMember
+            self.navigationController?.pushViewController(vc, animated: true)
+        }else{
+            AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.memebr_Added)
+        }
+        */
     }
     
     
     @IBAction func addMemberBtnActn(_ sender: Any) {
         print("Add member btn clicked......")
-        
         let vc: BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
         vc.bookingAddressFlow = .addMember
         vc.modalPresentationStyle = .automatic
         vc.navCtrnl = self.navigationController
+        vc.addMemberDelegate  = self
         self.present(vc, animated: true)
         
     }
@@ -74,9 +100,11 @@ class AddMemberViewController: CommonViewController {
         if let memberList = self.memberList, memberList.count == 0 {
             self.addMemberMBV.isHidden = true
             self.noteMemberBtn.isHidden = true
+            self.enableContinueBtn(isSelected: false)
         }else{
             self.addMemberMBV.isHidden = false
             self.noteMemberBtn.isHidden = false
+            self.enableContinueBtn(isSelected: true)
         }
         
         //---------------****************
@@ -106,6 +134,19 @@ class AddMemberViewController: CommonViewController {
         self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
     }
     
+    //MARK: -------------- ENABLE CONTINUE
+    private func enableContinueBtn(isSelected:Bool = false){
+        if isSelected {
+            self.continueBtn.isUserInteractionEnabled = true
+            self.continueBtn.backgroundColor = UIColor.appWhite
+            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
+        } else {
+            self.continueBtn.isUserInteractionEnabled = false
+            self.continueBtn.backgroundColor = UIColor.appDarkGray
+            self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
+        }
+    }
+    
 }
 
 //MARK: -------------- TABLEVIEW DELEGATE/DATASOURCE
@@ -122,6 +163,12 @@ extension AddMemberViewController: UITableViewDelegate, UITableViewDataSource{
         let cell: AddMemberTableViewCell = membersTblView.dequeueReusableCell(withIdentifier: "AddMemberTableViewCell", for: indexPath) as! AddMemberTableViewCell
         
         cell.setupCell(data: memberList?[indexPath.row])
+        
+        cell.editBtn.accessibilityHint = "\(memberList?[indexPath.row].id ?? -1)"
+        cell.editBtn.addTarget(self, action: #selector(editMemberBtnActn(sender: )), for: .touchUpInside)
+        
+        cell.delBtn.accessibilityHint = "\(memberList?[indexPath.row].id ?? -1)"
+        cell.delBtn.addTarget(self, action: #selector(deleteMemberBtnActn(sender: )), for: .touchUpInside)
         
         return cell
     }
@@ -141,6 +188,36 @@ extension AddMemberViewController: UITableViewDelegate, UITableViewDataSource{
         return 0.1
     }
     
+    //MARK: ------------EDIT MEMBER
+    @objc func editMemberBtnActn(sender: UIButton){
+        let indx = memberList?.firstIndex(where: {$0.id == Int(sender.accessibilityHint ?? " ")})
+        print(indx as Any)
+        
+        if let indx = indx {
+            let memberData = memberList?[indx]
+            print("memberData: ",memberData as Any)
+            
+            let vc: BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
+            vc.bookingAddressFlow = .addMember
+            vc.modalPresentationStyle = .automatic
+            vc.navCtrnl = self.navigationController
+            vc.addMemberData = memberData
+            vc.addMemberDelegate = self
+            self.present(vc, animated: true)
+        }
+    }
+    
+    //MARK: ------------DELETE MEMBER
+    @objc func deleteMemberBtnActn(sender: UIButton){
+        print(sender.accessibilityHint as Any)
+        AlertHelper.shared.showCustomeAlert(title: AppAlertStrings.delete_Str.localizedCapitalized + "!", message: AppAlertStrings.delete_AlertMsg, actions: ["cancel","ok"], withCancel: true, completion: {[weak self] getTag in
+            guard let self = self else { return  }
+            
+            if let getTag = getTag, getTag == 1 {
+                self.deleteMemberApi(inputIdStr: sender.accessibilityHint)
+            }
+        })
+    }
     
     //MARK: ------------ SETUP NO DATA FOUND
     private func setupRow(inputTable:UITableView) -> Int {
@@ -152,12 +229,23 @@ extension AddMemberViewController: UITableViewDelegate, UITableViewDataSource{
         vc.bookingAddressFlow = .addMember
         vc.modalPresentationStyle = .automatic
         vc.navCtrnl = self.navigationController
+        vc.addMemberDelegate = self
         self.present(vc, animated: true)
+    }
+    
+}
+
+//MARK: --------------------EXTENSION FOR RELOAD ADDED MEMBER DATA
+extension AddMemberViewController: AddMemberProtocol{
+    func memberAdd(isDismiss: Bool?) {
+        if isDismiss == true {
+            self.getMemberApi(params: getMemberParams?.getParams() ?? [:])
+        }
     }
 }
 
 extension AddMemberViewController{
-    
+
     private func getMemberApi(params: [String:String]){
         CreatePackageVM.getMemberPackagegroupApi(viewController: self, inputParms: params, completion: { [weak self] getResultData in
             guard let self = self, let getResultData = getResultData else { return  }
@@ -171,6 +259,18 @@ extension AddMemberViewController{
                 self.setupInputData()
             }
            
+        })
+    }
+    
+    private func deleteMemberApi(inputIdStr: String?){
+        CreatePackageVM.deleteMemberApi(viewController: self, inputId: inputIdStr, completion: { [weak self] getResultData in
+            guard let self = self else { return }
+            
+            print("Result Data: ", getResultData as Any)
+            
+            if getResultData?["status"] as? Bool == true  {
+                self.getMemberApi(params: getMemberParams?.getParams() ?? [:])
+            }
         })
     }
 }

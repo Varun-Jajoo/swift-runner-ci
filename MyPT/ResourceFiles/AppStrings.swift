@@ -111,11 +111,13 @@ struct AppStrings {
      public static let enter_password = "Please enter password."
      public static let enter_confirm = "Please enter confirm password."
      public static let valid_user_name = "Please enter valid user name."
+     public static let valid_age = "Please enter age."
      public static let logoutAlertMsg = "Are you sure, you want to logout?"
      public static let pswd_confirm_match = "Password and confirm password do not match."
      public static let no_results_found = "No results found!"
      public static let no_Address_Added = "No Address Added"
      public static let no_Memebr_Added = "No Member Added"
+     public static let memebr_Added = "Please add at least one Member!"
      public static let no_Address_Added_desc = "Add your home address to book a trainer and start your workouts hassle-free."
      public static let no_Match_alterMsg = "No match, but your next challenge is just a search away!"
      public static let select_dob = "Please select dob."
@@ -127,7 +129,10 @@ struct AppStrings {
      public static let select_City = "Please select city."
      public static let select_Country = "Please select country."
      public static let select_type = "Please select type."
+     public static let select_gender = "Please select gender."
      public static let select_Address = "Please select an address."
+     public static let delete_AlertMsg = "Are you sure, you want to delete?"
+     public static let delete_Str = "delete"
      
 }
 

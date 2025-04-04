@@ -46,11 +46,12 @@ class CreatePackageViewViewController: CommonViewController {
         print("continue btn clicked..")
         
         if let  package_type =  createParams?.package_type, package_type == "3" {
-            
             let vc: AddMemberViewController = AddMemberViewController.instantiate(appStoryboard: .booking)
             vc.getMemberParams = MemberParamsModel(package_type: package_type, type: self.createParams?.type, trainer_id: self.createParams?.trainer_id, studio_id: self.createParams?.studio_id)
+            vc.createPackageParamsAddMember = self.createParams
+            vc.avialCalanderparamsAddMember = self.avialCalanderparams
             self.navigationController?.pushViewController(vc, animated: true)
-            
+        
         }else{
             let vc:ChooseSessionViewController = ChooseSessionViewController.instantiate(appStoryboard: .booking)
             vc.inputParams = self.createParams

@@ -312,11 +312,23 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
             if let getIndx = getIndx {
                 let trainerDetails = self.gymTrainerData?[getIndx]
                 
+                
+                let currentMonth = Calendar.current.component(.month, from: Date())
+                
+                let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
+                vc.slotBookFlow = .bookTrainer
+                vc.params = AvailParmsModel(type: self.inputType, trainer_id: "\(trainerDetails?.id ?? 0)", studio_id: studioId, month: "\(currentMonth)", address_id: "")
+                self.navigationController?.pushViewController(vc, animated: true)
+                
+                
+                /*
                 let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
                 vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
                 vc.studioIdStr = studioId
                 vc.inputType = self.inputType
                 self.navigationController?.pushViewController(vc, animated: true)
+                
+                */
             }
         }
         
@@ -353,20 +365,22 @@ extension TrainerListViewController {
             guard let self = self, let getResultData = getResultData else { return  }
             print("get trainer list result data: ", getResultData as Any)
             
-            self.tagData?.removeAll()
-            self.trainerData?.removeAll()
-            self.tagData?.append(contentsOf: getResultData.data?.tags ?? [])
-            self.trainerData?.append(contentsOf: getResultData.data?.trainers ?? [])
-            
-            //-------------------Reload to set data
-            let tagModelData = TagModel(id: 1, name: "All Workouts", description: "", icon: "", image: "")
-            self.tagData?.insert(tagModelData, at: 0)
-            self.workoutCategoryCollView.reloadData()
-            
-            if let isGridshow = isGridShow, isGridshow {
-                self.trainerGridCollView.reloadData()
-            }else{
-                self.trainerListTblView.reloadData()
+            DispatchQueue.main.async {
+                self.tagData?.removeAll()
+                self.trainerData?.removeAll()
+                self.tagData?.append(contentsOf: getResultData.data?.tags ?? [])
+                self.trainerData?.append(contentsOf: getResultData.data?.trainers ?? [])
+                
+                //-------------------Reload to set data
+                let tagModelData = TagModel(id: 1, name: "All Workouts", description: "", icon: "", image: "")
+                self.tagData?.insert(tagModelData, at: 0)
+                self.workoutCategoryCollView.reloadData()
+                
+                if let isGridshow = self.isGridShow, isGridshow {
+                    self.trainerGridCollView.reloadData()
+                }else{
+                    self.trainerListTblView.reloadData()
+                }
             }
         })
     }
