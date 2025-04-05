@@ -105,7 +105,8 @@ class DashboardViewController: CommonViewController {
         
         self.workoutDays = ["day1","day2","day3","day4","day5","day6"]
         
-        setupUI()
+        self.setupUI()
+        self.regiterCollections()
         setUpCustomPageControl()
         self.updatePage(to: 0)
         
@@ -115,9 +116,8 @@ class DashboardViewController: CommonViewController {
             self.streakBadage3ImgView.image = createGrayBlurImage(from: imgView, blurRadius: 2.0)
         }
         
-
-
-       
+        self.setupInputData()
+        
 //        let originalImage = UIImage(named: "ic_streak_Badage2")!
 //        let colors = [UIColor(red: 45/255.0, green: 49/255.0, blue: 45/255.0, alpha: 1.0).cgColor,UIColor(red: 45/255.0, green: 49/255.0, blue: 45/255.0, alpha: 1.0).cgColor,UIColor(red: 45/255.0, green: 49/255.0, blue: 45/255.0, alpha: 1.0).cgColor]
 //        let locations: [CGFloat] = [0.0, 0.2, 0.3, 0.5, 1.0]
@@ -160,8 +160,8 @@ class DashboardViewController: CommonViewController {
         
     }
     
-
-    func setNavUI(){
+    
+    private func setNavUI(){
         self.setLeftMenu(leftImgs: [AppImages.chooseLocation, AppImages.forward], setTitle: [" Near Dubai Mall",nil], setTintColor: .appWhite, setTitleColor: .appWhite)
         self.setRighMenu(rightImgs: [AppImages.notificationCount,AppImages.notification], setTitle: ["10",nil], setTintColor: nil, setTitleColor: UIColor.appWhite)
     }
@@ -179,10 +179,34 @@ class DashboardViewController: CommonViewController {
         })
     }
     
+    //MARK: ---------------BTN TAG
+    enum Btntag: Int {
+        case bookTrainer = 2201, membership
+    }
     
-    //MARK: ---------- SET UI
-    func setupUI(){
+    @IBAction func commonBtnActn(_ sender: UIButton) {
+        print("btn tag", sender.tag)
         
+        switch sender.tag {
+        case Btntag.bookTrainer.rawValue:
+            print("book trainer")
+            let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
+            self.navigationController?.pushViewController(vc, animated: false)
+        default:
+            print("None.....")
+            break
+        }
+    }
+    
+    private func setupInputData(){
+        if let userData = appUserDefaults.getUserFromUserDefaults(as: SubmitDataModel.self), let userName = userData.user?.name {
+            print("userData", userData)
+            print("userData name: ", userName)
+            self.userNameLbl.text = userName
+        }
+    }
+    
+    private func regiterCollections(){
         //------------------------*************UICollectionview init
         upcomingSessionsCollView.register(UINib(nibName: "UpcomingSessionsCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "UpcomingSessionsCollectionViewCell")
         upcomingMealsCollView.register(UINib(nibName: "UpcomingMealsCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "UpcomingMealsCollectionViewCell")
@@ -195,6 +219,19 @@ class DashboardViewController: CommonViewController {
         
         //----------------------*************UITableview init
         self.workoutTblView.register(UINib(nibName: "MyWorkoutsTableViewCell", bundle: nil), forCellReuseIdentifier: "MyWorkoutsTableViewCell")
+    }
+    
+    
+    //MARK: ---------- SET UI
+    private func setupUI(){
+        
+        if let imgView = UIImage(named: "ic_bookTranierBackImg") {
+            self.bookTrainerAtHomeBtn.setBackgroundImage(imgView, for: .normal)
+            self.bookTrainerAtHomeBtn.clipsToBounds = true
+            self.bookTrainerAtHomeBtn.addGradientLayer(colors: [UIColor.mainBg.withAlphaComponent(0.9), UIColor.clear], locations: [0,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 12.0)
+        }
+        
+        self.membershipBtn.addGradientLayer(colors: [UIColor.mainBg.withAlphaComponent(0.9), UIColor.clear], locations: [0,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 12.0)
         
         
         DispatchQueue.main.async {
@@ -208,49 +245,48 @@ class DashboardViewController: CommonViewController {
             
             self.bookTrainerAtHomeBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             self.membershipBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+                        
+            [
+                self.waterIntekMBV,
+                self.calorieIntakeMBV,
+                self.calorieBurnMBV
+            ].forEach({
+                $0.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 18.0)
+            })
             
-            self.bookTrainerAtHomeBtn.layerGradient(startPoint: .center, endPoint: .bottomLeft, colorArray: [UIColor(red: 8.0/255.0, green: 18.0/255.0, blue: 22.0/255.0, alpha: 0.0).cgColor, UIColor(red: 30.0/255.0, green: 21.0/255.0, blue: 7.0/255.0, alpha: 1.0).cgColor], type: .axial)
-            self.membershipBtn.layerGradient(startPoint: .center, endPoint: .bottomLeft, colorArray: [UIColor(red: 8.0/255.0, green: 18.0/255.0, blue: 22.0/255.0, alpha: 0.0).cgColor, UIColor(red: 30.0/255.0, green: 21.0/255.0, blue: 7.0/255.0, alpha: 1.0).cgColor], type: .axial)
-        
-            self.waterIntekMBV.layerGradient(startPoint: .center, endPoint: .bottomLeft, colorArray: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 019.0/255.0, alpha: 1.0).cgColor, UIColor(red: 71/255.0, green: 77/255.0, blue: 96/255.0, alpha: 1).cgColor], type: .conic)
-            self.quantityMBV.layerGradient(startPoint: .center, endPoint: .bottomLeft, colorArray: [UIColor(red: 0/255.0, green: 184/255.0, blue: 251/255.0, alpha: 1.0).cgColor, UIColor(red: 0/255.0, green: 79/255.0, blue: 255/255.0, alpha: 1).cgColor], type: .axial)
-            self.calorieIntakeMBV.layerGradient(startPoint: .center, endPoint: .bottomLeft, colorArray: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 019.0/255.0, alpha: 1.0).cgColor, UIColor(red: 71/255.0, green: 77/255.0, blue: 96/255.0, alpha: 1).cgColor], type: .conic)
-            self.calorieBurnMBV.layerGradient(startPoint: .center, endPoint: .bottomLeft, colorArray: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 019.0/255.0, alpha: 1.0).cgColor, UIColor(red: 71/255.0, green: 77/255.0, blue: 96/255.0, alpha: 1).cgColor], type: .conic)
-            
-            self.waterIntekMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 18.0)
-            self.quantityMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 18.0)
+            self.quantityMBV.addGradient(colors: [UIColor(red: 0/255.0, green: 184/255.0, blue: 251/255.0, alpha: 1.0), UIColor(red: 0/255.0, green: 79/255.0, blue: 255/255.0, alpha: 1)], locations: [0.3,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 18)
             self.plusQuantityBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 10.0)
-            self.calorieIntakeMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 18.0)
-            self.calorieBurnMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 18.0)
-            
-            self.kcalProgressView.drawLineProgress(progressfill: 0.2, fillLineColor: UIColor.appYellow, cornerRadius: 3.0)
-            
+                        
+            self.kcalProgressView.drawLineProgress(progressfill: 0.2, fillLineColor: UIColor.appRatingYellow, cornerRadius: 3.0)
+          
             self.topView.setGradientBorder(cornerRadious:9.0,width: 0.8, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)])
             
             self.dayStreakMBV.setGradientBorder(cornerRadious:20.0,width: 0.8, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)])
+           
             self.dayStreakMBV.roundSideCorners(radius: 20.0, cornerSide: [.bottomLeft,.bottomRight])
-            self.calendarMBV.setGradientBorder(cornerRadious:20.0,width: 0.8, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)])
-            
-            self.dayStreakMBV.layerGradient(startPoint: .center, endPoint: .bottomLeft, colorArray: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 019.0/255.0, alpha: 1.0).cgColor, UIColor(red: 71/255.0, green: 77/255.0, blue: 96/255.0, alpha: 1).cgColor], type: .conic)
-            self.topView.layerGradient(startPoint: .center, endPoint: .bottomRight, colorArray: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 019.0/255.0, alpha: 1.0).cgColor, UIColor(red: 71/255.0, green: 77/255.0, blue: 96/255.0, alpha: 1).cgColor], type: .conic)
-//            self.calendarMBV.layerGradient(startPoint: .center, endPoint: .bottomLeft, colorArray: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 019.0/255.0, alpha: 1.0).cgColor, UIColor(red: 71/255.0, green: 77/255.0, blue: 96/255.0, alpha: 1).cgColor], type: .conic)
-            
-//            self.calendarLine.layerGradient(startPoint: .center, endPoint: .bottomLeft, colorArray: [UIColor(red: 36/255.0, green: 45/255.0, blue: 50/255.0, alpha: 0).cgColor, UIColor(red: 56/255.0, green: 71/255.0, blue: 81/255.0, alpha: 1.0).cgColor,UIColor(red: 36/255.0, green: 45/255.0, blue: 50/255.0, alpha: 0).cgColor], type: .axial)
-            
-            self.calendarMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 20.0)
-            self.calendarMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1.0), cornerRadius: 20)
 
+            self.topView.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1.0), cornerRadius: 9.0)
+            
+            self.dayStreakMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1.0), cornerRadius: 20)
+            
+            self.calendarMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1.0), cornerRadius: 20)
+            
             self.calendarMBV.setGradientBorder(cornerRadious:20.0,width: 2.0, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)])
+            self.calendarMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 20.0)
+                        
+            self.footerLine.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0.2)
             
-            self.footerLine.layerGradient(startPoint: .topLeft, endPoint: .bottomRight, colorArray: [UIColor(red: 36/255.0, green: 45/255.0, blue: 50/255.0, alpha: 0).cgColor, UIColor(red: 56/255.0, green: 71/255.0, blue: 81/255.0, alpha: 1.0).cgColor,UIColor(red: 36/255.0, green: 45/255.0, blue: 50/255.0, alpha: 0).cgColor], type: .axial)
-            
-            self.sunSubMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 9.0)
-            self.day2MBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 9.0)
-            self.day3MBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 9.0)
-            self.day4MBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 9.0)
-            self.day5MBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 9.0)
-            self.day6MBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 9.0)
-            self.day7MBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 9.0)
+            [
+                self.sunSubMBV,
+                self.day2MBV,
+                self.day3MBV,
+                self.day4MBV,
+                self.day5MBV,
+                self.day6MBV,
+                self.day7MBV
+            ].forEach({
+                $0.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 9.0)
+            })
         }
         
     }
@@ -314,6 +350,7 @@ extension DashboardViewController: UICollectionViewDataSource, UICollectionViewD
         }
         else if collectionView == productCategoryCollView{
             let cell:ProductCategoryCollViewCell = productCategoryCollView.dequeueReusableCell(withReuseIdentifier: "ProductCategoryCollViewCell", for: indexPath) as! ProductCategoryCollViewCell
+            cell.titleLblTopConstrnt.constant = 6.0
             cell.titleLbl.text = self.productCategory?[indexPath.row] as? String
             return cell
         }
@@ -323,6 +360,7 @@ extension DashboardViewController: UICollectionViewDataSource, UICollectionViewD
             return cell
         }else if collectionView == workoutsDayCollView{
             let cell:ProductCategoryCollViewCell = workoutsDayCollView.dequeueReusableCell(withReuseIdentifier: "ProductCategoryCollViewCell", for: indexPath) as! ProductCategoryCollViewCell
+            cell.titleLblTopConstrnt.constant = 6.0
             cell.titleLbl.text = self.workoutDays?[indexPath.row] as? String
             return cell
         }
@@ -380,11 +418,15 @@ extension DashboardViewController: UICollectionViewDataSource, UICollectionViewD
 //MARK: ---------------------------EXTENSION FOR UITABLEVIEW DATASOURSE/DELEGATE
 extension DashboardViewController: UITableViewDataSource, UITableViewDelegate{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 5
+        return 2
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell:MyWorkoutsTableViewCell = workoutTblView.dequeueReusableCell(withIdentifier: "MyWorkoutsTableViewCell", for: indexPath) as! MyWorkoutsTableViewCell
+        
+        DispatchQueue.main.async {
+            cell.cellMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 1, y: 1), endPoint: CGPoint(x: 0, y: 0), cornerRadius: 12.0)
+        }
         
         cell.completedUserMBV.isHidden = true
         cell.setupcellData()

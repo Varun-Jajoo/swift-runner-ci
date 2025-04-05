@@ -8,7 +8,7 @@
 import UIKit
 
 class DashboardGuestViewController: CommonViewController {
-
+    
     //MARK: ------------------VARIABLE
     var productCategory:[String]?
     
@@ -77,19 +77,20 @@ class DashboardGuestViewController: CommonViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.selectedCell()
-    }
         
-        func selectedCell(){
-            DispatchQueue.main.async {
-                
-                // Automatically select the first cell
-                let firstIndexPath = IndexPath(item: 0, section: 0)
-                    self.productCategoryCollView.selectItem(at: firstIndexPath, animated: true, scrollPosition: .top)
-                    // Optional: perform any additional setup for the selected cell
-                    self.productCategoryCollView.delegate?.collectionView?(self.productCategoryCollView, didSelectItemAt: firstIndexPath)
-                    self.view.layoutIfNeeded()
-                }
-            }
+    }
+    
+    func selectedCell(){
+        DispatchQueue.main.async {
+            
+            // Automatically select the first cell
+            let firstIndexPath = IndexPath(item: 0, section: 0)
+            self.productCategoryCollView.selectItem(at: firstIndexPath, animated: true, scrollPosition: .top)
+            // Optional: perform any additional setup for the selected cell
+            self.productCategoryCollView.delegate?.collectionView?(self.productCategoryCollView, didSelectItemAt: firstIndexPath)
+            self.view.layoutIfNeeded()
+        }
+    }
     
     func setNavUI(){
         self.setLeftMenu(leftImgs: [AppImages.chooseLocation, AppImages.forward], setTitle: [" Choose location",nil], setTintColor: .appWhite, setTitleColor: .appWhite)
@@ -146,34 +147,34 @@ class DashboardGuestViewController: CommonViewController {
     func setupUI(){
         
         //---------*************UICollectionview init
-    
+        
         transformationStoriesCollView.register(UINib(nibName: "TransformationStoriesCollViewCell", bundle: nil), forCellWithReuseIdentifier: "TransformationStoriesCollViewCell")
         upcomingCollView.register(UINib(nibName: "UpcomingClassCollViewCell", bundle: nil), forCellWithReuseIdentifier: "UpcomingClassCollViewCell")
         productCategoryCollView.register(UINib(nibName: "ProductCategoryCollViewCell", bundle: nil), forCellWithReuseIdentifier: "ProductCategoryCollViewCell")
         productListCollView.register(UINib(nibName: "ProductsListCollViewCell", bundle: nil), forCellWithReuseIdentifier: "ProductsListCollViewCell")
         nearByYouCollView.register(UINib(nibName: "GymsNearbyCollViewCell", bundle: nil), forCellWithReuseIdentifier: "GymsNearbyCollViewCell")
-
+        
         //-----------*************
         DispatchQueue.main.async {
             
-//            self.topNameMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0)
+            //            self.topNameMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0)
             self.bookTrainerExploreBtn.roundSideCorners(radius: 16.0, cornerSide: [.topRight])
             self.bookTrainerExploreBtn.backgroundColor = UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 0.4)
             self.differentWorkoutExploreBtn.roundSideCorners(radius: 16.0, cornerSide: [.topRight])
             self.planWorkoutExploreBtn.backgroundColor = UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 0.4)
             self.differentWorkoutExploreBtn.roundSideCorners(radius: 16.0, cornerSide: [.topRight])
             self.planWorkoutExploreBtn.backgroundColor = UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 0.4)
-
+            
             self.bookTrainerBckImgV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             self.workoutMBckImgView.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             self.planWorkoutImgV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             self.purchaseGymPassImgV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             self.grabNowMBckImgV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-           
+            
             self.startTrackingBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 8.0)
             
             self.grabNowBtn.setCornerRadius(borderWidth: 0.6, borderColor: UIColor.appWhite, cornerRadious: 12.0)
-           
+            
             self.grabNowBtn.layerGradient(startPoint: .topLeft, endPoint: .bottomLeft, colorArray: [UIColor(red: 96/255.0, green: 55/255.0, blue: 9/255.0, alpha: 1).cgColor, UIColor(red: 243/255.0, green: 141/255.0, blue: 27/255.0, alpha: 1).cgColor, UIColor(red: 96/255.0, green: 55/255.0, blue: 9/255.0, alpha: 1).cgColor,], type: .axial)
             
         }
@@ -254,16 +255,16 @@ extension DashboardGuestViewController: UICollectionViewDataSource, UICollection
         }
         else if collectionView == productListCollView{
             let cell:ProductsListCollViewCell = productListCollView.dequeueReusableCell(withReuseIdentifier: "ProductsListCollViewCell", for: indexPath) as! ProductsListCollViewCell
-           
+            
             return cell
         }
         else if collectionView == nearByYouCollView{
             let cell:GymsNearbyCollViewCell = nearByYouCollView.dequeueReusableCell(withReuseIdentifier: "GymsNearbyCollViewCell", for: indexPath) as! GymsNearbyCollViewCell
-           
+            
             return cell
         }
         else{
-          return  UICollectionViewCell()
+            return  UICollectionViewCell()
         }
     }
     
@@ -291,7 +292,7 @@ extension DashboardGuestViewController: UICollectionViewDataSource, UICollection
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
-    
+        
     }
 }
 
@@ -301,12 +302,13 @@ extension DashboardGuestViewController{
      1=>for home 2=>for gym
      */
     
-//    func getTrainerApi(){
-//        DashboardVM.gerTrainerApi(viewController: self, inputType: "gym", completion: { [weak self] getDataResult in
-//            guard let self = self else { return  }
-//            
-//            print(getDataResult as Any)
-//            
-//        })
-//    }
+    //    func getTrainerApi(){
+    //        DashboardVM.gerTrainerApi(viewController: self, inputType: "gym", completion: { [weak self] getDataResult in
+    //            guard let self = self else { return  }
+    //
+    //            print(getDataResult as Any)
+    //
+    //        })
+    //    }
 }
+

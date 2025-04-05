@@ -33,8 +33,7 @@ class CustomTabViewController: UITabBarController {
     private var shapeLayer = CAShapeLayer()
     
     //MARK: -------------Controllers
-//    let homeVC:DashboardViewController = DashboardViewController.instantiate(appStoryboard: .dashboard)
-//    
+    let homeVC:DashboardViewController = DashboardViewController.instantiate(appStoryboard: .dashboard)
     let homeGeustuserVC:DashboardGuestViewController = DashboardGuestViewController.instantiate(appStoryboard: .dashboard)
     
 //    let homeGeustuserVC:DashboardViewController = DashboardViewController.instantiate(appStoryboard: .dashboard) //only for testing
@@ -50,9 +49,15 @@ class CustomTabViewController: UITabBarController {
         super.viewDidLoad()
         self.view.backgroundColor = .clear
        
+        NotificationCenter.default.addObserver(self, selector: #selector(reloadTabFlow), name: NSNotification.Name("reloadTab"), object: nil)
+        
         setupTabbar()
 //        setupCustomTabBar()
         
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -67,6 +72,7 @@ class CustomTabViewController: UITabBarController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        self.setupTabbar()
         
         DispatchQueue.main.async {
              self.setupHeightTabbar()
@@ -74,6 +80,15 @@ class CustomTabViewController: UITabBarController {
          }
     }
     
+    //MARK: --------------FORCLY RELOAD TABVIEW
+    @objc func reloadTabFlow(_ notification: Notification) {
+        if let shouldReload = notification.object as? Bool {
+            print("Reloading tab because object is true")
+            isForGeustDashboard = shouldReload
+            appUserDefaults.setIsPackageCreated(value: !shouldReload)
+//            self.setupTabbar()
+        }
+    }
  
     //MARK: --------SET TABBAR
     func setupTabbar() {
@@ -95,6 +110,7 @@ class CustomTabViewController: UITabBarController {
 
                 
         homeGeustuserVC.tabBarItem = homeTabBarItem
+        homeVC.tabBarItem = homeTabBarItem
         bookingsVC.tabBarItem = bookingsTabBarItem
         libraryVC.tabBarItem = libraryTabBarItem
         calendarVC.tabBarItem = calendarTabBarItem
@@ -107,8 +123,15 @@ class CustomTabViewController: UITabBarController {
 //        guard let homeVC = homeVC?.viewController() else { return }
        
         selectedIndex = 0
+        
+        let vc = ((isForGeustDashboard == true) ? homeGeustuserVC : homeVC)
+        
+        let controllers = [vc, bookingsVC, libraryVC, calendarVC, moreVC]
+        
 //        let controllers = [homeVC, bookingsVC, libraryVC, calendarVC, moreVC]
-        let controllers = [homeGeustuserVC, bookingsVC, libraryVC, calendarVC, moreVC]
+//        let controllers = [homeGeustuserVC, bookingsVC, libraryVC, calendarVC, moreVC]
+  
+        
         
 //        if let geustDashboard =  isForGeustDashboard, geustDashboard {
 //            homeGeustuserVC.tabBarItem = homeTabBarItem

@@ -351,10 +351,12 @@ extension OtpViewController {
                     }
                     
                     if let isCompleted = getResult.data?.user?.isCompleted, isCompleted == 1 {
-                        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: true)
+                        appUserDefaults.setIsPackageCreated(value: true)
                         
-//                        let vc:PersoniledViewController = PersoniledViewController.instantiate(appStoryboard: .main)
-//                        self.navigationController?.pushViewController(vc, animated: true)
+                        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: appUserDefaults.getIsPackageCreated())
+                        
+                        //                        let vc:PersoniledViewController = PersoniledViewController.instantiate(appStoryboard: .main)
+                        //                        self.navigationController?.pushViewController(vc, animated: true)
                         
                     } else{
                         if let getStep = getResult.data?.step?.intValue ,  let currentVC = vcSteps.getCurrentVC(vcRawValue: getStep) {

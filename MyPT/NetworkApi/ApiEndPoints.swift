@@ -62,8 +62,9 @@ enum ApiEndPoint: String{
     case get_maember_package_group      =  "api/package-group"
     case add_member                     =  "api/add-member"
     case delete_member                  =  "api/delete-member"
+    case trainer_follow                 =  "api/trainer-follow"
     
-    
+   
     case authLoginOTP = "authLoginOTP"
     case refreshAccessToken = "refreshToken"
     

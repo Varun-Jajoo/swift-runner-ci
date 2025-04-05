@@ -66,7 +66,8 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
     }
     
     override func rightBtnActn(sender: UIButton) {
-        appSceneDelegate?.setupTab(selectedTab: 0)
+        print(appUserDefaults.getIsPackageCreated())
+        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
     }
     
     //------------------************Font

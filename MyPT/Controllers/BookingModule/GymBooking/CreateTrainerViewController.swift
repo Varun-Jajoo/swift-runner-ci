@@ -85,6 +85,8 @@ class CreateTrainerViewController: CommonViewController {
 
     @IBAction func continueBtnActn(_ sender: Any) {
         print("Continue btn actn.....")
+
+        NotificationCenter.default.post(name: NSNotification.Name("reloadTab"), object: false)
         
         if let getLat = getLat, let getLong = getLong {
             if let titleStr = trainerData?.first?["title"] as? String , self.continueBtn.accessibilityHint == titleStr {

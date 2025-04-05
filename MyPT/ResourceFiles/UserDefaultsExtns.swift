@@ -12,33 +12,42 @@ let appUserDefaults = UserDefaults.standard
 enum UserDefaultsKeys : String {
     case isLoggedIn = "Login"
     case userID     = "userId"
+    case packagerCreated = "packageCreated"
     case accessToken = "accessToken"
     case refressToken = "refreshToken"
 }
 
 extension UserDefaults{
-  
-    //MARK: Check Login
-      func setLoggedIn(value: Bool) {
-          set(value, forKey: UserDefaultsKeys.isLoggedIn.rawValue)
-          synchronize()
-      }
-
-      func getIsLoggedIn()-> Bool {
-          return bool(forKey: UserDefaultsKeys.isLoggedIn.rawValue)
-      }
-
-      //MARK: Save User Data
-      func setUserID(value: String?){
-          set(value, forKey: UserDefaultsKeys.userID.rawValue)
-          synchronize()
-      }
-
-      //MARK: Retrieve User Data
-      func getUserID() -> String?{
-          return string(forKey: UserDefaultsKeys.userID.rawValue)
-      }
     
+    //MARK: Check Login
+    func setLoggedIn(value: Bool) {
+        set(value, forKey: UserDefaultsKeys.isLoggedIn.rawValue)
+        synchronize()
+    }
+    
+    func getIsLoggedIn()-> Bool {
+        return bool(forKey: UserDefaultsKeys.isLoggedIn.rawValue)
+    }
+    
+    //MARK: Save User Data
+    func setUserID(value: String?){
+        set(value, forKey: UserDefaultsKeys.userID.rawValue)
+        synchronize()
+    }
+    
+    //MARK: Retrieve User Data
+    func getUserID() -> String?{
+        return string(forKey: UserDefaultsKeys.userID.rawValue)
+    }
+    
+    func setIsPackageCreated(value: Bool) {
+        set(!value, forKey: UserDefaultsKeys.packagerCreated.rawValue)
+        synchronize()
+    }
+    
+    func getIsPackageCreated()-> Bool {
+        return bool(forKey: UserDefaultsKeys.isLoggedIn.rawValue)
+    }
     
     func setUserName(value: String?){
         set(value, forKey: "userName")
@@ -70,10 +79,10 @@ extension UserDefaults{
     /*
      // Save model to UserDefaults (no need to pass a key)
      saveModel(user)
-
+     
      // Retrieve model from UserDefaults
      if let retrievedUser: UserModel = getModel(as: UserModel.self) {
-         print("User ID: \(retrievedUser.id), Name: \(retrievedUser.name)")
+     print("User ID: \(retrievedUser.id), Name: \(retrievedUser.name)")
      }
      */
     
@@ -104,17 +113,17 @@ extension UserDefaults{
     func getAccessToken() -> String?{
         return string(forKey: UserDefaultsKeys.accessToken.rawValue)
     }
-
-//    func getAccn() -> Int?{
-//        return integer(forKey: UserDefaultsKeys.accessToken.rawValue)
-//    }
+    
+    //    func getAccn() -> Int?{
+    //        return integer(forKey: UserDefaultsKeys.accessToken.rawValue)
+    //    }
     
     //setRefreshToken
     func setRefreshToken(refreshToken: String?){
         set(refreshToken, forKey: UserDefaultsKeys.refressToken.rawValue)
         synchronize()
     }
-
+    
     func getRefreshToken() -> String?{
         return string(forKey: UserDefaultsKeys.refressToken.rawValue)
     }
@@ -122,12 +131,12 @@ extension UserDefaults{
     
     //MARK: ----------- TO CLEAR ALL DATA
     func clearUserDefault() -> Bool {
-         guard let domainName = Bundle.main.bundleIdentifier else {
-             return false
-         }
-         removePersistentDomain(forName: domainName)
-         synchronize()
+        guard let domainName = Bundle.main.bundleIdentifier else {
+            return false
+        }
+        removePersistentDomain(forName: domainName)
+        synchronize()
         print("All Remove Data",Array(UserDefaults.standard.dictionaryRepresentation().keys).count)
         return true
-     }
+    }
 }

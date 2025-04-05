@@ -83,7 +83,10 @@ class GetStartViewController: CommonViewController , LoopingPlayerProgressDelega
     @IBAction func continueBtnActn(_ sender: Any) {
         print("continue btn clicked.")
         
-        appSceneDelegate?.setupTab(selectedTab: 0)
+        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: appUserDefaults.getIsPackageCreated())
+        
+//        appSceneDelegate?.setupTab(selectedTab: 0)
+        
         
 //        appSceneDelegate?.goToGuestDashboard()
         

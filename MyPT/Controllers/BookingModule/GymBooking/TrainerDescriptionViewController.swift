@@ -35,6 +35,7 @@ class TrainerDescriptionViewController: CommonViewController {
         }
     }
     
+    //-----------------------FOLLOW/UNFOLLOW BTN
     lazy var rightNavBtn: UIBarButtonItem = {
         let button =  UIButton(type: .system)
         button.tintColor = .white
@@ -148,9 +149,22 @@ class TrainerDescriptionViewController: CommonViewController {
         //        self.setRighMenu(rightImgs: [AppImages.follow], setTitle: [nil], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
         
-    
+    //MARK: --------------FOLLOW / UNFOLLOW BTN ACTN
     @objc func rightButtonTapped() {
         print("Custom right button tapped")
+        
+        //-------------------Follow Api
+        CreatePackageVM.trainerFollowApi(viewController: self, inputId: "\(self.detailsModel?.id ?? 0)", completion: { [weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return }
+            
+            if getResultData["status"] as? Bool == true {
+                let result = getResultData["data"] as? [String:Any]
+                let followStatus = result?["isFollowed"] as? Bool
+                self.detailsModel?.isFollowing = followStatus
+                self.trainerFollow()
+                AlertHelper.shared.alertMesssage(view: self, title: "", message: getResultData["msg"] as? String ?? "")
+            }
+        })
     }
 
     
@@ -173,8 +187,7 @@ class TrainerDescriptionViewController: CommonViewController {
         }
     }
     
-    private func setInputData(){
-        
+    private func trainerFollow(){
         if let button = rightNavBtn.customView as? UIButton {
             
             if let isFollowing = self.detailsModel?.isFollowing {
@@ -182,7 +195,11 @@ class TrainerDescriptionViewController: CommonViewController {
                 button.setTitle(setTitle, for: .normal)
             }
         }
+    }
+    
+    private func setInputData(){
         
+        self.trainerFollow()
         self.trainerImgView.loadImage(urlString: detailsModel?.profile, placeholder: AppImages.navLeft)
         self.trainerNameLbl.text = self.detailsModel?.name
         self.followrsCountLbl.text = self.detailsModel?.follower

@@ -13,7 +13,7 @@ class ProductsListCollViewCell: UICollectionViewCell {
     @IBOutlet weak var cellMBV: UIView!
     @IBOutlet weak var ratingBtn: UIButton!
     @IBOutlet weak var productImgView: UIImageView!
-    @IBOutlet weak var descLbl: UIView!
+    @IBOutlet weak var descMBV: UIView!
     @IBOutlet weak var productNameLbl: UILabel!
     @IBOutlet weak var priceLbl: UILabel!
     
@@ -24,8 +24,8 @@ class ProductsListCollViewCell: UICollectionViewCell {
         DispatchQueue.main.async {
             self.ratingBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 8.0)
             self.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            
-            self.descLbl.layerGradient(startPoint: .center, endPoint: .bottomLeft, colorArray: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 019.0/255.0, alpha: 1.0).cgColor, UIColor(red: 71/255.0, green: 77/255.0, blue: 96/255.0, alpha: 1).cgColor], type: .axial)
+           
+            self.descMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 1, y: 1), endPoint: CGPoint(x: 0, y: 0), cornerRadius: 0)
         }
     }
     

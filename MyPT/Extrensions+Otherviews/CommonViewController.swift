@@ -21,6 +21,7 @@ class CommonViewController: UIViewController {
         self.navigationController?.navigationItem.hidesBackButton = true
         self.navigationController?.navigationBar.backgroundColor = .clear
         self.statusBarColor(setColor: .clear)
+        self.setupLargeTitleBg(bgColor: .clear)
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification,
@@ -303,5 +304,16 @@ class CommonViewController: UIViewController {
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
         self.navigationController?.view.backgroundColor = .clear
+    }
+    
+    //MARK: -------------MAKE TRANSPARENT OF LARGE TITLE BACKGROUND/COLOR
+    func setupLargeTitleBg(bgColor: UIColor = UIColor.clear){
+        let navBarAppearance = UINavigationBarAppearance()
+        navBarAppearance.configureWithOpaqueBackground()
+        navBarAppearance.backgroundColor = bgColor //clear color is make transparent
+        navBarAppearance.shadowImage = nil // line
+        navBarAppearance.shadowColor = nil // line
+        UINavigationBar.appearance(whenContainedInInstancesOf: [UINavigationController.self]).standardAppearance = navBarAppearance
+        UINavigationBar.appearance(whenContainedInInstancesOf: [UINavigationController.self]).scrollEdgeAppearance = navBarAppearance
     }
 }

@@ -270,6 +270,8 @@ extension AddMemberViewController{
             
             if getResultData?["status"] as? Bool == true  {
                 self.getMemberApi(params: getMemberParams?.getParams() ?? [:])
+               
+                AlertHelper.shared.alertMesssage(view: self, title: "", message: getResultData?["msg"] as? String ?? "")
             }
         })
     }

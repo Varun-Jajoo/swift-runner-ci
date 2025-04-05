@@ -57,7 +57,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     //MARK: -----------CHECK USER LOGIN
     func checkIsUserLogin(){
         if appUserDefaults.getUserFromUserDefaults(as: SubmitDataModel.self)?.user?.id != 0 && appUserDefaults.getUserFromUserDefaults(as: SubmitDataModel.self)?.user?.isCompleted == 1 {
-            self.setupTab(selectedTab: 0, isGoGeustDashboard: true)
+            print(appUserDefaults.getIsPackageCreated())
+            self.setupTab(selectedTab: 0, isGoGeustDashboard: appUserDefaults.getIsPackageCreated())
         }else{
             self.goToMainView()
         }
@@ -95,7 +96,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     //MARK: ------------ GO TO Tabbar
     //set selectedTab is 0 to start from dashboard
-    func setupTab(selectedTab:Int, isGoGeustDashboard:Bool = false){
+    func setupTab(selectedTab:Int, isGoGeustDashboard:Bool = true){
         let tab = CustomTabViewController() // CustomViewController()
         tab.selectedIndex = selectedTab
         tab.isForGeustDashboard = isGoGeustDashboard

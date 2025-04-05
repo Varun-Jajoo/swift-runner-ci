@@ -533,6 +533,46 @@ extension UIView{
         }
     }
     
+    //MARK: ---------------------ADD GRADIENT LAYER
+    func addGradientLayer(
+        colors: [UIColor] = [.blue, .white],
+        locations: [NSNumber] = [0, 1],
+        startPoint: CGPoint = CGPoint(x: 0.0, y: 1.0),
+        endPoint: CGPoint = CGPoint(x: 1.0, y: 1.0),
+        cornerRadius: CGFloat = 0.0
+    ){
+        // Create gradient overlay
+        self.layer.sublayers?
+            .filter { $0.name == "layer_gradient" }
+            .forEach { $0.removeFromSuperlayer() }
+        
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.name = "layer_gradient"
+        gradientLayer.frame = self.bounds
+        gradientLayer.colors = colors.map { $0.cgColor }
+        gradientLayer.locations = locations
+        gradientLayer.startPoint = startPoint
+        gradientLayer.endPoint = endPoint
+        
+        /*
+        gradientLayer.frame = self.bounds
+        gradientLayer.colors = [
+            UIColor.blue.cgColor,
+            UIColor.clear.cgColor
+        ]
+        gradientLayer.startPoint = CGPoint(x: 0, y: 1)
+        gradientLayer.endPoint = CGPoint(x: 1, y: 1)
+        */
+
+        // Optional: round corners
+//            gradientLayer.cornerRadius = 12
+//            bookTrainerAtHomeBtn.layer.cornerRadius = 12
+
+        // Add gradient on top
+        self.layer.addSublayer(gradientLayer)
+    }
+    
+    
     func addGradientWithHeight(
         colors: [UIColor] = [.blue, .white],
         locations: [NSNumber] = [0, 1],

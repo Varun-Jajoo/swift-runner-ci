@@ -129,6 +129,7 @@ class BookingDetailsViewController: CommonViewController {
     
     deinit {
         print("------\(#function)------\(String(describing: Self.self))------" )
+            NotificationCenter.default.removeObserver(self)
     }
    
     override func viewWillAppear(_ animated: Bool) {

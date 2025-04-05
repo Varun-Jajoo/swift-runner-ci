@@ -305,4 +305,45 @@ class CreatePackageVM{
             }
         })
     }
+    
+    
+    
+    //MARK: --------------------api/trainer-follow
+    /*
+     id:2, trainer id is required
+     */
+    
+    class  func trainerFollowApi(viewController: UIViewController, inputId: String?, completion: @escaping(_ resultData:[String:Any]?) -> Void){
+        
+         let params:[String:Any] = [
+            "id": inputId ?? ""
+         ]
+         
+        print("params = ", params as Any)
+        
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .trainer_follow, method: .post , parameters: params, isShowLoading: true, completion: {  (getResponce, error) in
+            do{
+                print(getResponce as Any)
+                
+                if let responceData = getResponce {
+                    let getResult = try JSONSerialization.jsonObject(with: responceData, options: .mutableContainers) as? [String:Any]
+                    guard let getResult = getResult else { return }
+                    
+                    if (getResult["status"] as? Bool) == true  {
+                        completion(getResult)
+                    }
+                    else{
+                        
+                        let errorMsg = "\(((getResult["errors"] as? [String : Any])?.values.first as? [Any])?.first as? String ?? (getResult["msg"] as? String ?? ""))"
+                        AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg)
+                    }
+                }
+                
+            }catch {
+                print(error)
+            }
+            
+        })
+    }
+    
 }
