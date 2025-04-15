@@ -429,62 +429,85 @@ class BookingDetailsViewController: CommonViewController {
     }
     
     func fontSetUP(){
-        self.homeWorkoutTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
         self.homeworkoutDate.font = AppFont.semibold.size(12.0, familyName: familyManrope)
-        self.helpBtn.titleLabel?.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.sessionTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
-        self.sessionDateTitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.sessionDateLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.sessionTypeTitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.sessionTypeLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.sessionLocTitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.sessionLocLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.myTrainerTitleBtn.titleLabel?.font = AppFont.semibold.size(16.0, familyName: familyManrope)
-        self.trainerNameLbl.font = AppFont.bold.size(14.0, familyName: familyManrope)
+
         self.distanceLbl.font = AppFont.semibold.size(12.0, familyName: familyManrope)
         self.addressLbl.font = AppFont.semibold.size(12.0, familyName: familyManrope)
         self.ratingBtn.titleLabel?.font = AppFont.semibold.size(12.0, familyName: familyManrope)
-        self.requestCancellledTitleLbl.font = AppFont.bold.size(14.0, familyName: familyManrope)
         self.requestCancellledDateLbl.font = AppFont.semibold.size(12.0, familyName: familyManrope)
-        self.rateTrainerBtn.titleLabel?.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.declineBtn.titleLabel?.font = AppFont.bold.size(14.0, familyName: familyManrope)
-        self.acceptBtn.titleLabel?.font = AppFont.bold.size(14.0, familyName: familyManrope)
-        self.bookAgainBtn.titleLabel?.font = AppFont.bold.size(14.0, familyName: familyManrope)
-        self.cancelrequestBtn.titleLabel?.font = AppFont.bold.size(14.0, familyName: familyManrope)
         self.sessionSuccessfullyDescLbl.font = AppFont.semibold.size(12.0, familyName: familyManrope)
-        self.bookingDetailsTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
-        self.contactNumTitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.contactNumLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.amtPaidTitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.amtPaidLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.trainingLocTitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.trainingLocLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.trainingDateTitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.trainingDateLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.bookingRescheduleBtn.titleLabel?.font = AppFont.bold.size(14.0, familyName: familyManrope)
-        self.cancelBookingBtn.titleLabel?.font = AppFont.bold.size(14.0, familyName: familyManrope)
-        self.cancellationDetailsTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
-        self.canceledonTitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.cancellationDateLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.reasonTitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.reasonDescLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.refundTitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.refundAmtLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.cancellationPolicyTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
-        self.cancellationDescLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.learnMoreBtn.titleLabel?.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.exerciseLogTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
-        self.exercise1TitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.exercise1DescLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.exercise2TitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.exercise2DescLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.exercise3TitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.exercise3DescLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.trainerFeedTitleBck.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.trainerFeedBckDescLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.costTitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.costAmtLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
         self.customerSupportBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
+        
+        
+        
+        [
+            self.trainerNameLbl,
+            self.requestCancellledTitleLbl,
+            self.declineBtn.titleLabel,
+            self.acceptBtn.titleLabel,
+            self.bookAgainBtn.titleLabel,
+            self.cancelrequestBtn.titleLabel,
+            self.bookingRescheduleBtn.titleLabel,
+            self.cancelBookingBtn.titleLabel
+        ].forEach({[weak self] in
+            guard let self = self else { return  }
+            $0?.font = AppFont.bold.size(14.0, familyName: familyManrope)
+        })
+        
+        [
+            self.homeWorkoutTitleLbl,
+            self.sessionTitleLbl,
+            self.myTrainerTitleBtn.titleLabel,
+            self.bookingDetailsTitleLbl,
+            self.cancellationDetailsTitleLbl,
+            self.cancellationPolicyTitleLbl,
+            self.exerciseLogTitleLbl
+        ].forEach({[weak self] in
+            guard let self = self else { return  }
+            $0?.font = AppFont.semibold.size(16.0, familyName: familyManrope)
+        })
+        
+        
+        [
+            self.helpBtn.titleLabel,
+            self.sessionDateLbl,
+            self.sessionDateTitleLbl,
+            self.sessionTypeTitleLbl,
+            self.costAmtLbl,
+            self.sessionTypeLbl,
+            self.sessionLocTitleLbl,
+            self.sessionLocLbl,
+            self.rateTrainerBtn.titleLabel,
+            self.contactNumTitleLbl,
+            self.contactNumLbl,
+            self.amtPaidTitleLbl,
+            self.amtPaidLbl,
+            self.trainingLocTitleLbl,
+            self.trainingLocLbl,
+            self.trainingDateTitleLbl,
+            self.trainingDateLbl,
+            self.canceledonTitleLbl,
+            self.cancellationDateLbl,
+            self.reasonTitleLbl,
+            self.reasonDescLbl,
+            self.refundTitleLbl,
+            self.refundAmtLbl,
+            self.cancellationDescLbl,
+            self.learnMoreBtn.titleLabel,
+            self.exercise1TitleLbl,
+            self.exercise1DescLbl,
+            self.exercise2TitleLbl,
+            self.exercise2DescLbl,
+            self.exercise3TitleLbl,
+            self.exercise3DescLbl,
+            self.trainerFeedTitleBck,
+            self.trainerFeedBckDescLbl,
+            self.costTitleLbl,
+            self.costAmtLbl
+        ].forEach({[weak self] in
+            guard let self = self else { return  }
+            $0?.font = AppFont.semibold.size(14.0, familyName: familyManrope)
+        })
     }
 
 }

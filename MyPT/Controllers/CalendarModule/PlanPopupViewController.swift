@@ -306,7 +306,7 @@ extension PlanPopupViewController: UITableViewDataSource, UITableViewDelegate{
             else if indexPath.row == 1 {
                 self.dismiss(animated: true, completion: {
                     let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
-                    vc.flowSlot = calendarFlow.bookTrainer
+                    vc.flowSlot = calendarFlow.bookTrainerHomeWorkout
                     self.navCtrnl?.pushViewController(vc, animated: true)
                 })
             }

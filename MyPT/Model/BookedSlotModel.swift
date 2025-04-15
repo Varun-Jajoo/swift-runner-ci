@@ -43,3 +43,32 @@ struct BookedTrainerModel: Codable {
     var image: String?
     var tags: [String]?
 }
+
+
+//MARK: ----------- Booke MEMBERSHIP BaseModel
+struct BookMembershipBaseModel: Codable {
+    var status: Bool?
+    var data: BookMembershipDataModel?
+    var msg: String?
+    let errors: [String: [String]]?
+    
+}
+
+
+//MARK: --------- BookMembershipDataModel
+struct BookMembershipDataModel: Codable {
+    var studio: ValityStudioDetailModel?
+    var startDate: String?
+    var endDate: String?
+    var package: String?
+    var qr: String?
+    var location: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case package, qr, location
+        case startDate = "start_date"
+        case endDate = "end_date"
+        case studio
+    }
+}
+

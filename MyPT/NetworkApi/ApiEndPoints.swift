@@ -63,7 +63,11 @@ enum ApiEndPoint: String{
     case add_member                     =  "api/add-member"
     case delete_member                  =  "api/delete-member"
     case trainer_follow                 =  "api/trainer-follow"
+    case membership_validity            =  "api/membership-validity"
+    case review_package_membership      =  "api/review-package"
+    case book_membership                =  "api/book-membership"
     
+
    
     case authLoginOTP = "authLoginOTP"
     case refreshAccessToken = "refreshToken"

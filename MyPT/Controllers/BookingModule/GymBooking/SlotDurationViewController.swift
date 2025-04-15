@@ -39,7 +39,6 @@ class SlotDurationViewController: CommonViewController {
     @IBOutlet weak var startDateBtn: UIButton!
     @IBOutlet weak var endDateBtn: UIButton!
     
-    //    @IBOutlet weak var slotDate: FSCalendar!
     @IBOutlet weak var selectTimeTitleLbl: UILabel!
     @IBOutlet weak var dateListCollView: UICollectionView!
     @IBOutlet weak var bottomStck: UIStackView!
@@ -299,7 +298,7 @@ class SlotDurationViewController: CommonViewController {
         self.enableContinueBtn(isSelected: false)
         
         switch slotDurationFlow {
-        case .bookTrainer:
+        case .bookTrainerHomeWorkout, .bookTrainerGymWorkout:
            
             //----------------Api
             self.inputBookSlotParams = nil
@@ -311,8 +310,11 @@ class SlotDurationViewController: CommonViewController {
             inputSetDateParams?.timing = timeStr
             self.packageSetDate(setParams: inputSetDateParams?.getParams())
             
+        case .gymMembership, .withTrainerMembership, .withoutTrainerMembership:
+            print("membership flow")
         case .defaultFlow:
             print("default is called..")
+       
         }
     }
     
@@ -322,7 +324,7 @@ class SlotDurationViewController: CommonViewController {
         self.enableContinueBtn(isSelected: false)
         
         switch slotDurationFlow {
-        case .bookTrainer:
+        case .bookTrainerHomeWorkout, .bookTrainerGymWorkout:
             self.calendarView.isHidden = false
             self.bottomPriceMBV.isHidden = true
             self.packageMBV.isHidden = true
@@ -350,6 +352,18 @@ class SlotDurationViewController: CommonViewController {
             
             //----------------Api
             self.packageSetDate(setParams: inputSetDateParams?.getParams())
+            
+        case .gymMembership, .withTrainerMembership, .withoutTrainerMembership:
+            print("Membership flow")
+            
+            self.calendarView.isHidden = false
+            self.bottomPriceMBV.isHidden = true
+            self.packageMBV.isHidden = true
+            self.startEndMBV.isHidden = true
+            self.continueBtn.isHidden = true
+            
+            //----------------Api
+            self.getSlot(params: inputGetSlotParams?.getParams() ?? [:])
             
         case .defaultFlow:
             print("default is called..")
@@ -476,7 +490,7 @@ extension SlotDurationViewController:UICollectionViewDataSource, UICollectionVie
         
         
         switch slotDurationFlow {
-        case .bookTrainer:
+        case .bookTrainerHomeWorkout, .bookTrainerGymWorkout:
             //            self.bottomPriceMBV.isHidden = false
             //            self.packageMBV.isHidden = false
             
@@ -499,6 +513,25 @@ extension SlotDurationViewController:UICollectionViewDataSource, UICollectionVie
         case .createPackage:
             self.enableContinueBtn(isSelected: true)
             self.inputSetDateParams?.slot_id = "\(slotTimes?[indexPath.row].id ?? 0)"
+            
+        case .gymMembership, .withTrainerMembership, .withoutTrainerMembership:
+            print("Membership flow..")
+            
+            if self.bottomPriceMBV.isHidden {
+                self.bottomPriceMBV.animShow(duration: 0.2, delay: 0.1) {
+                    self.bottomPriceMBV.isHidden = false
+                    self.paymentBtn.isHidden = false
+//                    self.packageMBV.isHidden = false
+                    self.packageMBV.animShow(duration: 0.1, delay: 0) {
+                        self.packageMBV.isHidden = false
+                    }
+                }
+            }
+            
+            //------------------************Booked param
+            print("Slot Id: ","\(slotTimes?[indexPath.row].id ?? 0)")
+            
+            self.inputBookSlotParams = BookSlotParamsModel(studio_id: inputGetSlotParams?.studio_id, type: inputGetSlotParams?.type, trainer_id: inputGetSlotParams?.trainer_id, slot_id: "\(slotTimes?[indexPath.row].id ?? 0)", address_id: inputGetSlotParams?.address_id)
             
         case .defaultFlow:
             print("default is called..")

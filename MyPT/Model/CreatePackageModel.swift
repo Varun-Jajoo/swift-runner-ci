@@ -49,6 +49,35 @@ struct CreatePackageTrainerModel: Codable {
     }
 }
 
+//MARK: ------------------ MembershipValidityBaseModel
+struct MembershipValidityBaseModel: Codable {
+    var status: Bool?
+    var data: MembershipValityDataModel?
+    var msg: String?
+    let errors: [String: [String]]?
+}
+
+struct MembershipValityDataModel: Codable {
+    var packageDetail : ValityPackageDetailModel?
+    var studio : ValityStudioDetailModel?
+}
+
+struct ValityPackageDetailModel: Codable {
+    var price : FlexibleValue?
+    var validity : FlexibleValue?
+}
+
+
+struct ValityStudioDetailModel: Codable {
+    var avg_rating: String?
+    var id: Int?
+    var name: String?
+    var profile: String?
+    var tags: [String]?
+    var total_rating: FlexibleValue?
+}
+
+
 
 //MARK: --------------------- SetDateBaseModel
 struct SetDateBaseModel: Codable {

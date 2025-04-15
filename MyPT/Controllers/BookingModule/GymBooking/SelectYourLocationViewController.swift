@@ -91,17 +91,10 @@ class SelectYourLocationViewController: CommonViewController {
                     let currentMonth = Calendar.current.component(.month, from: Date())
                     
                     let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
-                    vc.slotBookFlow = .bookTrainer
+                    vc.slotBookFlow = .bookTrainerHomeWorkout
                     vc.params = AvailParmsModel(type: self.inputType, trainer_id: trainerIdStr, studio_id: studioIdStr, month: "\(currentMonth)", address_id: addressDetails?.id?.value)
                     self.navigationController?.pushViewController(vc, animated: true)
                 }
-                
-//                let currentMonth = Calendar.current.component(.month, from: Date())
-//                
-//                let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
-//                vc.slotBookFlow = .bookTrainer
-//                vc.params = AvailParmsModel(type: self.inputType, trainer_id: trainerIdStr, studio_id: studioIdStr, month: "\(currentMonth)", address_id: addressDetails?.id?.value)
-//                self.navigationController?.pushViewController(vc, animated: true)
             }
             
         }else{

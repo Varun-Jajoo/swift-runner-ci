@@ -190,6 +190,7 @@ class CustomTabViewController: UITabBarController {
         self.setupCustomTabBar()
     }
 
+    /*
     private func setupHeightTabbar() {
         self.tabBar.backgroundColor = UIColor.mainBg.withAlphaComponent(1.0)
         self.tabBar.isTranslucent = false
@@ -208,7 +209,33 @@ class CustomTabViewController: UITabBarController {
         }
         
         self.tabBar.frame = getFrame
+        
+        self.contentView.setNeedsLayout()
+        self.contentView.layoutIfNeeded()
     }
+    */
+    
+     private func setupHeightTabbar(heightIncrease: CGFloat = 15, imageBottomInset: CGFloat = 20) {
+         self.tabBar.backgroundColor = UIColor.mainBg.withAlphaComponent(1.0)
+         self.tabBar.isTranslucent = false
+
+         var getFrame: CGRect = self.tabBar.frame
+         getFrame.origin.y -= heightIncrease
+         getFrame.size.height += heightIncrease
+         self.tabBar.frame = getFrame
+
+         if let items = self.tabBar.items {
+             for (index, item) in items.enumerated() {
+                 item.imageInsets = (index == self.selectedIndex) ?
+                     UIEdgeInsets(top: 0, left: 0, bottom: imageBottomInset, right: 0) :
+                     .zero
+             }
+         }
+
+         self.tabBar.setNeedsLayout()
+         self.tabBar.layoutIfNeeded()
+     }
+
 
     private func setupCustomTabBar() {
         guard self.tabBar.superview != nil else { return }

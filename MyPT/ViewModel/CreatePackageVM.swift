@@ -7,6 +7,41 @@
 
 import UIKit
 
+
+//MARK: ------------------PACKAGEREVIEW WithoutTrainerParams PARAMS MODEL
+struct WithoutTrainerParams {
+    var price: String?
+    var start_date: String?
+    var end_date: String?
+    var days: String?
+    var studio_id: String?
+    
+    func getParamsReviewPackage() -> [String:String] {
+        var dictVar: [String:String] =  [:]
+        
+        if let price = price { dictVar["price"] = price }
+        if let start_date = start_date { dictVar["start_date"] = start_date }
+        if let end_date = end_date { dictVar["end_date"] = end_date }
+        if let days = days { dictVar["days"] = days }
+        if let studio_id = studio_id { dictVar["studio_id"] = studio_id }
+        
+        return dictVar
+    }
+    
+    func getParamsBookMembership() -> [String:Any] {
+        var dictVar: [String:Any] =  [:]
+        
+        if let price = price { dictVar["price"] = price }
+        if let start_date = start_date { dictVar["start_date"] = start_date }
+        if let end_date = end_date { dictVar["end_date"] = end_date }
+        if let days = days { dictVar["days"] = days }
+        if let studio_id = studio_id { dictVar["studio_id"] = studio_id }
+        
+        return dictVar
+    }
+}
+
+
 class CreatePackageVM{
     
     //MARK: -----------------------Create package for One buddy / With buddy
@@ -307,7 +342,6 @@ class CreatePackageVM{
     }
     
     
-    
     //MARK: --------------------api/trainer-follow
     /*
      id:2, trainer id is required
@@ -346,4 +380,144 @@ class CreatePackageVM{
         })
     }
     
+    
+    //MARK: --------------------- api/membership-validity
+    /*
+     studio_id: 5, studio id field is required
+     days: 12, no of days , atleast 1 one day is required
+     */
+    
+    class func membershipValidityApi(viewController: UIViewController, inputStudioId: String?, inputDays: String?, isShowLoader:Bool = true, completion: @escaping(_ resultData:MembershipValidityBaseModel?) -> Void){
+        
+        let params:[String:String] = [
+            "studio_id": inputStudioId ?? "",
+            "days": inputDays ?? ""
+        ]
+        
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .membership_validity, method: .get , queries: params, parameters:  nil, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
+            do{
+                
+                print(getResponce as Any)
+                if let responceData = getResponce {
+                    
+                    let getResult = try JSONDecoder().decode(MembershipValidityBaseModel.self, from: responceData)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    }
+                    else{
+                        let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+                        AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg ?? "")
+                    }
+                }
+                
+            }catch {
+                print(error)
+            }
+        })
+    }
+    
+    
+    //MARK: --------------------- api/review-package
+    /*
+     price: 123, price
+     start_date: 2025-03-04, start date
+     end_date: 2025-03-08, end date is required
+     days: 12, no of days , atleast 1 one day is required
+     studio_id: 4, studio id field is required
+     */
+    
+    class func reviewPackageMembershipApi(viewController: UIViewController, inputParams: [String:String]?, isShowLoader:Bool = true, completion: @escaping(_ resultData: ReviewPackageWithoutTrainerBaseModel?) -> Void){
+        
+        guard let inputParams = inputParams else { return  }
+       
+        /*
+        let params:[String:String] = [
+            "price": "",
+            "start_date": "",
+            "end_date": "",
+            "days": "",
+            "studio_id": ""
+        ]
+        */
+        
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .review_package_membership, method: .get , queries: inputParams, parameters:  nil, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
+            do{
+                
+                print(getResponce as Any)
+                if let responceData = getResponce {
+                    
+                    let getResult = try JSONDecoder().decode(ReviewPackageWithoutTrainerBaseModel.self, from: responceData)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    }
+                    else{
+                        let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+                        AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg ?? "")
+                    }
+                }
+                
+//                if let responceData = getResponce {
+//                    let getResult = try JSONSerialization.jsonObject(with: responceData, options: .mutableContainers) as? [String:Any]
+//                    guard let getResult = getResult else { return }
+//                    
+//                    if (getResult["status"] as? Bool) == true  {
+//                        completion(getResult)
+//                    }
+//                    else{
+//                        
+//                        let errorMsg = "\(((getResult["errors"] as? [String : Any])?.values.first as? [Any])?.first as? String ?? (getResult["msg"] as? String ?? ""))"
+//                        AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg)
+//                    }
+//                }
+                
+            }catch {
+                print(error)
+            }
+        })
+    }
+    
+    //MARK: -------------------- api/book-membership
+    /*
+     price: 123, price
+     start_date: 2025-04-02, start date is required
+     end_date: 2025-04-06, end date is required
+     days: 4, no of days required for validity
+     studio_id: 1, required
+     */
+    
+    class  func bookMembershipApi(viewController: UIViewController, inputParams:[String:Any]?, completion: @escaping(_ resultData: BookMembershipBaseModel?) -> Void){
+        print("params = ", inputParams as Any)
+        
+        /*
+         let params:[String:String] = [
+         "price": "123",
+         "start_date": "",
+         "end_date": "",
+         "days": "",
+         "studio_id": ""
+         ]
+        */
+        
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .book_membership, method: .post , parameters: inputParams, isShowLoading: true, completion: {  (getResponce, error) in
+            do{
+                
+                print(getResponce as Any)
+                if let responceData = getResponce {
+                    
+                    let getResult = try JSONDecoder().decode(BookMembershipBaseModel.self, from: responceData)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    }
+                    else{
+                        let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+                        AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg ?? "")
+                    }
+                }
+                
+            }catch {
+                print(error)
+            }
+            
+        })
+    }
 }

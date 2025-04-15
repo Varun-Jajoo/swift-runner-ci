@@ -10,6 +10,7 @@ import UIKit
 enum SesionFlow {
     case session
     case validity
+    case validityMembership
     case defaultSession
 }
 
@@ -21,6 +22,10 @@ class ChooseSessionViewController: CommonViewController {
     var availParams:AvailParmsModel?
     var inputParams:CreatePackageParamsModel?
     var packageDetails: CreatePackageDataModel?
+    var validityMembershipParam: (studioStr: String?,days: String?)?
+    var membershipDetailsData: MembershipValityDataModel?
+    
+    
     var tagsData: [TrainerTagModel]? = []
     var sessionCost:[String] = ["0.0"]
     
@@ -30,6 +35,7 @@ class ChooseSessionViewController: CommonViewController {
         }
     }
     
+    var isValidityData:Bool? = true
     
     private let tooltipView: UIView = {
         let vv = UIView()
@@ -84,15 +90,7 @@ class ChooseSessionViewController: CommonViewController {
             
         setupUI()
         setUpFont()
-        setUpTotalCost()
-        
-        self.startMonthLbl.text = "1 sessions"
-        
-        //---------------
-        inputParams?.sessions = "1"
-        self.createPackageApi(parms: inputParams?.getParams())
-        self.setInputData()
-        
+        self.setupFlowLoad()
     }
     
     deinit {
@@ -159,54 +157,228 @@ class ChooseSessionViewController: CommonViewController {
             break
         case .validity:
             flowSession = .defaultSession
+            isValidityData = true
             self.setInputData()
-        case .defaultSession:
+        case .validityMembership, .defaultSession:
             
             self.navigationController?.popViewController(animated: true)
         }
     }
     
+    private func setupFlowLoad(){
+        switch flowSession {
+        case .session, .validity, .defaultSession:
+            
+            setUpTotalCost()
+            self.startMonthLbl.text = "1 sessions"
+            //---------------
+            inputParams?.sessions = "1"
+            self.createPackageApi(parms: inputParams?.getParams())
+            self.setInputData()
+            break
+            
+        case .validityMembership:
+           
+            print("validityMembership..")
+            self.perSessionCostLbl.text = "Per Package Cost"
+            self.perSessionCostLbl.textColor = UIColor.txtDarkGray
+            self.totalCostLbl.text = "Total Cost"
+            self.totalCostLbl.textColor = UIColor.appYellow
+            self.sessionToggleBtn.isSelected = true
+            self.sessionToggleBtn.isUserInteractionEnabled = false
+           
+            let costAmt:String = "0"
+            
+            self.sessionCost.removeAll()
+            self.sessionCost.append(costAmt)
+            totalCostAmtPicker.items = sessionCost //items
+            totalCostAmtPicker.layoutIfNeeded()
+            
+            self.setUpTotalCost()
+            self.costSlider.isUserInteractionEnabled = true
+            self.topTitleLbl.text = "Validity of the package?"
+            self.noteStrings.removeAll()
+            self.noteStrings.append("The validity of the package determines the access period for MyPT gym")
+            scrollText(indx: 1)
+            
+            self.startMonthLbl.text = packageDetails?.validity
+            self.startMonthLbl.text = "1 day"
+            self.endPointLbl.text = "365 days"
+            
+            self.getMembershipValityApi(studioIdStr: validityMembershipParam?.studioStr, dayStr: validityMembershipParam?.days)
+            
+            self.setInputData()
+        
+            break
+        }
+    }
     
     //MARK: ---------------SETUP DATA
     private func setInputData(){
-        self.trainerProfileImgView.loadImage(urlString: packageDetails?.trainer?.image, placeholder: AppImages.navLeft)
-        self.trainerNameLbl.text = packageDetails?.trainer?.name
-//        self.noteStrings.removeAll()
-//        self.noteStrings.append("Increase session count for lower per session cost")
-        
-        self.setTotalCost(isTotalCost: isShowTotalCost)
         
         switch flowSession {
         case .session:
             //--------session is default set
             break
         case .validity:
-
-            self.costSlider.isUserInteractionEnabled = false
-            self.topTitleLbl.text = "Validity of the package?"
-            self.noteStrings.removeAll()
-            self.noteStrings.append("The validity of the package also determines the access period for the trainer")
-            scrollText(indx: 1)
             
+            if let _ = isValidityData {
+                self.trainerProfileImgView.loadImage(urlString: packageDetails?.trainer?.image, placeholder: AppImages.navLeft)
+                self.trainerNameLbl.text = packageDetails?.trainer?.name
+        //        self.noteStrings.removeAll()
+        //        self.noteStrings.append("Increase session count for lower per session cost")
+                
+                self.costSlider.isUserInteractionEnabled = false
+                self.topTitleLbl.text = "Validity of the package?"
+                self.noteStrings.removeAll()
+                self.noteStrings.append("The validity of the package also determines the access period for the trainer")
+                scrollText(indx: 1)
+            }
+   
+            self.setTotalCost(isTotalCost: isShowTotalCost)
             self.startMonthLbl.text = packageDetails?.validity
-            
             self.endPointLbl.text = "12"
+
+//            self.costSlider.isUserInteractionEnabled = false
+//            self.topTitleLbl.text = "Validity of the package?"
+//            self.noteStrings.removeAll()
+//            self.noteStrings.append("The validity of the package also determines the access period for the trainer")
+//            scrollText(indx: 1)
             
-//            let percentage = Int(sender.value / sender.maximumValue * 100)
-//            if percentage > 60 {
-//            }else{
-//            }
+//            self.startMonthLbl.text = packageDetails?.validity
+//            
+//            self.endPointLbl.text = "12"
+                        
+        case .validityMembership:
+            print("validity membership..")
+            
+            if let _ = isValidityData {
+                self.costSlider.isUserInteractionEnabled = true
+                self.topTitleLbl.text = "Validity of the package?"
+                self.noteStrings.removeAll()
+                self.noteStrings.append("The validity of the package determines the access period for MyPT gym")
+                scrollText(indx: 1)
+                
+    //            self.startMonthLbl.text = (membershipDetailsData?.packageDetail?.validity?.value ?? "") + " days" //"1 day"
+    //            self.endPointLbl.text = "365 days"
+                
+                //-----------------------***********
+                self.trainerProfileImgView.loadImage(urlString: membershipDetailsData?.studio?.profile, placeholder: AppImages.navLeft)
+                self.trainerNameLbl.text = membershipDetailsData?.studio?.name
+                
+            }
+           
+            
+            self.setValidityWithoutTrainer()
+            
+//            //-------------------- Cost
+//            let costAmt:String = membershipDetailsData?.packageDetail?.price?.value ?? "0"
+//            
+//            self.sessionCost.removeAll()
+//            self.sessionCost.append(costAmt)
+//            totalCostAmtPicker.items = sessionCost //items
+//            totalCostAmtPicker.layoutIfNeeded()
+//            
+//            //-------------------- Attributed Text for Discount Price
+//            let totalPrice = "" //"\(packageDetails?.totalPrice ?? 0.0)"
+//            
+//            let defaultAttributes = [
+//                .font: AppFont.semibold.size(25.0, familyName: familyClashDisplay),
+//                .foregroundColor: UIColor.appWhite
+//            ] as [NSAttributedString.Key : Any]
+//            
+//            let makeAttributes = [
+//                .font: AppFont.semibold.size(20.0, familyName: familyClashDisplay),
+//                .foregroundColor: UIColor.appWhite
+//            ] as [NSAttributedString.Key : Any]
+//                    
+//            let attributedNickName = [
+//                "",
+//                totalPrice.strikeThrough(with: AppFont.medium.size(20.0, familyName: familyClashDisplay), color: UIColor.txtDarkGray),
+//                NSAttributedString(string: "AED",
+//                                   attributes: makeAttributes),
+//            ] as [AttributedStringComponent]
+//            
+//            self.sessionCostLbl.attributedText = NSAttributedString(from: attributedNickName, defaultAttributes: defaultAttributes)
+//            
+//            self.sessionCostLbl.applyGradientLabel(colors: [UIColor.appWhite, UIColor.appWhite, UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0)], locations: [0, 0.3, 1.0])
+//            
+//            //---------------------***********
+//            self.updateContainerWidth()
+            
             
         case .defaultSession:
-            self.costSlider.isUserInteractionEnabled = true
-            self.topTitleLbl.text = "Choose total sessions"
-            self.noteStrings.removeAll()
-            self.noteStrings.append("Increase session count for lower per session cost")
-            scrollText(indx: 0)
+            
+            if let _ = isValidityData {
+                self.costSlider.isUserInteractionEnabled = true
+                self.topTitleLbl.text = "Choose total sessions"
+                self.noteStrings.removeAll()
+                self.noteStrings.append("Increase session count for lower per session cost")
+                scrollText(indx: 1)
+                self.trainerProfileImgView.loadImage(urlString: packageDetails?.trainer?.image, placeholder: AppImages.navLeft)
+                self.trainerNameLbl.text = packageDetails?.trainer?.name
+            }
             
             self.costSlider.sendActions(for: .valueChanged)
             self.endPointLbl.text = "\(Int(costSlider.maximumValue))"
+            self.setTotalCost(isTotalCost: isShowTotalCost)
+            
+//            self.costSlider.isUserInteractionEnabled = true
+//            self.topTitleLbl.text = "Choose total sessions"
+//            self.noteStrings.removeAll()
+//            self.noteStrings.append("Increase session count for lower per session cost")
+//            scrollText(indx: 1)
+            
+//            self.costSlider.sendActions(for: .valueChanged)
+//            self.endPointLbl.text = "\(Int(costSlider.maximumValue))"
+            
+//            self.trainerProfileImgView.loadImage(urlString: packageDetails?.trainer?.image, placeholder: AppImages.navLeft)
+//            self.trainerNameLbl.text = packageDetails?.trainer?.name
+    //        self.noteStrings.removeAll()
+    //        self.noteStrings.append("Increase session count for lower per session cost")
+            
+//            self.setTotalCost(isTotalCost: isShowTotalCost)
         }
+    }
+    
+    private func setValidityWithoutTrainer(){
+        
+        self.startMonthLbl.text = (membershipDetailsData?.packageDetail?.validity?.value ?? "") + " days" //"1 day"
+        self.endPointLbl.text = "365 days"
+        //-------------------- Cost
+        let costAmt:String = membershipDetailsData?.packageDetail?.price?.value ?? "0"
+        
+        self.sessionCost.removeAll()
+        self.sessionCost.append(costAmt)
+        totalCostAmtPicker.items = sessionCost //items
+        totalCostAmtPicker.layoutIfNeeded()
+        
+        //-------------------- Attributed Text for Discount Price
+        let totalPrice = "" //"\(packageDetails?.totalPrice ?? 0.0)"
+        
+        let defaultAttributes = [
+            .font: AppFont.semibold.size(25.0, familyName: familyClashDisplay),
+            .foregroundColor: UIColor.appWhite
+        ] as [NSAttributedString.Key : Any]
+        
+        let makeAttributes = [
+            .font: AppFont.semibold.size(20.0, familyName: familyClashDisplay),
+            .foregroundColor: UIColor.appWhite
+        ] as [NSAttributedString.Key : Any]
+                
+        let attributedNickName = [
+            "",
+            totalPrice.strikeThrough(with: AppFont.medium.size(20.0, familyName: familyClashDisplay), color: UIColor.txtDarkGray),
+            NSAttributedString(string: "AED",
+                               attributes: makeAttributes),
+        ] as [AttributedStringComponent]
+        
+        self.sessionCostLbl.attributedText = NSAttributedString(from: attributedNickName, defaultAttributes: defaultAttributes)
+        
+        self.sessionCostLbl.applyGradientLabel(colors: [UIColor.appWhite, UIColor.appWhite, UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0)], locations: [0, 0.3, 1.0])
+        
+        //---------------------***********
+        self.updateContainerWidth()
     }
     
     private func setTotalCost(isTotalCost:Bool){
@@ -255,19 +427,40 @@ class ChooseSessionViewController: CommonViewController {
 //        let items = ["50", "80", "100", "150", "200", "250", "300"]
         // Set the items for the picker
         
-        totalCostAmtPicker.items = sessionCost //items
-        costSlider.minimumValue = 1
-        costSlider.maximumValue = 100 //Float(sessionCost.count - 1) //Float(items.count - 1)
-        // Initially center the picker at the first item
-        totalCostAmtPicker.scrollToRow(0)
-        
-        //--------------
-        self.startPointLbl.text = "0"
-        self.endPointLbl.text = "\(Int(costSlider.maximumValue))"
-        
-        if let label = tooltipView.viewWithTag(100) as? UILabel {
-            label.text = "Save \(1)%"
+        switch flowSession {
+        case .session, .validity, .defaultSession:
+            totalCostAmtPicker.items = sessionCost //items
+            costSlider.minimumValue = 1
+            costSlider.maximumValue = 100 //Float(sessionCost.count - 1) //Float(items.count - 1)
+            // Initially center the picker at the first item
+            totalCostAmtPicker.scrollToRow(0)
+            
+            //--------------
+            self.startPointLbl.text = "0"
+            self.endPointLbl.text = "\(Int(costSlider.maximumValue))"
+            
+            if let label = tooltipView.viewWithTag(100) as? UILabel {
+                label.text = "Save \(1)%"
+            }
+            
+        case .validityMembership:
+                        
+            //------
+            totalCostAmtPicker.items = sessionCost //items
+            costSlider.minimumValue = 1
+            costSlider.maximumValue = 365
+            // Initially center the picker at the first item
+            totalCostAmtPicker.scrollToRow(0)
+            
+            //--------------
+            self.startPointLbl.text = "0"
+            self.endPointLbl.text = "\(Int(costSlider.maximumValue))"
+            
+            if let label = tooltipView.viewWithTag(100) as? UILabel {
+                label.text = "Save \(1)%"
+            }
         }
+        
     }
     
     func updateContainerWidth() {
@@ -303,21 +496,12 @@ class ChooseSessionViewController: CommonViewController {
             
             //----------------Gradient view
             
-            self.trainerProfileImgView.setCornerRadius(borderWidth: 0.5, borderColor: UIColor.appBorder, cornerRadious: self.trainerProfileImgView.frame.height/2.0)
+            self.trainerProfileImgView.setCornerRadius(borderWidth: 0.5, borderColor: UIColor.appBorder, cornerRadious: 12.0)
             self.sessionNoteMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appBorder, cornerRadious: 8.0)
             self.consultExpertMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             
             self.consultExpertBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            
-            /*
-             self.sessionSliderMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-             
-             self.sessionSliderMBV.layerGradient(startPoint: .topLeft, endPoint: .bottomRight, colorArray: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 019.0/255.0, alpha: 1.0).cgColor, UIColor(red: 71/255.0, green: 77/255.0, blue: 96/255.0, alpha: 1).cgColor, UIColor.mainBg.cgColor], type: .conic)
-             
-             self.sessionSliderMBV.setGradientBorder(cornerRadious:12,width: 1.0, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)])
-             */
-            
         }
     }
     
@@ -334,28 +518,6 @@ class ChooseSessionViewController: CommonViewController {
         self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
         self.startPointLbl.font = AppFont.semibold.size(10.0, familyName: familyManrope)
         self.endPointLbl.font = AppFont.semibold.size(10.0, familyName: familyManrope)
-        
-//        self.sessionCostLbl.font = AppFont.semibold.size(44.0, familyName: familyClashDisplay)
-        
-//        //-------------------- Attributed Text for Price
-//        let defaultAttributes = [
-//            .font: AppFont.semibold.size(25.0, familyName: familyClashDisplay),
-//            .foregroundColor: UIColor.appWhite
-//        ] as [NSAttributedString.Key : Any]
-//        
-//        let makeAttributes = [
-//            .font: AppFont.semibold.size(20.0, familyName: familyClashDisplay),
-//            .foregroundColor: UIColor.appWhite
-//        ] as [NSAttributedString.Key : Any]
-//        
-//        let attributedNickName = [
-//            "",
-//            "400".strikeThrough(with: AppFont.medium.size(20.0, familyName: familyClashDisplay), color: UIColor.txtDarkGray),
-//            NSAttributedString(string: "AED / Session",
-//                               attributes: makeAttributes),
-//        ] as [AttributedStringComponent]
-//        
-//        self.sessionCostLbl.attributedText = NSAttributedString(from: attributedNickName, defaultAttributes: defaultAttributes)
     }
     
     
@@ -363,55 +525,103 @@ class ChooseSessionViewController: CommonViewController {
     
     @objc func sliderTouchEnded(_ sender: UISlider) {
           print("Final Value on Scroll End: \(Int(sender.value))") // Value when user lifts finger
-        let row = Int(sender.value)
-//        inputParams?.sessions = "\(row+1)"
-        inputParams?.sessions = "\(row)"
-        self.createPackageApi(parms: inputParams?.getParams())
+        //-----------------------
+        switch flowSession {
+        case .session, .validity, .defaultSession:
+            let row = Int(sender.value)
+    //        inputParams?.sessions = "\(row+1)"
+            inputParams?.sessions = "\(row)"
+            self.createPackageApi(parms: inputParams?.getParams())
+       
+        case .validityMembership:
+            let row = Int(sender.value)
+       
+            self.validityMembershipParam?.days = "\(row)"
+           
+            self.getMembershipValityApi(studioIdStr: validityMembershipParam?.studioStr, dayStr: self.validityMembershipParam?.days)
+        }
+        
       }
     
     @IBAction func costSliderActn(_ sender: UISlider) {
         let row = Int(sender.value)
         guard sender.maximumValue > 1 else { return }
-        
         print("Scroll slider Row value : ", row)
-        
-        if sessionCost.count > 1 && row < sessionCost.count {
-            totalCostAmtPicker.scrollToRow(row, animated: true)
-        }
+        switch flowSession {
+        case .session, .validity, .defaultSession:
+           
+            if sessionCost.count > 1 && row < sessionCost.count {
+                totalCostAmtPicker.scrollToRow(row, animated: true)
+            }
 
-        self.updateContainerWidth()
-        
-        //---------------------*************
-        // Update tooltip text
-        let percentage = Int(sender.value / sender.maximumValue * 100)
-        //        tooltipLabel.text = "Save \(percentage)%"
-        
-        if let label = tooltipView.viewWithTag(100) as? UILabel {
-            label.text = "Save \(percentage)%"
-        }
-        
-        if percentage > 60 {
-//            self.startMonthLbl.text = "12 month"
-            self.startMonthLbl.text = "\(row) sessions" //"100 sessions"
-            self.startMonthLbl.textAlignment = .right
-            self.startScrolling()
+            self.updateContainerWidth()
             
-            if 1 <= noteStrings.count {
-                scrollText(indx: 1)
+            //---------------------*************
+            // Update tooltip text
+            let percentage = Int(sender.value / sender.maximumValue * 100)
+            //        tooltipLabel.text = "Save \(percentage)%"
+            
+            if let label = tooltipView.viewWithTag(100) as? UILabel {
+                label.text = "Save \(percentage)%"
             }
             
-        }else{
-//            self.startMonthLbl.text = "3 month"
-            self.startMonthLbl.text = "\(row) sessions" //"3 sessions"
-            self.startMonthLbl.textAlignment = .left
-            self.startScrolling()
-            
-            if 1 <= noteStrings.count {
-                scrollText(indx: 0)
+            if percentage > 60 {
+    //            self.startMonthLbl.text = "12 month"
+                self.startMonthLbl.text = "\(row) sessions" //"100 sessions"
+                self.startMonthLbl.textAlignment = .right
+                self.startScrolling()
+                
+                if 1 <= noteStrings.count {
+                    scrollText(indx: 1)
+                }
+                
+            }else{
+    //            self.startMonthLbl.text = "3 month"
+                self.startMonthLbl.text = "\(row) sessions" //"3 sessions"
+                self.startMonthLbl.textAlignment = .left
+                self.startScrolling()
+                
+                if 1 <= noteStrings.count {
+                    scrollText(indx: 0)
+                }
             }
+            
+            updateTooltipPosition()
+            
+        case .validityMembership:
+            
+            if sessionCost.count > 1 && row < sessionCost.count {
+                totalCostAmtPicker.scrollToRow(row, animated: true)
+            }
+            self.updateContainerWidth()
+            
+            //---------------------*************
+            // Update tooltip text
+            let percentage = Int(sender.value / sender.maximumValue * 100)
+            //        tooltipLabel.text = "Save \(percentage)%"
+            
+            if let label = tooltipView.viewWithTag(100) as? UILabel {
+                label.text = "Save \(percentage)%"
+            }
+            
+            if percentage > 60 {
+                self.startMonthLbl.text = "\(row) days"
+                self.startMonthLbl.textAlignment = .right
+                self.startScrolling()
+                if 1 <= noteStrings.count {
+                    scrollText(indx: 1)
+                }
+            }else{
+                self.startMonthLbl.text = "\(row) days"
+                self.startMonthLbl.textAlignment = .left
+                self.startScrolling()
+                
+                if 1 <= noteStrings.count {
+                    scrollText(indx: 0)
+                }
+            }
+            updateTooltipPosition()
         }
-        
-        updateTooltipPosition()
     }
     
     //MARK: --------------ANIMATED MONTH LABEL
@@ -464,23 +674,22 @@ class ChooseSessionViewController: CommonViewController {
                 vc.sessionsStr = packageDetails?.details?.sessions
                 self.navigationController?.pushViewController(vc, animated: true)
                 
+            case .validityMembership:
+                print("validity membership..")
+                
+                let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
+                vc.slotBookFlow = .withoutTrainerMembership
+                vc.totalDays = Int(membershipDetailsData?.packageDetail?.validity?.value ?? "0")
+                vc.priceStr = membershipDetailsData?.packageDetail?.price?.value
+                vc.studioIdStr = "\(membershipDetailsData?.studio?.id ?? 0)"
+                self.navigationController?.pushViewController(vc, animated: true)
+
             case .defaultSession:
                 flowSession = .validity
+                self.isValidityData = true
                 self.setInputData()
             }
-            
-            
-            /*
-            let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
-            vc.slotBookFlow = .createPackage
-            vc.params = availParams
-            vc.totalDays = packageDetails?.totalDays
-            vc.packageTypeStr = "\(packageDetails?.details?.packageType ?? 1)"
-            vc.sessionsStr = packageDetails?.details?.sessions
-            self.navigationController?.pushViewController(vc, animated: true)
-            
-            */
-            
+ 
         default:
             print("non...........")
         }
@@ -589,20 +798,34 @@ extension ChooseSessionViewController{
             print("getResultData", getResultData)
             if getResultData.status == true {
                 self.packageDetails = getResultData.data
-               
                 self.setInputData()
+                self.isValidityData = nil
                 self.tagsData?.removeAll()
                 self.tagsData?.append(contentsOf: self.packageDetails?.trainer?.tags ?? [])
                 print(self.tagsData?.count ?? 0)
                 self.categoryCollView.reloadData()
-                
-//                self.sessionCost.removeAll()
-//                self.sessionCost.append("\(self.packageDetails?.pricePerSession ?? 0.0)")
-//                totalCostAmtPicker.items = sessionCost //items
-//                totalCostAmtPicker.layoutIfNeeded()
                 self.updateContainerWidth()
                 
             }
+        })
+    }
+    
+    //MARK: ---------------MEMBERSHIP VALIDITY
+    func getMembershipValityApi(studioIdStr: String?, dayStr: String?){
+        CreatePackageVM.membershipValidityApi(viewController: self, inputStudioId: studioIdStr, inputDays: dayStr, completion: {[weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return }
+            
+            self.membershipDetailsData = getResultData.data
+            self.setInputData()
+            self.isValidityData = nil
+            self.tagsData?.removeAll()
+            if let getTags = self.membershipDetailsData?.studio?.tags {
+                self.tagsData = getTags.enumerated().map { index, name in
+                     TrainerTagModel(id: index + 1, name: name)
+                }
+            }
+            self.categoryCollView.reloadData()       
+            self.updateContainerWidth()
         })
     }
 }

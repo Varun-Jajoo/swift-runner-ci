@@ -15,7 +15,6 @@ class CreatePackageViewViewController: CommonViewController {
     var avialCalanderparams:AvailParmsModel?
     var isFirst:Bool? = true
     
-   
     //MARK: -------------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
     @IBOutlet weak var packageList: UITableView!
@@ -58,14 +57,6 @@ class CreatePackageViewViewController: CommonViewController {
             vc.availParams = self.avialCalanderparams
             self.navigationController?.pushViewController(vc, animated: true)
         }
-        
-        
-        /*
-        let vc:ChooseSessionViewController = ChooseSessionViewController.instantiate(appStoryboard: .booking)
-        vc.inputParams = self.createParams
-        vc.availParams = self.avialCalanderparams
-        self.navigationController?.pushViewController(vc, animated: true)
-        */
     }
     
     override func viewWillAppear(_ animated: Bool) {

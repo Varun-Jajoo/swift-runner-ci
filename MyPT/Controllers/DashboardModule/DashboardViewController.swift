@@ -191,9 +191,14 @@ class DashboardViewController: CommonViewController {
         case Btntag.bookTrainer.rawValue:
             print("book trainer")
             let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
+            vc.flowCreatePackage = .createPackage
             self.navigationController?.pushViewController(vc, animated: false)
         default:
             print("None.....")
+            let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
+            vc.flowCreatePackage = .gymMembership
+            self.navigationController?.pushViewController(vc, animated: false)
+            
             break
         }
     }

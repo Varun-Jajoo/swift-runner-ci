@@ -65,16 +65,20 @@ class CancellationPolicyViewController: UIViewController {
     func setupFont(){
         
         self.camcellationPolicyTitleLbl.font = AppFont.semibold.size(18.0, familyName: familyManrope)
-        self.timeTitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.cancellationBeforeTimeLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.freeLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.timeCancellationWithinTimeLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.chargesLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.cancellationDescTitleLbl.font = AppFont.semibold.size(18.0, familyName: familyManrope)
-        self.cancellationDescLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
         self.okBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
-         
+        self.cancellationDescTitleLbl.font = AppFont.semibold.size(18.0, familyName: familyManrope)
+        
+        [
+            self.timeTitleLbl,
+            self.cancellationBeforeTimeLbl,
+            self.freeLbl,
+            self.timeCancellationWithinTimeLbl,
+            self.chargesLbl,
+            self.cancellationDescLbl
+        ].forEach({ [weak self]  in
+            guard let self = self else { return  }
+            $0?.font = AppFont.semibold.size(14.0, familyName: familyManrope)
+        })
     }
     
-
 }

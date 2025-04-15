@@ -57,7 +57,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     //MARK: -----------CHECK USER LOGIN
     func checkIsUserLogin(){
         if appUserDefaults.getUserFromUserDefaults(as: SubmitDataModel.self)?.user?.id != 0 && appUserDefaults.getUserFromUserDefaults(as: SubmitDataModel.self)?.user?.isCompleted == 1 {
-            print(appUserDefaults.getIsPackageCreated())
+           
+//            self.setupTab(selectedTab: 0, isGoGeustDashboard: true)
+            
             self.setupTab(selectedTab: 0, isGoGeustDashboard: appUserDefaults.getIsPackageCreated())
         }else{
             self.goToMainView()

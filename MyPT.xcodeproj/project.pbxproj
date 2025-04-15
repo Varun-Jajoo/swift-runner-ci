@@ -59,6 +59,7 @@
 		B82622942CE37BCC000DFF7E /* UpcomingSessionsCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B82622912CE37BCC000DFF7E /* UpcomingSessionsCollectionViewCell.swift */; };
 		B82622982CE38573000DFF7E /* UpcomingMealsCollectionViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B82622972CE38573000DFF7E /* UpcomingMealsCollectionViewCell.xib */; };
 		B82622992CE38573000DFF7E /* UpcomingMealsCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B82622962CE38573000DFF7E /* UpcomingMealsCollectionViewCell.swift */; };
+		B82C5DC02DAD140400D12B85 /* ReviewPackageWithoutTrainerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B82C5DBF2DAD140400D12B85 /* ReviewPackageWithoutTrainerModel.swift */; };
 		B8335C462D38F27700B52EAF /* ChooseWorkoutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8335C452D38F27700B52EAF /* ChooseWorkoutViewController.swift */; };
 		B8335C482D3930AC00B52EAF /* BodyPartName.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8335C472D3930AB00B52EAF /* BodyPartName.swift */; };
 		B83364682D91860400EF5C82 /* AvailabilityCalendarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B83364672D91860400EF5C82 /* AvailabilityCalendarModel.swift */; };
@@ -417,6 +418,7 @@
 		B82622922CE37BCC000DFF7E /* UpcomingSessionsCollectionViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = UpcomingSessionsCollectionViewCell.xib; sourceTree = "<group>"; };
 		B82622962CE38573000DFF7E /* UpcomingMealsCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpcomingMealsCollectionViewCell.swift; sourceTree = "<group>"; };
 		B82622972CE38573000DFF7E /* UpcomingMealsCollectionViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = UpcomingMealsCollectionViewCell.xib; sourceTree = "<group>"; };
+		B82C5DBF2DAD140400D12B85 /* ReviewPackageWithoutTrainerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPackageWithoutTrainerModel.swift; sourceTree = "<group>"; };
 		B8335C452D38F27700B52EAF /* ChooseWorkoutViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseWorkoutViewController.swift; sourceTree = "<group>"; };
 		B8335C472D3930AB00B52EAF /* BodyPartName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyPartName.swift; sourceTree = "<group>"; };
 		B83364672D91860400EF5C82 /* AvailabilityCalendarModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailabilityCalendarModel.swift; sourceTree = "<group>"; };
@@ -1394,6 +1396,7 @@
 				B83364672D91860400EF5C82 /* AvailabilityCalendarModel.swift */,
 				B8BF06132D93D3E0009CC173 /* BookedSlotModel.swift */,
 				B854EDCB2D97E93F004D048F /* CreatePackageModel.swift */,
+				B82C5DBF2DAD140400D12B85 /* ReviewPackageWithoutTrainerModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -1856,6 +1859,7 @@
 				B842FAA22D60988A00E46E2B /* MealsViewController.swift in Sources */,
 				B8FBFE2D2D267ED3001041E5 /* InnerTableViewCell.swift in Sources */,
 				B89EC81F2D0036BE00FF5814 /* ReviewPackageViewController.swift in Sources */,
+				B82C5DC02DAD140400D12B85 /* ReviewPackageWithoutTrainerModel.swift in Sources */,
 				B807A2A12D7ABCA5009B1222 /* OrderRefundViewController.swift in Sources */,
 				B8F84D492D883363006C98EF /* SelectYourLocationViewController.swift in Sources */,
 				B8E7887F2D2FA82500F1D5D6 /* WorkoutTableViewCell.swift in Sources */,

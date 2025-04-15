@@ -12,11 +12,16 @@ class ReviewPackageViewController: CommonViewController {
     //MARK: -----------VARIBALE
     var inputCheckoutParams: SetDateParams?
     var inputBookSlotParams:BookSlotParamsModel? = nil
+    var inputParamMembership: WithoutTrainerParams? = nil
     var packagecheckoutData: PackageCheckoutDataModel?
+    var reviewDetailsWithoutTrainer: ReviewDataModel?
+    
     var trainersList: [PackageCheckoutTrainerModel]? = []
     var studioData:PackageCheckoutStudioModel?
     var memberList:[MemberModel]? = []
     var packageDetailsData:[[String:Any]]?
+    var packageWithoutTrainer: [ReviewPackageDetailModel]? = []
+    var flowReview: calendarFlow = .defaultFlow
     
     
     //MARK: ------------IBOUTLET
@@ -60,17 +65,11 @@ class ReviewPackageViewController: CommonViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-//        setupUI()
+        
         setNavUI()
         setUpFont()
-                        
         self.offerDetailsMBV.isHidden = true
-        
-        //-------------------Api
-        self.packageCheckoutApi(inputParams: inputCheckoutParams?.getPackageCheckoutParams())
-        
-        self.setInputData()
+        self.setupFlow()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -85,11 +84,6 @@ class ReviewPackageViewController: CommonViewController {
         
         setupUI()
         view.layoutIfNeeded()
-        
-//        DispatchQueue.main.async {
-//            self.addressTypeBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: self.addressTypeBtn.frame.height/2.5)
-//        }
-      
     }
     
     private func setNavUI(){
@@ -97,88 +91,156 @@ class ReviewPackageViewController: CommonViewController {
         self.setRighMenu(rightImgs: [AppImages.moreSettings], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
     
+    private func setupFlow(){
+        switch flowReview {
+        case .bookTrainerHomeWorkout, .bookTrainerGymWorkout, .createPackage, .gymMembership, .withTrainerMembership, .defaultFlow:
+            //-------------------Api
+            self.packageCheckoutApi(inputParams: inputCheckoutParams?.getPackageCheckoutParams())
+            self.setInputData()
+            
+        case .withoutTrainerMembership:
+           
+            self.trainingPreferenceMBV.isHidden = true
+            self.bookingSlotMBV.isHidden = true
+            self.addressMBV.isHidden = true
+            self.memberMBV.isHidden = true
+            self.memberList?.removeAll()
+            self.memberMBV.isHidden = true
+            
+            self.reviewPachageWithoutTrainer(inputParam: inputParamMembership?.getParamsReviewPackage() ?? [:])
+        }
+    }
+    
     private func setInputData(){
         
-        self.preferenceLbl.text = packagecheckoutData?.trainingPreference
-        self.bookingTimeLbl.text = packagecheckoutData?.slotTime
+        switch flowReview {
+        case .bookTrainerHomeWorkout, .bookTrainerGymWorkout, .createPackage, .gymMembership, .withTrainerMembership, .defaultFlow:
+            
+            self.preferenceLbl.text = packagecheckoutData?.trainingPreference
+            self.bookingTimeLbl.text = packagecheckoutData?.slotTime
 
-        if let getAddress = packagecheckoutData?.address {
-            self.addressMBV.isHidden = false
+            if let getAddress = packagecheckoutData?.address {
+                self.addressMBV.isHidden = false
+                
+                self.addressTypeBtn.setTitle(getAddress.type?.localizedCapitalized, for: .normal)
+                
+                let fullAddrStr = [getAddress.building_name?.value, getAddress.street?.value, getAddress.landmark, getAddress.city_name, getAddress.country_name]
+                    .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+                    .filter { !$0.isEmpty }
+                    .joined(separator: ", ")
+                
+                self.addressLbl.text = fullAddrStr
+                
+            }else{
+                self.addressMBV.isHidden = true
+            }
             
-            self.addressTypeBtn.setTitle(getAddress.type?.localizedCapitalized, for: .normal)
+            //----------------------***************
+            let startDateStr = DateFormatterHelper.shared.dateInsuffix(from: packagecheckoutData?.packageDetail?.startDate ?? "", fromFormat: "yyyy-MM-dd", toFormat: "d MMM yyyy") ?? ""
+            let endDateStr = DateFormatterHelper.shared.dateInsuffix(from: packagecheckoutData?.packageDetail?.endDate ?? "", fromFormat: "yyyy-MM-dd", toFormat: "d MMM yyyy") ?? ""
             
-            let fullAddrStr = [getAddress.building_name?.value, getAddress.street?.value, getAddress.landmark, getAddress.city_name, getAddress.country_name]
-                .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
-                .filter { !$0.isEmpty }
-                .joined(separator: ", ")
+            self.packageDetailsData = [
+                ["title":"Package","desc":packagecheckoutData?.packageDetail?.package ?? ""],
+                ["title":"Start Date","desc": startDateStr],
+                ["title":"End date","desc": endDateStr],
+                ["title":"Total Sessions","desc":packagecheckoutData?.packageDetail?.totalSessions ?? ""]
+            ]
             
-            self.addressLbl.text = fullAddrStr
+            self.packageDetails.reloadData()
             
-        }else{
-            self.addressMBV.isHidden = true
+            
+            //-------------------- Attributed Text for Price
+            var getAmount:String = ""
+            var currencyStr:String = ""
+            
+            if let pricePackage = packagecheckoutData?.packageDetail?.price {
+                let components = pricePackage.split(separator: " ")
+                getAmount = "\(components.first ?? "")"
+                currencyStr = "\(components.last ?? "")"
+            }
+            
+            let defaultAttributes = [
+                .font: AppFont.bold.size(32.0, familyName: familyManrope),
+                .foregroundColor: UIColor.appWhite
+            ] as [NSAttributedString.Key : Any]
+            
+            let makeAttributes = [
+                .font: AppFont.regular.size(14.0, familyName: familyManrope),
+                .foregroundColor: UIColor.appWhite
+            ] as [NSAttributedString.Key : Any]
+            
+            let priceAttributed = [
+                getAmount,
+                NSAttributedString(string: currencyStr,
+                                   attributes: makeAttributes)
+            ] as [AttributedStringComponent]
+            
+            self.paymentAmountLbl.attributedText = NSAttributedString(from: priceAttributed, defaultAttributes: defaultAttributes)
+            
+           
+            //-------------------- Attributed Text for MOBILE NUMBER
+            let mobileDefault = [
+                .font: AppFont.semibold.size(12.0, familyName: familyManrope),
+                .foregroundColor: UIColor.appDarkGray
+            ] as [NSAttributedString.Key : Any]
+            
+            let moblieAttr = [
+                .font: AppFont.semibold.size(12.0, familyName: familyManrope),
+                .foregroundColor: UIColor.appWhite
+            ] as [NSAttributedString.Key : Any]
+            
+            let mobileMakeAttr = [
+                "Mobile: ",
+                NSAttributedString(string: packagecheckoutData?.address?.mobile_no?.value ?? "",
+                                   attributes: moblieAttr)
+            ] as [AttributedStringComponent]
+            
+            self.mobileNumnLbl.attributedText = NSAttributedString(from: mobileMakeAttr, defaultAttributes: mobileDefault)
+            
+        case .withoutTrainerMembership:
+            
+         //----------------------***************
+          
+            if let packageDetail = reviewDetailsWithoutTrainer?.packageDetail {
+                self.packageDetailsData = [
+                    ["title":"Package","desc": packageDetail.package ?? ""],
+                    ["title":"Start Date","desc": packageDetail.startDate ?? ""],
+                    ["title":"End date","desc": packageDetail.endDate ?? ""],
+                    ["title":"Total Duration","desc": packageDetail.totalDuration ?? ""]
+                ]
+                
+                self.packageDetails.reloadData()
+            }
+            
+            //-------------------- Attributed Text for Price
+            var getAmount:String = ""
+            var currencyStr:String = ""
+            
+            if let pricePackage = reviewDetailsWithoutTrainer?.price {
+                let components = pricePackage.split(separator: " ")
+                getAmount = "\(components.first ?? "")"
+                currencyStr = components.count > 0 ? "AED" : "\(components.last ?? "")"
+            }
+            
+            let defaultAttributes = [
+                .font: AppFont.bold.size(32.0, familyName: familyManrope),
+                .foregroundColor: UIColor.appWhite
+            ] as [NSAttributedString.Key : Any]
+            
+            let makeAttributes = [
+                .font: AppFont.regular.size(14.0, familyName: familyManrope),
+                .foregroundColor: UIColor.appWhite
+            ] as [NSAttributedString.Key : Any]
+            
+            let priceAttributed = [
+                getAmount,
+                NSAttributedString(string: currencyStr,
+                                   attributes: makeAttributes)
+            ] as [AttributedStringComponent]
+            
+            self.paymentAmountLbl.attributedText = NSAttributedString(from: priceAttributed, defaultAttributes: defaultAttributes)
         }
         
-        //----------------------***************
-        let startDateStr = DateFormatterHelper.shared.dateInsuffix(from: packagecheckoutData?.packageDetail?.startDate ?? "", fromFormat: "yyyy-MM-dd", toFormat: "d MMM yyyy") ?? ""
-        let endDateStr = DateFormatterHelper.shared.dateInsuffix(from: packagecheckoutData?.packageDetail?.endDate ?? "", fromFormat: "yyyy-MM-dd", toFormat: "d MMM yyyy") ?? ""
-        
-        self.packageDetailsData = [
-            ["title":"Package","desc":packagecheckoutData?.packageDetail?.package ?? ""],
-            ["title":"Start Date","desc": startDateStr],
-            ["title":"End date","desc": endDateStr],
-            ["title":"Total Sessions","desc":packagecheckoutData?.packageDetail?.totalSessions ?? ""]
-        ]
-        
-        self.packageDetails.reloadData()
-        
-        
-        //-------------------- Attributed Text for Price
-        var getAmount:String = ""
-        var currencyStr:String = ""
-        
-        if let pricePackage = packagecheckoutData?.packageDetail?.price {
-            let components = pricePackage.split(separator: " ")
-            getAmount = "\(components.first ?? "")"
-            currencyStr = "\(components.last ?? "")"
-        }
-        
-        let defaultAttributes = [
-            .font: AppFont.bold.size(32.0, familyName: familyManrope),
-            .foregroundColor: UIColor.appWhite
-        ] as [NSAttributedString.Key : Any]
-        
-        let makeAttributes = [
-            .font: AppFont.regular.size(14.0, familyName: familyManrope),
-            .foregroundColor: UIColor.appWhite
-        ] as [NSAttributedString.Key : Any]
-        
-        let priceAttributed = [
-            getAmount,
-            NSAttributedString(string: currencyStr,
-                               attributes: makeAttributes)
-        ] as [AttributedStringComponent]
-        
-        self.paymentAmountLbl.attributedText = NSAttributedString(from: priceAttributed, defaultAttributes: defaultAttributes)
-        
-       
-        //-------------------- Attributed Text for MOBILE NUMBER
-        let mobileDefault = [
-            .font: AppFont.semibold.size(12.0, familyName: familyManrope),
-            .foregroundColor: UIColor.appDarkGray
-        ] as [NSAttributedString.Key : Any]
-        
-        let moblieAttr = [
-            .font: AppFont.semibold.size(12.0, familyName: familyManrope),
-            .foregroundColor: UIColor.appWhite
-        ] as [NSAttributedString.Key : Any]
-        
-        let mobileMakeAttr = [
-            "Mobile: ",
-            NSAttributedString(string: packagecheckoutData?.address?.mobile_no?.value ?? "",
-                               attributes: moblieAttr)
-        ] as [AttributedStringComponent]
-        
-        self.mobileNumnLbl.attributedText = NSAttributedString(from: mobileMakeAttr, defaultAttributes: mobileDefault)
     }
     
     
@@ -352,12 +414,19 @@ class ReviewPackageViewController: CommonViewController {
     //MARK: ------------- MAKE PAYMENT BTN ACTN
     @IBAction func paymentBtnActn(_ sender: Any) {
         print("make payment clicked")
-        
-        self.inputBookSlotParams = BookSlotParamsModel(studio_id: inputCheckoutParams?.studio_id, type: inputCheckoutParams?.type, trainer_id: inputCheckoutParams?.trainer_id, slot_id: inputCheckoutParams?.slot_id, address_id: packagecheckoutData?.address?.id?.value, is_package: "1", package_type: inputCheckoutParams?.package_type, date: inputCheckoutParams?.date, end_date: inputCheckoutParams?.end_date, sessions: inputCheckoutParams?.sessions, price: packagecheckoutData?.packageDetail?.price, days: "\(packagecheckoutData?.packageDetail?.days ?? 0)")
-        
-        print("inputBookSlotParams", inputBookSlotParams as Any)
-        //-----------------Called booking Api
-        self.bookSlot(inputParam: self.inputBookSlotParams?.getParams() ?? [:])
+        switch flowReview {
+        case .bookTrainerHomeWorkout, .bookTrainerGymWorkout, .createPackage, .gymMembership, .withTrainerMembership, .defaultFlow:
+            
+            self.inputBookSlotParams = BookSlotParamsModel(studio_id: inputCheckoutParams?.studio_id, type: inputCheckoutParams?.type, trainer_id: inputCheckoutParams?.trainer_id, slot_id: inputCheckoutParams?.slot_id, address_id: packagecheckoutData?.address?.id?.value, is_package: "1", package_type: inputCheckoutParams?.package_type, date: inputCheckoutParams?.date, end_date: inputCheckoutParams?.end_date, sessions: inputCheckoutParams?.sessions, price: packagecheckoutData?.packageDetail?.price, days: "\(packagecheckoutData?.packageDetail?.days ?? 0)")
+            
+            print("inputBookSlotParams", inputBookSlotParams as Any)
+            //-----------------Called booking Api
+            self.bookSlot(inputParam: self.inputBookSlotParams?.getParams() ?? [:])
+            
+        case .withoutTrainerMembership:
+            print("withoutTrainerMembership")
+            self.bookMembershipWithoutTrainer(inputParams: self.inputParamMembership?.getParamsReviewPackage())
+        }
         
     }
     
@@ -383,7 +452,6 @@ class ReviewPackageViewController: CommonViewController {
 extension ReviewPackageViewController: UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        
         if tableView == traninerTblView {
             return trainersList?.count ?? 0
         }else if tableView == packageDetails{
@@ -402,6 +470,9 @@ extension ReviewPackageViewController: UITableViewDelegate, UITableViewDataSourc
                 trainerCell.cellMBV.backgroundColor = UIColor.appCard2
                 trainerCell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             }
+            trainerCell.profileImgView.image = nil
+            trainerCell.ratingBtn.setTitle(nil, for: .normal)
+            trainerCell.trainerNameLbl.text = nil
             
             trainerCell.trainerTagsData = trainersList?[indexPath.row].tags
             trainerCell.setCellData(inputData: trainersList?[indexPath.row])
@@ -415,8 +486,9 @@ extension ReviewPackageViewController: UITableViewDelegate, UITableViewDataSourc
             
             cell.titleLbl.text = packageDetailsData?[indexPath.row]["title"] as? String
             cell.descLbl.text = packageDetailsData?[indexPath.row]["desc"] as? String
-            
+                    
             return cell
+            
         }else{
             let memberCell: AddMemberTableViewCell = membersTblView.dequeueReusableCell(withIdentifier: "AddMemberTableViewCell", for: indexPath) as! AddMemberTableViewCell
            
@@ -452,6 +524,7 @@ extension ReviewPackageViewController: UITableViewDelegate, UITableViewDataSourc
 
 extension ReviewPackageViewController{
     
+    //MARK: ------------------- CHECKOUT REVIEW FROM CREATE PACKAGE/GYM MEMBERSHIP
     private func packageCheckoutApi(inputParams: [String:Any]?){
         print("Package checkout params: ", inputParams as Any)
         CreatePackageVM.packageCheckoutApi(viewController: self, inputParams: inputParams, completion: { [weak self] getResultData in
@@ -467,9 +540,7 @@ extension ReviewPackageViewController{
                     self.trainersList?.append(trainerData)
                     self.traninerTblView.reloadData()
                 }
-                
-//                self.setInputData()
-                
+                                
 //                ---------------For  Gymworkout flow
                 if let getStudioData = getResultData?.data?.studio {
                     self.studioData = getStudioData
@@ -512,6 +583,47 @@ extension ReviewPackageViewController{
           
         })
     }
+    
+    //MARK: ------------------REVIEW PACKAGE FROM GYM MEMBERSHIP (WIHTOUT A TRAINER)
+    private func reviewPachageWithoutTrainer(inputParam: [String:String]){
+        CreatePackageVM.reviewPackageMembershipApi(viewController: self, inputParams: inputParam, completion: {[weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return  }
+            print("getResultData: ", getResultData)
+            
+            if getResultData.status == true {
+                self.reviewDetailsWithoutTrainer = nil
+                self.reviewDetailsWithoutTrainer = getResultData.data
+                
+                self.memberList?.removeAll()
+                self.memberMBV.isHidden = true
+                
+                self.trainersList?.removeAll()
+                if let getStudioData = getResultData.data?.studio {
+                    let convertTrainerModel = PackageCheckoutTrainerModel(id: getStudioData.id, name: getStudioData.name, profile: getStudioData.profile, noOfRating: getStudioData.total_rating?.value, averageRating: getStudioData.avg_rating, tags: getStudioData.tags)
+                    
+                    self.trainersList?.append(convertTrainerModel)
+                    self.traninerTblView.reloadData()
+                }
+                
+                self.setInputData()
+            }
+        })
+    }
+    
+    //---------------*********Book Membership From Without a Trainer flow
+    private func bookMembershipWithoutTrainer(inputParams: [String:Any]?){
+        CreatePackageVM.bookMembershipApi(viewController: self, inputParams: inputParams, completion: { [weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return }
+            print("getResultData: ", getResultData)
+            
+            if getResultData.status == true {
+                let vc:PaymentSuccessViewController = PaymentSuccessViewController.instantiate(appStoryboard: .booking)
+                vc.bookedMembership = getResultData.data
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+        })
+    }
+    
 }
 
 

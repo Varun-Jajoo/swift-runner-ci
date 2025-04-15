@@ -36,12 +36,7 @@ class TrainerListViewController: CommonViewController {
         
         self.categorySelectedIndex = IndexPath(row: 0, section: 0)
         self.setupUI()
-        
-        if let isFromHome = isFromHome, isFromHome {
-            self.getTrainerApi(inputFilter: "0", inpuntTagId: 0)
-        }else{
-            self.getSelectGymList(inputFilter: "0", inpuntTagId: 0)
-        }
+        self.flowTrainers()
     }
     
     deinit {
@@ -98,6 +93,28 @@ class TrainerListViewController: CommonViewController {
         }
     }
     
+    private func flowTrainers(){
+        switch flowSlot {
+        case .bookTrainerHomeWorkout, .bookTrainerGymWorkout, .createPackage:
+            
+            if let isFromHome = isFromHome, isFromHome {
+                self.getTrainerApi(inputFilter: "0", inpuntTagId: 0)
+            }else{
+                self.getSelectGymList(inputFilter: "0", inpuntTagId: 0)
+            }
+            
+        case .gymMembership, .withTrainerMembership, .withoutTrainerMembership:
+            self.getSelectGymList(inputFilter: "0", inpuntTagId: 0)
+            
+        case .defaultFlow:
+            print("Book trainer flow...")
+//            if let isFromHome = isFromHome, isFromHome {
+//                self.getTrainerApi(inputFilter: "0", inpuntTagId: 0)
+//            }else{
+//                self.getSelectGymList(inputFilter: "0", inpuntTagId: 0)
+//            }
+        }
+    }
     
     private func setupUI(){
         workoutCategoryCollView.register(UINib(nibName: "WorkoutCategoryCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WorkoutCategoryCollectionViewCell")
@@ -150,8 +167,6 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
             cell.distanceBtn.titleLabel?.numberOfLines = 2
             cell.landMarkBtn.titleLabel?.lineBreakMode = .byClipping
             cell.distanceBtn.titleLabel?.lineBreakMode = .byClipping
-//            cell.trainerTagsData = self.trainerData?[indexPath.row].tags
-//            cell.setupCellData(trainerData: self.trainerData?[indexPath.row])
             
             if let isFromHome = isFromHome, isFromHome {
                 cell.trainerTagsData = self.trainerData?[indexPath.row].tags
@@ -186,18 +201,37 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if collectionView == trainerGridCollView {
             
-            if let isFromHome = isFromHome, isFromHome {
+            switch flowSlot {
+            case .bookTrainerHomeWorkout, .bookTrainerGymWorkout, .createPackage:
+              
+                //----------------From book trainer
+                if let isFromHome = isFromHome, isFromHome {
+                    
+                    let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+                    vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.trainerData?[indexPath.row].id ?? 0)", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+                    vc.detailsFlowSetup = flowSlot //.bookTrainerHomeWorkout
+                    self.navigationController?.pushViewController(vc, animated: true)
+                    
+                }else{
+                    
+                    let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+                    
+                    vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "0")", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+                    vc.detailsFlowSetup = flowSlot //.bookTrainerGymWorkout
+                    self.navigationController?.pushViewController(vc, animated: true)
+                    
+                }
                 
+            case .gymMembership, .withTrainerMembership, .withoutTrainerMembership:
+                //----------------
                 let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
-                vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.trainerData?[indexPath.row].id ?? 0)", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+                vc.detailsFlowSetup = flowSlot //.gymMembership
+                vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "")", type: self.inputType, long: self.inputLat, lat: self.inputLong)
                 self.navigationController?.pushViewController(vc, animated: true)
                 
-            }else{
-                
-                let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
-                vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "0")", type: self.inputType, long: self.inputLat, lat: self.inputLong)
-                self.navigationController?.pushViewController(vc, animated: true)
-                
+            case .defaultFlow:
+                print("default .......")
+                break
             }
             
             
@@ -245,6 +279,7 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell:TrainerListTableViewCell = trainerListTblView.dequeueReusableCell(withIdentifier: "TrainerListTableViewCell", for: indexPath) as! TrainerListTableViewCell
+      
         if let isFromHome = isFromHome, isFromHome {
             cell.trainerTagsData = self.trainerData?[indexPath.row].tags
             cell.setCellData(trainerData: self.trainerData?[indexPath.row])
@@ -257,34 +292,40 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
             cell.bookSlotBtn.accessibilityHint = "\(self.gymTrainerData?[indexPath.row].id ?? 0)"
         }
         
-       
         cell.bookSlotBtn.addTarget(self, action: #selector(bookSlotBtnActn(sender: )), for: .touchUpInside)
-        
-//        cell.bookSlotBtn.addTarget(self, action: #selector(bookSlotBtnActn(sender: )), for: .touchUpInside)
-//        cell.trainerTagsData = self.trainerData?[indexPath.row].tags
-//        cell.setCellData(trainerData: self.trainerData?[indexPath.row])
-        
+                
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        if let isFromHome = isFromHome, isFromHome {
+    
+        switch flowSlot {
+        case .bookTrainerHomeWorkout, .bookTrainerGymWorkout, .createPackage:
+            //----------------From book trainer
+            if let isFromHome = isFromHome, isFromHome {
+                let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+                vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.trainerData?[indexPath.row].id ?? 0)", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+                vc.detailsFlowSetup = flowSlot
+                self.navigationController?.pushViewController(vc, animated: true)
+            }else{
+                let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+                vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "")", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+                vc.detailsFlowSetup = flowSlot //.bookTrainerGymWorkout
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+            
+        case .gymMembership, .withTrainerMembership, .withoutTrainerMembership:
+            //----------------
             let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
-            vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.trainerData?[indexPath.row].id ?? 0)", type: self.inputType, long: self.inputLat, lat: self.inputLong)
-            self.navigationController?.pushViewController(vc, animated: true)
-        }else{
-            let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+            vc.detailsFlowSetup = flowSlot
             vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "")", type: self.inputType, long: self.inputLat, lat: self.inputLong)
             self.navigationController?.pushViewController(vc, animated: true)
+            
+        case .defaultFlow:
+            print("default....")
+            break
         }
-        
-        
-        
-//        let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
-//        vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.trainerData?[indexPath.row].id ?? 0)", type: self.inputType, long: self.inputLat, lat: self.inputLong)
-//        self.navigationController?.pushViewController(vc, animated: true)
-        
+                
     }
     
     @objc func bookSlotBtnActn(sender:UIButton) {
@@ -311,40 +352,15 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
             
             if let getIndx = getIndx {
                 let trainerDetails = self.gymTrainerData?[getIndx]
-                
-                
                 let currentMonth = Calendar.current.component(.month, from: Date())
                 
                 let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
-                vc.slotBookFlow = .bookTrainer
+                vc.slotBookFlow = .bookTrainerGymWorkout
                 vc.params = AvailParmsModel(type: self.inputType, trainer_id: "\(trainerDetails?.id ?? 0)", studio_id: studioId, month: "\(currentMonth)", address_id: "")
                 self.navigationController?.pushViewController(vc, animated: true)
-                
-                
-                /*
-                let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
-                vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
-                vc.studioIdStr = studioId
-                vc.inputType = self.inputType
-                self.navigationController?.pushViewController(vc, animated: true)
-                
-                */
             }
         }
-        
- 
-        
-//        let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
-//        
-//        self.navigationController?.pushViewController(vc, animated: true)
-        
-        /*
-        let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
-        vc.slotBookFlow = flowSlot
-        self.navigationController?.pushViewController(vc, animated: true)
-        */
     }
-    
 }
     
 

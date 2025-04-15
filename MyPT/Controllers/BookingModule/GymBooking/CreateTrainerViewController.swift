@@ -7,6 +7,7 @@
 
 import UIKit
 
+
 class CreateTrainerViewController: CommonViewController {
 
     //MARK: --------------VARIABLE
@@ -14,6 +15,7 @@ class CreateTrainerViewController: CommonViewController {
     let locManager = GetLocationManager()
     var getLat:Double?
     var getLong:Double?
+    var flowCreatePackage:calendarFlow = .defaultFlow
     
     
     //MARK: -------------IBOUTLET
@@ -26,18 +28,7 @@ class CreateTrainerViewController: CommonViewController {
         setUpFont()
         setupUI()
         self.getLocation()
-        
-//        trainerData = [["title":"Home Workout","trainerImg":AppImages.homeWorkout as Any],
-//                       ["title":"Gym Workout","trainerImg":AppImages.gymWorkout as Any]
-//        ]
-        
-        trainerData = [["title":"Home Workout","trainerImg":AppImages.Home_workout as Any, "trainerImg_selected":AppImages.Home_workout_selected as Any],
-                       ["title":"Gym Workout","trainerImg":AppImages.gym_workout as Any, "trainerImg_selected":AppImages.gym_workout_selected as Any]
-        ]
-        
-        trainerListTblView.register(UINib(nibName: "TrainerTypeTableViewCell", bundle: nil), forCellReuseIdentifier: "TrainerTypeTableViewCell")
-        
-        self.continueBtn.isUserInteractionEnabled = false
+        self.setFlowCreatePackage()
         
     }
     
@@ -58,6 +49,40 @@ class CreateTrainerViewController: CommonViewController {
         
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
 //        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite)
+    }
+    
+    //MARK: -------------FLOW SETUP
+    private func setFlowCreatePackage(){
+        
+        trainerListTblView.register(UINib(nibName: "TrainerTypeTableViewCell", bundle: nil), forCellReuseIdentifier: "TrainerTypeTableViewCell")
+        
+        self.continueBtn.isUserInteractionEnabled = false
+        
+        //---------------------*********
+        switch flowCreatePackage {
+        case .gymMembership, .withTrainerMembership, .withoutTrainerMembership:
+            print("Membership flow..")
+            
+            self.topTitleLbl.text = "How would you like to train?"
+            
+            trainerData = [
+                ["title":"With a Trainer","trainerImg":AppImages.withTrainerMembership as Any, "trainerImg_selected":AppImages.withTrainerMembership_selected as Any],
+                ["title":"Without a Trainer","trainerImg":AppImages.withoutTrainerMembership as Any, "trainerImg_selected":AppImages.withoutTrainerMembership_selected as Any]
+            ]
+            self.trainerListTblView.reloadData()
+            
+        case .createPackage, .bookTrainerHomeWorkout, .bookTrainerGymWorkout, .defaultFlow:
+            print("Book a Trainer flow..")
+            
+            self.topTitleLbl.text = "Where would you like to train?"
+            
+            trainerData = [
+                ["title":"Home Workout","trainerImg":AppImages.Home_workout as Any, "trainerImg_selected":AppImages.Home_workout_selected as Any],
+                ["title":"Gym Workout","trainerImg":AppImages.gym_workout as Any, "trainerImg_selected":AppImages.gym_workout_selected as Any]
+            ]
+            
+            self.trainerListTblView.reloadData()
+        }
     }
     
     //MARK: -------------GET Lat long
@@ -86,8 +111,59 @@ class CreateTrainerViewController: CommonViewController {
     @IBAction func continueBtnActn(_ sender: Any) {
         print("Continue btn actn.....")
 
-        NotificationCenter.default.post(name: NSNotification.Name("reloadTab"), object: false)
+        //---------------------*********
+        switch flowCreatePackage {
+        case .withTrainerMembership, .withoutTrainerMembership, .gymMembership:
+            print("from membership...")
+            
+            if let getLat = getLat, let getLong = getLong {
+                
+                let vc:GymWorkoutViewController = GymWorkoutViewController.instantiate(appStoryboard: .booking)
+                vc.inputType = "gym"
+                vc.inputLat = "\(getLat)"
+                vc.inputLong = "\(getLong)"
+                
+                //---------------- Flow set for membership
+                if let titleStr = trainerData?.first?["title"] as? String , self.continueBtn.accessibilityHint == titleStr {
+                    print("with trainer")
+                    vc.flowGymwork = .withTrainerMembership //.withTrainerMembership
+                }else{
+                    print("without trainer")
+                    vc.flowGymwork = .withoutTrainerMembership //.withoutTrainerMembership
+                }
+                
+                self.navigationController?.pushViewController(vc, animated: true)
+                
+            }else{
+                self.getLocation()
+            }
+
+        case .bookTrainerHomeWorkout, .bookTrainerGymWorkout, .createPackage, .defaultFlow:
+            if let getLat = getLat, let getLong = getLong {
+                if let titleStr = trainerData?.first?["title"] as? String , self.continueBtn.accessibilityHint == titleStr {
+                    let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
+                    vc.flowSlot = .bookTrainerHomeWorkout  //calendarFlow.bookTrainerHomeWorkout
+                    vc.inputType = "home"
+                    vc.inputLat = "\(getLat)"
+                    vc.inputLong = "\(getLong)"
+                    vc.isFromHome = true
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }else{
+                    let vc:GymWorkoutViewController = GymWorkoutViewController.instantiate(appStoryboard: .booking)
+                    //        vc.flowSlot = calendarFlow.bookTrainer
+                    vc.flowGymwork = .bookTrainerGymWorkout
+                    vc.inputType = "gym"
+                    vc.inputLat = "\(getLat)"
+                    vc.inputLong = "\(getLong)"
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
+            }else{
+                self.getLocation()
+            }
+
+        }
         
+        /*
         if let getLat = getLat, let getLong = getLong {
             if let titleStr = trainerData?.first?["title"] as? String , self.continueBtn.accessibilityHint == titleStr {
                 let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
@@ -108,6 +184,7 @@ class CreateTrainerViewController: CommonViewController {
         }else{
             self.getLocation()
         }
+        */
                 
         /*
         if let titleStr = trainerData?.first?["title"] as? String , self.continueBtn.accessibilityHint == titleStr {
@@ -155,6 +232,19 @@ extension CreateTrainerViewController:UITableViewDataSource, UITableViewDelegate
        
         cell.setSelectdBGCell(trainerData?[indexPath.row]["trainerImg"] as? UIImage, selectedImg: trainerData?[indexPath.row]["trainerImg_selected"] as? UIImage, isSelectedCell: false)
         
+        //---------------------*********
+        
+        switch flowCreatePackage {
+        case .withTrainerMembership, .withoutTrainerMembership, .gymMembership:
+            cell.titleLbl.isHidden = false
+            cell.titleLbl.text = trainerData?[indexPath.row]["title"] as? String
+            
+        case .bookTrainerHomeWorkout, .bookTrainerGymWorkout , .createPackage , .defaultFlow:
+            cell.titleLbl.isHidden = true
+            cell.trainerImgView.isHidden = true
+        }
+        
+        
         /*
         cell.titleLbl.text = trainerData?[indexPath.row]["title"] as? String
 //        cell.trainerImgView.image = trainerData?[indexPath.row]["trainerImg"] as? UIImage
@@ -173,24 +263,7 @@ extension CreateTrainerViewController:UITableViewDataSource, UITableViewDelegate
         
         self.continueBtn.accessibilityHint = trainerData?[indexPath.row]["title"] as? String
         
-//        if indexPath.row == 0 {
-//            self.continueBtn.accessibilityHint = trainerData?[indexPath.row]["title"] as? String
-//        }
-        
         self.enableContinueBtn(isSelected: true)
-        
-        
-        
-//        if indexPath.row != 0 {
-//            self.enableContinueBtn(isSelected: false)
-//            AlertHelper.shared.showCustomeAlert(message: "work in progress.")
-//          
-//        }else{
-//            self.enableContinueBtn(isSelected: true)
-//        }
-//        selectedCell.setSelectdCell(trainerData?[indexPath.row]["trainerImg"] as? UIImage, selectedImg: trainerData?[indexPath.row]["trainerImg"] as? UIImage, isSelectedCell: true)
-        
-        
     }
     
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
@@ -199,9 +272,6 @@ extension CreateTrainerViewController:UITableViewDataSource, UITableViewDelegate
         let deSelectedCell = tableView.cellForRow(at: indexPath) as! TrainerTypeTableViewCell
         
         deSelectedCell.setSelectdBGCell(trainerData?[indexPath.row]["trainerImg"] as? UIImage, selectedImg: trainerData?[indexPath.row]["trainerImg_selected"] as? UIImage, isSelectedCell: false)
-        
-//        deSelectedCell.setSelectdCell(trainerData?[indexPath.row]["trainerImg"] as? UIImage, selectedImg: trainerData?[indexPath.row]["trainerImg"] as? UIImage, isSelectedCell: false)
     }
-    
     
 }

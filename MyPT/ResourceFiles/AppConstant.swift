@@ -132,7 +132,11 @@ public struct AppImages {
     public static let withGroup_selected = UIImage(named: "ic_withGroup_selected")
     public static let withGroup = UIImage(named: "ic_withGroup")
     
-    
+    //MARK: -----------------MEMBERSHIP
+    public static let withoutTrainerMembership_selected = UIImage(named: "ic_withoutTrainerMembership_selected")
+    public static let withoutTrainerMembership = UIImage(named: "ic_withoutTrainerMembership")
+    public static let withTrainerMembership_selected = UIImage(named: "ic_withTrainerMembership_selected")
+    public static let withTrainerMembership = UIImage(named: "ic_withTrainerMembership")
     
     //MARK: -----------------Bottom tabbar
     public static let bookings = UIImage(named: "ic_bookings")

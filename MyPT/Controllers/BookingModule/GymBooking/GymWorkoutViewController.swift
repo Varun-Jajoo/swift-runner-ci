@@ -17,6 +17,7 @@ class GymWorkoutViewController: CommonViewController {
     var gymTagData:[TagModel]? = []
     var studiosData:[TrainerModel]? = []
     var categorySelectedIndex:IndexPath?
+    var flowGymwork:calendarFlow = .defaultFlow
     
     //MARK: ----------------IBOUTLET
     @IBOutlet weak var searchMBV: UIView!
@@ -171,23 +172,53 @@ extension GymWorkoutViewController: UITableViewDataSource, UITableViewDelegate{
  
     //MARK: -----------------BTN ACTN
     @objc func viewDetailsBtnActn(sender: UIButton){
+                
         let vc:GymDetailsViewController = GymDetailsViewController.instantiate(appStoryboard: .booking)
         vc.inputStudioId = sender.accessibilityHint
         vc.inputLat = self.inputLat
         vc.inputLong = self.inputLong
         vc.inputType = self.inputType
+        vc.gymDetailsFlow = flowGymwork
+        
         self.navigationController?.pushViewController(vc, animated: true)
     }
     
     @objc func selectGymBtnActn(sender: UIButton){
-        let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
-        vc.flowSlot = calendarFlow.bookTrainer
-        vc.isFromHome = false
-        vc.studioId = sender.accessibilityHint
-        vc.inputLat = self.inputLat
-        vc.inputLong = self.inputLong
-        vc.inputType = self.inputType
-        self.navigationController?.pushViewController(vc, animated: true)
+        
+        switch flowGymwork{
+            
+        case .bookTrainerHomeWorkout, .bookTrainerGymWorkout, .createPackage, .defaultFlow:
+            let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
+            vc.isFromHome = false
+            vc.studioId = sender.accessibilityHint
+            vc.inputLat = self.inputLat
+            vc.inputLong = self.inputLong
+            vc.inputType = self.inputType
+            vc.flowSlot = flowGymwork
+            self.navigationController?.pushViewController(vc, animated: true)
+            
+        case .gymMembership:
+            print("gymMembership")
+        case .withTrainerMembership:
+            print("withTrainerMembership")
+            
+            let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
+            vc.isFromHome = false
+            vc.studioId = sender.accessibilityHint
+            vc.inputLat = self.inputLat
+            vc.inputLong = self.inputLong
+            vc.inputType = self.inputType
+            //--------------Flow for membership
+            vc.flowSlot = flowGymwork
+            self.navigationController?.pushViewController(vc, animated: true)
+            
+        case .withoutTrainerMembership:
+            let vc:ChooseSessionViewController = ChooseSessionViewController.instantiate(appStoryboard: .booking)
+            vc.validityMembershipParam = (sender.accessibilityHint,"1")
+            vc.flowSession = .validityMembership
+            self.navigationController?.pushViewController(vc, animated: true)
+            
+        }
     }
     
 }

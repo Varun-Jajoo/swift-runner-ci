@@ -37,7 +37,7 @@ class GymDetailsViewController: CommonViewController {
     var inputLong:String?
     var studioDetails: StudioDetailsModel?
     var sectionData:[[String:Any]]?
-    
+    var gymDetailsFlow:calendarFlow = .defaultFlow
     
     //MARK: --------------IBOUTLET
     @IBOutlet weak var mainScrollV: UIScrollView!
@@ -85,7 +85,6 @@ class GymDetailsViewController: CommonViewController {
         self.setUpUI()
         self.setUpFont()
         self.setMapShowData()
-        
         self.studioDatialsApi()
     }
     
@@ -195,7 +194,6 @@ class GymDetailsViewController: CommonViewController {
         view.layoutIfNeeded()
     }
     
-    
     private func setUpUI(){
         gymBannerCollView.register(UINib(nibName: "WithMeCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WithMeCollectionViewCell")
         gymOffersCollView.register(UINib(nibName: "MoreExploreCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "MoreExploreCollectionViewCell")
@@ -249,21 +247,37 @@ class GymDetailsViewController: CommonViewController {
     
     @IBAction func bookSlotBtnActn(_ sender: Any) {
         print("book slot btn actn.........")
-        
-        let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
-        vc.flowSlot = calendarFlow.bookTrainer
-        vc.isFromHome = false
-        vc.studioId = self.inputStudioId
-        vc.inputLat = self.inputLat
-        vc.inputLong = self.inputLong
-        vc.inputType = self.inputType
-        self.navigationController?.pushViewController(vc, animated: true)
-        
-        /*
-         let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
-         vc.flowSlot = calendarFlow.bookTrainer
-         self.navigationController?.pushViewController(vc, animated: true)
-         */
+        switch gymDetailsFlow {
+            
+        case .withTrainerMembership , .gymMembership:
+            print("gym with membership")
+            let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
+            vc.isFromHome = false
+            vc.studioId = self.inputStudioId
+            vc.inputLat = self.inputLat
+            vc.inputLong = self.inputLong
+            vc.inputType = self.inputType
+            //--------------Flow for membership
+            vc.flowSlot = gymDetailsFlow
+            self.navigationController?.pushViewController(vc, animated: true)
+            
+        case .withoutTrainerMembership:
+            print("gym without membership")
+            let vc:ChooseSessionViewController = ChooseSessionViewController.instantiate(appStoryboard: .booking)
+            vc.validityMembershipParam = (self.inputStudioId,"1")
+            vc.flowSession = .validityMembership
+            self.navigationController?.pushViewController(vc, animated: true)
+            
+        case .bookTrainerHomeWorkout, .bookTrainerGymWorkout , .createPackage , .defaultFlow:
+            let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
+            vc.flowSlot = gymDetailsFlow
+            vc.isFromHome = false
+            vc.studioId = self.inputStudioId
+            vc.inputLat = self.inputLat
+            vc.inputLong = self.inputLong
+            vc.inputType = self.inputType
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
     }
     
     private func setMapShowData(){

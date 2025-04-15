@@ -734,5 +734,4 @@ struct AddMemberParams {
         
         return dictVar
     }
-    
 }

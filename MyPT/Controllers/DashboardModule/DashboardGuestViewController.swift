@@ -61,6 +61,8 @@ class DashboardGuestViewController: CommonViewController {
                                ]
         setUpFont()
         setupUI()
+        
+        purchaseGymPassMBV.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(purchaseGymPassTapAct(tap: ))))
     }
     
     deinit {
@@ -109,8 +111,13 @@ class DashboardGuestViewController: CommonViewController {
         })
     }
     
+    @objc func purchaseGymPassTapAct(tap : UITapGestureRecognizer){
+        print("Purchase your Gym Pass")
+        
+    }
+    
     //------------------************Font
-    func setUpFont(){
+    private func setUpFont(){
         
         self.bookTrainerTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
         self.bookTrainerDescLbl.font = AppFont.medium.size(11.0, familyName: familyManrope)
@@ -144,10 +151,9 @@ class DashboardGuestViewController: CommonViewController {
     
     
     //MARK: ---------- SET UI
-    func setupUI(){
+    private func setupUI(){
         
         //---------*************UICollectionview init
-        
         transformationStoriesCollView.register(UINib(nibName: "TransformationStoriesCollViewCell", bundle: nil), forCellWithReuseIdentifier: "TransformationStoriesCollViewCell")
         upcomingCollView.register(UINib(nibName: "UpcomingClassCollViewCell", bundle: nil), forCellWithReuseIdentifier: "UpcomingClassCollViewCell")
         productCategoryCollView.register(UINib(nibName: "ProductCategoryCollViewCell", bundle: nil), forCellWithReuseIdentifier: "ProductCategoryCollViewCell")
@@ -210,13 +216,40 @@ class DashboardGuestViewController: CommonViewController {
     
     @objc func bookTrainer(sender:Any){
         let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
+        vc.flowCreatePackage = .createPackage
         self.navigationController?.pushViewController(vc, animated: false)
     }
     
+    //MARK: -------------BTN ACTN
+    enum CommonBtnTag: Int {
+    case diffSubWorkoutExplore = 101, planWorkoutEplore, purchaseGymPass
+    }
+    
+    
     //MARK: --------------COMMON BTN ACTN
-    @IBAction func commonBtnActn(_ sender: Any) {
-        let vc:LibraryViewController = LibraryViewController.instantiate(appStoryboard: .library)
-        self.navigationController?.pushViewController(vc, animated: true)
+    @IBAction func commonBtnActn(_ sender: UIButton) {
+        
+        switch sender.tag {
+        case CommonBtnTag.diffSubWorkoutExplore.rawValue:
+            let vc:LibraryViewController = LibraryViewController.instantiate(appStoryboard: .library)
+            self.navigationController?.pushViewController(vc, animated: true)
+        case CommonBtnTag.planWorkoutEplore.rawValue:
+            let vc: CalendarViewController = CalendarViewController.instantiate(appStoryboard: .calendar)
+            self.navigationController?.pushViewController(vc, animated: true)
+            
+        case CommonBtnTag.purchaseGymPass.rawValue:
+            let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
+            vc.flowCreatePackage = .gymMembership
+            self.navigationController?.pushViewController(vc, animated: false)
+            
+        default:
+            print("None........")
+            break
+        }
+        
+        
+        //        let vc:LibraryViewController = LibraryViewController.instantiate(appStoryboard: .library)
+        //        self.navigationController?.pushViewController(vc, animated: true)
         
     }
     

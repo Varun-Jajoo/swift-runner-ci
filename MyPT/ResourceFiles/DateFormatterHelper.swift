@@ -40,6 +40,16 @@ class DateFormatterHelper {
         return nil
     }
     
+    func getFormatDate(fromDate: Date, toFormat: String) -> String? {
+//        df.locale = Locale(identifier: "en_US_POSIX") // Ensures correct parsing
+//        df.dateFormat = fromFormat
+//        let toDf = DateFormatter()
+        df.locale = Locale(identifier: "en_US_POSIX")
+//        toDf.dateFormat = toFormat
+        df.dateFormat = toFormat
+        return  df.string(from: fromDate)
+    }
+    
     func dateString(from date: Date, format: String) -> String? {
         df.dateFormat = format
         df.locale = Locale(identifier: "en_US_POSIX")

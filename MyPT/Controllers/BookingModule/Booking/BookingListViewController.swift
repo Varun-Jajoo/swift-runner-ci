@@ -13,7 +13,6 @@ class BookingListViewController: CommonViewController {
     var selectedIndex:NSIndexPath = NSIndexPath(row: 0, section: 0)
     var bookingData:[Any]?
     
-    
     //MARK: ---------------- IBOUTLET
     @IBOutlet weak var bookingCategorySegm: UISegmentedControl!
     @IBOutlet weak var monthsBtn: UIButton!
@@ -100,7 +99,6 @@ class BookingListViewController: CommonViewController {
     
     @IBAction func filterBtnActn(_ sender: Any) {
         print("fliter btn clicked...")
-        
         let vc:FilterViewController = FilterViewController.instantiate(appStoryboard: .booking)
         vc.modalTransitionStyle = .coverVertical
         vc.navFilterCtrl = self.navigationController
@@ -154,7 +152,6 @@ extension BookingListViewController: UITableViewDataSource, UITableViewDelegate{
         
         if bookingCategorySegm.selectedSegmentIndex == 0 {
             let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
-            
             
             if selectedIndex.row == 0 {
                 

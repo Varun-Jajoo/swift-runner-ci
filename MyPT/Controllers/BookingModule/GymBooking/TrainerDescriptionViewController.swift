@@ -57,6 +57,7 @@ class TrainerDescriptionViewController: CommonViewController {
 //    var specialitiesData:[TrainerTagModel]?
     var inputParam: DetailsParam?
     private var isCounter:Int = 0
+    var detailsFlowSetup:calendarFlow = .defaultFlow
     
     
     //MARK: --------------IBOUTLET
@@ -323,28 +324,36 @@ class TrainerDescriptionViewController: CommonViewController {
     //MARK: -------------- BOOK SLOT BTN ACTN
     @IBAction func bookSlotBtnActn(_ sender: Any) {
         
-        let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
-        vc.trainerIdStr = inputParam?.trainer_id
-        vc.studioIdStr = inputParam?.studio_id
-        vc.inputType = inputParam?.type
-        self.navigationController?.pushViewController(vc, animated: true)
-        
-        /*
-        let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
-        vc.slotBookFlow = .bookTrainer
-        self.navigationController?.pushViewController(vc, animated: true)
-        */
-        
-        /*
-         //        let vc:BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
-         //        vc.modalPresentationStyle = .automatic
-         //        self.present(vc, animated: true)
-        let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
-        self.navigationController?.pushViewController(vc, animated: true)
-        
-        */
+        switch detailsFlowSetup {
+        case .bookTrainerHomeWorkout, .createPackage, .defaultFlow:
+            let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
+            vc.trainerIdStr = inputParam?.trainer_id
+            vc.studioIdStr = inputParam?.studio_id
+            vc.inputType = inputParam?.type
+            self.navigationController?.pushViewController(vc, animated: true)
+            
+        case .bookTrainerGymWorkout:
+            print("book trainer from home..")
+            
+            let currentMonth = Calendar.current.component(.month, from: Date())
+            
+            let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
+            vc.slotBookFlow = .bookTrainerGymWorkout
+            vc.params = AvailParmsModel(type: inputParam?.type, trainer_id: inputParam?.trainer_id, studio_id: inputParam?.studio_id, month: "\(currentMonth)", address_id: "")
+            vc.slotBookFlow = .bookTrainerGymWorkout
+            
+            self.navigationController?.pushViewController(vc, animated: true)
+            
+        case .gymMembership, .withTrainerMembership, .withoutTrainerMembership:
+            
+            let currentMonth = Calendar.current.component(.month, from: Date())
+            
+            let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
+            vc.slotBookFlow = .withTrainerMembership
+            vc.params = AvailParmsModel(type: inputParam?.type, trainer_id: "\(detailsModel?.id ?? 0)", studio_id: inputParam?.studio_id, month: "\(currentMonth)", address_id: "")
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
     }
-    
 }
 
 
@@ -360,7 +369,6 @@ extension TrainerDescriptionViewController: UICollectionViewDataSource, UICollec
             return detailsModel?.certificates?.count ?? 0
         }else if collectionView == mediaGalleryCollView{
             return collectionView.numberOfRows(count: detailsModel?.galleries?.count, title: AppAlertStrings.no_results_found, message: nil, messageImage: nil, messageImageHeight: 50.0, fromTop: 0)
-//            return detailsModel?.galleries?.count ?? 0
         }
         else{
             return self.specialitiesData?.count ?? 0
@@ -390,20 +398,12 @@ extension TrainerDescriptionViewController: UICollectionViewDataSource, UICollec
         }
         else if collectionView == trainMeCollView{
             let cell:WithMeCollectionViewCell = trainMeCollView.dequeueReusableCell(withReuseIdentifier: "WithMeCollectionViewCell", for: indexPath) as! WithMeCollectionViewCell
-           
-//            cell.videoThumbnailImgView.loadImage(urlString: detailsModel?.trainWithMe as? String, placeholder: AppImages.navLeft)
-            
-//             let urlString = detailsModel?.trainWithMe as? String
-//            let url = URL(string: urlString ?? "")
-           
+                      
             if let getUrl = URL(string: detailsModel?.trainWithMe as? String ?? "") {
                 getThumbnailImageFromVideoUrl(url: getUrl, completion: { (thumbNailImage) in
                     cell.videoThumbnailImgView.image = thumbNailImage
                     cell.centerImgView.isHidden = false
                     cell.centerImgView.image = UIImage(named: "ic_play_white")
-                    
-//                    cell.centerImgView.image = UIImage(named: "ic_thumbnailVideo")
-                    //ic_thumbnailVideo
                 })
             } else{
                 cell.centerImgView.isHidden = true
@@ -416,29 +416,18 @@ extension TrainerDescriptionViewController: UICollectionViewDataSource, UICollec
             
             cell.lavelTitleLbl.text = detailsModel?.certificates?[indexPath.row].level as? String
             cell.certificateNameLbl.text = detailsModel?.certificates?[indexPath.row].name as? String
-            
-//            if indexPath.row % 2 == 0 {
-//                cell.achivementImgView.isHidden = true
-//            }else{
-//                cell.achivementImgView.isHidden = false
-//            }
-            
+                        
             return cell
             
         }
         else if collectionView == mediaGalleryCollView{
             let cell:WithMeCollectionViewCell = mediaGalleryCollView.dequeueReusableCell(withReuseIdentifier: "WithMeCollectionViewCell", for: indexPath) as! WithMeCollectionViewCell
-            
-//            cell.videoThumbnailImgView.loadImage(urlString: detailsModel?.galleries?[indexPath.row].mediaPath as? String, placeholder: AppImages.navLeft)
-            
-            //cell.centerImgView.image = UIImage(named: "ic_thumbnailVideo")
-            
+                        
             if let getUrl = URL(string: detailsModel?.galleries?[indexPath.row].mediaPath ?? "") {
                 getThumbnailImageFromVideoUrl(url: getUrl, completion: { (thumbNailImage) in
                     cell.videoThumbnailImgView.image = thumbNailImage
                     cell.centerImgView.isHidden = false
                     cell.centerImgView.image = UIImage(named: "ic_play_white")
-                    //ic_thumbnailVideo
                 })
             } else{
                 cell.centerImgView.isHidden = true
