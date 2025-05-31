@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="ClassCategoryCollectionViewCell" id="gTV-IL-0wX" customClass="ClassCategoryCollectionViewCell" customModule="MyPT" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="418" height="413"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="418" height="413"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cur-aO-SmS">
+                        <rect key="frame" x="1" y="1" width="416" height="411"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_calendarFilter" translatesAutoresizingMaskIntoConstraints="NO" id="U2b-Q0-wKf">
+                                <rect key="frame" x="0.0" y="0.0" width="416" height="411"/>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Zumba" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KuI-s1-OqF">
+                                <rect key="frame" x="20" y="354.33333333333331" width="376" height="20.333333333333314"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="appWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="8 classes near you" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vGE-MD-rOS">
+                                <rect key="frame" x="20" y="378.66666666666669" width="376" height="20.333333333333314"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="txtDarkGray"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="U2b-Q0-wKf" secondAttribute="trailing" id="0Dd-bs-deV"/>
+                            <constraint firstItem="KuI-s1-OqF" firstAttribute="top" relation="greaterThanOrEqual" secondItem="cur-aO-SmS" secondAttribute="top" constant="100" id="1qO-kY-Xo3"/>
+                            <constraint firstItem="U2b-Q0-wKf" firstAttribute="top" secondItem="cur-aO-SmS" secondAttribute="top" id="3a4-DF-3UR"/>
+                            <constraint firstItem="KuI-s1-OqF" firstAttribute="trailing" secondItem="vGE-MD-rOS" secondAttribute="trailing" id="4fe-uH-yIj"/>
+                            <constraint firstAttribute="bottom" secondItem="vGE-MD-rOS" secondAttribute="bottom" constant="12" id="7xs-Gk-Tcb"/>
+                            <constraint firstItem="KuI-s1-OqF" firstAttribute="leading" secondItem="vGE-MD-rOS" secondAttribute="leading" id="Oc4-Kv-bUL"/>
+                            <constraint firstItem="vGE-MD-rOS" firstAttribute="top" secondItem="KuI-s1-OqF" secondAttribute="bottom" constant="4" id="Q3c-aw-Kbr"/>
+                            <constraint firstAttribute="bottom" secondItem="U2b-Q0-wKf" secondAttribute="bottom" id="gWN-yg-cuC"/>
+                            <constraint firstAttribute="trailing" secondItem="vGE-MD-rOS" secondAttribute="trailing" constant="20" id="lFb-eb-Cy5"/>
+                            <constraint firstItem="U2b-Q0-wKf" firstAttribute="leading" secondItem="cur-aO-SmS" secondAttribute="leading" id="nSb-M0-e3d"/>
+                            <constraint firstItem="vGE-MD-rOS" firstAttribute="leading" secondItem="cur-aO-SmS" secondAttribute="leading" constant="20" id="y5W-H4-VBa"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="cur-aO-SmS" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="1" id="8ME-3d-7cp"/>
+                <constraint firstItem="cur-aO-SmS" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="1" id="Aiv-eK-ZU4"/>
+                <constraint firstAttribute="bottom" secondItem="cur-aO-SmS" secondAttribute="bottom" constant="1" id="OdV-AC-ESR"/>
+                <constraint firstAttribute="trailing" secondItem="cur-aO-SmS" secondAttribute="trailing" constant="1" id="vle-o9-zs1"/>
+            </constraints>
+            <size key="customSize" width="418" height="413"/>
+            <connections>
+                <outlet property="bckImgView" destination="U2b-Q0-wKf" id="mRu-Ya-l2f"/>
+                <outlet property="cellMBV" destination="cur-aO-SmS" id="zjn-nB-SLL"/>
+                <outlet property="classNameLbl" destination="KuI-s1-OqF" id="JZl-1U-BKC"/>
+                <outlet property="classesNearCountLbl" destination="vGE-MD-rOS" id="hAQ-dX-Npc"/>
+            </connections>
+            <point key="canvasLocation" x="306.87022900763355" y="147.53521126760563"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="ic_calendarFilter" width="1344" height="896"/>
+        <namedColor name="appWhite">
+            <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="txtDarkGray">
+            <color red="0.58431372549019611" green="0.58431372549019611" blue="0.58431372549019611" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

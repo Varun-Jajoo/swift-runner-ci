@@ -12,6 +12,8 @@ class MoreViewController: UIViewController {
     //MARK: --------------VARIABLE
 //    var sectionData:[String]?
     var moreSectionData:[HydrationModel]?
+    var getLat:Double?
+    var getLong:Double?
     
 
     //MARK: ----------------IBOUTLET
@@ -22,6 +24,13 @@ class MoreViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if let lat = appUserDefaults.getLatLong()?.components(separatedBy: ",").first,  let long = appUserDefaults.getLatLong()?.components(separatedBy: ",").last{
+            self.getLat = Double(lat)
+            self.getLong = Double(long)
+        }else{
+            self.getLocation()
+        }
+
         
 //        // Configure the collection view layout
 //        DispatchQueue.main.async {
@@ -44,6 +53,9 @@ class MoreViewController: UIViewController {
         exploreCollView.register(UINib(nibName: "MoreExploreCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "MoreExploreCollectionViewCell")
         
         exploreCollView.register(CustomHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: CustomHeaderView.identifier)
+        exploreCollView.register(MoreLogoutCollectionReusableView.self,
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
+                                withReuseIdentifier: "MoreLogoutCollectionReusableView")
         
         self.setupInputData()
         
@@ -52,6 +64,12 @@ class MoreViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(true, animated: true)
+        if let lat = appUserDefaults.getLatLong()?.components(separatedBy: ",").first,  let long = appUserDefaults.getLatLong()?.components(separatedBy: ",").last{
+            self.getLat = Double(lat)
+            self.getLong = Double(long)
+        }else{
+            self.getLocation()
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -64,6 +82,15 @@ class MoreViewController: UIViewController {
         self.navigationController?.setNavigationBarHidden(false, animated: true)
     }
     
+    //MARK: -------------GET Lat long
+    private func getLocation(){
+        GetLocationManager.shared.requestLocation(completion: { [weak self] getLocation in
+            guard let self = self, let getLocation = getLocation else { return  }
+
+            self.getLat = getLocation.coordinate.latitude
+            self.getLong = getLocation.coordinate.longitude
+        })
+    }
     
     func setupInputData(){
         self.moreSectionData = [
@@ -133,32 +160,197 @@ extension MoreViewController:UICollectionViewDataSource, UICollectionViewDelegat
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-       
-        if (moreSectionData?[indexPath.section].items[indexPath.row].subTitle as? String)?.uppercased() == AppStrings.my_Goals.uppercased() {
-            let vc: MyGoalsViewController = MyGoalsViewController.instantiate(appStoryboard: .more)
-            self.navigationController?.pushViewController(vc, animated: true)
+        
+        if let subtitle = moreSectionData?[indexPath.section].items[indexPath.row].subTitle as? String,
+           let type = MoreSectionItemType.from(subtitle) {
             
-        }else if (moreSectionData?[indexPath.section].items[indexPath.row].subTitle as? String)?.uppercased() == AppStrings.my_meals.uppercased() {
+            let info = type.comingSoonInfo
             
-            let vc: MealsViewController = MealsViewController.instantiate(appStoryboard: .more)
-            self.navigationController?.pushViewController(vc, animated: true)
+            // Uncomment below when features go live
+            switch type {
+            case .myGoals:
+                let vc = MyGoalsViewController.instantiate(appStoryboard: .more)
+                self.navigationController?.pushViewController(vc, animated: true)
+            case .myMeals:
+                
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+//                let vc = MealsViewController.instantiate(appStoryboard: .more)
+//                self.navigationController?.pushViewController(vc, animated: true)
+            case .shop:
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                /*
+                 let vc = ShopViewController.instantiate(appStoryboard: .shop)
+                 self.navigationController?.pushViewController(vc, animated: true)
+                 */
+            case .myOrders:
+                
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+                /*
+                 let vc = OrderHistoryViewController.instantiate(appStoryboard: .shop)
+                 self.navigationController?.pushViewController(vc, animated: true)
+                 */
+                
+            case .cart:
+                
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+                /*
+                 let vc = CheckoutCartViewController.instantiate(appStoryboard: .shop)
+                 self.navigationController?.pushViewController(vc, animated: true)
+                 */
+            case .profile:
+//                let vc: ProfileViewController = ProfileViewController.instantiate(appStoryboard: .profile)
+//                
+//                let vc: ProfileEditViewController = ProfileEditViewController.instantiate(appStoryboard: .profile)
+//                self.navigationController?.pushViewController(vc, animated: true)
+                
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+            case .mybookings:
+                self.tabBarController?.selectedIndex = 1
+                //                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+            case .my_Health_Stats:
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+            case .My_Milestone:
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+            case .workout_library:
+                
+                self.tabBarController?.selectedIndex = 2
+                //                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+            case .My_Favourite_Workouts:
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+            case .My_Trainers:
+                
+                //                let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
+                //                self.navigationController?.pushViewController(vc, animated: false)
+                
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+            case .Chats:
+                
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+            case .find_a_Gym:
+                
+//                let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
+//                self.navigationController?.pushViewController(vc, animated: false)
+                
+                //                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                if let getLat = getLat, let getLong = getLong {
+                    let vc:GymWorkoutViewController = GymWorkoutViewController.instantiate(appStoryboard: .booking)
+                    vc.inputType = "gym"
+                    vc.inputLat = "\(getLat)"
+                    vc.inputLong = "\(getLong)"
+                    
+                    appUserDefaults.setGymPackage(value: "gym")
+                    
+                    //---------------- Flow set for membership
+                    vc.flowGymwork = .withoutTrainerMembership
+                    
+                    self.navigationController?.pushViewController(vc, animated: true)
+                    
+                }else{
+                    self.getLocation()
+                }
+                    
+            case .find_a_Trainer:
+                
+                let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
+                self.navigationController?.pushViewController(vc, animated: false)
+                
+//                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+            case .settings:
+                
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+            case .payment_History:
+                
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+            case .help_and_Support:
+                
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+            case .my_Orders:
+                
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+            case .myPT_Products:
+                
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+            case .Product:
+                
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+            case .add_Address:
+                
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+            case .order_Refund:
+                
+                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+            }
         }
-        else if (moreSectionData?[indexPath.section].items[indexPath.row].subTitle as? String)?.uppercased() == AppStrings.shop.uppercased() {
-            
-            let vc: ShopViewController = ShopViewController.instantiate(appStoryboard: .shop)
-            self.navigationController?.pushViewController(vc, animated: true)
-        }
-        else if (moreSectionData?[indexPath.section].items[indexPath.row].subTitle as? String)?.uppercased() == AppStrings.my_orders.uppercased() {
-            
-            let vc: OrderHistoryViewController = OrderHistoryViewController.instantiate(appStoryboard: .shop)
-            self.navigationController?.pushViewController(vc, animated: true)
-        }
-        else if (moreSectionData?[indexPath.section].items[indexPath.row].subTitle as? String)?.uppercased() == AppStrings.cart.uppercased() {
-            
-            let vc: CheckoutCartViewController = CheckoutCartViewController.instantiate(appStoryboard: .shop)
-            self.navigationController?.pushViewController(vc, animated: true)
-        }
-            
+        
+        /*
+         if (moreSectionData?[indexPath.section].items[indexPath.row].subTitle as? String)?.uppercased() == AppStrings.my_Goals.uppercased() {
+         
+         self.comingSoon(NavTitle: "My Goals", titleStr: "Locked for Now", descStr: "Goal setting and progress tracking will be live soon. Get ready to aim higher!")
+         
+         /*
+          let vc: MyGoalsViewController = MyGoalsViewController.instantiate(appStoryboard: .more)
+          self.navigationController?.pushViewController(vc, animated: true)
+          */
+         
+         }else if (moreSectionData?[indexPath.section].items[indexPath.row].subTitle as? String)?.uppercased() == AppStrings.my_meals.uppercased() {
+         
+         self.comingSoon(NavTitle: AppStrings.my_meals, titleStr: "Locked for Now", descStr: "Extra features are on the way. We’re adding more tools to power your fitness goals")
+         
+         /*
+          let vc: MealsViewController = MealsViewController.instantiate(appStoryboard: .more)
+          self.navigationController?.pushViewController(vc, animated: true)
+          */
+         }
+         else if (moreSectionData?[indexPath.section].items[indexPath.row].subTitle as? String)?.uppercased() == AppStrings.shop.uppercased() {
+         
+         self.comingSoon(NavTitle: AppStrings.shop, titleStr: "Locked for Now", descStr: "Soon you’ll be able to shop essentials and chat with the community — stay tuned!")
+         
+         /*
+          let vc: ShopViewController = ShopViewController.instantiate(appStoryboard: .shop)
+          self.navigationController?.pushViewController(vc, animated: true)
+          */
+         }
+         else if (moreSectionData?[indexPath.section].items[indexPath.row].subTitle as? String)?.uppercased() == AppStrings.my_orders.uppercased() {
+         self.comingSoon(NavTitle: AppStrings.my_orders, titleStr: "Locked for Now", descStr: "Soon you’ll be able to shop essentials and chat with the community — stay tuned!")
+         
+         /*
+          let vc: OrderHistoryViewController = OrderHistoryViewController.instantiate(appStoryboard: .shop)
+          self.navigationController?.pushViewController(vc, animated: true)
+          */
+         }
+         else if (moreSectionData?[indexPath.section].items[indexPath.row].subTitle as? String)?.uppercased() == AppStrings.cart.uppercased() {
+         
+         self.comingSoon(NavTitle: AppStrings.cart, titleStr: "Locked for Now", descStr: "Soon you’ll be able to shop essentials and chat with the community — stay tuned!")
+         /*
+          let vc: CheckoutCartViewController = CheckoutCartViewController.instantiate(appStoryboard: .shop)
+          self.navigationController?.pushViewController(vc, animated: true)
+          */
+         }
+         else if (moreSectionData?[indexPath.section].items[indexPath.row].subTitle as? String)?.uppercased() == AppStrings.profile.uppercased() {
+         
+         self.comingSoon(NavTitle: "Profile",titleStr: "Locked for Now", descStr: "Profiles are in progress. Soon you'll be able to track your journey and customize your experience.")
+         
+         //            self.setTopBackgroundImage(named: "ic_Mygoals_Upcoming")
+         //            self.addTopNavigationButton(action: #selector(handleTopButtonTapped))
+         //            self.addTopNavigationButton(title: "Profile", image: AppImages.backarrow, action: #selector(handleTopButtonTapped))
+         }
+         */
         
         //        let vc: MyGoalsViewController = MyGoalsViewController.instantiate(appStoryboard: .more)
         //
@@ -179,11 +371,160 @@ extension MoreViewController:UICollectionViewDataSource, UICollectionViewDelegat
             
             return header
         }
+        else if kind == UICollectionView.elementKindSectionFooter {
+            let footer = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: MoreLogoutCollectionReusableView.reuseIdentifier, for: indexPath) as! MoreLogoutCollectionReusableView
+            footer.backgroundColor = UIColor.clear
+
+            // Remove old targets to avoid duplicate actions
+            footer.button.removeTarget(nil, action: nil, for: .allEvents)
+
+            // Add action
+            footer.button.addTarget(self, action: #selector(footerButtonTapped), for: .touchUpInside)
+            
+            footer.deleteAccBtn.removeTarget(nil, action: nil, for: .allEvents)
+            footer.deleteAccBtn.addTarget(self, action: #selector(deleteUserBtnActn), for: .touchUpInside)
+            
+            return footer
+        }
         return UICollectionReusableView()
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         return CGSize(width: collectionView.frame.width, height: 60)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
+//        return CGSize(width: collectionView.bounds.width, height: 60) // Adjust height as needed
+        
+        if section == collectionView.numberOfSections - 1 {
+                return CGSize(width: collectionView.bounds.width, height: 130)
+            } else {
+                return .zero // no footer for other sections
+            }
+    }
+    
+    
+    @objc func backTapped() {
+        navigationController?.popViewController(animated: true)
+    }
+    
+    @objc func footerButtonTapped() {
+        print("Footer button tapped!")
+        AlertHelper.shared.showCustomeAlert(title: "", message: AppAlertStrings.logoutAlertMsg, actions: ["Ok", "Cancel"], withCancel: true, completion: { [weak self] tagGet in
+            guard self != nil else { return }
+            
+            if tagGet == 0 {
+                if appUserDefaults.clearUserDefault() {
+                    appSceneDelegate?.goToMainView()
+                }
+            }
+        })
+
+    }
+    
+    @objc func deleteUserBtnActn() {
+        print("Delete use btn clicked.")
+        
+        AlertHelper.shared.showCustomeAlert(title: "", message: AppAlertStrings.delete_AlertMsg, actions: ["Ok", "Cancel"], withCancel: true, completion: { [weak self] tagGet in
+            guard let self = self else { return }
+            
+            if tagGet == 0 {
+                RegistrationVM.deleteUserAccApi(viewController: self, completion: {[weak self] getResultData in
+                    guard let self = self else { return  }
+                    print("getResultData account delete", getResultData)
+                    if appUserDefaults.clearUserDefault() {
+                        appSceneDelegate?.goToMainView()
+                    }
+                })
+            }
+        })
+    }
+    
+    
+    //MARK: ---------------SETUP COMMING SOON
+    private func comingSoon(NavTitle: String? = "Profile",titleStr: String? = "Locked for Now", descStr: String? = "Profiles are in progress. Soon you'll be able to track your journey and customize your experience."){
+        self.view.setComingSoon(bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_upcomingStripe", lockImgName: "ic_upcomingLock" ,title: titleStr, desc: descStr)
+        self.view.addTopNavigationButton(title: NavTitle, image: AppImages.backarrow, target: self.view)
+    }
+    
+    //=======  
+    enum MoreSectionItemType: String, CaseIterable {
+        case myGoals = "MY GOALS"
+        case myMeals = "MY MEALS"
+        case shop = "SHOP"
+        case myOrders = "MY ORDERS"
+        case cart = "CART"
+        case profile = "PROFILE"
+        case mybookings = "MY BOOKINGS"
+        case my_Health_Stats = "MY HEALTH & STATS"
+        case My_Milestone = "MY MILESTONE"
+        case workout_library = "Workout Library"
+        case My_Favourite_Workouts = "MY FAVOURITE WORKOUTS"
+        case My_Trainers = "MY TRAINERS"
+        case Chats = "CHATS"
+        case find_a_Gym = "Find a Gym"
+        case find_a_Trainer = "Find a Trainer"
+        case settings = "Settings"
+        case payment_History = "Payment History"
+        case help_and_Support = "Help and Support"
+        case my_Orders = "My Orders"
+        case myPT_Products = "MyPT Products"
+        case Product = "Product"
+        case add_Address = "Add Address"
+        case order_Refund = "Order Refund"
+        
+        static func from(_ raw: String) -> MoreSectionItemType? {
+            return Self.allCases.first { $0.rawValue.uppercased() == raw.uppercased() }
+        }
+        
+        var comingSoonInfo: (navTitle: String, title: String, description: String) {
+            switch self {
+            case .myGoals:
+                return ("My Goals", "Locked for Now", "Goal setting and progress tracking will be live soon. Get ready to aim higher!")
+            case .myMeals:
+                return ("My Meals", "Locked for Now", "Extra features are on the way. We’re adding more tools to power your fitness goals.")
+            case .shop:
+                return ("Shop", "Locked for Now", "Soon you’ll be able to shop essentials and chat with the community — stay tuned!")
+            case .myOrders, .my_Orders:
+                return ("My Orders", "Locked for Now", "Your order history will be available here soon.")
+            case .cart:
+                return ("Cart", "Locked for Now", "Your cart will be ready soon for easier shopping.")
+            case .profile:
+                return ("Profile", "Locked for Now", "Profiles are in progress. Soon you'll be able to track your journey and customize your experience.")
+            case .mybookings:
+                return ("My Bookings", "Locked for Now", "You’ll soon be able to view and manage your bookings.")
+            case .my_Health_Stats:
+                return ("My Health & Stats", "Locked for Now", "Health tracking will be launching soon.")
+            case .My_Milestone:
+                return ("My Milestone", "Locked for Now", "Your achievements and milestones will be available soon.")
+            case .My_Favourite_Workouts:
+                return ("My Favourite Workouts", "Locked for Now", "Save and revisit your top workouts soon.")
+            case .My_Trainers:
+                return ("My Trainers", "Locked for Now", "Connect with your trainers — coming soon.")
+            case .Chats:
+                return ("Chats", "Locked for Now", "Soon you’ll be able to shop essentials and chat with the community — stay tuned!")
+            case .find_a_Gym:
+                return ("Find a Gym", "Locked for Now", "Discover gyms near you — feature coming soon.")
+            case .find_a_Trainer:
+                return ("Find a Trainer", "Locked for Now", "Trainer discovery will be available shortly.")
+            case .settings:
+                return ("Settings", "Locked for Now", "More control and preferences are on the way.")
+            case .payment_History:
+                return ("Payment History", "Locked for Now", "View past transactions soon.")
+            case .help_and_Support:
+                return ("Help & Support", "Locked for Now", "Support features are coming to help you better.")
+            case .myPT_Products:
+                return ("MyPT Products", "Locked for Now", "Track your product subscriptions here soon.")
+            case .Product:
+                return ("Product", "Locked for Now", "Product details and purchases will be added soon.")
+            case .add_Address:
+                return ("Add Address", "Locked for Now", "Save your delivery addresses — feature coming soon.")
+            case .order_Refund:
+                return ("Order Refund", "Locked for Now", "Request refunds for orders — available soon.")
+            case .workout_library:
+                return ("Workout Library", "Locked for Now", "Your personal library of workouts is almost ready. Hang tight — it's unlocking soon!")
+            }
+        }
     }
     
 }

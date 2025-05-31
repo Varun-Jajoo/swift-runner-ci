@@ -28,11 +28,18 @@
                                 </constraints>
                             </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_bckShadow" translatesAutoresizingMaskIntoConstraints="NO" id="Gcf-er-tGx">
-                                <rect key="frame" x="0.0" y="0.0" width="404" height="436"/>
+                                <rect key="frame" x="0.0" y="0.0" width="404" height="395"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_myStudio" translatesAutoresizingMaskIntoConstraints="NO" id="lIN-tS-7zo">
-                                <rect key="frame" x="111" y="-1" width="182" height="47.333333333333336"/>
+                                <rect key="frame" x="129.33333333333337" y="-5" width="145.66666666666663" height="52"/>
                             </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="MyPT Gym" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KqT-DO-04d">
+                                <rect key="frame" x="129.33333333333337" y="-5" width="145.66666666666663" height="37"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                <color key="textColor" name="appWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="MyPT Studio Dubai" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="4" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="o6i-jR-DLc">
                                 <rect key="frame" x="18" y="308.66666666666669" width="366" height="24"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
@@ -82,10 +89,10 @@
                                 <state key="normal" title="4.2 ratings" image="ic_star"/>
                             </button>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="SDZ-k1-jVX">
-                                <rect key="frame" x="1" y="396" width="402" height="40"/>
+                                <rect key="frame" x="1" y="396" width="402" height="35"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="40" id="5Ks-S9-eDl"/>
+                                    <constraint firstAttribute="height" constant="35" id="5Ks-S9-eDl"/>
                                 </constraints>
                                 <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="vYj-mN-hDO">
                                     <size key="itemSize" width="128" height="128"/>
@@ -99,10 +106,10 @@
                                 </connections>
                             </collectionView>
                             <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="RbZ-6N-RAo">
-                                <rect key="frame" x="0.0" y="461" width="404" height="60"/>
+                                <rect key="frame" x="0.0" y="456" width="404" height="65"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kVt-Gt-V0l">
-                                        <rect key="frame" x="0.0" y="0.0" width="194" height="60"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="194" height="65"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                         <inset key="contentEdgeInsets" minX="0.0" minY="17" maxX="0.0" maxY="17"/>
                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
@@ -111,7 +118,7 @@
                                         </state>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vbN-yK-gc7">
-                                        <rect key="frame" x="210" y="0.0" width="194" height="60"/>
+                                        <rect key="frame" x="210" y="0.0" width="194" height="65"/>
                                         <color key="backgroundColor" name="appWhite"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                         <inset key="contentEdgeInsets" minX="0.0" minY="17" maxX="0.0" maxY="17"/>
@@ -125,14 +132,16 @@
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="Gcf-er-tGx" firstAttribute="bottom" secondItem="SDZ-k1-jVX" secondAttribute="bottom" id="25c-oa-TXZ"/>
                             <constraint firstItem="RbZ-6N-RAo" firstAttribute="top" secondItem="SDZ-k1-jVX" secondAttribute="bottom" constant="25" id="2XI-1d-fhE"/>
                             <constraint firstItem="RbZ-6N-RAo" firstAttribute="leading" secondItem="DEq-52-TYN" secondAttribute="leading" id="2XX-3A-093"/>
+                            <constraint firstItem="KqT-DO-04d" firstAttribute="trailing" secondItem="lIN-tS-7zo" secondAttribute="trailing" id="4xr-RL-H9y"/>
                             <constraint firstItem="SDZ-k1-jVX" firstAttribute="top" secondItem="r5r-YH-w6o" secondAttribute="bottom" constant="1" id="7l4-4e-nAn"/>
                             <constraint firstItem="o6i-jR-DLc" firstAttribute="top" relation="greaterThanOrEqual" secondItem="r5r-YH-w6o" secondAttribute="top" constant="70" id="841-yR-e3T"/>
                             <constraint firstItem="c0b-qv-OMc" firstAttribute="trailing" secondItem="r5r-YH-w6o" secondAttribute="trailing" constant="-20" id="8J5-qH-HFN"/>
-                            <constraint firstItem="lIN-tS-7zo" firstAttribute="top" secondItem="r5r-YH-w6o" secondAttribute="top" constant="-1" id="BqY-35-SJR"/>
+                            <constraint firstItem="lIN-tS-7zo" firstAttribute="top" secondItem="r5r-YH-w6o" secondAttribute="top" constant="-5" id="BqY-35-SJR"/>
+                            <constraint firstItem="KqT-DO-04d" firstAttribute="top" secondItem="lIN-tS-7zo" secondAttribute="top" id="C7c-TT-KuM"/>
                             <constraint firstAttribute="bottom" secondItem="RbZ-6N-RAo" secondAttribute="bottom" constant="1" id="CIi-OW-M6S"/>
+                            <constraint firstItem="lIN-tS-7zo" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="DEq-52-TYN" secondAttribute="leading" constant="10" id="Cwq-Zx-wim"/>
                             <constraint firstAttribute="trailing" secondItem="SDZ-k1-jVX" secondAttribute="trailing" constant="1" id="D6V-eY-vei"/>
                             <constraint firstItem="SDZ-k1-jVX" firstAttribute="leading" secondItem="DEq-52-TYN" secondAttribute="leading" constant="1" id="DdP-HB-rzH"/>
                             <constraint firstItem="Gcf-er-tGx" firstAttribute="leading" secondItem="r5r-YH-w6o" secondAttribute="leading" id="Ext-rj-oBZ"/>
@@ -144,11 +153,13 @@
                             <constraint firstItem="Gcf-er-tGx" firstAttribute="trailing" secondItem="r5r-YH-w6o" secondAttribute="trailing" id="Vjh-T1-fya"/>
                             <constraint firstItem="lIN-tS-7zo" firstAttribute="centerX" secondItem="r5r-YH-w6o" secondAttribute="centerX" id="Wx1-0F-W5k"/>
                             <constraint firstItem="r5r-YH-w6o" firstAttribute="leading" secondItem="DEq-52-TYN" secondAttribute="leading" id="WyA-dT-he0"/>
-                            <constraint firstItem="lIN-tS-7zo" firstAttribute="width" secondItem="r5r-YH-w6o" secondAttribute="width" multiplier="0.45" id="ZYj-eb-ixo"/>
+                            <constraint firstItem="Gcf-er-tGx" firstAttribute="bottom" secondItem="r5r-YH-w6o" secondAttribute="bottom" id="agz-uf-BCq"/>
                             <constraint firstAttribute="trailing" secondItem="r5r-YH-w6o" secondAttribute="trailing" id="b43-Z6-dMg"/>
+                            <constraint firstItem="KqT-DO-04d" firstAttribute="leading" secondItem="lIN-tS-7zo" secondAttribute="leading" id="gLI-eN-oYA"/>
                             <constraint firstItem="c0b-qv-OMc" firstAttribute="bottom" secondItem="r5r-YH-w6o" secondAttribute="bottom" constant="-24" id="h8f-c1-A3f"/>
                             <constraint firstItem="c0b-qv-OMc" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Fso-9n-MPR" secondAttribute="trailing" constant="12" id="kae-Lh-btb"/>
                             <constraint firstItem="Fso-9n-MPR" firstAttribute="bottom" secondItem="c0b-qv-OMc" secondAttribute="bottom" id="ron-2g-Z12"/>
+                            <constraint firstItem="KqT-DO-04d" firstAttribute="bottom" secondItem="lIN-tS-7zo" secondAttribute="bottom" constant="-15" id="ueH-zP-uVl"/>
                             <constraint firstItem="o6i-jR-DLc" firstAttribute="leading" secondItem="Fso-9n-MPR" secondAttribute="leading" id="uqR-Ta-6oZ"/>
                             <constraint firstItem="Gcf-er-tGx" firstAttribute="top" secondItem="r5r-YH-w6o" secondAttribute="top" id="wT9-83-jlV"/>
                         </constraints>
@@ -174,6 +185,7 @@
                 <outlet property="ratingBtn" destination="c0b-qv-OMc" id="xk8-zp-GDW"/>
                 <outlet property="selectViewBtn" destination="vbN-yK-gc7" id="D8V-qM-cFT"/>
                 <outlet property="shadowImgView" destination="Gcf-er-tGx" id="193-It-MnG"/>
+                <outlet property="studioTypeLbl" destination="KqT-DO-04d" id="Rjv-gp-8VI"/>
                 <outlet property="timeBtn" destination="U50-0C-Ht6" id="yyz-VD-JQc"/>
                 <outlet property="topStudioImgView" destination="lIN-tS-7zo" id="Bra-MY-IHY"/>
                 <outlet property="viewDetailsBtn" destination="kVt-Gt-V0l" id="EYt-Pk-7Nz"/>
@@ -185,7 +197,7 @@
         <image name="ic_bckShadow" width="630.33331298828125" height="1134.3333740234375"/>
         <image name="ic_chooseLocation" width="16" height="16.333333969116211"/>
         <image name="ic_dashboardCircle" width="3" height="3.3333332538604736"/>
-        <image name="ic_myStudio" width="145.66667175292969" height="47.333332061767578"/>
+        <image name="ic_myStudio" width="145.66667175292969" height="52"/>
         <image name="ic_star" width="16" height="16.333333969116211"/>
         <image name="ic_studioMembership" width="336" height="192"/>
         <namedColor name="MainBgColor">

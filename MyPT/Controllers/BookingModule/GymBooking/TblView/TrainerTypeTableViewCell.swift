@@ -30,7 +30,7 @@ class TrainerTypeTableViewCell: UITableViewCell {
 
         if selected {
             DispatchQueue.main.async {
-                self.cellMBV.setCornerRadius(borderWidth: 1, borderColor: UIColor(red: 158/255.0, green: 188/255.0, blue: 255/255.0, alpha: 1.0), cornerRadious: 12.0)
+                self.cellMBV.setCornerRadius(borderWidth: 2, borderColor: UIColor(red: 158/255.0, green: 188/255.0, blue: 255/255.0, alpha: 1.0), cornerRadious: 12.0)
 //                self.trainerImgView.image = UIImage(named: "ic_homeWorkout")
             }
         }else{

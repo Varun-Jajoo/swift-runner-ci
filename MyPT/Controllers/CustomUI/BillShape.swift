@@ -13,6 +13,11 @@ class BillShape: UIView {
      let contentView = UIView()
     private let lineSubView = UIView()
 
+    let topTitleView = UIView()
+    let startView = UIView()
+    let customerDatailsView = UIView()
+    let addressMView = UIView()
+    
     let packageTitleLabel = UILabel()
     let packageLabel = UILabel()
     let trainerDetailTitleLabel = UILabel()
@@ -63,10 +68,32 @@ class BillShape: UIView {
         didSet {
             validUptoLabel.numberOfLines = 0
             validUptoLabel.attributedText = createDetailAttributedString(title: (validUptoDate?.title ?? ""), value: (validUptoDate?.value ?? "" ))
+            self.updateConstrnt()
             self.setNeedsLayout()
         }
     }
    
+    private func updateConstrnt(){
+        // Remove any existing constraint that uses a multiplier
+        if let existingConstraint = startView.constraints.first(where: {
+            ($0.firstItem as? UILabel) == startDateLabl && $0.firstAttribute == .width
+        }) {
+            startView.removeConstraint(existingConstraint)
+        }
+
+        // Determine the multiplier based on the validUptoLabel text
+        let trimmedText = validUptoLabel.text?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let isValidUptoEmpty = trimmedText?.isEmpty ?? true
+        let multiplier: CGFloat = isValidUptoEmpty ? 1.0 : 0.5
+        
+        // Recreate width constraint with new multiplier
+        let newWidthConstraint = startDateLabl.widthAnchor.constraint(equalTo: startView.widthAnchor, multiplier: multiplier)
+        newWidthConstraint.isActive = true
+
+        // Show/hide validUptoLabel as needed
+        validUptoLabel.isHidden = isValidUptoEmpty
+    }
+    
     var timingTxt:(title:String,value:String)? {
         didSet {
             timingLabel.numberOfLines = 0
@@ -88,8 +115,11 @@ class BillShape: UIView {
         didSet { self.setNeedsLayout() }
     }
     
-    var isDirection:Bool? = false {
-        didSet { self.setNeedsLayout() }
+    var isDirection:Bool? = true {
+        didSet {
+            locBtn.isHidden = isDirection ?? true
+            self.setNeedsLayout()
+        }
     }
     
     var cornerSize:CGSize = CGSize(width: 12, height: 12) {
@@ -170,7 +200,7 @@ class BillShape: UIView {
             stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20)
         ])
         
-        let topTitleView = UIView()
+//        let topTitleView = UIView()
         topTitleView.backgroundColor = UIColor.clear
         topTitleView.addSubview(packageTitleLabel)
         topTitleView.addSubview(packageLabel)
@@ -194,7 +224,7 @@ class BillShape: UIView {
         validUptoLabel.textAlignment = .right
         validUptoLabel.backgroundColor = UIColor.clear
         
-        let startView = UIView()
+//        let startView = UIView()
         startView.backgroundColor = UIColor.clear
         startView.addSubview(startDateLabl)
         startView.addSubview(validUptoLabel)
@@ -222,12 +252,12 @@ class BillShape: UIView {
         trainerImageView.translatesAutoresizingMaskIntoConstraints = false
         
         // Trainer detail Title Label
-        trainerDetailTitleLabel.font = UIFont.systemFont(ofSize: 10, weight: .medium)
-        trainerDetailTitleLabel.textColor = .darkGray
+        trainerDetailTitleLabel.font = AppFont.semibold.size(12.0, familyName: familyManrope)
+        trainerDetailTitleLabel.textColor = UIColor.txtDarkGray
         trainerDetailTitleLabel.translatesAutoresizingMaskIntoConstraints = false
     
-        trainerNameLabel.font = UIFont.systemFont(ofSize: 16, weight: .bold)
-        trainerNameLabel.textColor = .black
+        trainerNameLabel.font = AppFont.medium.size(18.0, familyName: familyClashDisplay)
+        trainerNameLabel.textColor = UIColor.mainBg
         trainerNameLabel.numberOfLines = 2
         trainerNameLabel.translatesAutoresizingMaskIntoConstraints = false
         
@@ -248,7 +278,7 @@ class BillShape: UIView {
         trainerTagsLabel.translatesAutoresizingMaskIntoConstraints = false
         
         
-        let customerDatailsView = UIView()
+//        let customerDatailsView = UIView()
         customerDatailsView.backgroundColor = UIColor.clear
         
         customerDatailsView.addSubview(trainerDetailTitleLabel)
@@ -314,7 +344,7 @@ class BillShape: UIView {
         
         //-----------------address bottom view ----------------************************
         
-        let addressMView = UIView()
+//        let addressMView = UIView()
         addressMView.backgroundColor = UIColor.clear
         stackView.addArrangedSubview(addressMView)
         
@@ -327,7 +357,7 @@ class BillShape: UIView {
         //Get Direction
         locBtn.backgroundColor = UIColor.clear
         locBtn.setTitleColor(UIColor(red: 73/255.0, green: 129/255.0, blue: 242/255.0, alpha: 1), for: .normal)
-        locBtn.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+        locBtn.titleLabel?.font = AppFont.semibold.size(12.0, familyName: familyManrope)
 //        locBtn.translatesAutoresizingMaskIntoConstraints = false
         // Set semanticContentAttribute to force right-to-left layout
         locBtn.semanticContentAttribute = .forceRightToLeft
@@ -347,7 +377,7 @@ class BillShape: UIView {
         addressMView.addSubview(qrCodeImageView)
         
         if let isDirection = isDirection {
-            locBtn.isHidden = !isDirection
+            locBtn.isHidden = isDirection
         }
         
         // MARK: - Layout Constraints
@@ -382,18 +412,18 @@ class BillShape: UIView {
         
         //---------------################
        
-        packageTitleLabel.font = UIFont.systemFont(ofSize: 10, weight: .medium)
-        packageTitleLabel.textColor = .darkGray
+        packageTitleLabel.font = AppFont.semibold.size(12.0, familyName: familyManrope)
+        packageTitleLabel.textColor = UIColor.txtDarkGray
         
-        packageLabel.font = UIFont.systemFont(ofSize: 15, weight: .medium)
-        packageLabel.textColor = .black
+        packageLabel.font = AppFont.medium.size(18.0, familyName: familyClashDisplay)
+        packageLabel.textColor = UIColor.mainBg
         packageLabel.numberOfLines = 0
         
-        trainerDetailTitleLabel.font = UIFont.systemFont(ofSize: 10, weight: .medium)
-        trainerDetailTitleLabel.textColor = .darkGray
+        trainerDetailTitleLabel.font = AppFont.semibold.size(12.0, familyName: familyManrope)
+        trainerDetailTitleLabel.textColor = UIColor.txtDarkGray
         
-        trainerNameLabel.font = UIFont.systemFont(ofSize: 16, weight: .bold)
-        trainerNameLabel.textColor = .black
+        trainerNameLabel.font = AppFont.medium.size(18.0, familyName: familyClashDisplay)
+        trainerNameLabel.textColor = UIColor.mainBg
         trainerNameLabel.numberOfLines = 2
         
 //        qrCodeImageView.image = generateQRCode(from: "https://www.myptdubai.com")
@@ -401,11 +431,10 @@ class BillShape: UIView {
         qrCodeImageView.heightAnchor.constraint(equalToConstant: 100).isActive = true
         qrCodeImageView.widthAnchor.constraint(equalToConstant: 100).isActive = true
         
-        locBtn.setTitleColor(UIColor.blue, for: .normal)
-        locBtn.titleLabel?.font = UIFont.systemFont(ofSize: 12, weight: .regular)
-        
-        footerLabel.font = UIFont.systemFont(ofSize: 12, weight: .regular)
-        footerLabel.textColor = .gray
+        locBtn.setTitleColor(UIColor(red: 73/255.0, green: 129/255.0, blue: 242/255.0, alpha: 1), for: .normal)
+        locBtn.titleLabel?.font = AppFont.semibold.size(12.0, familyName: familyManrope)
+        footerLabel.font = AppFont.semibold.size(12.0, familyName: familyManrope)
+        footerLabel.textColor = UIColor.txtDarkGray
         footerLabel.textAlignment = .center
         
         stackView.addArrangedSubview(footerLabel)
@@ -635,15 +664,15 @@ class TopAnimatedView: UIView {
     
     private func showLabels() {
         titleLabel.textAlignment = .center
-        titleLabel.font = UIFont.systemFont(ofSize: 24, weight: .bold)
-        titleLabel.textColor = .white
+        titleLabel.font = AppFont.semibold.size(32.0, familyName: familyClashDisplay)
+        titleLabel.textColor = UIColor.appWhite
         titleLabel.alpha = 1
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         topView.addSubview(titleLabel)
 
         descriptionLabel.textAlignment = .center
-        descriptionLabel.font = UIFont.systemFont(ofSize: 12, weight: .regular)
-        descriptionLabel.textColor = .lightGray
+        descriptionLabel.font = AppFont.semibold.size(14.0, familyName: familyManrope)
+        descriptionLabel.textColor = UIColor.txtDarkGray
         descriptionLabel.numberOfLines = 0
         descriptionLabel.alpha = 1
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -2068,11 +2097,12 @@ class TagViewHelper {
             tagBackgroundView.layer.cornerRadius = 6
             tagBackgroundView.layer.masksToBounds = true
             tagBackgroundView.translatesAutoresizingMaskIntoConstraints = false
+            tagBackgroundView.addGradient(colors: [UIColor(red: 22.0/255.0, green: 26.0/255.0, blue: 27.0/255.0, alpha: 1.0), UIColor(red: 27.0/255.0, green: 47.0/255.0, blue: 76.0/255.0, alpha: 1.0)], locations: [0,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 0, y: 0), cornerRadius: 6)
 
             let tagLabel = UILabel()
             tagLabel.text = tag
-            tagLabel.font = UIFont.systemFont(ofSize: 10, weight: .medium)
-            tagLabel.textColor = .white
+            tagLabel.font = AppFont.semibold.size(9.0, familyName: familyManrope)
+            tagLabel.textColor = UIColor.appWhite
             tagLabel.textAlignment = .center
             tagLabel.translatesAutoresizingMaskIntoConstraints = false
 

@@ -19,24 +19,16 @@ struct DetailsParam {
 class TrainerVM {
     
     //MARK: --------------------- get-trainer
-     /*
-      is_filter: 1, if filter 1 then tag id required, trainers or studio
-      tag_id: 1, tag id is required when is filter 1
-      type: gym, home, gym based on selection
-      long: 77.391029, this is current location always required
-      lat: 28.535517, this is current location always required
-     */
-    
     class func gerTrainerApi(viewController: UIViewController, inputParms: [String:String]?, isShowLoader:Bool = true, completion: @escaping(_ resultData:GetTrainerBaseModel?) -> Void){
         guard let inputParms = inputParms else { return  }
         
         /*
         let params:[String:String] = [
-            "type": inputType,
-            "is_filter": "",
-            "tag_id": "",
-            "long": "",
-            "lat": ""
+            "type": inputType, // type: gym, home, gym based on selection
+            "is_filter": "",   //is_filter: 1, if filter 1 then tag id required, trainers or studio
+            "tag_id": "",      //tag_id: 1, tag id is required when is filter 1
+            "long": "",        //long: 77.391029, this is current location always required
+            "lat": ""          //lat: 28.535517, this is current location always required
         ]
         */
         
@@ -52,7 +44,9 @@ class TrainerVM {
                     }
                     else{
                         let errorMsg = getResult.msg
+                        AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg ?? "")
                         
+                        /*
                         //----------Token expire
                         if let unauthorizedStr = errorMsg, unauthorizedStr.uppercased() == "Unauthorized".uppercased() {
                             AlertHelper.shared.showCustomeAlert(message: "Session expired, please login again", actions: ["Ok"], completion: { getTag in
@@ -67,6 +61,7 @@ class TrainerVM {
                             AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg ?? "")
                             
                         }
+                        */
                     }
                     
                     //                    if let jsonResult = try JSONSerialization.jsonObject(with: responceData, options: .mutableContainers) as? [String: Any] {
@@ -113,25 +108,17 @@ class TrainerVM {
     }
     
     //MARK: ------------------------- api/select/gym
-    /*
-     id = 5 , this is studio id , for get studio trainers
-     long = 77.391029, this is always required for current location
-     lat = 28.535517, this is always required for current location
-     is_filter = 1, if select tag based trainer
-     tag_id = 4, required if is_filter is 1
-     */
-
     class func selectGymApi(viewController: UIViewController, inputParms: [String:String]?, isShowLoader:Bool = true, completion: @escaping(_ resultData:GymTrainerBaseModel?) -> Void){
         guard let inputParms = inputParms else { return  }
         let params:[String:String] = inputParms
      
         /*
         let params:[String:String] = [
-            "id": "",
-            "long": "",
-            "lat": "",
-            "is_filter": "",
-            "tag_id": ""
+            "id": "",        //id = 5 , this is studio id , for get studio trainers
+            "long": "",      //long = 77.391029, this is always required for current location
+            "lat": "",       //lat = 28.535517, this is always required for current location
+            "is_filter": "", // is_filter = 1, if select tag based trainer
+            "tag_id": ""     //tag_id = 4, required if is_filter is 1
         ]
        */
         
@@ -183,15 +170,7 @@ class TrainerVM {
         })
     }
     
-    /*
-     type = gym, gym=>trainer from gym, home=>trainer for home
-     trainer_id = 1, trainer id is required
-     studio_id = 1, studio id required if selecting from gym
-     month = 03
-     address_id = 1
-     */
     
-   
     //MARK: ------------------------- api/get-availability
     class func calendarAvailabilityApi(viewController: UIViewController, inputParms: [String:String]?, isShowLoader:Bool = true, completion: @escaping(_ resultData:CalendarAvailabilityBaseModel?) -> Void){
         guard let inputParms = inputParms else { return  }
@@ -199,11 +178,11 @@ class TrainerVM {
        
         /*
          let params:[String:String] = [
-         "type": "",
-         "trainer_id": "",
-         "studio_id": "",
-         "month": ""
-         "address_id: ""
+         "type": "",        //type = gym, gym=>trainer from gym, home=>trainer for home
+         "trainer_id": "",  //trainer_id = 1, trainer id is required
+         "studio_id": "",   //studio_id = 1, studio id required if selecting from gym
+         "month": ""        //month = 03
+         "address_id: ""    //address_id = 1
          ]
        */
         
@@ -301,14 +280,11 @@ class TrainerVM {
     }
     
     //MARK: --------------------- Add Address/ Edit Address
-    //AddressBaseModel
     class  func addAddressApi(viewController: UIViewController, inputParams: [String:Any], completion: @escaping(_ resultData:AddressBaseModel?) -> Void){
-       
-        //"id" : "" , when add addres id is empty otherwise id which is getting list of address
        
         /*
         let params:[String:Any] = [
-            "id": "",
+            "id": "", //"id" : "" , when add addres id is empty otherwise id which is getting list of address
             "building_name": "" ,
             "street": "",
             "city_id": "",
@@ -348,27 +324,18 @@ class TrainerVM {
     
     
     //MARK: ------------------------- api/get-slots
-    /*
-     trainer_id: 2, trainer id required if selecting from gym
-     type: home, gym=>trainer from gym, home=>home trainer
-     date: 2025-03-25, date is required
-     timing: night, morning or evening(required)
-     studio_id: 5, studio id is required if selecting from gym
-     address_id: 1, address id is required if type is gym
-     */
-    
     class func getSlotsApi(viewController: UIViewController, inputParms: [String:String]?, isShowLoader:Bool = true, completion: @escaping(_ resultData:SlotsBaseModel?) -> Void){
         guard let inputParms = inputParms else { return  }
         let params:[String:String] = inputParms
         
         /*
          let params:[String:String] = [
-         "trainer_id": "",
-         "type": "",
-         "date": "",
-         "timing": "",
-         "studio_id": "",
-         "address_id: ""
+         "trainer_id": "", //trainer_id: 2, trainer id required if selecting from gym
+         "type": "",      //type: home, gym=>trainer from gym, home=>home trainer
+         "date": "",      //date: 2025-03-25, date is required
+         "timing": "",    //timing: night, morning or evening(required)
+         "studio_id": "", //studio_id: 5, studio id is required if selecting from gym
+         "address_id: ""  //address_id: 1, address id is required if type is gym
          ]
        */
        
@@ -391,40 +358,55 @@ class TrainerVM {
         })
     }
     
+    //MARK: ---------------------https://mobileapp.mypt-me.com/api/pay?amount=2
+    
+    class func ccavenuePaymentApi(viewController: UIViewController, inputPrice: String?, isShowLoader:Bool = true, completion: @escaping(_ resultData:[String:Any]?) -> Void){
+        let params:[String:String] =
+        [
+            "amount": inputPrice ?? ""
+        ]
+        
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .ccaavenue_payment, method: .get , queries: params, parameters:  nil, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
+          
+            do{
+
+                if let responceData = getResponce {
+                    let getResult = try JSONSerialization.jsonObject(with: responceData, options: .mutableContainers) as? [String:Any]
+                    guard let getResult = getResult else { return }
+                    if (getResult["status"] as? Bool) == true  {
+                        completion(getResult)
+                    }
+                    else{
+                        
+                        let errorMsg = "\(((getResult["errors"] as? [String : Any])?.values.first as? [Any])?.first as? String ?? (getResult["msg"] as? String ?? ""))"
+                        debugPrint(errorMsg)
+                    }
+                }
+                
+            }catch {
+                print(error)
+            }
+        })
+    }
     
     //MARK: --------------------- api/book-slot
-    /*
-     studio_id: 5, Studio id field is required if selecting from gym
-     type: gym, type will be home , gym
-     trainer_id: 1, trainer id filed is required
-     slot_id: 23, slot id field is required
-     address_id: 1, address id is required if type is gym
-     
-     is_package: 1, if hit through using package then 1 else blank
-     package_type: 3, package type is required
-     date: 2025-03-28, start date is required
-     end_date: 2025-04-25, end date is required
-     sessions: 12, no of sessions
-     price: 320, price field is required
-     days: 30, no of days
-     */
-    
     class  func bookSlotApi(viewController: UIViewController, inputParams: [String:Any], completion: @escaping(_ resultData:BookedSlotBaseModel?) -> Void){
        
         /*
          let params:[String:Any] = [
-         "studio_id": "",
-         "type": "" ,
-         "trainer_id": "",
-         "slot_id": "",
-         "address_id": "",
-         "is_package": "",
-         "package_type": "",
-         "date": "",
-         "end_date": "",
-         "sessions": "",
-         "price": "",
-         "days": ""
+         "studio_id": "",    //studio_id: 5, Studio id field is required if selecting from gym
+         "type": "" ,        //type: gym, type will be home , gym
+         "trainer_id": "",   //trainer_id: 1, trainer id filed is required
+         "slot_id": "",      //slot_id: 23, slot id field is required
+         "address_id": "",   //address_id: 1, address id is required if type is gym
+         "is_package": "",   //is_package: 1, if hit through using package then 1 else blank
+         "package_type": "", //package_type: 3, package type is required
+         "date": "",         //date: 2025-03-28, start date is required
+         "end_date": "",     //end_date: 2025-04-25, end date is required
+         "sessions": "",     //sessions: 12, no of sessions
+         "price": "",        //price: 320, price field is required
+         "days": ""          //days: 30, no of days
+         "transaction_id":""
          ]
         */
         

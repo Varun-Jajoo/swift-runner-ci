@@ -82,7 +82,7 @@ class NetworkManager {
                         self.handle401StatusCode(serviceEndPoint)
                         break
                     default:
-                        AlertHelper.shared.showCustomeAlert(message: error.localizedDescription)
+//                        AlertHelper.shared.showCustomeAlert(message: error.localizedDescription)
                         completion(nil, nil)
                         break
                     }
@@ -285,7 +285,7 @@ class NetworkManager {
                             self.handle401StatusCode(serviceEndPoint)
                             break
                         default:
-                            AlertHelper.shared.showCustomeAlert(message: error.localizedDescription, actions: ["OK"])
+//                            AlertHelper.shared.showCustomeAlert(message: error.localizedDescription, actions: ["OK"])
                             completion(nil, nil)
                             break
                         }

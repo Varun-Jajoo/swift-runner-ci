@@ -46,7 +46,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_trainerBadge" translatesAutoresizingMaskIntoConstraints="NO" id="kiQ-uz-gMU">
-                                        <rect key="frame" x="400" y="3" width="20" height="20"/>
+                                        <rect key="frame" x="400" y="0.0" width="20" height="20"/>
                                         <constraints>
                                             <constraint firstAttribute="width" secondItem="kiQ-uz-gMU" secondAttribute="height" id="Xc9-cE-PDV"/>
                                             <constraint firstAttribute="width" constant="20" id="y7x-sL-Npn"/>
@@ -55,12 +55,12 @@
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstItem="kiQ-uz-gMU" firstAttribute="top" secondItem="CZU-rT-FrE" secondAttribute="top" constant="2" id="PJS-8Y-emq"/>
                                     <constraint firstAttribute="bottom" secondItem="CZU-rT-FrE" secondAttribute="bottom" constant="2" id="UZ1-Pg-ncL"/>
                                     <constraint firstItem="CZU-rT-FrE" firstAttribute="top" secondItem="eU8-a8-ta5" secondAttribute="top" constant="1" id="Yuw-Vr-qx7"/>
                                     <constraint firstAttribute="trailing" secondItem="kiQ-uz-gMU" secondAttribute="trailing" constant="12" id="bMG-cV-f3D"/>
                                     <constraint firstItem="CZU-rT-FrE" firstAttribute="leading" secondItem="eU8-a8-ta5" secondAttribute="leading" constant="12" id="hTN-qo-Fvt"/>
                                     <constraint firstItem="kiQ-uz-gMU" firstAttribute="leading" secondItem="CZU-rT-FrE" secondAttribute="trailing" constant="12" id="hXz-sH-SC8"/>
+                                    <constraint firstItem="kiQ-uz-gMU" firstAttribute="bottom" secondItem="CZU-rT-FrE" secondAttribute="bottom" constant="1" id="rxD-ap-ZgU"/>
                                 </constraints>
                             </view>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="OhF-dk-2F9">

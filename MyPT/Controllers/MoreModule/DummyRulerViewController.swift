@@ -40,6 +40,8 @@ class DummyRulerViewController: UIViewController {
             doubleValue: Double(initialValue),
             unit: UnitMass.kilograms)
         self.view.layoutSubviews()
+        rulerMBV.refresh()
+        
     }
     
     /*

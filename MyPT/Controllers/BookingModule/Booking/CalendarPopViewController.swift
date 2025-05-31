@@ -12,7 +12,13 @@ class CalendarPopViewController: UIViewController {
     
     //MARK: ------------ VARIABLE
     var navCtrl:UINavigationController?
+    var bookingIdStr: String?
+    var availSlot: [AvailabilityStatusModel]?
+    var reasonRescheduleStr: String? 
+    var selectedDateStr: String? = nil
     
+   
+    /*
     fileprivate let gregorian: Calendar = Calendar(identifier: .indian)
     fileprivate lazy var dateFormatter1: DateFormatter = {
         let formatter = DateFormatter()
@@ -20,23 +26,36 @@ class CalendarPopViewController: UIViewController {
         formatter.dateFormat = "yyyy/MM/dd"
         return formatter
     }()
+    */
+    /*
     fileprivate lazy var dateFormatter2: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter
     }()
+    */
     
+    let statusColorMap: [String: UIColor] = [
+        "CLOSED".uppercased(): UIColor.txtDarkGray,
+        "AVAILABLE".uppercased(): UIColor.appGreen,
+        "FAST FILLING".uppercased(): UIColor.appLightYellow,
+        "FULLY BOOKED".uppercased(): UIColor.appOrangeRed
+    ]
     
-    let fillSelectionColors = ["2024/11/30": UIColor.clear]
-    let fillDefaultColors = ["2024/11/08": UIColor.clear, "2024/11/15": UIColor.clear, "2024/11/23": UIColor.clear]
-    let borderDefaultColors = ["2024/11/08": UIColor.clear]
-    let borderSelectionColors = ["01-11.2024":UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0)]
+//    let fillSelectionColors = ["2024/11/30": UIColor.clear]
+//    let fillDefaultColors = ["2024/11/08": UIColor.clear, "2024/11/15": UIColor.clear, "2024/11/23": UIColor.clear]
+//    let borderDefaultColors = ["2024/11/08": UIColor.clear]
+//    let borderSelectionColors = ["01-11.2024":UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0)]
     
-    var datesWithEvent = ["2024-11-03":UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), "2024-11-06":UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), "2024-11-12":UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), "2024-11-25":UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0)]
-   
-    var datesWithMultipleEvents = ["2024-11-05":UIColor.appColor(.appOrange)!, "2024-11-06":UIColor.appColor(.appOrange)!, "2024-11-08":UIColor.appLightYellow, "2024-11-09":UIColor.appLightYellow,"2024-11-10":UIColor.appLightYellow, "2024-11-11":UIColor.appLightYellow, "2024-11-12":UIColor.appColor(.appGreen)!,"2024-11-16":UIColor.appColor(.appGreen)!, "2024-11-20":UIColor.appDarkGray, "2024-11-22":UIColor.appDarkGray, "2024-11-23":UIColor.appDarkGray, "2024-11-28":UIColor.txtDarkGray]
+    let fillSelectionColors = ["key_date_string": UIColor.clear]
+    let fillDefaultColors = ["key_date_string": UIColor.clear]
+    let borderDefaultColors = ["key_date_string": UIColor.clear]
+    let borderSelectionColors = ["key_date_string":UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0)]
     
+    var disabledDates: [String] = [] //Dates to disable "yyyy-MM-dd"
+    //"yyyy-MM-dd"
+    lazy var datesWithMultipleEvents: [String:UIColor]? = [:]
 
     //MARK: --------------IBOUTLET
     @IBOutlet weak var rescheduleCalendarMBV: UIView!
@@ -54,14 +73,18 @@ class CalendarPopViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-       
+        self.setupFont()
+        self.enableContinueBtn(isSelected: false)
+        self.setpCalendarUI()
+        let currentMonth = Calendar.current.component(.month, from: Date())
+        self.calendarSlotAvail(inputMonth: "\(currentMonth)")
+                
+        self.monthTitleLbl.text = getMonthName(from: showCalendarMBV)
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        self.setupFont()
         self.setupUI()
-        self.setpCalendarUI()
     }
     
     deinit {
@@ -106,8 +129,12 @@ class CalendarPopViewController: UIViewController {
         self.dismiss(animated: true) {
             let vc:SlotPopViewController = SlotPopViewController.instantiate(appStoryboard: .booking)
             vc.modalPresentationStyle = .automatic
+            vc.bookingIdStr = self.bookingIdStr
+            vc.dateStr = self.selectedDateStr
+            vc.reasonRescheduleStr = self.reasonRescheduleStr
             self.navCtrl?.present(vc, animated: false)
         }
+        
     }
     
     func setupUI(){
@@ -139,6 +166,7 @@ class CalendarPopViewController: UIViewController {
     func setpCalendarUI(){
         showCalendarMBV.headerHeight = 0.0
         showCalendarMBV.delegate = self
+        showCalendarMBV.allowsMultipleSelection = false
         showCalendarMBV.appearance.titleFont = UIFont.boldSystemFont(ofSize: 15.0)
     }
     
@@ -155,6 +183,15 @@ class CalendarPopViewController: UIViewController {
         }
     }
     
+    //---------------------**********
+    func isFutureOrCurrentMonth(year: Int, month: Int) -> Bool {
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date())
+        let currentMonth = calendar.component(.month, from: Date())
+
+        // Check if the given year is greater OR it's the same year but a future or current month
+        return (year > currentYear) || (year == currentYear && month >= currentMonth)
+    }
 }
 
 
@@ -162,20 +199,26 @@ class CalendarPopViewController: UIViewController {
 extension CalendarPopViewController: FSCalendarDataSource, FSCalendarDelegate, FSCalendarDelegateAppearance {
     
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
+       /*
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "en_US_POSIX")
         dateFormatter.dateFormat = "yyyy-MM-dd" // Customize the format as needed
         let selectedDate = dateFormatter.string(from: date)
         print("Selected date: \(selectedDate)")
+        */
         
+        let selectedDate = DateFormatterHelper.shared.dateString(from: date, format: "yyyy-MM-dd") ?? ""
+        print("Selected date: \(selectedDate)")
+        self.selectedDateStr = selectedDate
         self.enableContinueBtn(isSelected: true)
         
-        
+        /*
         self.dismiss(animated: true) {
             let vc:SlotPopViewController = SlotPopViewController.instantiate(appStoryboard: .booking)
             vc.modalPresentationStyle = .automatic
             self.navCtrl?.present(vc, animated: true)
         }
+        */
         
         
 //        switch slotBookFlow {
@@ -208,10 +251,26 @@ extension CalendarPopViewController: FSCalendarDataSource, FSCalendarDelegate, F
            print("Current page changed to: \(monthName)")
         
         self.monthTitleLbl.text = getMonthName(from: showCalendarMBV)
+        
+        
+        //--------------------*************For getting next month Availibility
+        let calendarInstance = Calendar.current
+        let currentPage = calendar.currentPage // This gets the first day of the visible month
+        let year = calendarInstance.component(.year, from: currentPage)
+        let month = calendarInstance.component(.month, from: currentPage)
+        
+        if isFutureOrCurrentMonth(year: year, month: month) {
+            //-------------------------Api
+            self.calendarSlotAvail(inputMonth: "\(month)")
+        }
+        
        }
     
     func calendar(_ calendar: FSCalendar, numberOfEventsFor date: Date) -> Int {
-        let dateString = self.dateFormatter2.string(from: date)
+//        let dateString = self.dateFormatter2.string(from: date)
+        
+        let dateString = DateFormatterHelper.shared.dateString(from: date, format: "yyyy-MM-dd") ?? ""
+        
 //        if self.datesWithEvent.contains(dateString) {
 //            return 1
 //        }
@@ -219,10 +278,19 @@ extension CalendarPopViewController: FSCalendarDataSource, FSCalendarDelegate, F
 //            return 3
 //        }
         
+        /*
         if (self.datesWithMultipleEvents[dateString] != nil){
             return 1
         }
         if (self.datesWithMultipleEvents[dateString] != nil) {
+            return 3
+        }
+        */
+        
+        if (self.datesWithMultipleEvents?[dateString] != nil){
+            return 1
+        }
+        if (self.datesWithMultipleEvents?[dateString] != nil) {
             return 3
         }
         return 0
@@ -230,8 +298,15 @@ extension CalendarPopViewController: FSCalendarDataSource, FSCalendarDelegate, F
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventDefaultColorsFor date: Date) -> [UIColor]? {
         
-        let key = self.dateFormatter2.string(from: date)
-        if let colors = self.datesWithMultipleEvents[key] {
+//        let key = self.dateFormatter2.string(from: date)
+        
+        let key = DateFormatterHelper.shared.dateString(from: date, format: "yyyy-MM-dd") ?? ""
+        
+//        if let colors = self.datesWithMultipleEvents[key] {
+//            return [colors]
+//        }
+        
+        if let colors = self.datesWithMultipleEvents?[key] as? UIColor {
             return [colors]
         }
         return nil
@@ -244,7 +319,9 @@ extension CalendarPopViewController: FSCalendarDataSource, FSCalendarDelegate, F
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, fillSelectionColorFor date: Date) -> UIColor? {
-        let key = self.dateFormatter1.string(from: date)
+//        let key = self.dateFormatter1.string(from: date)
+        
+        let key = DateFormatterHelper.shared.dateString(from: date, format: "yyyy/MM/dd") ?? ""
         if let color = self.fillSelectionColors[key] {
             return color
         }
@@ -252,7 +329,9 @@ extension CalendarPopViewController: FSCalendarDataSource, FSCalendarDelegate, F
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, fillDefaultColorFor date: Date) -> UIColor? {
-        let key = self.dateFormatter1.string(from: date)
+//        let key = self.dateFormatter1.string(from: date)
+        
+        let key = DateFormatterHelper.shared.dateString(from: date, format: "yyyy/MM/dd") ?? ""
         if let color = self.fillDefaultColors[key] {
             return color
         }
@@ -260,7 +339,9 @@ extension CalendarPopViewController: FSCalendarDataSource, FSCalendarDelegate, F
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, borderDefaultColorFor date: Date) -> UIColor? {
-        let key = self.dateFormatter1.string(from: date)
+//        let key = self.dateFormatter1.string(from: date)
+        
+        let key = DateFormatterHelper.shared.dateString(from: date, format: "yyyy/MM/dd") ?? ""
         if let color = self.borderDefaultColors[key] {
             return color
         }
@@ -268,7 +349,9 @@ extension CalendarPopViewController: FSCalendarDataSource, FSCalendarDelegate, F
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, borderSelectionColorFor date: Date) -> UIColor? {
-        let key = self.dateFormatter1.string(from: date)
+//        let key = self.dateFormatter1.string(from: date)
+        
+        let key = DateFormatterHelper.shared.dateString(from: date, format: "yyyy/MM/dd") ?? ""
         if let color = self.borderSelectionColors[key] {
             return color
         }
@@ -282,4 +365,41 @@ extension CalendarPopViewController: FSCalendarDataSource, FSCalendarDelegate, F
         return 0.4
     }
     
+    func calendar(_ calendar: FSCalendar, shouldSelect date: Date, at monthPosition: FSCalendarMonthPosition) -> Bool {
+        
+        let dateString = DateFormatterHelper.shared.dateString(from: date, format: "yyyy-MM-dd") ?? ""
+       
+        return disabledDates.contains(dateString) // Return false to disable selection
+    }
+}
+
+//MARK: ---------------------EXTENSION FOR API
+extension CalendarPopViewController{
+    
+    private func calendarSlotAvail(inputMonth: String?){
+         let params:[String:String] = [
+            "id": self.bookingIdStr ?? "",
+            "month": inputMonth ?? "",
+         ]
+        
+        BookingVM.trainerSlotApi(inputParams: params, completion: {[weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return }
+           
+            if let getData = getResultData.data {
+                
+                getData.forEach({[weak self] in
+                    guard let self = self else { return  }
+                    if let getDate = $0.date, let status = $0.status?.uppercased(), let color = self.statusColorMap[status] {
+                        self.datesWithMultipleEvents?[getDate] = color
+                                                
+                        if status.uppercased() == "AVAILABLE".uppercased() || status.uppercased() == "FAST FILLING".uppercased() {
+                            self.disabledDates.append(getDate)
+                        }
+                      
+                    }
+                })
+            }
+            self.showCalendarMBV.reloadData()
+        })
+    }
 }

@@ -16,7 +16,6 @@ class SlotDurationViewController: CommonViewController {
     var avialCalanderparams:AvailParmsModel?
     var inputSetDateParams:SetDateParams?
     
-    
     var slotDurationFlow:calendarFlow = .defaultFlow
     let showCalView = CalendarView()
     var selectedDate:String?
@@ -147,6 +146,9 @@ class SlotDurationViewController: CommonViewController {
     }
     
     private func setUPUI(){
+        
+        showCalView.isCellSelected = false
+        
         dateListCollView.register(UINib(nibName: "ProductCategoryCollViewCell", bundle: nil), forCellWithReuseIdentifier: "ProductCategoryCollViewCell")
         
         //---------------**************
@@ -190,6 +192,7 @@ class SlotDurationViewController: CommonViewController {
 //        showCalView.frame = CGRect(x: 0, y: 0, width: self.view.frame.size.width - 50, height: 100)
         calendarView.backgroundColor = .clear
            calendarView.addSubview(showCalView)
+        showCalView.delegate = self
         showCalView.backgroundColor = .clear
         
         showCalView.setCurrentMonth(Calendar.current.component(.month, from: Date()), year: Calendar.current.component(.year, from: Date()))
@@ -253,6 +256,8 @@ class SlotDurationViewController: CommonViewController {
     private func setModeTime(isNight:Bool = false){
         
         if isNight {
+            self.nightModeBtn.applyTransition(type: .moveIn, subtype: .fromRight, duration: 0.5, timingFunction: .easeInEaseOut, completion: nil)
+            
             self.nightModeBtn.setTitle("Night", for: .normal)
             self.nightModeBtn.setImage(AppImages.night_mode?.withRenderingMode(.alwaysTemplate), for: .normal)
             self.nightModeBtn.tintColor = UIColor.mainBg
@@ -271,6 +276,8 @@ class SlotDurationViewController: CommonViewController {
             self.getSlotTimes(timeStr: "night")
             
         }else{
+            self.morningModeBtn.applyTransition(type: .moveIn, subtype: .fromLeft, duration: 0.5, timingFunction: .easeInEaseOut, completion: nil)
+            
             self.nightModeBtn.setTitle(nil, for: .normal)
             self.nightModeBtn.setImage(AppImages.night_mode?.withRenderingMode(.alwaysTemplate), for: .normal)
             self.nightModeBtn.tintColor = UIColor.white
@@ -428,16 +435,79 @@ class SlotDurationViewController: CommonViewController {
     @IBAction func paymentBtnActn(_ sender: Any) {
         print("clicked at paymentBtn")
         
-        if let slotId = inputBookSlotParams?.slot_id, !slotId.isEmpty {
-            self.bookSlot(inputParam: inputBookSlotParams?.getParams() ?? [:])
-        }else{
-            AlertHelper.shared.alertMesssage(view: self, title: "", message: "Please select slot")
+        if let pricePackage = self.slotsData?.price {
+            let components = pricePackage.split(separator: " ")
+            let vc: CCAvenuePaymentViewController = CCAvenuePaymentViewController.instantiate(appStoryboard: .booking)
+            vc.modalPresentationStyle = .overFullScreen
+            vc.costAmt =  Double(components.first ?? "0.0")
+            
+            vc.paymentSuccess = {[weak self] (getStatus, getTransactionId) in
+                guard let self = self, let getTransactionId = getTransactionId  else { return  }
+                inputBookSlotParams?.transaction_id = getTransactionId
+                
+                print("Slot booking params: ",inputBookSlotParams?.getParams() ?? [:])
+                if let slotId = inputBookSlotParams?.slot_id, !slotId.isEmpty {
+                    self.bookSlot(inputParam: inputBookSlotParams?.getParams() ?? [:])
+                }else{
+                    AlertHelper.shared.alertMesssage(view: self, title: "", message: "Please select slot")
+                }
+            }
+            self.navigationController?.present(vc, animated: true)
         }
         
-        /*
-        let vc:PaymentSuccessViewController = PaymentSuccessViewController.instantiate(appStoryboard: .booking)
-        self.navigationController?.pushViewController(vc, animated: true)
+        
+        
+        /* Payment method flow setup
+        if let pricePackage = self.slotsData?.price, let mainPrice = self.slotsData?.main_price?.value, let taxesRate = self.slotsData?.tax_rate?.value {
+//            let components = pricePackage.split(separator: " ")
+            let vc: PaymentMethodsViewController = PaymentMethodsViewController.instantiate(appStoryboard: .booking)
+            vc.totalPayableStr = pricePackage
+            vc.taxesStr = "\(taxesRate)"
+            vc.sessionCost = "\(mainPrice)"
+            
+            vc.paymentSuccess = {[weak self] (getStatus, getTransactionId, paymetMethod) in
+                guard let self = self else { return  }
+                
+                if paymetMethod == "ccavenue" {
+                    if let pricePackage = self.slotsData?.price {
+                        let components = pricePackage.split(separator: " ")
+                        let vc: CCAvenuePaymentViewController = CCAvenuePaymentViewController.instantiate(appStoryboard: .booking)
+                        vc.modalPresentationStyle = .overFullScreen
+                        vc.costAmt =  Double(components.first ?? "0.0")
+                        
+                        vc.paymentSuccess = {[weak self] (getStatus, getTransactionId) in
+                            guard let self = self, let getTransactionId = getTransactionId  else { return  }
+                            inputBookSlotParams?.transaction_id = getTransactionId
+                            
+                            print("Slot booking params: ",inputBookSlotParams?.getParams() ?? [:])
+                            if let slotId = inputBookSlotParams?.slot_id, !slotId.isEmpty {
+                                self.bookSlot(inputParam: inputBookSlotParams?.getParams() ?? [:])
+                            }else{
+                                AlertHelper.shared.alertMesssage(view: self, title: "", message: "Please select slot")
+                            }
+                        }
+                        self.navigationController?.present(vc, animated: true)
+                    }
+                }
+            }
+            self.navigationController?.pushViewController(vc, animated: false)
+        }
+
         */
+        
+        /*
+         if let slotId = inputBookSlotParams?.slot_id, !slotId.isEmpty {
+         self.bookSlot(inputParam: inputBookSlotParams?.getParams() ?? [:])
+         }else{
+         AlertHelper.shared.alertMesssage(view: self, title: "", message: "Please select slot")
+         }
+         */
+        
+        
+        /*
+         let vc:PaymentSuccessViewController = PaymentSuccessViewController.instantiate(appStoryboard: .booking)
+         self.navigationController?.pushViewController(vc, animated: true)
+         */
         
     }
     
@@ -451,12 +521,54 @@ class SlotDurationViewController: CommonViewController {
     
 }
 
+//MARK: ------------ CustomCalendarDelegate DELEGATE
+extension SlotDurationViewController: CustomCalendarDelegate{
+    func didSelecteed(withValue value: String?) {
+        print("Selected value: ", value as Any)
+        
+        let getSlotDate = DateFormatterHelper.shared.getDateFromFormat(fromDate: value ?? "", fromFormat: "yyyy-MM-dd HH:mm:ss Z", toFormat: "yyyy-MM-dd")
+        print("getSlotDate" , getSlotDate ?? "")
+        
+        
+        //----------------*******************######################
+        //------------------***************
+        self.bottomPriceMBV.isHidden = true
+        self.packageMBV.isHidden = true
+        
+        switch slotDurationFlow {
+        case .bookTrainerHomeWorkout, .bookTrainerGymWorkout:
+           
+            //----------------Api
+            self.inputBookSlotParams = nil
+            inputGetSlotParams?.date = getSlotDate
+            self.getSlot(params: inputGetSlotParams?.getParams() ?? [:])
+            
+        case .createPackage:
+            print("Pending")
+            //----------------it's not in use because of no use of calendar which is selection dates
+//            inputSetDateParams?.timing = timeStr
+//            self.packageSetDate(setParams: inputSetDateParams?.getParams())
+            
+        case .gymMembership, .withTrainerMembership, .withoutTrainerMembership:
+            print("membership flow")
+        case .defaultFlow:
+            print("default is called..")
+       
+        }
+        
+    }
+    
+    func didDeselecteed(withValue value: String?) {
+        print("didDeselecteed value: ", value as Any)
+    }
+}
+
 //MARK: ------------UICOLLECIONVIEW DATASOURCE/DELEGATE
 extension SlotDurationViewController:UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout{
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-        return collectionView.numberOfRows(count: slotTimes?.count ?? 0, title: AppAlertStrings.no_results_found, message: "", messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 150, height: 150)), messageImageHeight: nil, target: nil, fromCenter: -100, fromTop: nil)
+        return collectionView.numberOfRows(count: slotTimes?.count ?? 0, title: AppAlertStrings.no_slots_found, message: "", messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 150, height: 150)), messageImageHeight: nil, target: nil, fromCenter: -100, fromTop: nil)
         
 //        return slotTimes?.count ?? 0
     }
@@ -606,6 +718,7 @@ extension SlotDurationViewController{
             if getResultData.status == true {
                 let vc:PaymentSuccessViewController = PaymentSuccessViewController.instantiate(appStoryboard: .booking)
                 vc.bookedDataModel = getResultData.data
+                vc.billingViewFlow = .defaultBilling
                 self.navigationController?.pushViewController(vc, animated: true)
             }
           
@@ -743,6 +856,8 @@ struct BookSlotParamsModel {
     var sessions: String?
     var price: String?
     var days: String?
+    var transaction_id: String?
+    
     
     func getParams() -> [String: String] {
         var dict: [String: String] = [:]
@@ -759,6 +874,7 @@ struct BookSlotParamsModel {
         if let sessions = sessions { dict["sessions"] = sessions }
         if let price = price { dict["price"] = price }
         if let days = days { dict["days"] = days }
+        if let transaction_id = transaction_id { dict["transaction_id"] = transaction_id }
         
         return dict
     }

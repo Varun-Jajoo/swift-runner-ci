@@ -54,11 +54,24 @@ struct SubmitOtpBaseModel: Codable {
 // MARK: - OtpDataModel
 struct SubmitDataModel: Codable {
     var user: UserModel?
+    var  id: Int?
     var step: FlexibleValue?
     var token: FlexibleValue?
+    let name: String?
+    let email: String?
+    let phone: String?
+    let isCompleted: Int?
+    let dob, gender: String?
     
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(Int.self, forKey: .id)
+        name = try container.decodeIfPresent(String.self, forKey: .name)
+        email = try container.decodeIfPresent(String.self, forKey: .email)
+        phone = try container.decodeIfPresent(String.self, forKey: .phone)
+        isCompleted = try container.decodeIfPresent(Int.self, forKey: .isCompleted)
+        dob = try container.decodeIfPresent(String.self, forKey: .dob)
+        gender = try container.decodeIfPresent(String.self, forKey: .gender)
         step = try container.decodeIfPresent(FlexibleValue.self, forKey: .step)
         token = try container.decodeIfPresent(FlexibleValue.self, forKey: .token)
 
@@ -70,6 +83,7 @@ struct SubmitDataModel: Codable {
         } else {
             user = nil
         }
+       
     }
 }
 
@@ -89,6 +103,32 @@ struct UserModel: Codable {
         case dob, gender, information
     }
 }
+
+/*
+ ["data": {
+     dob = "<null>";
+     email = "<null>";
+     gender = "<null>";
+     id = 254;
+     "is_completed" = 0;
+     name = HRY;
+     phone = 1254365211;
+ }, "msg": Saved successfully!, "status": 1]
+ */
+
+/*
+ ["status": 1, "msg": Login successful, please complete step 0, "data": {
+     id = 17;
+     step = 0;
+     token = "899|4whjGHtdKLv7MMVsGa1MFLWZ6MqzbZ4o7J1CsXVPbec95e06";
+     user =     {
+         email = "<null>";
+         "is_completed" = 1;
+         name = JJ;
+         phone = 1111111111;
+     };
+ }]
+ */
 
 
 // MARK: ------- WeightBaseModel

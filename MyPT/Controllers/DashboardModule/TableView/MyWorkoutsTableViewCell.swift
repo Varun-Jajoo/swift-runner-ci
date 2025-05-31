@@ -27,6 +27,7 @@ class MyWorkoutsTableViewCell: UITableViewCell {
     @IBOutlet weak var progressView: UILabel!
     @IBOutlet weak var fitnesStatusBtn: UIButton!
     @IBOutlet weak var scoreBtn: UIButton!
+    @IBOutlet weak var dotBtn: UIButton!
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -36,8 +37,11 @@ class MyWorkoutsTableViewCell: UITableViewCell {
             
 //            self.progressView.drawLineProgress(progressfill: 0,fillLineColor: UIColor.appYellow, cornerRadius: 2.0)
             
-            self.fitnessTypeBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 8.0)
-            self.completedFitnessTypeBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 8.0)
+//            self.fitnessTypeBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 8.0)
+//            self.completedFitnessTypeBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 8.0)
+            
+            self.fitnessTypeBtn.setCornerWithShadow(borderWidth: 0, borderColor: nil, shadowColor: UIColor(red: 0, green: 0, blue: 0, alpha: 0.25), offSet: .zero, opacity: 0.4, shadowRadius: 5.0, cornerRadious: 8.0)
+            self.completedFitnessTypeBtn.setCornerWithShadow(borderWidth: 0, borderColor: nil, shadowColor: UIColor(red: 0, green: 0, blue: 0, alpha: 0.25), offSet: .zero, opacity: 0.4, shadowRadius: 5.0, cornerRadious: 8.0)
             
             self.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             self.userImgView.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 20.0)

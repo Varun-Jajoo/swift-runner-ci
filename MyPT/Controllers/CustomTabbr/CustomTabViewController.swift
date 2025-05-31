@@ -36,8 +36,7 @@ class CustomTabViewController: UITabBarController {
     let homeVC:DashboardViewController = DashboardViewController.instantiate(appStoryboard: .dashboard)
     let homeGeustuserVC:DashboardGuestViewController = DashboardGuestViewController.instantiate(appStoryboard: .dashboard)
     
-//    let homeGeustuserVC:DashboardViewController = DashboardViewController.instantiate(appStoryboard: .dashboard) //only for testing
-    
+//    let homeGeustuserVC:DashboardViewController = DashboardViewController.instantiate(appStoryboard: .dashboard) 
 //    let bookingsVC:BookingsViewController = BookingsViewController.instantiate(appStoryboard: .booking)
     let bookingsVC:BookingListViewController = BookingListViewController.instantiate(appStoryboard: .booking)
     let libraryVC:LibraryViewController = LibraryViewController.instantiate(appStoryboard: .library)
@@ -116,6 +115,10 @@ class CustomTabViewController: UITabBarController {
         calendarVC.tabBarItem = calendarTabBarItem
         moreVC.tabBarItem = moreTabBarItem
         
+        //---------*******
+        bookingsVC.isFromTab = true
+        calendarVC.isFromTab = true
+        
 //        notificationVC.isFromTab = true
 //        profileVC.isFromTabProfile = true
 //        meshnetVC.isFromTabbar = true
@@ -182,7 +185,6 @@ class CustomTabViewController: UITabBarController {
     }
     
     //-------------------*****************************
-
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         self.view.layoutIfNeeded()
@@ -224,11 +226,18 @@ class CustomTabViewController: UITabBarController {
          getFrame.size.height += heightIncrease
          self.tabBar.frame = getFrame
 
+//         if let items = self.tabBar.items {
+//             for (index, item) in items.enumerated() {
+//                 item.imageInsets = (index == self.selectedIndex) ?
+//                     UIEdgeInsets(top: 0, left: 0, bottom: imageBottomInset, right: 0) :
+//                     .zero
+//             }
+//         }
+         
          if let items = self.tabBar.items {
              for (index, item) in items.enumerated() {
                  item.imageInsets = (index == self.selectedIndex) ?
-                     UIEdgeInsets(top: 0, left: 0, bottom: imageBottomInset, right: 0) :
-                     .zero
+                     UIEdgeInsets(top: 0, left: 0, bottom: imageBottomInset, right: 0) : UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
              }
          }
 
@@ -304,9 +313,17 @@ class CustomTabViewController: UITabBarController {
     }
 
     override func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
-//        _ = self.createPathCircle()
+        _ = self.createPathCircle()
+        
+        if let geustUser = isForGeustDashboard, geustUser == true , let index = tabBar.items?.firstIndex(of: item) {
+            print("Selected tab index: \(index)")
+            if index != 0 {
+                if appUserDefaults.clearUserDefault() {
+                    appSceneDelegate?.goToMainView()
+                }
+            }
+        }
     }
-    
 }
 
 

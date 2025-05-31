@@ -11,21 +11,29 @@ class RegistrationVM {
     
     //MARK: ------------VALIDATION
     class func isValidePhone(phoneNumStr:String?) -> Bool {
-        if let userPhoneStr =  phoneNumStr, !userPhoneStr.isValidPhone(phone: userPhoneStr) || userPhoneStr.isEmpty{
+        
+        if let userPhoneStr =  phoneNumStr, userPhoneStr.isEmpty{
             AlertHelper.shared.showCustomeAlert(message: AppAlertStrings.enter_phone,actions: ["Ok"])
          return false
         }
+        
         return true
+//        if let userPhoneStr =  phoneNumStr, !userPhoneStr.isValidPhone(phone: userPhoneStr) || userPhoneStr.isEmpty{
+//            AlertHelper.shared.showCustomeAlert(message: AppAlertStrings.enter_phone,actions: ["Ok"])
+//         return false
+//        }
+//        return true
     }
     
     //MARK: --------------------- Login
-    class  func loginApi(inputPhoneNum:String?,inputCountryCode:String?, loginType: String?, completion: @escaping(_ resultData:LoginBaseModel?) -> Void){
-        guard let inputPhoneNum = inputPhoneNum, let inputCountryCode = inputCountryCode, let inputType = loginType else { return }
+    class  func loginApi(inputEmail: String?, inputPhoneNum:String?,inputCountryCode:String?, loginType: String?, completion: @escaping(_ resultData:LoginBaseModel?) -> Void){
+//        guard let inputPhoneNum = inputPhoneNum, let inputCountryCode = inputCountryCode, let inputType = loginType else { return }
         
         let params:[String:Any] = [
-            "country_code":inputCountryCode ,
-            "phone":inputPhoneNum,
-            "type": inputType
+            "country_code":inputCountryCode ?? "",
+            "phone":inputPhoneNum ?? "",
+            "type": loginType ?? "",
+            "email": inputEmail ?? ""
         ]
         
         NetworkManager.shared.genericAPICall(serviceEndPoint: .login, method: .post , parameters: params, isShowLoading: true, completion: {  (getResponce, error) in
@@ -42,12 +50,14 @@ class RegistrationVM {
     }
     
     //MARK: --------------------- Resend Otp
-    class  func resendOtpApi(inputPhoneNum:String?,inputCountryCode:String?, completion: @escaping(_ resultData:LoginBaseModel?) -> Void){
-        guard let inputPhoneNum = inputPhoneNum, let inputCountryCode = inputCountryCode else { return }
+    class  func resendOtpApi(inputEmail: String?, inputPhoneNum:String?, inputCountryCode:String?, loginType: String?, completion: @escaping(_ resultData:LoginBaseModel?) -> Void){
+//        guard let inputPhoneNum = inputPhoneNum, let inputCountryCode = inputCountryCode else { return }
         
         let params:[String:Any] = [
-            "country_code":inputCountryCode ,
-            "phone":inputPhoneNum,
+            "country_code":inputCountryCode ?? "",
+            "phone":inputPhoneNum ?? "",
+            "email": inputEmail ?? "",
+            "type": loginType ?? ""
         ]
         
         NetworkManager.shared.genericAPICall(serviceEndPoint: .resend_Otp, method: .post , parameters: params, isShowLoading: true, completion: {  (getResponce, error) in
@@ -64,14 +74,15 @@ class RegistrationVM {
     }
  
     //MARK: --------------------- Resend Otp
-    class  func submitOtpApi(inputPhoneNum:String?,inputCountryCode:String?, loginType: String?, otpStr: String?, completion: @escaping(_ resultData:SubmitOtpBaseModel?) -> Void){
-        guard let inputPhoneNum = inputPhoneNum, let inputCountryCode = inputCountryCode, let otpStr = otpStr, let loginType = loginType else { return }
+    class  func submitOtpApi(inputEmail: String?, inputPhoneNum:String?,inputCountryCode:String?, loginType: String?, otpStr: String?, completion: @escaping(_ resultData:SubmitOtpBaseModel?) -> Void){
+//        guard let inputPhoneNum = inputPhoneNum, let inputCountryCode = inputCountryCode, let otpStr = otpStr, let loginType = loginType else { return }
         
         let params:[String:Any] = [
-            "phone":inputPhoneNum,
-            "country_code":inputCountryCode,
-            "otp": otpStr,
-            "type": loginType
+            "phone":inputPhoneNum ?? "",
+            "country_code":inputCountryCode ?? "",
+            "otp": otpStr ?? "",
+            "type": loginType ?? "",
+            "email": inputEmail ?? ""
         ]
         
         NetworkManager.shared.genericAPICall(serviceEndPoint: .submit_Otp, method: .post , parameters: params, isShowLoading: true, completion: {  (getResponce, error) in
@@ -258,13 +269,7 @@ class RegistrationVM {
     class  func addWeightApi(viewController: UIViewController, inputWeight:String?, completion: @escaping(_ resultData: WeightBaseModel?) -> Void){
         guard let inputWeight = inputWeight else { return }
         /*
-         "weight": "22"
-         */
-        
-        /*
-         12lbs
-
-         12lbs or 23kg (lbs automatic convert into kg)
+         "weight": "22", 12lbs, 12lbs or 23kg (lbs automatic convert into kg)
          */
         
         let params:[String:Any] = [
@@ -443,6 +448,39 @@ class RegistrationVM {
             
         })
     }
+    
+    //MARK: ---------------------https://mobileapp.mypt-me.com/api/account-delete
+    class func deleteUserAccApi(viewController: UIViewController, isShowLoader:Bool = true, completion: @escaping(_ resultData:[String:Any]?) -> Void){
+//        let params:[String:String] =
+//        [
+//            "" : ""
+//        ]
+        
+        //        NetworkManager.shared.genericAPICall(serviceEndPoint: .account_delete, method: .get , queries: nil, parameters:  nil, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
+        
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .account_delete, method: .get , parameters: nil, isShowLoading: isShowLoader, completion: { (getResponce, error) in
+        
+            do{
+
+                if let responceData = getResponce {
+                    let getResult = try JSONSerialization.jsonObject(with: responceData, options: .mutableContainers) as? [String:Any]
+                    guard let getResult = getResult else { return }
+                    if (getResult["status"] as? Bool) == true  {
+                        completion(getResult)
+                    }
+                    else{
+                        
+                        let errorMsg = "\(((getResult["errors"] as? [String : Any])?.values.first as? [Any])?.first as? String ?? (getResult["msg"] as? String ?? ""))"
+                        debugPrint(errorMsg)
+                    }
+                }
+                
+            }catch {
+                print(error)
+            }
+        })
+    }
+    
     
     /*
      NetworkManager.shared.genericAPICall(serviceEndPoint: .login, method: .post , parameters: params, isShowLoading: true, completion: {  (getResponce, error) in

@@ -64,6 +64,7 @@ class RulerRangeTextView: UIControl, UITextFieldDelegate {
             self.textField.text = formatter.string(from: measurement)
         } else {
             self.textField.text = String(format: "%.1f", value)
+//            self.textField.text = String(format: "%.1f", value)
         }
         if let position = originalCursorPosition {
             self.textField.selectedTextRange = textField.textRange(
@@ -75,29 +76,55 @@ class RulerRangeTextView: UIControl, UITextFieldDelegate {
         Creates a new UITextField and assigns the constraint programmatically
     */
     func setupTextView() {
+        
         self.textField.removeFromSuperview()
         self.textField.isUserInteractionEnabled = false
-        let textField = UITextField(frame: self.bounds)
-        textField.textAlignment = NSTextAlignment.center
+        
+        let textField = UITextField()
         textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.textAlignment = .center
         textField.isUserInteractionEnabled = true
         textField.text = "0"
         textField.keyboardType = .decimalPad
         textField.delegate = self
+        
         self.addSubview(textField)
         
+        NSLayoutConstraint.activate([
+            textField.topAnchor.constraint(equalTo: self.topAnchor, constant: 5),
+            textField.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+            textField.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 1.0),
+//            textField.widthAnchor.constraint(equalToConstant: 80),
+            textField.heightAnchor.constraint(equalToConstant: 40)
+        ])
         
-        let views = ["textField": textField]
-        var constraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-5-[textField]-5-|",
-                                                         options: NSLayoutConstraint.FormatOptions.directionLeadingToTrailing,
-                metrics: nil,
-                views: views)
-        constraints += NSLayoutConstraint.constraints(withVisualFormat: "V:|-5-[textField]-5-|",
-                                                      options: NSLayoutConstraint.FormatOptions.directionLeadingToTrailing,
-                metrics: nil,
-                views: views)
-        self.addConstraints(constraints)
         self.textField = textField
+        
+        /*
+         self.textField.removeFromSuperview()
+         self.textField.isUserInteractionEnabled = false
+         let textField = UITextField(frame: self.bounds)
+         textField.textAlignment = NSTextAlignment.center
+         textField.translatesAutoresizingMaskIntoConstraints = false
+         textField.isUserInteractionEnabled = true
+         textField.text = "0"
+         textField.keyboardType = .decimalPad
+         textField.delegate = self
+         self.addSubview(textField)
+         
+         
+         let views = ["textField": textField]
+         var constraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-5-[textField]-5-|",
+         options: NSLayoutConstraint.FormatOptions.directionLeadingToTrailing,
+         metrics: nil,
+         views: views)
+         constraints += NSLayoutConstraint.constraints(withVisualFormat: "V:|-5-[textField]-5-|",
+         options: NSLayoutConstraint.FormatOptions.directionLeadingToTrailing,
+         metrics: nil,
+         views: views)
+         self.addConstraints(constraints)
+         self.textField = textField
+         */
     }
 
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
@@ -165,6 +192,4 @@ class RulerRangeTextView: UIControl, UITextFieldDelegate {
         }
         return super.resignFirstResponder()
     }
-
-
 }

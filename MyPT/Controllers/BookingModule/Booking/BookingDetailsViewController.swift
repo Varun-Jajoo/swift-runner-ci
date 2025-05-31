@@ -9,6 +9,7 @@ import UIKit
 
 enum BookingDetailsFlow {
     case reschedule
+    case rescheduleConsumer
     case upcoming
     case completed
     case cancelled
@@ -19,6 +20,18 @@ class BookingDetailsViewController: CommonViewController {
    
     //MARK: ------------ VARIBALE
     var detailsFlow:BookingDetailsFlow = .defaultDetails
+    var bookingIdStr: String?
+    var bookingDetailsData: BookingDetailsDataModel? = nil
+    var cancelledbookingDetailsData: BookingDetailsDataModel? = nil
+    
+    private var acceptType: Int? = nil{
+        didSet{
+            if let acceptType = acceptType {
+                self.bookingAcceptReject(inputIdStr: bookingIdStr, inputType: acceptType)
+            }
+        }
+    }
+    
     
     //MARK: -----------IBOUTLET
     @IBOutlet weak var homeWorkoutMBV: UIView!
@@ -120,6 +133,9 @@ class BookingDetailsViewController: CommonViewController {
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleData(notification:)), name: NSNotification.Name("DataSlotselected"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(canceledBooking(notification:)), name: NSNotification.Name("bookingCancelled"), object: nil)
+        
+        self.bookingDetails(inputId: self.bookingIdStr)
+        self.setInputData()
     }
     
     override func viewDidLayoutSubviews() {
@@ -144,6 +160,35 @@ class BookingDetailsViewController: CommonViewController {
     }
     
     @objc func canceledBooking(notification: Notification){
+        if let cancelledData = notification.object {
+            //cancelledbookingDetailsData
+            self.cancelledbookingDetailsData = nil
+            self.cancelledbookingDetailsData  = cancelledData as? BookingDetailsDataModel
+            self.bookingDetailsData = nil
+            self.bookingDetailsData = self.cancelledbookingDetailsData
+            
+            self.cancelledMBV.isHidden = false
+            self.profileTrainerMBV.isHidden = true
+            self.bookingRescheduleStckView.isHidden = true
+            self.cancellationPolicyMBV.isHidden = true
+            self.bookingAgainMBV.isHidden = false
+            self.sessionSuccessfullyDescLbl.textColor = UIColor.appWhite
+            self.sessionSuccessfullyMBV.backgroundColor = UIColor(red: 169.0/255.0, green: 94.0/255.0, blue: 9.0/255.0, alpha: 1)
+            
+            //----------------******* Data set
+            self.myTrainerTitleBtn.setImage(UIImage(named: "ic_calendarCan"), for: .normal)
+            self.myTrainerTitleBtn.setTitle(AppStrings.bookingStr + " " + AppStrings.cancelled , for: .normal)
+            self.myTrainerTitleBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0)
+            self.myTrainerTitleBtn.setTitleColor(UIColor.appWhite, for: .normal)
+            
+            self.sessionSuccessfullyDescLbl.text = "Your booking amount will be refunded back to the source of payment withing 24 hours"
+            
+             //------------------ Setup data
+            self.requestCancellledDateLbl.text = cancelledbookingDetailsData?.cancelledAtBooking
+            self.detailsData()
+        }
+        
+        /*
         if let data = notification.object as? String {
             print("Received data: \(data)")
             self.cancelledMBV.isHidden = false
@@ -165,6 +210,7 @@ class BookingDetailsViewController: CommonViewController {
             self.sessionSuccessfullyDescLbl.text = "Your booking amount will be refunded back to the source of payment withing 24 hours"
             
         }
+        */
     }
     
     @objc func handleData(notification: Notification) {
@@ -172,7 +218,7 @@ class BookingDetailsViewController: CommonViewController {
             print("Received data: \(data)")
             self.cancelRequestMBV.isHidden = false
             self.bookingRescheduleStckView.isHidden = true
-            self.sessionSuccessfullyDescLbl.text = "Your booking will be rescheduled once the trainer approves the request."
+            self.sessionSuccessfullyDescLbl.text =  data //"Your booking will be rescheduled once the trainer approves the request."
             self.sessionSuccessfullyDescLbl.textColor = UIColor.appWhite
             self.sessionSuccessfullyMBV.backgroundColor = UIColor.appLightBlue
             
@@ -182,7 +228,6 @@ class BookingDetailsViewController: CommonViewController {
             self.myTrainerTitleBtn.setTitleColor(UIColor.appWhite, for: .normal)
         }
     }
-    
     
     enum btntag: Int {
         case help = 2201, decline, accept, againBooking, reschedule, cancelBooking,cuctomSupprot,learMore, reviewRate, cancelRequest
@@ -196,7 +241,10 @@ class BookingDetailsViewController: CommonViewController {
             print("Help btn clicked.")
         case btntag.decline.rawValue:
             print("Decline btn clicked.")
-
+            
+            self.bookingAcceptReject(inputIdStr: self.bookingIdStr, inputType: 2)
+            
+            /*
             self.rescheduleMBV.backgroundColor = UIColor.appLightBlue
             self.trainerRescheduleLbl.text = AppStrings.find_Trainers_DescStr
             self.declineBtn.isHidden = true
@@ -207,7 +255,8 @@ class BookingDetailsViewController: CommonViewController {
                 self.emptyBtnFindsTrainer.isHidden = false
                 
             }
-           
+           */
+            
             //            let vc:CancellationPolicyViewController = CancellationPolicyViewController.instantiate(appStoryboard: .booking)
             //            vc.modalPresentationStyle = .automatic
             //            self.navigationController?.present(vc, animated: true)
@@ -221,12 +270,18 @@ class BookingDetailsViewController: CommonViewController {
                 self.navigationController?.pushViewController(vc, animated: false)
                 
             }else{
+                self.bookingAcceptReject(inputIdStr: self.bookingIdStr, inputType: 1)
+                
+                /*
+                //-------------when is used to accept reschedule from trainer
                 self.rescheduleMBV.isHidden = true
                 self.sessionSuccessfullyMBV.isHidden = false
                 self.sessionSuccessfullyMBV.animShow(duration: 0.3, delay: 0) {
                     print("animation done..")
                 }
+                */
             }
+
             
             //            let vc:CalendarPopViewController = CalendarPopViewController.instantiate(appStoryboard: .booking)
             //            vc.modalPresentationStyle = .automatic
@@ -235,6 +290,8 @@ class BookingDetailsViewController: CommonViewController {
             
         case btntag.againBooking.rawValue:
             print("Again Booking btn clicked.")
+            let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
+            self.navigationController?.pushViewController(vc, animated: false)
             
         case btntag.reschedule.rawValue:
             print("Reschedule btn clicked.")
@@ -242,6 +299,7 @@ class BookingDetailsViewController: CommonViewController {
             vc.modalTransitionStyle = .coverVertical
             vc.flowUI = .reschedule
             vc.navFilterCtrl = self.navigationController
+            vc.bookingIdStr =  self.bookingIdStr
             self.navigationController?.present(vc, animated: true)
         
         case btntag.cancelBooking.rawValue:
@@ -250,6 +308,7 @@ class BookingDetailsViewController: CommonViewController {
             let vc:ReschedulePopViewController = ReschedulePopViewController.instantiate(appStoryboard: .booking)
             vc.modalPresentationStyle = .automatic
             vc.rescheduleNavCtrl = self.navigationController
+            vc.inputBookingIdStr = self.bookingIdStr
             self.navigationController?.present(vc, animated: true)
           
         case btntag.help.rawValue:
@@ -264,16 +323,163 @@ class BookingDetailsViewController: CommonViewController {
             vc.navCtrl = self.navigationController
             self.navigationController?.present(vc, animated: true)
         case btntag.cancelRequest.rawValue:
-            print("print cancel request btn clicked..")
+            print("BookingIdStr cancel request btn clicked..", self.bookingIdStr as Any)
+            self.cancelRequestRescheduleConsumer(inputBookingId: self.bookingIdStr)
             
+            /*
+            AlertHelper.shared.showCustomeAlert(title: "", message: AppAlertStrings.cancel_AlertMsg, withCancel: true, completion: {[weak self] indx in
+                guard let self = self, let indx = indx else { return  }
+                if indx == 0{
+                    self.cancelRequestRescheduleConsumer(inputBookingId: self.bookingIdStr)
+                }
+            })
+            */
         default:
             print("Default is called")
         }
     }
     
+    private func declineRescheduleTrainer(){
+        self.rescheduleMBV.backgroundColor = UIColor.appLightBlue
+        self.trainerRescheduleLbl.text = AppStrings.find_Trainers_DescStr
+        self.declineBtn.isHidden = true
+        self.acceptBtn.accessibilityHint = AppStrings.find_Trainers
+        self.acceptBtn.setTitle(AppStrings.find_Trainers.uppercased(), for: .normal)
+        self.acceptBtn.applyTransition(type: .moveIn, subtype: .fromRight, duration: 0.5, timingFunction: .easeInEaseOut){
+            print("animation is done...")
+            self.emptyBtnFindsTrainer.isHidden = false
+            
+        }
+    }
+    
+    //MARK: ------------INPUT DATA SETUP
+    private func setInputData(){
+       
+        switch detailsFlow {
+        case .reschedule:
+            print("reschedule flow")
+            self.trainerRescheduleLbl.text = bookingDetailsData?.msg
+            self.detailsData()
+            
+        case .rescheduleConsumer:
+            print("rescheduleConsumer")
+            self.cancelRequestMBV.isHidden = false
+            self.bookingRescheduleStckView.isHidden = true
+            self.rescheduleMBV.isHidden = true
+            self.sessionSuccessfullyMBV.isHidden = false
+            self.sessionSuccessfullyDescLbl.text = "Your booking will be rescheduled once the trainer approves the request."
+            self.sessionSuccessfullyDescLbl.textColor = UIColor.appWhite
+            self.sessionSuccessfullyMBV.backgroundColor = UIColor.appLightBlue
+            
+            self.myTrainerTitleBtn.setImage(UIImage(named: "ic_calendarCan"), for: .normal)
+            self.myTrainerTitleBtn.setTitle(AppStrings.reschedule_Request + " " + AppStrings.pendingStr, for: .normal)
+            self.myTrainerTitleBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0)
+            self.myTrainerTitleBtn.setTitleColor(UIColor.appWhite, for: .normal)
+            
+            self.detailsData()
+            
+        case .upcoming:
+            print("upcoming flow")
+//            self.trainerRescheduleLbl.text = bookingDetailsData?.cancellationPolicyMsg
+            self.sessionSuccessfullyDescLbl.text = bookingDetailsData?.cancellationPolicyMsg
+            self.detailsData()
+            
+        case .completed:
+            print("completed flow")
+            
+            //-----------************* SESSION DATA SETUP
+            self.sessionDateLbl.text = bookingDetailsData?.bookingDetail?.trainingDate
+            self.sessionTypeLbl.text = (bookingDetailsData?.bookingDetail?.type ?? "").localizedCapitalized + " Workout"
+            self.sessionLocLbl.text = bookingDetailsData?.bookingDetail?.location
+            
+            //------------************* WORKOUT SUMMARY
+            self.cancellationDetailsTitleLbl.text = "Workout Summary"
+            self.canceledonTitleLbl.text = "Workout Focus"
+            self.cancellationDateLbl.text = "" //"Chest & Back"
+            self.reasonTitleLbl.text = "Calories Burned"
+            self.reasonDescLbl.text = "" //"200kcal"
+            self.refundTitleLbl.text = "Duration"
+            self.refundAmtLbl.text = "" //"2h 30m"
+            
+            //------------************ EXERCISE LOG DETAILS
+            self.exerciseLogTitleLbl.text = "Exercise Log"
+            self.exercise1TitleLbl.text = "Exercise 1"
+            self.exercise1DescLbl.text = ""
+            self.exercise2TitleLbl.text = "Exercise 2"
+            self.exercise2DescLbl.text = ""
+            self.exercise3TitleLbl.text = "Exercise 3"
+            self.exercise3DescLbl.text = ""
+            
+            self.costAmtLbl.text = bookingDetailsData?.bookingDetail?.price
+            
+            self.detailsData()
+            
+        case .cancelled:
+            print("cancelled flow")
+            
+            self.cancellationDateLbl.text = bookingDetailsData?.cancellationDetail?.cancelledOn
+            self.reasonDescLbl.text = bookingDetailsData?.cancellationDetail?.reason
+            self.refundAmtLbl.text = bookingDetailsData?.cancellationDetail?.refundAmount
+            self.detailsData()
+            
+        case .defaultDetails:
+            print("defaultDetails flow")
+        }
+        
+       
+        
+        /*
+         self.sessionTitleLbl.text = ""
+         self.sessionDateTitleLbl.text = ""
+         self.sessionDateLbl.text = ""
+         self.sessionTypeTitleLbl.text = ""
+         self.sessionTypeLbl.text = ""
+         self.sessionLocTitleLbl.text = ""
+         self.sessionLocLbl.text = ""
+         self.requestCancellledTitleLbl.text = ""
+         self.requestCancellledDateLbl.text = ""
+         self.sessionSuccessfullyDescLbl.text = ""
+         self.bookingDetailsTitleLbl.text = ""
+         self.contactNumTitleLbl.text = ""
+         self.cancellationDetailsTitleLbl.text = ""
+         self.canceledonTitleLbl.text = ""
+         self.cancellationDateLbl.text = ""
+         self.reasonTitleLbl.text = ""
+         self.reasonDescLbl.text = ""
+         self.refundTitleLbl.text = ""
+         self.refundAmtLbl.text = ""
+         self.cancellationPolicyTitleLbl.text = ""
+         self.cancellationDescLbl.text = ""
+         self.exerciseLogTitleLbl.text = ""
+         self.exercise1TitleLbl.text = ""
+         self.exercise1DescLbl.text = ""
+         self.exercise2TitleLbl.text = ""
+         self.exercise2DescLbl.text = ""
+         self.exercise3TitleLbl.text = ""
+         self.exercise3DescLbl.text = ""
+         self.trainerFeedTitleBck.text = ""
+         self.trainerFeedBckDescLbl.text = ""
+         self.costTitleLbl.text = ""
+         self.costAmtLbl.text = ""
+         */
+    }
+    
+    private func detailsData(){
+        self.homeWorkoutTitleLbl.text = (bookingDetailsData?.bookingDetail?.type?.localizedCapitalized ?? "") + " Workout"
+        self.homeworkoutDate.text = bookingDetailsData?.bookedAt
+        self.trainerProfileImgV.loadImage(urlString: bookingDetailsData?.trainerDetail?.profile, placeholder: UIImage(named: ""))
+        self.trainerNameLbl.text = bookingDetailsData?.trainerDetail?.name
+        self.distanceLbl.text = bookingDetailsData?.trainerDetail?.distance
+        self.addressLbl.text = bookingDetailsData?.trainerDetail?.location
+        self.ratingBtn.setTitle(bookingDetailsData?.trainerDetail?.averageRating, for: .normal)
+        self.contactNumLbl.text = bookingDetailsData?.bookingDetail?.contact
+        self.amtPaidLbl.text = bookingDetailsData?.bookingDetail?.price
+        self.trainingLocLbl.text = bookingDetailsData?.bookingDetail?.location
+        self.trainingDateLbl.text = bookingDetailsData?.bookingDetail?.trainingDate
+    }
     
     //MARK: ---------------SETUP FLOW
-    func setupFlowDetails(){
+    private func setupFlowDetails(){
         
         self.cancelledMBV.isHidden = true
         self.cancelRequestMBV.isHidden = true
@@ -283,7 +489,7 @@ class BookingDetailsViewController: CommonViewController {
         
         switch detailsFlow {
             
-        case .reschedule:
+        case .reschedule, .rescheduleConsumer:
             print("reschedule flow")
             self.sessionOverviewMBV.isHidden = true
 //            self.sessionOverviewSubMBV.isHidden = true
@@ -328,7 +534,7 @@ class BookingDetailsViewController: CommonViewController {
             self.myTrainerTitleBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0)
             self.myTrainerTitleBtn.setTitleColor(UIColor.appWhite, for: .normal)
             
-            self.sessionSuccessfullyDescLbl.text = "Free cancellation/reschedule before Wed, Sep 20, 01:00 AM. Know More"
+//            self.sessionSuccessfullyDescLbl.text = "Free cancellation/reschedule before Wed, Sep 20, 01:00 AM. Know More"
           
             self.sessionSuccessfullyDescLbl.textColor = UIColor.appLightGray
             self.sessionSuccessfullyMBV.backgroundColor = UIColor(red: 28.0/255.0, green: 31.0/255.0, blue: 33.0/255.0, alpha: 1)
@@ -360,6 +566,7 @@ class BookingDetailsViewController: CommonViewController {
             self.customerSupportBtn.isHidden = false
             self.customerSupportBtnHeightConstrnt.constant = 45.0
             
+            /*
             //------------************* Data setup
             self.cancellationDetailsTitleLbl.text = "Workout Summary"
             self.canceledonTitleLbl.text = "Workout Focus"
@@ -368,6 +575,7 @@ class BookingDetailsViewController: CommonViewController {
             self.reasonDescLbl.text = "200kcal"
             self.refundTitleLbl.text = "Duration"
             self.refundAmtLbl.text = "2h 30m"
+            */
             
         case .cancelled:
             print("cancelled flow")
@@ -405,41 +613,64 @@ class BookingDetailsViewController: CommonViewController {
     //MARK: ----------------SETUPUI
     func setUpUI(){
         DispatchQueue.main.async {
-            self.homeWorkoutMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.helpBtn.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appWhite, cornerRadious: 12.0)
-            self.bookingRescheduleBtn.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appWhite, cornerRadious: 12.0)
-            self.cancelBookingBtn.setCornerRadius(borderWidth: 0, borderColor: UIColor.appWhite, cornerRadious: 12.0)
-            self.sessionOverviewSubMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.trainerSubMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.homeWorkoutMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.rescheduleMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.declineBtn.setCornerRadius(borderWidth: 1, borderColor: UIColor.appWhite, cornerRadious: 12.0)
-            self.acceptBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.bookAgainBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.cancelrequestBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.sessionSuccessfullyMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.bookingDetailsSubMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.cancellationSubMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.cancellationSubMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.exerciseLogSubMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.costCreditMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.customerSupportBtn.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appWhite, cornerRadious: 12.0)
             
+            self.trainerProfileImgV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12)
+            
+            [
+                self.helpBtn,
+                self.bookingRescheduleBtn,
+                self.declineBtn,
+                self.customerSupportBtn
+            ].forEach({[weak self] in
+                guard self != nil else { return }
+                $0.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appWhite, cornerRadious: 12.0)
+            })
+            
+            //--------------------*********
+            [
+                self.homeWorkoutMBV,
+                self.sessionOverviewSubMBV,
+                self.trainerSubMBV,
+                self.homeWorkoutMBV,
+                self.rescheduleMBV,
+                self.acceptBtn,
+                self.bookAgainBtn,
+                self.cancelBookingBtn,
+                self.cancelrequestBtn,
+                self.sessionSuccessfullyMBV,
+                self.bookingDetailsSubMBV,
+                self.cancellationSubMBV,
+                self.cancellationSubMBV,
+                self.exerciseLogSubMBV,
+                self.costCreditMBV
+            ].forEach({[weak self] in
+                guard self != nil else { return  }
+                $0?.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+            })
+            
+            self.exerciseLineV.backgroundColor = UIColor.clear
+            self.lineV.backgroundColor = UIColor.clear
+            self.exerciseLineV.addGradient(colors: UIColor.appMultiColor(.lineVGradient), locations: [0,0.5,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0.2)
+            self.lineV.addGradient(colors: UIColor.appMultiColor(.lineVGradient), locations: [0,0.5,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0.2)
         }
     }
     
     func fontSetUP(){
-        self.homeworkoutDate.font = AppFont.semibold.size(12.0, familyName: familyManrope)
-
-        self.distanceLbl.font = AppFont.semibold.size(12.0, familyName: familyManrope)
-        self.addressLbl.font = AppFont.semibold.size(12.0, familyName: familyManrope)
-        self.ratingBtn.titleLabel?.font = AppFont.semibold.size(12.0, familyName: familyManrope)
-        self.requestCancellledDateLbl.font = AppFont.semibold.size(12.0, familyName: familyManrope)
-        self.sessionSuccessfullyDescLbl.font = AppFont.semibold.size(12.0, familyName: familyManrope)
         self.customerSupportBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
+        //_____________________#################
+        [
+            self.homeworkoutDate,
+            self.distanceLbl,
+            self.addressLbl,
+            self.ratingBtn.titleLabel,
+            self.requestCancellledDateLbl,
+            self.sessionSuccessfullyDescLbl
+        ].forEach({ [weak self] in
+            guard self != nil else { return }
+            $0?.font = AppFont.semibold.size(12.0, familyName: familyManrope)
+        })
         
-        
-        
+        //____________________################
         [
             self.trainerNameLbl,
             self.requestCancellledTitleLbl,
@@ -450,10 +681,11 @@ class BookingDetailsViewController: CommonViewController {
             self.bookingRescheduleBtn.titleLabel,
             self.cancelBookingBtn.titleLabel
         ].forEach({[weak self] in
-            guard let self = self else { return  }
+            guard self != nil else { return  }
             $0?.font = AppFont.bold.size(14.0, familyName: familyManrope)
         })
         
+        //____________________################
         [
             self.homeWorkoutTitleLbl,
             self.sessionTitleLbl,
@@ -463,11 +695,11 @@ class BookingDetailsViewController: CommonViewController {
             self.cancellationPolicyTitleLbl,
             self.exerciseLogTitleLbl
         ].forEach({[weak self] in
-            guard let self = self else { return  }
+            guard self != nil else { return  }
             $0?.font = AppFont.semibold.size(16.0, familyName: familyManrope)
         })
         
-        
+        //____________________################
         [
             self.helpBtn.titleLabel,
             self.sessionDateLbl,
@@ -505,9 +737,73 @@ class BookingDetailsViewController: CommonViewController {
             self.costTitleLbl,
             self.costAmtLbl
         ].forEach({[weak self] in
-            guard let self = self else { return  }
+            guard self != nil else { return  }
             $0?.font = AppFont.semibold.size(14.0, familyName: familyManrope)
         })
     }
 
+}
+
+//MARK: --------------------EXTENSION FOR API
+extension BookingDetailsViewController{
+    
+    //MARK: -------------------------BOOKING DETAILS API
+    private func bookingDetails(inputId: String?){
+        if let lat = appUserDefaults.getLatLong()?.components(separatedBy: ",").first,  let long = appUserDefaults.getLatLong()?.components(separatedBy: ",").last{
+           
+            let params:[String:String] = [
+                "id": inputId ?? "",
+                "long": long,
+                "lat": lat
+            ]
+            
+            BookingVM.bookingDetailsApi(inputParams: params, completion: {[weak self] getResultData in
+                guard let self = self, let getResultData = getResultData else { return  }
+                print("getResultData: ", getResultData)
+                self.bookingDetailsData = getResultData.data
+                self.setInputData()
+            })
+        }
+        
+    }
+    
+    private func bookingAcceptReject(inputIdStr: String? , inputType: Int){
+        let params:[String:Any] = [
+            "id": inputIdStr ?? "", //id:1 , session id is required
+            "type": inputType  // type:2 , 1=>accept , 2=>cancel
+        ]
+      
+        BookingVM.acceptRejectBookingApi(inputParams: params, completion: {[weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return }
+            print("getResultData: ", getResultData)
+            
+            if getResultData["status"] as? Bool == true {
+                let detailData = getResultData["data"] as? [String:Any]
+                let msgStr = detailData?["msg"] as? String //get date
+               
+                //------------flow accept/declone
+                if let typeStr = detailData?["type"] as? String, typeStr.uppercased() == "accept".uppercased(){
+                    self.sessionSuccessfullyDescLbl.text = "Your session has been successfully rescheduled to \(msgStr ?? "") We look forward to seeing you then!"
+                    //"Your session has been successfully rescheduled to 3rd Jan, 2024 | 10:30 PM. We look forward to seeing you then!"
+                    //-------------------------**************
+                    self.rescheduleMBV.isHidden = true
+                    self.sessionSuccessfullyMBV.isHidden = false
+                    self.sessionSuccessfullyMBV.animShow(duration: 0.3, delay: 0) {
+                        print("animation done..")
+                    }
+                    
+                }else{
+                    self.declineRescheduleTrainer()
+                }
+            }
+        })
+    }
+    
+    private func cancelRequestRescheduleConsumer(inputBookingId: String?){
+        BookingVM.cancelRequstConsumerRescheduleApi(inputId: inputBookingId, completion: {[weak self] getResultData in
+            guard let self = self else { return }
+            
+            self.navigationController?.popViewController(animated: true)
+        })
+    }
 }

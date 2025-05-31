@@ -37,25 +37,8 @@ class BookingListTableViewCell: UITableViewCell {
         super.awakeFromNib()
         // Initialization code
         
-        self.addLeftBorder(borderColor: UIColor.appYellow)
-       
-        DispatchQueue.main.async {
-            self.cellMBV.layerGradient(startPoint: .center, endPoint: .bottomLeft, colorArray: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 019.0/255.0, alpha: 1.0).cgColor, UIColor(red: 71/255.0, green: 77/255.0, blue: 96/255.0, alpha: 1).cgColor], type: .axial)
-          
-            self.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.rescheduledBtn.layerGradient(startPoint: .topLeft, endPoint: .bottomRight, colorArray: [UIColor(red: 255/255.0, green: 198/255.0, blue: 6/255.0, alpha: 1.0).cgColor, UIColor(red: 153/255.0, green: 119/255.0, blue: 4/255.0, alpha: 1).cgColor], type: .axial)
-           
-            self.rescheduledBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-
-            //            self.lineLbl.layerGradient(startPoint: .topLeft, endPoint: .bottomRight, colorArray: [UIColor(red: 36/255.0, green: 45/255.0, blue: 50/255.0, alpha: 0).cgColor, UIColor(red: 36/255.0, green: 45/255.0, blue: 50/255.0, alpha: 0).cgColor, UIColor(red: 56/255.0, green: 71/255.0, blue: 81/255.0, alpha: 1.0).cgColor,UIColor(red: 36/255.0, green: 45/255.0, blue: 50/255.0, alpha: 0).cgColor, UIColor(red: 36/255.0, green: 45/255.0, blue: 50/255.0, alpha: 0).cgColor], type: .conic)
-            self.lineLbl.backgroundColor = .clear
-            self.lineV.backgroundColor = UIColor.appBorder
-//            self.lineV.drawLine(start: CGPoint(x: 0, y: 1), toPoint: CGPoint(x: 1, y: 1.0))
-           
-//            self.lineV.addGradient(colors: [UIColor.appWhite,UIColor(red: 36/255.0, green: 45/255.0, blue: 50/255.0, alpha: 0), UIColor(red: 56/255.0, green: 71/255.0, blue: 81/255.0, alpha: 1.0),UIColor(red: 36/255.0, green: 45/255.0, blue: 50/255.0, alpha: 0), UIColor.appWhite], locations: [0,2], startPoint: CGPoint(x: 0.4, y: 0), endPoint: CGPoint(x: 0.7, y: 1), type: .axial)
-            
-        }
-        
+//        self.addLeftBorder(borderColor: UIColor.appYellow)
+        self.setupUI()
         self.setUpFont()
     }
 
@@ -65,35 +48,119 @@ class BookingListTableViewCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
-    //MARK: -----------FONT SETUP
-    func setUpFont(){
-        self.dateLbl.font = AppFont.semibold.size(18, familyName: familyManrope)
-        self.workoutFocusTitleLbl.font = AppFont.semibold.size(12, familyName: familyManrope)
-        self.workoutFocusDescLbl.font = AppFont.semibold.size(14, familyName: familyManrope)
-        self.sessionTypeTitleLbl.font = AppFont.semibold.size(12, familyName: familyManrope)
-        self.sessionDescLbl.font = AppFont.semibold.size(14, familyName: familyManrope)
-        self.durationTitleLbl.font = AppFont.semibold.size(12, familyName: familyManrope)
-        self.timeLbl.font = AppFont.semibold.size(14, familyName: familyManrope)
-//        self.lineLbl.font = AppFont.semibold.size(12, familyName: familyManrope)
-        self.myTrainerTitleLbl.font = AppFont.semibold.size(12, familyName: familyManrope)
-        self.trainerNameLbl.font = AppFont.semibold.size(14, familyName: familyManrope)
-        self.trainerLocTitleLbl.font = AppFont.semibold.size(12, familyName: familyManrope)
-        self.trainingLocDesc.font = AppFont.semibold.size(14, familyName: familyManrope)
-        self.rescheduledBtn.titleLabel?.font = AppFont.semibold.size(12, familyName: familyManrope)
+    private func setupUI(){
+        DispatchQueue.main.async {
+            self.cellMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 1, y: 1), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 12.0)
+            self.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+            self.rescheduledBtn.addGradient(colors: [UIColor(red: 255/255.0, green: 198/255.0, blue: 6/255.0, alpha: 1.0), UIColor(red: 153/255.0, green: 119/255.0, blue: 4/255.0, alpha: 1)], locations: [0,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 12.0)
+           
+            self.rescheduledBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+            self.lineLbl.backgroundColor = .clear
+            self.lineV.backgroundColor = UIColor.clear
+            self.lineV.addGradient(colors: UIColor.appMultiColor(.lineVGradient2), locations: [0,0.3,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0.2)
+            self.contentView.setNeedsLayout()
+            self.contentView.layoutIfNeeded()
+            
+            /*
+             [
+                 UIColor(red: 42.0/255.0, green: 45.0/255.0, blue: 47.0/255.0, alpha: 0.2),
+                 UIColor(red: 52.0/255.0, green: 55.0/255.0, blue: 57.0/255.0, alpha: 1),
+                 UIColor(red: 42.0/255.0, green: 45.0/255.0, blue: 47.0/255.0, alpha: 0.2)]
+             */
+            
+//            self.lineV.drawLine(start: CGPoint(x: 0, y: 1), toPoint: CGPoint(x: 1, y: 1.0))
+        }
     }
     
-    func addLeftBorder(borderColor: UIColor? = UIColor.appYellow) {
+    //MARK: -----------FONT SETUP
+    private func setUpFont(){
+        self.dateLbl.font = AppFont.semibold.size(18, familyName: familyManrope)
+        
+        [
+            self.workoutFocusDescLbl,
+            self.sessionDescLbl,
+            self.timeLbl,
+            self.trainerNameLbl,
+            self.trainingLocDesc
+        ].forEach({[weak self] in
+            guard self != nil else { return }
+            $0?.font = AppFont.semibold.size(14, familyName: familyManrope)
+        })
+        
+        [
+            self.workoutFocusTitleLbl,
+            self.sessionTypeTitleLbl,
+            self.durationTitleLbl,
+            self.myTrainerTitleLbl,
+            self.trainerLocTitleLbl,
+            self.rescheduledBtn.titleLabel
+        ].forEach({[weak self] in
+            guard self != nil else { return  }
+            $0?.font = AppFont.semibold.size(12, familyName: familyManrope)
+        })
+    }
+    
+    func addLeftBorder(borderColor: UIColor? = UIColor.clear) {
            let leftBorder = CALayer()
+        self.cellMBV.layer.sublayers?.removeAll(where: { $0.name == "left_border" })
+        leftBorder.name = "left_border"
         leftBorder.backgroundColor = borderColor?.cgColor // Set your border color
-        leftBorder.frame = CGRect(x: 0, y: 0, width: 3.0, height: self.cellMBV.frame.height) // Adjust width as needed
+        DispatchQueue.main.async {
+            leftBorder.frame = CGRect(x: 0, y: 0, width: 3.0, height: self.cellMBV.frame.height) // Adjust width as needed
+        }
         self.cellMBV.layer.addSublayer(leftBorder)
+        self.setupUI()
        }
+    
+    
+    //MARK: --------------SETUP CELL DATA
+    func setUpCell(inputData: BookingDataModel?, type:Int? = 2){
+        guard let inputData = inputData, let type = type else { return }
+        self.rescheduledBtn.isHidden = true
+        self.dateLbl.text = inputData.timing
+        self.workoutFocusDescLbl.text = inputData.workoutFocus?.joined(separator: ",")
+        self.sessionDescLbl.text = inputData.sessionType
+        self.timeLbl.text = inputData.duration
+        self.trainerNameLbl.text = inputData.trainer
+        self.trainingLocDesc.text = inputData.location
        
-       override func layoutSubviews() {
-           super.layoutSubviews()
-           // Update the border height dynamically in case cell height changes
-//           if let leftBorder = self.cellMBV.layer.sublayers?.first {
-//               leftBorder.frame = CGRect(x: 0, y: 0, width: 2.0, height: self.cellMBV.frame.height)
-//           }
-       }
+        if type == 2{
+            if let isReschedule = inputData.isReschedule, isReschedule {
+                self.rescheduledBtn.isHidden = false
+                self.rescheduledBtn.setTitle(inputData.msg, for: .normal)
+                self.addLeftBorder(borderColor: UIColor.appRatingYellow)
+                
+                let text = inputData.timing ?? ""
+                let dot = " ●"
+                // Text attributes
+                let textAttributes: [NSAttributedString.Key: Any] = [
+                    .foregroundColor: UIColor.appWhite
+                ]
+                let textAttributed = NSAttributedString(string: text, attributes: textAttributes)
+
+                // Dot attributes
+                let dotAttributes: [NSAttributedString.Key: Any] = [
+                    .foregroundColor: UIColor.appRatingYellow
+                ]
+                let dotAttributed = NSAttributedString(string: dot, attributes: dotAttributes)
+
+                // Combine them
+                let finalString = NSMutableAttributedString()
+                finalString.append(textAttributed)
+                finalString.append(dotAttributed)
+                self.dateLbl.attributedText = finalString
+                                
+            }else{
+                self.addLeftBorder(borderColor: UIColor(red: 93.0/255.0, green: 182.0/255.0, blue: 195.0/255.0, alpha: 1))
+            }
+        } else if type == 0{
+            self.addLeftBorder(borderColor: UIColor.appRed)
+        } else if type == 1{
+            self.addLeftBorder(borderColor: UIColor.appGreen)
+        }
+        self.contentView.setNeedsLayout()
+        self.contentView.layoutIfNeeded()
+        self.setupUI()
+    }
+           
 }

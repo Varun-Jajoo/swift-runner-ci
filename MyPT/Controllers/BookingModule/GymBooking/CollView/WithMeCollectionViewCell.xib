@@ -24,7 +24,7 @@
                                 <rect key="frame" x="1" y="1" width="484" height="473"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </imageView>
-                            <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_play_white" translatesAutoresizingMaskIntoConstraints="NO" id="KHX-ep-zCx">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_play_white" translatesAutoresizingMaskIntoConstraints="NO" id="KHX-ep-zCx">
                                 <rect key="frame" x="215" y="209.33333333333334" width="56.333333333333314" height="56.333333333333343"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </imageView>

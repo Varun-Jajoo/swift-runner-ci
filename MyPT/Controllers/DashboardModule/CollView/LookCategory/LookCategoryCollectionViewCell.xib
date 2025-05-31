@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="LookCategoryCollectionViewCell" id="gTV-IL-0wX" customClass="LookCategoryCollectionViewCell" customModule="MyPT" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="464" height="426"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="464" height="426"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="u66-QZ-AHO">
+                        <rect key="frame" x="1" y="1" width="462" height="424"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_calendarFilter" translatesAutoresizingMaskIntoConstraints="NO" id="shv-0e-2Wy">
+                                <rect key="frame" x="1" y="1" width="460" height="422"/>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Zumba" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="V05-FV-CdZ">
+                                <rect key="frame" x="13" y="354.33333333333331" width="436" height="32.333333333333314"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="27"/>
+                                <color key="textColor" name="appWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="8 classes near you" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TLp-Ln-IU4">
+                                <rect key="frame" x="13" y="390.66666666666669" width="436" height="20.333333333333314"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="appLightGray"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemCyanColor"/>
+                        <constraints>
+                            <constraint firstItem="TLp-Ln-IU4" firstAttribute="top" secondItem="V05-FV-CdZ" secondAttribute="bottom" constant="4" id="8jX-vY-En3"/>
+                            <constraint firstItem="shv-0e-2Wy" firstAttribute="leading" secondItem="u66-QZ-AHO" secondAttribute="leading" constant="1" id="BC5-iR-PbX"/>
+                            <constraint firstItem="TLp-Ln-IU4" firstAttribute="bottom" secondItem="shv-0e-2Wy" secondAttribute="bottom" constant="-12" id="GXg-3Y-vuB"/>
+                            <constraint firstItem="TLp-Ln-IU4" firstAttribute="leading" secondItem="shv-0e-2Wy" secondAttribute="leading" constant="12" id="IIh-Bf-Wn5"/>
+                            <constraint firstAttribute="trailing" secondItem="shv-0e-2Wy" secondAttribute="trailing" constant="1" id="NLw-ee-4tJ"/>
+                            <constraint firstAttribute="bottom" secondItem="shv-0e-2Wy" secondAttribute="bottom" constant="1" id="TSs-SE-kee"/>
+                            <constraint firstItem="TLp-Ln-IU4" firstAttribute="trailing" secondItem="shv-0e-2Wy" secondAttribute="trailing" constant="-12" id="bLX-Qm-XXK"/>
+                            <constraint firstItem="V05-FV-CdZ" firstAttribute="leading" secondItem="TLp-Ln-IU4" secondAttribute="leading" id="bvE-PG-gBr"/>
+                            <constraint firstItem="shv-0e-2Wy" firstAttribute="top" secondItem="u66-QZ-AHO" secondAttribute="top" constant="1" id="gPC-eg-2DL"/>
+                            <constraint firstItem="V05-FV-CdZ" firstAttribute="trailing" secondItem="TLp-Ln-IU4" secondAttribute="trailing" id="oSh-AV-WIt"/>
+                            <constraint firstItem="V05-FV-CdZ" firstAttribute="top" relation="greaterThanOrEqual" secondItem="shv-0e-2Wy" secondAttribute="top" constant="50" id="yVS-aj-yOM"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="u66-QZ-AHO" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="1" id="1ca-DZ-AJT"/>
+                <constraint firstAttribute="trailing" secondItem="u66-QZ-AHO" secondAttribute="trailing" constant="1" id="5qi-4J-ktO"/>
+                <constraint firstAttribute="bottom" secondItem="u66-QZ-AHO" secondAttribute="bottom" constant="1" id="7RA-FK-FzD"/>
+                <constraint firstItem="u66-QZ-AHO" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="1" id="epb-Wi-Buk"/>
+            </constraints>
+            <size key="customSize" width="464" height="426"/>
+            <connections>
+                <outlet property="categoryBckImgView" destination="shv-0e-2Wy" id="CZY-eD-pGp"/>
+                <outlet property="categoryNameLbl" destination="V05-FV-CdZ" id="BkT-H8-pLZ"/>
+                <outlet property="cellMBV" destination="u66-QZ-AHO" id="hw9-B6-WhO"/>
+                <outlet property="nearYouLbl" destination="TLp-Ln-IU4" id="WEj-k1-PE3"/>
+            </connections>
+            <point key="canvasLocation" x="442.74809160305341" y="152.11267605633805"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="ic_calendarFilter" width="1344" height="896"/>
+        <namedColor name="appLightGray">
+            <color red="0.83137254901960789" green="0.83137254901960789" blue="0.83137254901960789" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appWhite">
+            <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="systemCyanColor">
+            <color red="0.1960784314" green="0.67843137249999996" blue="0.90196078430000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>

@@ -65,6 +65,12 @@ class LibraryViewController: CommonViewController {
         self.registerColl()
         self.setupProgress()
         
+        self.view.setComingSoon(bgColor: UIColor(red: 0, green: 5/255.0, blue: 2/255.0, alpha: 0.7),centerImgName: "ic_upcomingStripe", lockImgName: "ic_upcomingLock" ,title: "Workout Library", desc: "Your personal library of workouts is almost ready. Hang tight — it's unlocking soon!.")
+        
+//        self.setBackgroundImage(named: "ic_upcoming_Library")
+//        self.setTopBackgroundImage(named: "ic_upcoming_Library")
+        
+        
         /*
         self.gymCategoryData = [
             [
@@ -133,6 +139,9 @@ class LibraryViewController: CommonViewController {
             self.workoutsCategoryCollView.delegate?.collectionView?(self.workoutsCategoryCollView, didSelectItemAt: firstIndexPath)
             self.view.layoutIfNeeded()
         }
+        
+        //------------------upcoming
+//        self.setTopBackgroundImage(named: "ic_upcoming_Library")
     }
     
     deinit {
@@ -147,9 +156,27 @@ class LibraryViewController: CommonViewController {
         self.exploreWorkoutApi()
     }
     
-    func setNavUI(){
+    
+    private func setNavUI(){
         self.setLeftMenu(leftImgs: [nil], setTitle: ["Explore Library"], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
+    
+//    func setBackgroundImage(named imageName: String) {
+//        let backgroundImageView = UIImageView(frame: self.view.bounds)
+//        backgroundImageView.image = UIImage(named: imageName)
+//        backgroundImageView.contentMode = .scaleAspectFill
+//        backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
+//
+//        view.addSubview(backgroundImageView)
+//        
+//        NSLayoutConstraint.activate([
+//            backgroundImageView.topAnchor.constraint(equalTo: view.topAnchor),
+//            backgroundImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+//            backgroundImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+//            backgroundImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+//        ])
+//    }
+    
     
     //MARK: ---------------BTN TAG
     enum Btntag: Int {
@@ -374,7 +401,7 @@ extension LibraryViewController: UICollectionViewDelegate, UICollectionViewDataS
             
             
             if let imgBck = self.gymFeaturedData?[indexPath.row].image.value {
-                featuredCell.bckMImgView.loadImage(urlString: "\(imgBck)", placeholder: AppImages.navLeft)
+                featuredCell.bckMImgView.loadImage(urlString: "\(imgBck)", placeholder: UIImage())
             }
             
             featuredCell.topCategoryLbl.text = self.gymFeaturedData?[indexPath.row].title.value

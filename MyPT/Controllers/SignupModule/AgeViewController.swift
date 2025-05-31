@@ -10,8 +10,8 @@ import UIKit
 class AgeViewController: CommonViewController {
 
     //MARK: -------------VARIABLE
-    private let datePickerContainer = DatePickerContainerView2() //DatePickerContainerView()
     var selectedDate:String?
+    private let dobPicker = WheelDob()
     
     
     //MARK: ----------IBOUTLET
@@ -28,8 +28,7 @@ class AgeViewController: CommonViewController {
         setupUI()
         setUpFont()
         self.enableContinueBtn(isSelected: true)
-//        self.setupCustomDOB()
-        self.setupCostomDOB2()
+        self.wheelDobSetup()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -39,12 +38,26 @@ class AgeViewController: CommonViewController {
         setNavUI()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        dobPicker.frame = CGRect(x: 0, y: 20, width: self.yearsMBV.frame.width, height: 300)
+    }
+    
     func setNavUI(){
         self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
         self.setProgress(0.4)
         
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
         self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite)
+    }
+    
+    override func rightBtnActn(sender: UIButton) {
+        
+        appUserDefaults.setRegistrationSkip(value: true)
+        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
+        
+//        appSceneDelegate?.goToGuestDashboard()
     }
     
     //MARK: ---------- SET UI
@@ -58,7 +71,7 @@ class AgeViewController: CommonViewController {
     
     //------------------************Font
     func setUpFont(){
-        self.noteLbl.font = AppFont.regular.size(12.0, familyName: familyOverpass)
+        self.noteLbl.font = AppFont.regular.size(12.0, familyName: familyOverpassMono)
         self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
     }
     
@@ -72,7 +85,7 @@ class AgeViewController: CommonViewController {
                 guard let self = self else { return  }
                 
                 if getResultData?.status == true {
-                    
+                    appUserDefaults.setRegistrationSkip(value: false)
                     if let detailsData = getResultData?.data {
                         appUserDefaults.saveUserToUserDefaults(detailsData)
                     }
@@ -104,56 +117,26 @@ class AgeViewController: CommonViewController {
         }
     }
     
-    func setupCostomDOB2(){
+    func wheelDobSetup(){
         
-        datePickerContainer.delegate = self
-        DispatchQueue.main.async {
-            self.datePickerContainer.frame = self.yearsMBV.bounds
-            self.yearsMBV.addSubview(self.datePickerContainer)
-        }
-
-      datePickerContainer.backgroundColor = UIColor.clear
-      
-    }
-    
-    
-    //MARK: ----------------MAKE CUSTOM DOB
-    func setupCustomDOB(){
-        DispatchQueue.main.async {
-            var circularPicker = CustomCircularDOB() //CustomPickerView()
-            circularPicker.frame = self.yearsMBV.bounds
-            circularPicker.pickerType = .year // Set the initial picker type
-                circularPicker.backgroundColor = UIColor.mainBg
-            circularPicker.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: circularPicker.frame.size.width/2.0)
-//                circularPicker.frame.origin.x = 30
-            self.yearsMBV.addSubview(circularPicker)
-            
-            self.yearsMBV.backgroundColor = UIColor.black
-            
-            var circularPickerM = CustomCircularDOB() //CircularPicker()
-            circularPickerM.frame = self.monthsMBV.bounds
-            circularPickerM.pickerType = .month // Set the initial picker type
-//                circularPickerM.frame.origin.x = 30
-           
-            circularPickerM.backgroundColor = UIColor.mainBg
-            circularPickerM.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: circularPicker.frame.size.width/2.0)
-            self.monthsMBV.addSubview(circularPickerM)
-            
-            var circularPickerDay = CustomCircularDOB()
-            circularPickerDay.frame = self.daysMBV.bounds
-            circularPickerDay.pickerType = .day // Set the initial picker type
-//            circularPickerDay.backgroundColor = UIColor.clear
-            circularPickerDay.backgroundColor = UIColor.mainBg
-            circularPickerDay.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: circularPicker.frame.size.width/2.0)
-//                circularPickerDay.frame.origin.x = 30
-            self.daysMBV.addSubview(circularPickerDay)
-        }
+        dobPicker.delegate = self
+        dobPicker.backgroundColor = UIColor.clear
+        self.yearsMBV.addSubview(dobPicker)
+        
+//        let dobPicker = WheelDob()
+//         dobPicker.frame = CGRect(x: 0, y: 0, width: self.yearsMBV.frame.width, height: 500)
+       
+        //        let dobPicker = WheelDob()
+        //        dobPicker.frame = CGRect(x: 10, y: 200, width: self.view.frame.width-20, height: 500)
+        //        dobPicker.delegate = self
+        //        dobPicker.backgroundColor = UIColor.clear //UIColor.black.withAlphaComponent(0.8)
+        //        view.addSubview(dobPicker)
+        
     }
     
 }
 
-//MARK: --------------------- DatePickerContainerDelegate
-extension AgeViewController: DatePickerContainerDelegate{
+extension AgeViewController: SelectedDateDelegate{
     func selectDate(date: (year: String?, month: String?, day: String?)?) {
         selectedDate = nil
         guard let date = date else { return }
@@ -165,3 +148,5 @@ extension AgeViewController: DatePickerContainerDelegate{
         print("age is = ", age ?? "")
     }
 }
+
+

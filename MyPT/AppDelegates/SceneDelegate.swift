@@ -17,11 +17,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         
-        self.checkIsUserLogin()
+        self.goToSplash()
         
-//        self.goToMainView()
-//        goToDashboard()
-//        setupTab(selectedTab: 0, isGoGeustDashboard: true)
+//        self.checkIsUserLogin()
+       
         
         guard let _ = (scene as? UIWindowScene) else { return }
     }
@@ -56,18 +55,31 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     //MARK: -----------CHECK USER LOGIN
     func checkIsUserLogin(){
-        if appUserDefaults.getUserFromUserDefaults(as: SubmitDataModel.self)?.user?.id != 0 && appUserDefaults.getUserFromUserDefaults(as: SubmitDataModel.self)?.user?.isCompleted == 1 {
+        if appUserDefaults.getUserFromUserDefaults(as: SubmitDataModel.self)?.id != 0 && appUserDefaults.getUserFromUserDefaults(as: SubmitDataModel.self)?.user?.isCompleted == 1 {
            
 //            self.setupTab(selectedTab: 0, isGoGeustDashboard: true)
             
             self.setupTab(selectedTab: 0, isGoGeustDashboard: appUserDefaults.getIsPackageCreated())
-        }else{
+        }
+        else if appUserDefaults.getRegistrationSkip() == true {
+            appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
+        }
+        else{
             self.goToMainView()
         }
     }
     
     
     //MARK: -------------SET FLOW
+    func goToSplash() {
+        stroyBoard = UIStoryboard(name: "Main", bundle: nil)
+        let navController: UINavigationController? = stroyBoard?.instantiateViewController(withIdentifier: "navigation") as? UINavigationController
+      
+        let vc:CustomSplashViewController = CustomSplashViewController.instantiate(appStoryboard: .main)
+        navController?.setViewControllers([vc], animated: false)
+        window?.rootViewController = navController
+    }
+    
     func goToMainView() {
         stroyBoard = UIStoryboard(name: "Main", bundle: nil)
         let navController: UINavigationController? = stroyBoard?.instantiateViewController(withIdentifier: "navigation") as? UINavigationController

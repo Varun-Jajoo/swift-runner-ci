@@ -1,5 +1,5 @@
 {
-  "originHash" : "b493b8910add8400c596d427a23545e29ef29f7276fe9c5675a675583786f61b",
+  "originHash" : "aa84fcb822794df346113d1d8ba3e3be4158058f79ba2b3d8a970f91de296587",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -35,6 +35,15 @@
       "state" : {
         "revision" : "3786e5028d868482ef88140117d33efd60828300",
         "version" : "9.1.1"
+      }
+    },
+    {
+      "identity" : "ios-places-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/googlemaps/ios-places-sdk",
+      "state" : {
+        "revision" : "f18c63a43ed8399a81e539525983377d63b7b003",
+        "version" : "9.4.1"
       }
     },
     {
@@ -116,6 +125,15 @@
       "state" : {
         "revision" : "c33f7c775ba7feea6047a1fc3257f2e5863b44f7",
         "version" : "2.3.1"
+      }
+    },
+    {
+      "identity" : "tabby-ios-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tabby-ai/tabby-ios-sdk.git",
+      "state" : {
+        "revision" : "6e20252dc06a1119a65b631021faace0431d81bd",
+        "version" : "1.7.8"
       }
     }
   ],

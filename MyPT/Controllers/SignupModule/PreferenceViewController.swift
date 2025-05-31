@@ -18,8 +18,8 @@ class PreferenceViewController: CommonViewController {
     @IBOutlet weak var preferenceCollView: UICollectionView!
     @IBOutlet weak var preferencCollViewHeightConstrnt: NSLayoutConstraint!
     @IBOutlet weak var prefernceNoteMBV: UIView!
-    @IBOutlet weak var preferenceNoteLbl: UILabel!
     @IBOutlet weak var continueBtn: UIButton!
+    @IBOutlet weak var preferenceNoteBtn: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -57,14 +57,19 @@ class PreferenceViewController: CommonViewController {
     }
     
     override func rightBtnActn(sender: UIButton) {
-        appSceneDelegate?.goToGuestDashboard()
+        appUserDefaults.setRegistrationSkip(value: true)
+        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
     }
     
     //------------------************Font
     func setUpFont(){
         self.topDescLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
         //        self.subDescLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
-        self.preferenceNoteLbl.font = AppFont.regular.size(12.0, familyName: familyOverpass)
+        self.preferenceNoteBtn.setTitle("No worries, we’ve got your gym needs covered", for: .normal)
+        
+        self.preferenceNoteBtn.titleLabel?.numberOfLines = 2
+        self.preferenceNoteBtn.titleLabel?.font = AppFont.regular.size(12.0, familyName: familyOverpassMono)
+        
         self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
     }
     
@@ -88,9 +93,10 @@ class PreferenceViewController: CommonViewController {
         if let selectPreference = self.selectPreference , !selectPreference.isEmpty {
             RegistrationVM.addPreferworkApi(viewController: self, inputName: selectPreference.lowercased(), completion: {[weak self] getResultData in
                 guard let self = self , let getResultData = getResultData else { return }
-                
+               
+                self.continueBtn.isUserInteractionEnabled = true
                 if getResultData.status == true {
-                    
+                    appUserDefaults.setRegistrationSkip(value: false)
                     if let detailsData = getResultData.data {
                         appUserDefaults.saveUserToUserDefaults(detailsData)
                     }
@@ -134,6 +140,10 @@ extension PreferenceViewController: UICollectionViewDelegate, UICollectionViewDa
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell:PersonalizedCollectionViewCell = preferenceCollView.dequeueReusableCell(withReuseIdentifier: "PersonalizedCollectionViewCell", for: indexPath) as! PersonalizedCollectionViewCell
+        cell.cellMBV.backgroundColor = UIColor.clear
+        DispatchQueue.main.async {
+            cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 0.0)
+        }
         cell.titleLbl.text = dataPreference?[indexPath.row]["title"] as? String
         cell.titleLbl.lineBreakMode = .byClipping
         cell.fitnessImgView.image = dataPreference?[indexPath.row]["images"] as? UIImage

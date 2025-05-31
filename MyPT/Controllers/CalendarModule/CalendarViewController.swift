@@ -10,6 +10,7 @@ import UIKit
 class CalendarViewController: CommonViewController {
 
     //MARK: ------------------VARIABLE
+    var isFromTab: Bool? = false
     private let customCalendar = CalendarView()
 //    var navCtrnl:UINavigationController?
     
@@ -26,6 +27,13 @@ class CalendarViewController: CommonViewController {
         self.setupUI()
         self.setupFont()
         self.setupCalendarView()
+        
+        //------------------upcoming
+        self.view.setComingSoon(bgColor: UIColor(red: 0, green: 5/255.0, blue: 2/255.0, alpha: 1.0),centerImgName: "ic_upcomingStripe", lockImgName: "ic_upcomingLock" ,title: "Locked for Now", desc: "Your personal fitness planner is almost here. Soon you’ll be able to schedule workouts and stay on track with ease.")
+        
+//        self.setTopBackgroundImage(named: "ic_calendar_upcoming")
+//        self.view.setComingSoon(bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_upcomingStripe", lockImgName: "ic_upcomingLock" ,title: "Locked for Now", desc: "Profiles are in progress. Soon you'll be able to track your journey and customize your experience.")
+//        self.view.addTopNavigationButton(title: "Profile", image: AppImages.backarrow, target: self.view)
     }
     
     deinit {
@@ -40,8 +48,20 @@ class CalendarViewController: CommonViewController {
         self.setupCalendarView()
     }
     
-    func setNavUI(){
-        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [AppStrings.calendarStr], setTintColor: .black, setTitleColor: UIColor.appWhite)
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        //------------------upcoming
+//        self.view.setComingSoon(bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_upcomingStripe", lockImgName: "ic_upcomingLock" ,title: "Locked for Now", desc: "Your personal fitness planner is almost here. Soon you’ll be able to schedule workouts and stay on track with ease.")
+    }
+    
+    private func setNavUI(){
+        var navBckBtn: UIImage? = nil
+        if let isFromTab = isFromTab {
+            navBckBtn = (isFromTab ? nil : AppImages.backarrow)
+        }
+        
+        self.setLeftMenu(leftImgs: [navBckBtn], setTitle: [AppStrings.calendarStr], setTintColor: .black, setTitleColor: UIColor.appWhite)
 //        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
     

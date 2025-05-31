@@ -13,6 +13,7 @@ class CityDropDownViewController: UIViewController, UITableViewDataSource, UITab
     var sentBackData: ((_ name: String?, _ id: Int?, _ countyName: String?, _ countryId: Int?) -> Void)?
     var countName: String?
     var countId: Int?
+    var getAlltCityData: CityDataModel?
     var cityData:[CityModel]? = []
     
     //-----------------IBOUTLET
@@ -22,14 +23,21 @@ class CityDropDownViewController: UIViewController, UITableViewDataSource, UITab
         super.viewDidLoad()
         
         self.view.backgroundColor = UIColor.clear
+        self.dataListTblView.showsVerticalScrollIndicator = false
+        self.dataListTblView.showsHorizontalScrollIndicator = false
         self.dataListTblView.register(UINib(nibName: "PointsTableViewCell", bundle: nil), forCellReuseIdentifier: "PointsTableViewCell")
-        
-        self.getCityListApi()
+       
+        if let cityData = cityData, cityData.count < 0 || cityData.isEmpty {
+            self.getCityListApi()
+        }
     }
     
+   
     //MARK: --------------------- DATASOURCE / DELEGATE
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tableView.numberOfRows(count: self.cityData?.count, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult, messageImageHeight: 200.0, fromTop: 50)
+        return self.cityData?.count ?? 0
+        
+//        return tableView.numberOfRows(count: self.cityData?.count, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult, messageImageHeight: 200.0, fromTop: 50)
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -47,7 +55,8 @@ class CityDropDownViewController: UIViewController, UITableViewDataSource, UITab
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
+        self.countName = getAlltCityData?.name
+        self.countId = getAlltCityData?.id
         self.sentBackData?(cityData?[indexPath.row].name, cityData?[indexPath.row].id, self.countName, self.countId)
         self.dismiss(animated: true, completion: nil)
         
@@ -68,6 +77,8 @@ extension CityDropDownViewController{
             guard let self = self, let getResultData = getResultData else { return  }
             
             print("getResultData", getResultData)
+            self.getAlltCityData = nil
+            self.getAlltCityData = getResultData.data
             self.countName = getResultData.data?.name
             self.countId = getResultData.data?.id
             self.cityData?.removeAll()

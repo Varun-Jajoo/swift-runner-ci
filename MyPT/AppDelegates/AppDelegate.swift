@@ -9,6 +9,8 @@ import UIKit
 import IQKeyboardManagerSwift
 import GoogleMaps
 import IQKeyboardToolbarManager
+import GooglePlaces
+import Tabby
 
 
 @main
@@ -16,9 +18,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        //AIzaSyAVUPi_nxwfDShp4Oifg1foIAfvDy-ePZw
        
-        GMSServices.provideAPIKey("AIzaSyBcjdk3tch99jhgrQx2miMW3xdRW9By8Vc")
+//        GMSServices.provideAPIKey("AIzaSyBcjdk3tch99jhgrQx2miMW3xdRW9By8Vc")
+//        GMSPlacesClient.provideAPIKey("AIzaSyBcjdk3tch99jhgrQx2miMW3xdRW9By8Vc")
+        
+        GMSServices.provideAPIKey(AppConstant.gMap_services_Key)
+        GMSPlacesClient.provideAPIKey(AppConstant.gMap_services_Key)
+        TabbySDK.shared.setup(withApiKey: AppConstant.tabby_key)
         
         IQKeyboardManager.shared.isEnabled = true
         IQKeyboardManager.shared.resignOnTouchOutside = true

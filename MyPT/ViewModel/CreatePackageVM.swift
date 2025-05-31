@@ -15,6 +15,7 @@ struct WithoutTrainerParams {
     var end_date: String?
     var days: String?
     var studio_id: String?
+    var transaction_id: String?
     
     func getParamsReviewPackage() -> [String:String] {
         var dictVar: [String:String] =  [:]
@@ -24,6 +25,7 @@ struct WithoutTrainerParams {
         if let end_date = end_date { dictVar["end_date"] = end_date }
         if let days = days { dictVar["days"] = days }
         if let studio_id = studio_id { dictVar["studio_id"] = studio_id }
+        if let transaction_id = transaction_id { dictVar["transaction_id"] = transaction_id }
         
         return dictVar
     }
@@ -44,30 +46,50 @@ struct WithoutTrainerParams {
 
 class CreatePackageVM{
     
-    //MARK: -----------------------Create package for One buddy / With buddy
+    //MARK: -----------------------Check package is created or not
+    class func checkPackageCreatedApi(viewController: UIViewController, inputParms: [String:String]?, isShowLoader:Bool = true, completion: @escaping(_ resultData:[String:Any]?) -> Void){
+        guard let inputParms = inputParms else { return  }
+        /*
+         let params:[String:String] = [
+         :
+         ]
+         */
+        let params:[String:String] = inputParms
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .check_type_Package, method: .get , queries: params, parameters:  nil, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
+            do{
+                if let responceData = getResponce {
+                    let getResult = try JSONSerialization.jsonObject(with: responceData, options: .mutableContainers) as? [String:Any]
+                    guard let getResult = getResult else { return }
+                    if (getResult["status"] as? Bool) == true  {
+                        completion(getResult)
+                    }
+                    else{
+                        
+                        let errorMsg = "\(((getResult["errors"] as? [String : Any])?.values.first as? [Any])?.first as? String ?? (getResult["msg"] as? String ?? ""))"
+//                        AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg)
+                        debugPrint(errorMsg)
+                    }
+                }
+            }catch {
+                print(error)
+            }
+        })
+    }
     
-    /*
-     package_type: 1, 1=>one-on-one,2=>buddy,3=>group
-     sessions: 13, no of sessions,initally remains 1
-     type: gym, home=>if selected from home, gym=>selected from gym
-     trainer_id: 1, trainer id is required
-     studio_id: 5, studio id is required if type is gym
-     month: 3, month
-     address_id: 1, Address id is required if type is home
-     */
+    //MARK: -----------------------Create package for One buddy / With buddy
     
     class func createPackageApi(viewController: UIViewController, inputParms: [String:String]?, isShowLoader:Bool = true, completion: @escaping(_ resultData:CreatePackageBaseModel?) -> Void){
         guard let inputParms = inputParms else { return  }
         
         /*
          let params:[String:String] = [
-         "package_type": "",
-         "sessions": "",
-         "type": "",
-         "trainer_id": "",
-         "studio_id": "",
-         "month": "",
-         "address_id": ""
+         "package_type": "",  //package_type: 1, 1=>one-on-one,2=>buddy,3=>group
+         "sessions": "",     //sessions: 13, no of sessions,initally remains 1
+         "type": "",         //type: gym, home=>if selected from home, gym=>selected from gym
+         "trainer_id": "",   //trainer_id: 1, trainer id is required
+         "studio_id": "",   //studio_id: 5, studio id is required if type is gym
+         "month": "",       //month: 3, month
+         "address_id": ""   //address_id: 1, Address id is required if type is home
          ]
          */
         
@@ -96,33 +118,20 @@ class CreatePackageVM{
         })
     }
     
-    
     //MARK: ------------------ api/package-setdate
-    /*
-     package_type: 1
-     sessions: 13
-     type: gym
-     trainer_id: 1
-     studio_id: 5
-     date: 2025-03-15 , start Date
-     end_date: 2025-04-02, End date
-     timing: morning
-     address_id: 1, address id is required if type is home
-     */
-    
     class  func packageSetDateApi(viewController: UIViewController, inputParams: [String:Any]?, completion: @escaping(_ resultData:SetDateBaseModel?) -> Void){
         
         /*
          let params:[String:Any] = [
-         "package_type": "",
-         "sessions": "" ,
-         "type": "",
-         "trainer_id": "",
-         "studio_id": "",
-         "date": "",
-         "end_date": "",
-         "timing": "",
-         "address_id": "",
+         "package_type": "", //package_type: 1
+         "sessions": "" ,    //sessions: 13
+         "type": "",         //type: gym
+         "trainer_id": "",   //trainer_id: 1
+         "studio_id": "",    //studio_id: 5
+         "date": "",         //date: 2025-03-15 , start Date
+         "end_date": "",    //end_date: 2025-04-02, End date
+         "timing": "",      //timing: morning
+         "address_id": "",  //address_id: 1, address id is required if type is home
          ]
          */
         
@@ -153,32 +162,19 @@ class CreatePackageVM{
     
     
     //MARK: ------------------ api/package-checkout
-    //http://mypt.test/api/package-checkout
-    /*
-     package_type: 1, package type is required 1,2,3
-     sessions: 13, no of session , at least one is required
-     type: gym,  home or gym
-     trainer_id: 1, trainer id is required
-     studio_id: 5, studio id is required if type is gym
-     date: 2025-03-29, start date
-     end_date: 2025-04-02, end date
-     address_id: 1, address id is required if type is home
-     slot_id: 18, slot id is required
-     */
-    
     class  func packageCheckoutApi(viewController: UIViewController, inputParams: [String:Any]?, completion: @escaping(_ resultData:PackageCheckoutBaseModel?) -> Void){
         
         /*
          let params:[String:Any] = [
-         "package_type": "",
-         "sessions": "" ,
-         "type": "",
-         "trainer_id": "",
-         "studio_id": "",
-         "date": "",
-         "end_date": "",
-         "address_id": "",
-         "slot_id": ""
+         "package_type": "",   //package_type: 1, package type is required 1,2,3
+         "sessions": "" ,      //sessions: 13, no of session , at least one is required
+         "type": "",           //type: gym,  home or gym
+         "trainer_id": "",     //trainer_id: 1, trainer id is required
+         "studio_id": "",      //studio_id: 5, studio id is required if type is gym
+         "date": "",           //date: 2025-03-29, start date
+         "end_date": "",       //end_date: 2025-04-02, end date
+         "address_id": "",     //address_id: 1, address id is required if type is home
+         "slot_id": ""         //slot_id: 18, slot id is required
          ]
          */
         
@@ -226,22 +222,15 @@ class CreatePackageVM{
     }
     
     //MARK:------------------- "api/package-group"
-    /*
-     package_type: 3, this will always remains
-     type: gym, gym=>select from studio, home=>direct home
-     trainer_id: 1, trainer id is required
-     studio_id: 1, studio id required if type is gym
-     */
-    
     class func getMemberPackagegroupApi(viewController: UIViewController, inputParms: [String:String]?, isShowLoader:Bool = true, completion: @escaping(_ resultData:MemberBaseModel?) -> Void){
         guard let inputParms = inputParms else { return  }
         
         /*
          let params:[String:String] = [
-         "package_type": "",
-         "type": "",
-         "trainer_id": "",
-         "studio_id": ""
+         "package_type": "", //package_type: 3, this will always remains
+         "type": "",         //type: gym, gym=>select from studio, home=>direct home
+         "trainer_id": "",   //trainer_id: 1, trainer id is required
+         "studio_id": ""     //studio_id: 1, studio id required if type is gym
          ]
          */
         
@@ -265,24 +254,15 @@ class CreatePackageVM{
         })
     }
     
-    
     //MARK: ------------------ api/add-member
-    //http://mypt.test/api/add-member
-    /*
-     name: jojos, name field is required
-     age: 22, age is required
-     gender: male, gender field is required=>male,female,others
-     id: 1, if edit then id is required else not required meanwhile when want to add new member then id wiil be nil
-     */
-    
     class  func addMemberApi(viewController: UIViewController, inputParams: [String:Any]?, completion: @escaping(_ resultData: AddMemberBaseModel?) -> Void){
         
         /*
          let params:[String:Any] = [
-         "name": "",
-         "age": "" ,
-         "gender": "",
-         "id": ""
+         "name": "",     //name: jojos, name field is required
+         "age": "" ,     //age: 22, age is required
+         "gender": "",   //gender: male, gender field is required=>male,female,others
+         "id": ""       //id: 1, if edit then id is required else not required meanwhile when want to add new                   member then id wiil be nil
          ]
          */
         
@@ -349,10 +329,10 @@ class CreatePackageVM{
     
     class  func trainerFollowApi(viewController: UIViewController, inputId: String?, completion: @escaping(_ resultData:[String:Any]?) -> Void){
         
-         let params:[String:Any] = [
-            "id": inputId ?? ""
-         ]
-         
+        let params:[String:Any] = [
+            "id": inputId ?? "" //id:2, trainer id is required
+        ]
+        
         print("params = ", params as Any)
         
         NetworkManager.shared.genericAPICall(serviceEndPoint: .trainer_follow, method: .post , parameters: params, isShowLoading: true, completion: {  (getResponce, error) in
@@ -409,36 +389,26 @@ class CreatePackageVM{
                         AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg ?? "")
                     }
                 }
-                
             }catch {
                 print(error)
             }
         })
     }
     
-    
     //MARK: --------------------- api/review-package
-    /*
-     price: 123, price
-     start_date: 2025-03-04, start date
-     end_date: 2025-03-08, end date is required
-     days: 12, no of days , atleast 1 one day is required
-     studio_id: 4, studio id field is required
-     */
-    
     class func reviewPackageMembershipApi(viewController: UIViewController, inputParams: [String:String]?, isShowLoader:Bool = true, completion: @escaping(_ resultData: ReviewPackageWithoutTrainerBaseModel?) -> Void){
         
         guard let inputParams = inputParams else { return  }
-       
+        
         /*
-        let params:[String:String] = [
-            "price": "",
-            "start_date": "",
-            "end_date": "",
-            "days": "",
-            "studio_id": ""
-        ]
-        */
+         let params:[String:String] = [
+         "price": "",        //price: 123, price
+         "start_date": "",   //start_date: 2025-03-04, start date
+         "end_date": "",     //end_date: 2025-03-08, end date is required
+         "days": "",         //days: 12, no of days , atleast 1 one day is required
+         "studio_id": ""     //studio_id: 4, studio id field is required
+         ]
+         */
         
         NetworkManager.shared.genericAPICall(serviceEndPoint: .review_package_membership, method: .get , queries: inputParams, parameters:  nil, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
             do{
@@ -456,19 +426,19 @@ class CreatePackageVM{
                     }
                 }
                 
-//                if let responceData = getResponce {
-//                    let getResult = try JSONSerialization.jsonObject(with: responceData, options: .mutableContainers) as? [String:Any]
-//                    guard let getResult = getResult else { return }
-//                    
-//                    if (getResult["status"] as? Bool) == true  {
-//                        completion(getResult)
-//                    }
-//                    else{
-//                        
-//                        let errorMsg = "\(((getResult["errors"] as? [String : Any])?.values.first as? [Any])?.first as? String ?? (getResult["msg"] as? String ?? ""))"
-//                        AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg)
-//                    }
-//                }
+                //                if let responceData = getResponce {
+                //                    let getResult = try JSONSerialization.jsonObject(with: responceData, options: .mutableContainers) as? [String:Any]
+                //                    guard let getResult = getResult else { return }
+                //
+                //                    if (getResult["status"] as? Bool) == true  {
+                //                        completion(getResult)
+                //                    }
+                //                    else{
+                //
+                //                        let errorMsg = "\(((getResult["errors"] as? [String : Any])?.values.first as? [Any])?.first as? String ?? (getResult["msg"] as? String ?? ""))"
+                //                        AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg)
+                //                    }
+                //                }
                 
             }catch {
                 print(error)
@@ -477,47 +447,50 @@ class CreatePackageVM{
     }
     
     //MARK: -------------------- api/book-membership
-    /*
-     price: 123, price
-     start_date: 2025-04-02, start date is required
-     end_date: 2025-04-06, end date is required
-     days: 4, no of days required for validity
-     studio_id: 1, required
-     */
-    
     class  func bookMembershipApi(viewController: UIViewController, inputParams:[String:Any]?, completion: @escaping(_ resultData: BookMembershipBaseModel?) -> Void){
         print("params = ", inputParams as Any)
         
         /*
          let params:[String:String] = [
-         "price": "123",
-         "start_date": "",
-         "end_date": "",
-         "days": "",
-         "studio_id": ""
+         "price": "123",    //price: 123, price
+         "start_date": "",  //start_date: 2025-04-02, start date is required
+         "end_date": "",    //end_date: 2025-04-06, end date is required
+         "days": "",        //days: 4, no of days required for validity
+         "studio_id": ""    //studio_id: 1, required
+         "transaction_id": "" //
          ]
-        */
+         */
         
         NetworkManager.shared.genericAPICall(serviceEndPoint: .book_membership, method: .post , parameters: inputParams, isShowLoading: true, completion: {  (getResponce, error) in
             do{
-                
                 print(getResponce as Any)
                 if let responceData = getResponce {
-                    
                     let getResult = try JSONDecoder().decode(BookMembershipBaseModel.self, from: responceData)
                     if (getResult.status == true)  {
                         completion(getResult)
                     }
                     else{
                         let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
-                        AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg ?? "")
+                        //                        AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg ?? "")
+                        
+                        //----------Token expire
+                        if let unauthorizedStr = errorMsg, unauthorizedStr.uppercased() == "Unauthorized".uppercased() {
+                            AlertHelper.shared.showCustomeAlert(message: "Session expired, please login again", actions: ["Ok"], completion: { getTag in
+                                
+                                if  appUserDefaults.clearUserDefault() {
+                                    appSceneDelegate?.goToMainView()
+                                }
+                            })
+                            
+                            return
+                        }else{
+                            AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg ?? "")
+                        }
                     }
                 }
-                
             }catch {
                 print(error)
             }
-            
         })
     }
 }

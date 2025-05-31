@@ -59,7 +59,9 @@ class GenderViewController: CommonViewController {
     }
     
     override func rightBtnActn(sender: UIButton) {
-        appSceneDelegate?.goToGuestDashboard()
+        
+        appUserDefaults.setRegistrationSkip(value: true)
+        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
     }
     
     //------------------************Font
@@ -132,6 +134,8 @@ class GenderViewController: CommonViewController {
                 guard let self = self, let getResultData = getResultData else { return  }
                 
                 if getResultData.status == true {
+                    appUserDefaults.setRegistrationSkip(value: false)
+                    
                     if let detailsData = getResultData.data {
                         appUserDefaults.saveUserToUserDefaults(detailsData)
                     }

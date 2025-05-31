@@ -73,7 +73,6 @@ class ChooseSessionViewController: CommonViewController {
     @IBOutlet weak var totalCostLbl: UILabel!
     @IBOutlet weak var totalCostAmtPicker: CustomPickerView!
     @IBOutlet weak var totalCostAmtPickerWidthConstrnt: NSLayoutConstraint!
-    @IBOutlet weak var sessionToggleBtn: UIButton!
     @IBOutlet weak var costSlider: UISlider!
     @IBOutlet weak var startMonthLbl: UILabel!
     @IBOutlet weak var sessionCostLbl: UILabel!
@@ -84,6 +83,8 @@ class ChooseSessionViewController: CommonViewController {
     @IBOutlet weak var consultExpertMBV: UIView!
     @IBOutlet weak var consultExpertBtn: UIButton!
     @IBOutlet weak var continueBtn: UIButton!
+    @IBOutlet weak var customSwitch: CustomSwipeSwitch!
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -184,8 +185,15 @@ class ChooseSessionViewController: CommonViewController {
             self.perSessionCostLbl.textColor = UIColor.txtDarkGray
             self.totalCostLbl.text = "Total Cost"
             self.totalCostLbl.textColor = UIColor.appYellow
-            self.sessionToggleBtn.isSelected = true
-            self.sessionToggleBtn.isUserInteractionEnabled = false
+//            self.sessionToggleBtn.isSelected = true
+//            self.sessionToggleBtn.isUserInteractionEnabled = false
+            self.customSwitch.isUserInteractionEnabled = false
+            self.customSwitch.isSelected = true
+            
+            //-------------need to hide when come from without a trainer
+            self.perSessionCostLbl.isHidden = true
+            self.totalCostLbl.isHidden = true
+            self.customSwitch.isHidden = true
            
             let costAmt:String = "0"
             
@@ -223,7 +231,7 @@ class ChooseSessionViewController: CommonViewController {
         case .validity:
             
             if let _ = isValidityData {
-                self.trainerProfileImgView.loadImage(urlString: packageDetails?.trainer?.image, placeholder: AppImages.navLeft)
+                self.trainerProfileImgView.loadImage(urlString: packageDetails?.trainer?.image, placeholder: UIImage())
                 self.trainerNameLbl.text = packageDetails?.trainer?.name
         //        self.noteStrings.removeAll()
         //        self.noteStrings.append("Increase session count for lower per session cost")
@@ -263,7 +271,7 @@ class ChooseSessionViewController: CommonViewController {
     //            self.endPointLbl.text = "365 days"
                 
                 //-----------------------***********
-                self.trainerProfileImgView.loadImage(urlString: membershipDetailsData?.studio?.profile, placeholder: AppImages.navLeft)
+                self.trainerProfileImgView.loadImage(urlString: membershipDetailsData?.studio?.profile, placeholder: UIImage())
                 self.trainerNameLbl.text = membershipDetailsData?.studio?.name
                 
             }
@@ -315,7 +323,7 @@ class ChooseSessionViewController: CommonViewController {
                 self.noteStrings.removeAll()
                 self.noteStrings.append("Increase session count for lower per session cost")
                 scrollText(indx: 1)
-                self.trainerProfileImgView.loadImage(urlString: packageDetails?.trainer?.image, placeholder: AppImages.navLeft)
+                self.trainerProfileImgView.loadImage(urlString: packageDetails?.trainer?.image, placeholder: UIImage())
                 self.trainerNameLbl.text = packageDetails?.trainer?.name
             }
             
@@ -440,12 +448,17 @@ class ChooseSessionViewController: CommonViewController {
             self.endPointLbl.text = "\(Int(costSlider.maximumValue))"
             
             if let label = tooltipView.viewWithTag(100) as? UILabel {
-                label.text = "Save \(1)%"
+                label.text = "Save 20%" //"Save \(1)%"
             }
+            
+            //------------------********
+            totalCostAmtPicker.scrollToRow(80, animated: true)
+            self.updateContainerWidth()
             
         case .validityMembership:
                         
             //------
+            
             totalCostAmtPicker.items = sessionCost //items
             costSlider.minimumValue = 1
             costSlider.maximumValue = 365
@@ -457,8 +470,12 @@ class ChooseSessionViewController: CommonViewController {
             self.endPointLbl.text = "\(Int(costSlider.maximumValue))"
             
             if let label = tooltipView.viewWithTag(100) as? UILabel {
-                label.text = "Save \(1)%"
+                label.text = "Save 20%" //"Save \(1)%"
             }
+            
+            //------------------********
+            totalCostAmtPicker.scrollToRow(80, animated: true)
+            self.updateContainerWidth()
         }
         
     }
@@ -472,9 +489,7 @@ class ChooseSessionViewController: CommonViewController {
     
     //MARK: -----------SETUI
     private func setupUI(){
-        
-//        CustomSlider
-        
+         
         categoryCollView.register(UINib(nibName: "ProductCategoryCollViewCell", bundle: nil), forCellWithReuseIdentifier: "ProductCategoryCollViewCell")
         self.consultExpertBtn.titleLabel?.numberOfLines = 2
         
@@ -502,6 +517,15 @@ class ChooseSessionViewController: CommonViewController {
             
             self.consultExpertBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+        }
+        
+        //-----------------***************** Custom switch
+        customSwitch.onToggle = { [weak self] isSelected in
+            guard let self = self else { return  }
+            print("isSelected", isSelected)
+            self.isShowTotalCost = isSelected
+            self.perSessionCostLbl.textColor = (!isSelected ? UIColor.appYellow : UIColor.txtDarkGray)
+            self.totalCostLbl.textColor = (isSelected ? UIColor.appYellow : UIColor.txtDarkGray)
         }
     }
     
@@ -550,11 +574,13 @@ class ChooseSessionViewController: CommonViewController {
         switch flowSession {
         case .session, .validity, .defaultSession:
            
+            /*
             if sessionCost.count > 1 && row < sessionCost.count {
                 totalCostAmtPicker.scrollToRow(row, animated: true)
             }
-
-            self.updateContainerWidth()
+             self.updateContainerWidth()
+            */
+           
             
             //---------------------*************
             // Update tooltip text
@@ -562,8 +588,9 @@ class ChooseSessionViewController: CommonViewController {
             //        tooltipLabel.text = "Save \(percentage)%"
             
             if let label = tooltipView.viewWithTag(100) as? UILabel {
-                label.text = "Save \(percentage)%"
+                label.text = "Save 20%" //"Save \(percentage)%"
             }
+            
             
             if percentage > 60 {
     //            self.startMonthLbl.text = "12 month"
@@ -590,10 +617,12 @@ class ChooseSessionViewController: CommonViewController {
             
         case .validityMembership:
             
+            /*
             if sessionCost.count > 1 && row < sessionCost.count {
                 totalCostAmtPicker.scrollToRow(row, animated: true)
             }
             self.updateContainerWidth()
+            */
             
             //---------------------*************
             // Update tooltip text
@@ -601,7 +630,7 @@ class ChooseSessionViewController: CommonViewController {
             //        tooltipLabel.text = "Save \(percentage)%"
             
             if let label = tooltipView.viewWithTag(100) as? UILabel {
-                label.text = "Save \(percentage)%"
+                label.text = "Save 20%" //"Save \(percentage)%"
             }
             
             if percentage > 60 {
@@ -640,7 +669,7 @@ class ChooseSessionViewController: CommonViewController {
     
     //MARK: -----------ENUM  BTN TAG
     enum btnTag:Int {
-        case edit = 301, sessionToggle, consultExpert, continueBtn
+        case edit = 301, consultExpert, continueBtn
     }
     
     //MARK: -----------EDIT BTN ACTN
@@ -651,11 +680,7 @@ class ChooseSessionViewController: CommonViewController {
         case btnTag.edit.rawValue:
             print("edit btn clicked.")
             self.navigationController?.popToViewController(ofClass: TrainerListViewController.self, animated: true)
-            
-        case btnTag.sessionToggle.rawValue:
-            print("sessionToggle btn clicked.")
-            sender.isSelected.toggle()
-            self.isShowTotalCost = sender.isSelected
+               
         case btnTag.consultExpert.rawValue:
             print("consultExpert btn clicked.")
         case btnTag.continueBtn.rawValue:
@@ -694,13 +719,25 @@ class ChooseSessionViewController: CommonViewController {
             print("non...........")
         }
         
+        /*
+         case btnTag.sessionToggle.rawValue:
+             print("sessionToggle btn clicked.")
+ //            sender.isSelected.toggle()
+ //            self.isShowTotalCost = sender.isSelected
+          
+         */
+        
     }
     
     //MARK: -----------SESSION SELECTION BTN ACTN
     private func updateTooltipPosition() {
         
         self.costSlider.maximumTrackTintColor = UIColor.appWhite
-        let thumbRect = self.costSlider.thumbRect(forBounds: self.costSlider.bounds, trackRect: self.costSlider.trackRect(forBounds: self.costSlider.bounds), value: self.costSlider.value)
+//        let thumbRect = self.costSlider.thumbRect(forBounds: self.costSlider.bounds, trackRect: self.costSlider.trackRect(forBounds: self.costSlider.bounds), value: self.costSlider.value) //for show 100%
+        
+        let value80 = self.costSlider.minimumValue + 0.8 * (self.costSlider.maximumValue - self.costSlider.minimumValue) //for only show 80%
+        
+        let thumbRect = self.costSlider.thumbRect(forBounds: self.costSlider.bounds, trackRect: self.costSlider.trackRect(forBounds: self.costSlider.bounds), value: value80)
         let thumbX = thumbRect.origin.x + thumbRect.width / 2
         
         // Update tooltip position

@@ -32,13 +32,15 @@ class MyGoalsViewController: CommonViewController, UITableViewDelegate, UITableV
         ]
         
         self.myGoalsTblView.register(UINib(nibName: "MyGoalsTableViewCell", bundle: nil), forCellReuseIdentifier: "MyGoalsTableViewCell")
+        
+        //------------------upcoming
+//        self.setTopBackgroundImage(named: "ic_Mygoals_Upcoming")
+        
+        self.view.setComingSoon(bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_upcomingStripe", lockImgName: "ic_upcomingLock" ,title: "Locked for Now", desc: "Goal setting and progress tracking will be live soon. Get ready to aim higher!")
+//        self.view.addTopNavigationButton(title: "Profile", image: AppImages.backarrow, target: self.view)
        
     }
     
-//    override func viewDidLayoutSubviews() {
-//        super.viewDidLayoutSubviews()
-//
-//    }
     
     deinit {
         print("------\(#function)------\(String(describing: Self.self))------" )
@@ -50,6 +52,12 @@ class MyGoalsViewController: CommonViewController, UITableViewDelegate, UITableV
         self.statusBarColor(setColor: .clear)
         setNavUI()
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+//        self.setTopBackgroundImage(named: "ic_Mygoals_Upcoming")
+    }
+    
     func setNavUI(){
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [AppStrings.my_Goals], setTintColor: .black, setTitleColor: UIColor.appWhite)
 //        self.setRighMenu(rightImgs: [AppImages.moreSettings], setTitle: [nil], setTintColor: .black, setTitleColor: UIColor.appWhite)

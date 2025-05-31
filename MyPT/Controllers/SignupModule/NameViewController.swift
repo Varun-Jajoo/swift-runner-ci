@@ -39,20 +39,19 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
         } else {
             print("No user found in UserDefaults")
         }
-        
     }
     
     override func keyboardWillShow(_ notification: Notification) {
         super.keyboardWillShow(notification)
         print("keyboardWillShow")
-        self.customBlurViewShow(viewShow: self.mgImgView)
+        self.addBlurWithVibrancyEffect(viewShow: self.mgImgView, alphBlur: 1.0, vibrancyAlphBlur: 0.4)
     }
-    
+        
     override func keyboardWillHide(_ notification: Notification) {
         super.keyboardWillHide(notification)
-        self.customBlurViewKeyboardWillHide(viewShow: self.mgImgView)
+        self.customBlurViewRemove(viewShow: self.mgImgView)
     }
-    
+        
     deinit {
         NotificationCenter.default.removeObserver(self)
         print("------\(#function)------\(String(describing: Self.self))------" )
@@ -60,6 +59,7 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+      
     }
         
     //------------------************Font
@@ -68,6 +68,7 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
         self.descLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
         self.fullNameTitleLbl.font = AppFont.medium.size(10.0, familyName: familyManrope)
         self.fullNameTxtField.font = AppFont.semibold.size(16.0, familyName: familyManrope)
+        self.fullNameTxtField.setPlaceholder(text: "Full name", font: AppFont.semibold.size(14.0, familyName: familyManrope), color: UIColor.txtDarkGray)
         self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
     }
     
@@ -77,7 +78,6 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
         self.fullNameTxtField.addTarget(self, action: #selector(textFieldDidChange(textField:)), for: UIControl.Event.editingChanged)
         DispatchQueue.main.async {
             
-            self.fullNameTxtField.placeholderSet(placeHolder: "Full name", color: UIColor.txtDarkGray)
             //            self.fullNameTxtField.setLeftRightPadding(16)
             self.nameTxtMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appBorder, cornerRadious: 12.0)
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)

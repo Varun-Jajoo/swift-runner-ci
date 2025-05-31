@@ -11,13 +11,48 @@ let appUserDefaults = UserDefaults.standard
 
 enum UserDefaultsKeys : String {
     case isLoggedIn = "Login"
+    case isSkipToHome = "skip"
     case userID     = "userId"
     case packagerCreated = "packageCreated"
     case accessToken = "accessToken"
     case refressToken = "refreshToken"
+    case latLong = "latLong"
+    case currendAddr = "currentAddr"
 }
 
 extension UserDefaults{
+    
+    //MARK: Lat Log
+    func setLatLong(value: String?){
+        set(value, forKey: UserDefaultsKeys.latLong.rawValue)
+        synchronize()
+    }
+    
+    //MARK: Retrieve Lat Long
+    func getLatLong() -> String?{
+        return string(forKey: UserDefaultsKeys.latLong.rawValue)
+    }
+    
+    //MARK: set Current addres
+    func setCurrentAddr(value: String?){
+        set(value, forKey: UserDefaultsKeys.currendAddr.rawValue)
+        synchronize()
+    }
+    
+    //MARK: Retrieve Current addres
+    func getCurrentAddr() -> String?{
+        return string(forKey: UserDefaultsKeys.currendAddr.rawValue)
+    }
+    
+    //MARK: Check Login
+    func setRegistrationSkip(value: Bool) {
+        set(value, forKey: UserDefaultsKeys.isSkipToHome.rawValue)
+        synchronize()
+    }
+    
+    func getRegistrationSkip()-> Bool {
+        return bool(forKey: UserDefaultsKeys.isSkipToHome.rawValue)
+    }
     
     //MARK: Check Login
     func setLoggedIn(value: Bool) {
@@ -56,6 +91,16 @@ extension UserDefaults{
     
     func getUserName() -> String?{
         return string(forKey: "userName")
+    }
+    
+    
+    func setGymPackage(value: String?){
+        set(value, forKey: "gym")
+        synchronize()
+    }
+    
+    func getGymPackage() -> String?{
+        return string(forKey: "gym")
     }
     
     func saveModel<T: Codable>(_ model: T) {
@@ -138,5 +183,10 @@ extension UserDefaults{
         synchronize()
         print("All Remove Data",Array(UserDefaults.standard.dictionaryRepresentation().keys).count)
         return true
+    }
+    
+    //------------Remove value
+    func removeValue(forKey key: String) {
+        self.removeObject(forKey: key)
     }
 }

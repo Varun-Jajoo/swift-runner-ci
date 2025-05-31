@@ -40,7 +40,7 @@ class SelectYourLocationViewController: CommonViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(updateAddress(_:)), name: NSNotification.Name("UpdateAddress"), object: nil)
         
         setupUI()
-        
+        self.enableDateBtn(isSelected: false, btn: self.dateNtimeBtn)
         self.selectAddrTblView.contentInset = UIEdgeInsets(top: -50, left: 0, bottom: 0, right: 0)
         self.dateNtimeBtn.isHidden = true
         self.selectAddrTblView.reloadData()
@@ -163,6 +163,34 @@ class SelectYourLocationViewController: CommonViewController {
         }
     }
     
+    //MARK: -------------- ENABLE CONTINUE
+//    func enableContinueBtn(isSelected:Bool = false){
+//        if isSelected {
+//            self.continueBtn.isUserInteractionEnabled = true
+//            self.continueBtn.backgroundColor = UIColor.appWhite
+//            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
+//        } else {
+//            self.continueBtn.isUserInteractionEnabled = false
+//            self.continueBtn.backgroundColor = UIColor.appDarkGray
+//            self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
+//        }
+//    }
+    
+    //MARK: -------------- ENABLE CONTINUE
+    func enableDateBtn(isSelected:Bool = false, btn:UIButton){
+        if isSelected {
+            btn.isUserInteractionEnabled = true
+            btn.backgroundColor = UIColor.appWhite
+            btn.setTitleColor(UIColor.mainBg, for: .normal)
+            btn.setImage(AppImages.arrow_right_black, for: .normal)
+        } else {
+            btn.isUserInteractionEnabled = false
+            btn.backgroundColor = UIColor.appDarkGray
+            btn.setTitleColor(UIColor.appWhite, for: .normal)
+            btn.setImage(AppImages.arrow_rightWhite, for: .normal)
+            
+        }
+    }
 }
 
 //MARK: --------------------TABLEVIEW DELEGATE/ DATASOURCE
@@ -246,6 +274,7 @@ extension SelectYourLocationViewController: UITableViewDelegate, UITableViewData
     @objc func selectAddrBtnActn(sender: UIButton){
         sender.isSelected = true
         self.selectedIdStr = sender.accessibilityHint
+        self.enableDateBtn(isSelected: true, btn: self.dateNtimeBtn)
         self.selectAddrTblView.reloadData()
         
 //        sender.isSelected = !sender.isSelected

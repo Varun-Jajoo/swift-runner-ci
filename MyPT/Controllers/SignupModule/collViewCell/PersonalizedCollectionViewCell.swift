@@ -19,6 +19,8 @@ class PersonalizedCollectionViewCell: UICollectionViewCell {
         cellMBV.backgroundColor = UIColor.appBorder
         DispatchQueue.main.async {
             self.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 16.0)
+            self.contentView.setNeedsLayout()
+            self.contentView.layoutIfNeeded()
         }
     }
     
@@ -46,10 +48,21 @@ class PersonalizedCollectionViewCell: UICollectionViewCell {
     
     func setSelectdCellUrl(_ imgStr:String? = nil, selectedImgStr:String? = nil,isSelectedCell:Bool){
         if isSelectedCell {
-            fitnessImgView.loadImage(urlString: selectedImgStr, placeholder: UIImage(named: "ic_navLeft"))
+            fitnessImgView.loadImage(urlString: selectedImgStr, placeholder: UIImage())
         }else{
-            fitnessImgView.loadImage(urlString: imgStr, placeholder: UIImage(named: "ic_navLeft"))
+            fitnessImgView.loadImage(urlString: imgStr, placeholder: UIImage())
         }
     }
     
+    
+    func setupCell(){
+//        cell.titleLbl.text = dataPersonalized?[indexPath.row].name as? String
+        //dataPersonalized?[indexPath.row]["title"] as? String
+        self.titleLbl.lineBreakMode = .byClipping
+        
+//        cell.fitnessImgView.loadImage(urlString: dataPersonalized?[indexPath.row].image as? String, placeholder: UIImage(named: ""))
+        
+        self.contentView.setNeedsLayout()
+        self.contentView.layoutIfNeeded()
+    }
 }

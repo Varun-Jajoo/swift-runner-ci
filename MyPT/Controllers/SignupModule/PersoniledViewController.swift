@@ -15,6 +15,7 @@ class PersoniledViewController: CommonViewController {
     var dataPersonalized:[PersonalizedDataModel]? = []
     var selectIds:[Int]? = []
 //    var selectIds: Set<Int>? = []
+    var dynamicHeigthColl: CGFloat?
     
     var selecteInd:IndexPath = IndexPath(row: -0, section: 0)
     
@@ -32,6 +33,10 @@ class PersoniledViewController: CommonViewController {
         setupUI()
         
         self.continueBtn.isUserInteractionEnabled = false
+       
+        if let userData = appUserDefaults.getUserFromUserDefaults(as: SubmitDataModel.self), let userName = userData.name {
+            self.titleLbl.text = "Hello " + userName + ","
+        }
         
         /*
         dataPersonalized = [ ["title":"Weight Management","images":AppImages.Weight_Management as Any,"seleced_images":AppImages.Weight_Management_Selected as Any],
@@ -45,6 +50,8 @@ class PersoniledViewController: CommonViewController {
         
         fitnessCollView.register(UINib(nibName: "PersonalizedCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "PersonalizedCollectionViewCell")
         fitnessCollView.allowsMultipleSelection = true
+        
+        self.getPersonalizedApi()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -52,7 +59,7 @@ class PersoniledViewController: CommonViewController {
         self.setNavigationColor(setColor: .clear)
         self.statusBarColor(setColor: .clear)
         setNavUI()
-        self.getPersonalizedApi()
+//        self.getPersonalizedApi()
     }
     
     func setNavUI(){
@@ -65,14 +72,15 @@ class PersoniledViewController: CommonViewController {
     }
     
     override func rightBtnActn(sender: UIButton) {
-        appSceneDelegate?.goToGuestDashboard()
+        appUserDefaults.setRegistrationSkip(value: true)
+        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
     }
     
     //------------------************Font
     func setUpFont(){
         self.titleLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
         self.subDescLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
-        self.progressNoteLbl.font = AppFont.regular.size(12.0, familyName: familyOverpass)
+        self.progressNoteLbl.font = AppFont.regular.size(12.0, familyName: familyOverpassMono)
         self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
     }
     
@@ -113,7 +121,14 @@ class PersoniledViewController: CommonViewController {
         let height = self.fitnessCollView.collectionViewLayout.collectionViewContentSize.height
             if self.fitnessCollView.contentSize.height != 0 {
            
-                self.fitnessCollViewHeightConstrnt.constant = height
+                if let localDynamicHeigthColl = self.dynamicHeigthColl {
+                    
+                    self.fitnessCollViewHeightConstrnt.constant = localDynamicHeigthColl
+                    self.fitnessCollView.layoutIfNeeded()
+                }else{
+                    self.dynamicHeigthColl = height
+                    self.fitnessCollViewHeightConstrnt.constant = height
+                }
             }
             self.fitnessCollView.layoutIfNeeded()
         }
@@ -130,21 +145,28 @@ extension PersoniledViewController: UICollectionViewDelegate, UICollectionViewDa
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell:PersonalizedCollectionViewCell = fitnessCollView.dequeueReusableCell(withReuseIdentifier: "PersonalizedCollectionViewCell", for: indexPath) as! PersonalizedCollectionViewCell
+        cell.cellMBV.backgroundColor = UIColor.clear
+        DispatchQueue.main.async {
+            cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 0.0)
+        }
+        
         cell.titleLbl.text = dataPersonalized?[indexPath.row].name as? String
         //dataPersonalized?[indexPath.row]["title"] as? String
         cell.titleLbl.lineBreakMode = .byClipping
 //        cell.fitnessImgView.image = dataPersonalized?[indexPath.row]["images"] as? UIImage
         
-        cell.fitnessImgView.loadImage(urlString: dataPersonalized?[indexPath.row].image as? String, placeholder: UIImage(named: "ic_navLeft"))
+        cell.fitnessImgView.loadImage(urlString: dataPersonalized?[indexPath.row].image as? String, placeholder: UIImage(named: ""))
+        
+        cell.setupCell()
         
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-        return CGSize(width: collectionView.frame.width*0.43, height: collectionView.frame.height*0.25)
+//        return CGSize(width: collectionView.frame.width*0.43, height: collectionView.frame.height*0.25)
         
-//        return CGSize(width: collectionView.frame.width*0.43, height: collectionView.frame.height*0.40)
+        return CGSize(width: collectionView.frame.width*0.43, height: collectionView.frame.height*0.30)
     }
     
     
@@ -159,6 +181,7 @@ extension PersoniledViewController: UICollectionViewDelegate, UICollectionViewDa
         }
                 
         cell.setSelectdCellUrl(dataPersonalized?[indexPath.row].image as? String, selectedImgStr: dataPersonalized?[indexPath.row].selectImage as? String, isSelectedCell: true)
+        
         
 //        cell.setSelectdCell(dataPersonalized?[indexPath.row].image as? UIImage, selectedImg: dataPersonalized?[indexPath.row].selectImage as? UIImage, isSelectedCell: true)
         
@@ -200,9 +223,12 @@ extension PersoniledViewController: UICollectionViewDelegate, UICollectionViewDa
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         
-        DispatchQueue.main.async {
-            self.updateViewConstraints()
-        }
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+//            self.updateViewConstraints()
+//        }
+//        DispatchQueue.main.async {
+//            self.updateViewConstraints()
+//        }
     }
     
 }
@@ -229,7 +255,10 @@ extension PersoniledViewController {
         RegistrationVM.addPersonalizedApi(viewController: self, inputIds: inputIds, completion: { [weak self] getResultData in
             guard let self = self, let getResultData = getResultData else { return }
             print("getResultData: ", getResultData)
+            self.continueBtn.isUserInteractionEnabled = true
             if getResultData.status == true {
+                appUserDefaults.setRegistrationSkip(value: false)
+                
                 if let detailsData = getResultData.data {
                     appUserDefaults.saveUserToUserDefaults(detailsData)
                 }

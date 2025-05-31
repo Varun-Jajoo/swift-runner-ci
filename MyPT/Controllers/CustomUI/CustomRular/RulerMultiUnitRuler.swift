@@ -27,7 +27,6 @@ public class RulerSegmentUnit: NSObject, NSCopying {
     public var image: UIImage?
     public var markerTypes: Array<RulerRangeMarkerType> = Array()
 
-
     public var formatter: MeasurementFormatter? {
         didSet {
             if let formatter = self.formatter {
@@ -62,6 +61,7 @@ public class RulerSegmentUnit: NSObject, NSCopying {
 public class RulerSegmentUnitControlStyle: NSObject {
     public var textFieldBackgroundColor: UIColor = UIColor.clear
     public var textFieldFont: UIFont = kDefaultTextFieldFont
+    public var TopTextFieldFont: UIFont = kDefaultTextFieldFont
     public var textFieldTextColor: UIColor = UIColor.white
     public var scrollViewBackgroundColor: UIColor = UIColor.clear
     public var colorOverrides: Dictionary<RulerRange<Float>, UIColor>?
@@ -91,6 +91,13 @@ public class RulerMultiUnitRuler: UIView {
             setupViews()
         }
     }
+    
+    public var showSegment: Int = 0 {
+        didSet{
+            showSegmentAtIndex(showSegment)
+        }
+    }
+    
     public var delegate: RulerMultiUnitRulerDelegate?
     public var measurement: NSMeasurement?
     private var segmentedViews: [UIView]?
@@ -177,6 +184,7 @@ public class RulerMultiUnitRuler: UIView {
                                         segmentStyle style: RulerSegmentUnitControlStyle,
                                         range floatRange: RulerRange<Float>) -> RulerRangeScrollView {
         let scrollView = RulerRangeScrollView(frame: self.bounds)
+        scrollView.delegate = self
         scrollView.markerTypes = segmentUnit.markerTypes
         scrollView.backgroundColor = style.scrollViewBackgroundColor
         scrollView.range = floatRange
@@ -191,6 +199,7 @@ public class RulerMultiUnitRuler: UIView {
         return scrollView
     }
     
+    /*
     private func setupSegmentViews() -> ([UIView], [RulerRangeScrollView], [RulerRangeTextView], [RulerRangePointerView]) {
         var segmentViews: [UIView] = []
         var pointerViews: [RulerRangePointerView] = []
@@ -297,6 +306,116 @@ public class RulerMultiUnitRuler: UIView {
 
         return (segmentViews, scrollViews, textViews, pointerViews)
     }
+    */
+    
+    //---------------------
+    
+    private func setupSegmentViews() -> ([UIView], [RulerRangeScrollView], [RulerRangeTextView], [RulerRangePointerView]) {
+        var segmentViews: [UIView] = []
+        var pointerViews: [RulerRangePointerView] = []
+        var scrollViews: [RulerRangeScrollView] = []
+        var textViews: [RulerRangeTextView] = []
+        let pointV = UIView()
+
+        guard let dataSource = self.dataSource else {
+            return (segmentViews, scrollViews, textViews, pointerViews)
+        }
+
+        for index in 0..<dataSource.numberOfSegments {
+            let segmentView = UIView()
+            segmentView.translatesAutoresizingMaskIntoConstraints = false
+
+            let segmentUnit = dataSource.unitForSegmentAtIndex(index: index)
+            if let unit = segmentUnit.unit {
+                let style = dataSource.styleForUnit(unit)
+                let range = dataSource.rangeForUnit(unit)
+
+                let pointerView = setupPointerView(inSegmentView: segmentView, unit: segmentUnit, segmentStyle: style)
+                let scrollView = setupSegmentScrollView(inSegmentView: segmentView, unit: segmentUnit, segmentStyle: style, range: range)
+                let textView = setupSegmentBottomView(inSegmentView: segmentView, unit: segmentUnit, style: style)
+                let underlineView = setupSegmentLineUnderBottomView(inSegmentView: segmentView)
+
+                underlineView.isHidden = true
+                var constraints = [NSLayoutConstraint]()
+
+                let views: [String: UIView] = [
+                    "scrollView": scrollView,
+                    "textView": textView,
+                    "underlineView": underlineView,
+                    "pointerView": pointerView
+                ]
+
+                switch direction {
+                case .vertical:
+                    constraints += NSLayoutConstraint.constraints(withVisualFormat: "V:|-5-[textView(25)]-1-[underlineView(2)]-5-[scrollView]-5-|", options: [], metrics: nil, views: views)
+                    constraints += NSLayoutConstraint.constraints(withVisualFormat: "H:|-5-[pointerView(10)]-0-[scrollView]-5-[textView]-5-|", options: [], metrics: nil, views: views)
+                    constraints += NSLayoutConstraint.constraints(withVisualFormat: "V:|-5-[pointerView]-5-|", options: [], metrics: nil, views: views)
+                    constraints += NSLayoutConstraint.constraints(withVisualFormat: "H:|-5-[pointerView(10)]-0-[scrollView]-5-[underlineView]-5-|", options: [], metrics: nil, views: views)
+
+                    // Rotate scroll and pointer views, keep text upright
+                    scrollView.transform = CGAffineTransform(rotationAngle: .pi / 2)
+                    pointerView.transform = CGAffineTransform(rotationAngle: .pi / 2)
+                    textView.transform = .identity // Ensure upright text
+
+                case .horizontal:
+                    constraints += NSLayoutConstraint.constraints(withVisualFormat: "H:|-5-[scrollView]-5-|", options: [], metrics: nil, views: views)
+                    constraints += NSLayoutConstraint.constraints(withVisualFormat: "H:|-15-[textView]-5-|", options: [], metrics: nil, views: views)
+                    constraints += NSLayoutConstraint.constraints(withVisualFormat: "H:|-5-[pointerView]-5-|", options: [], metrics: nil, views: views)
+                    constraints += NSLayoutConstraint.constraints(withVisualFormat: "H:|-5-[underlineView]-5-|", options: [], metrics: nil, views: views)
+                    constraints += NSLayoutConstraint.constraints(withVisualFormat: "V:|-5-[textView(25)]-1-[underlineView(2)]-5-[scrollView]-5-[pointerView(10)]-5-|", options: [], metrics: nil, views: views)
+                }
+
+                segmentView.backgroundColor = style.scrollViewBackgroundColor
+                segmentView.addConstraints(constraints)
+                segmentViews.append(segmentView)
+                scrollViews.append(scrollView)
+                textViews.append(textView)
+                pointerViews.append(pointerView)
+
+                pointerView.isHidden = true
+                addSubview(segmentView)
+
+                textView.isUserInteractionEnabled = false
+
+                segmentView.isHidden = (index != selectedSegmentIndex)
+                if index == selectedSegmentIndex {
+                    textView.backgroundColor = style.textFieldBackgroundColor
+                    textView.textField.backgroundColor = style.textFieldBackgroundColor
+                    textView.textField.textColor = style.textFieldTextColor
+                }
+            }
+        }
+
+        // Final segment pointer overlay view
+        if let segmentV = segmentViews.last {
+            pointV.backgroundColor = .clear
+            pointV.translatesAutoresizingMaskIntoConstraints = false
+            segmentV.addSubview(pointV)
+
+            let imageView = UIImageView()
+            imageView.image = UIImage(named: "ic_polygon_ruler")
+            imageView.contentMode = .scaleAspectFit
+            imageView.translatesAutoresizingMaskIntoConstraints = false
+            pointV.addSubview(imageView)
+
+            NSLayoutConstraint.activate([
+                pointV.centerXAnchor.constraint(equalTo: segmentV.centerXAnchor),
+                pointV.centerYAnchor.constraint(equalTo: segmentV.centerYAnchor, constant: 5),
+                pointV.widthAnchor.constraint(equalToConstant: 40),
+                pointV.heightAnchor.constraint(equalToConstant: 40),
+
+                imageView.centerXAnchor.constraint(equalTo: pointV.centerXAnchor),
+                imageView.centerYAnchor.constraint(equalTo: pointV.centerYAnchor),
+                imageView.widthAnchor.constraint(equalTo: pointV.widthAnchor),
+                imageView.heightAnchor.constraint(equalTo: pointV.heightAnchor)
+            ])
+        }
+
+        return (segmentViews, scrollViews, textViews, pointerViews)
+    }
+    
+    
+    //---------------------
     
     
     private func showSegmentAtIndex(_ index: Int) {
@@ -339,6 +458,7 @@ public class RulerMultiUnitRuler: UIView {
         textView.backgroundColor = style.textFieldBackgroundColor
         textView.textField.backgroundColor = style.textFieldBackgroundColor
         textView.textField.textColor = style.textFieldTextColor
+        textView.textField.font = style.TopTextFieldFont
         textView.unit = segmentUnit.unit
         textView.formatter = segmentUnit.formatter
         textView.translatesAutoresizingMaskIntoConstraints = false
@@ -403,6 +523,18 @@ public class RulerMultiUnitRuler: UIView {
                     }
                 }
             }
+        }
+    }
+}
+
+extension RulerMultiUnitRuler: RulerRangeScrollViewDelegate {
+    func rulerScrollViewDidReachThreshold(_ scrollView: RulerRangeScrollView, currentValue: Float) {
+        let newRange = scrollView.range
+        let newMax = newRange.location + newRange.length + 100 
+        if newMax <= 100000 { // prevent infinite loading
+            newRange.length = newMax - newRange.location
+//            scrollView.range = newRange
+            scrollView.setNeedsLayout()
         }
     }
 }

@@ -21,24 +21,27 @@ class CommonViewController: UIViewController {
         self.navigationController?.navigationItem.hidesBackButton = true
         self.navigationController?.navigationBar.backgroundColor = .clear
         self.statusBarColor(setColor: .clear)
-        self.setupLargeTitleBg(bgColor: .clear)
+        self.setupLargeTitleBg(collapsedColor: UIColor.mainBg, expandedColor: .clear)
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification,
                                                object: nil)
     }
     
-    func customBlurViewShow(viewShow:UIView?, alphBlur:Float = 0.2, bgColor:UIColor = .mainBg){
-        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
-        blurView.frame = view.bounds
-        blurView.backgroundColor = bgColor
-        blurView.alpha = 0.2
-        blurView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        viewShow?.insertSubview(blurView, at: 1)
+    func customBlurViewShow(viewShow:UIView?, alphBlur:CGFloat = 0.4, bgColor:UIColor = .mainBg){
+        self.customBlurViewRemove(viewShow: viewShow)
+
+        UIView.performWithoutAnimation {
+            let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
+            blurView.frame = view.bounds
+            blurView.backgroundColor = bgColor
+            blurView.alpha = alphBlur
+            blurView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            viewShow?.insertSubview(blurView, at: 1)
+        }
     }
     
-    
-    func customBlurViewKeyboardWillHide(viewShow:UIView?){
+    func customBlurViewRemove(viewShow:UIView?){
         viewShow?.subviews.forEach { view in
             if view is UIVisualEffectView {
                 view.removeFromSuperview()
@@ -48,12 +51,26 @@ class CommonViewController: UIViewController {
     
     @objc func keyboardWillShow(_ notification:
                                 Notification) {
-        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
-        blurView.frame = view.bounds
-        blurView.backgroundColor = .mainBg
-        blurView.alpha = 0.2
-        blurView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.insertSubview(blurView, at: 0)
+        
+        self.customBlurViewShow(viewShow: view, alphBlur: 0.4, bgColor: UIColor.mainBg)
+       
+        /*
+        view.subviews.forEach { view in
+            if view is UIVisualEffectView {
+                view.removeFromSuperview()
+            }
+        }
+        
+        UIView.performWithoutAnimation {
+            //----------------------------------------
+            let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
+            blurView.frame = view.bounds
+            blurView.backgroundColor = .mainBg
+            blurView.alpha = 0.4
+            blurView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            view?.insertSubview(blurView, at: 0)
+        }
+        */
     }
     
     @objc func keyboardWillHide(_ notification: Notification) {
@@ -63,6 +80,35 @@ class CommonViewController: UIViewController {
             }
         }
     }
+    
+    func addBlurWithVibrancyEffect(viewShow:UIView?, alphBlur:CGFloat = 1.0, vibrancyAlphBlur:CGFloat = 0.4, bgColor: UIColor? = UIColor.clear, vibrancyBgColor: UIColor? = UIColor.clear) {
+        // Remove any existing blur effect views
+        for subview in view.subviews {
+            if let blurView = subview as? UIVisualEffectView {
+                blurView.removeFromSuperview()
+            }
+        }
+
+        // Disable animations temporarily
+        UIView.performWithoutAnimation {
+            // Blur Effect
+            let blurEffect = UIBlurEffect(style: .dark)
+            let blurEffectView = UIVisualEffectView(effect: blurEffect)
+            blurEffectView.frame = self.view.bounds
+            blurEffectView.backgroundColor = bgColor
+            blurEffectView.alpha = alphBlur
+            viewShow?.addSubview(blurEffectView)
+
+            // Vibrancy Effect
+            let vibrancyEffect = UIVibrancyEffect(blurEffect: blurEffect)
+            let vibrancyEffectView = UIVisualEffectView(effect: vibrancyEffect)
+            vibrancyEffectView.frame = self.view.bounds
+            vibrancyEffectView.backgroundColor = vibrancyBgColor
+            vibrancyEffectView.alpha = vibrancyAlphBlur
+            blurEffectView.contentView.addSubview(vibrancyEffectView) // Add vibrancy to the blur view's content view
+        }
+    }
+    
     
     deinit {
         NotificationCenter.default.removeObserver(self)
@@ -188,6 +234,7 @@ class CommonViewController: UIViewController {
 //                backBtn.setTitle("back", for: .normal)
             backBtn.tintColor = setTintColor
             backBtn.setTitleColor(setTitleColor, for: .normal)
+                        
             backBtn.sizeToFit()
             backBtn.tag = imgs.offset
             backBtn.addTarget(self, action: #selector(leftBtnActn(sender: )), for: .touchUpInside)
@@ -199,7 +246,7 @@ class CommonViewController: UIViewController {
         
         for titleStr in setTitle.enumerated() {
             if titleStr.offset < leftImgs.count {
-                backButton[titleStr.offset].setTitle(titleStr.element, for: .normal)
+                backButton[titleStr.offset].setTitle("  " + (titleStr.element ?? ""), for: .normal)
             }
         }
         
@@ -307,13 +354,32 @@ class CommonViewController: UIViewController {
     }
     
     //MARK: -------------MAKE TRANSPARENT OF LARGE TITLE BACKGROUND/COLOR
-    func setupLargeTitleBg(bgColor: UIColor = UIColor.clear){
-        let navBarAppearance = UINavigationBarAppearance()
-        navBarAppearance.configureWithOpaqueBackground()
-        navBarAppearance.backgroundColor = bgColor //clear color is make transparent
-        navBarAppearance.shadowImage = nil // line
-        navBarAppearance.shadowColor = nil // line
-        UINavigationBar.appearance(whenContainedInInstancesOf: [UINavigationController.self]).standardAppearance = navBarAppearance
-        UINavigationBar.appearance(whenContainedInInstancesOf: [UINavigationController.self]).scrollEdgeAppearance = navBarAppearance
+//    func setupLargeTitleBg(bgColor: UIColor = UIColor.clear){
+//        let navBarAppearance = UINavigationBarAppearance()
+//        navBarAppearance.configureWithOpaqueBackground()
+//        navBarAppearance.backgroundColor = bgColor //clear color is make transparent
+//        navBarAppearance.shadowImage = nil // line
+//        navBarAppearance.shadowColor = nil // line
+//        UINavigationBar.appearance(whenContainedInInstancesOf: [UINavigationController.self]).standardAppearance = navBarAppearance
+//        UINavigationBar.appearance(whenContainedInInstancesOf: [UINavigationController.self]).scrollEdgeAppearance = navBarAppearance
+//    }
+    
+    func setupLargeTitleBg(collapsedColor: UIColor, expandedColor: UIColor = .clear) {
+        // Appearance for collapsed state (when scrolled)
+        let standardAppearance = UINavigationBarAppearance()
+        standardAppearance.configureWithOpaqueBackground()
+        standardAppearance.backgroundColor = collapsedColor
+        standardAppearance.shadowColor = nil
+
+        // Appearance for expanded state (large title visible)
+        let scrollEdgeAppearance = UINavigationBarAppearance()
+        scrollEdgeAppearance.configureWithTransparentBackground()
+        scrollEdgeAppearance.backgroundColor = expandedColor
+        scrollEdgeAppearance.shadowColor = nil
+
+        let navBar = UINavigationBar.appearance(whenContainedInInstancesOf: [UINavigationController.self])
+        navBar.standardAppearance = standardAppearance
+        navBar.scrollEdgeAppearance = scrollEdgeAppearance
     }
+
 }

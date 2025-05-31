@@ -387,10 +387,6 @@ class CustomViewController: UITabBarController {
 //        shapeLayer?.path = path.cgPath
     }
 
-    
-    
-
-
 }
 
 

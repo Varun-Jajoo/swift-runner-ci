@@ -24,6 +24,7 @@ enum AssetsColor {
 
 enum AssetsMultiColor {
     case gradientColor
+    case gradientColor2
     case redGradientColor
     case borderGradientColor
     case stepsConnect
@@ -70,6 +71,8 @@ extension UIColor {
         switch name {
         case .gradientColor:
             return [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 1.0), UIColor(red: 71.0/255.0, green: 77.0/255.0, blue: 96.0/255.0, alpha: 1.0)]
+        case .gradientColor2:
+            return [UIColor(red: 0, green: 0, blue: 0, alpha: 0), UIColor(red: 0, green: 5/255.0, blue: 2/255.0, alpha: 1.0)]
         case .redGradientColor:
             return [UIColor(red: 31.0/255.0, green: 15.0/255.0, blue:  9.0/255.0, alpha: 1.0), UIColor(red: 96.0/255.0, green: 73.0/255.0, blue: 71.0/255.0, alpha: 1.0)]
         case .borderGradientColor:
@@ -98,7 +101,8 @@ extension UIColor {
         case .greenGradient:
             return [UIColor(red: 29.0/255.0, green: 215.0/255.0, blue: 148.0/255.0, alpha: 1.0), UIColor(red: 9.0/255.0, green: 46.0/255.0, blue: 46.0/255.0, alpha: 1.0)]
         }
-    
+    //rgba(0, 0, 0, 0)
+        //rgba(0, 5, 2, 1)
     }
 }
 
@@ -106,6 +110,7 @@ extension UIColor {
 //MARK: -------------- FOR SYSTEM IMAGE
 public struct AppImages {
     
+    public static let profile_placeholder = UIImage(named: "ic_profile_placeholder")
     public static let navLeft = UIImage(named: "ic_navLeft")
     public static let backarrow = UIImage(named: "ic_back_arrow")
     public static let arrow_right = UIImage(named: "ic_arrow_right")
@@ -228,6 +233,8 @@ public struct AppImages {
     public static let gymWorkout = UIImage(named: "ic_gymWorkout")
     public static let homeWorkout = UIImage(named: "ic_homeWorkout")
     public static let grid = UIImage(named: "ic_grid")
+    public static let selected_grid = UIImage(named: "ic_selected_grid")
+    public static let unselectedList = UIImage(named: "ic_unselectedList")
     public static let menuNav = UIImage(named: "ic_menuNav")
     public static let personal_workout = UIImage(named: "ic_person_workout")
     public static let trainer_atGym = UIImage(named: "ic_trainer_atGym")
@@ -262,6 +269,7 @@ public struct AppImages {
 public let familyClashDisplay          = "ClashDisplay"
 public let familyManrope               = "Manrope"
 public let familyOverpass              = "Overpass"
+public let familyOverpassMono          = "OverpassMono"
 public let familyClashDisplayVariable  = "ClashDisplayVariable"
 
 
@@ -303,5 +311,8 @@ enum AppFont: String {
     
 }
 
-
+public struct AppConstant{
+    public static let gMap_services_Key = "AIzaSyBcjdk3tch99jhgrQx2miMW3xdRW9By8Vc"
+    public static let tabby_key = "pk_test_c0dfc062-d62c-4723-a699-8710812c1847"
+}
 

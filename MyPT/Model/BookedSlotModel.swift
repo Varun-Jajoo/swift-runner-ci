@@ -25,6 +25,7 @@ struct BookedSlotData: Codable {
     var timing, location: String?
 }
 
+
 //MARK: ---------- DateClass
 struct SlotDateModel: Codable {
     var startDate, validTill: String?
@@ -33,6 +34,23 @@ struct SlotDateModel: Codable {
         case startDate = "start_date"
         case validTill = "valid_till"
     }
+}
+
+//MARK: ----------- BookClassBaseModel
+struct BookClassBaseModel: Codable {
+    var status: Bool?
+    var data: BookingClassDataModel?
+    var msg: String?
+    let errors: [String: [String]]?
+    
+}
+
+// MARK: --------- Booking Class DataModel (For upcoming sessiogn)
+struct BookingClassDataModel: Codable {
+    let trainer: BookedTrainerModel?
+    let date: String?
+    let qr: String?
+    let timing, location: String?
 }
 
 //MARK: ----------- BookedTrainerModel

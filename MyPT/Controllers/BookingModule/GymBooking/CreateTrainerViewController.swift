@@ -12,7 +12,6 @@ class CreateTrainerViewController: CommonViewController {
 
     //MARK: --------------VARIABLE
     var trainerData:[[String:Any]]?
-    let locManager = GetLocationManager()
     var getLat:Double?
     var getLong:Double?
     var flowCreatePackage:calendarFlow = .defaultFlow
@@ -27,7 +26,12 @@ class CreateTrainerViewController: CommonViewController {
         super.viewDidLoad()
         setUpFont()
         setupUI()
-        self.getLocation()
+     
+        if let lat = appUserDefaults.getLatLong()?.components(separatedBy: ",").first, let long = appUserDefaults.getLatLong()?.components(separatedBy: ",").last{
+            self.getLat = Double(lat)
+            self.getLong = Double(long)
+        }
+        
         self.setFlowCreatePackage()
         
     }
@@ -87,12 +91,14 @@ class CreateTrainerViewController: CommonViewController {
     
     //MARK: -------------GET Lat long
     private func getLocation(){
-        locManager.requestLocation(completion: { [weak self] getLocation in
-            guard let self = self, let getLocation = getLocation else { return  }
-
+        GetLocationManager.shared.requestLocationWithAddress {[weak self] location, addressPart in
+            guard let self = self, let getLocation = location else { return  }
+            appUserDefaults.setLatLong(value: "\(getLocation.coordinate.latitude),\(getLocation.coordinate.longitude)")
+            appUserDefaults.setCurrentAddr(value: addressPart.0)
+            
             self.getLat = getLocation.coordinate.latitude
             self.getLong = getLocation.coordinate.longitude
-        })
+        }
     }
     
     //MARK: ---------- SET UI
@@ -111,6 +117,8 @@ class CreateTrainerViewController: CommonViewController {
     @IBAction func continueBtnActn(_ sender: Any) {
         print("Continue btn actn.....")
 
+        appUserDefaults.removeValue(forKey: "gym")
+       
         //---------------------*********
         switch flowCreatePackage {
         case .withTrainerMembership, .withoutTrainerMembership, .gymMembership:
@@ -122,6 +130,8 @@ class CreateTrainerViewController: CommonViewController {
                 vc.inputType = "gym"
                 vc.inputLat = "\(getLat)"
                 vc.inputLong = "\(getLong)"
+                
+                appUserDefaults.setGymPackage(value: "gym")
                 
                 //---------------- Flow set for membership
                 if let titleStr = trainerData?.first?["title"] as? String , self.continueBtn.accessibilityHint == titleStr {
@@ -149,6 +159,7 @@ class CreateTrainerViewController: CommonViewController {
                     vc.isFromHome = true
                     self.navigationController?.pushViewController(vc, animated: true)
                 }else{
+                    appUserDefaults.setGymPackage(value: "gym")
                     let vc:GymWorkoutViewController = GymWorkoutViewController.instantiate(appStoryboard: .booking)
                     //        vc.flowSlot = calendarFlow.bookTrainer
                     vc.flowGymwork = .bookTrainerGymWorkout
@@ -203,7 +214,6 @@ class CreateTrainerViewController: CommonViewController {
         
     }
     
-        
     //MARK: -------------- ENABLE CONTINUE
     func enableContinueBtn(isSelected:Bool = false){
         if isSelected {

@@ -57,6 +57,7 @@ class CalendarView: UIView {
         }
     }
     
+    var isSelectionAll: Bool? = false
     
     private var currentMonth: Date = Date()
     private var daysInCurrentMonth: Int = 0
@@ -244,22 +245,31 @@ extension CalendarView: UICollectionViewDataSource, UICollectionViewDelegate, UI
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CalendarCell", for: indexPath) as! CalendarCell
                 
+        DispatchQueue.main.async {
+            cell.cellMBV.setCornerWithShadow(borderWidth: 0, borderColor: nil, shadowColor: UIColor(red: 17.0/255.0, green: 18.0/255.0, blue: 20.0/255.0, alpha: 0.05), offSet: .zero, opacity: 0.4, shadowRadius: 0.4, cornerRadious: 0)
+            
+            cell.cellImgGradient.setCornerRadius(borderWidth: 0.0, borderColor: UIColor.clear, cornerRadious: cell.cellMBV.frame.width*0.33)
+        }
+       
+        cell.cellImgGradient.image = UIImage(named: "ic_slotGradient")
+        
         if getSelectedInd.row == indexPath.row {
             DispatchQueue.main.async {
                 cell.dotMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: cell.dotMBV.frame.size.height/3.0)
-                
-                cell.cellMBV.backgroundColor = UIColor.appCard
-                cell.cellMBV.layerGradient(startPoint: .topRight, endPoint: .bottomRight, colorArray: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 019.0/255.0, alpha: 1.0).cgColor, UIColor(red: 71/255.0, green: 77/255.0, blue: 96/255.0, alpha: 1).cgColor], type: .axial)
-                
-                cell.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 158.0/255.0, green: 188/255.0, blue: 255/255.0, alpha: 1.0), cornerRadious: 12.0)
+                                
+                cell.cellMBV.backgroundColor = UIColor.clear
+//                cell.cellMBV.backgroundColor = UIColor.mainBg.withAlphaComponent(0.3)
+                cell.cellMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor2), locations: [0,1], startPoint: CGPoint(x: 0, y: 0.3), endPoint: CGPoint(x: 0, y: 0), cornerRadius: cell.cellMBV.frame.width*0.33)
+               
+                cell.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 158.0/255.0, green: 188/255.0, blue: 255/255.0, alpha: 1.0), cornerRadious: cell.cellMBV.frame.width*0.33)
             }
         }else{
             DispatchQueue.main.async {
-                cell.cellMBV.backgroundColor = UIColor.appCard
-                cell.cellMBV.layerGradient(startPoint: .topRight, endPoint: .bottomRight, colorArray: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 019.0/255.0, alpha: 1.0).cgColor, UIColor(red: 71/255.0, green: 77/255.0, blue: 96/255.0, alpha: 1).cgColor], type: .axial)
+                cell.cellMBV.backgroundColor = UIColor.clear
+                cell.cellMBV.setCornerRadius(borderWidth: 0.0, borderColor: nil, cornerRadious: cell.cellMBV.frame.width*0.33)
+                cell.cellMBV.setGradientCellBorder(cornerRadius: cell.cellMBV.frame.width*0.33, width: 1, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 0.5))
                 
-                cell.cellMBV.setCornerRadius(borderWidth: 1, borderColor: UIColor.appBorder, cornerRadious: 12.0)
-                cell.cellMBV.setGradientBorder(cornerRadious:12.0,width: 1.0, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)])
+                cell.cellMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor2), locations: [0,1], startPoint: CGPoint(x: 0, y: 0.3), endPoint: CGPoint(x: 0, y: 0), cornerRadius: cell.cellMBV.frame.width*0.33)
                 
                 cell.dotMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: cell.dotMBV.frame.size.height/3.0)
             }
@@ -269,10 +279,12 @@ extension CalendarView: UICollectionViewDataSource, UICollectionViewDelegate, UI
         
         cell.dayLabel.text = getDate(dateString: "\(allDays[indexPath.row])").dayName
         cell.dayLabel.textColor = UIColor.txtDarkGray
+        cell.dateLabel.font = AppFont.medium.size(12.0, familyName: familyManrope)
         cell.dayLabel.textAlignment = .center
         cell.dateLabel.text = getDate(dateString: "\(allDays[indexPath.row])").numDate
         cell.dateLabel.textColor = UIColor.appWhite
         cell.dateLabel.textAlignment = .center
+        cell.dateLabel.font = AppFont.bold.size(20.0, familyName: familyManrope)
         
         let key = self.dateFormatter.string(from: allDays[indexPath.row])
         if let colors = self.datesWithMultipleEvents?[key] as? UIColor {
@@ -313,17 +325,23 @@ extension CalendarView: UICollectionViewDataSource, UICollectionViewDelegate, UI
     
     func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
        
+        /*
         let allDays = getAllDaysOfCurrentMonth()
         let dateString =  self.dateFormatter.string(from: allDays[indexPath.row])
         guard let isSelection = disabledDates?.contains(dateString) else { return true}
         guard let isCellSelected = isCellSelected else { return true }
                 
         return isCellSelected ? !isSelection : isCellSelected
+        */
+        
+        let selectedDate = getAllDaysOfCurrentMonth()[indexPath.row]
+        return (isSelectionAll ?? false) ? true : selectedDate.isTodayOrFuture
+        
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-        return CGSize(width: collectionView.frame.width*0.13, height: collectionView.frame.height)
+        return CGSize(width: collectionView.frame.width*0.15, height: collectionView.frame.height)
     }
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
@@ -371,6 +389,13 @@ class CalendarCell: UICollectionViewCell {
         return cellV
     }()
     
+    lazy var cellImgGradient: UIImageView = {
+        let imgV = UIImageView()
+        imgV.contentMode = .scaleAspectFill
+        imgV.clipsToBounds = true
+        return imgV
+    }()
+   
     lazy var dotMBV: UIView = {
         let cellV = UIView()
         
@@ -380,7 +405,7 @@ class CalendarCell: UICollectionViewCell {
     lazy var dayLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.font = UIFont.systemFont(ofSize: 16)
+        label.font = AppFont.medium.size(12.0, familyName: familyManrope)
         return label
     }()
     lazy var dateLabel: UILabel = {
@@ -405,11 +430,13 @@ class CalendarCell: UICollectionViewCell {
     {
         
         contentView.addSubview(cellMBV)
+        cellMBV.addSubview(cellImgGradient)
         cellMBV.addSubview(dayLabel)
         cellMBV.addSubview(dateLabel)
         cellMBV.addSubview(dotMBV)
         
         cellMBV.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             cellMBV.topAnchor.constraint(equalTo:
                                             contentView.topAnchor),
@@ -417,8 +444,16 @@ class CalendarCell: UICollectionViewCell {
             cellMBV.trailingAnchor.constraint(equalTo:
                                                 contentView.trailingAnchor),
             cellMBV.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
-            
         ])
+        
+     
+          cellImgGradient.translatesAutoresizingMaskIntoConstraints = false
+          NSLayoutConstraint.activate([
+              cellImgGradient.topAnchor.constraint(equalTo: cellMBV.topAnchor),
+              cellImgGradient.bottomAnchor.constraint(equalTo: cellMBV.bottomAnchor),
+              cellImgGradient.leadingAnchor.constraint(equalTo: cellMBV.leadingAnchor),
+              cellImgGradient.trailingAnchor.constraint(equalTo: cellMBV.trailingAnchor),
+          ])
         
         
         dayLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -454,12 +489,22 @@ class CalendarCell: UICollectionViewCell {
     override var isSelected: Bool {
         didSet {
             if self.isSelected {
-                self.cellMBV.backgroundColor = UIColor.appDarkGray
-                self.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 158.0/255.0, green: 188/255.0, blue: 255/255.0, alpha: 1.0), cornerRadious: 12.0)
+                self.cellMBV.backgroundColor = UIColor.clear
+                self.cellMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor2), locations: [0,1], startPoint: CGPoint(x: 0, y: 0.3), endPoint: CGPoint(x: 0, y: 0), cornerRadius: self.cellMBV.frame.width*0.33)
+               
+                self.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 158.0/255.0, green: 188/255.0, blue: 255/255.0, alpha: 1.0), cornerRadious: self.cellMBV.frame.width*0.33)
+                self.contentView.setNeedsLayout()
+                self.contentView.layoutIfNeeded()
             }
             else {
-                self.cellMBV.setCornerRadius(borderWidth: 1, borderColor: UIColor.appBorder, cornerRadious: 12.0)
-                self.cellMBV.setGradientBorder(cornerRadious:12.0,width: 1.0, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)])
+                self.cellMBV.backgroundColor = UIColor.clear
+                self.cellMBV.setCornerRadius(borderWidth: 0.0, borderColor: nil, cornerRadious: self.cellMBV.frame.width*0.33)
+                self.cellMBV.setGradientCellBorder(cornerRadius: self.cellMBV.frame.width*0.33, width: 1, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 0.5))
+                
+                self.cellMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor2), locations: [0,1], startPoint: CGPoint(x: 0, y: 0.3), endPoint: CGPoint(x: 0, y: 0), cornerRadius: self.cellMBV.frame.width*0.33)
+                
+                self.contentView.setNeedsLayout()
+                self.contentView.layoutIfNeeded()
             }
         }
     }

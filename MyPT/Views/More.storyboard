@@ -1633,7 +1633,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" contentInsetAdjustmentBehavior="never" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="aS0-OZ-4Lc">
-                                <rect key="frame" x="1" y="136" width="391" height="672"/>
+                                <rect key="frame" x="1" y="136" width="391" height="637"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="4aP-K2-qk4">
                                     <size key="itemSize" width="128" height="128"/>
@@ -1643,10 +1643,10 @@
                                 </collectionViewFlowLayout>
                                 <cells>
                                     <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="gje-Tk-BCh">
-                                        <rect key="frame" x="19" y="0.0" width="127.99999999999997" height="128"/>
+                                        <rect key="frame" x="19" y="0.0" width="128" height="128"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="ZHM-pg-OhO">
-                                            <rect key="frame" x="0.0" y="0.0" width="127.99999999999997" height="128"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </collectionViewCellContentView>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -1666,7 +1666,7 @@
                             <constraint firstItem="vDu-zF-Fre" firstAttribute="trailing" secondItem="pFM-v9-uNT" secondAttribute="trailing" constant="20" id="BVV-JQ-V7u"/>
                             <constraint firstItem="vDu-zF-Fre" firstAttribute="trailing" secondItem="aS0-OZ-4Lc" secondAttribute="trailing" constant="1" id="CgS-WJ-9nE"/>
                             <constraint firstItem="pFM-v9-uNT" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" constant="20" id="Xg5-ZL-scT"/>
-                            <constraint firstItem="vDu-zF-Fre" firstAttribute="bottom" secondItem="aS0-OZ-4Lc" secondAttribute="bottom" constant="10" id="Xot-P3-odK"/>
+                            <constraint firstItem="vDu-zF-Fre" firstAttribute="bottom" secondItem="aS0-OZ-4Lc" secondAttribute="bottom" constant="45" id="Xot-P3-odK"/>
                             <constraint firstItem="cEH-QO-mSn" firstAttribute="leading" secondItem="pFM-v9-uNT" secondAttribute="leading" id="njc-U9-exW"/>
                             <constraint firstItem="cEH-QO-mSn" firstAttribute="trailing" secondItem="pFM-v9-uNT" secondAttribute="trailing" id="qxV-OZ-WER"/>
                             <constraint firstItem="aS0-OZ-4Lc" firstAttribute="top" secondItem="cEH-QO-mSn" secondAttribute="bottom" constant="12" id="v0h-z5-pyt"/>

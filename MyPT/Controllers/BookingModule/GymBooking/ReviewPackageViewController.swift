@@ -420,12 +420,47 @@ class ReviewPackageViewController: CommonViewController {
             self.inputBookSlotParams = BookSlotParamsModel(studio_id: inputCheckoutParams?.studio_id, type: inputCheckoutParams?.type, trainer_id: inputCheckoutParams?.trainer_id, slot_id: inputCheckoutParams?.slot_id, address_id: packagecheckoutData?.address?.id?.value, is_package: "1", package_type: inputCheckoutParams?.package_type, date: inputCheckoutParams?.date, end_date: inputCheckoutParams?.end_date, sessions: inputCheckoutParams?.sessions, price: packagecheckoutData?.packageDetail?.price, days: "\(packagecheckoutData?.packageDetail?.days ?? 0)")
             
             print("inputBookSlotParams", inputBookSlotParams as Any)
+            
+            
             //-----------------Called booking Api
-            self.bookSlot(inputParam: self.inputBookSlotParams?.getParams() ?? [:])
+            
+            if let pricePackage = packagecheckoutData?.packageDetail?.price {
+                let components = pricePackage.split(separator: " ")
+                let vc: CCAvenuePaymentViewController = CCAvenuePaymentViewController.instantiate(appStoryboard: .booking)
+                vc.modalPresentationStyle = .overFullScreen
+                vc.costAmt =  Double(components.first ?? "0.0")
+                
+                vc.paymentSuccess = {[weak self] (getStatus, getTransactionId) in
+                    guard let self = self, let getTransactionId = getTransactionId  else { return  }
+                    inputBookSlotParams?.transaction_id = getTransactionId
+                    print("Slot booking params: ",inputBookSlotParams?.getParams() ?? [:])
+                    self.bookSlot(inputParam: self.inputBookSlotParams?.getParams() ?? [:])
+                }
+                self.navigationController?.present(vc, animated: true)
+            }
+            
+//            self.bookSlot(inputParam: self.inputBookSlotParams?.getParams() ?? [:])
             
         case .withoutTrainerMembership:
             print("withoutTrainerMembership")
-            self.bookMembershipWithoutTrainer(inputParams: self.inputParamMembership?.getParamsReviewPackage())
+//            self.bookMembershipWithoutTrainer(inputParams: self.inputParamMembership?.getParamsReviewPackage()) //only for testing
+            
+            if let pricePackage = reviewDetailsWithoutTrainer?.price {
+                
+                let components = pricePackage.split(separator: " ")
+                let vc: CCAvenuePaymentViewController = CCAvenuePaymentViewController.instantiate(appStoryboard: .booking)
+                vc.modalPresentationStyle = .overFullScreen
+                vc.costAmt =  Double(components.first ?? "0.0")
+                
+                vc.paymentSuccess = {[weak self] (getStatus, getTransactionId) in
+                    guard let self = self, let getTransactionId = getTransactionId  else { return  }
+                    self.inputParamMembership?.transaction_id = getTransactionId
+                    print("without membership Slot booking params: ",self.inputParamMembership?.getParamsReviewPackage() ?? [:])
+                    
+                    self.bookMembershipWithoutTrainer(inputParams: self.inputParamMembership?.getParamsReviewPackage())
+                }
+                self.navigationController?.present(vc, animated: true)
+            }
         }
         
     }
@@ -570,7 +605,7 @@ extension ReviewPackageViewController{
     //MARK: -----------------SLOT BOOKED API
     private func bookSlot(inputParam: [String:Any]){
         print("Book Slot inputParam: ", inputParam)
-        
+                
         TrainerVM.bookSlotApi(viewController: self, inputParams: inputParam, completion: {[weak self]  getResultData in
             guard let self = self, let getResultData = getResultData else { return  }
             
@@ -578,6 +613,7 @@ extension ReviewPackageViewController{
             if getResultData.status == true {
                 let vc:PaymentSuccessViewController = PaymentSuccessViewController.instantiate(appStoryboard: .booking)
                 vc.bookedDataModel = getResultData.data
+                vc.billingViewFlow = .defaultBilling
                 self.navigationController?.pushViewController(vc, animated: true)
             }
           

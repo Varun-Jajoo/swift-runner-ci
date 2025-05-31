@@ -24,8 +24,9 @@ class AlertHelper: NSObject {
         let alertController = UIAlertController(title: alertTitle,
                                                 message: alertMessage,
                                                 preferredStyle: .alert)
+        let getActions: [String] = (withCancel ? actions : [actions.first ?? "OK"])
         
-        for (index,item) in actions.enumerated() {
+        for (index,item) in getActions.enumerated() {
             
             let action = UIAlertAction(title: item,
                                        style: .default,
@@ -35,6 +36,7 @@ class AlertHelper: NSObject {
             
             alertController.addAction(action)
         }
+        
         DispatchQueue.main.async(execute: {
             self.presentViewController(alertController: alertController)
         })

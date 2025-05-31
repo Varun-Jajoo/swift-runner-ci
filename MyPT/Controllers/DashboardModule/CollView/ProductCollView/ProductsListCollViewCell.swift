@@ -50,7 +50,7 @@ class ProductsListCollViewCell: UICollectionViewCell {
         let attributedNickName = [
             "299",
             NSAttributedString(string: "AED",
-                               attributes: makeAttributes), "329AED".strikeThrough(with: AppFont.medium.size(16.0, familyName: familyClashDisplay), color: UIColor.txtDarkGray)
+                               attributes: makeAttributes), "329AED".strikeThrough(with: AppFont.medium.size(12.0, familyName: familyClashDisplay), color: UIColor.txtDarkGray)
         ] as [AttributedStringComponent]
         
         self.priceLbl.attributedText       =  NSAttributedString(from: attributedNickName, defaultAttributes: defaultAttributes)

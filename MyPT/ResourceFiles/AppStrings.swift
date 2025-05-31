@@ -46,7 +46,7 @@ struct AppStrings {
     public static let checkout_Str = "Checkout"
     public static let your_Workout_Gear_is_Waiting = "Your Workout Gear is Waiting!"
     public static let empty_MyOrders_Msg = "Once you place an order, it’ll appear here, ready to power up your fitness journey"
-    
+    public static let reserve_Slot = "Reserve Slot"
     
     
     //-------************Bottom Tabbar
@@ -114,7 +114,8 @@ struct AppStrings {
      public static let valid_age = "Please enter age."
      public static let logoutAlertMsg = "Are you sure, you want to logout?"
      public static let pswd_confirm_match = "Password and confirm password do not match."
-     public static let no_results_found = "No results found!"
+     public static let no_results_found = "No results found"
+     public static let no_slots_found = "No slots found"
      public static let no_Address_Added = "No Address Added"
      public static let no_Memebr_Added = "No Member Added"
      public static let memebr_Added = "Please add at least one Member!"
@@ -133,6 +134,9 @@ struct AppStrings {
      public static let select_Address = "Please select an address."
      public static let delete_AlertMsg = "Are you sure, you want to delete?"
      public static let delete_Str = "delete"
+     public static let cancel_AlertMsg = "Are you sure, you want to cancel?"
+     public static let location_permission = "Permission Needed"
+     public static let loaction_access = "Location access is required to proceed. Please enable location permissions in your device settings to ensure the app functions properly."
      
 }
 

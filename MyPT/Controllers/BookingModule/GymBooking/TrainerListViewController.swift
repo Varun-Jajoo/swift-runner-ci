@@ -67,10 +67,15 @@ class TrainerListViewController: CommonViewController {
     
     func setNavUI(){
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [AppStrings.trainers], setTintColor: .black, setTitleColor: UIColor.appWhite)
-        self.setRighMenu(rightImgs: [AppImages.grid, AppImages.menuNav,  AppImages.search_normal], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
+        self.setRighMenu(rightImgs: [AppImages.grid?.resized(to: CGSize(width: 25.0, height: 25.0)), AppImages.menuNav?.resized(to: CGSize(width: 25.0, height: 25.0)),  AppImages.search_normal], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
     
     override func rightBtnActn(sender: UIButton) {
+        let grid: UIImage? = (sender.tag == 0 ? AppImages.selected_grid : AppImages.grid)
+        let list: UIImage? = (sender.tag == 1 ? AppImages.menuNav : AppImages.unselectedList)
+        
+        self.setRighMenu(rightImgs: [grid?.resized(to: CGSize(width: 25.0, height: 25.0)), list?.resized(to: CGSize(width: 25.0, height: 25.0)), AppImages.search_normal], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
+        
         if sender.tag == 0 {
             print("Gridlayout")
             self.isGridShow = true
@@ -87,9 +92,28 @@ class TrainerListViewController: CommonViewController {
             
         }else{
             print("cliecked at search...")
-            let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
-            vc.searchStr = "Trainers"
-            self.navigationController?.pushViewController(vc, animated: true)
+            
+            /*
+            if let isFromHome = isFromHome, isFromHome {
+                let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
+                vc.searchStr = "Trainers"
+                vc.searchTrainerData = self.trainerData
+                vc.seacrhGymTrainerData = nil
+                self.navigationController?.pushViewController(vc, animated: true)
+            }else{
+                let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
+                vc.searchStr = "Trainers"
+                vc.searchTrainerData = nil
+                vc.seacrhGymTrainerData = self.gymTrainerData
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+            */
+            
+//            let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
+//            vc.searchStr = "Trainers"
+//            vc.searchTrainerData = self.trainerData
+//            vc.seacrhGymTrainerData = self.gymTrainerData
+//            self.navigationController?.pushViewController(vc, animated: true)
         }
     }
     
@@ -184,10 +208,10 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
             DispatchQueue.main.async {
                 if self.categorySelectedIndex?.row == indexPath.row {
                     cell.cellMBV.backgroundColor = UIColor.clear
-                    cell.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), cornerRadious: 12.0)
+                    cell.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), cornerRadious: cell.cellMBV.frame.size.height/2.0)//12.0
                 }else{
                     cell.cellMBV.backgroundColor = UIColor.clear
-                    cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+                    cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: cell.cellMBV.frame.size.height/2.0)
                 }
             }
             
@@ -208,16 +232,34 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
                 if let isFromHome = isFromHome, isFromHome {
                     
                     let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
-                    vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.trainerData?[indexPath.row].id ?? 0)", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+//                    vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.trainerData?[indexPath.row].id ?? 0)", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+                    
+                    vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "", type: self.inputType, long: self.inputLong, lat: self.inputLat)
                     vc.detailsFlowSetup = flowSlot //.bookTrainerHomeWorkout
+//                    vc.isSlotsAvail = self.trainerData?[indexPath.row].isfull
+                    
+                    if let isFull = self.trainerData?[indexPath.row].isfull, let slotAvail = self.trainerData?[indexPath.row].slot?.value, isFull && slotAvail.lowercased() == "no".lowercased() {
+                        vc.isSlotsAvail = true
+                    }else{
+                        vc.isSlotsAvail = false
+                    }
+                    
                     self.navigationController?.pushViewController(vc, animated: true)
                     
                 }else{
                     
                     let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
                     
-                    vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "0")", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+                    vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "0")", type: self.inputType, long: self.inputLong, lat: self.inputLat )
                     vc.detailsFlowSetup = flowSlot //.bookTrainerGymWorkout
+//                    vc.isSlotsAvail = self.gymTrainerData?[indexPath.row].isfull
+                    
+                    if let isFull = self.gymTrainerData?[indexPath.row].isfull, let slotAvail = self.gymTrainerData?[indexPath.row].slot, isFull && slotAvail.lowercased() == "no".lowercased() {
+                        vc.isSlotsAvail = true
+                    }else{
+                        vc.isSlotsAvail = false
+                    }
+                    
                     self.navigationController?.pushViewController(vc, animated: true)
                     
                 }
@@ -226,7 +268,15 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
                 //----------------
                 let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
                 vc.detailsFlowSetup = flowSlot //.gymMembership
-                vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "")", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+                vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "")", type: self.inputType, long: self.inputLong, lat: self.inputLat)
+//                vc.isSlotsAvail = self.gymTrainerData?[indexPath.row].isfull
+                
+                if let isFull = self.gymTrainerData?[indexPath.row].isfull, let slotAvail = self.gymTrainerData?[indexPath.row].slot, isFull && slotAvail.lowercased() == "no".lowercased() {
+                    vc.isSlotsAvail = true
+                }else{
+                    vc.isSlotsAvail = false
+                }
+                
                 self.navigationController?.pushViewController(vc, animated: true)
                 
             case .defaultFlow:
@@ -259,7 +309,10 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if collectionView == trainerGridCollView {
-            return CGSize(width: collectionView.frame.size.width*0.46, height: 340)
+            let cellWdth = collectionView.frame.size.width*0.46
+            return CGSize(width: cellWdth, height: cellWdth * 1.5)
+            
+//            return CGSize(width: collectionView.frame.size.width*0.46, height: 340)
         }else{
             return CGSize(width: collectionView.frame.size.width, height: collectionView.frame.size.height)
         }
@@ -280,6 +333,8 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell:TrainerListTableViewCell = trainerListTblView.dequeueReusableCell(withIdentifier: "TrainerListTableViewCell", for: indexPath) as! TrainerListTableViewCell
       
+//        cell.isUserInteractionEnabled = false
+        
         if let isFromHome = isFromHome, isFromHome {
             cell.trainerTagsData = self.trainerData?[indexPath.row].tags
             cell.setCellData(trainerData: self.trainerData?[indexPath.row])
@@ -304,12 +359,29 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
             //----------------From book trainer
             if let isFromHome = isFromHome, isFromHome {
                 let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
-                vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.trainerData?[indexPath.row].id ?? 0)", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+//                vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.trainerData?[indexPath.row].id ?? 0)", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+                vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "", type: self.inputType, long: self.inputLong, lat: self.inputLat)
+//                vc.isSlotsAvail = self.trainerData?[indexPath.row].isfull
+                
+                if let isFull = self.trainerData?[indexPath.row].isfull, let slotAvail = self.trainerData?[indexPath.row].slot?.value, isFull && slotAvail.lowercased() == "no".lowercased() {
+                    vc.isSlotsAvail = true
+                }else{
+                    vc.isSlotsAvail = false
+                }
+                
                 vc.detailsFlowSetup = flowSlot
                 self.navigationController?.pushViewController(vc, animated: true)
             }else{
                 let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
-                vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "")", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+                vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "")", type: self.inputType, long: self.inputLong, lat: self.inputLat)
+//                vc.isSlotsAvail = self.gymTrainerData?[indexPath.row].isfull
+                
+                if let isFull = self.gymTrainerData?[indexPath.row].isfull, let slotAvail = self.gymTrainerData?[indexPath.row].slot, isFull && slotAvail.lowercased() == "no".lowercased() {
+                    vc.isSlotsAvail = true
+                }else{
+                    vc.isSlotsAvail = false
+                }
+                
                 vc.detailsFlowSetup = flowSlot //.bookTrainerGymWorkout
                 self.navigationController?.pushViewController(vc, animated: true)
             }
@@ -317,9 +389,20 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
         case .gymMembership, .withTrainerMembership, .withoutTrainerMembership:
             //----------------
             let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+//            vc.isSlotsAvail = self.gymTrainerData?[indexPath.row].isfull
+            
+            if let isFull = self.gymTrainerData?[indexPath.row].isfull, let slotAvail = self.gymTrainerData?[indexPath.row].slot, isFull && slotAvail.lowercased() == "no".lowercased() {
+                vc.isSlotsAvail = true
+            }else{
+                vc.isSlotsAvail = false
+            }
             vc.detailsFlowSetup = flowSlot
-            vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "")", type: self.inputType, long: self.inputLat, lat: self.inputLong)
+            vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "")", type: self.inputType, long: self.inputLong, lat: self.inputLat )
             self.navigationController?.pushViewController(vc, animated: true)
+            
+            /*
+             if let isFull = trainerDetails?.isfull, let slotAvail = trainerDetails?.slot?.value, isFull && slotAvail.lowercased() == "no".lowercased() {
+             */
             
         case .defaultFlow:
             print("default....")
@@ -338,11 +421,25 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
             if let getIndx = getIndx {
                 let trainerDetails = self.trainerData?[getIndx]
                 
-                let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
-                vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
-                vc.studioIdStr = studioId
-                vc.inputType = self.inputType
-                self.navigationController?.pushViewController(vc, animated: true)
+                
+//                if let isFull = trainerDetails?.isfull, isFull {
+                
+                if let isFull = trainerDetails?.isfull, let slotAvail = trainerDetails?.slot?.value, isFull && slotAvail.lowercased() == "no".lowercased() {
+                    print("No slots available")
+                }
+                else{
+                    let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
+                    vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
+                    vc.studioIdStr = studioId
+                    vc.inputType = self.inputType
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
+                
+//                let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
+//                vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
+//                vc.studioIdStr = studioId
+//                vc.inputType = self.inputType
+//                self.navigationController?.pushViewController(vc, animated: true)
             }
         }else{
             
@@ -354,10 +451,23 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
                 let trainerDetails = self.gymTrainerData?[getIndx]
                 let currentMonth = Calendar.current.component(.month, from: Date())
                 
-                let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
-                vc.slotBookFlow = .bookTrainerGymWorkout
-                vc.params = AvailParmsModel(type: self.inputType, trainer_id: "\(trainerDetails?.id ?? 0)", studio_id: studioId, month: "\(currentMonth)", address_id: "")
-                self.navigationController?.pushViewController(vc, animated: true)
+//                if let isFull = trainerDetails?.isfull, isFull {
+                
+                if let isFull = trainerDetails?.isfull , let slotAvail = trainerDetails?.slot, isFull && slotAvail.lowercased() == "no".lowercased() {
+                    print("No slots available")
+                }
+                else{
+                    let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
+                    vc.slotBookFlow = .bookTrainerGymWorkout
+                    vc.params = AvailParmsModel(type: self.inputType, trainer_id: "\(trainerDetails?.id ?? 0)", studio_id: studioId, month: "\(currentMonth)", address_id: "")
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
+                
+                
+//                let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
+//                vc.slotBookFlow = .bookTrainerGymWorkout
+//                vc.params = AvailParmsModel(type: self.inputType, trainer_id: "\(trainerDetails?.id ?? 0)", studio_id: studioId, month: "\(currentMonth)", address_id: "")
+//                self.navigationController?.pushViewController(vc, animated: true)
             }
         }
     }

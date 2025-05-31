@@ -31,7 +31,7 @@ struct GymTrainerModel: Codable {
     var id: Int?
     var studioID, name, location, distance: String?
     var slot: String?
-    var isVerified: Bool?
+    var isVerified, isfull: Bool?
     var profile: String?
     var averageRating: Int?
     var noOfRating: String?
@@ -40,6 +40,7 @@ struct GymTrainerModel: Codable {
     enum CodingKeys: String, CodingKey {
         case id
         case studioID = "studio_id"
+        case isfull = "is_full"
         case name, location, distance, slot
         case isVerified = "is_verified"
         case profile, averageRating, noOfRating, tags

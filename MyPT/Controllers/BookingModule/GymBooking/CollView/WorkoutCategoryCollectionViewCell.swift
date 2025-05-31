@@ -33,12 +33,12 @@ class WorkoutCategoryCollectionViewCell: UICollectionViewCell {
     override var isSelected: Bool {
             didSet {
                 if self.isSelected {
-                    self.cellMBV.backgroundColor = UIColor.clear
-                    self.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), cornerRadious: 12.0)
+                    self.cellMBV.backgroundColor = UIColor(red: 28.0/255.0, green: 31.0/255.0, blue: 33.0/255.0, alpha: 1.0)
+                    self.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), cornerRadious: self.cellMBV.frame.size.height/2.0) //12.0
                 }
                 else {
                     self.cellMBV.backgroundColor = UIColor.clear
-                    self.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+                    self.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: self.cellMBV.frame.size.height/2.0)
                 }
             }
         }

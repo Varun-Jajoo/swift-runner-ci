@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -140,13 +140,13 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="89i-de-fkR">
-                                        <rect key="frame" x="0.0" y="78.333333333333343" width="578" height="31"/>
+                                        <rect key="frame" x="0.0" y="78.333333333333343" width="578" height="30.666666666666671"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eb2-AD-d17">
-                                                <rect key="frame" x="20" y="15" width="538" height="1"/>
+                                                <rect key="frame" x="20" y="15" width="538" height="0.66666666666666607"/>
                                                 <color key="backgroundColor" name="appDarkGray"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="height" constant="1" id="jT8-0c-cRq"/>
+                                                    <constraint firstAttribute="height" constant="0.80000000000000004" id="jT8-0c-cRq"/>
                                                 </constraints>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                 <nil key="textColor"/>
@@ -154,7 +154,7 @@
                                                 <size key="shadowOffset" width="0.0" height="0.0"/>
                                             </label>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6xJ-ve-Jdk">
-                                                <rect key="frame" x="20" y="15" width="538" height="1"/>
+                                                <rect key="frame" x="20" y="15" width="538" height="0.66666666666666607"/>
                                                 <color key="backgroundColor" name="txtDarkGray"/>
                                             </view>
                                         </subviews>
@@ -169,7 +169,7 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DUr-Pt-gtN">
-                                        <rect key="frame" x="0.0" y="109.33333333333336" width="578" height="52.666666666666671"/>
+                                        <rect key="frame" x="0.0" y="109.00000000000001" width="578" height="52.666666666666671"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="qhM-Kz-baO">
                                                 <rect key="frame" x="20" y="1" width="538" height="50.666666666666664"/>
@@ -184,7 +184,7 @@
                                                                 <nil key="highlightedColor"/>
                                                             </label>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Christene De Koning" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iOa-h1-Ne4">
-                                                                <rect key="frame" x="0.0" y="30.333333333333314" width="268" height="19.333333333333329"/>
+                                                                <rect key="frame" x="0.0" y="30.333333333333343" width="268" height="19.333333333333329"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                                                 <color key="textColor" name="appWhite"/>
                                                                 <nil key="highlightedColor"/>
@@ -210,7 +210,7 @@
                                                                 <nil key="highlightedColor"/>
                                                             </label>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="My PT Studio, Dubai Mall" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Tmk-WH-cOs">
-                                                                <rect key="frame" x="1" y="30.333333333333314" width="267" height="19.333333333333329"/>
+                                                                <rect key="frame" x="1" y="30.333333333333343" width="267" height="19.333333333333329"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                                                 <color key="textColor" name="appWhite"/>
                                                                 <nil key="highlightedColor"/>
@@ -237,10 +237,10 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mSl-KM-IyU">
-                                        <rect key="frame" x="0.0" y="162" width="578" height="53"/>
+                                        <rect key="frame" x="0.0" y="161.66666666666669" width="578" height="53.333333333333343"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" showsMenuAsPrimaryAction="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nKf-z5-0oJ">
-                                                <rect key="frame" x="0.0" y="22" width="578" height="31"/>
+                                                <rect key="frame" x="0.0" y="22" width="578" height="31.333333333333329"/>
                                                 <color key="backgroundColor" name="appRatingYellow"/>
                                                 <inset key="contentEdgeInsets" minX="0.0" minY="9" maxX="0.0" maxY="9"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="5" maxY="0.0"/>

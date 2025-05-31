@@ -19,6 +19,12 @@ class GymWorkoutViewController: CommonViewController {
     var categorySelectedIndex:IndexPath?
     var flowGymwork:calendarFlow = .defaultFlow
     
+    var gymCountNear: Int? {
+        didSet{
+            self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: ["\(gymCountNear ?? 0) Gyms Near You."], setTintColor: .black, setTitleColor: UIColor.appWhite)
+        }
+    }
+    
     //MARK: ----------------IBOUTLET
     @IBOutlet weak var searchMBV: UIView!
     @IBOutlet weak var searchLocBtn: UIButton!
@@ -48,8 +54,8 @@ class GymWorkoutViewController: CommonViewController {
         setNavUI()
     }
     
-    func setNavUI(){
-        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: ["12 Gyms Near You."], setTintColor: .black, setTitleColor: UIColor.appWhite)
+    private func setNavUI(){
+        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: ["\(gymCountNear ?? 0) Gyms Near You."], setTintColor: .black, setTitleColor: UIColor.appWhite)
         self.setRighMenu(rightImgs: [AppImages.search_normal], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
     
@@ -69,7 +75,25 @@ class GymWorkoutViewController: CommonViewController {
         */
     }
     
-    func setUpUI(){
+    @IBAction func searchLocBtnActn(_ sender: Any) {
+        print("search btn clicked..")
+        
+        GetLocationManager.shared.presentSearchPlace(from: self, completion: { [weak self] placeData in
+            guard let self = self else { return  }
+            self.searchTxtField.text = nil
+            self.searchTxtField.text = placeData.name
+            self.inputLong = "\(placeData.coordinate.longitude)"
+            self.inputLat = "\(placeData.coordinate.latitude)"
+            self.getTrainerApi(inputFilter: "0", inpuntTagId: 0)
+        })
+    }
+    
+    private func setUpUI(){
+        self.searchTxtField.text = appUserDefaults.getCurrentAddr() //GetLocationManager.shared.getCurrentAddr.0
+        
+        searchLocBtn.titleLabel?.font = AppFont.semibold.size(14.0, familyName: familyManrope)
+        searchTxtField.font = AppFont.semibold.size(14.0, familyName: familyManrope)
+        
         //-------------------Register collectionview
         categoryCollView.register(UINib(nibName: "WorkoutCategoryCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WorkoutCategoryCollectionViewCell")
        
@@ -105,10 +129,10 @@ extension GymWorkoutViewController: UICollectionViewDelegate, UICollectionViewDa
         DispatchQueue.main.async {
             if self.categorySelectedIndex?.row == indexPath.row {
                 cell.cellMBV.backgroundColor = UIColor.clear
-                cell.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), cornerRadious: 12.0)
+                cell.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), cornerRadious: cell.cellMBV.frame.size.height/2.0) //12.0
             }else{
                 cell.cellMBV.backgroundColor = UIColor.clear
-                cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+                cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: cell.cellMBV.frame.size.height/2.0)
             }
         }
         
@@ -250,6 +274,8 @@ extension GymWorkoutViewController{
             self.gymTagData?.insert(tagModelData, at: 0)
             self.categoryCollView.reloadData()
             self.trainerListTblView.reloadData()
+            
+            self.gymCountNear = self.studiosData?.count
             
         })
     }

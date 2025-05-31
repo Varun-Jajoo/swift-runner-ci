@@ -29,6 +29,8 @@ struct AvailabilityDataModel: Codable {
     var date: String?
     var slots: [SlotModel]?
     var price: String?
+    var main_price: FlexibleValue?
+    var tax_rate: FlexibleValue?
     var infomation: InfomationModel?
 }
 

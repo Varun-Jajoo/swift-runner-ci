@@ -13,11 +13,13 @@ class GymWorkoutTableViewCell: UITableViewCell {
     var trainerTagsData:[TrainerTagModel]? = [] {
         didSet{
             if let trainerTagsData = trainerTagsData {
+                guard trainerTagsData.count > 0 else { return }
                 restrictedRange = [0...trainerTagsData.count - 1]
                 self.categoryCollView.reloadData()
             }
         }
     }
+    
     // Indexes of restricted items
     var restrictedRange: [ClosedRange<Int>] = [0...4]  // These cells can't be selected
     
@@ -25,6 +27,7 @@ class GymWorkoutTableViewCell: UITableViewCell {
     @IBOutlet weak var cellMBV: UIView!
     @IBOutlet weak var gymMainImgV: UIImageView!
     @IBOutlet weak var topStudioImgView: UIImageView!
+    @IBOutlet weak var studioTypeLbl: UILabel!
     @IBOutlet weak var shadowImgView: UIImageView!
     @IBOutlet weak var gymNameLbl: UILabel!
     @IBOutlet weak var distanceBtn: UIButton!
@@ -40,6 +43,8 @@ class GymWorkoutTableViewCell: UITableViewCell {
         super.awakeFromNib()
         // Initialization code
        
+        self.setupFont()
+        
         categoryCollView.register(UINib(nibName: "ProductCategoryCollViewCell", bundle: nil), forCellWithReuseIdentifier: "ProductCategoryCollViewCell")
         
         self.distanceBtn.titleLabel?.numberOfLines = 3
@@ -47,6 +52,9 @@ class GymWorkoutTableViewCell: UITableViewCell {
         self.timeBtn.titleLabel?.numberOfLines = 3
         
         DispatchQueue.main.async {
+            self.shadowImgView.backgroundColor = UIColor.clear
+            self.shadowImgView.addGradientImgV(colors: UIColor.appMultiColor(.gradientColor2), locations: [0,1], startPoint: CGPoint(x: 0, y: 0.5), endPoint: CGPoint(x: 0, y: 1))
+            
             self.viewDetailsBtn.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appWhite, cornerRadious: 12.0)
             self.selectViewBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
         }
@@ -62,12 +70,16 @@ class GymWorkoutTableViewCell: UITableViewCell {
         guard let studioData = studioData else { return }
         
         DispatchQueue.main.async {
-            self.gymMainImgV.loadImage(urlString: studioData.profile, placeholder: AppImages.navLeft)
+            self.gymMainImgV.loadImage(urlString: studioData.profile, placeholder: UIImage())
             self.gymNameLbl.text = studioData.name
             self.distanceBtn.setTitle(studioData.distance, for: .normal)
             self.landMarkBtn.setTitle(studioData.location, for: .normal)
             self.timeBtn.setTitle(studioData.timing, for: .normal)
             self.ratingBtn.setTitle(studioData.noOfRating, for: .normal)
+            self.shadowImgView.image = nil
+            self.studioTypeLbl.text = studioData.studioTag
+            
+//            self.shadowImgView.image = UIImage(named: "ic_bckShadow")
         }
 //        self.gymMainImgV.loadImage(urlString: studioData.profile, placeholder: AppImages.navLeft)
 //        self.gymNameLbl.text = studioData.name
@@ -75,6 +87,25 @@ class GymWorkoutTableViewCell: UITableViewCell {
 //        self.landMarkBtn.setTitle(studioData.location, for: .normal)
 //        self.timeBtn.setTitle(studioData.timing, for: .normal)
 //        self.ratingBtn.setTitle(studioData.noOfRating, for: .normal)
+    }
+    
+    
+    private func setupFont(){
+        self.studioTypeLbl.font = AppFont.bold.size(12.0, familyName: familyManrope)
+        self.gymNameLbl.font = AppFont.semibold.size(20.0, familyName: familyClashDisplay)
+       [
+        distanceBtn,
+        landMarkBtn,
+        timeBtn,
+        ratingBtn
+       ].forEach({[weak self] in
+           guard self != nil else {
+               return
+           }
+           $0?.titleLabel?.font = AppFont.semibold.size(9.0, familyName: familyManrope)
+       })
+        viewDetailsBtn.titleLabel?.font = AppFont.bold.size(16, familyName: familyManrope)
+        selectViewBtn.titleLabel?.font = AppFont.bold.size(16, familyName: familyManrope)
     }
     
 }
@@ -95,6 +126,8 @@ extension GymWorkoutTableViewCell: UICollectionViewDataSource, UICollectionViewD
         let cell:ProductCategoryCollViewCell = categoryCollView.dequeueReusableCell(withReuseIdentifier: "ProductCategoryCollViewCell", for: indexPath) as! ProductCategoryCollViewCell
         cell.cellMBV.backgroundColor = UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1)
      
+        cell.titleLblTopConstrnt.constant = 7
+        
         if let lastCell = collectionView.isLastCell(), let totalCount = trainerTagsData?.count,( lastCell == indexPath.row && totalCount > 3) {
             cell.titleLbl.text = "+3"
         }else{

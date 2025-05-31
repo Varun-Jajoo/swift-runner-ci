@@ -7,11 +7,12 @@
 
 import UIKit
 import GoogleMaps
-
+import GooglePlaces
 
 enum LocationFlow {
     case addAddress
     case editAddress
+    case homePage
     case defaultLoc
 }
 
@@ -85,6 +86,8 @@ class LocationsViewController: CommonViewController {
             }else{
                 print("New add address...")
             }
+        case .homePage:
+            print("Home form")
         case .defaultLoc:
             print("none.....")
         }
@@ -94,7 +97,7 @@ class LocationsViewController: CommonViewController {
     func setNavUI(){
      
         switch flowLocation {
-        case .addAddress, .editAddress:
+        case .addAddress, .editAddress, .homePage:
             
             self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
             //        self.setNavigationTitle(title: AppStrings.select_plan, color: UIColor.black, font: AppFont.Bold.size(22.0))
@@ -112,15 +115,18 @@ class LocationsViewController: CommonViewController {
     override func rightBtnActn(sender: UIButton) {
        
         switch flowLocation {
-        case .addAddress, .editAddress:
+        case .addAddress, .editAddress, .homePage:
             print("address....")
         case .defaultLoc:
-            appSceneDelegate?.goToGuestDashboard()
+            appUserDefaults.setRegistrationSkip(value: true)
+            appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
+            
+//            appSceneDelegate?.goToGuestDashboard()
         }
     }
     
     //MARK: ---------- SET UI
-    func setupUI(){
+    private func setupUI(){
         DispatchQueue.main.async {
             self.locSearch.setCornerRadius(borderWidth: 1, borderColor: .appBorder, cornerRadious: 12.0)
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
@@ -128,7 +134,7 @@ class LocationsViewController: CommonViewController {
     }
     
     //------------------************Font
-    func setUpFont(){
+    private func setUpFont(){
         self.topTitleLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
         self.mainAddrLbl.font = AppFont.semibold.size(18.0, familyName: familyManrope)
         self.subAddrLbl.font = AppFont.semibold.size(12.0, familyName: familyManrope)
@@ -144,15 +150,17 @@ class LocationsViewController: CommonViewController {
         self.locSearch.searchTextField.textColor = UIColor.appWhite
         self.locSearch.isTranslucent = false
         self.locSearch.placeholder = "Search for area, street name..."
-        self.locSearch.setPlaceholderColor(UIColor.txtDarkGray)
-        self.locSearch.searchTextField.font = AppFont.semibold.size(18.0, familyName: familyManrope)
+        self.locSearch.searchTextField.font = AppFont.semibold.size(14.0, familyName: familyManrope)
         self.locSearch.showsCancelButton = false
         self.locSearch.searchTextField.setRightPaddingPoint(40.0)
         
         if let textField = self.locSearch.value(forKey: "searchField") as? UITextField {
             textField.clearButtonMode = .never
+            textField.attributedPlaceholder = NSAttributedString(
+                string: "Search for area, street name...",
+                attributes: [NSAttributedString.Key.foregroundColor: UIColor.txtDarkGray]
+            )
         }
-    
     }
     
     //MARK: ----------------MAP VIEW
@@ -195,16 +203,17 @@ class LocationsViewController: CommonViewController {
             self.mapView?.removeFromSuperview()
             self.mapView = mapView
             self.mapView.delegate = self
-            self.mapView.isMyLocationEnabled = false
+//            self.mapView.isMyLocationEnabled = false
             self.mapView.isUserInteractionEnabled = true
 //            self.mapView.mapType = .terrain // Other types: .normal, .hybrid, .satellite
             self.mapView.accessibilityElementsHidden = false
-            self.mapView.gestureRecognizers=nil
+            self.mapView.gestureRecognizers = nil
             self.mapView.padding=UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-            self.mapView.settings.myLocationButton = true
+            self.mapView.settings.myLocationButton = false
             self.mapView.settings.compassButton = true
-            self.mapView.isMyLocationEnabled = true
+//            self.mapView.isMyLocationEnabled = true
             self.mapView.isIndoorEnabled = true
+            self.mapView.isMyLocationEnabled = false
             self.currentLocMap.addSubview(self.mapView)
                         
             do {
@@ -269,6 +278,10 @@ class LocationsViewController: CommonViewController {
                 AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.enter_Location)
             }
             
+        case .homePage:
+            print("From Home Page.")
+            self.navigationController?.popViewController(animated: true)
+            
         case .defaultLoc:
             
             if let mainAddrLbl = self.mainAddrLbl.text , !mainAddrLbl.isEmpty, let subAddrLbl = self.subAddrLbl.text, !subAddrLbl.isEmpty, let lat = showmapCamera?.latitude as? Double, let long = showmapCamera?.longitude as? Double {
@@ -280,6 +293,8 @@ class LocationsViewController: CommonViewController {
                     guard let self = self, let getResultData = getResultData else { return  }
                     
                     if getResultData.status == true {
+                        appUserDefaults.setRegistrationSkip(value: false)
+                        
                         if let detailsData = getResultData.data {
                             appUserDefaults.saveUserToUserDefaults(detailsData)
                         }
@@ -323,8 +338,20 @@ class LocationsViewController: CommonViewController {
     @IBAction func rightSearchBtnActn(_ sender: Any) {
         print("rightSearchBtnActn clicked")
         self.locSearch.text = nil
+        self.startUpdating()
     }
     
+    func startUpdating() {
+        self.locationManager = CLLocationManager()
+        if let locationManager = self.locationManager {
+            locationManager.delegate = self
+            locationManager.requestWhenInUseAuthorization()
+            locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+            locationManager.requestAlwaysAuthorization()
+            locationManager.distanceFilter = 50
+            locationManager.startUpdatingLocation()
+        }
+    }
     
     //MARK: -------------- ENABLE CONTINUE
     func enableContinueBtn(isSelected:Bool = false){
@@ -338,6 +365,14 @@ class LocationsViewController: CommonViewController {
             self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
         }
     }
+    
+    
+    private func searchPlace(){
+        let autocompleteController = GMSAutocompleteViewController()
+             autocompleteController.delegate = self
+             present(autocompleteController, animated: true, completion: nil)
+    }
+    
 }
 
 //MARK: ----------------Extension for searchbar
@@ -347,32 +382,40 @@ extension LocationsViewController:UISearchBarDelegate{
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
         self.locSearch.showsCancelButton = false
         self.locSearch.searchTextField.setRightPaddingPoint(40.0)
+        self.searchPlace()
        }
 
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
            searchBar.text = nil
            searchBar.showsCancelButton = false
 
+          dismiss(animated: true, completion: nil)
            // Remove focus from the search bar.
            searchBar.endEditing(true)
 
            // Perform any necessary work.  E.g., repopulating a table view
            // if the search bar performs filtering.
        }
+    
        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
 
            // Perform search action with the search text
 
            print("Search text: \(searchBar.text ?? "")")
-           
+           dismiss(animated: true, completion: nil)
            self.locSearch.endEditing(true)
-
        }
 
 }
 
 //MARK: ---------------- Extension for google map delegate
 extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate {
+    
+    
+    private func startUpdatingLocation() {
+        locationManager?.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager?.startUpdatingLocation()
+    }
     
     func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
         // Handle marker tap events
@@ -393,6 +436,9 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
     
     func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
         //        reverseGeocodeCoordinate(position.target)
+        let centerCoordinate = mapView.projection.coordinate(for: self.mapView.center)
+        self.showmapCamera = centerCoordinate
+        self.getCurrentAddr(location: CLLocation(latitude: centerCoordinate.latitude, longitude: centerCoordinate.longitude))
     }
     
     func mapView(_ mapView: GMSMapView, willMove gesture: Bool) {
@@ -402,9 +448,20 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
     // MARK: - CLLocationManagerDelegate
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         
-        guard status == .authorizedWhenInUse else {
-            return
-        }
+        switch status {
+         case .authorizedAlways, .authorizedWhenInUse:
+             startUpdatingLocation()
+         case .denied, .restricted:
+            AlertHelper.shared.showCustomeAlert(title: AppAlertStrings.location_permission, message: AppAlertStrings.loaction_access, actions: ["Open Settings"], withCancel: false, completion: {[weak self] tag in
+                guard self != nil else { return }
+                if let appSettings = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(appSettings)
+                }
+            })
+            
+         default:
+             break
+         }
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -468,6 +525,8 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
                                 var subAddrStr = ""
                                 
                                 self.mainAddrLbl.text = lines.first
+                                appUserDefaults.setLatLong(value: "\(getLcation.coordinate.latitude),\(getLcation.coordinate.longitude)")
+                                appUserDefaults.setCurrentAddr(value: lines.first)
                                 
                                 if let subLocality = places.first?.subLocality  {
                                     subAddrStr += subLocality + ", "
@@ -587,6 +646,32 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
         }
         */
 }
+
+extension LocationsViewController: GMSAutocompleteViewControllerDelegate{
+    func viewController(_ viewController: GMSAutocompleteViewController, didAutocompleteWith place: GMSPlace) {
+        print("Place selected: \(place.name ?? "No name")")
+                print("Address: \(place.formattedAddress ?? "")")
+                print("Coordinates: \(place.coordinate.latitude), \(place.coordinate.longitude)")
+   
+        self.locSearch.text = place.name
+//        self.locationManager?.stopUpdatingLocation()
+        self.showmapCamera = place.coordinate
+        self.getCurrentAddr(location: CLLocation(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude))
+       
+        dismiss(animated: true, completion: nil)
+    }
+    
+    func viewController(_ viewController: GMSAutocompleteViewController, didFailAutocompleteWithError error: any Error) {
+        dismiss(animated: true, completion: nil)
+        print("Error: ", error.localizedDescription)
+    }
+    
+    func wasCancelled(_ viewController: GMSAutocompleteViewController) {
+        dismiss(animated: true, completion: nil)
+    }
+}
+
+
 
 struct MarkerModel {
     let latitude: Double

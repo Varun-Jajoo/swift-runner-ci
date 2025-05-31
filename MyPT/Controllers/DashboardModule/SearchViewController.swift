@@ -11,6 +11,10 @@ class SearchViewController: UIViewController {
 
     //MARK: ---------------VARIABLE
     var searchStr: String?
+    var searchTrainerData:[TrainerModel]? = []
+    var seacrhGymTrainerData:[GymTrainerModel]? = []
+    private var localTrainerData:[TrainerModel]? = []
+    private var loaclhGymTrainerData:[GymTrainerModel]? = []
     
     //MARK: ----------------IBOUTLET
     @IBOutlet weak var topSearchMBV: UIView!
@@ -80,11 +84,16 @@ class SearchViewController: UIViewController {
 //MARK: ---------------UITABLEVIEW DATASOURCE/ DELEGATE
 extension SearchViewController: UITableViewDataSource, UITableViewDelegate{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+       
+        return tableView.numberOfRows(count: self.searchTrainerData?.count, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult, messageImageHeight: 200.0, fromTop: 50)
+        
+//        return 10
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell: SearchTableViewCell = recordTblView.dequeueReusableCell(withIdentifier: "SearchTableViewCell", for: indexPath) as! SearchTableViewCell
+        cell.searchTitleLbl.text = self.searchTrainerData?[indexPath.row].name
+        cell.subTitleLbl.text = self.searchTrainerData?[indexPath.row].description
         
         return cell
     }

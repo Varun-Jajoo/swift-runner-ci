@@ -52,12 +52,17 @@ class GridTrainerCollectionViewCell: UICollectionViewCell {
     
     func setupCellData(trainerData: TrainerModel?){
         guard let trainerData = trainerData else { return }
+        self.trainerBadgeImgView.isHidden = true
         
-        self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: AppImages.navLeft)
+        self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: UIImage())
         self.ratingBtn.setTitle(trainerData.noOfRating, for: .normal)
         self.gymNameLbl.text = trainerData.name
         self.distanceBtn.setTitle(trainerData.distance, for: .normal)
         self.landMarkBtn.setTitle(trainerData.location, for: .normal)
+        
+        if let isVerify = trainerData.isVerified, isVerify {
+            self.trainerBadgeImgView.isHidden = false
+        }
     }
     
     //MARK: -------------SET CELL INPUTDATA
@@ -66,11 +71,15 @@ class GridTrainerCollectionViewCell: UICollectionViewCell {
         
         DispatchQueue.main.async {
             
-            self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: AppImages.navLeft)
+            self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: UIImage())
             self.ratingBtn.setTitle(trainerData.noOfRating, for: .normal)
             self.gymNameLbl.text = trainerData.name
             self.distanceBtn.setTitle(trainerData.distance, for: .normal)
             self.landMarkBtn.setTitle(trainerData.location, for: .normal)
+            
+            if let isVerify = trainerData.isVerified, isVerify {
+                self.trainerBadgeImgView.isHidden = false
+            }
             
 //            self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: AppImages.navLeft)
 //            self.gymNameLbl.text = trainerData.name

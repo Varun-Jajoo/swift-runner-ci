@@ -9,6 +9,9 @@ import UIKit
 
 class SelectMonthViewController: UIViewController {
 
+    var filterMonth: ((_ monthData: String?) -> Void)?
+    
+    //MARK: ---------------- IBOUTLET
     @IBOutlet weak var bottomMBV: UIView!
     @IBOutlet weak var barBtn: UIButton!
     @IBOutlet weak var monthTitleLbl: UILabel!
@@ -21,13 +24,15 @@ class SelectMonthViewController: UIViewController {
 //        setUpUI()
         setupFont()
         
+        self.view.backgroundColor = UIColor.mainBg.withAlphaComponent(0.7)
+        selectDatePicker.date = Date()
+        
         if #available(iOS 17.4, *) {
             selectDatePicker.datePickerMode = .yearAndMonth
         } else {
             // Fallback on earlier versions
             selectDatePicker.datePickerMode = .countDownTimer
         }
-        
     }
     
     override func viewDidLayoutSubviews() {
@@ -61,16 +66,30 @@ class SelectMonthViewController: UIViewController {
         switch sender.tag {
         case btnTag.barPop.rawValue:
             print("bar btn clicked.")
+            self.dismiss(animated: true)
         case btnTag.clearPop.rawValue:
             print("clearPop btn clicked.")
+            self.filterMonth?(nil)
+            self.dismiss(animated: true)
         case btnTag.okPop.rawValue:
+            let dateStr = DateFormatterHelper.shared.dateString(from: selectDatePicker.date, format: "yyyy-MM")
+            self.filterMonth?(dateStr)
             self.dismiss(animated: true)
         default:
             print("none....")
            
         }
-        
     }
     
-
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first {
+            let location = touch.location(in: view)
+            if !self.bottomMBV.frame.contains(location) {
+                self.dismiss(animated: true, completion: nil)
+            }else{
+                print("tap at popup view.")
+            }
+        }
+    }
+    
 }

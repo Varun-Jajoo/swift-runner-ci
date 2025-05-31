@@ -44,9 +44,15 @@
 		<string>Manrope-Medium.otf</string>
 		<string>Manrope-Regular.otf</string>
 		<string>Manrope-SemiBold.otf</string>
+		<string>overpass-mono-light.otf</string>
+		<string>overpass-mono-semibold.otf</string>
+		<string>overpass-mono-regular.otf</string>
+		<string>overpass-mono-bold.otf</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
+		<key>CFBundleIconName</key>
+		<string>AppIcon</string>
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 		<key>UISceneConfigurations</key>
@@ -63,8 +69,27 @@
 				</dict>
 			</array>
 		</dict>
-        <key>CFBundleIconName</key>
-        <string>AppIcon</string>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Your app requires camera access for pose detection.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Your app requires camera access for pose detection.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>For secure verification on the checkout step</string>
+    
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSExceptionDomains</key>
+        <dict>
+            <key>secure.ccavenue.ae</key>
+            <dict>
+                <key>NSIncludesSubdomains</key>
+                <true/>
+                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                <true/>
+            </dict>
+        </dict>
+    </dict>
+
 </dict>
 </plist>

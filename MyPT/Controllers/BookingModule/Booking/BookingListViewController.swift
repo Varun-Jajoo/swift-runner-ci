@@ -10,8 +10,36 @@ import UIKit
 class BookingListViewController: CommonViewController {
 
     //MARK: ---------------- VARIABLE
+    var isFromTab: Bool? = false
+    
     var selectedIndex:NSIndexPath = NSIndexPath(row: 0, section: 0)
-    var bookingData:[Any]?
+    var bookingData:[BookingDataModel]? = []
+    var selectedTags: Int? = 2 {
+        didSet{
+            if let selectedTags = selectedTags {
+                //-----Api called
+                self.bookingListApi(typeStr: "\(selectedTags)", dateStr: nil, sessionType: nil, location: nil)
+            }
+        }
+    }
+    
+//    var filterMont: String? {
+//        didSet{
+//            if let selectedTags = selectedTags {
+//                self.bookingListApi(typeStr: "\(selectedTags)", dateStr: filterMont, sessionType: nil, location: nil)
+//            }
+//        }
+//    }
+    
+    var filterData: (month:String?, sessionTypeStr: String?, locationStr: String?)  {
+        didSet{
+            if let selectedTags = selectedTags {
+                self.bookingListApi(typeStr: "\(selectedTags)", dateStr: filterData.month, sessionType: filterData.sessionTypeStr, location: filterData.locationStr)
+            }
+        }
+    }
+    
+    var loadShowSections: [FilterSection]? = []
     
     //MARK: ---------------- IBOUTLET
     @IBOutlet weak var bookingCategorySegm: UISegmentedControl!
@@ -22,15 +50,8 @@ class BookingListViewController: CommonViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.bookingCategorySegm.setTitle(AppStrings.upcoming, forSegmentAt: 0)
-        self.bookingCategorySegm.setTitle(AppStrings.cancelled, forSegmentAt: 1)
-        self.bookingCategorySegm.setTitle(AppStrings.completed, forSegmentAt: 2)
-        self.bookingCategorySegm.selectedSegmentIndex = 0
-        
-        self.bookingData = [1,1,1,1,1]
-
-//        self.setUpUI()
         self.setUpFont()
+        self.selectedTags = 2
     }
     
     override func viewDidLayoutSubviews() {
@@ -47,16 +68,23 @@ class BookingListViewController: CommonViewController {
         self.setNavigationColor(setColor: .clear)
         self.statusBarColor(setColor: .clear)
         setNavUI()
+        
+        let tags = self.selectedTags
+        self.selectedTags = tags
+         
     }
     
-    func setNavUI(){
-        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [AppStrings.booking_Listings], setTintColor: .black, setTitleColor: UIColor.appWhite)
+    private func setNavUI(){
+        var navBckBtn: UIImage? = nil
+        if let isFromTab = isFromTab {
+            navBckBtn = (isFromTab ? nil : AppImages.backarrow)
+        }
+       
+        self.setLeftMenu(leftImgs: [navBckBtn], setTitle: [AppStrings.booking_Listings], setTintColor: .black, setTitleColor: UIColor.appWhite)
 //        self.setRighMenu(rightImgs: [AppImages.shareGymWorkout], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
     
-    func setUpUI(){
-        
-        bookingListTbl.register(UINib(nibName: "BookingListTableViewCell", bundle: nil), forCellReuseIdentifier: "BookingListTableViewCell")
+    private func setUpUI(){
         
         DispatchQueue.main.async {
             self.bookingCategorySegm.backgroundColor = UIColor.mainBg.withAlphaComponent(0.6)
@@ -68,32 +96,64 @@ class BookingListViewController: CommonViewController {
         }
     }
     
-    func setUpFont(){
+    private func setUpFont(){
+        //----------------------Tableview Register
+        self.bookingListTbl.register(UINib(nibName: "BookingListTableViewCell", bundle: nil), forCellReuseIdentifier: "BookingListTableViewCell")
+        
+        //------------------------Setup segment
+        self.bookingCategorySegm.setTitle(AppStrings.upcoming, forSegmentAt: 0) //for upcoming
+        self.bookingCategorySegm.setTitle(AppStrings.cancelled, forSegmentAt: 1) //for cancelled
+        self.bookingCategorySegm.setTitle(AppStrings.completed, forSegmentAt: 2) //for completed
+        self.bookingCategorySegm.selectedSegmentIndex = 0
+        
+        //----------------------*********** Font
         self.bookingCategorySegm.setTitleFont(AppFont.semibold.size(14, familyName: familyManrope))
         self.monthsBtn.titleLabel?.font = AppFont.semibold.size(12, familyName: familyManrope)
         self.filterBtn.titleLabel?.font = AppFont.semibold.size(12, familyName: familyManrope)
     }
     
+    //type: 0, 1 => completed, 2 => upcoming, 0 => cancel
+    let segmentTags = [0: 2, 1: 0, 2: 1]
+    
     @IBAction func bookingCategorySegActn(_ sender: UISegmentedControl) {
-        print("segment selected tag = ", sender.selectedSegmentIndex)
+//        print("segment selected tag = ", sender.selectedSegmentIndex)
         selectedIndex = NSIndexPath(row: sender.selectedSegmentIndex, section: 0)
-        self.bookingListTbl.reloadData()
         
+        if let tag = segmentTags[sender.selectedSegmentIndex] {
+               print("Selected tag: \(tag)")
+            self.loadShowSections?.removeAll()
+            self.selectedTags = tag
+           }
+        
+        
+//        self.bookingListTbl.reloadData()
+        
+        /*
         if sender.selectedSegmentIndex == 0 {
-            self.bookingData?.append(1)
-            self.bookingData?.append(1)
-            self.bookingData?.append(1)
+//            self.bookingData?.append(1)
+//            self.bookingData?.append(1)
+//            self.bookingData?.append(1)
             self.bookingListTbl.reloadData()
         }else{
 //            self.bookingData?.removeAll()
             self.bookingListTbl.reloadData()
         }
+        */
     }
     
     @IBAction func monthsBtnAcn(_ sender: Any) {
         print("month btn clicked...")
         let vc:SelectMonthViewController = SelectMonthViewController.instantiate(appStoryboard: .booking)
         vc.modalTransitionStyle = .coverVertical
+        vc.filterMonth = {[weak self] getMonth in
+            guard let self = self else { return  }
+            print("getMonth", getMonth as Any)
+            self.filterData.month = getMonth
+            
+//            if let selectedTags = selectedTags {
+//                self.bookingListApi(typeStr: "\(selectedTags)", dateStr: getMonth, sessionType: nil, location: nil)
+//            }
+        }
         self.navigationController?.present(vc, animated: true)
     }
     
@@ -102,6 +162,16 @@ class BookingListViewController: CommonViewController {
         let vc:FilterViewController = FilterViewController.instantiate(appStoryboard: .booking)
         vc.modalTransitionStyle = .coverVertical
         vc.navFilterCtrl = self.navigationController
+        vc.flowUI = .filterBooking
+        vc.filterData = {[weak self] (sessionType, loc, localData) in
+            guard let self = self else { return }
+            print("getData: ", (sessionType, loc, localData))
+            self.loadShowSections?.removeAll()
+            self.loadShowSections?.append(contentsOf: localData ?? [])
+            self.filterData.sessionTypeStr = sessionType
+            self.filterData.locationStr = loc
+        }
+        vc.loadSections = self.loadShowSections
         self.navigationController?.present(vc, animated: true)
     }
     
@@ -113,10 +183,20 @@ extension BookingListViewController: UITableViewDataSource, UITableViewDelegate{
    
     //MARK: ------------NO DATA FOUND CONFIGURATION
     func noSessionsConfig(inputTable:UITableView?, getCount:Int?) -> Int{
-        let msgImage = UIImage(named: "ic_noSessions")
-       
-        guard let countReturn = inputTable?.numberOfRows(count: self.bookingData?.count, title: AppStrings.no_sessions_found, message: AppStrings.you_have_not_booked_session_yet, messageImage: msgImage, messageImageHeight: (msgImage?.size.height ?? 10) * 0.7, reloadSetTitle: AppStrings.book_session.uppercased(), target: self, action: #selector(reloadData(sender: )), fromTop: 12.0) else { return 0}
-      
+        let imgHeight = (self.bookingListTbl?.frame.size.height ?? 50) * 0.3
+        let msgImage = UIImage(named: "ic_noSessions")?.resized(to: CGSize(width: imgHeight, height: imgHeight))
+        
+        guard let countReturn = inputTable?.numberOfRows(count: self.bookingData?.count, title: AppStrings.no_sessions_found, message: AppStrings.you_have_not_booked_session_yet, messageImage: msgImage, messageImageHeight: imgHeight, reloadSetTitle: AppStrings.book_session.uppercased(), target: self, action: #selector(reloadData(sender: )), fromTop: 12.0) else { return 0}
+        
+        /*
+        if selectedTags == 0{
+            let msgImage = UIImage(named: "ic_search_NoResult")?.resized(to: CGSize(width: imgHeight * 1.5, height: imgHeight * 1.5))
+            guard let countReturn = inputTable?.numberOfRows(count: self.bookingData?.count, title: AppAlertStrings.no_results_found, message: "", messageImage: msgImage, messageImageHeight: msgImage?.size.height, fromCenter: -45.0) else { return 0}
+           
+            return countReturn
+        }
+        */
+        
         return  countReturn
     }
     
@@ -128,6 +208,11 @@ extension BookingListViewController: UITableViewDataSource, UITableViewDelegate{
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell:BookingListTableViewCell = bookingListTbl.dequeueReusableCell(withIdentifier: "BookingListTableViewCell", for: indexPath) as! BookingListTableViewCell
         cell.rescheduledBtn.isHidden = true
+        cell.addLeftBorder(borderColor: UIColor.clear)
+        cell.setUpCell(inputData: self.bookingData?[indexPath.row], type: self.selectedTags)
+        
+        /*
+         cell.rescheduledBtn.isHidden = true
         if selectedIndex.row == 0 {
 //            cell.addLeftBorder(borderColor: UIColor.appYellow)
             if indexPath.row == 0 {
@@ -143,47 +228,93 @@ extension BookingListViewController: UITableViewDataSource, UITableViewDelegate{
             cell.addLeftBorder(borderColor: UIColor.appGreen)
         }
         
+        */
+        
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
-//        self.navigationController?.pushViewController(vc, animated: true)
         
-        if bookingCategorySegm.selectedSegmentIndex == 0 {
-            let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
-            
-            if selectedIndex.row == 0 {
+        let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
+        
+        if selectedTags == 2{
+            if let isReschedule = self.bookingData?[indexPath.row].isReschedule, isReschedule, let isTrainerReschedule = self.bookingData?[indexPath.row].isTrainer {
+                vc.detailsFlow = (isTrainerReschedule ? .reschedule : .rescheduleConsumer)
                 
-                if indexPath.row == 0 {
-                    vc.detailsFlow = .reschedule
-                }else{
-                    vc.detailsFlow = .upcoming
-                }
-                
-                self.navigationController?.pushViewController(vc, animated: true)
+            }else{
+                vc.detailsFlow = .upcoming
             }
-        }
-        else if bookingCategorySegm.selectedSegmentIndex == 1 {
-            let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
+        } else if selectedTags == 0{
             vc.detailsFlow = .cancelled
-            self.navigationController?.pushViewController(vc, animated: true)
-        }
-        else if bookingCategorySegm.selectedSegmentIndex == 2 {
-            let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
+        } else if selectedTags == 1{
             vc.detailsFlow = .completed
-            self.navigationController?.pushViewController(vc, animated: true)
-            
         }
+        vc.bookingIdStr = "\(self.bookingData?[indexPath.row].id ?? 0)"
+        self.navigationController?.pushViewController(vc, animated: true)
+        
+        
+        //        let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
+        //        self.navigationController?.pushViewController(vc, animated: true)
+        
+        
+        /*
+         if bookingCategorySegm.selectedSegmentIndex == 0 {
+         let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
+         
+         if selectedIndex.row == 0 {
+         
+         if indexPath.row == 0 {
+         vc.detailsFlow = .reschedule
+         }else{
+         vc.detailsFlow = .upcoming
+         }
+         
+         self.navigationController?.pushViewController(vc, animated: true)
+         }
+         }
+         else if bookingCategorySegm.selectedSegmentIndex == 1 {
+         let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
+         vc.detailsFlow = .cancelled
+         self.navigationController?.pushViewController(vc, animated: true)
+         }
+         else if bookingCategorySegm.selectedSegmentIndex == 2 {
+         let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
+         vc.detailsFlow = .completed
+         self.navigationController?.pushViewController(vc, animated: true)
+         
+         }
+         */
         
     }
     
+    //MARK: ---------------DATA RELOAD
     @objc func reloadData(sender: UIButton){
-        self.bookingData?.append(1)
-        self.bookingData?.append(1)
-        self.bookingData?.append(1)
-        self.bookingListTbl.reloadData()
+//        let getTags = self.selectedTags
+//        self.selectedTags = getTags
+        
+        let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
+        self.navigationController?.pushViewController(vc, animated: false)
     }
     
+}
+
+//MARK: ----------------EXTENSION FOR API
+extension BookingListViewController{
+    
+    private func bookingListApi(typeStr: String, dateStr: String?, sessionType: String?, location: String?){
+//        type: 0, 1 => completed, 2 => upcoming, 0 => cancel
+        
+        BookingVM.getBookingApi(inputType: typeStr, inputDate: dateStr, inputSessionType: sessionType, inputLocation: location, completion: {[weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return }
+           
+            print("getResultData", getResultData)
+            self.bookingData?.removeAll()
+            
+            if getResultData.status == true {
+                self.bookingData?.append(contentsOf: getResultData.data ?? [])
+            }
+            self.bookingListTbl.reloadData()
+        })
+    }
 }
 

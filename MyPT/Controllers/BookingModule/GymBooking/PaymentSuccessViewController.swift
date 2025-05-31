@@ -9,11 +9,20 @@ import UIKit
 import AVKit
 import AVFoundation
 
+enum BillingFlow {
+    case upcomingClass
+    case defaultBilling
+}
+
 class PaymentSuccessViewController: UIViewController {
     
     //MARK: ------------- VARIABLE
+    var billingViewFlow: BillingFlow = .defaultBilling
+    
     var bookedDataModel:BookedSlotData? = nil
     var bookedMembership: BookMembershipDataModel? = nil
+    var bookClassModel: BookingClassDataModel? = nil
+    
 
     var player: AVAudioPlayer?
     
@@ -106,86 +115,159 @@ class PaymentSuccessViewController: UIViewController {
             shapeView.cornerSide = [.bottomLeft, .bottomRight]
             
             //--------------------*********** Data Setup
-            
-            if let getBookedDataModel = self.bookedDataModel{
-                shapeView.packageTitleLabel.text = "Package"
-                shapeView.packageLabel.text = getBookedDataModel.package ?? ""
-                shapeView.startDate = (title: "Start Date", value: getBookedDataModel.date?.startDate ?? "")
-                shapeView.validUptoDate = (title: "Valid Upto", value: getBookedDataModel.date?.validTill ?? "")
-                shapeView.timingTxt = (title: "Timing", value: getBookedDataModel.timing ?? "")
-                shapeView.locationTxt = (title: "Location", value: getBookedDataModel.location ?? "")
+            switch self.billingViewFlow {
+            case .upcomingClass:
+                print("Upcoming classes booking..")
+                shapeView.packageTitleLabel.isHidden = true
+                shapeView.packageLabel.isHidden = true
+                shapeView.topTitleView.isHidden = true
+                shapeView.startDate = (title: "Date", value: self.bookClassModel?.date ?? "")
+                shapeView.validUptoDate = (title: "", value: "")
+                shapeView.timingTxt = (title: "Timing", value: self.bookClassModel?.timing ?? "")
+                shapeView.locationTxt = (title: "Location", value: self.bookClassModel?.location ?? "")
                 shapeView.trainerDetailTitleLabel.text = "Trainer Details"
-                shapeView.trainerNameLabel.text = getBookedDataModel.trainer?.name ?? ""
+                shapeView.trainerNameLabel.text = self.bookClassModel?.trainer?.name
+                shapeView.qrCodeImageView.loadImage(urlString: self.bookClassModel?.qr ?? "", placeholder:  nil)
+                shapeView.trainerImageView.loadImage(urlString: self.bookClassModel?.trainer?.image, placeholder: nil)
+                shapeView.isDirection = true
+                shapeView.locBtn.setTitle("Get Direction", for: .normal)
+                shapeView.locBtn.setImage(UIImage(named: "ic_arrow_right_blue"), for: .normal)
                 shapeView.footerLabel.text = "Scan the QR code to access the gym premises."
                 
-                shapeView.trainerImageView.loadImage(urlString: getBookedDataModel.trainer?.image ?? "", placeholder: AppImages.navLeft)
-                
-                shapeView.qrCodeImageView.loadImage(urlString: getBookedDataModel.qr ?? "", placeholder:  UIImage(named: ""))
-                
-                if getBookedDataModel.trainer?.isVerified == true {
+                if self.bookClassModel?.trainer?.isVerified == true {
                     shapeView.trainerBadgeImageView.isHidden = false
                 }else{
                     shapeView.trainerBadgeImageView.isHidden = true
                 }
                 
-                if (getBookedDataModel.trainer?.tags?.count ?? 0) > 3 {
+                if (self.bookClassModel?.trainer?.tags?.count ?? 0) > 3 {
                     var tags:[String] = []
                     
                     for i in 0...1 {
-                        tags.append(getBookedDataModel.trainer?.tags?[i] ?? "")
+                        tags.append(self.bookClassModel?.trainer?.tags?[i] ?? "")
                     }
                     tags.append("+3")
-                    
                     shapeView.trainerTags = tags
                 }else{
-                    shapeView.trainerTags = getBookedDataModel.trainer?.tags ?? []
+                    shapeView.trainerTags = self.bookClassModel?.trainer?.tags ?? []
                 }
-            } else{
-                shapeView.packageTitleLabel.text = "Package"
-                shapeView.packageLabel.text = self.bookedMembership?.package ?? ""
-                shapeView.startDate = (title: "Start Date", value: self.bookedMembership?.startDate ?? "")
-                shapeView.validUptoDate = (title: "Valid Upto", value: self.bookedMembership?.endDate ?? "")
-                shapeView.timingTxt = (title: "", value: "")
-                shapeView.locationTxt = (title: "Location", value: self.bookedMembership?.location ?? "")
+                
+                /*
+                shapeView.trainerTags = ["Cardio", "t2", "+5",]
+                shapeView.startDate = (title: "Date", value: "13th June 24 13th June 24 13th June 24 13th June 24")
+//                shapeView.validUptoLabel.isHidden = true
+                shapeView.validUptoDate = (title: "", value: "")
+                shapeView.timingTxt = (title: "Timing", value: "10:00 to 11:00")
+                shapeView.locationTxt = (title: "Location", value: "Dubia Location")
                 shapeView.trainerDetailTitleLabel.text = "Trainer Details"
-                shapeView.trainerNameLabel.text = self.bookedMembership?.studio?.name
+                shapeView.trainerNameLabel.text = "Christene De Koning"
+                shapeView.qrCodeImageView.image = UIImage(named: "ic_QR_Code")
                 shapeView.footerLabel.text = "Scan the QR code to access the gym premises."
-                
-                shapeView.trainerImageView.loadImage(urlString: self.bookedMembership?.studio?.profile, placeholder: AppImages.navLeft)
-                shapeView.qrCodeImageView.loadImage(urlString: self.bookedMembership?.qr, placeholder:  UIImage(named: ""))
-                
-                shapeView.trainerBadgeImageView.isHidden = true
-                       
-                if (self.bookedMembership?.studio?.tags?.count ?? 0) > 3 {
-                    var tags:[String] = []
+                shapeView.trainerImageView.image = UIImage(named: "ic_trainer")
+                shapeView.isDirection = true
+                shapeView.locBtn.setTitle("Get Direction", for: .normal)
+                shapeView.locBtn.setImage(UIImage(named: "ic_arrow_right_blue"), for: .normal)
+                */
+            
+            case .defaultBilling:
+                if let getBookedDataModel = self.bookedDataModel{
+                    shapeView.packageTitleLabel.text = "Package"
+                    shapeView.packageLabel.text = getBookedDataModel.package ?? ""
+                    shapeView.startDate = (title: "Start Date", value: getBookedDataModel.date?.startDate ?? "")
+                    shapeView.validUptoDate = (title: "Valid Upto", value: getBookedDataModel.date?.validTill ?? "")
+                    shapeView.timingTxt = (title: "Timing", value: getBookedDataModel.timing ?? "")
+                    shapeView.locationTxt = (title: "Location", value: getBookedDataModel.location ?? "")
+                    shapeView.trainerDetailTitleLabel.text = "Trainer Details"
+                    shapeView.trainerNameLabel.text = getBookedDataModel.trainer?.name ?? ""
+                    shapeView.footerLabel.text = "Scan the QR code to access the gym premises."
                     
-                    for i in 0...1 {
-                        tags.append(self.bookedMembership?.studio?.tags?[i] ?? "")
+                    shapeView.trainerImageView.loadImage(urlString: getBookedDataModel.trainer?.image ?? "", placeholder: UIImage())
+                    
+                    shapeView.qrCodeImageView.loadImage(urlString: getBookedDataModel.qr ?? "", placeholder:  UIImage(named: ""))
+                    
+                    shapeView.isDirection = true
+                    if appUserDefaults.getGymPackage() == "gym" {
+                        shapeView.isDirection = false
+                        shapeView.locBtn.setTitle("Get Direction", for: .normal)
+                        shapeView.locBtn.setImage(UIImage(named: "ic_arrow_right_blue"), for: .normal)
                     }
-                    tags.append("+3")
                     
-                    shapeView.trainerTags = tags
-                }else{
-                    shapeView.trainerTags = self.bookedMembership?.studio?.tags ?? []
+                    if getBookedDataModel.trainer?.isVerified == true {
+                        shapeView.trainerBadgeImageView.isHidden = false
+                    }else{
+                        shapeView.trainerBadgeImageView.isHidden = true
+                    }
+                    
+                    if (getBookedDataModel.trainer?.tags?.count ?? 0) > 3 {
+                        var tags:[String] = []
+                        
+                        for i in 0...1 {
+                            tags.append(getBookedDataModel.trainer?.tags?[i] ?? "")
+                        }
+                        tags.append("+3")
+                        
+                        shapeView.trainerTags = tags
+                    }else{
+                        shapeView.trainerTags = getBookedDataModel.trainer?.tags ?? []
+                    }
+                } else{
+                    shapeView.packageTitleLabel.text = "Package"
+                    shapeView.packageLabel.text = self.bookedMembership?.package ?? ""
+                    shapeView.startDate = (title: "Start Date", value: self.bookedMembership?.startDate ?? "")
+                    shapeView.validUptoDate = (title: "Valid Upto", value: self.bookedMembership?.endDate ?? "")
+                    shapeView.timingTxt = (title: "", value: "")
+                    shapeView.locationTxt = (title: "Location", value: self.bookedMembership?.location ?? "")
+                    shapeView.trainerDetailTitleLabel.text = "Trainer Details"
+                    shapeView.trainerNameLabel.text = self.bookedMembership?.studio?.name
+                    shapeView.footerLabel.text = "Scan the QR code to access the gym premises."
+                    
+                    shapeView.trainerImageView.loadImage(urlString: self.bookedMembership?.studio?.profile, placeholder: UIImage())
+                    shapeView.qrCodeImageView.loadImage(urlString: self.bookedMembership?.qr, placeholder:  UIImage(named: ""))
+                    
+                    shapeView.trainerBadgeImageView.isHidden = true
+                    
+                    shapeView.isDirection = true
+                    if appUserDefaults.getGymPackage() == "gym" {
+                        shapeView.isDirection = false
+                        shapeView.locBtn.setTitle("Get Direction", for: .normal)
+                        shapeView.locBtn.setImage(UIImage(named: "ic_arrow_right_blue"), for: .normal)
+                    }
+                           
+                    if (self.bookedMembership?.studio?.tags?.count ?? 0) > 3 {
+                        var tags:[String] = []
+                        
+                        for i in 0...1 {
+                            tags.append(self.bookedMembership?.studio?.tags?[i] ?? "")
+                        }
+                        tags.append("+3")
+                        
+                        shapeView.trainerTags = tags
+                    }else{
+                        shapeView.trainerTags = self.bookedMembership?.studio?.tags ?? []
+                    }
                 }
             }
             
+    
             
 //            shapeView.trainerImageView.image = UIImage(named: "ic_trainer")
-            
-//            shapeView.packageTitleLabel.text = "Package"
-//            shapeView.packageLabel.text = "12 months, Elite Gym Membership"
-//            shapeView.trainerTags = ["Cardio", "t2", "+5",]
-//            shapeView.startDate = (title: "Start Date", value: "06/24")
-//            shapeView.validUptoDate = (title: "Valid Upto", value: "06/25")
-//            shapeView.timingTxt = (title: "Timing", value: "10:00 to 11:00")
-//            shapeView.locationTxt = (title: "Location", value: "Dubia Location")
-//            shapeView.trainerDetailTitleLabel.text = "Trainer Details"
-//            shapeView.trainerNameLabel.text = "Christene De Koning"
-//            shapeView.qrCodeImageView.image = UIImage(named: "ic_QR_Code")
-//            shapeView.footerLabel.text = "Scan the QR code to access the gym premises."
-//            shapeView.trainerImageView.image = UIImage(named: "ic_trainer")
-            
+            /*
+            shapeView.packageTitleLabel.text = "Package"
+            shapeView.packageLabel.text = "12 months, Elite Gym Membership"
+            shapeView.trainerTags = ["Cardio", "t2", "+5",]
+            shapeView.startDate = (title: "Start Date", value: "06/24")
+            shapeView.validUptoDate = (title: "Valid Upto", value: "06/25")
+            shapeView.timingTxt = (title: "Timing", value: "10:00 to 11:00")
+            shapeView.locationTxt = (title: "Location", value: "Dubia Location")
+            shapeView.trainerDetailTitleLabel.text = "Trainer Details"
+            shapeView.trainerNameLabel.text = "Christene De Koning"
+            shapeView.qrCodeImageView.image = UIImage(named: "ic_QR_Code")
+            shapeView.footerLabel.text = "Scan the QR code to access the gym premises."
+            shapeView.trainerImageView.image = UIImage(named: "ic_trainer")
+            shapeView.isDirection = true
+            shapeView.locBtn.setTitle("Get Direction", for: .normal)
+            shapeView.locBtn.setImage(UIImage(named: "ic_arrow_right_blue"), for: .normal)
+            */
             
             self.view.setNeedsLayout()
         }

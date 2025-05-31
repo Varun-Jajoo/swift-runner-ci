@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="ResourcesCollectionViewCell" id="gTV-IL-0wX" customClass="ResourcesCollectionViewCell" customModule="MyPT" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="419" height="311"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="419" height="311"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hep-P1-svC">
+                        <rect key="frame" x="1" y="1" width="417" height="309"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_calendarFilter" translatesAutoresizingMaskIntoConstraints="NO" id="9dN-bo-bb7">
+                                <rect key="frame" x="1" y="1" width="415" height="307"/>
+                            </imageView>
+                            <stackView opaque="NO" contentMode="scaleToFill" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="9Xi-SG-Fba">
+                                <rect key="frame" x="337" y="22" width="60" height="25"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="i3q-lN-B2G">
+                                        <rect key="frame" x="0.0" y="0.0" width="25" height="25"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="25" id="izw-r3-I6w"/>
+                                            <constraint firstAttribute="width" secondItem="i3q-lN-B2G" secondAttribute="height" multiplier="1:1" id="yQH-ZC-vZL"/>
+                                        </constraints>
+                                        <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" image="ic_share">
+                                            <color key="titleColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        </state>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YU6-FZ-1C7">
+                                        <rect key="frame" x="35" y="0.0" width="25" height="25"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" secondItem="YU6-FZ-1C7" secondAttribute="height" multiplier="1:1" id="BtB-WB-pXv"/>
+                                            <constraint firstAttribute="width" constant="25" id="KJ8-In-1sL"/>
+                                            <constraint firstAttribute="width" secondItem="YU6-FZ-1C7" secondAttribute="height" multiplier="1:1" id="Qsk-ig-yMc"/>
+                                        </constraints>
+                                        <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" image="ic_heart">
+                                            <color key="titleColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        </state>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Stretching and Recovery Sessions" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RSm-y2-sCI">
+                                <rect key="frame" x="20" y="238.66666666666666" width="377" height="20.333333333333343"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="appWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="i2c-Bs-eXs">
+                                <rect key="frame" x="20" y="267" width="194" height="22"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RaO-rV-rjh">
+                                        <rect key="frame" x="0.0" y="0.0" width="44" height="22"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" title=" 4.1" image="ic_star">
+                                            <color key="titleColor" name="appWhite"/>
+                                        </state>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="l5I-NW-xsg">
+                                        <rect key="frame" x="52" y="0.0" width="3" height="22"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" image="ic_grayDot">
+                                            <color key="titleColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        </state>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qwD-T9-ZJA">
+                                        <rect key="frame" x="63" y="0.0" width="57.333333333333343" height="22"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" title=" 121k" image="ic_viewsUser">
+                                            <color key="titleColor" name="appWhite"/>
+                                        </state>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9py-HL-Cjd">
+                                        <rect key="frame" x="128.33333333333334" y="0.0" width="3" height="22"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" image="ic_grayDot">
+                                            <color key="titleColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        </state>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ghT-Kv-oIl">
+                                        <rect key="frame" x="139.33333333333334" y="0.0" width="54.666666666666657" height="22"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" title=" 251" image="ic_redHeartbeat">
+                                            <color key="titleColor" name="appWhite"/>
+                                        </state>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="9dN-bo-bb7" firstAttribute="top" secondItem="hep-P1-svC" secondAttribute="top" constant="1" id="B1M-6J-Aiq"/>
+                            <constraint firstAttribute="bottom" secondItem="9dN-bo-bb7" secondAttribute="bottom" constant="1" id="ItM-Rh-NJD"/>
+                            <constraint firstAttribute="trailing" secondItem="RSm-y2-sCI" secondAttribute="trailing" constant="20" id="Kpj-jI-ahn"/>
+                            <constraint firstItem="i2c-Bs-eXs" firstAttribute="leading" secondItem="RSm-y2-sCI" secondAttribute="leading" id="L1N-nm-s2v"/>
+                            <constraint firstItem="9dN-bo-bb7" firstAttribute="leading" secondItem="hep-P1-svC" secondAttribute="leading" constant="1" id="O0M-XM-Ezp"/>
+                            <constraint firstItem="9Xi-SG-Fba" firstAttribute="top" secondItem="hep-P1-svC" secondAttribute="top" constant="22" id="bPj-b9-HuQ"/>
+                            <constraint firstItem="i2c-Bs-eXs" firstAttribute="trailing" relation="lessThanOrEqual" secondItem="RSm-y2-sCI" secondAttribute="trailing" id="d7C-ab-kr9"/>
+                            <constraint firstItem="RSm-y2-sCI" firstAttribute="leading" secondItem="hep-P1-svC" secondAttribute="leading" constant="20" id="gkc-CZ-6wZ"/>
+                            <constraint firstItem="RSm-y2-sCI" firstAttribute="top" relation="greaterThanOrEqual" secondItem="hep-P1-svC" secondAttribute="top" constant="103" id="k4r-9X-x2h"/>
+                            <constraint firstItem="i2c-Bs-eXs" firstAttribute="top" secondItem="RSm-y2-sCI" secondAttribute="bottom" constant="8" id="l8H-g7-Neq"/>
+                            <constraint firstAttribute="trailing" secondItem="9dN-bo-bb7" secondAttribute="trailing" constant="1" id="lPK-AF-jWg"/>
+                            <constraint firstAttribute="trailing" secondItem="9Xi-SG-Fba" secondAttribute="trailing" constant="20" id="p76-sF-e77"/>
+                            <constraint firstAttribute="bottom" secondItem="i2c-Bs-eXs" secondAttribute="bottom" constant="20" id="wc5-0O-PpO"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="hep-P1-svC" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="1" id="XYF-CK-KTa"/>
+                <constraint firstAttribute="trailing" secondItem="hep-P1-svC" secondAttribute="trailing" constant="1" id="YXX-u0-wZW"/>
+                <constraint firstAttribute="bottom" secondItem="hep-P1-svC" secondAttribute="bottom" constant="1" id="meL-Hb-928"/>
+                <constraint firstItem="hep-P1-svC" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="1" id="uO6-rd-MMS"/>
+            </constraints>
+            <size key="customSize" width="419" height="311"/>
+            <connections>
+                <outlet property="bckImgView" destination="9dN-bo-bb7" id="S10-pb-VDz"/>
+                <outlet property="cellMBV" destination="hep-P1-svC" id="MBh-Mx-iqr"/>
+                <outlet property="dot1Btn" destination="l5I-NW-xsg" id="z7g-9z-UiX"/>
+                <outlet property="dot2Btn" destination="9py-HL-Cjd" id="UeC-2F-opT"/>
+                <outlet property="likeBtn" destination="YU6-FZ-1C7" id="r1d-v7-Gqw"/>
+                <outlet property="likesCountBtn" destination="ghT-Kv-oIl" id="heR-CO-c8j"/>
+                <outlet property="ratingBtn" destination="RaO-rV-rjh" id="FU8-i9-hJd"/>
+                <outlet property="resourceTitleLbl" destination="RSm-y2-sCI" id="wl1-jP-j6p"/>
+                <outlet property="shareBtn" destination="i3q-lN-B2G" id="9mj-Fg-sR7"/>
+                <outlet property="stckBottomConstrnt" destination="wc5-0O-PpO" id="w8n-ce-MPE"/>
+                <outlet property="viewsCountBtn" destination="qwD-T9-ZJA" id="wHR-Ws-3Oa"/>
+            </connections>
+            <point key="canvasLocation" x="301.52671755725191" y="111.61971830985917"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="ic_calendarFilter" width="1344" height="896"/>
+        <image name="ic_grayDot" width="3" height="3.3333332538604736"/>
+        <image name="ic_heart" width="24" height="24.333333969116211"/>
+        <image name="ic_redHeartbeat" width="20.666666030883789" height="19"/>
+        <image name="ic_share" width="24" height="24.333333969116211"/>
+        <image name="ic_star" width="16" height="16.333333969116211"/>
+        <image name="ic_viewsUser" width="16.333333969116211" height="16.333333969116211"/>
+        <namedColor name="appWhite">
+            <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

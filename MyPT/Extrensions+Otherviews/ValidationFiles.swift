@@ -31,3 +31,25 @@ extension String {
     }
     
 }
+
+
+extension Double {
+    
+    /*
+     let value1 = 2.222
+     print(value1.formattedTwoDecimal) // Output: "2.22"
+     */
+    var formattedTwoDecimal: String {
+        let formatter = NumberFormatter()
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 2
+        formatter.numberStyle = .decimal
+        return formatter.string(from: NSNumber(value: self)) ?? "\(self)"
+    }
+}
+
+extension Float {
+    var formattedTwoDecimal: String {
+        Double(self).formattedTwoDecimal
+    }
+}

@@ -9,6 +9,12 @@ import UIKit
 import ImageIO
 import CoreImage
 
+private var backImageViewTag: Int { return 1011 }
+private var navBtnTag: Int { return 1012 }
+private var backViewTag: Int { return 1013 }
+private var centerImgTag: Int { return 1014 }
+private var lockImgTag: Int { return 1015 }
+
 
 func createGrayBlurImage(from image: UIImage, blurRadius:Float = 5.0) -> UIImage? {
     guard let ciImage = CIImage(image: image) else { return nil }
@@ -32,6 +38,7 @@ func createGrayBlurImage(from image: UIImage, blurRadius:Float = 5.0) -> UIImage
     return blurredImage
 
 }
+
 
 func addGradientBackgroundToImage(image: UIImage, colors: [CGColor], locations: [CGFloat]) -> UIImage? {
     // 1. Create a gradient image
@@ -111,6 +118,163 @@ extension UIView{
          }
          return nil
      }
+    
+    //MARK: ------------- SET BACKGROUND IMAGE
+    
+    func setComingSoon(mainVTop: CGFloat? = 0.0, mainVBottom: CGFloat? = 0.0, centerY: CGFloat? = 0.0,
+        bgColor: UIColor? = .clear,
+        centerImgName centerImageName: String,
+        lockImgName: String = "lock_icon",
+        title: String? = "Title",
+        desc: String? = "Description",
+        titleFont: UIFont? = AppFont.medium.size(24.0, familyName: familyClashDisplay),
+        descFont: UIFont? = AppFont.semibold.size(14.0, familyName: familyManrope),
+        titleTextColor: UIColor? = UIColor.appWhite,
+        descTextcolor: UIColor? = UIColor.txtDarkGray
+    ) {
+        // Remove existing view if already added
+        if let existing = self.viewWithTag(backViewTag) {
+            existing.removeFromSuperview()
+        }
+
+        let backView = UIView()
+        backView.translatesAutoresizingMaskIntoConstraints = false
+        backView.backgroundColor = bgColor
+        backView.tag = backViewTag
+        self.addSubview(backView)
+
+        let centerImageView = UIImageView()
+        centerImageView.tag = centerImgTag
+        centerImageView.image = UIImage(named: centerImageName)
+        centerImageView.contentMode = .scaleAspectFill
+        centerImageView.translatesAutoresizingMaskIntoConstraints = false
+        centerImageView.isUserInteractionEnabled = false
+        centerImageView.backgroundColor = .clear
+        backView.addSubview(centerImageView)
+
+        let lockImageView = UIImageView()
+        lockImageView.tag = lockImgTag
+        lockImageView.image = UIImage(named: lockImgName)
+        lockImageView.contentMode = .scaleAspectFill
+        lockImageView.translatesAutoresizingMaskIntoConstraints = false
+        lockImageView.isUserInteractionEnabled = false
+        lockImageView.backgroundColor = .clear
+        centerImageView.addSubview(lockImageView)
+
+        let titleLbl = UILabel()
+        titleLbl.text = title
+        titleLbl.font = titleFont
+        titleLbl.textColor = titleTextColor
+        titleLbl.numberOfLines = 0
+        titleLbl.textAlignment = .center
+        titleLbl.translatesAutoresizingMaskIntoConstraints = false
+        backView.addSubview(titleLbl)
+
+        let descLbl = UILabel()
+        descLbl.text = desc
+        descLbl.font = descFont
+        descLbl.textColor = descTextcolor
+        descLbl.numberOfLines = 0
+        descLbl.textAlignment = .center
+        descLbl.translatesAutoresizingMaskIntoConstraints = false
+        backView.addSubview(descLbl)
+
+        NSLayoutConstraint.activate([
+//            backView.topAnchor.constraint(equalTo: self.topAnchor),
+//            backView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            backView.topAnchor.constraint(equalTo: self.topAnchor, constant: mainVTop ?? 0.0),
+            backView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -(mainVBottom ?? 0.0)),
+            backView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            backView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+
+            centerImageView.centerXAnchor.constraint(equalTo: backView.centerXAnchor),
+//            centerImageView.centerYAnchor.constraint(equalTo: backView.centerYAnchor),
+
+            centerImageView.centerYAnchor.constraint(equalTo: backView.centerYAnchor, constant: centerY ?? 0.0) ,
+            lockImageView.centerXAnchor.constraint(equalTo: centerImageView.centerXAnchor),
+            lockImageView.centerYAnchor.constraint(equalTo: centerImageView.centerYAnchor),
+
+            titleLbl.topAnchor.constraint(equalTo: centerImageView.bottomAnchor, constant: 10),
+            titleLbl.leadingAnchor.constraint(equalTo: backView.leadingAnchor, constant: 76),
+            titleLbl.trailingAnchor.constraint(equalTo: backView.trailingAnchor, constant: -76),
+
+            descLbl.topAnchor.constraint(equalTo: titleLbl.bottomAnchor, constant: 12),
+            descLbl.leadingAnchor.constraint(equalTo: backView.leadingAnchor, constant: 76),
+            descLbl.trailingAnchor.constraint(equalTo: backView.trailingAnchor, constant: -76),
+            descLbl.bottomAnchor.constraint(lessThanOrEqualTo: backView.bottomAnchor, constant: -20)
+        ])
+    }
+
+    
+    //MARK: ------------- SET BACKGROUND IMAGE
+    func setTopBackgroundImage(named imageName: String) {
+        let backgroundImageView = UIImageView()
+        if let imageView = self.viewWithTag(backImageViewTag) {
+            imageView.removeFromSuperview()
+        }
+        backgroundImageView.tag = backImageViewTag
+        backgroundImageView.image = UIImage(named: imageName)
+        backgroundImageView.contentMode = .scaleAspectFill
+        backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
+        backgroundImageView.isUserInteractionEnabled = false // So it doesn't block touches
+
+        self.addSubview(backgroundImageView)
+
+        NSLayoutConstraint.activate([
+            backgroundImageView.topAnchor.constraint(equalTo: self.topAnchor),
+            backgroundImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            backgroundImageView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            backgroundImageView.trailingAnchor.constraint(equalTo: self.trailingAnchor)
+        ])
+    }
+    
+    // MARK: - Add Top Navigation Button
+    
+    func addTopNavigationButton(title: String? = "Back", image: UIImage? = nil, target: Any?, action: Selector? = nil) {
+        let button = UIButton(type: .system)
+        button.tag = navBtnTag
+
+        self.viewWithTag(navBtnTag)?.removeFromSuperview()
+
+        button.setTitleColor(UIColor.appWhite, for: .normal)
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
+
+        if let titleStr = title, let image = image {
+            button.setTitle("  " + titleStr, for: .normal)
+            button.setImage(image.withRenderingMode(.alwaysOriginal), for: .normal)
+        } else {
+            button.setTitle(title, for: .normal)
+        }
+
+        if let action = action, let target = target {
+            button.addTarget(target, action: action, for: .touchUpInside)
+        }else{
+            button.addTarget(target, action: #selector(backButtonTapped(sender: )), for: .touchUpInside)
+        }
+
+        button.translatesAutoresizingMaskIntoConstraints = false
+        self.addSubview(button)
+
+        NSLayoutConstraint.activate([
+            button.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 2),
+            button.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
+            button.heightAnchor.constraint(equalToConstant: 40)
+        ])
+    }
+    
+    //MARK: ------------REMOVE COMMING SOON
+    @objc func backButtonTapped(sender: UIButton) {
+        if let backView = self.viewWithTag(backViewTag) {
+            backView.removeFromSuperview()
+            }
+
+            if let navButton = self.viewWithTag(navBtnTag) {
+                navButton.removeFromSuperview()
+            }
+        if let imageView = self.viewWithTag(backImageViewTag) {
+            imageView.removeFromSuperview()
+        }
+    }
     
 //    func addTopShadow(to view: UIView) {
 //        view.layer.masksToBounds = false
@@ -380,6 +544,39 @@ extension UIView{
         layer.addSublayer(border)
     }
     
+    func setGradientCellBorder(cornerRadius: CGFloat, width: CGFloat,
+                                colors: [UIColor],
+                                startPoint: CGPoint = CGPoint(x: 0.5, y: 0),
+                                endPoint: CGPoint = CGPoint(x: 0.5, y: 1)) {
+
+        let borderLayerName = "gradientBorderLayer_MultiLayer"
+
+        // Remove any existing border layers
+        layer.sublayers?.removeAll(where: { $0.name == borderLayerName })
+
+        // Gradient layer
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.name = borderLayerName
+        gradientLayer.frame = bounds
+        gradientLayer.colors = colors.map { $0.cgColor }
+        gradientLayer.startPoint = startPoint
+        gradientLayer.endPoint = endPoint
+
+        // Shape layer (stroke only, no fill)
+        let shapeLayer = CAShapeLayer()
+        let insetRect = bounds.insetBy(dx: width / 2, dy: width / 2)
+        shapeLayer.path = UIBezierPath(roundedRect: insetRect, cornerRadius: cornerRadius - width / 2).cgPath
+        shapeLayer.lineWidth = width
+        shapeLayer.strokeColor = UIColor.black.cgColor // This doesn't matter; it's overridden by gradient
+        shapeLayer.fillColor = UIColor.clear.cgColor
+
+        gradientLayer.mask = shapeLayer
+
+        // Add to main layer
+        layer.addSublayer(gradientLayer)
+    }
+
+    
     private static let kLayerNameGradientBorder = "GradientBorderLayer"
     
     func setGradientBorder(cornerRadious:CGFloat, width: CGFloat,
@@ -422,6 +619,13 @@ extension UIView{
     
     
     //MARK: --------------- AddGradient LAYER
+    
+    /*
+     (0,0) is the top-left corner
+     (1,0) is the top-right corner
+     (0,1) is the bottom-left corner
+     (1,1) is the bottom-right corner
+     */
     
     /*
      let colors: [UIColor] = [.blue, .white, .red]
@@ -1020,6 +1224,14 @@ extension UITextField {
                                                          attributes: [NSAttributedString.Key.foregroundColor:color])
     }
         
+    func setPlaceholder(text: String, font: UIFont, color: UIColor = .lightGray) {
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: color
+            ]
+            self.attributedPlaceholder = NSAttributedString(string: text, attributes: attributes)
+        }
+    
     func setMultiColorPlaceholder(firstStr: String, firstColor: UIColor, firstfont: UIFont, secondStr: String, secondColor: UIColor, secondfont: UIFont) {
         let attributedString = NSMutableAttributedString()
         
@@ -1227,6 +1439,57 @@ extension UILabel {
         
         return characterIndex
     }
+}
+
+
+extension String {
+
+        func attributedStringWithGradient(
+            _ gradientColors: [UIColor],
+            frame: CGRect,
+            font: UIFont,
+            //Add startPoint and endPoint as parameters with default values for a vertical gradient
+            startPoint: CGPoint = CGPoint(x: 0.5, y: 0.0), // Default: Top-center
+            endPoint: CGPoint = CGPoint(x: 0.5, y: 1.0)    // Default: Bottom-center
+        ) -> NSAttributedString {
+
+            // 1. Create a gradient layer
+            let gradientLayer = CAGradientLayer()
+            gradientLayer.frame = frame
+            gradientLayer.colors = gradientColors.map { $0.cgColor }
+
+            // Set the start and end points for the linear gradient direction
+            gradientLayer.startPoint = startPoint
+            gradientLayer.endPoint = endPoint
+            // gradientLayer.type = .axial // This is the default, so explicitly setting it is optional for linear
+
+            // 2. Create a pattern from the gradient layer
+            UIGraphicsBeginImageContextWithOptions(gradientLayer.bounds.size, false, 0) // Use gradientLayer.bounds.size
+            if let context = UIGraphicsGetCurrentContext() {
+                gradientLayer.render(in: context)
+                guard let image = UIGraphicsGetImageFromCurrentImageContext() else {
+                    UIGraphicsEndImageContext()
+                    // Return a basic attributed string in case of image creation failure
+                    return NSAttributedString(string: self, attributes: [.font: font])
+                }
+                UIGraphicsEndImageContext()
+                let patternColor = UIColor(patternImage: image)
+
+                // 3. Create an attributed string
+                let attributedString = NSMutableAttributedString(string: self)
+                let fullRange = NSRange(location: 0, length: self.count)
+
+                // Set the gradient color and font
+                attributedString.addAttribute(.foregroundColor, value: patternColor, range: fullRange)
+                attributedString.addAttribute(.font, value: font, range: fullRange)
+
+                return attributedString
+            } else {
+                UIGraphicsEndImageContext() // Ensure context is ended even if UIGraphicsGetCurrentContext returns nil
+                // Return a basic attributed string in case of context failure
+                return NSAttributedString(string: self, attributes: [.font: font])
+            }
+        }
 }
 
 
@@ -1812,6 +2075,7 @@ extension UITableView {
             messageImageView.backgroundColor = .clear
             messageImageView.image = messageImage
             messageImageView.contentMode = .scaleAspectFill
+            messageImageView.clipsToBounds = true
             
             titleLabel.text = title
             titleLabel.textColor = UIColor.appWhite

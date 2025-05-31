@@ -7,6 +7,7 @@
 
 import UIKit
 import GoogleMaps
+import AVKit
 
 class GymDetailsViewController: CommonViewController {
     
@@ -26,6 +27,20 @@ class GymDetailsViewController: CommonViewController {
         }
     }
     
+    private var videoUrl: String? {
+        didSet {
+            guard let videoStr = videoUrl, let videoURL = URL(string: videoStr) else { return }
+
+            let player = AVPlayer(url: videoURL)
+            let vc = CustomPlayerViewController()
+            vc.player = player
+            vc.modalPresentationStyle = .overFullScreen
+            self.present(vc, animated: true) {
+                player.play()
+            }
+        }
+    }
+    
     // Indexes of restricted items
     var restrictedRange: [ClosedRange<Int>] = [0...4]  // These cells can't be selected
     
@@ -36,6 +51,8 @@ class GymDetailsViewController: CommonViewController {
     var inputLat:String?
     var inputLong:String?
     var studioDetails: StudioDetailsModel?
+    var localDatAmenity: [String]? = []
+    
     var sectionData:[[String:Any]]?
     var gymDetailsFlow:calendarFlow = .defaultFlow
     
@@ -78,10 +95,16 @@ class GymDetailsViewController: CommonViewController {
     @IBOutlet weak var showLocMapHeightConstrnt: NSLayoutConstraint!
     @IBOutlet weak var gymRatingCollViewHeightConstrnt: NSLayoutConstraint!
     @IBOutlet weak var gymTimeTblViewHeightConstrnt: NSLayoutConstraint!
+    @IBOutlet weak var showAllEquipmentsBtnHeightConstrnt: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.showAllEquipmentsBtn.isHidden = true
+        self.showAllEquipmentsBtn.setTitle(nil, for: .normal)
+        self.showAllEquipmentsBtnHeightConstrnt.constant = 1.0
+        
+        self.gymRatingMBV.isHidden = true
         self.setUpUI()
         self.setUpFont()
         self.setMapShowData()
@@ -125,9 +148,7 @@ class GymDetailsViewController: CommonViewController {
         }
     }
     
-    
     private func setInputData(){
-        self.showAllEquipmentsBtn.setTitle("SHOW ALL EQUIPMENTS", for: .normal)
         self.showAllReviewsBtn.setTitle("SHOW ALL REVIEWS", for: .normal)
         
         self.gymNameLbl.text = studioDetails?.name
@@ -162,7 +183,28 @@ class GymDetailsViewController: CommonViewController {
                 self.view.layoutIfNeeded()
             }
         }
+        
+        //------------------**********
+        self.descLbl.appendReadmore(after: studioDetails?.description ?? "", trailingContent: .readmore)
+        
+        self.descLbl.addReadMoreTapGesture(target: self, action: #selector(handleReadMoreTap(_:)))
     }
+    
+    //MARK: ------------------FOR MAKING EXPANDABLE STRING OF UILABEL
+    @objc private func handleReadMoreTap(_ gesture: UITapGestureRecognizer) {
+           let tapLocation = gesture.location(in: self.descLbl)
+           guard let tappedIndex = self.descLbl.getTappedTextIndex(tapLocation) else { return }
+           
+           let readMoreText = TrailingContent.readmore.text
+           let readLessText = TrailingContent.readless.text
+           let fullAttributedString = self.descLbl.attributedText?.string ?? ""
+
+           if fullAttributedString.range(of: readMoreText) != nil, tappedIndex >= (fullAttributedString.count - readMoreText.count) {
+               self.descLbl.appendReadLess(after: self.studioDetails?.description ?? "", trailingContent: .readless)
+           } else if fullAttributedString.range(of: readLessText) != nil, tappedIndex >= (fullAttributedString.count - readLessText.count) {
+               self.descLbl.appendReadmore(after: self.studioDetails?.description ?? "", trailingContent: .readmore)
+           }
+       }
     
     override func updateViewConstraints() {
         super.updateViewConstraints()
@@ -176,11 +218,13 @@ class GymDetailsViewController: CommonViewController {
         }
         
         if equipmentInsideTblView.contentSize.height != 0 {
-            if equipmentInsideTblView.contentSize.height < 300 {
-                equipmentInsideTblViewHeightConstrnt.constant = equipmentInsideTblView.contentSize.height
-            }else{
-                equipmentInsideTblViewHeightConstrnt.constant = 300
-            }
+            equipmentInsideTblViewHeightConstrnt.constant = equipmentInsideTblView.contentSize.height
+            self.equipmentInsideTblView.layoutIfNeeded()
+//            if equipmentInsideTblView.contentSize.height < 300 {
+//                equipmentInsideTblViewHeightConstrnt.constant = equipmentInsideTblView.contentSize.height
+//            }else{
+//                equipmentInsideTblViewHeightConstrnt.constant = 300
+//            }
         }
         
         if gymTimeTblView.contentSize.height != 0 {
@@ -243,6 +287,30 @@ class GymDetailsViewController: CommonViewController {
     // Update the current page based on some user interaction (e.g., swiping between views)
     private func updatePage(to index: Int) {
         self.pageContrl.currentPage = index
+    }
+    
+    //MARK: ----------------EQUIPMENT BTNACTN
+    @IBAction func equipmentBtnActn(_ sender: UIButton) {
+        sender.isSelected = !sender.isSelected
+        print("sender.isSelected", sender.isSelected)
+        if let amenityConut = studioDetails?.amenity?.count {
+            if sender.isSelected && amenityConut > 3 {
+                self.showAllEquipmentsBtn.setTitle("LESS ALL EQUIPMENTS", for: .normal)
+                self.localDatAmenity?.removeAll()
+                self.localDatAmenity?.append(contentsOf: studioDetails?.amenity ?? [])
+                self.equipmentInsideTblView.reloadData()
+               
+            }else{
+                self.showAllEquipmentsBtn.setTitle("SHOW ALL EQUIPMENTS", for: .normal)
+                self.localDatAmenity?.removeAll()
+                let amenities = studioDetails?.amenity ?? []
+                self.localDatAmenity?.append(contentsOf: amenities.prefix(4))
+                self.equipmentInsideTblView.reloadData()
+            }
+        }else{
+            self.showAllEquipmentsBtn.setTitle(nil, for: .normal)
+            self.showAllEquipmentsBtn.isHidden = true
+        }
     }
     
     @IBAction func bookSlotBtnActn(_ sender: Any) {
@@ -356,8 +424,39 @@ class GymDetailsViewController: CommonViewController {
             locationManager.distanceFilter = 50
             locationManager.startUpdatingLocation()
         }
+    }
+    
+    func openGoogleMapsToDestination(destinationLatitude: Double, destinationLongitude: Double, destinationName: String = "Destination") {
         
+        // Get user's current coordinates
+        var sourceLatitude: Double?
+        var sourceLongitude: Double?
         
+        GetLocationManager.shared.requestLocationWithAddress {[weak self] location, addressPart in
+            guard let self = self else { return }
+            sourceLatitude = location?.coordinate.latitude
+            sourceLongitude = location?.coordinate.longitude
+            
+            // Get user's current coordinates
+            guard let sourceLatitude = sourceLatitude, let sourceLongitude = sourceLongitude else {
+                print("Current location not available.")
+                return
+            }
+            
+            // Build the Google Maps URL
+            let urlString = "comgooglemaps://?saddr=\(sourceLatitude),\(sourceLongitude)&daddr=\(destinationLatitude),\(destinationLongitude)&directionsmode=driving"
+            
+            // Check if Google Maps is installed
+            if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            } else {
+                // Fallback to Google Maps web if the app is not installed
+                let webUrlString = "https://www.google.com/maps/dir/?api=1&origin=\(sourceLatitude),\(sourceLongitude)&destination=\(destinationLatitude),\(destinationLongitude)&travelmode=driving"
+                if let webUrl = URL(string: webUrlString) {
+                    UIApplication.shared.open(webUrl, options: [:], completionHandler: nil)
+                }
+            }
+        }
     }
     
     
@@ -392,7 +491,9 @@ extension GymDetailsViewController: UICollectionViewDataSource, UICollectionView
         
         if collectionView == gymBannerCollView {
             
-            return collectionView.numberOfRows(count: studioDetails?.profile?.count ?? 0, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100, height: 100)), messageImageHeight: 80, fromCenter: -10, fromTop: nil)
+//            return collectionView.numberOfRows(count: studioDetails?.profile?.count ?? 0, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100, height: 100)), messageImageHeight: 80, fromCenter: -10, fromTop: nil)
+            
+            return collectionView.numberOfRows(count: studioDetails?.profile?.count ?? 0, title: AppAlertStrings.no_results_found, message: nil, messageImage: nil, messageImageHeight: 80, fromCenter: -10, fromTop: nil)
         }else if collectionView == categoryCollView {
             
             return self.sectionData?.count ?? 0
@@ -402,7 +503,7 @@ extension GymDetailsViewController: UICollectionViewDataSource, UICollectionView
         }
         else if collectionView == mediaGalleryCollView{
             
-            return collectionView.numberOfRows(count: studioDetails?.reviews?.count ?? 0, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100, height: 100)), messageImageHeight: 100, fromCenter: nil, fromTop: 2)
+            return collectionView.numberOfRows(count: studioDetails?.gallery?.count ?? 0, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100, height: 100)), messageImageHeight: 100, fromCenter: nil, fromTop: 2)
             
         }else if collectionView == gymOffersCollView{
             
@@ -418,12 +519,17 @@ extension GymDetailsViewController: UICollectionViewDataSource, UICollectionView
             let cell: WithMeCollectionViewCell = gymBannerCollView.dequeueReusableCell(withReuseIdentifier: "WithMeCollectionViewCell", for: indexPath) as! WithMeCollectionViewCell
             
             cell.centerImgView.isHidden = true
-            cell.videoThumbnailImgView.loadImage(urlString: studioDetails?.profile?[indexPath.row], placeholder: AppImages.navLeft)
+            cell.videoThumbnailImgView.loadImage(urlString: studioDetails?.profile?[indexPath.row], placeholder: UIImage())
             
             return cell
         }
         else if collectionView == categoryCollView{
             let categoryCell:WorkoutCategoryCollectionViewCell = categoryCollView.dequeueReusableCell(withReuseIdentifier: "WorkoutCategoryCollectionViewCell", for: indexPath) as! WorkoutCategoryCollectionViewCell
+            
+            DispatchQueue.main.async {
+                categoryCell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: categoryCell.cellMBV.frame.size.height/2.0)
+            }
+            
             categoryCell.categoryTitleLbl.text = sectionData?[indexPath.row]["title"] as? String
             categoryCell.categoryImgView.image = sectionData?[indexPath.row]["img"] as? UIImage
             
@@ -436,7 +542,7 @@ extension GymDetailsViewController: UICollectionViewDataSource, UICollectionView
                 offersCell.categoryImgView.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             }
             
-            offersCell.categoryImgView.loadImage(urlString: studioDetails?.facility?[indexPath.row].icon, placeholder: AppImages.navLeft)
+            offersCell.categoryImgView.loadImage(urlString: studioDetails?.facility?[indexPath.row].icon, placeholder: UIImage())
             offersCell.titleLbl.text = studioDetails?.facility?[indexPath.row].name as? String
             
             return offersCell
@@ -445,7 +551,7 @@ extension GymDetailsViewController: UICollectionViewDataSource, UICollectionView
         else if collectionView == gymRatingCollView{
             let ratingCell:RatingsCollectionViewCell = gymRatingCollView.dequeueReusableCell(withReuseIdentifier: "RatingsCollectionViewCell", for: indexPath) as! RatingsCollectionViewCell
             
-            ratingCell.userImgView.loadImage(urlString: studioDetails?.reviews?[indexPath.row].image, placeholder: AppImages.navLeft)
+            ratingCell.userImgView.loadImage(urlString: studioDetails?.reviews?[indexPath.row].image, placeholder: UIImage())
             ratingCell.userNameLbl.text = studioDetails?.reviews?[indexPath.row].name
             //            ratingCell.reviewMsgLbl.text = studioDetails?.reviews?[indexPath.row].rating
             return ratingCell
@@ -488,6 +594,9 @@ extension GymDetailsViewController: UICollectionViewDataSource, UICollectionView
             else  if (sectionData?[indexPath.row]["title"] as? String)?.uppercased() == "Review".uppercased() {
                 scrollToView(self.gymRatingCollView)
             }
+        }
+        else if collectionView == mediaGalleryCollView{
+            self.videoUrl = studioDetails?.gallery?[indexPath.row].mediaPath  //detailsModel?.galleries?[indexPath.row].mediaPath
         }
     }
     
@@ -536,7 +645,7 @@ extension GymDetailsViewController: UITableViewDataSource, UITableViewDelegate{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
         if tableView == equipmentInsideTblView {
-            return studioDetails?.amenity?.count ?? 0
+            return localDatAmenity?.count ?? 00  //studioDetails?.amenity?.count ?? 0
         }
         else{
             return 1
@@ -576,6 +685,18 @@ extension GymDetailsViewController: UITableViewDataSource, UITableViewDelegate{
 extension GymDetailsViewController: GMSMapViewDelegate, CLLocationManagerDelegate {
     
     // MARK: - CLLocationManagerDelegate
+    
+    func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
+        // Handle marker tap events
+        print(marker.position.latitude,marker.position.longitude)
+        self.openGoogleMapsToDestination(destinationLatitude: marker.position.latitude, destinationLongitude: marker.position.longitude, destinationName: "")
+        return true
+    }
+    
+    func mapView(_ mapView: GMSMapView, didTapAt coordinate: CLLocationCoordinate2D) {
+        print("You tapped at \(coordinate.latitude), \(coordinate.longitude)")
+    }
+    
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         
         guard status == .authorizedWhenInUse else {
@@ -694,9 +815,31 @@ extension GymDetailsViewController {
             self.setInputData()
             self.gymBannerCollView.reloadData()
             self.gymOffersCollView.reloadData()
-            self.equipmentInsideTblView.reloadData()
+//            self.equipmentInsideTblView.reloadData()
             self.gymTimeTblView.reloadData()
             self.gymRatingCollView.reloadData()
+            self.mediaGalleryCollView.reloadData()
+            
+            //-----------------------Equipment
+            if let amenityConut = studioDetails?.amenity?.count {
+                if amenityConut > 4 {
+                    self.showAllEquipmentsBtn.setTitle("SHOW ALL EQUIPMENTS", for: .normal)
+                    self.showAllEquipmentsBtnHeightConstrnt.constant = 56.0
+                    self.showAllEquipmentsBtn.isHidden = false
+                    self.localDatAmenity?.removeAll()
+                    let amenities = studioDetails?.amenity ?? []
+                    self.localDatAmenity?.append(contentsOf: amenities.prefix(4))
+                    self.equipmentInsideTblView.reloadData()
+                }else{
+                    self.showAllEquipmentsBtn.setTitle(nil, for: .normal)
+                    self.showAllEquipmentsBtnHeightConstrnt.constant = 1.0
+                    self.showAllEquipmentsBtn.isHidden = true
+                    self.localDatAmenity?.removeAll()
+                    self.localDatAmenity?.append(contentsOf: studioDetails?.amenity ?? [])
+                    self.equipmentInsideTblView.reloadData()
+                }
+            }
+            
             if let getLat = studioDetails?.latitude, let getLong = studioDetails?.longitude, let lat = Double(getLat), let long = Double(getLong) {
                 
                 self.showmapCamera = CLLocationCoordinate2D(latitude: lat, longitude: long)

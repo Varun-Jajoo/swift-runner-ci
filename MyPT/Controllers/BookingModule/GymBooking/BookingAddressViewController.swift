@@ -29,6 +29,7 @@ class BookingAddressViewController: UIViewController {
     var bookingAddressFlow: BookingAddressFlow = .defaultBooing
     var delegate:BookingAddressProtocol?
     var addMemberDelegate: AddMemberProtocol?
+    var getAlltCityData: CityDataModel?
     
     var idStr: String?
     var city_idStr: String?
@@ -96,7 +97,11 @@ class BookingAddressViewController: UIViewController {
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.getCityListApi()
+    }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -307,7 +312,7 @@ class BookingAddressViewController: UIViewController {
             if let addressData = addressData {
                 self.setInputData(data: addressData)
                 self.inputLat = "\(addressData.lat?.value ?? "0.0")"
-                self.inputLat = "\(addressData.lat?.value ?? "0.0")"
+                self.inputLong = "\(addressData.long?.value ?? "0.0")"
                 
             }
             
@@ -321,7 +326,7 @@ class BookingAddressViewController: UIViewController {
                 
                 //-----------------setup input data
                 self.inputLat = "\(addressData.lat?.value ?? "0.0")"
-                self.inputLat = "\(addressData.lat?.value ?? "0.0")"
+                self.inputLong = "\(addressData.long?.value ?? "0.0")"
             }
             
             self.setupTxtField()
@@ -466,7 +471,12 @@ class BookingAddressViewController: UIViewController {
     //MARK: -------------FOR DROP DOWN
     private func openDropDown(inputView: UIView){
         let popupVC:CityDropDownViewController = CityDropDownViewController.instantiate(appStoryboard: .booking)
-         popupVC.modalPresentationStyle = .popover
+        popupVC.modalPresentationStyle = .popover
+        popupVC.getAlltCityData = nil
+        popupVC.getAlltCityData = self.getAlltCityData
+        popupVC.cityData?.removeAll()
+        popupVC.cityData?.append(contentsOf: self.getAlltCityData?.cities ?? [])
+        
         popupVC.sentBackData = { [weak self] getCityName , getId, getCountryName, getCountryId in
             guard let self = self else { return  }
             print("name", getCityName as Any, "id", getId as Any)
@@ -484,15 +494,19 @@ class BookingAddressViewController: UIViewController {
                 self.countryHintLbl.text = "Country"
             }
         }
-    //        popupVC.preferredContentSize = CGSize(width: 200, height: 100)
+    
         popupVC.view.backgroundColor = UIColor.mainBg
+  
          if let popoverController = popupVC.popoverPresentationController {
              popoverController.sourceView = inputView
              popoverController.sourceRect = inputView.bounds
              popoverController.permittedArrowDirections = .any
              popoverController.delegate = self
+             popoverController.backgroundColor = UIColor.mainBg
          }
-         present(popupVC, animated: false)
+        popupVC.preferredContentSize = CGSize(width: self.view.frame.size.width - 40, height: 350)
+
+        present(popupVC, animated: true)
     }
         
     private func setupUI(){
@@ -696,8 +710,8 @@ extension BookingAddressViewController: UITextFieldDelegate{
 
 
 //MARK: --------------EXTENSION FOR API
-//extension BookingAddressViewController{
-//    
+extension BookingAddressViewController{
+    
 //    private func getAddressListApi(){
 //        TrainerVM.getAddressApi(viewController: self, inputParms: [:], completion: { [weak self] getResultData in
 //            guard let self = self, let getResultData = getResultData else { return  }
@@ -706,8 +720,17 @@ extension BookingAddressViewController: UITextFieldDelegate{
 //          
 //        })
 //    }
-//    
-//}
+    
+    private func getCityListApi(){
+        TrainerVM.getCityApi(viewController: self, inputParms: [:], isShowLoader: false, completion: { [weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return  }
+            print("getResultData", getResultData)
+            self.getAlltCityData = nil
+            self.getAlltCityData = getResultData.data
+        })
+    }
+    
+}
 
 // MARK: ------------ UIPopoverPresentationControllerDelegate
 extension BookingAddressViewController: UIPopoverPresentationControllerDelegate {

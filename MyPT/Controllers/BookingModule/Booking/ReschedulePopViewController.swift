@@ -11,6 +11,9 @@ class ReschedulePopViewController: UIViewController {
     
     //MARK: ------------- VARIABLE
     var rescheduleNavCtrl:UINavigationController?
+    var inputBookingIdStr:String?
+//    var reasonRescheduleStr:String?
+    
     
     //MARK: --------------IBOUTEL
     @IBOutlet weak var reschedulePopupMBV: UIView!
@@ -25,12 +28,14 @@ class ReschedulePopViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
     
+        self.setupFont()
+        
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         self.setupUI()
-        self.setupFont()
+//        self.setupFont()
     }
     
     deinit {
@@ -50,15 +55,25 @@ class ReschedulePopViewController: UIViewController {
                 vc.modalTransitionStyle = .coverVertical
                 vc.flowUI = .cancellationReason
                 vc.navFilterCtrl = self.rescheduleNavCtrl
+                vc.bookingIdStr = self.inputBookingIdStr
                 self.rescheduleNavCtrl?.present(vc, animated: true)
             })
             
         }else{
             print("Reschedule btn clicked ......")
+            
+            self.dismiss(animated: true, completion: {
+                let vc:FilterViewController = FilterViewController.instantiate(appStoryboard: .booking)
+                vc.modalTransitionStyle = .coverVertical
+                vc.flowUI = .reschedule
+                vc.navFilterCtrl = self.rescheduleNavCtrl
+                vc.bookingIdStr =  self.inputBookingIdStr
+                self.rescheduleNavCtrl?.present(vc, animated: true)
+            })
         }
     }
     
-    func setupUI(){
+    private func setupUI(){
         DispatchQueue.main.async {
             self.reschedulePopupMBV.roundSideCorners(radius: 12.0, cornerSide: [.topLeft, .topRight])
             self.reschedulePopupMBV.applyShadow(fillColor: UIColor.appCard2, shadowColor: UIColor.black, shadowRadius: 12, opacity: 0.8, offset: .zero, cornerRadius: 12)
@@ -69,7 +84,7 @@ class ReschedulePopViewController: UIViewController {
         }
     }
     
-    func setupFont(){
+    private func setupFont(){
         self.rescheduleTitleLbl.font = AppFont.semibold.size(18.0, familyName: familyManrope)
         self.descTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
         self.descLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)

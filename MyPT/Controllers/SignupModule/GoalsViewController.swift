@@ -50,6 +50,8 @@ class GoalsViewController: CommonViewController {
             print("userData", userData)
             print("userData Height: ", userHeight,"userData name: ", userName, "Id: ",userData.id ?? "",  userData.phone ?? "")
         }
+        
+        self.getGoalsDataApi()
     }
     
     deinit {
@@ -62,7 +64,7 @@ class GoalsViewController: CommonViewController {
         self.statusBarColor(setColor: .clear)
         setNavUI()
         
-        self.getGoalsDataApi()
+//        self.getGoalsDataApi()
     }
     
     func setNavUI(){
@@ -75,13 +77,15 @@ class GoalsViewController: CommonViewController {
     }
     
     override func rightBtnActn(sender: UIButton) {
-        appSceneDelegate?.goToGuestDashboard()
+        appUserDefaults.setRegistrationSkip(value: true)
+        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
+//        appSceneDelegate?.goToGuestDashboard()
     }
     
     //------------------************Font
     func setUpFont(){
         self.descLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
-        self.bottomNoteLbl.font = AppFont.regular.size(12.0, familyName: familyOverpass)
+        self.bottomNoteLbl.font = AppFont.regular.size(12.0, familyName: familyOverpassMono)
         self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
     }
     
@@ -136,11 +140,15 @@ extension GoalsViewController:  UICollectionViewDelegate, UICollectionViewDataSo
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell:PersonalizedCollectionViewCell = goalsCollView.dequeueReusableCell(withReuseIdentifier: "PersonalizedCollectionViewCell", for: indexPath) as! PersonalizedCollectionViewCell
+        cell.cellMBV.backgroundColor = UIColor.clear
+        DispatchQueue.main.async {
+            cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 0.0)
+        }
 //        cell.titleLbl.text = dataGoals?[indexPath.row]["title"] as? String
         cell.titleLbl.lineBreakMode = .byClipping
         cell.titleLbl.text = dataGoals?[indexPath.row].name as? String
         
-        cell.fitnessImgView.loadImage(urlString: dataGoals?[indexPath.row].image as? String, placeholder: UIImage(named: "ic_navLeft"))
+        cell.fitnessImgView.loadImage(urlString: dataGoals?[indexPath.row].image as? String, placeholder: UIImage())
         
 //        cell.fitnessImgView.image = dataGoals?[indexPath.row]["images"] as? UIImage
         return cell
@@ -234,7 +242,9 @@ extension GoalsViewController {
         
         RegistrationVM.addGoalApi(viewController: self, inputIds: inputIds, completion: {[weak self] getResultData in
             guard let self = self, let getResultData = getResultData else { return }
+            self.continueBtn.isUserInteractionEnabled = true
             if getResultData.status == true {
+                appUserDefaults.setRegistrationSkip(value: false)
                 if let detailsData = getResultData.data {
                     appUserDefaults.saveUserToUserDefaults(detailsData)
                 }

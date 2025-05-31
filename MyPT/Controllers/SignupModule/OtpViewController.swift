@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 enum vcSteps: Int {
     case one = 1, two, three, four, five, six,seven, eight
@@ -41,6 +42,7 @@ enum vcSteps: Int {
 class OtpViewController: CommonViewController, UITextFieldDelegate {
     
     //MARK: ---------VARIABLE
+    var player: LoopingPlayer?
     var mobilNumStr:String?
     var countryCodeStr:String?
     var inputType:String?
@@ -91,10 +93,17 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         
         setupUI()
         setUpFont()
+        setUpVideo()
+        self.customBlurViewShow(viewShow: self.view)
     }
     
+    override func keyboardWillHide(_ notification: Notification) {
+        super.keyboardWillHide(notification)
+        self.customBlurViewShow(viewShow: self.view)
+    }
     
     deinit {
+        player?.progressDelegate = nil
         print("------\(#function)------\(String(describing: Self.self))------" )
     }
     
@@ -108,6 +117,8 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         self.stopTimer()
+        self.player?.pause()
+        self.player?.pausePlayback()
     }
     
     func setNavUI(){
@@ -118,6 +129,34 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
     //MARK: ---------------EDIT MOBILE NUMBER ACTN
     @IBAction func editMobileBtnActn(_ sender: Any) {
         self.navigationController?.popViewController(animated: false)
+    }
+    
+    //MARK: ---------------------VIDEO SETUP
+    func setUpVideo(){
+        if let filePath = Bundle.main.path(forResource: "landdingVideo", ofType: "mp4") {
+            let fileURL = URL(fileURLWithPath: filePath)
+            
+            // Initialize LoopingPlayer
+            player = LoopingPlayer(url: fileURL)
+            player?.progressDelegate = self
+            
+            // Add video layer
+            if let player = player {
+                let playerLayer = AVPlayerLayer(player: player)
+                DispatchQueue.main.async {
+                    playerLayer.frame = self.view.bounds
+                    playerLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
+                    playerLayer.zPosition = -1
+                    self.view.layer.addSublayer(playerLayer)
+                }
+                
+                // Start playback
+                player.play()
+            }
+        } else {
+            print("Video file not found")
+        }
+        
     }
     
     //MARK: --------------------Timer
@@ -208,6 +247,13 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         self.receiveOtpLbl.font = AppFont.regular.size(12.0, familyName: familyManrope)
         self.resentOtpLbl.font = AppFont.bold.size(12.0, familyName: familyManrope)
         self.resentOtpLbl.textColor = UIColor.appWhite
+     
+        //------------
+        if inputType != "3" {
+            self.topTitleLbl.text = "Verify your mobile number"
+        }else{
+            self.topTitleLbl.text = "Verify your email"
+        }
         
         
         //        //-------------------- Attributed Text
@@ -324,8 +370,21 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
 extension OtpViewController {
     
     func resendOtp(){
-        if RegistrationVM.isValidePhone(phoneNumStr: self.mobilNumStr) {
-            RegistrationVM.resendOtpApi(inputPhoneNum: self.mobilNumStr, inputCountryCode: self.countryCodeStr, completion: { [weak self] getResult in
+        if inputType != "3" {
+            if RegistrationVM.isValidePhone(phoneNumStr: self.mobilNumStr) {
+                RegistrationVM.resendOtpApi(inputEmail: "", inputPhoneNum: self.mobilNumStr, inputCountryCode: self.countryCodeStr, loginType: self.inputType, completion: { [weak self] getResult in
+                    guard let self = self, let getResult = getResult else { return  }
+                    
+                    if getResult.status == true {
+                        AlertHelper.shared.alertMesssage(view: self, title: "", message: (getResult.msg ?? ""))
+                        self.startTimer()
+                    }else{
+                        AlertHelper.shared.alertMesssage(view: self, title: "", message: (getResult.errors?.values.first?.first as? String ?? ""))
+                    }
+                })
+            }
+        }else{
+            RegistrationVM.resendOtpApi(inputEmail: self.mobilNumStr, inputPhoneNum: "", inputCountryCode: self.countryCodeStr, loginType: self.inputType, completion: { [weak self] getResult in
                 guard let self = self, let getResult = getResult else { return  }
                 
                 if getResult.status == true {
@@ -338,47 +397,96 @@ extension OtpViewController {
         }
     }
     
-    
     func submitOtp(inputOtp: String){
-        if RegistrationVM.isValidePhone(phoneNumStr: self.mobilNumStr) {
-            RegistrationVM.submitOtpApi(inputPhoneNum: self.mobilNumStr, inputCountryCode: self.countryCodeStr, loginType: self.inputType, otpStr: inputOtp, completion: { [weak self] getResult in
-                guard let self = self, let getResult = getResult else { return  }
-                
-                if getResult.status == true {
-                    if let userData = getResult.data {
-                        appUserDefaults.saveUserToUserDefaults(userData)
-                        appUserDefaults.setAccessToken(accessToken: userData.token?.value)
-                    }
+        if inputType != "3" {
+            if RegistrationVM.isValidePhone(phoneNumStr: self.mobilNumStr) {
+                RegistrationVM.submitOtpApi(inputEmail: "", inputPhoneNum: self.mobilNumStr, inputCountryCode: self.countryCodeStr, loginType: self.inputType, otpStr: inputOtp, completion: { [weak self] getResult in
+                    guard let self = self, let getResult = getResult else { return  }
                     
-                    if let isCompleted = getResult.data?.user?.isCompleted, isCompleted == 1 {
-                        appUserDefaults.setIsPackageCreated(value: true)
-                        
-                        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: appUserDefaults.getIsPackageCreated())
-                        
-                        //                        let vc:PersoniledViewController = PersoniledViewController.instantiate(appStoryboard: .main)
-                        //                        self.navigationController?.pushViewController(vc, animated: true)
-                        
-                    } else{
-                        if let getStep = getResult.data?.step?.intValue ,  let currentVC = vcSteps.getCurrentVC(vcRawValue: getStep) {
-                            // Use the currentVC, which will be the type of the corresponding view controller
-                            let getVC = currentVC.instantiate(appStoryboard: .main)
-                            self.navigationController?.pushViewController(getVC, animated: true)
+                    if getResult.status == true {
+                        if let userData = getResult.data {
+                            appUserDefaults.saveUserToUserDefaults(userData)
+                            appUserDefaults.setAccessToken(accessToken: userData.token?.value)
                         }
-                        else{
-                            let vc:NameViewController = NameViewController.instantiate(appStoryboard: .main)
-                            self.navigationController?.pushViewController(vc, animated: false)
+                        
+                        if let isCompleted = getResult.data?.user?.isCompleted, isCompleted == 1 {
+                            appUserDefaults.setIsPackageCreated(value: true)
+                            
+                            appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: appUserDefaults.getIsPackageCreated())
+                            
+                            //                        let vc:PersoniledViewController = PersoniledViewController.instantiate(appStoryboard: .main)
+                            //                        self.navigationController?.pushViewController(vc, animated: true)
+                            
+                        } else{
+                            if let getStep = getResult.data?.step?.intValue ,  let currentVC = vcSteps.getCurrentVC(vcRawValue: getStep) {
+                                // Use the currentVC, which will be the type of the corresponding view controller
+                                let getVC = currentVC.instantiate(appStoryboard: .main)
+                                self.navigationController?.pushViewController(getVC, animated: true)
+                            }
+                            else{
+                                let vc:NameViewController = NameViewController.instantiate(appStoryboard: .main)
+                                self.navigationController?.pushViewController(vc, animated: false)
+                            }
                         }
+                        
+                    }else{
+                        //(getResult.errors?.values.first?.first as? String ?? "")
+                        let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+                        AlertHelper.shared.alertMesssage(view: self, title: "", message: errorMsg ?? "")
                     }
+                })
+            }
+        }else{
+//            if RegistrationVM.isValidePhone(phoneNumStr: self.mobilNumStr) {
+                RegistrationVM.submitOtpApi(inputEmail: self.mobilNumStr, inputPhoneNum: "", inputCountryCode: self.countryCodeStr, loginType: self.inputType, otpStr: inputOtp, completion: { [weak self] getResult in
+                    guard let self = self, let getResult = getResult else { return  }
                     
-                }else{
-                    //(getResult.errors?.values.first?.first as? String ?? "")
-                    let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
-                    AlertHelper.shared.alertMesssage(view: self, title: "", message: errorMsg ?? "")
-                }
-            })
+                    if getResult.status == true {
+                        if let userData = getResult.data {
+                            appUserDefaults.saveUserToUserDefaults(userData)
+                            appUserDefaults.setAccessToken(accessToken: userData.token?.value)
+                        }
+                        
+                        if let isCompleted = getResult.data?.user?.isCompleted, isCompleted == 1 {
+                            appUserDefaults.setIsPackageCreated(value: true)
+                            
+                            appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: appUserDefaults.getIsPackageCreated())
+                            
+                            //                        let vc:PersoniledViewController = PersoniledViewController.instantiate(appStoryboard: .main)
+                            //                        self.navigationController?.pushViewController(vc, animated: true)
+                            
+                        } else{
+                            if let getStep = getResult.data?.step?.intValue ,  let currentVC = vcSteps.getCurrentVC(vcRawValue: getStep) {
+                                // Use the currentVC, which will be the type of the corresponding view controller
+                                let getVC = currentVC.instantiate(appStoryboard: .main)
+                                self.navigationController?.pushViewController(getVC, animated: true)
+                            }
+                            else{
+                                let vc:NameViewController = NameViewController.instantiate(appStoryboard: .main)
+                                self.navigationController?.pushViewController(vc, animated: false)
+                            }
+                        }
+                        
+                    }else{
+                        //(getResult.errors?.values.first?.first as? String ?? "")
+                        let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+                        AlertHelper.shared.alertMesssage(view: self, title: "", message: errorMsg ?? "")
+                    }
+                })
+//            }
         }
+
+    }
+}
+
+extension OtpViewController: LoopingPlayerProgressDelegate{
+    func loopingPlayer(loopingPlayer: LoopingPlayer, didLoad percentage: Float) {
+        print("Loading progress: \(percentage * 100)%")
     }
     
+    func loopingPlayer(loopingPlayer: LoopingPlayer, didFinishLoading succeeded: Bool) {
+        print(succeeded ? "Video loaded successfully!" : "Failed to load video.")
+    }
     
     
 }

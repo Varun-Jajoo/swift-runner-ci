@@ -60,7 +60,7 @@ class ReviewProfileTableViewCell: UITableViewCell {
     //MARK: ---------------SET CELL DATA
     func setCellData(inputData: PackageCheckoutTrainerModel?){
         guard let inputData = inputData else { return  }
-        self.profileImgView.loadImage(urlString: inputData.profile, placeholder: AppImages.navLeft)
+        self.profileImgView.loadImage(urlString: inputData.profile, placeholder: UIImage())
         self.trainerNameLbl.text = inputData.name
         
          //------------------rating atttibuted btn text

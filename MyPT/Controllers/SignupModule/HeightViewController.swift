@@ -10,13 +10,13 @@ import UIKit
 class HeightViewController: CommonViewController {
 
     //MARK: -------------VARIABLE
-    let heightRengeView = RangePickerView()
-    var heightValues = Array(1 ... 12)
     var selectedHeight:String?
-    
+    var heightPicker = HeightPickerControl()
+    var titleFeetLbl = UILabel()
     
     //MARK: -------------IBOUTLET
     @IBOutlet weak var measureScaleMBV: UIView!
+    @IBOutlet weak var scaleMBV: RulerMultiUnitRuler!
     @IBOutlet weak var heightMeasureType: UISegmentedControl!
     @IBOutlet weak var topTitleLbl: UILabel!
     @IBOutlet weak var continueBtn: UIButton!
@@ -29,7 +29,7 @@ class HeightViewController: CommonViewController {
         setUpSegmet()
         setupSegmentedControlStyle()
         enableContinueBtn(isSelected: true)
-        setLayout()
+        self.setupFeetRuler()
         
         if let userData = appUserDefaults.getUserFromUserDefaults(as: UserModel.self), let userName = userData.name {
             print("userData", userData)
@@ -44,7 +44,7 @@ class HeightViewController: CommonViewController {
         setNavUI()
     }
     
-    func setNavUI(){
+    private func setNavUI(){
         self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
         self.setProgress(0.5)
         
@@ -54,17 +54,160 @@ class HeightViewController: CommonViewController {
     }
     
     //------------------************Font
-    func setUpFont(){
+    private func setUpFont(){
         self.topTitleLbl.font = AppFont.medium.size(28.0, familyName: familyClashDisplay)
         self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
     }
     
+    override func rightBtnActn(sender: UIButton) {
+        appUserDefaults.setRegistrationSkip(value: true)
+        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
+    }
+    
     //MARK: ---------- SET UI
-    func setupUI(){
+    private func setupUI(){
         //-----------*************
         DispatchQueue.main.async {
             self.heightMeasureType.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 6.0)
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+        }
+    }
+    
+    
+    //MARK: -----------------MAKE RULER FOR WEIGHT
+    
+    func setupFeetRuler(){
+        heightPicker.removeFromSuperview()
+        titleFeetLbl.removeFromSuperview()
+        titleFeetLbl  = UILabel()
+        titleFeetLbl.text = nil
+        heightPicker = HeightPickerControl()
+        heightPicker.translatesAutoresizingMaskIntoConstraints = false
+        heightPicker.unit = .feetInches
+        heightPicker.maxFeet = 300
+        heightPicker.addTarget(self, action: #selector(heightChanged(_:)), for: .valueChanged)
+        heightPicker.backgroundColor = UIColor.clear
+        heightPicker.rulerViewBgColor = UIColor.clear
+        scaleMBV.addSubview(heightPicker)
+        titleFeetLbl.backgroundColor = UIColor.clear
+        titleFeetLbl.textColor = UIColor.appWhite
+        titleFeetLbl.textAlignment = .right
+        scaleMBV.addSubview(titleFeetLbl)
+        titleFeetLbl.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            heightPicker.trailingAnchor.constraint(equalTo: scaleMBV.trailingAnchor, constant: 10),
+            heightPicker.centerYAnchor.constraint(equalTo: scaleMBV.centerYAnchor),
+            heightPicker.widthAnchor.constraint(equalToConstant: 250),
+            heightPicker.heightAnchor.constraint(equalTo: scaleMBV.heightAnchor, multiplier: 0.96),
+            titleFeetLbl.leadingAnchor.constraint(equalTo: heightPicker.leadingAnchor, constant: -170),
+            titleFeetLbl.centerYAnchor.constraint(equalTo: scaleMBV.centerYAnchor),
+            titleFeetLbl.widthAnchor.constraint(equalTo: heightPicker.widthAnchor, multiplier: 1.0),
+            titleFeetLbl.heightAnchor.constraint(equalTo: heightPicker.heightAnchor, multiplier: 0.8)
+        ])
+        
+        self.scrollScale(inputView: heightPicker)
+    }
+    
+    //MARK: -----------------MAKE RULER FOR WEIGHT
+    func setupCMSRuler(){
+        heightPicker.removeFromSuperview()
+        titleFeetLbl.removeFromSuperview()
+        titleFeetLbl  = UILabel()
+        titleFeetLbl.text = nil
+        heightPicker = HeightPickerControl()
+        heightPicker.translatesAutoresizingMaskIntoConstraints = false
+        heightPicker.unit = .centimeters
+        heightPicker.maxCM = 650.0
+        heightPicker.addTarget(self, action: #selector(heightChanged(_:)), for: .valueChanged)
+        heightPicker.backgroundColor = UIColor.clear
+        heightPicker.rulerViewBgColor = UIColor.clear
+        scaleMBV.addSubview(heightPicker)
+        titleFeetLbl.backgroundColor = UIColor.clear
+        titleFeetLbl.textColor = UIColor.appWhite
+        titleFeetLbl.textAlignment = .right
+        scaleMBV.addSubview(titleFeetLbl)
+        titleFeetLbl.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            heightPicker.trailingAnchor.constraint(equalTo: scaleMBV.trailingAnchor, constant: 10),
+            heightPicker.centerYAnchor.constraint(equalTo: scaleMBV.centerYAnchor),
+            heightPicker.widthAnchor.constraint(equalToConstant: 250),
+            heightPicker.heightAnchor.constraint(equalTo: scaleMBV.heightAnchor, multiplier: 0.96),
+            titleFeetLbl.leadingAnchor.constraint(equalTo: heightPicker.leadingAnchor, constant: -170),
+            titleFeetLbl.centerYAnchor.constraint(equalTo: scaleMBV.centerYAnchor),
+            titleFeetLbl.widthAnchor.constraint(equalTo: heightPicker.widthAnchor, multiplier: 1.0),
+            titleFeetLbl.heightAnchor.constraint(equalTo: heightPicker.heightAnchor, multiplier: 0.8)
+        ])
+        
+        self.scrollScale(inputView: heightPicker)
+    }
+    
+    func scrollScale(inputView: UIView){
+        
+        if let scrollView = inputView.subviews.first(where: { $0 is UIScrollView }) as? UIScrollView {
+            print("Found scroll view: \(scrollView)")
+            scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: false)
+        }
+        
+//        if let scrollView = inputView.subviews.first(where: { $0 is UIScrollView }) as? UIScrollView {
+//            print("Found scroll view: \(scrollView)")
+//            scrollView.setContentOffset(CGPoint(x: 0, y: 10), animated: true)
+//        }
+    }
+    
+    //MARK: ----------------GETTING VALUE FROM SCALE
+    @objc func heightChanged(_ sender: HeightPickerControl) {
+        print("Selected: \(sender.selectedFeet)ft \(sender.selectedInches)in")
+        
+        let feetAttributes = [
+            .font: AppFont.bold.size(50.0, familyName: familyManrope),
+            .foregroundColor: UIColor.appWhite
+        ] as [NSAttributedString.Key : Any]
+        
+        let ftAttributes = [
+            .font: AppFont.medium.size(25.0, familyName: familyManrope),
+            .foregroundColor: UIColor.txtDarkGray
+        ] as [NSAttributedString.Key : Any]
+        
+        //----------------Getting unit
+        switch sender.unit {
+         case .feetInches:
+             print("Selected: \(sender.selectedFeet) ft \(sender.selectedInches) in")
+            
+            self.selectedHeight = nil
+            self.selectedHeight = "\(sender.selectedFeet)ft\(sender.selectedInches)"
+                        
+            var attributedParts: [AttributedStringComponent] = [
+                NSAttributedString(string: "\(sender.selectedFeet)", attributes: feetAttributes),
+                NSAttributedString(string: "ft", attributes: ftAttributes)
+            ]
+        
+            if sender.selectedInches > 0 {
+                attributedParts.append(NSAttributedString(string: "\(sender.selectedInches)", attributes: feetAttributes))
+                attributedParts.append(NSAttributedString(string: "in", attributes: ftAttributes))
+            }
+
+            self.titleFeetLbl.attributedText = NSAttributedString(from: attributedParts, defaultAttributes: feetAttributes)
+            
+         case .centimeters:
+             print("Selected: \(sender.selectedCM) cm")
+            
+            self.selectedHeight = nil
+            self.selectedHeight = "\(sender.selectedCM)cm"
+            
+            let attributedParts: [AttributedStringComponent] = [
+                NSAttributedString(string: formatNumber(sender.selectedCM), attributes: feetAttributes),
+                NSAttributedString(string: "cm", attributes: ftAttributes)
+            ]
+                        
+            self.titleFeetLbl.attributedText = NSAttributedString(from: attributedParts, defaultAttributes: feetAttributes)
+         }
+    }
+    
+    private func formatNumber(_ number: Double) -> String {
+        if number.truncatingRemainder(dividingBy: 1) == 0 {
+            return String(Int(number)) // Remove decimal
+        } else {
+            return String(number) // Keep decimal
         }
     }
     
@@ -80,23 +223,6 @@ class HeightViewController: CommonViewController {
         UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.txtDarkGray, .font:AppFont.semibold.size(14.0, familyName: familyManrope)], for: .normal)
         UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.appWhite, .font:AppFont.semibold.size(14.0, familyName: familyManrope)], for: .selected)
     }
-    
-    func setLayout(){
-        DispatchQueue.main.async {
-            self.heightRengeView.frame = self.measureScaleMBV.bounds
-            self.measureScaleMBV.addSubview(self.heightRengeView)
-        }
-        
-        heightRengeView.delegate = self
-        heightRengeView.alignment = .vertical
-        heightRengeView.valueType = "ft"
-        heightRengeView.backgroundColor = UIColor.clear
-        
-        if heightRengeView.alignment == .vertical {
-            heightRengeView.transform = CGAffineTransform(rotationAngle: -CGFloat.pi)
-        }
-    }
-    
     
     //MARK: ------------setup segmantstyle
     func setupSegmentedControlStyle(){
@@ -115,14 +241,11 @@ class HeightViewController: CommonViewController {
     
     @IBAction func heightMeasureTypeActn(_ sender: UISegmentedControl) {
         print(sender.selectedSegmentIndex )
+        
         if sender.selectedSegmentIndex == 0 {
-            heightValues = Array(1 ... 12)
-            heightRengeView.setRange()
-            heightRengeView.valueType = "ft"
+            self.setupFeetRuler()
         }else{
-            heightValues = Array(50...250)
-            heightRengeView.setRange()
-            heightRengeView.valueType = "cm"
+            self.setupCMSRuler()
         }
     }
     
@@ -130,12 +253,13 @@ class HeightViewController: CommonViewController {
     @IBAction func continueBtnActn(_ sender: Any) {
         
         //--------discussion on responce model as like weight, height data type
-        
         if let selectedHeight = self.selectedHeight, !selectedHeight.isEmpty {
             RegistrationVM.addheightApi(viewController: self, inputHeight: selectedHeight, completion: { [weak self] getResultData in
                 guard let self = self, let getResultData = getResultData else { return  }
                 
                 if getResultData.status == true {
+                    appUserDefaults.setRegistrationSkip(value: false)
+                    
                     if let detailsData = getResultData.data {
                         appUserDefaults.saveUserToUserDefaults(detailsData)
                     }
@@ -164,23 +288,3 @@ class HeightViewController: CommonViewController {
     }
 }
 
-//MARK: -------------EXTENSION FOR RangePickerViewDelegate
-extension HeightViewController: RangePickerViewDelegate{
-    func rangePickerView(_ rangePickerView: RangePickerView, titleForRowAtIndex row: Int) -> String? {
-        String(heightValues[row])
-    }
-
-    func rangePickerView(_ rangePickerView: RangePickerView, didSelectRow row: Int) {}
-
-    func rangePickerView(_ rangePickerView: RangePickerView, numberOfIndicesAt row: Int) -> Int? {
-        heightValues.count
-    }
-
-    func rangePickerView(_ rangePickerView: RangePickerView, headerTitleIndicesAt row: Int) -> String? {
-        
-        self.selectedHeight = nil
-        self.selectedHeight = String(heightValues[row])
-        
-       return String(heightValues[row])
-    }
-}

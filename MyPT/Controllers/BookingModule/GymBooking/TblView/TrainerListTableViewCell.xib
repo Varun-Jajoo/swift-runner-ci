@@ -32,11 +32,18 @@
                                 <rect key="frame" x="1" y="384.66666666666669" width="454" height="71.333333333333314"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="MyPT Studio Dubai" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LnV-v4-QB9">
-                                        <rect key="frame" x="20" y="1" width="414" height="24"/>
+                                        <rect key="frame" x="20" y="1" width="382" height="24"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                         <color key="textColor" name="appWhite"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_trainerBadge" translatesAutoresizingMaskIntoConstraints="NO" id="HXC-Ww-uGa">
+                                        <rect key="frame" x="414" y="6" width="20" height="20"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" secondItem="HXC-Ww-uGa" secondAttribute="height" id="XDd-YL-WDz"/>
+                                            <constraint firstAttribute="width" constant="20" id="Zyv-T2-gru"/>
+                                        </constraints>
+                                    </imageView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="D1l-2V-4bc">
                                         <rect key="frame" x="20" y="37" width="55" height="16.333333333333329"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -81,7 +88,6 @@
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="trailing" secondItem="LnV-v4-QB9" secondAttribute="trailing" constant="20" id="3Jb-fr-Vw3"/>
                                     <constraint firstItem="D1l-2V-4bc" firstAttribute="leading" secondItem="LnV-v4-QB9" secondAttribute="leading" id="3XI-Ri-mIo"/>
                                     <constraint firstItem="4fw-01-ZmC" firstAttribute="centerY" secondItem="kuS-kg-ezO" secondAttribute="centerY" id="6s0-pL-Rsy"/>
                                     <constraint firstItem="VbT-o7-ex0" firstAttribute="centerY" secondItem="D1l-2V-4bc" secondAttribute="centerY" id="ACz-E2-jdH"/>
@@ -92,8 +98,12 @@
                                     <constraint firstItem="VbT-o7-ex0" firstAttribute="leading" secondItem="D1l-2V-4bc" secondAttribute="trailing" constant="5" id="PK9-zD-EJE"/>
                                     <constraint firstItem="4fw-01-ZmC" firstAttribute="leading" secondItem="kuS-kg-ezO" secondAttribute="trailing" constant="4" id="Qos-1m-BCO"/>
                                     <constraint firstItem="D1l-2V-4bc" firstAttribute="top" secondItem="LnV-v4-QB9" secondAttribute="bottom" constant="12" id="WjU-pk-7PB"/>
+                                    <constraint firstItem="HXC-Ww-uGa" firstAttribute="leading" secondItem="LnV-v4-QB9" secondAttribute="trailing" constant="12" id="cAB-1B-3Ko"/>
                                     <constraint firstItem="kuS-kg-ezO" firstAttribute="centerY" secondItem="D1l-2V-4bc" secondAttribute="centerY" id="ixl-qf-wTu"/>
+                                    <constraint firstItem="HXC-Ww-uGa" firstAttribute="bottom" secondItem="LnV-v4-QB9" secondAttribute="bottom" constant="1" id="sA4-Nx-qHm"/>
                                     <constraint firstAttribute="bottom" secondItem="VbT-o7-ex0" secondAttribute="bottom" constant="18" id="uaB-Gk-527"/>
+                                    <constraint firstItem="HXC-Ww-uGa" firstAttribute="width" secondItem="HXC-Ww-uGa" secondAttribute="height" id="uad-J5-aJI"/>
+                                    <constraint firstAttribute="trailing" secondItem="HXC-Ww-uGa" secondAttribute="trailing" constant="20" id="ufV-BD-rgi"/>
                                     <constraint firstItem="LnV-v4-QB9" firstAttribute="top" secondItem="VOU-rJ-cTE" secondAttribute="top" constant="1" id="wIC-xb-goL"/>
                                 </constraints>
                             </view>
@@ -116,16 +126,16 @@
                                 </connections>
                             </collectionView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Fdq-36-bzx">
-                                <rect key="frame" x="0.0" y="535" width="246" height="104"/>
+                                <rect key="frame" x="0.0" y="535" width="246" height="81"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="Hurry Up!" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cMQ-n7-msj">
-                                        <rect key="frame" x="19" y="2" width="226" height="82"/>
+                                        <rect key="frame" x="19" y="2" width="226" height="59"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" name="appWhite"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="255" verticalCompressionResistancePriority="755" text="Only 2 slots available" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ihe-Ug-s86">
-                                        <rect key="frame" x="19" y="86" width="226" height="17"/>
+                                        <rect key="frame" x="19" y="63" width="226" height="17"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <color key="textColor" name="txtDarkGray"/>
                                         <nil key="highlightedColor"/>
@@ -143,7 +153,7 @@
                                 </constraints>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="100" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1bK-UL-g5b">
-                                <rect key="frame" x="258" y="587" width="178" height="52"/>
+                                <rect key="frame" x="258" y="564" width="178" height="52"/>
                                 <color key="backgroundColor" name="appWhite"/>
                                 <inset key="contentEdgeInsets" minX="45" minY="17" maxX="45" maxY="17"/>
                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
@@ -152,16 +162,16 @@
                                 </state>
                             </button>
                         </subviews>
-                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" name="MainBgColor"/>
                         <constraints>
                             <constraint firstItem="E64-Pm-shD" firstAttribute="leading" secondItem="6I2-vM-DNo" secondAttribute="leading" constant="1" id="0Fg-AJ-R8Y"/>
                             <constraint firstAttribute="trailing" secondItem="E64-Pm-shD" secondAttribute="trailing" constant="1" id="ANK-1T-NaH"/>
                             <constraint firstItem="Fdq-36-bzx" firstAttribute="top" secondItem="dbo-8j-enJ" secondAttribute="bottom" constant="20" id="CiB-XI-Qqr"/>
                             <constraint firstItem="Fdq-36-bzx" firstAttribute="leading" secondItem="6I2-vM-DNo" secondAttribute="leading" id="Ef7-nb-Ogh"/>
                             <constraint firstItem="VOU-rJ-cTE" firstAttribute="trailing" secondItem="E64-Pm-shD" secondAttribute="trailing" id="EvO-Md-46A"/>
-                            <constraint firstAttribute="bottom" secondItem="1bK-UL-g5b" secondAttribute="bottom" constant="1" id="Fib-B5-19u"/>
+                            <constraint firstAttribute="bottom" secondItem="1bK-UL-g5b" secondAttribute="bottom" constant="24" id="Fib-B5-19u"/>
                             <constraint firstAttribute="trailing" secondItem="1bK-UL-g5b" secondAttribute="trailing" constant="20" id="Mc8-PF-tvm"/>
-                            <constraint firstAttribute="bottom" secondItem="Fdq-36-bzx" secondAttribute="bottom" constant="1" id="PQ8-Tx-gaE"/>
+                            <constraint firstAttribute="bottom" secondItem="Fdq-36-bzx" secondAttribute="bottom" constant="24" id="PQ8-Tx-gaE"/>
                             <constraint firstItem="VOU-rJ-cTE" firstAttribute="bottom" secondItem="E64-Pm-shD" secondAttribute="bottom" constant="1" id="Qa7-hn-4ck"/>
                             <constraint firstItem="E64-Pm-shD" firstAttribute="top" secondItem="6I2-vM-DNo" secondAttribute="top" constant="1" id="ShR-bG-pec"/>
                             <constraint firstItem="dbo-8j-enJ" firstAttribute="trailing" secondItem="E64-Pm-shD" secondAttribute="trailing" id="aoX-Eo-pMQ"/>
@@ -197,6 +207,7 @@
                 <outlet property="ratingBtn" destination="kuS-kg-ezO" id="0BY-Re-7pR"/>
                 <outlet property="slotMBV" destination="Fdq-36-bzx" id="wjd-jq-o74"/>
                 <outlet property="trainerImgView" destination="E64-Pm-shD" id="Tbz-Ep-opq"/>
+                <outlet property="trainerVerifyImgView" destination="HXC-Ww-uGa" id="WNO-4k-tW8"/>
             </connections>
             <point key="canvasLocation" x="212.21374045801525" y="238.73239436619718"/>
         </tableViewCell>
@@ -207,6 +218,7 @@
         <image name="ic_grayDot" width="3" height="3.3333332538604736"/>
         <image name="ic_star" width="16" height="16.333333969116211"/>
         <image name="ic_trainer" width="429.66665649414062" height="437"/>
+        <image name="ic_trainerBadge" width="14.333333015441895" height="14.333333015441895"/>
         <namedColor name="MainBgColor">
             <color red="0.0" green="0.019607843137254902" blue="0.0078431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
@@ -217,7 +229,7 @@
             <color red="0.58431372549019611" green="0.58431372549019611" blue="0.58431372549019611" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="tintColor">
-            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

@@ -24,14 +24,16 @@ class TrainerDescriptionViewController: CommonViewController {
     }
   
     private var videoUrl: String? {
-        didSet{
+        didSet {
             guard let videoStr = videoUrl, let videoURL = URL(string: videoStr) else { return }
-               let player = AVPlayer(url: videoURL)
-               let vc = AVPlayerViewController()
-               vc.player = player
-               present(vc, animated: true) {
-                   player.play()
-               }
+
+            let player = AVPlayer(url: videoURL)
+            let vc = CustomPlayerViewController()
+            vc.player = player
+            vc.modalPresentationStyle = .overFullScreen
+            self.present(vc, animated: true) {
+                player.play()
+            }
         }
     }
     
@@ -58,6 +60,7 @@ class TrainerDescriptionViewController: CommonViewController {
     var inputParam: DetailsParam?
     private var isCounter:Int = 0
     var detailsFlowSetup:calendarFlow = .defaultFlow
+    var isSlotsAvail:Bool?
     
     
     //MARK: --------------IBOUTLET
@@ -65,6 +68,14 @@ class TrainerDescriptionViewController: CommonViewController {
     @IBOutlet weak var trainerNameLbl: UILabel!
     @IBOutlet weak var badgeImgView: UIImageView!
     @IBOutlet weak var followrsMBV: UIView!
+    @IBOutlet weak var trainerMenuMBV: UIView!
+    @IBOutlet weak var descMBV: UIView!
+    @IBOutlet weak var experienceDetailsMBV: UIView!
+    @IBOutlet weak var SpecialitiesMBV: UIView!
+    @IBOutlet weak var CertificationsMBV: UIView!
+    @IBOutlet weak var WhyTrainwithMeMBV: UIView!
+    @IBOutlet weak var motivationMBV: UIView!
+    @IBOutlet weak var mediaGalleryMBV: UIView!
     @IBOutlet weak var followrsCountLbl: UILabel!
     @IBOutlet weak var followersLbl: UILabel!
     @IBOutlet weak var distanceBtn: UIButton!
@@ -90,6 +101,7 @@ class TrainerDescriptionViewController: CommonViewController {
     @IBOutlet weak var motivationQuoteTitleLbl: UILabel!
     @IBOutlet weak var quoteMBV: UIView!
     @IBOutlet weak var motivationQuoteDescLbl: UILabel!
+    @IBOutlet weak var motivationQuoteDescLblBottomConstrnt: NSLayoutConstraint!
     @IBOutlet weak var quoteWriterNameLbl: UILabel!
     @IBOutlet weak var mediaGalleryLbl: UILabel!
     @IBOutlet weak var mediaGalleryCollView: UICollectionView!
@@ -106,12 +118,15 @@ class TrainerDescriptionViewController: CommonViewController {
         trainMeCollView.register(UINib(nibName: "WithMeCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WithMeCollectionViewCell")
         mediaGalleryCollView.register(UINib(nibName: "WithMeCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WithMeCollectionViewCell")
         certificationsCollView.register(UINib(nibName: "CertificatesCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "CertificatesCollectionViewCell")
+       
+        if let isSlotsAvail = isSlotsAvail, isSlotsAvail {
+            self.enableContinueBtn(isSelected: !isSlotsAvail, btn: self.bookSlotBtn)
+        }
         
         setupUI()
         setUpFont()
         self.inputTagData()
         self.getTrainerDetailsApi()
-        
     }
     
     deinit {
@@ -201,7 +216,9 @@ class TrainerDescriptionViewController: CommonViewController {
     private func setInputData(){
         
         self.trainerFollow()
-        self.trainerImgView.loadImage(urlString: detailsModel?.profile, placeholder: AppImages.navLeft)
+        self.trainerImgView.loadImage(urlString: detailsModel?.profile, placeholder: UIImage())
+        self.trainerImgView.contentMode = .scaleAspectFit
+        self.trainerImgView.clipsToBounds = true
         self.trainerNameLbl.text = self.detailsModel?.name
         self.followrsCountLbl.text = self.detailsModel?.follower
         //        self.followersLbl.text = ""
@@ -222,6 +239,8 @@ class TrainerDescriptionViewController: CommonViewController {
         
         self.motivationQuoteDescLbl.text = "\"\(self.detailsModel?.quote ?? "")\""
         self.quoteWriterNameLbl.isHidden = true
+        self.quoteWriterNameLbl.text = nil
+        self.motivationQuoteDescLblBottomConstrnt.constant = 0.0
         
         if let verified = self.detailsModel?.isVerified, verified {
             badgeImgView.isHidden = false
@@ -234,6 +253,19 @@ class TrainerDescriptionViewController: CommonViewController {
         self.descLbl.appendReadmore(after: self.detailsModel?.description ?? "", trailingContent: .readmore)
         
         self.descLbl.addReadMoreTapGesture(target: self, action: #selector(handleReadMoreTap(_:)))
+        
+        //----------------********** Manage views
+        self.descMBV.isHidden = true
+//        self.experienceDetailsMBV.isHidden = true
+        self.motivationMBV.isHidden = true
+        
+        if let description = self.detailsModel?.description, !description.trimmingCharacters(in: .whitespaces).isEmpty {
+            self.descMBV.isHidden = false
+        }
+        if let quote = self.detailsModel?.quote, !quote.trimmingCharacters(in: .whitespaces).isEmpty {
+            self.motivationMBV.isHidden = false
+        }
+        
         
         //        self.mediaGalleryLbl.text = ""
         //        self.expDescLbl.text = ""
@@ -267,6 +299,9 @@ class TrainerDescriptionViewController: CommonViewController {
     
         //---------------------**************UI
         DispatchQueue.main.async {
+            
+            self.trainerImgView.addGradientLayer(colors: [UIColor(red: 0, green: 0, blue: 0, alpha: 0), UIColor(red: 0, green: 5/255.0, blue: 2.0/255.0, alpha: 1.0)], locations: [0.92,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 0)
+            
             [
                 self.bookSlotBtn,
                 self.followrsMBV,
@@ -352,6 +387,19 @@ class TrainerDescriptionViewController: CommonViewController {
             vc.slotBookFlow = .withTrainerMembership
             vc.params = AvailParmsModel(type: inputParam?.type, trainer_id: "\(detailsModel?.id ?? 0)", studio_id: inputParam?.studio_id, month: "\(currentMonth)", address_id: "")
             self.navigationController?.pushViewController(vc, animated: true)
+        }
+    }
+    
+    //MARK: -------------- ENABLE CONTINUE
+    func enableContinueBtn(isSelected:Bool = false, btn:UIButton){
+        if isSelected {
+            btn.isUserInteractionEnabled = true
+            btn.backgroundColor = UIColor.appWhite
+            btn.setTitleColor(UIColor.mainBg, for: .normal)
+        } else {
+            btn.isUserInteractionEnabled = false
+            btn.backgroundColor = UIColor.appDarkGray
+            btn.setTitleColor(UIColor.appWhite, for: .normal)
         }
     }
 }
@@ -533,9 +581,29 @@ extension TrainerDescriptionViewController{
                 self.detailsModel = getResult.data
                 self.specialitiesData?.append(contentsOf: self.detailsModel?.tags ?? [])
                 self.setInputData()
-                self.trainMeCollView.reloadData()
-                self.certificationsCollView.reloadData()
-                self.mediaGalleryCollView.reloadData()
+                
+                self.SpecialitiesMBV.isHidden = true
+                self.CertificationsMBV.isHidden = true
+                self.WhyTrainwithMeMBV.isHidden = true
+                self.mediaGalleryMBV.isHidden = true
+                
+                if let specialitiesData = self.specialitiesData?.count, specialitiesData != 0 {
+                    self.SpecialitiesMBV.isHidden = false
+                    self.specialitiesCollView.reloadData()
+                }
+                if let certificates = detailsModel?.certificates?.count, certificates != 0 {
+                    self.CertificationsMBV.isHidden = false
+                    self.certificationsCollView.reloadData()
+                }
+                if let galleries = detailsModel?.galleries?.count, galleries != 0 {
+                    self.WhyTrainwithMeMBV.isHidden = false
+                    self.mediaGalleryCollView.reloadData()
+                }
+                
+                if let trainWithMe = detailsModel?.trainWithMe , !trainWithMe.isEmpty {
+                    self.WhyTrainwithMeMBV.isHidden = false
+                    self.trainMeCollView.reloadData()
+                }
             }
         })
     }

@@ -52,7 +52,7 @@ class BookingCalendarViewController: CommonViewController {
     var startDateStr: String?
     var endDateStr: String?
     
-    
+    /*
     fileprivate let gregorian: Calendar = Calendar(identifier: .indian)
     fileprivate lazy var dateFormatter1: DateFormatter = {
         let formatter = DateFormatter()
@@ -60,13 +60,22 @@ class BookingCalendarViewController: CommonViewController {
         formatter.dateFormat = "yyyy/MM/dd"
         return formatter
     }()
+    */
     
+    /*
     fileprivate lazy var dateFormatter2: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter
     }()
+    */
+    
+    private var monthName: String? {
+        didSet{
+            self.monthTitleLbl.text = monthName
+        }
+    }
     
     let statusColorMap: [String: UIColor] = [
         "CLOSED".uppercased(): UIColor.txtDarkGray,
@@ -160,8 +169,21 @@ class BookingCalendarViewController: CommonViewController {
     }
     
     func setNavUI(){
-        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [AppStrings.book_a_Slot], setTintColor: .black, setTitleColor: UIColor.appWhite)
+//        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [AppStrings.book_a_Slot], setTintColor: .black, setTitleColor: UIColor.appWhite)
         self.setRighMenu(rightImgs: [AppImages.moreSettings], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
+        
+        //----********### Nav
+        
+        switch slotBookFlow {
+        case .bookTrainerHomeWorkout, .bookTrainerGymWorkout, .gymMembership, .withTrainerMembership, .defaultFlow:
+            self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [AppStrings.book_a_Slot], setTintColor: .black, setTitleColor: UIColor.appWhite)
+            
+        case .createPackage, .withoutTrainerMembership:
+            self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
+            self.setProgress(0.2)
+            self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
+        }
+        
     }
     
     //MARK: ---------- SET UI
@@ -241,6 +263,12 @@ class BookingCalendarViewController: CommonViewController {
             //-------------------------Api
             self.getAvailableSlots(inputParams: self.params?.getParams() ?? ["":""])
             
+            //-----------forcly call today
+            let date = Date() // Or any specific date you want to select
+            self.bookingCalendar.select(date)
+            self.bookingCalendar.delegate?.calendar?(self.bookingCalendar, didSelect: date, at: .current)
+            self.monthTitleLbl.text = getMonthName(from: bookingCalendar)
+                        
         case .gymMembership:
             print("gymMembership")
             
@@ -266,6 +294,7 @@ class BookingCalendarViewController: CommonViewController {
             let date = Date() // Or any specific date you want to select
             self.bookingCalendar.select(date)
             self.bookingCalendar.delegate?.calendar?(self.bookingCalendar, didSelect: date, at: .current)
+            self.monthTitleLbl.text = getMonthName(from: bookingCalendar)
             
         case .defaultFlow:
             print("default is called..")
@@ -355,6 +384,8 @@ class BookingCalendarViewController: CommonViewController {
         if sender.tag == 601 {
             print("left arrow clicked of month")
             // Go to the previous month
+            guard bookingCalendar.currentPage.startOfDay >= Date().startOfDay else { return }
+            
             if let previousMonth = Calendar.current.date(byAdding: .month, value: -1, to: bookingCalendar.currentPage) {
                 bookingCalendar.setCurrentPage(previousMonth, animated: true)
                 calendarCurrentPageDidChange(bookingCalendar) // Manually call delegate
@@ -392,11 +423,23 @@ class BookingCalendarViewController: CommonViewController {
 
 extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate, FSCalendarDelegateAppearance {
     
+    // Set minimum scrollable/selectable date (start of current month)
+    func minimumDate(for calendar: FSCalendar) -> Date {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month], from: Date())
+        return calendar.date(from: components)!
+    }
+
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
+        
+        /*
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-        dateFormatter.dateFormat = "dd-MM-yyyy" // "yyyy-MM-dd" // Customize the format as needed
+        dateFormatter.dateFormat = "dd-MM-yyyy" // Customize the format as needed
         let selectedDate = dateFormatter.string(from: date)
+        */
+        
+        let selectedDate = DateFormatterHelper.shared.dateString(from: date, format: "dd-MM-yyyy") ?? ""
         print("Selected date: \(selectedDate)")
         
         self.enableContinueBtn(isSelected: true)
@@ -404,15 +447,19 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
         switch slotBookFlow {
         case .bookTrainerHomeWorkout, .bookTrainerGymWorkout, .withTrainerMembership, .gymMembership:
             
+            /*
             dateFormatter.dateFormat = "yyyy-MM-dd"
             let getSlotDate = dateFormatter.string(from: date)
+            */
+            
+            let getSlotDate = DateFormatterHelper.shared.dateString(from: date, format: "yyyy-MM-dd") ?? ""
             
             let vc:SlotDurationViewController = SlotDurationViewController.instantiate(appStoryboard: .booking)
             vc.slotDurationFlow = slotBookFlow
             vc.selectedDate = "\(selectedDate)"
             vc.showCalView.datesWithMultipleEvents = self.datesWithMultipleEvents
             vc.showCalView.disabledDates = self.disabledDates
-            vc.showCalView.isCellSelected = false
+            vc.showCalView.isCellSelected = true
             vc.inputGetSlotParams = GetSlotParamsModel(trainer_id: self.params?.trainer_id, type: self.params?.type, date: "\(getSlotDate)", timing: "morning", studio_id: self.params?.studio_id, address_id: self.params?.address_id)
             vc.avialCalanderparams = self.params
             vc.slotDurationFlow = slotBookFlow
@@ -505,7 +552,11 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
     }
     
     func calendar(_ calendar: FSCalendar, numberOfEventsFor date: Date) -> Int {
-        let dateString = self.dateFormatter2.string(from: date)
+//        let dateString = self.dateFormatter2.string(from: date)
+        //"yyyy-MM-dd"
+        
+        let dateString = DateFormatterHelper.shared.dateString(from: date, format: "yyyy-MM-dd") ?? ""
+        
 //        if self.datesWithEvent.contains(dateString) {
 //            return 1
 //        }
@@ -524,7 +575,10 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventDefaultColorsFor date: Date) -> [UIColor]? {
         
-        let key = self.dateFormatter2.string(from: date)
+//        let key = self.dateFormatter2.string(from: date)
+        
+        let key = DateFormatterHelper.shared.dateString(from: date, format: "yyyy-MM-dd") ?? ""
+        
         if let colors = self.datesWithMultipleEvents?[key] as? UIColor {
             return [colors]
         }
@@ -538,7 +592,8 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, fillSelectionColorFor date: Date) -> UIColor? {
-        let key = self.dateFormatter1.string(from: date)
+//        let key = self.dateFormatter1.string(from: date)
+        let key = DateFormatterHelper.shared.dateString(from: date, format: "yyyy/MM/dd") ?? ""
         if let color = self.fillSelectionColors[key] {
             return color
         }
@@ -546,7 +601,9 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, fillDefaultColorFor date: Date) -> UIColor? {
-        let key = self.dateFormatter1.string(from: date)
+//        let key = self.dateFormatter1.string(from: date)
+       
+        let key = DateFormatterHelper.shared.dateString(from: date, format: "yyyy/MM/dd") ?? ""
         if let color = self.fillDefaultColors[key] {
             return color
         }
@@ -554,7 +611,8 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, borderDefaultColorFor date: Date) -> UIColor? {
-        let key = self.dateFormatter1.string(from: date)
+//        let key = self.dateFormatter1.string(from: date)
+        let key = DateFormatterHelper.shared.dateString(from: date, format: "yyyy/MM/dd") ?? ""
         if let color = self.borderDefaultColors[key] {
             return color
         }
@@ -562,7 +620,9 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, borderSelectionColorFor date: Date) -> UIColor? {
-        let key = self.dateFormatter1.string(from: date)
+//        let key = self.dateFormatter1.string(from: date)
+        
+        let key = DateFormatterHelper.shared.dateString(from: date, format: "yyyy/MM/dd") ?? ""
         if let color = self.borderSelectionColors[key] {
             return color
         }
@@ -583,11 +643,19 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
            
            switch slotBookFlow{
            case .bookTrainerHomeWorkout, .bookTrainerGymWorkout, .createPackage, .gymMembership, .withTrainerMembership, .defaultFlow:
-               let dateString =  self.dateFormatter2.string(from: date) //formatDate(date)
+//               let dateString =  self.dateFormatter2.string(from: date) //formatDate(date)
+               
+               /*
+               let dateString = DateFormatterHelper.shared.dateString(from: date, format: "yyyy-MM-dd") ?? ""
               
                return disabledDates.contains(dateString) // Return false to disable selection
+               */
+                              
+               return date >= Date().startOfDay
+               
            case .withoutTrainerMembership:
                
+               /*
                let calendar = Calendar.current
                let components = calendar.dateComponents([.year, .month], from: date)
                
@@ -600,6 +668,9 @@ extension BookingCalendarViewController:FSCalendarDataSource, FSCalendarDelegate
                }
                
                return false
+               */
+               
+               return date >= Date().startOfDay
            }
            
            /*
@@ -695,4 +766,14 @@ extension BookingCalendarViewController {
             self.bookingCalendar.reloadData()
         })
     }
+}
+
+extension Date {
+    var startOfDay: Date {
+        return Calendar.current.startOfDay(for: self)
+    }
+    
+    var isTodayOrFuture: Bool {
+           return self.startOfDay >= Date().startOfDay
+       }
 }

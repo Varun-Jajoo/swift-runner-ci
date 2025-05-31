@@ -117,5 +117,20 @@ class DateFormatterHelper {
             }
         }
     }
+    
+    func getTimeOfDay(for date: Date = Date()) -> String {
+        let hour = Calendar.current.component(.hour, from: date)
+
+        switch hour {
+        case 5..<12:
+            return "Morning"
+        case 12..<17:
+            return "Afternoon"
+        case 17..<21:
+            return "Evening"
+        default:
+            return "Night"
+        }
+    }
 
 }

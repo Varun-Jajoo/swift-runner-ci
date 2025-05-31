@@ -13,6 +13,7 @@ class TrainerListTableViewCell: UITableViewCell {
     var trainerTagsData:[TrainerTagModel]? = [] {
         didSet{
             if let trainerTagsData = trainerTagsData {
+                guard trainerTagsData.count > 0 else { return }
                 restrictedRange = [0...trainerTagsData.count - 1]
                 self.gymCategoryCollView.reloadData()
             }
@@ -36,6 +37,7 @@ class TrainerListTableViewCell: UITableViewCell {
     @IBOutlet weak var gymCategoryCollView: UICollectionView!
     @IBOutlet weak var noteLbl: UILabel!
     @IBOutlet weak var numberSlotLbl: UILabel!
+    @IBOutlet weak var trainerVerifyImgView: UIImageView!
     
 
     override func awakeFromNib() {
@@ -49,8 +51,13 @@ class TrainerListTableViewCell: UITableViewCell {
     
     private func setupUI(){
         DispatchQueue.main.async {
+            
+            self.trainerImgView.addGradientImgV(colors: [UIColor(red: 0, green: 0, blue: 0, alpha: 0), UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 0.7)], locations: [0, 1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1))
             self.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+            self.cellMBV.addGradient(colors: [UIColor(red: 0, green: 0, blue: 0, alpha: 0), UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 1.0)], locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 12.0)
             self.bookSlotBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+            
+            self.trainerImgView.roundSideCorners(radius: 12.0, cornerSide: [.topLeft, .topRight])
             self.contentView.setNeedsLayout()
             self.contentView.layoutIfNeeded()
         }
@@ -59,13 +66,52 @@ class TrainerListTableViewCell: UITableViewCell {
     //MARK: -------------SET CELL INPUTDATA
     func setCellData(trainerData: TrainerModel?){
         guard let trainerData = trainerData else { return  }
-            self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: AppImages.navLeft)
+        
+        self.bookSlotBtn.backgroundColor = UIColor.appWhite
+        self.bookSlotBtn.setTitleColor(UIColor.mainBg, for: .normal)
+        
+        self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: UIImage())
             self.gymNameLbl.text = trainerData.name
             self.distanceBtn.setTitle(trainerData.distance, for: .normal)
             self.ratingBtn.setTitle("\(trainerData.averageRating?.doubleValue ?? 0.0)", for: .normal)
             self.avgRatingBtn.setTitle(trainerData.noOfRating ?? "", for: .normal)
             self.landMarkBtn.setTitle(trainerData.location, for: .normal)
-            self.numberSlotLbl.text = "Only \(trainerData.slot ?? "") slots available"
+      
+//        if let isFull = trainerData.isfull, isFull {
+        
+        if let isFull = trainerData.isfull, let slotAvail = trainerData.slot?.value, isFull && slotAvail.lowercased() == "no".lowercased() {
+            self.noteLbl.text = "No slots available"
+            self.numberSlotLbl.text = nil
+            self.bookSlotBtn.backgroundColor = UIColor.appDarkGray
+            self.bookSlotBtn.setTitleColor(UIColor.appWhite, for: .normal)
+        }
+        else{
+            self.noteLbl.text = "Hurry Up!"
+            self.numberSlotLbl.text = "Only \(trainerData.slot?.value ?? "") slots available"
+            self.bookSlotBtn.isUserInteractionEnabled = true
+        }
+        
+        self.trainerVerifyImgView.isHidden = true
+        if let isVerify = trainerData.isVerified, isVerify {
+            self.trainerVerifyImgView.isHidden = false
+        }
+        
+        /*
+         if isSelected {
+             self.continueBtn.isUserInteractionEnabled = true
+             self.continueBtn.backgroundColor = UIColor.appWhite
+             self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
+         } else {
+             self.continueBtn.isUserInteractionEnabled = false
+             self.continueBtn.backgroundColor = UIColor.appDarkGray
+             self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
+         }
+         */
+        
+//        self.numberSlotLbl.text = "Only \(trainerData.slot?.value ?? "") slots available"
+//            self.numberSlotLbl.text = "Only \(trainerData.slot ?? "") slots available"
+        
+        
         
         self.contentView.setNeedsLayout()
         self.contentView.layoutIfNeeded()
@@ -77,14 +123,34 @@ class TrainerListTableViewCell: UITableViewCell {
     func setGymCellData(trainerData: GymTrainerModel?){
         guard let trainerData = trainerData else { return  }
         
-            self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: AppImages.navLeft)
+        self.bookSlotBtn.backgroundColor = UIColor.appWhite
+        self.bookSlotBtn.setTitleColor(UIColor.mainBg, for: .normal)
+        
+        self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: UIImage())
             self.gymNameLbl.text = trainerData.name
             self.distanceBtn.setTitle(trainerData.distance, for: .normal)
             self.ratingBtn.setTitle("\(trainerData.averageRating ?? 0)", for: .normal)
             self.avgRatingBtn.setTitle(trainerData.noOfRating ?? "", for: .normal)
             self.landMarkBtn.setTitle(trainerData.location, for: .normal)
+//            self.numberSlotLbl.text = "Only \(trainerData.slot ?? "") slots available"
+        
+        self.trainerVerifyImgView.isHidden = true
+        if let isVerify = trainerData.isVerified, isVerify {
+            self.trainerVerifyImgView.isHidden = false
+        }
+        
+        if let isFull = trainerData.isfull, let slotAvail = trainerData.slot, isFull && slotAvail.lowercased() == "no".lowercased() {
+            self.noteLbl.text = "No slots available"
+            self.numberSlotLbl.text = nil
+            self.bookSlotBtn.backgroundColor = UIColor.appDarkGray
+            self.bookSlotBtn.setTitleColor(UIColor.appWhite, for: .normal)
+        }
+        else{
+            self.noteLbl.text = "Hurry Up!"
             self.numberSlotLbl.text = "Only \(trainerData.slot ?? "") slots available"
-            
+            self.bookSlotBtn.isUserInteractionEnabled = true
+        }
+        
             self.contentView.setNeedsLayout()
             self.contentView.layoutIfNeeded()
             self.setupUI()
@@ -142,7 +208,11 @@ extension TrainerListTableViewCell: UICollectionViewDataSource, UICollectionView
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell:ProductCategoryCollViewCell = gymCategoryCollView.dequeueReusableCell(withReuseIdentifier: "ProductCategoryCollViewCell", for: indexPath) as! ProductCategoryCollViewCell
-        cell.cellMBV.backgroundColor = UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1)
+        DispatchQueue.main.async {
+            cell.cellMBV.backgroundColor = UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1)
+        }
+       
+        cell.titleLblTopConstrnt.constant = 7.5
         
         if let lastCell = collectionView.isLastCell(), let totalCount = trainerTagsData?.count,( lastCell == indexPath.row && totalCount > 3) {
             cell.titleLbl.text = "+3"

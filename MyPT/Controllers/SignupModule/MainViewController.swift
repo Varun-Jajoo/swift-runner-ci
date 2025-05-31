@@ -20,10 +20,13 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
     @IBOutlet weak var topTitleLbl: UILabel!
     @IBOutlet weak var subTitileLbl: UILabel!
     @IBOutlet weak var mobileNumTxt: UITextField!
+    @IBOutlet weak var emailTxtField: UITextField!
     @IBOutlet weak var continueBtn: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.mobileNumTxt.isHidden = true
         
         self.continueBtn.isUserInteractionEnabled = false
         mobileNumTxt.delegate = self
@@ -38,6 +41,13 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
         setupUI()
         setUpVideo()
 //        loadVideo()
+        
+//        //------------------only for testin for age ui
+//        let currentVC = vcSteps.getCurrentVC(vcRawValue: 3)
+//        if let getVC = currentVC?.instantiate(appStoryboard: .main){
+//            self.navigationController?.pushViewController(getVC, animated: true)
+//        }
+       
     }
     
     deinit {
@@ -53,6 +63,7 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
         self.setNavigationColor(setColor: .clear)
         self.statusBarColor(setColor: .clear)
         setNavUI()
+        self.mobileNumTxt.isHidden = true
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -75,15 +86,21 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
         self.topTitleLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
         self.subTitileLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
         self.mobileNumTxt.font = AppFont.semibold.size(20.0, familyName: familyManrope)
+        self.emailTxtField.font = AppFont.semibold.size(20.0, familyName: familyManrope)
         self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
     }
     
     //MARK: ---------- SET UI
     func setupUI(){
-        self.countryCodeStr = "+971"
+        self.countryCodeStr = isTesting ? "+91" : "+971" //for country code
+        
         DispatchQueue.main.async {
             self.mobileNumTxt.setLeftPaddingWithImage(95.0, self.mobileNumTxt.font?.lineHeight.magnitude ?? 1.0, UIImage(named: "ic_countyCode"), self.countryCodeStr ?? "+971")
-            self.mobileNumTxt.placeholderSet(placeHolder: "XXX-XXX-XXXX", color: UIColor.txtDarkGray)
+            self.mobileNumTxt.placeholderSet(placeHolder: "XXX-XXX-XXX", color: UIColor.txtDarkGray)
+            
+            self.emailTxtField.setLeftPaddingWithImage(35, 0, UIImage(named: "ic_email"), "")
+            self.emailTxtField.placeholderSet(placeHolder: "Enter you email id", color: UIColor.txtDarkGray)
+            
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
         }
     }
@@ -165,7 +182,7 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
     //MARK: ----------CONTINUE BTN ACTN
     @IBAction func continueBtnActn(_ sender: Any) {
             
-        if let mobileStr = mobileNumTxt.text {
+        if let mobileStr = mobileNumTxt.text , !mobileStr.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             let phoneNumber = mobileStr.replacingOccurrences(of: "-", with: "")
             
             if RegistrationVM.isValidePhone(phoneNumStr: phoneNumber) {
@@ -173,7 +190,7 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
                 self.view.endEditing(true)
                 self.inputType = "1"
                 
-                RegistrationVM.loginApi(inputPhoneNum: phoneNumber, inputCountryCode: self.countryCodeStr, loginType: self.inputType, completion: { [weak self] getResult in
+                RegistrationVM.loginApi(inputEmail: "", inputPhoneNum: phoneNumber, inputCountryCode: self.countryCodeStr, loginType: self.inputType, completion: { [weak self] getResult in
                     guard let self = self, let getResult = getResult else { return  }
                     
                     if getResult.status == true {
@@ -188,10 +205,29 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
                     }
                 })
             }
+        }else if let email = emailTxtField.text{
+            
+            self.view.endEditing(true)
+            self.inputType = "3"
+            self.countryCodeStr = ""
+            
+            RegistrationVM.loginApi(inputEmail: email,inputPhoneNum: "", inputCountryCode: self.countryCodeStr, loginType: self.inputType, completion: { [weak self] getResult in
+                guard let self = self, let getResult = getResult else { return  }
+                
+                if getResult.status == true {
+                    let vc:OtpViewController = OtpViewController.instantiate(appStoryboard: .main)
+                    vc.mobilNumStr = email
+                    vc.countryCodeStr = self.countryCodeStr
+                    vc.inputType = self.inputType
+                    self.navigationController?.pushViewController(vc, animated: false)
+                }else{
+                    let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+                    AlertHelper.shared.alertMesssage(view: self, title: "", message: errorMsg ?? "")
+                }
+            })
         }
         
-    
-
+        
         /*
         let vc:OtpViewController = OtpViewController.instantiate(appStoryboard: .main)
         vc.mobilNumStr = "+971" + " " + (mobileNumTxt.text ?? "XXXXXXXXXX")
@@ -220,8 +256,10 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
     }
     
     
-    // UITextFieldDelegate method to restrict the input to 10 digits
+    // UITextFieldDelegate
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        
+        if textField == mobileNumTxt {
         // Allow only numeric input
         let allowedCharacterSet = CharacterSet.decimalDigits
         let characterSet = CharacterSet(charactersIn: string)
@@ -229,23 +267,34 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
         if !allowedCharacterSet.isSuperset(of: characterSet) {
             return false // Disallow non-numeric input
         }
+        //restrict the input to 10 digits
+        let countNum:Int = self.countryCodeStr == "+971" ? 11 : 12
         
-        // Check the total length after the proposed change
-        if let currentText = textField.text, let stringRange = Range(range, in: currentText) {
-            let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
-            if updatedText.count >= 12 {
+            // Check the total length after the proposed change
+            if let currentText = textField.text, let stringRange = Range(range, in: currentText) {
+                let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+                if updatedText.count >= countNum {
+                    self.enableContinueBtn(isSelected: true)
+                }else{
+                    self.enableContinueBtn(isSelected: false)
+                }
+                
+                if let textFieldMobile = self.mobileNumTxt.text, string != "" {
+                    if textFieldMobile.count == 3 || textFieldMobile.count == 7 {
+                        self.mobileNumTxt.text = textFieldMobile.text + "-"
+                    }
+                }
+                
+                return updatedText.count <= countNum // 11= for 9 digits, 12 for 10 digits Allow input only if it results in 10 or fewer digits
+            }
+        }
+        else if textField == emailTxtField{
+            print(textField.text ?? "")
+            if let validSmail = textField.text?.isValidEmail(), validSmail {
                 self.enableContinueBtn(isSelected: true)
             }else{
                 self.enableContinueBtn(isSelected: false)
             }
-            
-            if let textFieldMobile = self.mobileNumTxt.text, string != "" {
-                if textFieldMobile.count == 3 || textFieldMobile.count == 7 {
-                    self.mobileNumTxt.text = textFieldMobile.text + "-"
-                }
-            }
-            
-            return updatedText.count <= 12 // Allow input only if it results in 10 or fewer digits
         }
         
         return true
@@ -269,7 +318,7 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
 extension MainViewController {
     //MARK: -------------------CHECK COMPLETED STEPS API
     func checkStep(){
-        RegistrationVM.checkStep(viewController: self, params: nil, isShowLoader: true, completion: { [weak self] getResult in
+        RegistrationVM.checkStep(viewController: self, params: nil, isShowLoader: false, completion: { [weak self] getResult in
             guard let self = self, let getResult = getResult else { return  }
             let  getData = getResult["data"] as? [String:Any]
             if let getIncompleteStep = getData?["incompletestep"] as? Int, let currentVC = vcSteps.getCurrentVC(vcRawValue: getIncompleteStep) {

@@ -10,17 +10,28 @@ import UIKit
 class DashboardGuestViewController: CommonViewController {
     
     //MARK: ------------------VARIABLE
+    var currentAddrText: String? = "" {
+        didSet{
+            self.setLeftMenu(leftImgs: [AppImages.chooseLocation, AppImages.forward], setTitle: ["\(currentAddrText?.trimmingCharacters(in: .whitespaces) ?? "")",nil], setTintColor: .appWhite, setTitleColor: .appWhite)
+        }
+    }
+    
+    var studiosData:[TrainerModel]? = []
+    var upcomingClassesData:[UpcomingClassModel]? = []
     var productCategory:[String]?
     
     //MARK: -------------------IBOUTLET
     @IBOutlet weak var topNameMBV: UIView!
+    @IBOutlet weak var topNameTopConstrtnt: NSLayoutConstraint!
     @IBOutlet weak var userNameLbl: UILabel!
+    @IBOutlet weak var userProfileBtn: UIButton!
     @IBOutlet weak var bookTrainerBckImgV: UIImageView!
     @IBOutlet weak var workoutMBckImgView: UIImageView!
     @IBOutlet weak var planWorkoutImgV: UIImageView!
     @IBOutlet weak var purchaseGymPassImgV: UIImageView!
     @IBOutlet weak var grabNowMBckImgV: UIImageView!
     @IBOutlet weak var grabNowMBV: UIView!
+    @IBOutlet weak var shopProductsMBV: UIView!
     @IBOutlet weak var bookTrainerTitleLbl: UILabel!
     @IBOutlet weak var bookTrainerDescLbl: UILabel!
     @IBOutlet weak var bookTrainerExploreBtn: UIButton!
@@ -43,6 +54,7 @@ class DashboardGuestViewController: CommonViewController {
     @IBOutlet weak var grabNowPriceLbl: UILabel!
     @IBOutlet weak var grabNowBtn: UIButton!
     @IBOutlet weak var transformationStoriesCollView: UICollectionView!
+    @IBOutlet weak var upcomingNearClassesMBV: UIView!
     @IBOutlet weak var upcomingCollView: UICollectionView!
     @IBOutlet weak var productCategoryCollView: UICollectionView!
     @IBOutlet weak var productListCollView: UICollectionView!
@@ -51,10 +63,14 @@ class DashboardGuestViewController: CommonViewController {
     @IBOutlet weak var authorLbl: UILabel!
     @IBOutlet weak var onTheWayLbl: UILabel!
     @IBOutlet weak var startTrackingBtn: UIButton!
+    @IBOutlet weak var trainerTrackingMBV: UIView!
+    @IBOutlet weak var footerLineLbl: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.trainerTrackingMBV.isHidden = true
+        self.getLocation()
         self.productCategory = ["All Equipment",
                                 "Fitness Equipment",
                                 "Apparel & Accessories"
@@ -63,6 +79,11 @@ class DashboardGuestViewController: CommonViewController {
         setupUI()
         
         purchaseGymPassMBV.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(purchaseGymPassTapAct(tap: ))))
+        
+        let greatingTimeStr = DateFormatterHelper.shared.getTimeOfDay()
+        self.userNameLbl.text = "Good " + greatingTimeStr
+        
+        self.lockFeature()
     }
     
     deinit {
@@ -73,13 +94,46 @@ class DashboardGuestViewController: CommonViewController {
         super.viewWillAppear(animated)
         self.setNavigationColor(setColor: .clear)
         self.statusBarColor(setColor: .clear)
-        setNavUI()
+        self.setNavUI()
+        self.topUserNameMBV()
+        
+        if let lat = appUserDefaults.getLatLong()?.components(separatedBy: ",").first{
+            print("Current lat", lat)
+            let currentLoc: String? = appUserDefaults.getCurrentAddr()
+            if let currentLoc = currentLoc {
+                self.currentAddrText = String(currentLoc.prefix(25))
+            }
+            
+            self.getTrainerApi(inputFilter: "0", inpuntTagId: 0)
+            self.upcomingClassesApi()
+            
+        }else{
+            self.getLocation()
+        }
+        
+        self.lockFeature()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.selectedCell()
-        
+        self.topUserNameMBV()
+        self.getLocation()
+    }
+    
+    private func topUserNameMBV(){
+        //---------------------- Navigationview
+        if let navigationController = self.navigationController {
+            let navBarHeight = navigationController.navigationBar.frame.height
+            let topSafeArea = (self.view.safeAreaInsets.top - 10.0)
+            let totalTopHeight = navBarHeight + topSafeArea
+            self.topNameTopConstrtnt.constant = totalTopHeight
+            
+            self.userProfileBtn.setNeedsLayout()
+            self.userProfileBtn.layoutIfNeeded()
+            self.topNameMBV.setNeedsLayout()
+            self.topNameMBV.layoutIfNeeded()
+        }
     }
     
     func selectedCell(){
@@ -95,20 +149,61 @@ class DashboardGuestViewController: CommonViewController {
     }
     
     func setNavUI(){
-        self.setLeftMenu(leftImgs: [AppImages.chooseLocation, AppImages.forward], setTitle: [" Choose location",nil], setTintColor: .appWhite, setTitleColor: .appWhite)
-        self.setRighMenu(rightImgs: [AppImages.notificationCount,AppImages.notification], setTitle: ["0",nil], setTintColor: nil, setTitleColor: UIColor.appWhite)
+        self.setLeftMenu(leftImgs: [AppImages.chooseLocation, AppImages.forward], setTitle: [" \(currentAddrText ?? "")",nil], setTintColor: .appWhite, setTitleColor: .appWhite)
+       
+        let logout = UIImage(named: "ic_logout")?.resized(to: CGSize(width: 25.0, height: 25.0))?.withRenderingMode(.alwaysTemplate).withTintColor(UIColor.appWhite)
+        
+        self.setRighMenu(rightImgs: [logout ,AppImages.notification], setTitle: [nil,nil], setTintColor: UIColor.appWhite, setTitleColor: UIColor.appWhite)
+  
+//        self.setRighMenu(rightImgs: [AppImages.notificationCount,AppImages.notification], setTitle: ["0",nil], setTintColor: nil, setTitleColor: UIColor.appWhite)
+    }
+    
+    private func lockFeature(){
+        self.grabNowMBV.setComingSoon(mainVTop: 0, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+       
+        self.shopProductsMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+      
+        self.upcomingNearClassesMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+    }
+    
+    override func leftBtnActn(sender: UIButton) {
+        let vc:LocationsViewController = LocationsViewController.instantiate(appStoryboard: .main)
+        vc.flowLocation = .homePage
+        vc.isFromEditAddress = false
+        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     override func rightBtnActn(sender: UIButton) {
-        AlertHelper.shared.showCustomeAlert(title: "", message: AppAlertStrings.logoutAlertMsg, actions: ["Ok", "Cancel"], withCancel: true, completion: { [weak self] tagGet in
-            guard self != nil else { return }
-            
-            if tagGet == 0 {
-                if appUserDefaults.clearUserDefault() {
-                    appSceneDelegate?.goToMainView()
+        
+        print("right btn tag= ", sender.tag)
+        if sender.tag == 0 {
+            AlertHelper.shared.showCustomeAlert(title: "", message: AppAlertStrings.logoutAlertMsg, actions: ["Ok", "Cancel"], withCancel: true, completion: { [weak self] tagGet in
+                guard self != nil else { return }
+                
+                if tagGet == 0 {
+                    if appUserDefaults.clearUserDefault() {
+                        appSceneDelegate?.goToMainView()
+                    }
                 }
+            })
+        }
+    }
+    
+    //MARK: -------------GET Lat long
+    private func getLocation(){
+        
+        GetLocationManager.shared.requestLocationWithAddress {[weak self] location, addressPart in
+            guard let self = self else { return }
+            appUserDefaults.setLatLong(value: "\(location?.coordinate.latitude ?? 0),\(location?.coordinate.longitude ?? 0)")
+            appUserDefaults.setCurrentAddr(value: addressPart.0)
+            
+            let currentLoc: String? = addressPart.0
+            if let currentLoc = currentLoc {
+                self.currentAddrText = String(currentLoc.prefix(25))
             }
-        })
+            self.getTrainerApi(inputFilter: "0", inpuntTagId: 0)
+            self.upcomingClassesApi()
+        }
     }
     
     @objc func purchaseGymPassTapAct(tap : UITapGestureRecognizer){
@@ -163,6 +258,10 @@ class DashboardGuestViewController: CommonViewController {
         //-----------*************
         DispatchQueue.main.async {
             
+            self.topNameMBV.backgroundColor = UIColor.clear
+            self.topNameMBV.addGradient(colors: [UIColor(red: 17.0/255.0, green: 18.0/255.0, blue: 20.0/255.0, alpha: 0.2), UIColor(red: 0/255.0, green: 5.0/255.0, blue: 2.0/255.0, alpha: 1)], locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1))
+            self.userProfileBtn.setGradientMultiBorder(cornerRadius: 18.0, width: 1.5, colors: [UIColor(red: 207.0/255.0, green: 171.0/255.0, blue: 104.0/255.0, alpha: 1.0),UIColor(red: 255.0/255.0, green: 241.0/255.0, blue: 216.0/255.0, alpha: 1.0),UIColor(red: 173/255.0, green: 130/255.0, blue: 54/255.0, alpha: 1.0)], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1))
+            
             //            self.topNameMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0)
             self.bookTrainerExploreBtn.roundSideCorners(radius: 16.0, cornerSide: [.topRight])
             self.bookTrainerExploreBtn.backgroundColor = UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 0.4)
@@ -183,11 +282,11 @@ class DashboardGuestViewController: CommonViewController {
             
             self.grabNowBtn.layerGradient(startPoint: .topLeft, endPoint: .bottomLeft, colorArray: [UIColor(red: 96/255.0, green: 55/255.0, blue: 9/255.0, alpha: 1).cgColor, UIColor(red: 243/255.0, green: 141/255.0, blue: 27/255.0, alpha: 1).cgColor, UIColor(red: 96/255.0, green: 55/255.0, blue: 9/255.0, alpha: 1).cgColor,], type: .axial)
             
+            self.footerLineLbl.backgroundColor = UIColor.clear
+            self.footerLineLbl.addGradient(colors: UIColor.appMultiColor(.lineVGradient2), locations: [0,0.5,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0.2)
         }
         
-        
         //-------------------- Attributed Text for Price
-        
         let defaultAttributes = [
             .font: AppFont.medium.size(32.0, familyName: familyClashDisplay),
             .foregroundColor: UIColor.appWhite
@@ -207,17 +306,21 @@ class DashboardGuestViewController: CommonViewController {
         self.grabNowPriceLbl.attributedText       =  NSAttributedString(from: attributedNickName, defaultAttributes: defaultAttributes)
         
         //UIColor(red: 212.0/255.0, green: 212.0/255.0, blue: 212.0/255.0, alpha: 1.0)
-        
-        
         //-------------------------*************
         
         self.bookTrainerBckImgV.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(bookTrainer(sender: ))))
     }
     
     @objc func bookTrainer(sender:Any){
+        if appUserDefaults.clearUserDefault() {
+            appSceneDelegate?.goToMainView()
+        }
+        
+        /*
         let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
         vc.flowCreatePackage = .createPackage
         self.navigationController?.pushViewController(vc, animated: false)
+        */
     }
     
     //MARK: -------------BTN ACTN
@@ -238,9 +341,16 @@ class DashboardGuestViewController: CommonViewController {
             self.navigationController?.pushViewController(vc, animated: true)
             
         case CommonBtnTag.purchaseGymPass.rawValue:
+            
+            if appUserDefaults.clearUserDefault() {
+                appSceneDelegate?.goToMainView()
+            }
+            
+            /*
             let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
             vc.flowCreatePackage = .gymMembership
             self.navigationController?.pushViewController(vc, animated: false)
+            */
             
         default:
             print("None........")
@@ -263,6 +373,12 @@ extension DashboardGuestViewController: UICollectionViewDataSource, UICollection
         if collectionView == productCategoryCollView{
             return productCategory?.count ?? 0
         }
+        else if collectionView == upcomingCollView{
+            return collectionView.numberOfRows(count: self.upcomingClassesData?.count, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100.0, height: 100.0)), messageImageHeight: 100.0, fromTop: nil)
+        }
+        else if collectionView == nearByYouCollView{
+            return collectionView.numberOfRows(count: self.studiosData?.count, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100.0, height: 100.0)), messageImageHeight: 100.0, fromTop: nil)
+        }
         else{
             return 5
         }
@@ -278,11 +394,12 @@ extension DashboardGuestViewController: UICollectionViewDataSource, UICollection
         else if collectionView == upcomingCollView{
             let cell:UpcomingClassCollViewCell = upcomingCollView.dequeueReusableCell(withReuseIdentifier: "UpcomingClassCollViewCell", for: indexPath) as! UpcomingClassCollViewCell
             
-            
+            cell.setCell(cellData: upcomingClassesData?[indexPath.row])
             return cell
         }
         else if collectionView == productCategoryCollView{
             let cell:ProductCategoryCollViewCell = productCategoryCollView.dequeueReusableCell(withReuseIdentifier: "ProductCategoryCollViewCell", for: indexPath) as! ProductCategoryCollViewCell
+            cell.titleLblTopConstrnt.constant = 9.0
             cell.titleLbl.text = self.productCategory?[indexPath.row] as? String
             return cell
         }
@@ -294,6 +411,10 @@ extension DashboardGuestViewController: UICollectionViewDataSource, UICollection
         else if collectionView == nearByYouCollView{
             let cell:GymsNearbyCollViewCell = nearByYouCollView.dequeueReusableCell(withReuseIdentifier: "GymsNearbyCollViewCell", for: indexPath) as! GymsNearbyCollViewCell
             
+            cell.voucherImgView.isHidden = true
+            cell.voucherLbl.isHidden = true
+            cell.setCellData(studioData: self.studiosData?[indexPath.row])
+           
             return cell
         }
         else{
@@ -301,6 +422,37 @@ extension DashboardGuestViewController: UICollectionViewDataSource, UICollection
         }
     }
     
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if collectionView == upcomingCollView{
+            if let lat = appUserDefaults.getLatLong()?.components(separatedBy: ",").first, let long = appUserDefaults.getLatLong()?.components(separatedBy: ",").last{
+                let vc: ClassDetailsViewController = ClassDetailsViewController.instantiate(appStoryboard: .dashboard)
+                vc.flowClassDetails = .guestUser
+                vc.scheludeIdStr = "\(upcomingClassesData?[indexPath.row].scheduleID ?? 0)"
+                vc.inputLat = lat
+                vc.inputLong = long
+                self.navigationController?.pushViewController(vc, animated: true)
+                
+            }else{
+                self.getLocation()
+            }
+            
+        }
+        else if collectionView == nearByYouCollView{
+            if appUserDefaults.clearUserDefault() {
+                appSceneDelegate?.goToMainView()
+            }
+            
+            /*
+            let vc:GymDetailsViewController = GymDetailsViewController.instantiate(appStoryboard: .booking)
+            vc.inputStudioId = "\(self.studiosData?[indexPath.row].id ?? 0)"
+            vc.inputLat = self.inputLat
+            vc.inputLong = self.inputLong
+            vc.inputType = "gym"
+            vc.gymDetailsFlow = .bookTrainerGymWorkout
+            self.navigationController?.pushViewController(vc, animated: true)
+            */
+        }
+    }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
@@ -323,13 +475,77 @@ extension DashboardGuestViewController: UICollectionViewDataSource, UICollection
     }
     
     
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        
-        
-    }
 }
 
 extension DashboardGuestViewController{
+    
+    //MARK: --------------------GET TRAINER LIST API
+    private func getTrainerApi(inputFilter: String?, inpuntTagId: Int?){
+        
+        if let lat = appUserDefaults.getLatLong()?.components(separatedBy: ",").first, let long = appUserDefaults.getLatLong()?.components(separatedBy: ",").last{
+            
+            let params:[String:String] = [
+                "type": "gym",
+                "is_filter": "",
+                "tag_id": "" ,
+                "long": long,
+                "lat": lat
+            ]
+            
+            TrainerVM.gerTrainerApi(viewController: self, inputParms: params, completion: { [weak self] getResultData in
+                guard let self = self, let getResultData = getResultData else { return  }
+                print("get trainer list result data: ", getResultData as Any)
+                self.studiosData?.removeAll()
+                self.studiosData?.append(contentsOf: getResultData.data?.studios ?? [])
+                self.nearByYouCollView.reloadData()
+            })
+            
+        }else{
+            self.getLocation()
+        }
+    }
+    
+    private func upcomingClassesApi(){
+        
+        if let lat = appUserDefaults.getLatLong()?.components(separatedBy: ",").first, let long = appUserDefaults.getLatLong()?.components(separatedBy: ",").last{
+            
+            let params:[String:String] = [
+                "long": long,
+                "lat": lat
+            ]
+            
+            UpcomingClassVM.upcomingClassesApi(inputParams: params, isShowLoader: true, completion: {[weak self] resultData in
+                guard let self = self, let resultData = resultData  else { return }
+                
+                self.upcomingClassesData?.removeAll()
+                self.upcomingClassesData?.append(contentsOf: resultData.data?.allClasses ?? [])
+                print("self.upcomingClassesData: \(self.upcomingClassesData ?? [])")
+                if let _ = self.upcomingClassesData {
+                    self.upcomingCollView.reloadData()
+                    
+                    /*
+                     if upcomingClassesData.count == 1 {
+                     self.classesNearYouCollView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .left, animated: true)
+                     
+                     if let flowLayout = classesNearYouCollView.collectionViewLayout as? UICollectionViewFlowLayout {
+                     flowLayout.sectionInset = UIEdgeInsets(top: 0, left: 19, bottom: 0, right: classesNearYouCollView.bounds.width)
+                     }
+                     }else{
+                     if let flowLayout = classesNearYouCollView.collectionViewLayout as? UICollectionViewFlowLayout {
+                     flowLayout.sectionInset = UIEdgeInsets(top: 0, left: 19, bottom: 0, right: 19)
+                     }
+                     }
+                     */
+                }
+            })
+            
+        }else{
+            self.getLocation()
+        }
+    }
+    
+    
+    
     /*
      http://mypt.test/api/book-trainer
      1=>for home 2=>for gym

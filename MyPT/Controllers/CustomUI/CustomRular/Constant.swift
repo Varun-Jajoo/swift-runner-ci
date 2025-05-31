@@ -24,5 +24,5 @@ let kDefaultTextFieldFont: UIFont = AppFont.ExtraBold.size(14.0, familyName: fam
 //        size: 10.0)
 
 let kScrollAnimationSpeed: CGFloat = 300.0
-let kRangeLayerMaximumWidth: Float = 7000.0
-let kRangeLayerMaximumHeight: Float = 7000.0
+let kRangeLayerMaximumWidth: Float = 70000.0 //7000.0
+let kRangeLayerMaximumHeight: Float = 70000.0

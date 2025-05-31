@@ -13,6 +13,15 @@ struct SectionModel {
     let items: [String]
 }
 
+struct FilterSection {
+    let title: String?
+    var items: [FilteItem]?
+}
+
+struct FilteItem {
+    let title: String?
+    var isSelected: Bool?
+}
 
 //MARK: ------------ HYDRATION MODEL
 struct HydrationModel {
