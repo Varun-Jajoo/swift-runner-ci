@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FacebookLogin
 
 enum flowPackageCreate {
     case notPackage
@@ -17,7 +18,6 @@ enum flowPackageCreate {
 class DashboardViewController: CommonViewController {
     
     //MARK: ------------------VARIABLE
-        
     var flowpackage: flowPackageCreate = .defaultPackage
     
     var currentAddrText: String? = "" {
@@ -29,7 +29,6 @@ class DashboardViewController: CommonViewController {
     var productCategory:[String]?
     var workoutDays:[String]?
     private let pageControl = CustomPageControl()
-    
     var upcomingSessionData:[BookingDataModel]? = [] {
         didSet{
             self.upcomingSessionsCollView.reloadData()
@@ -265,27 +264,27 @@ class DashboardViewController: CommonViewController {
 
         
         //--------------Coming soon
-        self.dailyProgressMBV.setComingSoon(mainVTop: 30, mainVBottom: 2, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+        self.dailyProgressMBV.setComingSoon(mainVTop: 30, mainVBottom: 2, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
         
         
-        self.workoutsMBV.setComingSoon(mainVTop: 35, mainVBottom: 30, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+        self.workoutsMBV.setComingSoon(mainVTop: 35, mainVBottom: 30, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
        
         self.myActivityMBV.setComingSoon(mainVTop: 35,
-                                         mainVBottom: 35, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+                                         mainVBottom: 35, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
       
         
-        self.upcomingClassesNearYouMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+        self.upcomingClassesNearYouMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
         
         
-        self.myActiveChallengeMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+        self.myActiveChallengeMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
         
-        self.myActiveChallengeMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+        self.myActiveChallengeMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
         
-        self.shopProductsMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+        self.shopProductsMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
         
        
         self.topView.isHidden = true
-        self.dayStreakMBV.setComingSoon(mainVTop: -50, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+        self.dayStreakMBV.setComingSoon(mainVTop: -50, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
     }
     
     
@@ -405,9 +404,9 @@ class DashboardViewController: CommonViewController {
     
     private func setNavUI(){
         self.setLeftMenu(leftImgs: [AppImages.chooseLocation, AppImages.forward], setTitle: [" \(currentAddrText ?? "")",nil], setTintColor: .appWhite, setTitleColor: .appWhite)
-        let logout = UIImage(named: "ic_logout")?.resized(to: CGSize(width: 25.0, height: 25.0))?.withRenderingMode(.alwaysTemplate).withTintColor(UIColor.appWhite)
+//        let logout = UIImage(named: "ic_logout")?.resized(to: CGSize(width: 25.0, height: 25.0))?.withRenderingMode(.alwaysTemplate).withTintColor(UIColor.appWhite)
         
-        self.setRighMenu(rightImgs: [logout ,AppImages.notification], setTitle: [nil,nil], setTintColor: UIColor.appWhite, setTitleColor: UIColor.appWhite)
+//        self.setRighMenu(rightImgs: [AppImages.notification], setTitle: [nil], setTintColor: UIColor.appWhite, setTitleColor: UIColor.appWhite)
         
 //        self.setRighMenu(rightImgs: [AppImages.notificationCount,AppImages.notification], setTitle: ["10",nil], setTintColor: nil, setTitleColor: UIColor.appWhite)
     }
@@ -421,18 +420,33 @@ class DashboardViewController: CommonViewController {
     
     override func rightBtnActn(sender: UIButton) {
         print("right btn tag= ", sender.tag)
+        /*
         if sender.tag == 0 {
             AlertHelper.shared.showCustomeAlert(title: "", message: AppAlertStrings.logoutAlertMsg, actions: ["Ok", "Cancel"], withCancel: true, completion: { [weak self] tagGet in
                 guard self != nil else { return }
                 
                 if tagGet == 0 {
+                    self?.logoutIfFacebookLoggedIn()
                     if appUserDefaults.clearUserDefault() {
                         appSceneDelegate?.goToMainView()
                     }
+                    
                 }
             })
         }
+        */
         
+    }
+    
+    func logoutIfFacebookLoggedIn() {
+        if let token = AccessToken.current, !token.isExpired {
+            // User is logged in — proceed to logout
+            let loginManager = LoginManager()
+            loginManager.logOut()
+            print("Facebook user has been logged out.")
+        } else {
+            print("No Facebook session found. Logout not needed.")
+        }
     }
     
     //MARK: ---------FLOW PACKAGE CREATE
@@ -463,11 +477,11 @@ class DashboardViewController: CommonViewController {
             self.memberTypeLbl.text = "Gold Member"
             
             self.myActivityMBV.setComingSoon(mainVTop: 35,
-                                             mainVBottom: 35, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+                                             mainVBottom: 35, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
          
-            self.workoutsMBV.setComingSoon(mainVTop: 35, mainVBottom: 30, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+            self.workoutsMBV.setComingSoon(mainVTop: 35, mainVBottom: 30, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
         
-            self.myActiveChallengeMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+            self.myActiveChallengeMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
             
             break
         case .membershipExpire:
@@ -481,7 +495,7 @@ class DashboardViewController: CommonViewController {
     
     //MARK: ---------------BTN TAG
     enum Btntag: Int {
-        case bookTrainer = 2201, membership, upcomingSeeion, meals2withoutPackage, meals, dailyProgress, myWorkouts, myActivity, classesNear, MyActiveChallenges, gymNearBy, shopProducts
+        case bookTrainer = 2201, membership, upcomingSeeion, meals2withoutPackage, meals, dailyProgress, myWorkouts, myActivity, classesNear, MyActiveChallenges, gymNearBy, shopProducts , userProfile
     }
     
     @IBAction func commonBtnActn(_ sender: UIButton) {
@@ -552,6 +566,10 @@ class DashboardViewController: CommonViewController {
         case Btntag.shopProducts.rawValue:
             print("shopProducts clicked..")
             
+        case Btntag.userProfile.rawValue:
+            let vc: ProfileViewController = ProfileViewController.instantiate(appStoryboard: .profile)
+            self.navigationController?.pushViewController(vc, animated: true)
+            
         default:
             print("None.....")
 //            let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
@@ -563,10 +581,16 @@ class DashboardViewController: CommonViewController {
     }
     
     private func setupInputData(){
+        let greatingTimeStr = DateFormatterHelper.shared.getTimeOfDay()
+        
         if let userData = appUserDefaults.getUserFromUserDefaults(as: SubmitDataModel.self), let userName = userData.user?.name {
-            let greatingTimeStr = DateFormatterHelper.shared.getTimeOfDay()
+//            let greatingTimeStr = DateFormatterHelper.shared.getTimeOfDay()
             
             self.userNameLbl.text = "Good " + greatingTimeStr + " " + userName
+        }else{
+            if let userName = appUserDefaults.getUserName() {
+                self.userNameLbl.text = "Good " + greatingTimeStr + " " + userName
+            }
         }
     }
     

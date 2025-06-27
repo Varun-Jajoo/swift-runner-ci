@@ -7,7 +7,6 @@
 
 import AVKit
 
-
 class CustomPlayerViewController: AVPlayerViewController {
    
     override func viewWillDisappear(_ animated: Bool) {
@@ -19,4 +18,20 @@ class CustomPlayerViewController: AVPlayerViewController {
          super.dismiss(animated: false, completion: completion)
      }
     
+}
+
+
+
+class CustomImagePickerController: UIImagePickerController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        isModalInPresentation = true // Prevent swipe-to-dismiss
+    }
+
+    override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
+        // Optional: Log or intercept dismiss if needed
+        print("Dismiss called on CustomImagePickerController")
+//        super.dismiss(animated: flag, completion: completion)
+        super.dismiss(animated: false, completion: completion)
+    }
 }

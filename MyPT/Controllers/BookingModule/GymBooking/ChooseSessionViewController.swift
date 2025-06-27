@@ -245,8 +245,20 @@ class ChooseSessionViewController: CommonViewController {
    
             self.setTotalCost(isTotalCost: isShowTotalCost)
             self.startMonthLbl.text = packageDetails?.validity
-            self.endPointLbl.text = "12"
+            self.endPointLbl.text = "365"
+            
+            print("packageDetails validity = ", packageDetails?.validity as Any)
+            if let validityCount = packageDetails?.validity {
+                let validityParts = validityCount.components(separatedBy: " ")
 
+                if let unit = validityParts.first(where: { $0.lowercased() == "month" || $0.lowercased() == "months" }) {
+                    print("Found unit: \(unit)")
+                    self.endPointLbl.text = "12"
+                }else{
+                    self.endPointLbl.text = "365"
+                }
+            }
+            
 //            self.costSlider.isUserInteractionEnabled = false
 //            self.topTitleLbl.text = "Validity of the package?"
 //            self.noteStrings.removeAll()
@@ -275,7 +287,6 @@ class ChooseSessionViewController: CommonViewController {
                 self.trainerNameLbl.text = membershipDetailsData?.studio?.name
                 
             }
-           
             
             self.setValidityWithoutTrainer()
             

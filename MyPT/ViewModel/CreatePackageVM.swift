@@ -77,7 +77,6 @@ class CreatePackageVM{
     }
     
     //MARK: -----------------------Create package for One buddy / With buddy
-    
     class func createPackageApi(viewController: UIViewController, inputParms: [String:String]?, isShowLoader:Bool = true, completion: @escaping(_ resultData:CreatePackageBaseModel?) -> Void){
         guard let inputParms = inputParms else { return  }
         

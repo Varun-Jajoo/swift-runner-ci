@@ -65,7 +65,10 @@ class LibraryViewController: CommonViewController {
         self.registerColl()
         self.setupProgress()
         
-        self.view.setComingSoon(bgColor: UIColor(red: 0, green: 5/255.0, blue: 2/255.0, alpha: 0.7),centerImgName: "ic_upcomingStripe", lockImgName: "ic_upcomingLock" ,title: "Workout Library", desc: "Your personal library of workouts is almost ready. Hang tight — it's unlocking soon!.")
+        self.view.setComingSoon(bgColor: UIColor(red: 0, green: 5/255.0, blue: 2/255.0, alpha: 0.7),centerImgName: "ic_upcomingStripe", lockImgName: "ic_upcomingLock" ,title: AppStrings.coming_soon, desc: "Your personal library of workouts is almost ready. Hang tight — it's coming soon!.")
+        
+        //"Workout Library"
+        //"Your personal library of workouts is almost ready. Hang tight — it's unlocking soon!."
         
 //        self.setBackgroundImage(named: "ic_upcoming_Library")
 //        self.setTopBackgroundImage(named: "ic_upcoming_Library")

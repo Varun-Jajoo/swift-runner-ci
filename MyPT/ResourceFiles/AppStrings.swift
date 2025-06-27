@@ -25,7 +25,7 @@ struct AppStrings {
     public static let you_have_not_booked_session_yet = "You haven’t booked a session yet, start with your first session today!"
     public static let booking_Details = "Booking Details"
     public static let reschedule_Request = "Reschedule Request"
-    public static let booking_Acceepted = "Booking Acceepted"
+    public static let booking_Accepted = "Booking Accepted"
     public static let session_Cancelled = "Session Cancelled"
     public static let find_Trainers = "Find Trainers"
     public static let find_Trainers_DescStr = "You’ve declined the trainer’s request to reschedule. Explore alternative trainers available for the same day to keep your session on track"
@@ -47,7 +47,8 @@ struct AppStrings {
     public static let your_Workout_Gear_is_Waiting = "Your Workout Gear is Waiting!"
     public static let empty_MyOrders_Msg = "Once you place an order, it’ll appear here, ready to power up your fitness journey"
     public static let reserve_Slot = "Reserve Slot"
-    
+    public static let coming_soon = "Coming soon"
+    public static let booking_QR_code = "BOOKING QR CODE"
     
     //-------************Bottom Tabbar
     public static let homeStr = "Home"

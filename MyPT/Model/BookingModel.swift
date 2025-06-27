@@ -68,11 +68,11 @@ struct BookingDetailsDataModel: Codable {
 
 //MARK: ------------- BookingDetailModel
 struct BookingDetailModel: Codable {
-    var contact, price, location, trainingDate: String?
+    var contact, price, location, trainingDate, qr: String?
     var type: String?
 
     enum CodingKeys: String, CodingKey {
-        case contact, price, location
+        case contact, price, location, qr
         case trainingDate = "training_date"
         case type
     }

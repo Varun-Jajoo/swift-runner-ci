@@ -10,14 +10,15 @@ import Foundation
 let appUserDefaults = UserDefaults.standard
 
 enum UserDefaultsKeys : String {
-    case isLoggedIn = "Login"
-    case isSkipToHome = "skip"
-    case userID     = "userId"
-    case packagerCreated = "packageCreated"
-    case accessToken = "accessToken"
-    case refressToken = "refreshToken"
-    case latLong = "latLong"
-    case currendAddr = "currentAddr"
+    case isLoggedIn            =  "Login"
+    case isSkipToHome          =  "skip"
+    case userID                =  "userId"
+    case packagerCreated       =  "packageCreated"
+    case accessToken           =  "accessToken"
+    case refressToken          =  "refreshToken"
+    case latLong               =  "latLong"
+    case currendAddr           =  "currentAddr"
+    case social_login_userId   =   "social_id"
 }
 
 extension UserDefaults{
@@ -73,6 +74,17 @@ extension UserDefaults{
     //MARK: Retrieve User Data
     func getUserID() -> String?{
         return string(forKey: UserDefaultsKeys.userID.rawValue)
+    }
+    
+    //MARK: Save social login userId
+    func setSocialId(value: String?){
+        set(value, forKey: UserDefaultsKeys.social_login_userId.rawValue)
+        synchronize()
+    }
+    
+    //MARK: Retrieve social login userId
+    func getSocialId() -> String?{
+        return string(forKey: UserDefaultsKeys.social_login_userId.rawValue)
     }
     
     func setIsPackageCreated(value: Bool) {

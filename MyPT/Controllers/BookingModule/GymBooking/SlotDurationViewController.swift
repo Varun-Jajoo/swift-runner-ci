@@ -425,7 +425,7 @@ class SlotDurationViewController: CommonViewController {
         let vc:CreatePackageViewViewController = CreatePackageViewViewController.instantiate(appStoryboard: .booking)
         vc.createParams = CreatePackageParamsModel(package_type: "", sessions: "", type: inputGetSlotParams?.type, timing: inputGetSlotParams?.timing, trainer_id: inputGetSlotParams?.trainer_id, studio_id: inputGetSlotParams?.studio_id, month: "\(Int(self.getMonth(inputDateStr: selectedDate ?? "").0) ?? 0)", address_id: inputGetSlotParams?.address_id)
         vc.avialCalanderparams = self.avialCalanderparams
-        
+        vc.isFirst = false
         self.navigationController?.pushViewController(vc, animated: true)
         
     }
@@ -435,6 +435,7 @@ class SlotDurationViewController: CommonViewController {
     @IBAction func paymentBtnActn(_ sender: Any) {
         print("clicked at paymentBtn")
         
+      // only for testing for ccavenue
         if let pricePackage = self.slotsData?.price {
             let components = pricePackage.split(separator: " ")
             let vc: CCAvenuePaymentViewController = CCAvenuePaymentViewController.instantiate(appStoryboard: .booking)
@@ -496,13 +497,14 @@ class SlotDurationViewController: CommonViewController {
         */
         
         /*
+        //-------- Only for Testing
          if let slotId = inputBookSlotParams?.slot_id, !slotId.isEmpty {
          self.bookSlot(inputParam: inputBookSlotParams?.getParams() ?? [:])
          }else{
          AlertHelper.shared.alertMesssage(view: self, title: "", message: "Please select slot")
          }
-         */
-        
+        */
+         
         
         /*
          let vc:PaymentSuccessViewController = PaymentSuccessViewController.instantiate(appStoryboard: .booking)
@@ -577,6 +579,11 @@ extension SlotDurationViewController:UICollectionViewDataSource, UICollectionVie
        
         let cell:ProductCategoryCollViewCell = dateListCollView.dequeueReusableCell(withReuseIdentifier: "ProductCategoryCollViewCell", for: indexPath) as! ProductCategoryCollViewCell
         cell.cellMBV.backgroundColor = UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1)
+        
+        DispatchQueue.main.async {
+            cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: 12.0)
+        }
+        
         cell.titleLbl.text = slotTimes?[indexPath.row].time as? String
                 
         if let getTimes = slotTimes?[indexPath.row].time as? String {
@@ -600,6 +607,11 @@ extension SlotDurationViewController:UICollectionViewDataSource, UICollectionVie
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
+        let cell = collectionView.cellForItem(at: indexPath) as! ProductCategoryCollViewCell
+        cell.cellMBV.backgroundColor = UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1) //UIColor.clear
+        DispatchQueue.main.async {
+            cell.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), cornerRadious: 12.0)
+        }
         
         switch slotDurationFlow {
         case .bookTrainerHomeWorkout, .bookTrainerGymWorkout:
@@ -653,9 +665,12 @@ extension SlotDurationViewController:UICollectionViewDataSource, UICollectionVie
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         print("Did deselect a cell at \(indexPath.row)")
         let cell = collectionView.cellForItem(at: indexPath) as! ProductCategoryCollViewCell
+//        cell.cellMBV.backgroundColor = UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1)
         
-        cell.cellMBV.backgroundColor = UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1)
-                
+        cell.cellMBV.backgroundColor = UIColor.appDarkGray
+        DispatchQueue.main.async {
+            cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: 12.0)
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {

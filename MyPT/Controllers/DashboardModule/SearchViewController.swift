@@ -10,11 +10,16 @@ import UIKit
 class SearchViewController: UIViewController {
 
     //MARK: ---------------VARIABLE
+    var inputType:String?
+    var inputLat:String?
+    var inputLong:String?
+    var gymStudioFlow:calendarFlow = .defaultFlow
     var searchStr: String?
-    var searchTrainerData:[TrainerModel]? = []
+    var searchStudiosData:[TrainerModel]? = []
     var seacrhGymTrainerData:[GymTrainerModel]? = []
-    private var localTrainerData:[TrainerModel]? = []
-    private var loaclhGymTrainerData:[GymTrainerModel]? = []
+    private var localSearchStudiosData:[TrainerModel]? = []
+    private var localhGymTrainerData:[GymTrainerModel]? = []
+    
     
     //MARK: ----------------IBOUTLET
     @IBOutlet weak var topSearchMBV: UIView!
@@ -85,19 +90,30 @@ class SearchViewController: UIViewController {
 extension SearchViewController: UITableViewDataSource, UITableViewDelegate{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
        
-        return tableView.numberOfRows(count: self.searchTrainerData?.count, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult, messageImageHeight: 200.0, fromTop: 50)
+//        return tableView.numberOfRows(count: self.searchTrainerData?.count, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult, messageImageHeight: 200.0, fromTop: 50)
+        
+        return tableView.numberOfRows(count: self.searchStudiosData?.count, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult, messageImageHeight: 200.0, fromTop: 50)
         
 //        return 10
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell: SearchTableViewCell = recordTblView.dequeueReusableCell(withIdentifier: "SearchTableViewCell", for: indexPath) as! SearchTableViewCell
-        cell.searchTitleLbl.text = self.searchTrainerData?[indexPath.row].name
-        cell.subTitleLbl.text = self.searchTrainerData?[indexPath.row].description
+        cell.searchTitleLbl.text = self.searchStudiosData?[indexPath.row].name
+        cell.subTitleLbl.text = self.searchStudiosData?[indexPath.row].description
         
         return cell
     }
     
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let vc:GymDetailsViewController = GymDetailsViewController.instantiate(appStoryboard: .booking)
+        vc.inputStudioId = String(self.searchStudiosData?[indexPath.row].id ?? 0)
+        vc.inputLat = self.inputLat
+        vc.inputLong = self.inputLong
+        vc.inputType = self.inputType
+        vc.gymDetailsFlow = gymStudioFlow
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
     
 }
 
@@ -116,5 +132,6 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
         return cell
     }
     
-    
 }
+
+

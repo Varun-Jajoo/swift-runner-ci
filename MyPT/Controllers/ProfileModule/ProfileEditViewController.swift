@@ -16,10 +16,26 @@ struct EditSectionModel {
 class ProfileEditViewController: CommonViewController {
 
 //    var editData: [[String:Any]]? = []
+    //MARK: ----------VARIABLE
+      let imagePicker = ImagePicker()
+    var profileImg: UIImage?
+    var coverImg: UIImage?
+    var userInfo: UserInformationModel?
+    var userAddr: UserAddressModel?
+    var updateProfile: UpdateUserDataModel?
     
     var editData:[EditSectionModel]?
-
+//    var addressData:AddressDataModel?
+    var getAlltCityData: CityDataModel?
+    var city_idStr: String?
+    var country_idStr: String?
+    var typeStr: String?
+    var inputLat: String?
+    var inputLong: String?
+    var isFromUpdate: Bool?
     
+    
+    //MARK: --------------IBOUTLET
     @IBOutlet weak var profileHeaderImgView: UIImageView!
     @IBOutlet weak var userNameTopConstrnt: NSLayoutConstraint!
     @IBOutlet weak var userNameMBV: UIView!
@@ -68,10 +84,14 @@ class ProfileEditViewController: CommonViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.isFromUpdate = true
+        imagePicker.delegate = self
 //        self.profileData()
         self.setupTxtField()
         self.setupUI()
         self.setupFont()
+        self.setInputData()
         
 //        profileDataTblView.register(UINib(nibName: "TxtFieldTableViewCell", bundle: nil), forCellReuseIdentifier: "TxtFieldTableViewCell")
 //        self.customBlurViewRemove(viewShow: self.profileDataTblView)
@@ -94,6 +114,13 @@ class ProfileEditViewController: CommonViewController {
         self.statusBarColor(setColor: .clear)
         setNavUI()
         self.topUserNameMBV()
+        self.getCityListApi()
+        
+        if let  isFromUpdate {
+            self.userInfoApi()
+        }
+        
+//        self.userInfoApi()
     }
         
     override func viewDidAppear(_ animated: Bool) {
@@ -101,6 +128,15 @@ class ProfileEditViewController: CommonViewController {
         self.topUserNameMBV()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        DispatchQueue.main.async {
+            self.profileHeaderImgView.addGradientLayer(colors: [UIColor(red: 0, green: 0, blue: 0, alpha: 0), UIColor(red: 0, green: 5/255.0, blue: 2.0/255.0, alpha: 0.1)], locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 0)
+            
+            self.profileHeaderImgView.addGradientLayer(colors: [UIColor(red: 0, green: 0, blue: 0, alpha: 0), UIColor(red: 0, green: 5/255.0, blue: 2.0/255.0, alpha: 1.0)], locations: [0.92,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 0)
+        }
+    }
    
     private func topUserNameMBV(){
         //---------------------- Navigationview
@@ -125,10 +161,249 @@ class ProfileEditViewController: CommonViewController {
         print("notification", notification)
         self.customBlurViewRemove(viewShow: self.view)
     }
+        
+    private func setInputData(){
+        self.countryTxtField.isUserInteractionEnabled = false
+        self.mobileNumTxtField.isUserInteractionEnabled = false
+        self.dobTxtField.isUserInteractionEnabled = false
+        
+        self.profileHeaderImgView.loadImage(urlString: userInfo?.cover_image, placeholder: UIImage(named: "ic_profileHeader"))
+        self.userProfileImgView.loadImage(urlString: userInfo?.profile, placeholder: AppImages.profile_placeholder)
+        
+//        DispatchQueue.main.async {
+//            self.profileHeaderImgView.addGradientLayer(colors: [UIColor(red: 0, green: 0, blue: 0, alpha: 0), UIColor(red: 0, green: 5/255.0, blue: 2.0/255.0, alpha: 0.8)], locations: [0.96,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 0)
+//        }
+       
+//        DispatchQueue.main.async {
+//            self.profileHeaderImgView.addGradientLayer(colors: [UIColor(red: 0, green: 0, blue: 0, alpha: 0), UIColor(red: 0, green: 5/255.0, blue: 2.0/255.0, alpha: 0.1)], locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 0)
+//        }
+        
+        self.fullNameTxtField.text = userInfo?.name
+        self.emailTxtField.text = userInfo?.email
+        self.mobileNumTxtField.text = userInfo?.phone
+        self.dobTxtField.text = userInfo?.dob
+        self.genderTxtField.text = userInfo?.gender?.localizedCapitalized
+//        self.locTxtField.text = userAddr?.cityName
+        self.addressTxtField.text = userAddr?.address
+        self.countryTxtField.text = userAddr?.countryName
+        self.cityTxtField.text = userAddr?.cityName
+                
+        //--------------
+        [
+            self.fullNameTxtField,
+            self.emailTxtField,
+            self.mobileNumTxtField,
+            self.dobTxtField,
+            self.genderTxtField,
+            self.locTxtField,
+            self.addressTxtField,
+            self.postalCodeTxtField,
+            self.countryTxtField,
+            self.stateTxtField,
+            self.cityTxtField
+        ].forEach({[weak self] in
+            guard self != nil else {
+                return
+            }
+            $0?.sendActions(for: .editingChanged)
+        })
+        
+        //--------------------**********
+        if let addrData = userAddr {
+            self.inputLat = addrData.lat
+            self.inputLong = addrData.long
+            self.city_idStr = "\(addrData.cityID?.intValue ?? 0)"
+            self.country_idStr = "\(addrData.countryID?.intValue ?? 0)"
+        }
+        
+        //enableContinueBtn
+        if let _ = userInfo?.name {
+            self.enableContinueBtn(isSelected: true, btn: saveBtn)
+        }else{
+            self.enableContinueBtn(isSelected: false, btn: saveBtn)
+        }
+        
+    }
+    
+    private func setUpdateInputData(updateDate: UpdateUserDataModel){
+        
+        self.fullNameTxtField.text = updateDate.name // userInfo?.name
+        self.emailTxtField.text = updateDate.email
+//        self.mobileNumTxtField.text = updateDate.ph
+//        self.dobTxtField.text = updateDate.d
+        self.genderTxtField.text = updateDate.gender
+       
+//        self.locTxtField.text = updateDate.location
+        self.addressTxtField.text = updateDate.address
+//        self.countryTxtField.text = updateDate.c
+//        self.cityTxtField.text = updateDate.city_id
+        
+        //--------------
+        [
+            self.fullNameTxtField,
+            self.emailTxtField,
+            self.mobileNumTxtField,
+            self.dobTxtField,
+            self.genderTxtField,
+            self.locTxtField,
+            self.addressTxtField,
+            self.postalCodeTxtField,
+            self.countryTxtField,
+            self.stateTxtField,
+            self.cityTxtField
+        ].forEach({[weak self] in
+            guard self != nil else {
+                return
+            }
+            $0?.sendActions(for: .editingChanged)
+        })
+        
+        //--------------------**********
+        if let addrData = userAddr {
+            self.inputLat = addrData.lat
+            self.inputLong = addrData.long
+            self.city_idStr = "\(addrData.cityID?.intValue ?? 0)"
+            self.country_idStr = "\(addrData.countryID?.intValue ?? 0)"
+        }
+    }
+    
+    enum editBtnTag: Int {
+    case profileBtn = 2201, bgProfile, saveChange, editGender
+    }
+    
+    @IBAction func editProfileCommonBtnActn(_ sender: UIButton) {
+        switch sender.tag {
+        case editBtnTag.profileBtn.rawValue:
+            print("Profile edit")
+            let vc:EditPhotoPopupViewController = EditPhotoPopupViewController.instantiate(appStoryboard: .profile)
+            vc.getBackImg = {[weak self] getImg in
+                self?.userProfileImgView.image = getImg
+                self?.profileImg = getImg
+            }
+            vc.navCtrnl = self.navigationController
+            vc.profileImg = self.userProfileImgView.image
+            vc.modalPresentationStyle = .automatic
+            self.navigationController?.present(vc, animated: true)
+            
+        case editBtnTag.bgProfile.rawValue:
+            print("bgProfile btn")         
+            let vc:EditPhotoPopupViewController = EditPhotoPopupViewController.instantiate(appStoryboard: .profile)
+            vc.getBackImg = {[weak self] getImg in
+                self?.profileHeaderImgView.image = getImg
+            }
+            vc.navCtrnl = self.navigationController
+            vc.coverProfileImg = self.profileHeaderImgView.image
+            vc.modalPresentationStyle = .automatic
+            self.navigationController?.present(vc, animated: true)
+            
+        case editBtnTag.saveChange.rawValue:
+            print("saveChange btn")
+            let setParams:[String:String] = [
+                "name": (self.fullNameTxtField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
+                "email": (self.emailTxtField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
+                "gender": (self.genderTxtField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines).lowercased(),
+                "location": "location",
+                "address": (self.addressTxtField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
+                "country_id": self.country_idStr ?? "", //static 231
+                "city_id": self.city_idStr ?? "",
+                "address_id": "",
+                "long": self.inputLong ?? "",
+                "lat": self.inputLat ?? ""
+             ]
+            
+            self.updateUserInfo(params: setParams)
+            
+        case editBtnTag.editGender.rawValue:
+            self.genderTxtField.becomeFirstResponder()
+            
+        default:
+            print("none.........")
+        }
+    }
+    
+    //MARK: -------------FOR DROP DOWN
+    private func openDropDown(inputView: UIView){
+        let popupVC:CityDropDownViewController = CityDropDownViewController.instantiate(appStoryboard: .booking)
+        popupVC.modalPresentationStyle = .popover
+        popupVC.getAlltCityData = nil
+        popupVC.getAlltCityData = self.getAlltCityData
+        popupVC.cityData?.removeAll()
+        popupVC.cityData?.append(contentsOf: self.getAlltCityData?.cities ?? [])
+        
+        popupVC.sentBackData = { [weak self] getCityName , getId, getCountryName, getCountryId in
+            guard let self = self else { return  }
+            print("name", getCityName as Any, "id", getId as Any)
+            self.cityTxtField.text = getCityName
+            self.countryTxtField.text = getCountryName
+            self.city_idStr = "\(getId ?? 0)"
+            self.country_idStr = "\(getCountryId ?? 0)"
+            
+            self.cityTxtField.sendActions(for: .editingChanged)
+            self.countryTxtField.sendActions(for: .editingChanged)
+            
+//            if let city = self.cityTxtField.text, !city.isEmpty{
+//                self.cityHintLbl.isHidden = false
+//                self.cityHintLbl.text = "City"
+//            }
+//            if let country = self.countryTxtField.text, !country.isEmpty {
+//                self.countryHintLbl.isHidden = false
+//                self.countryHintLbl.text = "Country"
+//            }
+        }
+    
+        popupVC.view.backgroundColor = UIColor.mainBg
+  
+         if let popoverController = popupVC.popoverPresentationController {
+             popoverController.sourceView = inputView
+             popoverController.sourceRect = inputView.bounds
+             popoverController.permittedArrowDirections = .any
+             popoverController.delegate = self
+             popoverController.backgroundColor = UIColor.mainBg
+         }
+        popupVC.preferredContentSize = CGSize(width: self.view.frame.size.width - 40, height: 350)
+
+        present(popupVC, animated: true)
+    }
+    
+    //MARK: -------------FOR DROP DOWN
+    private func genderDropDown(inputView: UIView){
+        let popupVC:CityDropDownViewController = CityDropDownViewController.instantiate(appStoryboard: .booking)
+        popupVC.modalPresentationStyle = .popover
+        popupVC.getAlltCityData = nil
+        popupVC.cityData?.removeAll()
+        let citiyModel: [CityModel] = [
+            CityModel(name: "Male"),
+            CityModel(name: "Female"),
+            CityModel(name: "Other")
+        ]
+        
+        popupVC.cityData?.append(contentsOf: citiyModel)
+        
+        popupVC.sentBackData = { [weak self] getCityName , getId, getCountryName, getCountryId in
+            guard let self = self else { return  }
+            print("name", getCityName as Any, "id", getId as Any)
+            self.genderTxtField.text = getCityName
+        }
+    
+        popupVC.view.backgroundColor = UIColor.mainBg
+  
+         if let popoverController = popupVC.popoverPresentationController {
+             popoverController.sourceView = inputView
+             popoverController.sourceRect = inputView.bounds
+             popoverController.permittedArrowDirections = .any
+             popoverController.delegate = self
+             popoverController.backgroundColor = UIColor.mainBg
+         }
+        popupVC.preferredContentSize = CGSize(width: self.view.frame.size.width - 40, height: 180)
+
+        present(popupVC, animated: true)
+    }
+    
     
     private func setupUI(){
         DispatchQueue.main.async {
             self.profileHeaderImgView.addGradientLayer(colors: [UIColor(red: 0, green: 0, blue: 0, alpha: 0), UIColor(red: 0, green: 5/255.0, blue: 2.0/255.0, alpha: 0.8)], locations: [0.96,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 0)
+                        
             self.userProfileImgView.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 16.0)
             self.userProfileImgView.setGradientMultiBorder(cornerRadius: 16.0, width: 3, colors: [
                 UIColor(red: 207.0/255.0, green: 171.0/255.0, blue: 104.0/255.0, alpha: 1.0),
@@ -247,6 +522,19 @@ class ProfileEditViewController: CommonViewController {
             key.delegate = self
             key.addTarget(self, action: #selector(textFieldDidChange(textField:)), for: UIControl.Event.editingChanged)
         })
+    }
+    
+    //MARK: -------------- ENABLE CONTINUE
+    func enableContinueBtn(isSelected:Bool = false, btn:UIButton){
+        if isSelected {
+            btn.isUserInteractionEnabled = true
+            btn.backgroundColor = UIColor.appWhite
+            btn.setTitleColor(UIColor.mainBg, for: .normal)
+        } else {
+            btn.isUserInteractionEnabled = false
+            btn.backgroundColor = UIColor.appDarkGray
+            btn.setTitleColor(UIColor.appWhite, for: .normal)
+        }
     }
     
     
@@ -374,6 +662,48 @@ extension ProfileEditViewController: UITextFieldDelegate{
         textField.resignFirstResponder()
     }
     
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        if textField == locTxtField{
+            view.endEditing(true)
+            self.isFromUpdate = nil
+            let vc:LocationsViewController = LocationsViewController.instantiate(appStoryboard: .main)
+            vc.flowLocation = .updateProfile
+            vc.isFromEditAddress = false
+            vc.sendBackAddr = {[weak self] getCurrentAddr in
+                guard self != nil else {
+                    return
+                }
+                
+                self?.addressTxtField.text = getCurrentAddr
+                
+                if let lat = appUserDefaults.getLatLong()?.components(separatedBy: ",").first,  let long = appUserDefaults.getLatLong()?.components(separatedBy: ",").last{
+                    self?.inputLat = lat
+                    self?.inputLong = long
+                }
+            }
+            self.navigationController?.pushViewController(vc, animated: true)
+            
+            return false
+        }
+       else if textField == self.cityTxtField {
+            view.endEditing(true)
+            self.openDropDown(inputView: textField)
+            return false
+        }
+        else if textField == self.countryTxtField {
+            view.endEditing(true)
+            self.openDropDown(inputView: textField)
+            return false
+        }
+        else if textField == genderTxtField{
+            view.endEditing(true)
+            self.genderDropDown(inputView: textField)
+            return false
+        }
+        return true
+    }
+    
+    
     // UITextFieldDelegate method to restrict the input to 10 digits
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         
@@ -451,6 +781,122 @@ extension ProfileEditViewController: UITextFieldDelegate{
         return hintTxtAddAddress[inputLabel] ?? ""
     }
     
+}
+
+extension ProfileEditViewController: ImagePickerDelegate {
+    
+    func imagePicker(_ imagePicker: ImagePicker, didSelect image: UIImage) {
+        // Handle the selected image
+        // You can display, upload, or process the image as needed
+        userProfileImgView.image = image
+        imagePicker.dismiss()
+    }
+    
+    func cancelButtonDidClick(on imagePicker: ImagePicker) {
+        print("Image selection/capture was canceled")
+        imagePicker.dismiss()
+    }
+}
+
+
+// MARK: -------------------------- API
+extension ProfileEditViewController{
+    
+    private func getCityListApi(){
+        TrainerVM.getCityApi(viewController: self, inputParms: [:], isShowLoader: false, completion: { [weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return  }
+//            print("City Data", getResultData)
+            self.getAlltCityData = nil
+            self.getAlltCityData = getResultData.data
+        })
+    }
+    
+    private func userInfoApi(){
+        ProfileVM.getUserInformationApi(inputParams: nil, completion: {[weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return }
+            print("getResultData", getResultData)
+            if getResultData.status == true {
+                self.userInfo = getResultData.data?.userInformation
+                self.userAddr = getResultData.data?.userAddress
+                print("getResultData", getResultData.data?.userInformation?.name as Any)
+                self.setInputData()
+            }
+        })
+    }
+    
+    private func updateUserInfo(params:[String:String]?){
+        /*
+         let params:[String:Any] = [
+         "name": "", //name is required
+         "email": "", //email is required
+         "gender": "", //male/female/others
+         "location": "", //location is required
+         "address": "",  //address is required
+         "country_id": "", //static 231
+         "city_id": "",  //city id is required
+         "address_id": "", //optional
+         "long": "", //location based
+         "lat": "" //location based
+         ]
+         */
+        
+        var imageParam:[String:Any] = [:]
+        
+        if let profileImg = self.userProfileImgView.image {
+            imageParam["profile"] = profileImg
+            imageParam["cover_image"] = self.profileHeaderImgView.image ?? UIImage()
+            
+            ProfileVM.updateProfileInfApi(inputparams: params, imageParams: imageParam, completion: {[weak self] getResultData in
+                guard let self = self, let getResultData = getResultData  else { return  }
+                
+                print("getResultData", getResultData)
+                if let userData = getResultData.data {
+                    print("userData", userData)
+                    self.navigationController?.popViewController(animated: true)
+                }
+            })
+            
+        }else{
+            AlertHelper.shared.showCustomeAlert(message: "Please take photo.")
+        }
+    }
+    
+//    private func updateUserInfo(params:[String:Any]?){
+//        /*
+//         let params:[String:Any] = [
+//         "name": "", //name is required
+//         "email": "", //email is required
+//         "gender": "", //male/female/others
+//         "location": "", //location is required
+//         "address": "",  //address is required
+//         "country_id": "", //static 231
+//         "city_id": "",  //city id is required
+//         "address_id": "", //optional
+//         "long": "", //location based
+//         "lat": "" //location based
+//         ]
+//         */
+//        
+//        ProfileVM.updateInformationApi(inputparams: params, completion: {[weak self] getResultData in
+//            guard let self = self, let getResultData = getResultData  else { return  }
+//            print("getResultData", getResultData)
+//            if let userData = getResultData.data {
+//                print("userData", userData)
+//                self.navigationController?.popViewController(animated: true)
+//                
+////                AlertHelper.shared.showCustomeAlert(title: "", message: getResultData.msg ?? "", actions: ["ok"], withCancel: false, completion: { getInx in
+////                    print(getInx as Any)
+////                })
+//            }
+//        })
+//    }
+}
+
+// MARK: ------------ UIPopoverPresentationControllerDelegate
+extension ProfileEditViewController: UIPopoverPresentationControllerDelegate {
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .none  // Keeps it as a popover on iPhone instead of full-screen
+    }
 }
 
 //extension ProfileEditViewController: UITableViewDelegate, UITableViewDataSource, CustomCellDelegate{

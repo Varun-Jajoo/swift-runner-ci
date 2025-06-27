@@ -12,7 +12,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="GridTrainerCollectionViewCell" id="gTV-IL-0wX" customClass="GridTrainerCollectionViewCell" customModule="MyPT" customModuleProvider="target">
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="GridTrainerCollectionViewCell" id="gTV-IL-0wX" customClass="GridTrainerCollectionViewCell" customModule="MyPT_Connect" customModuleProvider="target">
             <rect key="frame" x="0.0" y="0.0" width="436" height="499"/>
             <autoresizingMask key="autoresizingMask"/>
             <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
@@ -80,7 +80,7 @@
                                     <outlet property="delegate" destination="gTV-IL-0wX" id="XVM-G7-lqp"/>
                                 </connections>
                             </collectionView>
-                            <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" contentHorizontalAlignment="left" contentVerticalAlignment="top" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bHW-yR-n4Q">
+                            <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="left" contentVerticalAlignment="top" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bHW-yR-n4Q">
                                 <rect key="frame" x="13" y="465" width="53" height="16.333333333333314"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="11"/>
@@ -98,7 +98,7 @@
                                 <color key="tintColor" systemColor="tintColor"/>
                                 <inset key="contentEdgeInsets" minX="0.0" minY="0.0" maxX="6" maxY="0.0"/>
                                 <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-5" maxY="0.0"/>
-                                <state key="normal" title="Near Dubai Mall " image="ic_grayDot">
+                                <state key="normal" title="Near Dubai Mall" image="ic_grayDot">
                                     <color key="titleColor" name="appWhite"/>
                                     <color key="titleShadowColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </state>
@@ -160,7 +160,7 @@
             <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="tintColor">
-            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

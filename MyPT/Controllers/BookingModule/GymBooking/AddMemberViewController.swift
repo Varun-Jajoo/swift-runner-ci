@@ -79,12 +79,30 @@ class AddMemberViewController: CommonViewController {
     
     @IBAction func addMemberBtnActn(_ sender: Any) {
         print("Add member btn clicked......")
+        
+        if let maxMember = memberData?.maxMember, let totalAddMember =  self.memberList?.count, (Int(maxMember) ?? 0) > totalAddMember {
+            
+            let vc: BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
+            vc.bookingAddressFlow = .addMember
+            vc.modalPresentationStyle = .automatic
+            vc.navCtrnl = self.navigationController
+            vc.addMemberDelegate  = self
+            vc.addMaxMember = Int(maxMember)
+            vc.addedMember = totalAddMember
+            self.present(vc, animated: true)
+        }
+        else{
+            AlertHelper.shared.alertMesssage(view: self, title: "", message: memberData?.limit ?? "")
+        }
+        
+        /*
         let vc: BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
         vc.bookingAddressFlow = .addMember
         vc.modalPresentationStyle = .automatic
         vc.navCtrnl = self.navigationController
         vc.addMemberDelegate  = self
         self.present(vc, animated: true)
+        */
         
     }
     
@@ -194,16 +212,21 @@ extension AddMemberViewController: UITableViewDelegate, UITableViewDataSource{
         print(indx as Any)
         
         if let indx = indx {
-            let memberData = memberList?[indx]
+            let memberDetailsData = memberList?[indx]
             print("memberData: ",memberData as Any)
             
-            let vc: BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
-            vc.bookingAddressFlow = .addMember
-            vc.modalPresentationStyle = .automatic
-            vc.navCtrnl = self.navigationController
-            vc.addMemberData = memberData
-            vc.addMemberDelegate = self
-            self.present(vc, animated: true)
+            if let maxMember = memberData?.maxMember, let totalAddMember =  self.memberList?.count{
+                
+                let vc: BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
+                vc.bookingAddressFlow = .addMember
+                vc.modalPresentationStyle = .automatic
+                vc.navCtrnl = self.navigationController
+                vc.addMemberData = memberDetailsData
+                vc.addedMember = (totalAddMember == Int(maxMember) ? totalAddMember - 1: totalAddMember)
+                vc.addMaxMember = Int(maxMember)
+                vc.addMemberDelegate = self
+                self.present(vc, animated: true)
+            }
         }
     }
     
@@ -239,6 +262,12 @@ extension AddMemberViewController: UITableViewDelegate, UITableViewDataSource{
 extension AddMemberViewController: AddMemberProtocol{
     func memberAdd(isDismiss: Bool?) {
         if isDismiss == true {
+            self.getMemberApi(params: getMemberParams?.getParams() ?? [:])
+        }
+    }
+    
+    func editReloadData(isReload: Bool?) {
+        if isReload == true {
             self.getMemberApi(params: getMemberParams?.getParams() ?? [:])
         }
     }

@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "B8FDEEBE2CC8CAD00061639F"
-               BuildableName = "MyPT.app"
+               BuildableName = "MyPT Connect.app"
                BlueprintName = "MyPT"
                ReferencedContainer = "container:MyPT.xcodeproj">
             </BuildableReference>
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "B8FDEEBE2CC8CAD00061639F"
-            BuildableName = "MyPT.app"
+            BuildableName = "MyPT Connect.app"
             BlueprintName = "MyPT"
             ReferencedContainer = "container:MyPT.xcodeproj">
          </BuildableReference>
@@ -62,7 +62,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "B8FDEEBE2CC8CAD00061639F"
-            BuildableName = "MyPT.app"
+            BuildableName = "MyPT Connect.app"
             BlueprintName = "MyPT"
             ReferencedContainer = "container:MyPT.xcodeproj">
          </BuildableReference>

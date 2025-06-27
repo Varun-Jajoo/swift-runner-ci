@@ -2,15 +2,41 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb1311462707653880</string>
+				<string>com.googleusercontent.apps.405850399410-3plk6horqe62b9a0t316to75fbm5r1tr</string>
+				<string>msteams</string>
+			</array>
+		</dict>
+	</array>
+	<key>FacebookAppID</key>
+	<string>1311462707653880</string>
+	<key>FacebookClientToken</key>
+	<string>5814be5585d2012bca11b59a4b09579a</string>
+	<key>FacebookDisplayName</key>
+	<string>MyPT Connect</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
-		<string>comgooglemaps</string>
-		<string>comgooglemaps-x-callback</string>
+		<string>fbapi</string>
+		<string>fb-messenger-share-api</string>
+		<string>msteams</string>
 	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>secure.ccavenue.ae</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
 	</dict>
 	<key>UIAppFonts</key>
 	<array>
@@ -70,26 +96,14 @@
 			</array>
 		</dict>
 	</dict>
-	<key>NSCameraUsageDescription</key>
-	<string>Your app requires camera access for pose detection.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Your app requires camera access for pose detection.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>For secure verification on the checkout step</string>
-    
-    <key>NSAppTransportSecurity</key>
-    <dict>
-        <key>NSExceptionDomains</key>
-        <dict>
-            <key>secure.ccavenue.ae</key>
-            <dict>
-                <key>NSIncludesSubdomains</key>
-                <true/>
-                <key>NSExceptionAllowsInsecureHTTPLoads</key>
-                <true/>
-            </dict>
-        </dict>
-    </dict>
-
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+	<key>UIDeviceFamily</key>
+	<array>
+		<integer>1</integer>
+	</array>
 </dict>
 </plist>

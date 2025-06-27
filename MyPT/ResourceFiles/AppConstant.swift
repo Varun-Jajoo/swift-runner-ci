@@ -41,6 +41,19 @@ enum AssetsMultiColor {
 
 
 extension UIColor {
+    
+    convenience init(hex: String) {
+         var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+         hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+         var rgb: UInt64 = 0
+         Scanner(string: hexSanitized).scanHexInt64(&rgb)
+
+         let r = CGFloat((rgb & 0xFF0000) >> 16) / 255
+         let g = CGFloat((rgb & 0x00FF00) >> 8) / 255
+         let b = CGFloat(rgb & 0x0000FF) / 255
+
+         self.init(red: r, green: g, blue: b, alpha: 1.0)
+     }
 
     static func appColor(_ name: AssetsColor) -> UIColor? {
         switch name {
@@ -101,8 +114,6 @@ extension UIColor {
         case .greenGradient:
             return [UIColor(red: 29.0/255.0, green: 215.0/255.0, blue: 148.0/255.0, alpha: 1.0), UIColor(red: 9.0/255.0, green: 46.0/255.0, blue: 46.0/255.0, alpha: 1.0)]
         }
-    //rgba(0, 0, 0, 0)
-        //rgba(0, 5, 2, 1)
     }
 }
 

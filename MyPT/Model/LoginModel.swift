@@ -9,12 +9,44 @@ import Foundation
 
 
 // MARK: ------ LoginBaseModel
-struct LoginBaseModel: Codable {
+//struct LoginBaseModel: Codable {
+//    var status: Bool?
+//    var data: LoginDataModel?
+//    var msg: String?
+//    let errors: [String: [String]]?
+//}
+
+struct LoginBaseModel: Decodable {
     var status: Bool?
     var data: LoginDataModel?
     var msg: String?
-    let errors: [String: [String]]?
+    var errors: [String: [String]]?
+
+    enum CodingKeys: String, CodingKey {
+        case status
+        case data
+        case msg
+        case errors
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        self.status = try? container.decode(Bool.self, forKey: .status)
+        self.data = try? container.decode(LoginDataModel.self, forKey: .data)
+        self.msg = try? container.decode(String.self, forKey: .msg)
+
+        if let errorDict = try? container.decode([String: [String]].self, forKey: .errors) {
+            self.errors = errorDict
+        } else if let errorString = try? container.decode(String.self, forKey: .errors) {
+            // If error is a string, assign it under a generic key
+            self.errors = ["error": [errorString]]
+        } else {
+            self.errors = nil
+        }
+    }
 }
+
 
 
 // MARK: ------- LoginDataModel
@@ -60,6 +92,8 @@ struct SubmitDataModel: Codable {
     let name: String?
     let email: String?
     let phone: String?
+    let latitude: String?
+    let longitude: String?
     let isCompleted: Int?
     let dob, gender: String?
     
@@ -74,6 +108,8 @@ struct SubmitDataModel: Codable {
         gender = try container.decodeIfPresent(String.self, forKey: .gender)
         step = try container.decodeIfPresent(FlexibleValue.self, forKey: .step)
         token = try container.decodeIfPresent(FlexibleValue.self, forKey: .token)
+        latitude = try container.decodeIfPresent(String.self, forKey: .latitude)
+        longitude = try container.decodeIfPresent(String.self, forKey: .longitude)
 
         // Handle `data` as both an array and a dictionary
         if let dataDictionary = try? container.decode(UserModel.self, forKey: .user) {
@@ -93,43 +129,17 @@ struct UserModel: Codable {
     let name: String?
     let email: String?
     let phone: String?
+    let address: String?
     let isCompleted: Int?
     let dob, gender: String?
     let information: InformationModel?
 
     enum CodingKeys: String, CodingKey {
-        case id, name, email, phone
+        case id, name, email, phone, address
         case isCompleted = "is_completed"
         case dob, gender, information
     }
 }
-
-/*
- ["data": {
-     dob = "<null>";
-     email = "<null>";
-     gender = "<null>";
-     id = 254;
-     "is_completed" = 0;
-     name = HRY;
-     phone = 1254365211;
- }, "msg": Saved successfully!, "status": 1]
- */
-
-/*
- ["status": 1, "msg": Login successful, please complete step 0, "data": {
-     id = 17;
-     step = 0;
-     token = "899|4whjGHtdKLv7MMVsGa1MFLWZ6MqzbZ4o7J1CsXVPbec95e06";
-     user =     {
-         email = "<null>";
-         "is_completed" = 1;
-         name = JJ;
-         phone = 1111111111;
-     };
- }]
- */
-
 
 // MARK: ------- WeightBaseModel
 struct WeightBaseModel: Codable {
@@ -138,7 +148,6 @@ struct WeightBaseModel: Codable {
     let msg: String?
     let errors: [String: [String]]?
 }
-
 
 // MARK: --------- InformationModel
 struct InformationModel: Codable {

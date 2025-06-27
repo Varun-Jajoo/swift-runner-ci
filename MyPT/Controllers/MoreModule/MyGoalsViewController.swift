@@ -36,7 +36,7 @@ class MyGoalsViewController: CommonViewController, UITableViewDelegate, UITableV
         //------------------upcoming
 //        self.setTopBackgroundImage(named: "ic_Mygoals_Upcoming")
         
-        self.view.setComingSoon(bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_upcomingStripe", lockImgName: "ic_upcomingLock" ,title: "Locked for Now", desc: "Goal setting and progress tracking will be live soon. Get ready to aim higher!")
+        self.view.setComingSoon(bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_upcomingStripe", lockImgName: "ic_upcomingLock" ,title: AppStrings.coming_soon, desc: "Goal setting and progress tracking will be live soon. Get ready to aim higher!")
 //        self.view.addTopNavigationButton(title: "Profile", image: AppImages.backarrow, target: self.view)
        
     }

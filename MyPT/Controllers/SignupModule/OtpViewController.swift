@@ -23,7 +23,6 @@ enum vcSteps: Int {
             return GenderViewController.self
         case .three:
             return AgeViewController.self
-//            return DemmyAgeViewController.self
         case .four:
             return WeightViewController.self
         case .five:
@@ -111,6 +110,7 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         super.viewWillAppear(animated)
         self.setNavigationColor(setColor: .clear)
         self.statusBarColor(setColor: .clear)
+        self.startTimer()
         setNavUI()
     }
     
@@ -405,7 +405,19 @@ extension OtpViewController {
                     
                     if getResult.status == true {
                         if let userData = getResult.data {
+                            
+//                            if userData.name == nil {
+//                                if let userModelData = getResult.data?.user {
+//                                    appUserDefaults.saveUserToUserDefaults(userModelData)
+//                                }
+//                            }else{
+//                                appUserDefaults.saveUserToUserDefaults(userData)
+//
+//                            }
+                            
+                            
                             appUserDefaults.saveUserToUserDefaults(userData)
+                            appUserDefaults.setUserName(value: userData.user?.name)
                             appUserDefaults.setAccessToken(accessToken: userData.token?.value)
                         }
                         
@@ -443,7 +455,17 @@ extension OtpViewController {
                     
                     if getResult.status == true {
                         if let userData = getResult.data {
+//                            if userData.name == nil {
+//                                if let userModelData = getResult.data?.user {
+//                                    appUserDefaults.saveUserToUserDefaults(userModelData)
+//                                }
+//                            }else{
+//                                appUserDefaults.saveUserToUserDefaults(userData)
+//
+//                            }
+                            
                             appUserDefaults.saveUserToUserDefaults(userData)
+                            appUserDefaults.setUserName(value: userData.user?.name)
                             appUserDefaults.setAccessToken(accessToken: userData.token?.value)
                         }
                         

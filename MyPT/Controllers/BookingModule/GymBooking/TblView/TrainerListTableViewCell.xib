@@ -42,67 +42,69 @@
                                         <constraints>
                                             <constraint firstAttribute="width" secondItem="HXC-Ww-uGa" secondAttribute="height" id="XDd-YL-WDz"/>
                                             <constraint firstAttribute="width" constant="20" id="Zyv-T2-gru"/>
+                                            <constraint firstAttribute="width" secondItem="HXC-Ww-uGa" secondAttribute="height" id="uad-J5-aJI"/>
                                         </constraints>
                                     </imageView>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="D1l-2V-4bc">
-                                        <rect key="frame" x="20" y="37" width="55" height="16.333333333333329"/>
-                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                        <inset key="contentEdgeInsets" minX="0.0" minY="0.0" maxX="6" maxY="0.0"/>
-                                        <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-5" maxY="0.0"/>
-                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                        <state key="normal" title="1.2km" image="ic_chooseLocation">
-                                            <color key="titleColor" name="appWhite"/>
-                                        </state>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VbT-o7-ex0">
-                                        <rect key="frame" x="80" y="37" width="235" height="16.333333333333329"/>
-                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                                        <color key="tintColor" systemColor="tintColor"/>
-                                        <inset key="contentEdgeInsets" minX="0.0" minY="0.0" maxX="6" maxY="0.0"/>
-                                        <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-5" maxY="0.0"/>
-                                        <state key="normal" title="Near Dubai Mall " image="ic_grayDot">
-                                            <color key="titleColor" name="appWhite"/>
-                                            <color key="titleShadowColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        </state>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kuS-kg-ezO">
-                                        <rect key="frame" x="327" y="36.666666666666629" width="38" height="17"/>
-                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                        <state key="normal" title="4.2 " image="ic_star">
-                                            <color key="titleColor" name="appWhite"/>
-                                        </state>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4fw-01-ZmC">
-                                        <rect key="frame" x="369" y="37.666666666666629" width="65" height="15"/>
-                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                        <state key="normal" title="12k ratings" image="ic_dashboardCircle">
-                                            <color key="titleColor" name="txtDarkGray"/>
-                                        </state>
-                                    </button>
+                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KJz-Id-emX">
+                                        <rect key="frame" x="20" y="37" width="414" height="16.333333333333329"/>
+                                        <subviews>
+                                            <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="D1l-2V-4bc">
+                                                <rect key="frame" x="0.0" y="0.0" width="55" height="16.333333333333332"/>
+                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                <inset key="contentEdgeInsets" minX="0.0" minY="0.0" maxX="6" maxY="0.0"/>
+                                                <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-5" maxY="0.0"/>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <state key="normal" title="1.2km" image="ic_chooseLocation">
+                                                    <color key="titleColor" name="appWhite"/>
+                                                </state>
+                                            </button>
+                                            <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="245" verticalHuggingPriority="245" horizontalCompressionResistancePriority="745" verticalCompressionResistancePriority="745" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VbT-o7-ex0">
+                                                <rect key="frame" x="55" y="0.0" width="256" height="16.333333333333332"/>
+                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                <color key="tintColor" systemColor="tintColor"/>
+                                                <inset key="contentEdgeInsets" minX="0.0" minY="1" maxX="6" maxY="1"/>
+                                                <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-5" maxY="0.0"/>
+                                                <state key="normal" image="ic_grayDot">
+                                                    <color key="titleColor" name="appWhite"/>
+                                                    <color key="titleShadowColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                </state>
+                                            </button>
+                                            <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kuS-kg-ezO">
+                                                <rect key="frame" x="311" y="0.0" width="33" height="16.333333333333332"/>
+                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="6"/>
+                                                <inset key="contentEdgeInsets" minX="0.0" minY="0.0" maxX="5" maxY="0.0"/>
+                                                <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-4" maxY="0.0"/>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <state key="normal" title="4.2 " image="ic_star">
+                                                    <color key="titleColor" name="appWhite"/>
+                                                </state>
+                                            </button>
+                                            <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4fw-01-ZmC">
+                                                <rect key="frame" x="344" y="0.0" width="70" height="16.333333333333332"/>
+                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                <inset key="contentEdgeInsets" minX="0.0" minY="0.0" maxX="5" maxY="0.0"/>
+                                                <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-4" maxY="0.0"/>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <state key="normal" title="12k ratings" image="ic_dashboardCircle">
+                                                    <color key="titleColor" name="txtDarkGray"/>
+                                                </state>
+                                            </button>
+                                        </subviews>
+                                    </stackView>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstItem="D1l-2V-4bc" firstAttribute="leading" secondItem="LnV-v4-QB9" secondAttribute="leading" id="3XI-Ri-mIo"/>
-                                    <constraint firstItem="4fw-01-ZmC" firstAttribute="centerY" secondItem="kuS-kg-ezO" secondAttribute="centerY" id="6s0-pL-Rsy"/>
-                                    <constraint firstItem="VbT-o7-ex0" firstAttribute="centerY" secondItem="D1l-2V-4bc" secondAttribute="centerY" id="ACz-E2-jdH"/>
-                                    <constraint firstAttribute="trailing" secondItem="4fw-01-ZmC" secondAttribute="trailing" constant="20" id="GtD-7R-mVJ"/>
-                                    <constraint firstItem="VbT-o7-ex0" firstAttribute="top" secondItem="D1l-2V-4bc" secondAttribute="top" id="HOq-bw-hcV"/>
+                                    <constraint firstAttribute="trailing" secondItem="KJz-Id-emX" secondAttribute="trailing" constant="20" id="BHf-Wa-rDP"/>
+                                    <constraint firstItem="KJz-Id-emX" firstAttribute="top" secondItem="LnV-v4-QB9" secondAttribute="bottom" constant="12" id="ImH-sg-UJk"/>
                                     <constraint firstItem="LnV-v4-QB9" firstAttribute="leading" secondItem="VOU-rJ-cTE" secondAttribute="leading" constant="20" id="Jam-Zu-OsQ"/>
-                                    <constraint firstItem="kuS-kg-ezO" firstAttribute="leading" secondItem="VbT-o7-ex0" secondAttribute="trailing" constant="12" id="LKh-Ub-pnX"/>
-                                    <constraint firstItem="VbT-o7-ex0" firstAttribute="leading" secondItem="D1l-2V-4bc" secondAttribute="trailing" constant="5" id="PK9-zD-EJE"/>
-                                    <constraint firstItem="4fw-01-ZmC" firstAttribute="leading" secondItem="kuS-kg-ezO" secondAttribute="trailing" constant="4" id="Qos-1m-BCO"/>
-                                    <constraint firstItem="D1l-2V-4bc" firstAttribute="top" secondItem="LnV-v4-QB9" secondAttribute="bottom" constant="12" id="WjU-pk-7PB"/>
+                                    <constraint firstItem="KJz-Id-emX" firstAttribute="leading" secondItem="LnV-v4-QB9" secondAttribute="leading" id="OsV-at-daw"/>
+                                    <constraint firstAttribute="bottom" secondItem="KJz-Id-emX" secondAttribute="bottom" constant="18" id="TG1-op-wtR"/>
                                     <constraint firstItem="HXC-Ww-uGa" firstAttribute="leading" secondItem="LnV-v4-QB9" secondAttribute="trailing" constant="12" id="cAB-1B-3Ko"/>
-                                    <constraint firstItem="kuS-kg-ezO" firstAttribute="centerY" secondItem="D1l-2V-4bc" secondAttribute="centerY" id="ixl-qf-wTu"/>
                                     <constraint firstItem="HXC-Ww-uGa" firstAttribute="bottom" secondItem="LnV-v4-QB9" secondAttribute="bottom" constant="1" id="sA4-Nx-qHm"/>
-                                    <constraint firstAttribute="bottom" secondItem="VbT-o7-ex0" secondAttribute="bottom" constant="18" id="uaB-Gk-527"/>
-                                    <constraint firstItem="HXC-Ww-uGa" firstAttribute="width" secondItem="HXC-Ww-uGa" secondAttribute="height" id="uad-J5-aJI"/>
                                     <constraint firstAttribute="trailing" secondItem="HXC-Ww-uGa" secondAttribute="trailing" constant="20" id="ufV-BD-rgi"/>
                                     <constraint firstItem="LnV-v4-QB9" firstAttribute="top" secondItem="VOU-rJ-cTE" secondAttribute="top" constant="1" id="wIC-xb-goL"/>
                                 </constraints>
@@ -206,6 +208,7 @@
                 <outlet property="numberSlotLbl" destination="Ihe-Ug-s86" id="zIQ-9D-GJg"/>
                 <outlet property="ratingBtn" destination="kuS-kg-ezO" id="0BY-Re-7pR"/>
                 <outlet property="slotMBV" destination="Fdq-36-bzx" id="wjd-jq-o74"/>
+                <outlet property="topConstrntLoctionConstrnt" destination="ImH-sg-UJk" id="lIO-fb-B2M"/>
                 <outlet property="trainerImgView" destination="E64-Pm-shD" id="Tbz-Ep-opq"/>
                 <outlet property="trainerVerifyImgView" destination="HXC-Ww-uGa" id="WNO-4k-tW8"/>
             </connections>
@@ -229,7 +232,7 @@
             <color red="0.58431372549019611" green="0.58431372549019611" blue="0.58431372549019611" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="tintColor">
-            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

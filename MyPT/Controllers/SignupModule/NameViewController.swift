@@ -39,6 +39,7 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
         } else {
             print("No user found in UserDefaults")
         }
+        
     }
     
     override func keyboardWillShow(_ notification: Notification) {

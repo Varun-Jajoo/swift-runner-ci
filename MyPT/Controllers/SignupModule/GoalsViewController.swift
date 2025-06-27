@@ -72,7 +72,8 @@ class GoalsViewController: CommonViewController {
         self.setProgress(0.6)
         
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
-        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite)
+//        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite) skipe remove need of client
+        
         //        self.setNavigationTitle(title: AppStrings.select_plan, color: UIColor.black, font: AppFont.Bold.size(22.0))
     }
     
@@ -148,9 +149,9 @@ extension GoalsViewController:  UICollectionViewDelegate, UICollectionViewDataSo
         cell.titleLbl.lineBreakMode = .byClipping
         cell.titleLbl.text = dataGoals?[indexPath.row].name as? String
         
-        cell.fitnessImgView.loadImage(urlString: dataGoals?[indexPath.row].image as? String, placeholder: UIImage())
+//        cell.fitnessImgView.loadImage(urlString: dataGoals?[indexPath.row].image as? String, placeholder: UIImage())
         
-//        cell.fitnessImgView.image = dataGoals?[indexPath.row]["images"] as? UIImage
+        cell.fitnessImgView.image = dataGoals?[indexPath.row].cachedUnselectedImg as? UIImage
         return cell
     }
     
@@ -171,11 +172,9 @@ extension GoalsViewController:  UICollectionViewDelegate, UICollectionViewDataSo
             self.selectIds?.append(dataGoals?[indexPath.row].id ?? 0)
         }
         
-        cell.setSelectdCellUrl(dataGoals?[indexPath.row].image as? String, selectedImgStr: dataGoals?[indexPath.row].selectImage as? String, isSelectedCell: true)
+        cell.setSelectdCell(dataGoals?[indexPath.row].cachedUnselectedImg, selectedImg: dataGoals?[indexPath.row].cachedSelectedImg, isSelectedCell: true)
         
-        /*
-        cell.setSelectdCell(dataGoals?[indexPath.row]["images"] as? UIImage, selectedImg: dataGoals?[indexPath.row]["seleced_images"] as? UIImage, isSelectedCell: true)
-        */
+//        cell.setSelectdCellUrl(dataGoals?[indexPath.row].image as? String, selectedImgStr: dataGoals?[indexPath.row].selectImage as? String, isSelectedCell: true)
         
         if cell.isSelected {
             self.continueBtn.isUserInteractionEnabled = true
@@ -197,8 +196,10 @@ extension GoalsViewController:  UICollectionViewDelegate, UICollectionViewDataSo
         } else {
             self.selectIds?.append(dataGoals?[indexPath.row].id ?? 0)
         }
-                        
-        cell.setSelectdCellUrl(dataGoals?[indexPath.row].image as? String, selectedImgStr: dataGoals?[indexPath.row].selectImage as? String, isSelectedCell: false)
+            
+        cell.setSelectdCell(dataGoals?[indexPath.row].cachedUnselectedImg, selectedImg: dataGoals?[indexPath.row].cachedSelectedImg, isSelectedCell: false)
+        
+//        cell.setSelectdCellUrl(dataGoals?[indexPath.row].image as? String, selectedImgStr: dataGoals?[indexPath.row].selectImage as? String, isSelectedCell: false)
         
         if let selectIds = selectIds, selectIds.isEmpty || selectIds.count == 0 {
             self.continueBtn.isUserInteractionEnabled = false
@@ -232,7 +233,31 @@ extension GoalsViewController {
             
             self.dataGoals?.removeAll()
             self.dataGoals?.append(contentsOf: getResultData?.data ?? [])
-            self.goalsCollView.reloadData()
+//            self.goalsCollView.reloadData()
+            
+             if let prefrencesData = getResultData?.data {
+                 let group = DispatchGroup()
+                 for (index, dataModel) in prefrencesData.enumerated() {
+                     group.enter()
+                     ImageDownloader.shared.downloadImage(from: dataModel.image ?? "") { [weak self] image in
+                         guard let self = self else { return }
+                         self.dataGoals?[index].cachedUnselectedImg = image
+                         group.leave()
+                     }
+                     group.enter()
+                     ImageDownloader.shared.downloadImage(from: dataModel.selectImage ?? "") { [weak self] selectedImage in
+                         guard let self = self else { return }
+                         self.dataGoals?[index].cachedSelectedImg = selectedImage
+                         group.leave()
+                     }
+                 }
+                 // When all images are loaded
+                 group.notify(queue: .main) { [weak self] in
+                     guard let self = self else { return }
+                     self.goalsCollView.reloadData()
+                 }
+             }
+            
         })
     }
     

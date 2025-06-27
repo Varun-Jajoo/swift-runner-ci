@@ -11,7 +11,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="UpcomingMealsCollectionViewCell" id="gTV-IL-0wX" customClass="UpcomingMealsCollectionViewCell" customModule="MyPT" customModuleProvider="target">
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="UpcomingMealsCollectionViewCell" id="gTV-IL-0wX" customClass="UpcomingMealsCollectionViewCell" customModule="MyPT_Connect" customModuleProvider="target">
             <rect key="frame" x="0.0" y="0.0" width="350" height="203"/>
             <autoresizingMask key="autoresizingMask"/>
             <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
@@ -110,6 +110,9 @@
                     </view>
                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_mealsType" translatesAutoresizingMaskIntoConstraints="NO" id="ZTM-O4-Zn3">
                         <rect key="frame" x="16" y="-4" width="133.33333333333334" height="32.333333333333336"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="32.329999999999998" id="Nae-TA-JQD"/>
+                        </constraints>
                     </imageView>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Breakfast" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="W2S-Dc-cND">
                         <rect key="frame" x="17" y="-3" width="133.33333333333334" height="22.333333333333332"/>
@@ -140,6 +143,8 @@
                 <outlet property="fatBtn" destination="TXg-Ec-zAl" id="kId-BA-7ZE"/>
                 <outlet property="kcalBtn" destination="1aC-ff-reO" id="UX1-bh-rBn"/>
                 <outlet property="likeBtn" destination="HBr-iV-omX" id="Evh-yh-HSy"/>
+                <outlet property="likeBtnTopconstrnt" destination="I2h-3L-5WH" id="JRM-VY-e3m"/>
+                <outlet property="mealTypeImgViewHeightConstrnt" destination="Nae-TA-JQD" id="MQJ-YZ-a8w"/>
                 <outlet property="mealTypeImgview" destination="ZTM-O4-Zn3" id="cFk-5s-wNY"/>
                 <outlet property="mealsTypeTitleLbl" destination="W2S-Dc-cND" id="Thz-Uz-OMa"/>
                 <outlet property="proteinBtn" destination="4P2-35-Q5B" id="axW-Gh-Ikk"/>

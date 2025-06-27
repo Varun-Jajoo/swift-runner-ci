@@ -18,7 +18,7 @@
         <!--Dashboard Guest View Controller-->
         <scene sceneID="s0d-6b-0kx">
             <objects>
-                <viewController storyboardIdentifier="DashboardGuestViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="Y6W-OH-hqX" customClass="DashboardGuestViewController" customModule="MyPT" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="DashboardGuestViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="Y6W-OH-hqX" customClass="DashboardGuestViewController" customModule="MyPT_Connect" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="5EZ-qb-Rvc">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -38,7 +38,7 @@
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mKr-D3-8WA" userLabel="topNameMBV">
                                                 <rect key="frame" x="0.0" y="90" width="393" height="131"/>
                                                 <subviews>
-                                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="252" contentHorizontalAlignment="fill" contentVerticalAlignment="fill" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ao8-ro-8P9">
+                                                    <button opaque="NO" tag="104" contentMode="scaleToFill" horizontalHuggingPriority="252" contentHorizontalAlignment="fill" contentVerticalAlignment="fill" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ao8-ro-8P9">
                                                         <rect key="frame" x="20" y="24.666666666666671" width="60" height="60"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="60" id="2Q9-8H-wAN"/>
@@ -46,6 +46,9 @@
                                                         </constraints>
                                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                         <state key="normal" image="ic_dashboardAvatars"/>
+                                                        <connections>
+                                                            <action selector="commonBtnActn:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="7Hh-gV-3uC"/>
+                                                        </connections>
                                                     </button>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Good Morning " lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Wlk-Ww-TzC">
                                                         <rect key="frame" x="96" y="18" width="235" height="73"/>
@@ -232,7 +235,7 @@
                                                 <color key="textColor" name="txtDarkGray"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="right" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="daY-FV-zy8">
+                                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="right" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="daY-FV-zy8">
                                                 <rect key="frame" x="347.33333333333331" y="639.66666666666663" width="25.666666666666686" height="25.333333333333371"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                 <state key="normal" image="ic_forward"/>
@@ -899,7 +902,7 @@
         <!--Dashboard View Controller-->
         <scene sceneID="FMs-T6-yIr">
             <objects>
-                <viewController storyboardIdentifier="DashboardViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="9rl-M5-jdK" customClass="DashboardViewController" customModule="MyPT" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="DashboardViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="9rl-M5-jdK" customClass="DashboardViewController" customModule="MyPT_Connect" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="elT-4y-yRU">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -925,7 +928,7 @@
                                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_profile_placeholder" translatesAutoresizingMaskIntoConstraints="NO" id="aKh-77-0oC">
                                                                         <rect key="frame" x="20" y="2" width="60" height="60"/>
                                                                     </imageView>
-                                                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="252" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gzH-kR-H0M">
+                                                                    <button opaque="NO" tag="2213" contentMode="scaleToFill" horizontalHuggingPriority="252" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gzH-kR-H0M">
                                                                         <rect key="frame" x="20" y="2" width="60" height="60"/>
                                                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                         <constraints>
@@ -934,6 +937,9 @@
                                                                         </constraints>
                                                                         <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                                        <connections>
+                                                                            <action selector="commonBtnActn:" destination="9rl-M5-jdK" eventType="touchUpInside" id="Q5Y-bw-tCR"/>
+                                                                        </connections>
                                                                     </button>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Gold Member " lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1YB-o0-amQ">
                                                                         <rect key="frame" x="96" y="4" width="231" height="17"/>
@@ -1090,7 +1096,7 @@
                                                             <constraint firstItem="28b-jm-QLy" firstAttribute="top" secondItem="D43-l1-iGF" secondAttribute="bottom" constant="12" id="quV-Vv-IYh"/>
                                                         </constraints>
                                                     </view>
-                                                    <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sv8-wZ-ieU" userLabel="pageControlMBV" customClass="CustomPageControl" customModule="MyPT" customModuleProvider="target">
+                                                    <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sv8-wZ-ieU" userLabel="pageControlMBV" customClass="CustomPageControl" customModule="MyPT_Connect" customModuleProvider="target">
                                                         <rect key="frame" x="0.0" y="624" width="393" height="6"/>
                                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                         <constraints>
@@ -1403,7 +1409,7 @@
                                                                         <color key="textColor" name="txtDarkGray"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
-                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1Ih-ox-wix">
+                                                                    <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1Ih-ox-wix">
                                                                         <rect key="frame" x="347.33333333333331" y="90.666666666666742" width="25.666666666666686" height="25.333333333333329"/>
                                                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                                         <state key="normal" image="ic_forward"/>
@@ -2656,7 +2662,7 @@
         <!--Search View Controller-->
         <scene sceneID="mUA-Sx-Hqj">
             <objects>
-                <viewController storyboardIdentifier="SearchViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="PBU-ie-Oni" customClass="SearchViewController" customModule="MyPT" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SearchViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="PBU-ie-Oni" customClass="SearchViewController" customModule="MyPT_Connect" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="MlU-dM-zMe">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -2810,7 +2816,7 @@
         <!--Upcoming Soon View Controller-->
         <scene sceneID="cxi-Aa-fV8">
             <objects>
-                <viewController storyboardIdentifier="UpcomingSoonViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="tLD-x3-M9T" customClass="UpcomingSoonViewController" customModule="MyPT" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="UpcomingSoonViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="tLD-x3-M9T" customClass="UpcomingSoonViewController" customModule="MyPT_Connect" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="3Py-cR-9cL">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -2841,7 +2847,7 @@
         <!--Upcoming Classes View Controller-->
         <scene sceneID="Hau-0I-Rvv">
             <objects>
-                <viewController storyboardIdentifier="UpcomingClassesViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="JG8-lP-PL1" customClass="UpcomingClassesViewController" customModule="MyPT" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="UpcomingClassesViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="JG8-lP-PL1" customClass="UpcomingClassesViewController" customModule="MyPT_Connect" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="L2a-au-PE6">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -3209,7 +3215,7 @@
         <!--Classes View Controller-->
         <scene sceneID="3pA-lI-7bR">
             <objects>
-                <viewController storyboardIdentifier="ClassesViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="zLX-mq-sER" customClass="ClassesViewController" customModule="MyPT" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ClassesViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="zLX-mq-sER" customClass="ClassesViewController" customModule="MyPT_Connect" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="b0x-Gy-CWe">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -3435,7 +3441,7 @@
         <!--Resource View Controller-->
         <scene sceneID="H6q-5d-4la">
             <objects>
-                <viewController storyboardIdentifier="ResourceViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="8eQ-es-IOF" customClass="ResourceViewController" customModule="MyPT" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ResourceViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="8eQ-es-IOF" customClass="ResourceViewController" customModule="MyPT_Connect" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="0td-DJ-m5w">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -3485,7 +3491,7 @@
         <!--Class Category View Controller-->
         <scene sceneID="8Er-XW-6Xf">
             <objects>
-                <viewController storyboardIdentifier="ClassCategoryViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="6Wn-pn-MJV" customClass="ClassCategoryViewController" customModule="MyPT" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ClassCategoryViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="6Wn-pn-MJV" customClass="ClassCategoryViewController" customModule="MyPT_Connect" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Fm6-Hp-IEM">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -3537,7 +3543,7 @@
         <!--Resource Details View Controller-->
         <scene sceneID="ct8-ft-c2i">
             <objects>
-                <viewController storyboardIdentifier="ResourceDetailsViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="p1G-4P-sjY" customClass="ResourceDetailsViewController" customModule="MyPT" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ResourceDetailsViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="p1G-4P-sjY" customClass="ResourceDetailsViewController" customModule="MyPT_Connect" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="3P8-Fq-53b">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -3656,7 +3662,7 @@
         <!--Class Details View Controller-->
         <scene sceneID="y85-EQ-hBb">
             <objects>
-                <viewController storyboardIdentifier="ClassDetailsViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="cUi-pg-fNl" customClass="ClassDetailsViewController" customModule="MyPT" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ClassDetailsViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="cUi-pg-fNl" customClass="ClassDetailsViewController" customModule="MyPT_Connect" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="1hi-WR-ojl">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -4313,7 +4319,7 @@
         <!--Category Wise Classes View Controller-->
         <scene sceneID="Zgd-W3-7lr">
             <objects>
-                <viewController storyboardIdentifier="CategoryWiseClassesViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="keU-Ta-fAu" customClass="CategoryWiseClassesViewController" customModule="MyPT" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="CategoryWiseClassesViewController" hidesBottomBarWhenPushed="YES" useStoryboardIdentifierAsRestorationIdentifier="YES" id="keU-Ta-fAu" customClass="CategoryWiseClassesViewController" customModule="MyPT_Connect" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="h7Y-cd-wnv">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

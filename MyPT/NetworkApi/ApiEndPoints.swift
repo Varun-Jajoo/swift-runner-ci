@@ -19,7 +19,7 @@ var recordFound: Int              { return 2001 }
 var noRecordFound: Int            { return 2002 }
 var recordAlreadyExist: Int       { return 2003}
 
-var isTesting:Bool                { return false }
+var isTesting:Bool                { return true }
 
 
 //App base urls
@@ -88,8 +88,15 @@ enum ApiEndPoint: String{
     case book_class                     =  "api/book-class"
     case ccaavenue_payment              =  "api/pay"
     case account_delete                 =  "api/account-delete"
+    case social_login                   =  "api/social-login"
+    case user_trainer                   =  "api/user-trainer"
+    case user_profile                   =  "api/user-profile"
+    case user_information               =  "api/user-information"
+    case update_information             =  "api/update-information"
+    case delete_user_profileImage       =  "api/delete-user-profile-image"
     
   
+    
     case authLoginOTP = "authLoginOTP"
     case refreshAccessToken = "refreshToken"
     

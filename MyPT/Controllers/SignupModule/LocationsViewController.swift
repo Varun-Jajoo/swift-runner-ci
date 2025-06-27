@@ -13,6 +13,7 @@ enum LocationFlow {
     case addAddress
     case editAddress
     case homePage
+    case updateProfile
     case defaultLoc
 }
 
@@ -39,6 +40,9 @@ class LocationsViewController: CommonViewController {
     
     var isFromEditAddress:Bool? = false
     var getAddressData:AddressDataModel? = AddressDataModel()
+    var sendBackAddr: ((String?) -> Void)?
+    private var currentAddr: String?
+    
     
     //MARK: -------------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
@@ -88,6 +92,8 @@ class LocationsViewController: CommonViewController {
             }
         case .homePage:
             print("Home form")
+        case .updateProfile:
+            print("update Profile")
         case .defaultLoc:
             print("none.....")
         }
@@ -97,7 +103,7 @@ class LocationsViewController: CommonViewController {
     func setNavUI(){
      
         switch flowLocation {
-        case .addAddress, .editAddress, .homePage:
+        case .addAddress, .editAddress, .homePage, .updateProfile:
             
             self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
             //        self.setNavigationTitle(title: AppStrings.select_plan, color: UIColor.black, font: AppFont.Bold.size(22.0))
@@ -107,7 +113,9 @@ class LocationsViewController: CommonViewController {
             self.setProgress(1.0)
             
             self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
-            self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite)
+         
+//            self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite) skipe remove need of client
+            
             //        self.setNavigationTitle(title: AppStrings.select_plan, color: UIColor.black, font: AppFont.Bold.size(22.0))
         }
     }
@@ -115,7 +123,7 @@ class LocationsViewController: CommonViewController {
     override func rightBtnActn(sender: UIButton) {
        
         switch flowLocation {
-        case .addAddress, .editAddress, .homePage:
+        case .addAddress, .editAddress, .homePage, .updateProfile:
             print("address....")
         case .defaultLoc:
             appUserDefaults.setRegistrationSkip(value: true)
@@ -127,6 +135,10 @@ class LocationsViewController: CommonViewController {
     
     //MARK: ---------- SET UI
     private func setupUI(){
+        
+        self.mainAddrLbl.numberOfLines = 2
+        self.subAddrLbl.numberOfLines = 2
+        
         DispatchQueue.main.async {
             self.locSearch.setCornerRadius(borderWidth: 1, borderColor: .appBorder, cornerRadious: 12.0)
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
@@ -281,7 +293,11 @@ class LocationsViewController: CommonViewController {
         case .homePage:
             print("From Home Page.")
             self.navigationController?.popViewController(animated: true)
-            
+       
+        case .updateProfile:
+            print("update profile..")
+            self.sendBackAddr?(self.currentAddr)
+            self.navigationController?.popViewController(animated: true)
         case .defaultLoc:
             
             if let mainAddrLbl = self.mainAddrLbl.text , !mainAddrLbl.isEmpty, let subAddrLbl = self.subAddrLbl.text, !subAddrLbl.isEmpty, let lat = showmapCamera?.latitude as? Double, let long = showmapCamera?.longitude as? Double {
@@ -436,9 +452,15 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
     
     func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
         //        reverseGeocodeCoordinate(position.target)
-        let centerCoordinate = mapView.projection.coordinate(for: self.mapView.center)
-        self.showmapCamera = centerCoordinate
-        self.getCurrentAddr(location: CLLocation(latitude: centerCoordinate.latitude, longitude: centerCoordinate.longitude))
+        if let isFromEditAddress = self.isFromEditAddress, !isFromEditAddress {
+            let centerCoordinate = mapView.projection.coordinate(for: self.mapView.center)
+            self.showmapCamera = centerCoordinate
+            self.getCurrentAddr(location: CLLocation(latitude: centerCoordinate.latitude, longitude: centerCoordinate.longitude))
+        }
+        
+        //        let centerCoordinate = mapView.projection.coordinate(for: self.mapView.center)
+        //        self.showmapCamera = centerCoordinate
+        //        self.getCurrentAddr(location: CLLocation(latitude: centerCoordinate.latitude, longitude: centerCoordinate.longitude))
     }
     
     func mapView(_ mapView: GMSMapView, willMove gesture: Bool) {
@@ -523,7 +545,7 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
                                 print("GEOCODE: Formatted Address: \(lines)")
                                 
                                 var subAddrStr = ""
-                                
+                                self.currentAddr = lines.first
                                 self.mainAddrLbl.text = lines.first
                                 appUserDefaults.setLatLong(value: "\(getLcation.coordinate.latitude),\(getLcation.coordinate.longitude)")
                                 appUserDefaults.setCurrentAddr(value: lines.first)
@@ -581,6 +603,8 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
                                     self.getAddressData?.long?.value = "\(getLcation.coordinate.longitude)"
                                 }
                                 
+                                
+                                self.setUpMapHeigth()
                             }
                             
                         } else {

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FacebookCore
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -24,7 +25,29 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         guard let _ = (scene as? UIWindowScene) else { return }
     }
+    
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard let url = URLContexts.first?.url else {
+            return
+        }
 
+        ApplicationDelegate.shared.application(
+            UIApplication.shared,
+            open: url,
+            sourceApplication: nil,
+            annotation: [UIApplication.OpenURLOptionsKey.annotation]
+        )
+    }
+    
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+              let incomingURL = userActivity.webpageURL else {
+            return
+        }
+        navigateUniversalLink(incomingURL, window: window)
+    }
+    
+    
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
         // This occurs shortly after the scene enters the background, or when its session is discarded.
@@ -118,8 +141,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let objNav = UINavigationController(rootViewController: tab)
         objNav.isNavigationBarHidden = true
         window?.rootViewController = objNav
+        
+//        // Now that TabBar is shown, handle deep link
+//        if let url = DeepLinkRouter.shared.pendingURL {
+//            DeepLinkRouter.shared.handle(url: url, window: window)
+//            DeepLinkRouter.shared.pendingURL = nil // clear after handling
+//          }
     }
     
-
 }
 

@@ -33,21 +33,16 @@ class PersoniledViewController: CommonViewController {
         setupUI()
         
         self.continueBtn.isUserInteractionEnabled = false
-       
+     
         if let userData = appUserDefaults.getUserFromUserDefaults(as: SubmitDataModel.self), let userName = userData.name {
             self.titleLbl.text = "Hello " + userName + ","
+        }else{
+            //appUserDefaults.getUserFromUserDefaults(as: UserModel.self)
+            if let userName = appUserDefaults.getUserName() {
+                self.titleLbl.text = "Hello " + userName + ","
+            }
         }
-        
-        /*
-        dataPersonalized = [ ["title":"Weight Management","images":AppImages.Weight_Management as Any,"seleced_images":AppImages.Weight_Management_Selected as Any],
-                             ["title":"Boost Self Esteem","images":AppImages.Boost_Esteem as Any,"seleced_images":AppImages.Boost_Esteem_selected as Any],
-                             ["title":"Health & Fitness","images":AppImages.Health_Fitness as Any,"seleced_images":AppImages.Health_Fitness_selected as Any],
-                             ["title":"Chronic illness Care","images":AppImages.Chronic_illness_Care as Any,"seleced_images":AppImages.Chronic_illness_Care_selected as Any],
-                             ["title":"Preparing for an event","images":AppImages.Preparing_event as Any,"seleced_images":AppImages.Preparing_event_selected as Any],
-                             ["title":"Others","images":AppImages.Others_Presonalized as Any,"seleced_images":AppImages.Others_Presonalized_selected as Any]
-        ]
-        */
-        
+                
         fitnessCollView.register(UINib(nibName: "PersonalizedCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "PersonalizedCollectionViewCell")
         fitnessCollView.allowsMultipleSelection = true
         
@@ -67,8 +62,7 @@ class PersoniledViewController: CommonViewController {
         self.setProgress(0.2)
         
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
-        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite)
-        //        self.setNavigationTitle(title: AppStrings.select_plan, color: UIColor.black, font: AppFont.Bold.size(22.0))
+//        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite) skipe remove need of client
     }
     
     override func rightBtnActn(sender: UIButton) {
@@ -106,7 +100,6 @@ class PersoniledViewController: CommonViewController {
         }else{
             AlertHelper.shared.alertMesssage(view: self, title: "", message: "Please select at least one")
         }
-        
         
         /*
         let vc:GenderViewController = GenderViewController.instantiate(appStoryboard: .main)
@@ -153,9 +146,9 @@ extension PersoniledViewController: UICollectionViewDelegate, UICollectionViewDa
         cell.titleLbl.text = dataPersonalized?[indexPath.row].name as? String
         //dataPersonalized?[indexPath.row]["title"] as? String
         cell.titleLbl.lineBreakMode = .byClipping
-//        cell.fitnessImgView.image = dataPersonalized?[indexPath.row]["images"] as? UIImage
+        cell.fitnessImgView.image = dataPersonalized?[indexPath.row].cachedUnselectedImg as? UIImage
         
-        cell.fitnessImgView.loadImage(urlString: dataPersonalized?[indexPath.row].image as? String, placeholder: UIImage(named: ""))
+//        cell.fitnessImgView.loadImage(urlString: dataPersonalized?[indexPath.row].image as? String, placeholder: UIImage(named: ""))
         
         cell.setupCell()
         
@@ -179,14 +172,11 @@ extension PersoniledViewController: UICollectionViewDelegate, UICollectionViewDa
         } else {
             self.selectIds?.append(dataPersonalized?[indexPath.row].id ?? 0)
         }
+        
+        cell.setSelectdCell(dataPersonalized?[indexPath.row].cachedUnselectedImg, selectedImg: dataPersonalized?[indexPath.row].cachedSelectedImg, isSelectedCell: true)
                 
-        cell.setSelectdCellUrl(dataPersonalized?[indexPath.row].image as? String, selectedImgStr: dataPersonalized?[indexPath.row].selectImage as? String, isSelectedCell: true)
-        
-        
-//        cell.setSelectdCell(dataPersonalized?[indexPath.row].image as? UIImage, selectedImg: dataPersonalized?[indexPath.row].selectImage as? UIImage, isSelectedCell: true)
-        
-//        cell.setSelectdCell(dataPersonalized?[indexPath.row]["images"] as? UIImage, selectedImg: dataPersonalized?[indexPath.row]["seleced_images"] as? UIImage, isSelectedCell: true)
-        
+//        cell.setSelectdCellUrl(dataPersonalized?[indexPath.row].image as? String, selectedImgStr: dataPersonalized?[indexPath.row].selectImage as? String, isSelectedCell: true)
+                
         if cell.isSelected {
             self.continueBtn.isUserInteractionEnabled = true
             self.continueBtn.backgroundColor = UIColor.appWhite
@@ -209,16 +199,15 @@ extension PersoniledViewController: UICollectionViewDelegate, UICollectionViewDa
             self.selectIds?.append(dataPersonalized?[indexPath.row].id ?? 0)
         }
                         
-        cell.setSelectdCellUrl(dataPersonalized?[indexPath.row].image as? String, selectedImgStr: dataPersonalized?[indexPath.row].selectImage as? String, isSelectedCell: false)
+//        cell.setSelectdCellUrl(dataPersonalized?[indexPath.row].image as? String, selectedImgStr: dataPersonalized?[indexPath.row].selectImage as? String, isSelectedCell: false)
+        
+        cell.setSelectdCell(dataPersonalized?[indexPath.row].cachedUnselectedImg, selectedImg: dataPersonalized?[indexPath.row].cachedSelectedImg, isSelectedCell: false)
         
         if let selectIds = selectIds, selectIds.isEmpty || selectIds.count == 0 {
             self.continueBtn.isUserInteractionEnabled = false
             self.continueBtn.backgroundColor = UIColor.appDarkGray
             self.continueBtn.setTitleColor(UIColor.appLightGray, for: .normal)
         }
-        
-//        cell.setSelectdCell(dataPersonalized?[indexPath.row]["images"] as? UIImage, selectedImg: dataPersonalized?[indexPath.row]["seleced_images"] as? UIImage, isSelectedCell: false)
-        
     }
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
@@ -243,8 +232,29 @@ extension PersoniledViewController {
             guard let self = self, let getResultData = getResultData else { return }
             self.dataPersonalized?.removeAll()
             self.dataPersonalized?.append(contentsOf: getResultData.data ?? [])
-            print("Data personalized: ",self.dataPersonalized as Any)
-            self.fitnessCollView.reloadData()
+            
+            if let prefrencesData = getResultData.data {
+                let group = DispatchGroup()
+                for (index, dataModel) in prefrencesData.enumerated() {
+                    group.enter()
+                    ImageDownloader.shared.downloadImage(from: dataModel.image ?? "") { [weak self] image in
+                        guard let self = self else { return }
+                        self.dataPersonalized?[index].cachedUnselectedImg = image
+                        group.leave()
+                    }
+                    group.enter()
+                    ImageDownloader.shared.downloadImage(from: dataModel.selectImage ?? "") { [weak self] selectedImage in
+                        guard let self = self else { return }
+                        self.dataPersonalized?[index].cachedSelectedImg = selectedImage
+                        group.leave()
+                    }
+                }
+                // When all images are loaded
+                group.notify(queue: .main) { [weak self] in
+                    guard let self = self else { return }
+                    self.fitnessCollView.reloadData()
+                }
+            }
         })
     }
     

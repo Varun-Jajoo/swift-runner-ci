@@ -154,9 +154,15 @@ class NetworkManager {
                     // Handle timeout specifically
                     print("Request timed out.")
                     SVProgressHUD.showError(withStatus: "Request timed out. Please try again.")
-                } else {
+                }else if (error as NSError).code == NSURLErrorNotConnectedToInternet {
+                    // Handle no internet connection
+                    print("No internet connection.")
+                    SVProgressHUD.showError(withStatus: "No internet connection. Please check your settings.")
+                }
+                else {
                     // Handle other errors
                     print("An error occurred: \(error.localizedDescription)")
+//                    SVProgressHUD.showError(withStatus: "An error occurred. Please try again.")
 //                    SVProgressHUD.showError(withStatus: "An error occurred.")
                 }
                 
@@ -194,28 +200,46 @@ class NetworkManager {
         }
     }
     
-    
-    func uploadMedia (_ serviceEndPoint: ApiEndPoint, method: HTTPMethod, queries: [String: String]? = nil, parameters: Parameters? = nil, interceptor: RequestInterceptor? = nil, isShowLoading: Bool = false, mediaPaths: [[String: Any]], completion: @escaping ((Data?, Error?) -> Void)){
+    func uploadMedia(serviceEndPoint: ApiEndPoint,
+                     method: HTTPMethod,
+                     queries: [String: String]? = nil,
+                     parameters: Parameters? = nil,
+                     interceptor: RequestInterceptor? = nil,
+                     isShowLoading: Bool = false,
+                     mediaPaths: [[String: Any]],
+                     completion: @escaping ((Data?, Error?) -> Void)) {
         
-        let url = serviceEndPoint.getURL(queries: queries)
-        let headers: HTTPHeaders = ["Content-Type" : "multipart/form-data"]
-        
-        guard let url = url else {
-            // Invalid url
+        guard let url = serviceEndPoint.getURL(queries: queries) else {
             return
         }
-        if isShowLoading{
+        
+        let headers: HTTPHeaders = ["Content-Type" : "multipart/form-data"]
+        
+        if isShowLoading {
             Utility.showLoader(message: AppAlertStrings.please_wait)
         }
         
         AF.upload(
             multipartFormData: { multipartFormData in
+                
+                // Append parameters
+                if let parameters = parameters {
+                    for (key, value) in parameters {
+                        let stringValue = "\(value)"
+                        if let data = stringValue.data(using: .utf8) {
+                            multipartFormData.append(data, withName: key)
+                        }
+                    }
+                }
+                
+                // Append media files
                 for mediaPath in mediaPaths {
-                    for (key,value) in mediaPath{
-                        if let url = value as? URL{
-                            let mimeType: String
-                            var pathExtension: String = url.pathExtension
+                    for (key, value) in mediaPath {
+                        if let url = value as? URL {
                             let fileExtension = url.pathExtension.lowercased()
+                            var pathExtension = url.pathExtension
+                            let mimeType: String
+                            
                             switch fileExtension {
                             case "jpg", "jpeg":
                                 mimeType = "image/jpeg"
@@ -234,67 +258,61 @@ class NetworkManager {
                                 mimeType = "application/octet-stream"
                             }
                             
-                            do {
-                                if let data = try? Data(contentsOf: url){
-                                    multipartFormData.append(data, withName: "files", fileName: "files."+pathExtension, mimeType:  mimeType)
-                                }
+                            if let data = try? Data(contentsOf: url) {
+                                multipartFormData.append(data,
+                                                         withName: key, // Use key as form field name
+                                                         fileName: "\(key).\(pathExtension)",
+                                                         mimeType: mimeType)
                             }
-                        }else if let image = value as? UIImage{
-                            multipartFormData.append(image.jpegData(compressionQuality: 0.5)!, withName: "files" , fileName: "files.png", mimeType: "image/png")
+                        } else if let image = value as? UIImage {
+                            if let data = image.jpegData(compressionQuality: 0.5) {
+                                multipartFormData.append(data,
+                                                         withName: key,
+                                                         fileName: "\(key).jpg",
+                                                         mimeType: "image/jpeg")
+                            }
                         }
                     }
                 }
             },
-            to: url, method: .post , headers: headers, interceptor: interceptor ?? self).validate()
-            .responseData { (response) in
-                Utility.hideLoader()
-                switch response.result{
-                case .success(_):
-                    if let statusCode = response.response?.statusCode {
-                        switch statusCode {
-                            
-                        case 200...299:
-                            if let data = response.data {
-                                do {
-                                    if let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any] {
-                                        print(json)
-                                        completion(data, nil)
-                                    }
-                                }catch {
-                                    print(error.localizedDescription)
-                                }
-                                completion(data, nil)
-                            }
-                        case badRequest:
-                            // Bad Request: Handle the specific error case
-                            print("Bad Request")
-                        case InvalidAccessTokenCode:
-                            // Unauthorized: Handle the specific error case
-                            self.handle401StatusCode(serviceEndPoint)
-                            print("INVALID AUTHTOKEN") //when AuthToken is expire
-                            
-                        default:
-                            print("Status Code: \(statusCode)")
-                            break
-                        }
-                    }
-                case .failure(let error):
-                    if let statusCode = response.response?.statusCode {
-                        switch statusCode {
-                        case InvalidAccessTokenCode:
-                            self.handle401StatusCode(serviceEndPoint)
-                            break
-                        default:
-//                            AlertHelper.shared.showCustomeAlert(message: error.localizedDescription, actions: ["OK"])
-                            completion(nil, nil)
-                            break
-                        }
+            to: url,
+            method: method,
+            headers: headers,
+            interceptor: interceptor ?? self
+        )
+        .validate()
+        .responseData { response in
+            Utility.hideLoader()
+            switch response.result {
+            case .success(_):
+                if let statusCode = response.response?.statusCode {
+                    switch statusCode {
+                    case 200...299:
+                        completion(response.data, nil)
+                    case badRequest:
+                        print("Bad Request")
+                    case InvalidAccessTokenCode:
+                        self.handle401StatusCode(serviceEndPoint)
+                    default:
+                        print("Unhandled status code: \(statusCode)")
                     }
                 }
+            case .failure(let error):
+                if let statusCode = response.response?.statusCode {
+                    switch statusCode {
+                    case InvalidAccessTokenCode:
+                        self.handle401StatusCode(serviceEndPoint)
+                    default:
+                        print("Upload failed: \(error.localizedDescription)")
+                        completion(nil, error)
+                    }
+                } else {
+                    completion(nil, error)
+                }
             }
+        }
     }
-    
-    
+
     /*
     func uploadMedia (_ serviceEndPoint: ApiEndPoint, method: HTTPMethod, queries: [String: String]? = nil, parameters: Parameters? = nil, interceptor: RequestInterceptor? = nil, isShowLoading: Bool = false, requestImages arrImages: [Dictionary<String, Any>], requestVideos arrVideos: Dictionary<String, Any>, requestData postData: Dictionary<String, Any>, completion: @escaping ((Data?, Error?) -> Void)){
         
@@ -442,6 +460,9 @@ extension NetworkManager: RequestInterceptor {
     func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
         var request = urlRequest
                 
+        // Set custom timeout
+        request.timeoutInterval = 90 // seconds, change as needed
+        
         guard let token = appUserDefaults.getAccessToken() else {
             completion(.success(urlRequest))
             return

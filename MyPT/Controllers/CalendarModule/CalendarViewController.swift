@@ -29,7 +29,7 @@ class CalendarViewController: CommonViewController {
         self.setupCalendarView()
         
         //------------------upcoming
-        self.view.setComingSoon(bgColor: UIColor(red: 0, green: 5/255.0, blue: 2/255.0, alpha: 1.0),centerImgName: "ic_upcomingStripe", lockImgName: "ic_upcomingLock" ,title: "Locked for Now", desc: "Your personal fitness planner is almost here. Soon you’ll be able to schedule workouts and stay on track with ease.")
+        self.view.setComingSoon(bgColor: UIColor(red: 0, green: 5/255.0, blue: 2/255.0, alpha: 1.0),centerImgName: "ic_upcomingStripe", lockImgName: "ic_upcomingLock" ,title: AppStrings.coming_soon, desc: "Your personal fitness planner is almost here. Soon you’ll be able to schedule workouts and stay on track with ease.")
         
 //        self.setTopBackgroundImage(named: "ic_calendar_upcoming")
 //        self.view.setComingSoon(bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_upcomingStripe", lockImgName: "ic_upcomingLock" ,title: "Locked for Now", desc: "Profiles are in progress. Soon you'll be able to track your journey and customize your experience.")

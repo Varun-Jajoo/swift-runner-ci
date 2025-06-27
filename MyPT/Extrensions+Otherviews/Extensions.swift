@@ -103,6 +103,25 @@ func addGradientBackgroundToImage(image: UIImage, colors: [CGColor], locations: 
 //    return image
 //}
 
+extension UIButton {
+    func loadImage(urlString: String?, placeholder: UIImage?, for state: UIControl.State = .normal, imageSize: CGSize? = CGSize(width: 30.0, height: 30.0)) {
+        self.setImage(placeholder, for: state)
+        guard let urlString = urlString, let url = URL(string: urlString) else { return }
+
+        Task { [weak self] in
+            do {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                if let image = UIImage(data: data) {
+                    await MainActor.run {
+                        self?.setImage(image.resized(to: imageSize ?? CGSize(width: 30.0, height: 30.0)), for: state)
+                    }
+                }
+            } catch {
+                print("Image loading error: \(error)")
+            }
+        }
+    }
+}
 
 
 //MARK: ----------------------- Extension for UIView
@@ -1276,6 +1295,36 @@ enum TrailingContent {
 
 
 extension UILabel {
+    
+    func renderedLineCount(containerWidth: CGFloat) -> Int {
+            guard let text = self.text, let font = self.font else { return 0 }
+
+            let textStorage = NSTextStorage(string: text)
+            let textContainer = NSTextContainer(size: CGSize(width: containerWidth, height: .greatestFiniteMagnitude))
+            textContainer.lineFragmentPadding = 0.0
+            textContainer.lineBreakMode = self.lineBreakMode
+            textContainer.maximumNumberOfLines = self.numberOfLines
+
+            let layoutManager = NSLayoutManager()
+            layoutManager.addTextContainer(textContainer)
+            textStorage.addLayoutManager(layoutManager)
+            textStorage.addAttribute(.font, value: font, range: NSRange(location: 0, length: text.count))
+
+            layoutManager.glyphRange(for: textContainer)
+
+            var lineCount = 0
+            var index = 0
+            var lineRange = NSRange(location: 0, length: 0)
+
+            while index < layoutManager.numberOfGlyphs {
+                layoutManager.lineFragmentRect(forGlyphAt: index, effectiveRange: &lineRange)
+                index = NSMaxRange(lineRange)
+                lineCount += 1
+            }
+
+            return lineCount
+        }
+    
     /// Animates the label to scroll through an array of strings.
     /// - Parameters:
     ///   - strings: The array of strings to scroll through.
@@ -1520,12 +1569,34 @@ extension UIImageView {
     
     
     //MARK: ---------------IMAGE GETTING FROM URL
-    func loadImage(urlString: String?, placeholder: UIImage?) {
+    func loadImage(urlString: String?, placeholder: UIImage?, resize: CGSize? = nil) {
         self.image = placeholder
-        guard let urlString = urlString, let url = URL(string: urlString) else { return  }
+        guard let urlString = urlString, let url = URL(string: urlString) else { return }
+
         Task { [weak self] in
-            let (data, _) = try await URLSession.shared.data(from: url)
-            self?.image = UIImage(data: data)
+            do {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                if let image = UIImage(data: data) {
+//                    self?.image = image
+                    if let resize = resize {
+                        self?.image = image.resized(to: resize)
+                    }else{
+                        self?.image = image
+                    }
+                } else {
+                    if let resize = resize {
+                        self?.image = placeholder?.resized(to: resize) 
+                    }else{
+                        self?.image = placeholder
+                    }
+                }
+            } catch {
+                if let resize = resize {
+                    self?.image = placeholder?.resized(to: resize)
+                }else{
+                    self?.image = placeholder
+                }
+            }
         }
     }
     
@@ -2242,21 +2313,21 @@ extension UISearchBar {
         }
         return textField
     }
-
+    
     func clearBackgroundColor() {
         guard let UISearchBarBackground: AnyClass = NSClassFromString("UISearchBarBackground") else { return }
-
+        
         for view in subviews {
             for subview in view.subviews where subview.isKind(of: UISearchBarBackground) {
                 subview.alpha = 0
             }
         }
     }
-
+    
     public var activityIndicator: UIActivityIndicatorView? {
         return textField?.leftView?.subviews.compactMap { $0 as? UIActivityIndicatorView }.first
     }
-
+    
     var isLoading: Bool {
         get {
             return activityIndicator != nil
@@ -2269,7 +2340,7 @@ extension UISearchBar {
                     newActivityIndicator.backgroundColor = textField?.backgroundColor ?? UIColor.white
                     textField?.leftView?.addSubview(newActivityIndicator)
                     let leftViewSize = textField?.leftView?.frame.size ?? CGSize.zero
-
+                    
                     newActivityIndicator.center = CGPoint(x: leftViewSize.width - newActivityIndicator.frame.width / 2,
                                                           y: leftViewSize.height / 2)
                 }
@@ -2278,17 +2349,17 @@ extension UISearchBar {
             }
         }
     }
-
+    
     func changePlaceholderColor(_ color: UIColor) {
         guard let UISearchBarTextFieldLabel: AnyClass = NSClassFromString("UISearchBarTextFieldLabel"),
-            let field = textField else {
+              let field = textField else {
             return
         }
         for subview in field.subviews where subview.isKind(of: UISearchBarTextFieldLabel) {
             (subview as! UILabel).textColor = color
         }
     }
-
+    
     func setRightImage(normalImage: UIImage,
                        highLightedImage: UIImage) {
         showsBookmarkButton = true
@@ -2300,7 +2371,7 @@ extension UISearchBar {
         }
     }
     
-        func setLeftImage(_ image: UIImage,
+    func setLeftImage(_ image: UIImage,
                       with padding: CGFloat = 0,
                       tintColor: UIColor) {
         let imageView = UIImageView()
@@ -2309,7 +2380,7 @@ extension UISearchBar {
         imageView.widthAnchor.constraint(equalToConstant: 20).isActive = true
         imageView.heightAnchor.constraint(equalToConstant: 20).isActive = true
         imageView.tintColor = tintColor
-
+        
         if padding != 0 {
             let stackView = UIStackView()
             stackView.axis = .horizontal
@@ -2324,17 +2395,39 @@ extension UISearchBar {
             stackView.addArrangedSubview(paddingView)
             stackView.addArrangedSubview(imageView)
             textField?.leftView = stackView
-
+            
         } else {
             textField?.leftView = imageView
         }
     }
     
     func setPlaceholderColor(_ color: UIColor) {
-         let textField = self.value(forKey: "searchField") as? UITextField
-         let placeholder = textField!.value(forKey: "placeholderLabel") as? UILabel
-         placeholder?.textColor = color
-     }
+        let textField = self.value(forKey: "searchField") as? UITextField
+        let placeholder = textField!.value(forKey: "placeholderLabel") as? UILabel
+        placeholder?.textColor = color
+    }
+    
+    //MARK: ------------ADD DONE BUTTON
+    func addDoneButtonOnKeyboard() {
+        if let textField = self.value(forKey: "searchField") as? UITextField {
+            let toolbar = UIToolbar()
+            toolbar.sizeToFit()
+            
+            let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+            let doneButton = UIBarButtonItem(title: "Done", style: .done, target: nil, action: nil)
+            
+            doneButton.action = #selector(self.dismissKeyboard)
+            doneButton.target = self
+            
+            toolbar.items = [flexSpace, doneButton]
+            textField.inputAccessoryView = toolbar
+        }
+    }
+    
+    @objc private func dismissKeyboard() {
+        self.resignFirstResponder()
+        self.endEditing(true)
+    }
 }
 
 //MARK: -----------Extension UISegmentedControl

@@ -40,7 +40,4 @@ class ProductCategoryCollViewCell: UICollectionViewCell {
                 }
             }
         }
-    
-    //rgba(158, 188, 255, 1)
-    
 }

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FacebookLogin
 
 class MoreViewController: UIViewController {
     
@@ -201,13 +202,10 @@ extension MoreViewController:UICollectionViewDataSource, UICollectionViewDelegat
                  self.navigationController?.pushViewController(vc, animated: true)
                  */
             case .profile:
-//                let vc: ProfileViewController = ProfileViewController.instantiate(appStoryboard: .profile)
-//                
-//                let vc: ProfileEditViewController = ProfileEditViewController.instantiate(appStoryboard: .profile)
-//                self.navigationController?.pushViewController(vc, animated: true)
+                let vc: ProfileViewController = ProfileViewController.instantiate(appStoryboard: .profile)
+                self.navigationController?.pushViewController(vc, animated: true)
                 
-                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
-                
+//                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
             case .mybookings:
                 self.tabBarController?.selectedIndex = 1
                 //                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
@@ -414,17 +412,33 @@ extension MoreViewController:UICollectionViewDataSource, UICollectionViewDelegat
             guard self != nil else { return }
             
             if tagGet == 0 {
+                self?.logoutIfFacebookLoggedIn()
                 if appUserDefaults.clearUserDefault() {
                     appSceneDelegate?.goToMainView()
                 }
             }
         })
-
+    }
+    
+    func logoutIfFacebookLoggedIn() {
+        if let token = AccessToken.current, !token.isExpired {
+            // User is logged in — proceed to logout
+            let loginManager = LoginManager()
+            loginManager.logOut()
+            print("Facebook user has been logged out.")
+        } else {
+            print("No Facebook session found. Logout not needed.")
+        }
     }
     
     @objc func deleteUserBtnActn() {
         print("Delete use btn clicked.")
+        let vc:DeleteAccPopupViewController = DeleteAccPopupViewController.instantiate(appStoryboard: .more)
+        vc.modalPresentationStyle = .automatic
+        self.present(vc, animated: true)
         
+        
+        /*  Only for testing
         AlertHelper.shared.showCustomeAlert(title: "", message: AppAlertStrings.delete_AlertMsg, actions: ["Ok", "Cancel"], withCancel: true, completion: { [weak self] tagGet in
             guard let self = self else { return }
             
@@ -438,11 +452,12 @@ extension MoreViewController:UICollectionViewDataSource, UICollectionViewDelegat
                 })
             }
         })
+        */
     }
     
     
     //MARK: ---------------SETUP COMMING SOON
-    private func comingSoon(NavTitle: String? = "Profile",titleStr: String? = "Locked for Now", descStr: String? = "Profiles are in progress. Soon you'll be able to track your journey and customize your experience."){
+    private func comingSoon(NavTitle: String? = "Profile",titleStr: String? = AppStrings.coming_soon, descStr: String? = "Profiles are in progress. Soon you'll be able to track your journey and customize your experience."){
         self.view.setComingSoon(bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_upcomingStripe", lockImgName: "ic_upcomingLock" ,title: titleStr, desc: descStr)
         self.view.addTopNavigationButton(title: NavTitle, image: AppImages.backarrow, target: self.view)
     }
@@ -480,49 +495,49 @@ extension MoreViewController:UICollectionViewDataSource, UICollectionViewDelegat
         var comingSoonInfo: (navTitle: String, title: String, description: String) {
             switch self {
             case .myGoals:
-                return ("My Goals", "Locked for Now", "Goal setting and progress tracking will be live soon. Get ready to aim higher!")
+                return ("My Goals", AppStrings.coming_soon, "Goal setting and progress tracking will be live soon. Get ready to aim higher!")
             case .myMeals:
-                return ("My Meals", "Locked for Now", "Extra features are on the way. We’re adding more tools to power your fitness goals.")
+                return ("My Meals",  AppStrings.coming_soon, "Extra features are on the way. We’re adding more tools to power your fitness goals.")
             case .shop:
-                return ("Shop", "Locked for Now", "Soon you’ll be able to shop essentials and chat with the community — stay tuned!")
+                return ("Shop",  AppStrings.coming_soon, "Soon you’ll be able to shop essentials and chat with the community — stay tuned!")
             case .myOrders, .my_Orders:
-                return ("My Orders", "Locked for Now", "Your order history will be available here soon.")
+                return ("My Orders",  AppStrings.coming_soon, "Your order history will be available here soon.")
             case .cart:
-                return ("Cart", "Locked for Now", "Your cart will be ready soon for easier shopping.")
+                return ("Cart",  AppStrings.coming_soon, "Your cart will be ready soon for easier shopping.")
             case .profile:
-                return ("Profile", "Locked for Now", "Profiles are in progress. Soon you'll be able to track your journey and customize your experience.")
+                return ("Profile",  AppStrings.coming_soon, "Profiles are in progress. Soon you'll be able to track your journey and customize your experience.")
             case .mybookings:
-                return ("My Bookings", "Locked for Now", "You’ll soon be able to view and manage your bookings.")
+                return ("My Bookings",  AppStrings.coming_soon, "You’ll soon be able to view and manage your bookings.")
             case .my_Health_Stats:
-                return ("My Health & Stats", "Locked for Now", "Health tracking will be launching soon.")
+                return ("My Health & Stats",  AppStrings.coming_soon, "Health tracking will be launching soon.")
             case .My_Milestone:
-                return ("My Milestone", "Locked for Now", "Your achievements and milestones will be available soon.")
+                return ("My Milestone",  AppStrings.coming_soon, "Your achievements and milestones will be available soon.")
             case .My_Favourite_Workouts:
-                return ("My Favourite Workouts", "Locked for Now", "Save and revisit your top workouts soon.")
+                return ("My Favourite Workouts",  AppStrings.coming_soon, "Save and revisit your top workouts soon.")
             case .My_Trainers:
-                return ("My Trainers", "Locked for Now", "Connect with your trainers — coming soon.")
+                return ("My Trainers",  AppStrings.coming_soon, "Connect with your trainers — coming soon.")
             case .Chats:
-                return ("Chats", "Locked for Now", "Soon you’ll be able to shop essentials and chat with the community — stay tuned!")
+                return ("Chats",  AppStrings.coming_soon, "Soon you’ll be able to shop essentials and chat with the community — stay tuned!")
             case .find_a_Gym:
-                return ("Find a Gym", "Locked for Now", "Discover gyms near you — feature coming soon.")
+                return ("Find a Gym",  AppStrings.coming_soon, "Discover gyms near you — feature coming soon.")
             case .find_a_Trainer:
-                return ("Find a Trainer", "Locked for Now", "Trainer discovery will be available shortly.")
+                return ("Find a Trainer",  AppStrings.coming_soon, "Trainer discovery will be available shortly.")
             case .settings:
-                return ("Settings", "Locked for Now", "More control and preferences are on the way.")
+                return ("Settings",  AppStrings.coming_soon, "More control and preferences are on the way.")
             case .payment_History:
-                return ("Payment History", "Locked for Now", "View past transactions soon.")
+                return ("Payment History",  AppStrings.coming_soon, "View past transactions soon.")
             case .help_and_Support:
-                return ("Help & Support", "Locked for Now", "Support features are coming to help you better.")
+                return ("Help & Support",  AppStrings.coming_soon, "Support features are coming to help you better.")
             case .myPT_Products:
-                return ("MyPT Products", "Locked for Now", "Track your product subscriptions here soon.")
+                return ("MyPT Products",  AppStrings.coming_soon, "Track your product subscriptions here soon.")
             case .Product:
-                return ("Product", "Locked for Now", "Product details and purchases will be added soon.")
+                return ("Product",  AppStrings.coming_soon, "Product details and purchases will be added soon.")
             case .add_Address:
-                return ("Add Address", "Locked for Now", "Save your delivery addresses — feature coming soon.")
+                return ("Add Address",  AppStrings.coming_soon, "Save your delivery addresses — feature coming soon.")
             case .order_Refund:
-                return ("Order Refund", "Locked for Now", "Request refunds for orders — available soon.")
+                return ("Order Refund",  AppStrings.coming_soon, "Request refunds for orders — available soon.")
             case .workout_library:
-                return ("Workout Library", "Locked for Now", "Your personal library of workouts is almost ready. Hang tight — it's unlocking soon!")
+                return ("Workout Library",  AppStrings.coming_soon, "Your personal library of workouts is almost ready. Hang tight — it's unlocking soon!")
             }
         }
     }

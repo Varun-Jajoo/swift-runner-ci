@@ -20,6 +20,7 @@ class SelectYourLocationViewController: CommonViewController {
     var addressData:[AddressDataModel]? = []
     var addressDetails: AddressDataModel?
     var selectedIdStr:String?
+    private var cacheSelectedIdStr: String? = nil
     var trainerIdStr:String?
     var studioIdStr:String?
     var inputType:String?
@@ -273,6 +274,7 @@ extension SelectYourLocationViewController: UITableViewDelegate, UITableViewData
     
     @objc func selectAddrBtnActn(sender: UIButton){
         sender.isSelected = true
+        self.cacheSelectedIdStr = sender.accessibilityHint
         self.selectedIdStr = sender.accessibilityHint
         self.enableDateBtn(isSelected: true, btn: self.dateNtimeBtn)
         self.selectAddrTblView.reloadData()
@@ -341,6 +343,14 @@ extension SelectYourLocationViewController {
             print("getResultData", getResultData.data as Any)
             self.addressData?.removeAll()
             self.addressData?.append(contentsOf: getResultData.data ?? [])
+                        
+            if let addrsId = self.selectedIdStr {
+                self.selectedIdStr = addrsId
+            }else{
+                self.selectedIdStr = self.addressData?.first?.id?.value
+            }
+            
+            self.enableDateBtn(isSelected: true, btn: self.dateNtimeBtn)
             self.selectAddrTblView.reloadData()
             
             //--------------************-------

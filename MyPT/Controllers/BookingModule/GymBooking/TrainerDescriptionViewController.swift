@@ -61,6 +61,7 @@ class TrainerDescriptionViewController: CommonViewController {
     private var isCounter:Int = 0
     var detailsFlowSetup:calendarFlow = .defaultFlow
     var isSlotsAvail:Bool?
+    var istagMenuHeight: Bool?
     
     
     //MARK: --------------IBOUTLET
@@ -79,7 +80,9 @@ class TrainerDescriptionViewController: CommonViewController {
     @IBOutlet weak var followrsCountLbl: UILabel!
     @IBOutlet weak var followersLbl: UILabel!
     @IBOutlet weak var distanceBtn: UIButton!
-    @IBOutlet weak var landMark: UIButton!
+//    @IBOutlet weak var landMark: UIButton!
+    @IBOutlet weak var landMarkAddrLbl: UILabel!
+    
     @IBOutlet weak var ratingBtn: UIButton!
     @IBOutlet weak var ratingCountBtn: UIButton!
     @IBOutlet weak var trainerMenuCollView: UICollectionView!
@@ -108,6 +111,7 @@ class TrainerDescriptionViewController: CommonViewController {
     @IBOutlet weak var bookSlotBtn: UIButton!
     @IBOutlet weak var certificationsCollView: UICollectionView!
     @IBOutlet weak var certificationsCollViewHeightConstrnt: NSLayoutConstraint!
+    @IBOutlet weak var trainerTagHeightConstrnt: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -153,6 +157,7 @@ class TrainerDescriptionViewController: CommonViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.istagMenuHeight = true
         self.setNavigationColor(setColor: .clear)
         self.statusBarColor(setColor: .clear)
         setNavUI()
@@ -192,6 +197,7 @@ class TrainerDescriptionViewController: CommonViewController {
             ["title":"Why Train With Me","img": UIImage(named: "ic_story_white") as Any],
             ["title":"Gallery","img": UIImage(named: "ic_gallery_white") as Any]
         ]
+        self.istagMenuHeight = true
         self.trainerMenuCollView.reloadData()
         
         //-----------------************
@@ -223,7 +229,7 @@ class TrainerDescriptionViewController: CommonViewController {
         self.followrsCountLbl.text = self.detailsModel?.follower
         //        self.followersLbl.text = ""
         self.distanceBtn.setTitle(self.detailsModel?.distance, for: .normal)
-        self.landMark.setTitle(self.detailsModel?.location, for: .normal)
+        self.landMarkAddrLbl.text = self.detailsModel?.location
         self.ratingBtn.setTitle(self.detailsModel?.noOfRating, for: .normal)
         self.ratingCountBtn.setTitle(self.detailsModel?.averageRating, for: .normal)
         self.descLbl.text = self.detailsModel?.description
@@ -333,7 +339,7 @@ class TrainerDescriptionViewController: CommonViewController {
         self.trainerNameLbl.font = AppFont.medium.size(22.0, familyName: familyClashDisplay)
         self.followrsCountLbl.font = AppFont.semibold.size(18.0, familyName: familyManrope)
         self.followersLbl.font = AppFont.semibold.size(12.0, familyName: familyManrope)
-        self.landMark.titleLabel?.font = AppFont.semibold.size(14.0, familyName: familyManrope)
+        self.landMarkAddrLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
         self.descLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
         self.expCountLbl.font = AppFont.medium.size(30.0, familyName: familyClashDisplay)
         self.expDescLbl.font = AppFont.semibold.size(12.0, familyName: familyManrope)
@@ -492,6 +498,13 @@ extension TrainerDescriptionViewController: UICollectionViewDataSource, UICollec
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
         if collectionView == trainMeCollView{
+            
+            if let _ = istagMenuHeight {
+                self.istagMenuHeight = nil
+                self.trainerTagHeightConstrnt.constant = 40
+                self.trainMeCollView.layoutIfNeeded()
+            }
+            
             return CGSize(width: collectionView.frame.width*0.90, height: collectionView.frame.height)
             
         }

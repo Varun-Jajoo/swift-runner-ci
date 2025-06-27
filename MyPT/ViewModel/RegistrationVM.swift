@@ -40,10 +40,20 @@ class RegistrationVM {
             do{
                 if let responceData = getResponce {
                     let getResult = try JSONDecoder().decode(LoginBaseModel.self, from: responceData)
-                    completion(getResult)
+//                    completion(getResult)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    }
+                    else{
+//                        let errorMsg = getResult.msg
+                        let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+                        AlertHelper.shared.showCustomeAlert(title: "", message: errorMsg ?? "", completion: nil)
+                    }
+                    
                 }
             }catch {
                 print(error)
+            
             }
             
         })
@@ -64,7 +74,15 @@ class RegistrationVM {
             do{
                 if let responceData = getResponce {
                     let getResult = try JSONDecoder().decode(LoginBaseModel.self, from: responceData)
-                    completion(getResult)
+                    
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    }
+                    else{
+//                        let errorMsg = getResult.msg
+                        let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+                        AlertHelper.shared.showCustomeAlert(title: "", message: errorMsg ?? "", completion: nil)
+                    }
                 }
             }catch {
                 print(error)
@@ -82,7 +100,9 @@ class RegistrationVM {
             "country_code":inputCountryCode ?? "",
             "otp": otpStr ?? "",
             "type": loginType ?? "",
-            "email": inputEmail ?? ""
+            "email": inputEmail ?? "",
+            "device_type": "ios",
+            "device_token": "48r748fjdfbdjdcn"
         ]
         
         NetworkManager.shared.genericAPICall(serviceEndPoint: .submit_Otp, method: .post , parameters: params, isShowLoading: true, completion: {  (getResponce, error) in
@@ -480,6 +500,42 @@ class RegistrationVM {
             }
         })
     }
+    
+    //MARK: ------------------Social login https://mobileapp.mypt-me.com/api/social-login
+    class func socialLoginApi(inputParams: [String:Any]?, completion: @escaping(_ resultData: SubmitOtpBaseModel?) -> Void){
+        
+        /*
+         let params:[String:Any] = [
+         "unique_id": "",     //if type is 1 then required
+         "phone": "" ,       //if type is 1 then required
+         "email": "",
+         "type": "",         //1 for phone , 2 for social media, if type is 3 then email is require
+         "name": "",
+         "device_type": "ios",
+         "device_token": "48r748fjdfbdjdcn"
+         ]
+         */
+        
+       print("inputParams = ", inputParams as Any)
+       
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .social_login, method: .post , parameters: inputParams, isShowLoading: true, completion: {  (getResponce, error) in
+           do{
+               print(getResponce as Any)
+               if let responceData = getResponce {
+                   let getResult = try JSONDecoder().decode(SubmitOtpBaseModel.self, from: responceData)
+                   if getResult.status == true  {
+                       completion(getResult)
+                   }
+                   else{
+                       let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+                       AlertHelper.shared.showCustomeAlert(title: "", message: errorMsg ?? "", completion: nil)
+                   }
+               }
+           }catch {
+               print(error)
+           }
+       })
+   }
     
     
     /*

@@ -63,7 +63,8 @@ class GymDetailsViewController: CommonViewController {
     @IBOutlet weak var gymNameLbl: UILabel!
     @IBOutlet weak var pageContrl: CustomPageControl!
     @IBOutlet weak var distanceBtn: UIButton!
-    @IBOutlet weak var locAddr: UIButton!
+//    @IBOutlet weak var locAddr: UIButton!
+    @IBOutlet weak var locAddrLbl: UILabel!
     @IBOutlet weak var ratingBtn: UIButton!
     @IBOutlet weak var categoryCollView: UICollectionView!
     @IBOutlet weak var descLbl: UILabel!
@@ -108,7 +109,12 @@ class GymDetailsViewController: CommonViewController {
         self.setUpUI()
         self.setUpFont()
         self.setMapShowData()
-        self.studioDatialsApi()
+     
+        if let _ = inputLat, let _ = inputLong{
+            self.studioDatialsApi()
+        }else{
+            self.getLocation()
+        }
     }
     
     deinit {
@@ -140,6 +146,24 @@ class GymDetailsViewController: CommonViewController {
         //        }
     }
     
+    override func rightBtnActn(sender: UIButton) {
+        print(sender.tag)
+        ImageDownloader.shared.downloadImage(from: (studioDetails?.profile?.first ?? ""), completion: {[weak self] img in
+            guard let self = self , let img = img else {
+                return
+            }
+            
+            let getBaseUrl:String = AppBaseUrl.baseScheme.rawValue + "://" + AppBaseUrl.baseDevUrl.rawValue
+            print(getBaseUrl)
+            
+//            let urlString = "https://mobileapp.mypt-me.com/\(self.inputType ?? "")/\(studioDetails?.id ?? 0)/\(gymDetailsFlow)"
+            
+            let urlString = "\(getBaseUrl)/\(self.inputType ?? "")/\(studioDetails?.id ?? 0)/\(gymDetailsFlow)"
+            Utility.shared.shareSocial(viewController: self, textToShare: studioDetails?.name ?? "", imageToShare: img, urlShareStr: urlString)
+        })
+    }
+    
+    
     @objc func handleMapPanGesture(_ gesture: UIPanGestureRecognizer) {
         if gesture.state == .began {
             mainScrollV.isScrollEnabled = false  // Disable ScrollView scrolling when map interaction starts
@@ -153,7 +177,7 @@ class GymDetailsViewController: CommonViewController {
         
         self.gymNameLbl.text = studioDetails?.name
         self.distanceBtn.setTitle(studioDetails?.distance, for: .normal)
-        self.locAddr.setTitle(studioDetails?.address, for: .normal)
+        self.locAddrLbl.text = studioDetails?.address
         let avgRating = studioDetails?.averageRating ?? "0.0"
         let noOfRating = studioDetails?.noOfRating ?? "0.0"
         
@@ -161,9 +185,6 @@ class GymDetailsViewController: CommonViewController {
         self.descLbl.text = studioDetails?.description
         self.gymLocAddrLbl.text = studioDetails?.address
         self.gymRatingTitleBtn.setTitle(avgRating + "\u{2022}" + noOfRating, for: .normal)
-        //        self.showAllEquipmentsBtn.setTitle("12", for: .normal)
-        //        self.showAllReviewsBtn.setTitle("40", for: .normal)
-        
         self.setUpCustomPageControl()
         self.updatePage(to: 0)
         
@@ -259,7 +280,7 @@ class GymDetailsViewController: CommonViewController {
     private func setUpFont(){
         self.gymNameLbl.font = AppFont.medium.size(22, familyName: familyClashDisplay)
         self.distanceBtn.titleLabel?.font = AppFont.semibold.size(14, familyName: familyManrope)
-        self.locAddr.titleLabel?.font = AppFont.semibold.size(14, familyName: familyManrope)
+        self.locAddrLbl.font = AppFont.semibold.size(14, familyName: familyManrope)
         self.ratingBtn.titleLabel?.font = AppFont.semibold.size(12, familyName: familyManrope)
         self.descLbl.font = AppFont.semibold.size(14, familyName: familyManrope)
         self.gymOffersTitleLbl.font = AppFont.semibold.size(16, familyName: familyManrope)
@@ -482,6 +503,20 @@ class GymDetailsViewController: CommonViewController {
         }
     }
     */
+    
+    private func getLocation(){
+        GetLocationManager.shared.requestLocationWithAddress {[weak self] location, addressPart in
+            guard let self = self else { return }
+            
+            appUserDefaults.setLatLong(value: "\(location?.coordinate.latitude ?? 0),\(location?.coordinate.longitude ?? 0)")
+            appUserDefaults.setCurrentAddr(value: addressPart.0)
+            
+            self.inputLat = "\(location?.coordinate.latitude ?? 0)"
+            self.inputLong = "\(location?.coordinate.longitude ?? 0)"
+            
+            self.studioDatialsApi()
+        }
+    }
 }
 
 

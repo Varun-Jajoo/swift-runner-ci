@@ -69,6 +69,7 @@ class ReviewPackageViewController: CommonViewController {
         setNavUI()
         setUpFont()
         self.offerDetailsMBV.isHidden = true
+        self.offersMBV.isHidden = true
         self.setupFlow()
     }
     
@@ -282,6 +283,7 @@ class ReviewPackageViewController: CommonViewController {
     private func setUpFont(){
         
         packageDetails.register(UINib(nibName: "PackageDetailsTableViewCell", bundle: nil), forCellReuseIdentifier: "PackageDetailsTableViewCell")
+        packageDetails.isUserInteractionEnabled = false
         
         self.traninerTblView.register(UINib(nibName: "ReviewProfileTableViewCell", bundle: nil), forCellReuseIdentifier: "ReviewProfileTableViewCell")
         self.membersTblView.register(UINib(nibName: "AddMemberTableViewCell", bundle: nil), forCellReuseIdentifier: "AddMemberTableViewCell")
@@ -335,6 +337,8 @@ class ReviewPackageViewController: CommonViewController {
             
         case btnTag.editOffers.rawValue:
             print("edit offers btn clicked")
+            
+            /*  only for flow is not completed
             let vc:CouponsOffersViewController = CouponsOffersViewController.instantiate(appStoryboard: .booking)
             vc.sentBackCoupon = { [weak self] getData in
                 guard let self = self else { return }
@@ -351,8 +355,14 @@ class ReviewPackageViewController: CommonViewController {
             }
             self.navigationController?.pushViewController(vc, animated: true)
             
+            */
+            
+            AlertHelper.shared.showCustomeAlert(message: "Coming soon...")
+            
         case btnTag.viewCoupon.rawValue:
             print("view coupon btn clicked")
+            
+            /* only for flow is not completed
             let vc:CouponsOffersViewController = CouponsOffersViewController.instantiate(appStoryboard: .booking)
             vc.sentBackCoupon = { [weak self] getData in
                 guard let self = self else { return }
@@ -367,6 +377,9 @@ class ReviewPackageViewController: CommonViewController {
                 }
             }
             self.navigationController?.pushViewController(vc, animated: true)
+            */
+            
+            AlertHelper.shared.showCustomeAlert(message: "Coming soon...")
             
         case btnTag.deleteOffer.rawValue:
             print("delete offers btn clicked")

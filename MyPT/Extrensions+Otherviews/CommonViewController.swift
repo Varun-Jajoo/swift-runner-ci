@@ -10,6 +10,8 @@ import UIKit
 class CommonViewController: UIViewController {
     
     var progressLayer:CAShapeLayer?
+    var leftNavButtons: [UIButton] = []
+    var rightNavButtons: [UIButton] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -225,6 +227,8 @@ class CommonViewController: UIViewController {
         var backButton:[UIButton] = []
         backButton.removeAll()
         
+        // 2. Clear previous buttons and store new ones
+        leftNavButtons.removeAll()
         var leftBarButtonsArray:[UIBarButtonItem] = []
         leftBarButtonsArray.removeAll()
         
@@ -240,7 +244,7 @@ class CommonViewController: UIViewController {
             backBtn.addTarget(self, action: #selector(leftBtnActn(sender: )), for: .touchUpInside)
             
             backButton.append(backBtn)
-            
+            leftNavButtons.append(backBtn)
             leftBarButtonsArray.append(UIBarButtonItem(customView: backButton[imgs.offset]))
         }
         
@@ -249,6 +253,7 @@ class CommonViewController: UIViewController {
                 backButton[titleStr.offset].setTitle("  " + (titleStr.element ?? ""), for: .normal)
             }
         }
+        
         
         navigationItem.leftBarButtonItems = leftBarButtonsArray
     }
@@ -265,6 +270,8 @@ class CommonViewController: UIViewController {
         
         var rightButton:[UIButton] = []
         rightButton.removeAll()
+        // 3. Clear previous buttons and store new ones
+        rightNavButtons.removeAll()
         var rightBarButtonsArray:[UIBarButtonItem] = []
         rightBarButtonsArray.removeAll()
         
@@ -293,7 +300,7 @@ class CommonViewController: UIViewController {
             }
             
             rightButton.append(rightBtn)
-            
+            rightNavButtons.append(rightBtn)
             rightBarButtonsArray.append(UIBarButtonItem(customView: rightButton[imgs.offset]))
             // Set the image to the right
             

@@ -18,6 +18,27 @@ enum calendarFlow {
     case defaultFlow
 }
 
+extension calendarFlow {
+    static func from(string: String) -> calendarFlow {
+        switch string {
+        case "bookTrainerHomeWorkout":
+            return .bookTrainerHomeWorkout
+        case "bookTrainerGymWorkout":
+            return .bookTrainerGymWorkout
+        case "createPackage":
+            return .createPackage
+        case "gymMembership":
+            return .gymMembership
+        case "withTrainerMembership":
+            return .withTrainerMembership
+        case "withoutTrainerMembership":
+            return .withoutTrainerMembership
+        default:
+            return .defaultFlow
+        }
+    }
+}
+
 struct AvailParmsModel {
     var type: String?
     var trainer_id: String?
@@ -198,10 +219,8 @@ class BookingCalendarViewController: CommonViewController {
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             
             //----------------Gradient view
-            
-            self.bookingCalendar.layerGradient(startPoint: .topLeft, endPoint: .bottomRight, colorArray: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 019.0/255.0, alpha: 1.0).cgColor, UIColor(red: 71/255.0, green: 77/255.0, blue: 96/255.0, alpha: 1).cgColor,UIColor.mainBg.cgColor], type: .conic)
-            self.calendarMBV.layerGradient(startPoint: .topLeft, endPoint: .bottomRight, colorArray: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 019.0/255.0, alpha: 1.0).cgColor, UIColor(red: 71/255.0, green: 77/255.0, blue: 96/255.0, alpha: 1).cgColor, UIColor.mainBg.cgColor], type: .conic)
-            
+            self.bookingCalendar.backgroundColor = UIColor.clear
+            self.calendarMBV.addGradient(colors: [UIColor(red: 0, green: 0, blue: 0, alpha: 0.5), UIColor(red: 0, green: 5/255.0, blue: 2/255.0, alpha: 1)], locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 20.0)
             self.calendarMBV.setGradientBorder(cornerRadious:20.0,width: 1.0, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)])
             
 //            self.bookingCalendar.setGradientBorder(cornerRadious:20.0,width: 1.0, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)])

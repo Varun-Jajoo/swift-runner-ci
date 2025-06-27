@@ -46,7 +46,7 @@ class WeightViewController: CommonViewController {
         self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
         self.setProgress(0.4)
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
-        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite)
+//        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite) skipe remove need of client
     }
     
     override func rightBtnActn(sender: UIButton) {

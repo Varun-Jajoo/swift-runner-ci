@@ -18,8 +18,9 @@ class UpcomingMealsCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var fatBtn: UIButton!
     @IBOutlet weak var mealTypeImgview: UIImageView!
     @IBOutlet weak var mealsTypeTitleLbl: UILabel!
+    @IBOutlet weak var mealTypeImgViewHeightConstrnt: NSLayoutConstraint!
+    @IBOutlet weak var likeBtnTopconstrnt: NSLayoutConstraint!
     
-
     override func awakeFromNib() {
         super.awakeFromNib()
        

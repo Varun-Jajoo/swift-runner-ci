@@ -123,6 +123,7 @@ class BookingDetailsViewController: CommonViewController {
     @IBOutlet weak var costAmtLbl: UILabel!
     @IBOutlet weak var customerSupportBtn: UIButton!
     @IBOutlet weak var customerSupportBtnHeightConstrnt: NSLayoutConstraint!
+    @IBOutlet weak var bookingQRBtn: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -230,7 +231,7 @@ class BookingDetailsViewController: CommonViewController {
     }
     
     enum btntag: Int {
-        case help = 2201, decline, accept, againBooking, reschedule, cancelBooking,cuctomSupprot,learMore, reviewRate, cancelRequest
+        case help = 2201, decline, accept, againBooking, reschedule, cancelBooking,cuctomSupprot,learMore, reviewRate, cancelRequest, bookingQR
     }
 
     //MARK: -------------COMMON BTN ACTN
@@ -334,6 +335,16 @@ class BookingDetailsViewController: CommonViewController {
                 }
             })
             */
+            
+        case btntag.bookingQR.rawValue:
+            if let qrStr = bookingDetailsData?.bookingDetail?.qr {
+                let vc: BookingDetailsQRViewController = BookingDetailsQRViewController.instantiate(appStoryboard: .booking)
+                vc.qrUrlStr = qrStr
+                vc.modalPresentationStyle = .automatic
+                self.present(vc, animated: true)
+            }
+           
+            
         default:
             print("Default is called")
         }
@@ -467,7 +478,7 @@ class BookingDetailsViewController: CommonViewController {
     private func detailsData(){
         self.homeWorkoutTitleLbl.text = (bookingDetailsData?.bookingDetail?.type?.localizedCapitalized ?? "") + " Workout"
         self.homeworkoutDate.text = bookingDetailsData?.bookedAt
-        self.trainerProfileImgV.loadImage(urlString: bookingDetailsData?.trainerDetail?.profile, placeholder: UIImage(named: ""))
+        self.trainerProfileImgV.loadImage(urlString: bookingDetailsData?.trainerDetail?.profile, placeholder: UIImage(named: "ic_profile_placeholder"))
         self.trainerNameLbl.text = bookingDetailsData?.trainerDetail?.name
         self.distanceLbl.text = bookingDetailsData?.trainerDetail?.distance
         self.addressLbl.text = bookingDetailsData?.trainerDetail?.location
@@ -476,6 +487,9 @@ class BookingDetailsViewController: CommonViewController {
         self.amtPaidLbl.text = bookingDetailsData?.bookingDetail?.price
         self.trainingLocLbl.text = bookingDetailsData?.bookingDetail?.location
         self.trainingDateLbl.text = bookingDetailsData?.bookingDetail?.trainingDate
+        
+        self.bookingQRBtn.loadImage(urlString: bookingDetailsData?.bookingDetail?.qr, placeholder: nil, imageSize: CGSize(width: 25.0, height: 25.0))
+        self.bookingQRBtn.setTitle("  " + AppStrings.booking_QR_code, for: .normal)
     }
     
     //MARK: ---------------SETUP FLOW
@@ -530,7 +544,7 @@ class BookingDetailsViewController: CommonViewController {
             
             //------------***********
             self.myTrainerTitleBtn.setImage(UIImage(named: "ic_calendarCan"), for: .normal)
-            self.myTrainerTitleBtn.setTitle(AppStrings.booking_Acceepted, for: .normal)
+            self.myTrainerTitleBtn.setTitle(AppStrings.booking_Accepted, for: .normal)
             self.myTrainerTitleBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0)
             self.myTrainerTitleBtn.setTitleColor(UIColor.appWhite, for: .normal)
             
@@ -612,6 +626,7 @@ class BookingDetailsViewController: CommonViewController {
     
     //MARK: ----------------SETUPUI
     func setUpUI(){
+        
         DispatchQueue.main.async {
             
             self.trainerProfileImgV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12)
@@ -620,7 +635,8 @@ class BookingDetailsViewController: CommonViewController {
                 self.helpBtn,
                 self.bookingRescheduleBtn,
                 self.declineBtn,
-                self.customerSupportBtn
+                self.customerSupportBtn,
+                self.bookingQRBtn
             ].forEach({[weak self] in
                 guard self != nil else { return }
                 $0.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appWhite, cornerRadious: 12.0)
@@ -657,6 +673,7 @@ class BookingDetailsViewController: CommonViewController {
     
     func fontSetUP(){
         self.customerSupportBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
+        self.bookingQRBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
         //_____________________#################
         [
             self.homeworkoutDate,

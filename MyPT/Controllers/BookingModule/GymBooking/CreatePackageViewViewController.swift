@@ -20,7 +20,6 @@ class CreatePackageViewViewController: CommonViewController {
     @IBOutlet weak var packageList: UITableView!
     @IBOutlet weak var continueBtn: UIButton!
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -33,7 +32,8 @@ class CreatePackageViewViewController: CommonViewController {
 
         packageList.register(UINib(nibName: "TrainerTypeTableViewCell", bundle: nil), forCellReuseIdentifier: "TrainerTypeTableViewCell")
         
-        self.continueBtn.isUserInteractionEnabled = false
+//        self.continueBtn.isUserInteractionEnabled = false
+        self.enableContinueBtn(isSelected: false)
         self.setupUI()
     }
     
@@ -78,6 +78,7 @@ class CreatePackageViewViewController: CommonViewController {
                 self.packageList.selectRow(at: firstIndexPath, animated: true, scrollPosition: .top)
                 // Optional: perform any additional setup for the selected cell
                 self.packageList.delegate?.tableView?(self.packageList, didSelectRowAt: firstIndexPath)
+                self.enableContinueBtn(isSelected: isFirst)
                 self.view.layoutIfNeeded()
             }
         }
@@ -134,13 +135,14 @@ extension CreatePackageViewViewController:UITableViewDelegate, UITableViewDataSo
         
         cell.setSelectdBGCell(packageData?[indexPath.row]["trainerImg"] as? UIImage, selectedImg: packageData?[indexPath.row]["trainerImg_selected"] as? UIImage, isSelectedCell: false)
         
-        self.enableContinueBtn(isSelected: true)
+//        self.enableContinueBtn(isSelected: true)
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         isFirst = false
+        self.enableContinueBtn(isSelected: true)
         
         let selectedCell = tableView.cellForRow(at: indexPath) as! TrainerTypeTableViewCell
         

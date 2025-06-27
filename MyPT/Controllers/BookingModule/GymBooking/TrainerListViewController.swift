@@ -10,6 +10,85 @@ import UIKit
 class TrainerListViewController: CommonViewController {
 
     //MARK: --------------VARIBALE
+    
+    private lazy var searchContainerView: UIView = {
+        let container = UIView()
+        container.backgroundColor = UIColor.mainBg
+        container.layer.cornerRadius = 8
+        container.layer.masksToBounds = true
+        container.setCornerRadius(borderWidth: 1, borderColor: UIColor.appCard, cornerRadious: 12.0)
+
+        let searchBar = UISearchBar()
+        searchBar.tag = 101
+        searchBar.searchBarStyle = .minimal
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        searchBar.backgroundImage = UIImage() // Removes border
+        searchBar.isTranslucent = false
+        searchBar.backgroundColor = .clear
+        searchBar.delegate = self
+        searchBar.backgroundColor = UIColor.mainBg
+        searchBar.backgroundColor = UIColor.mainBg
+        searchBar.barTintColor = UIColor.mainBg
+        searchBar.tintColor = UIColor.appWhite
+        searchBar.searchTextField.backgroundColor = UIColor.mainBg
+        searchBar.searchTextField.textColor = UIColor.appWhite
+        searchBar.isTranslucent = false
+        searchBar.placeholder = ""
+        searchBar.searchTextField.font = AppFont.semibold.size(14.0, familyName: familyManrope)
+        searchBar.showsCancelButton = false
+        searchBar.searchTextField.rightView = nil
+        searchBar.searchTextField.rightViewMode = .never
+        searchBar.setBackgroundImage(UIImage.init(), for: UIBarPosition.any, barMetrics: UIBarMetrics.default)
+        searchBar.backgroundImage = UIImage()
+        searchBar.addDoneButtonOnKeyboard()
+            
+        if let textField = searchBar.value(forKey: "searchField") as? UITextField {
+            //            textField.clearButtonMode = .never
+            textField.leftView = nil
+            textField.rightView = nil
+            textField.rightViewMode = .never
+            textField.translatesAutoresizingMaskIntoConstraints = false
+            // Optional: Customize appearance
+            textField.borderStyle = .none
+            textField.layer.cornerRadius = 8
+            textField.backgroundColor = UIColor.mainBg
+            
+            // Add constraints to fill the search bar
+            NSLayoutConstraint.activate([
+                textField.leadingAnchor.constraint(equalTo: searchBar.leadingAnchor, constant: 0),
+                textField.trailingAnchor.constraint(equalTo: searchBar.trailingAnchor, constant: 2),
+                textField.topAnchor.constraint(equalTo: searchBar.topAnchor, constant: 0),
+                textField.bottomAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 0)
+            ])
+        }
+
+        let clearButton = UIButton()
+        clearButton.setImage(UIImage(named: "ic_cross"), for: .normal)
+        clearButton.tintColor = UIColor.mainBg
+        clearButton.translatesAutoresizingMaskIntoConstraints = false
+        clearButton.backgroundColor = UIColor.clear
+        clearButton.addTarget(self, action: #selector(clearSearch), for: .touchUpInside)
+        
+        let stack = UIStackView(arrangedSubviews: [searchBar, clearButton])
+        stack.axis = .horizontal
+        stack.spacing = 4
+        stack.alignment = .center
+        stack.translatesAutoresizingMaskIntoConstraints = false
+
+        container.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 4),
+            stack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -4),
+            stack.topAnchor.constraint(equalTo: container.topAnchor, constant: 2),
+            stack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -2),
+            clearButton.widthAnchor.constraint(equalToConstant: 20),
+            clearButton.heightAnchor.constraint(equalToConstant: 20)
+        ])
+
+        return container
+    }()
+
+    
     var isFromHome:Bool?
     var categorySelectedIndex:IndexPath?
     var flowSlot:calendarFlow = .defaultFlow
@@ -22,9 +101,15 @@ class TrainerListViewController: CommonViewController {
     var tagData:[TagModel]? = []
     var trainerData:[TrainerModel]? = []
     var gymTrainerData:[GymTrainerModel]? = []
+    var trainerDataLocal: [TrainerModel]? = []
+    var gymTrainerDataLocal: [GymTrainerModel]? = []
+    
     var isGridShow:Bool?
     
     //MARK: ----------------IBOUTLET
+    @IBOutlet weak var searchMBVTopConstrnt: NSLayoutConstraint!
+    @IBOutlet weak var searchMBVLeading: NSLayoutConstraint!
+    @IBOutlet weak var searchMBVTrailing: NSLayoutConstraint!
     @IBOutlet weak var workoutCategoryCollView: UICollectionView!
     @IBOutlet weak var trainerListTblView: UITableView!
     @IBOutlet weak var trainerGridCollView: UICollectionView!
@@ -65,55 +150,82 @@ class TrainerListViewController: CommonViewController {
         setNavUI()
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.searchContainerView.removeFromSuperview()
+    }
+    
     func setNavUI(){
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [AppStrings.trainers], setTintColor: .black, setTitleColor: UIColor.appWhite)
         self.setRighMenu(rightImgs: [AppImages.grid?.resized(to: CGSize(width: 25.0, height: 25.0)), AppImages.menuNav?.resized(to: CGSize(width: 25.0, height: 25.0)),  AppImages.search_normal], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
     
     override func rightBtnActn(sender: UIButton) {
-        let grid: UIImage? = (sender.tag == 0 ? AppImages.selected_grid : AppImages.grid)
-        let list: UIImage? = (sender.tag == 1 ? AppImages.menuNav : AppImages.unselectedList)
-        
-        self.setRighMenu(rightImgs: [grid?.resized(to: CGSize(width: 25.0, height: 25.0)), list?.resized(to: CGSize(width: 25.0, height: 25.0)), AppImages.search_normal], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
-        
-        if sender.tag == 0 {
-            print("Gridlayout")
-            self.isGridShow = true
-            trainerGridCollView.reloadData()
-            tblMBV.isHidden = true
-            collMBV.isHidden = false
+        if sender.tag != 2 {
+            let grid: UIImage? = (sender.tag == 0 ? AppImages.selected_grid : AppImages.grid)
+            let list: UIImage? = (sender.tag == 1 ? AppImages.menuNav : AppImages.unselectedList)
             
-        }else if sender.tag == 1{
-            print("show list view")
-            self.isGridShow = false
-            trainerListTblView.reloadData()
-            tblMBV.isHidden = false
-            collMBV.isHidden = true
+            self.setRighMenu(rightImgs: [grid?.resized(to: CGSize(width: 25.0, height: 25.0)), list?.resized(to: CGSize(width: 25.0, height: 25.0)), AppImages.search_normal], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
             
-        }else{
-            print("cliecked at search...")
+            if sender.tag == 0 {
+                print("Gridlayout")
+                self.isGridShow = true
+                trainerGridCollView.reloadData()
+                tblMBV.isHidden = true
+                collMBV.isHidden = false
+                
+            }else if sender.tag == 1{
+                print("show list view")
+                self.isGridShow = false
+                trainerListTblView.reloadData()
+                tblMBV.isHidden = false
+                collMBV.isHidden = true
+                
+            }else{
+                print("cliecked at search...")
+                
+                /*
+                 if let isFromHome = isFromHome, isFromHome {
+                 let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
+                 vc.searchStr = "Trainers"
+                 vc.searchTrainerData = self.trainerData
+                 vc.seacrhGymTrainerData = nil
+                 self.navigationController?.pushViewController(vc, animated: true)
+                 }else{
+                 let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
+                 vc.searchStr = "Trainers"
+                 vc.searchTrainerData = nil
+                 vc.seacrhGymTrainerData = self.gymTrainerData
+                 self.navigationController?.pushViewController(vc, animated: true)
+                 }
+                 */
+                
+                //            let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
+                //            vc.searchStr = "Trainers"
+                //            vc.searchTrainerData = self.trainerData
+                //            vc.seacrhGymTrainerData = self.gymTrainerData
+                //            self.navigationController?.pushViewController(vc, animated: true)
+            }
+        }else if sender.tag == 2{
+            self.navSearchUI()
             
+                        
             /*
             if let isFromHome = isFromHome, isFromHome {
-                let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
-                vc.searchStr = "Trainers"
-                vc.searchTrainerData = self.trainerData
-                vc.seacrhGymTrainerData = nil
-                self.navigationController?.pushViewController(vc, animated: true)
+            let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
+            vc.searchStr = "Trainers"
+            vc.searchTrainerData = self.trainerData
+            vc.seacrhGymTrainerData = nil
+            self.navigationController?.pushViewController(vc, animated: true)
             }else{
-                let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
-                vc.searchStr = "Trainers"
-                vc.searchTrainerData = nil
-                vc.seacrhGymTrainerData = self.gymTrainerData
-                self.navigationController?.pushViewController(vc, animated: true)
+            let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
+            vc.searchStr = "Trainers"
+            vc.searchTrainerData = nil
+            vc.seacrhGymTrainerData = self.gymTrainerData
+            self.navigationController?.pushViewController(vc, animated: true)
             }
-            */
             
-//            let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
-//            vc.searchStr = "Trainers"
-//            vc.searchTrainerData = self.trainerData
-//            vc.seacrhGymTrainerData = self.gymTrainerData
-//            self.navigationController?.pushViewController(vc, animated: true)
+            */
         }
     }
     
@@ -140,6 +252,24 @@ class TrainerListViewController: CommonViewController {
         }
     }
     
+    
+    @objc func clearSearch(sender: UIButton){
+        print("lcear search bar")
+        self.removeSearch()
+//        self.searchContainerView.applyTransition(type: .moveIn, subtype: .fromLeft, duration: 0.5, timingFunction: .easeInEaseOut, completion: {[weak self] in
+//            
+//            self?.searchContainerView.removeFromSuperview()
+//        })
+    }
+    
+    private func removeSearch(){
+        self.searchContainerView.applyTransition(type: .moveIn, subtype: .fromLeft, duration: 0.5, timingFunction: .easeInEaseOut, completion: {[weak self] in
+            
+            self?.searchContainerView.removeFromSuperview()
+        })
+    }
+    
+    
     private func setupUI(){
         workoutCategoryCollView.register(UINib(nibName: "WorkoutCategoryCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WorkoutCategoryCollectionViewCell")
         
@@ -152,7 +282,76 @@ class TrainerListViewController: CommonViewController {
         trainerListTblView.reloadData()
     }
     
-    
+    private func navSearchUI(){
+        guard let navBar = self.navigationController?.navigationBar else { return }
+        
+        //        animShowFromRightToLeft(duration: 0.7)
+        searchContainerView.alpha = 0
+        searchContainerView.isHidden = true
+        navBar.addSubview(searchContainerView)
+        searchContainerView.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Positioning vertically inside navbar
+        NSLayoutConstraint.activate([
+            searchContainerView.topAnchor.constraint(equalTo: navBar.topAnchor, constant: 0),
+            searchContainerView.bottomAnchor.constraint(equalTo: navBar.bottomAnchor, constant: 0),
+        ])
+        
+        // Leading (after left buttons)
+        if let leftLastButton = self.leftNavButtons.last,
+           let leftFrame = leftLastButton.superview?.convert(leftLastButton.frame, to: self.view) {
+            let trailingLeft = leftFrame.maxX
+            self.searchContainerView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: trailingLeft + 8).isActive = true
+        } else {
+            self.searchContainerView.leadingAnchor.constraint(equalTo: navBar.leadingAnchor, constant: 16).isActive = true
+        }
+        
+        // Trailing (before right buttons)
+        if let rightLastButton = self.rightNavButtons.last,
+           let rightFrame = rightLastButton.superview?.convert(rightLastButton.frame, to: self.view) {
+            //                let leadingRight = rightFrame.minX
+            let leadingRight = rightFrame.maxX
+            self.searchContainerView.trailingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: leadingRight).isActive = true
+        } else {
+            self.searchContainerView.trailingAnchor.constraint(equalTo: navBar.trailingAnchor, constant: -16).isActive = true
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            self.animShowFromRightToLeft(duration: 0.7) {
+                let trainerSearchbar = self.searchContainerView.viewWithTag(101) as? UISearchBar
+                if let textField = trainerSearchbar?.value(forKey: "searchField") as? UITextField {
+                    textField.becomeFirstResponder()
+                }
+            }
+//            self.animShowFromRightToLeft(duration: 0.7)
+        }
+    }
+        
+    func animShowFromRightToLeft(duration: TimeInterval = 1, completion: (() -> Void)? = nil) {
+        let container = self.searchContainerView
+        self.view.layoutIfNeeded()
+        let finalFrame = container.frame
+        
+        // Start with width = 0, origin.x = right edge (finalFrame.maxX)
+        container.frame = CGRect(
+            x: finalFrame.maxX,
+            y: finalFrame.origin.y,
+            width: 0,
+            height: finalFrame.height
+        )
+        container.alpha = 1
+        container.isHidden = false
+        self.searchContainerView.isHidden = false
+//        DispatchQueue.main.async {
+            UIView.animate(withDuration: duration, animations: {
+                container.frame = finalFrame
+//                self.searchContainerView.isHidden = false
+            }, completion: { _ in
+                completion?()
+            })
+//        }
+    }
+
 //    private func firstCellSelect(getCount: Int?){
 //        if let tagData = getCount, tagData > 0 {
 //            let firstIndexPath = IndexPath(item: 0, section: 0)
@@ -187,8 +386,8 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
         if collectionView == trainerGridCollView {
             let cell:GridTrainerCollectionViewCell = trainerGridCollView.dequeueReusableCell(withReuseIdentifier: "GridTrainerCollectionViewCell", for: indexPath) as! GridTrainerCollectionViewCell
             
-            cell.landMarkBtn.titleLabel?.numberOfLines = 2
-            cell.distanceBtn.titleLabel?.numberOfLines = 2
+            cell.landMarkBtn.titleLabel?.numberOfLines = 1
+            cell.distanceBtn.titleLabel?.numberOfLines = 1
             cell.landMarkBtn.titleLabel?.lineBreakMode = .byClipping
             cell.distanceBtn.titleLabel?.lineBreakMode = .byClipping
             
@@ -472,7 +671,92 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
         }
     }
 }
+
+//MARK: ---------------- SEARCHBAR DELEAGTE
+extension TrainerListViewController: UISearchBarDelegate{
     
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.text = nil
+//        searchBar.showsCancelButton = false
+        // Remove focus from the search bar.
+        searchBar.endEditing(true)
+        searchBar.resignFirstResponder()
+        
+        /*
+        if let isFromHome = isFromHome, isFromHome {
+                self.trainerData?.removeAll()
+                self.trainerData = self.trainerDataLocal
+        }else{
+                self.gymTrainerDataLocal?.removeAll()
+                self.gymTrainerData = self.gymTrainerDataLocal
+        }
+        
+        if let isGridshow = isGridShow, isGridshow {
+            self.trainerGridCollView.reloadData()
+        }else{
+            self.trainerListTblView.reloadData()
+        }
+        */
+        
+        // Perform any necessary work.  E.g., repopulating a table view
+        // if the search bar performs filtering.
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        // Perform search action with the search text
+        print("Search text: \(searchBar.text ?? "")")
+        searchBar.resignFirstResponder()
+    }
+    
+    // SearchBar Delegate
+      func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+//          if searchText.isEmpty {
+//                   filteredPeople = people
+//               } else {
+//                   filteredPeople = people.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+//               }
+          
+          if let isFromHome = isFromHome, isFromHome {
+              if searchText.isEmpty {
+                  self.trainerData?.removeAll()
+                  self.trainerData = self.trainerDataLocal
+                  print("in empty self.trainerData: ", self.trainerData?.count as Any)
+              } else {
+                  if let trainerData = self.trainerDataLocal {
+                      self.trainerData = trainerData.filter { ($0.name ?? "").lowercased().contains(searchText.lowercased()) }
+                      print("in filter trainerData: ", self.trainerData?.count as Any)
+                  }else{
+                      print("in outer trainerData: ", self.trainerData?.count as Any)
+                  }
+              }
+          }else{
+              if searchText.isEmpty {
+                  self.gymTrainerDataLocal?.removeAll()
+                  self.gymTrainerData = self.gymTrainerDataLocal
+              } else {
+                  if let trainerData = self.gymTrainerData {
+                      self.gymTrainerData = trainerData.filter { ($0.name ?? "").lowercased().contains(searchText.lowercased()) }
+                  }
+              }
+          }
+          
+          if let isGridshow = isGridShow, isGridshow {
+              self.trainerGridCollView.reloadData()
+          }else{
+              self.trainerListTblView.reloadData()
+          }
+      }
+    
+ 
+     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+         print(searchBar.text as Any)
+         }
+    
+     
+         func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+                searchBar.resignFirstResponder()
+         }
+}
 
 //MARK: -----------------------EXTENSION FOR API
 extension TrainerListViewController {
@@ -496,7 +780,9 @@ extension TrainerListViewController {
                 self.trainerData?.removeAll()
                 self.tagData?.append(contentsOf: getResultData.data?.tags ?? [])
                 self.trainerData?.append(contentsOf: getResultData.data?.trainers ?? [])
-                
+                self.trainerDataLocal?.removeAll()
+                self.trainerDataLocal = self.trainerData
+               
                 //-------------------Reload to set data
                 let tagModelData = TagModel(id: 1, name: "All Workouts", description: "", icon: "", image: "")
                 self.tagData?.insert(tagModelData, at: 0)
@@ -540,6 +826,8 @@ extension TrainerListViewController {
             self.trainerData?.removeAll()
             self.tagData?.append(contentsOf: getResultData.data?.tags ?? [])
             self.gymTrainerData?.append(contentsOf: getResultData.data?.trainers ?? [])
+            self.gymTrainerDataLocal?.removeAll()
+            self.gymTrainerDataLocal = self.gymTrainerData
             
             //-------------------Reload to set data
             let tagModelData = TagModel(id: 1, name: "All Workouts", description: "", icon: "", image: "")

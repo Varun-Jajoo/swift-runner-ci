@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FacebookLogin
 
 class DashboardGuestViewController: CommonViewController {
     
@@ -151,19 +152,19 @@ class DashboardGuestViewController: CommonViewController {
     func setNavUI(){
         self.setLeftMenu(leftImgs: [AppImages.chooseLocation, AppImages.forward], setTitle: [" \(currentAddrText ?? "")",nil], setTintColor: .appWhite, setTitleColor: .appWhite)
        
-        let logout = UIImage(named: "ic_logout")?.resized(to: CGSize(width: 25.0, height: 25.0))?.withRenderingMode(.alwaysTemplate).withTintColor(UIColor.appWhite)
+//        let logout = UIImage(named: "ic_logout")?.resized(to: CGSize(width: 25.0, height: 25.0))?.withRenderingMode(.alwaysTemplate).withTintColor(UIColor.appWhite)
         
-        self.setRighMenu(rightImgs: [logout ,AppImages.notification], setTitle: [nil,nil], setTintColor: UIColor.appWhite, setTitleColor: UIColor.appWhite)
+//        self.setRighMenu(rightImgs: [AppImages.notification], setTitle: [nil], setTintColor: UIColor.appWhite, setTitleColor: UIColor.appWhite)
   
 //        self.setRighMenu(rightImgs: [AppImages.notificationCount,AppImages.notification], setTitle: ["0",nil], setTintColor: nil, setTitleColor: UIColor.appWhite)
     }
     
     private func lockFeature(){
-        self.grabNowMBV.setComingSoon(mainVTop: 0, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+//        self.grabNowMBV.setComingSoon(mainVTop: 0, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
        
-        self.shopProductsMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+        self.shopProductsMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
       
-        self.upcomingNearClassesMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title: "Locked", desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+        self.upcomingNearClassesMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
     }
     
     override func leftBtnActn(sender: UIButton) {
@@ -174,18 +175,31 @@ class DashboardGuestViewController: CommonViewController {
     }
     
     override func rightBtnActn(sender: UIButton) {
-        
         print("right btn tag= ", sender.tag)
+        /*
         if sender.tag == 0 {
             AlertHelper.shared.showCustomeAlert(title: "", message: AppAlertStrings.logoutAlertMsg, actions: ["Ok", "Cancel"], withCancel: true, completion: { [weak self] tagGet in
                 guard self != nil else { return }
                 
                 if tagGet == 0 {
+                    self?.logoutIfFacebookLoggedIn()
                     if appUserDefaults.clearUserDefault() {
                         appSceneDelegate?.goToMainView()
                     }
                 }
             })
+        }
+        */
+    }
+    
+    func logoutIfFacebookLoggedIn() {
+        if let token = AccessToken.current, !token.isExpired {
+            // User is logged in — proceed to logout
+            let loginManager = LoginManager()
+            loginManager.logOut()
+            print("Facebook user has been logged out.")
+        } else {
+            print("No Facebook session found. Logout not needed.")
         }
     }
     
@@ -325,7 +339,7 @@ class DashboardGuestViewController: CommonViewController {
     
     //MARK: -------------BTN ACTN
     enum CommonBtnTag: Int {
-    case diffSubWorkoutExplore = 101, planWorkoutEplore, purchaseGymPass
+    case diffSubWorkoutExplore = 101, planWorkoutEplore, purchaseGymPass, userProfile
     }
     
     
@@ -352,6 +366,10 @@ class DashboardGuestViewController: CommonViewController {
             self.navigationController?.pushViewController(vc, animated: false)
             */
             
+        case CommonBtnTag.userProfile.rawValue:
+            let vc: ProfileViewController = ProfileViewController.instantiate(appStoryboard: .profile)
+            self.navigationController?.pushViewController(vc, animated: true)
+            
         default:
             print("None........")
             break
@@ -362,7 +380,6 @@ class DashboardGuestViewController: CommonViewController {
         //        self.navigationController?.pushViewController(vc, animated: true)
         
     }
-    
     
 }
 

@@ -18,7 +18,6 @@ class GymWorkoutViewController: CommonViewController {
     var studiosData:[TrainerModel]? = []
     var categorySelectedIndex:IndexPath?
     var flowGymwork:calendarFlow = .defaultFlow
-    
     var gymCountNear: Int? {
         didSet{
             self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: ["\(gymCountNear ?? 0) Gyms Near You."], setTintColor: .black, setTitleColor: UIColor.appWhite)
@@ -71,8 +70,38 @@ class GymWorkoutViewController: CommonViewController {
             self.categoryCollView.delegate?.collectionView?(self.categoryCollView, didSelectItemAt: firstIndexPath)
             self.view.layoutIfNeeded()
         }
-        
         */
+    }
+    
+    override func rightBtnActn(sender: UIButton) {
+        
+//        let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
+       
+        //GymSearchViewController
+        let vc: GymSearchViewController = GymSearchViewController.instantiate(appStoryboard: .booking)
+        
+        vc.searchStr = "Trainers"
+        vc.searchStudiosData = self.studiosData
+        vc.inputType = self.inputType
+        vc.inputLat = self.inputLat
+        vc.inputLong = self.inputLong
+        vc.gymStudioFlow = self.flowGymwork
+//        vc.seacrhGymTrainerData = self.gymTrainerData
+        self.navigationController?.pushViewController(vc, animated: true)
+        
+//        if let isFromHome = isFromHome, isFromHome {
+//        let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
+//        vc.searchStr = "Trainers"
+//        vc.searchTrainerData = self.trainerData
+//        vc.seacrhGymTrainerData = nil
+//        self.navigationController?.pushViewController(vc, animated: true)
+//        }else{
+//        let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
+//        vc.searchStr = "Trainers"
+//        vc.searchTrainerData = nil
+//        vc.seacrhGymTrainerData = self.gymTrainerData
+//        self.navigationController?.pushViewController(vc, animated: true)
+//        }
     }
     
     @IBAction func searchLocBtnActn(_ sender: Any) {

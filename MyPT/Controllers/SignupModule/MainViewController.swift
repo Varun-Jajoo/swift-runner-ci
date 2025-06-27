@@ -8,6 +8,7 @@
 import UIKit
 import AVKit
 import AVFoundation
+import FacebookLogin
 
 class MainViewController: CommonViewController,UITextFieldDelegate {
     
@@ -22,11 +23,16 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
     @IBOutlet weak var mobileNumTxt: UITextField!
     @IBOutlet weak var emailTxtField: UITextField!
     @IBOutlet weak var continueBtn: UIButton!
+    @IBOutlet weak var gloginBtn: UIButton!
+    @IBOutlet weak var fbLoginBtn: UIButton!
+    @IBOutlet weak var appleLoginBtn: UIButton!
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.mobileNumTxt.isHidden = true
+        self.mobileNumTxt.isHidden = false
+        self.emailTxtField.isHidden = true
         
         self.continueBtn.isUserInteractionEnabled = false
         mobileNumTxt.delegate = self
@@ -63,7 +69,8 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
         self.setNavigationColor(setColor: .clear)
         self.statusBarColor(setColor: .clear)
         setNavUI()
-        self.mobileNumTxt.isHidden = true
+        self.mobileNumTxt.isHidden = false
+        self.emailTxtField.isHidden = true
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -102,6 +109,17 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
             self.emailTxtField.placeholderSet(placeHolder: "Enter you email id", color: UIColor.txtDarkGray)
             
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+            
+            [
+                self.gloginBtn,
+                self.fbLoginBtn,
+                self.appleLoginBtn
+            ].forEach({[weak self] in
+                guard self != nil else {
+                    return
+                }
+                $0?.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appBorder, cornerRadious: ($0?.frame.size.height ?? 15)/2.0)
+            })
         }
     }
     
@@ -245,14 +263,116 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
         switch sender.tag {
         case socialBtnTag.googleLogin.rawValue:
             print("Google clicked at btn")
+            
+            GLoginManager.shared.gLogin(viewController: self,completion: { [weak self] userInfo, userProfile in
+                guard self != nil else { return }
+                print("userInfo= ",userInfo as Any,"userProfile= ",userProfile as Any)
+//                appUserDefaults.setUserID(value: userInfo?["uid"] as? String)
+//                appUserDefaults.setUserName(value: (userInfo?["email"] as? String))
+               
+                appUserDefaults.setSocialId(value: userInfo?["uid"] as? String)
+                appUserDefaults.setUserName(value: (userInfo?["fullName"] as? String))
+                
+                //1 for phone , 2 for social media, if type is 3 then email is require
+                let params:[String:Any] = [
+                    "unique_id": userInfo?["uid"] as? String ?? "",
+                    "phone": (userInfo?["phoneNumber"] as? String) ?? "" ,
+                    "email": (userInfo?["email"] as? String) ?? "",
+                    "type": "2",
+                    "name": (userProfile?["fullName"] as? String) ?? "",
+                    "device_type": "ios",
+                    "device_token": "48r748fjdfbdjdcn"
+                ]
+                
+                RegistrationVM.socialLoginApi(inputParams: params, completion: {[weak self] getResult in
+                    
+                    guard let self = self, let getResult = getResult else { return  }
+                    
+                    if getResult.status == true {
+                        if let userData = getResult.data {
+                            appUserDefaults.saveUserToUserDefaults(userData)
+                            appUserDefaults.setUserName(value: userData.user?.name)
+                            appUserDefaults.setAccessToken(accessToken: userData.token?.value)
+                        }
+                        
+                        if let isCompleted = getResult.data?.user?.isCompleted, isCompleted == 1 {
+                            appUserDefaults.setIsPackageCreated(value: true)
+                            appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: appUserDefaults.getIsPackageCreated())
+                            
+                        } else{
+                            if let getStep = getResult.data?.step?.intValue ,  let currentVC = vcSteps.getCurrentVC(vcRawValue: getStep) {
+                                // Use the currentVC, which will be the type of the corresponding view controller
+                                let getVC = currentVC.instantiate(appStoryboard: .main)
+                                self.navigationController?.pushViewController(getVC, animated: true)
+                            }
+                            else{
+                                let vc:NameViewController = NameViewController.instantiate(appStoryboard: .main)
+                                self.navigationController?.pushViewController(vc, animated: false)
+                            }
+                        }
+                    }
+                })
+            })
+            
         case socialBtnTag.fbLogin.rawValue:
             print("fbLogin clicked at btn")
+            self.fbLogin()
+            
         case socialBtnTag.appleLoggin.rawValue:
             print("appleLoggin clicked at btn")
+            AppleAuthManager.shared.handleAppleIdRequest()
+            AppleAuthManager.shared.sendData = { [weak self] dataGet in
+                guard self != nil else {
+                    return
+                }
+                print(dataGet)
+                appUserDefaults.setSocialId(value: dataGet.userIdentifier)
+                appUserDefaults.setUserName(value: dataGet.fullName)
+                
+                //1 for phone , 2 for social media, if type is 3 then email is require
+                let params:[String:Any] = [
+                    "unique_id": dataGet.userIdentifier ?? "",
+                    "phone": "" ,
+                    "email": dataGet.email ?? "",
+                    "type": "2",
+                    "name": dataGet.fullName ?? "",
+                    "device_type": "ios",
+                    "device_token": "48r748fjdfbdjdcn"
+                ]
+                                
+                RegistrationVM.socialLoginApi(inputParams: params, completion: {[weak self] getResult in
+                    
+                    guard let self = self, let getResult = getResult else { return  }
+                    
+                    if getResult.status == true {
+                        if let userData = getResult.data {
+                            appUserDefaults.saveUserToUserDefaults(userData)
+                            appUserDefaults.setUserName(value: userData.user?.name)
+                            appUserDefaults.setAccessToken(accessToken: userData.token?.value)
+                        }
+                        
+                        if let isCompleted = getResult.data?.user?.isCompleted, isCompleted == 1 {
+                            appUserDefaults.setIsPackageCreated(value: true)
+                            appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: appUserDefaults.getIsPackageCreated())
+                            
+                        } else{
+                            if let getStep = getResult.data?.step?.intValue ,  let currentVC = vcSteps.getCurrentVC(vcRawValue: getStep) {
+                                // Use the currentVC, which will be the type of the corresponding view controller
+                                let getVC = currentVC.instantiate(appStoryboard: .main)
+                                self.navigationController?.pushViewController(getVC, animated: true)
+                            }
+                            else{
+                                let vc:NameViewController = NameViewController.instantiate(appStoryboard: .main)
+                                self.navigationController?.pushViewController(vc, animated: false)
+                            }
+                        }
+                    }
+                })
+            }
+            
         default:
             print("Default...")
         }
-        
     }
     
     
@@ -290,10 +410,12 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
         }
         else if textField == emailTxtField{
             print(textField.text ?? "")
-            if let validSmail = textField.text?.isValidEmail(), validSmail {
-                self.enableContinueBtn(isSelected: true)
-            }else{
-                self.enableContinueBtn(isSelected: false)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                if let validSmail = textField.text?.isValidEmail(), validSmail {
+                    self.enableContinueBtn(isSelected: true)
+                }else{
+                    self.enableContinueBtn(isSelected: false)
+                }
             }
         }
         
@@ -312,6 +434,86 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
             self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
         }
     }
+    
+    //MARK: -------------------FACEBOOK LOGIN
+    private func fbLogin(){
+        let loginManager = LoginManager()
+            loginManager.logIn(permissions: ["public_profile", "email"], from: self) { result, error in
+                if let error = error {
+                    print("Login failed:", error.localizedDescription)
+                    return
+                }
+
+                guard let result = result, !result.isCancelled else {
+                    print(" Login cancelled.")
+                    return
+                }
+                // Successfully logged in
+                self.fetchFacebookUserData()
+            }
+    }
+    
+    func fetchFacebookUserData() {
+        GraphRequest(graphPath: "me", parameters: ["fields": "id, name, email"]).start { _, result, error in
+            if let error = error {
+                print("Failed to fetch user data:", error.localizedDescription)
+            } else if let userData = result as? [String: Any] {
+                print("User Data:", userData)
+
+                // Extract and save to UserDefaults
+                let userID = userData["id"] as? String
+                let name = userData["name"] as? String
+                let email = userData["email"] as? String
+                print("name",name ?? "")
+                print("email",email ?? "")
+                print("Saved name: \(name ?? ""), email: \(email ?? "") to UserDefaults")
+                
+                appUserDefaults.setSocialId(value: userID)
+                appUserDefaults.setUserName(value: name)
+                
+                //1 for phone , 2 for social media, if type is 3 then email is require
+                let params:[String:Any] = [
+                    "unique_id": userID ?? "",
+                    "phone": "" ,
+                    "email": email ?? "",
+                    "type": "2",
+                    "name": name ?? "",
+                    "device_type": "ios",
+                    "device_token": "48r748fjdfbdjdcn"
+                ]
+                
+                RegistrationVM.socialLoginApi(inputParams: params, completion: {[weak self] getResult in
+                    
+                    guard let self = self, let getResult = getResult else { return  }
+                    
+                    if getResult.status == true {
+                        if let userData = getResult.data {
+                            appUserDefaults.saveUserToUserDefaults(userData)
+                            appUserDefaults.setUserName(value: userData.user?.name)
+                            appUserDefaults.setAccessToken(accessToken: userData.token?.value)
+                        }
+                        
+                        if let isCompleted = getResult.data?.user?.isCompleted, isCompleted == 1 {
+                            appUserDefaults.setIsPackageCreated(value: true)
+                            appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: appUserDefaults.getIsPackageCreated())
+                            
+                        } else{
+                            if let getStep = getResult.data?.step?.intValue ,  let currentVC = vcSteps.getCurrentVC(vcRawValue: getStep) {
+                                // Use the currentVC, which will be the type of the corresponding view controller
+                                let getVC = currentVC.instantiate(appStoryboard: .main)
+                                self.navigationController?.pushViewController(getVC, animated: true)
+                            }
+                            else{
+                                let vc:NameViewController = NameViewController.instantiate(appStoryboard: .main)
+                                self.navigationController?.pushViewController(vc, animated: false)
+                            }
+                        }
+                    }
+                })
+            }
+        }
+    }
+    
 }
 
 //MARK: -------------------EXTENSION FOR API
@@ -321,11 +523,27 @@ extension MainViewController {
         RegistrationVM.checkStep(viewController: self, params: nil, isShowLoader: false, completion: { [weak self] getResult in
             guard let self = self, let getResult = getResult else { return  }
             let  getData = getResult["data"] as? [String:Any]
+            
+            if let userData = getData?["user"] as? [String:Any] {
+                do {
+                    // Convert dictionary to JSON data
+                    let jsonData = try JSONSerialization.data(withJSONObject: userData, options: [])
+                    // Decode JSON data into model
+                    let user = try JSONDecoder().decode(SubmitDataModel.self, from: jsonData)
+                    appUserDefaults.saveUserToUserDefaults(user)
+                    
+                } catch {
+                    print("Error decoding JSON: \(error)")
+                }
+                
+                }
+            
             if let getIncompleteStep = getData?["incompletestep"] as? Int, let currentVC = vcSteps.getCurrentVC(vcRawValue: getIncompleteStep) {
                 // Use the currentVC, which will be the type of the corresponding view controller
                 let getVC = currentVC.instantiate(appStoryboard: .main)
                 self.navigationController?.pushViewController(getVC, animated: true)
             }
+            
         })
     }
 }

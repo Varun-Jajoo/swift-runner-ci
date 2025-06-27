@@ -116,7 +116,14 @@ class ClassDetailsViewController: CommonViewController {
         self.setupFont()
         self.setupUI()
         self.registerCell()
-        self.classDetailsApi()
+//        self.classDetailsApi()
+        
+        if let _ = inputLat, let _ = inputLong{
+            self.classDetailsApi()
+        }else{
+            self.getLocation()
+        }
+        
         self.setInputData()
         
         bookingBtn.setTitle(AppStrings.reserve_Slot, for: .normal)
@@ -145,7 +152,17 @@ class ClassDetailsViewController: CommonViewController {
     
     @objc func shareBtnTapped() {
         print("Custom right button tapped")
-        Utility.shared.shareSocial(viewController: self, textToShare: "Share to social", imageToShare: AppImages.navLeft ?? UIImage(), urlShareStr: "https://www.google.com/")
+        ImageDownloader.shared.downloadImage(from: (classDetails?.classProfile ?? ""), completion: {[weak self] img in
+            guard let self = self , let img = img else {
+                return
+            }
+            let getBaseUrl:String = AppBaseUrl.baseScheme.rawValue + "://" + AppBaseUrl.baseDevUrl.rawValue
+            print(getBaseUrl)
+            let urlString = "\(getBaseUrl)/class/\(scheludeIdStr ?? "")/\(flowClassDetails)"
+            Utility.shared.shareSocial(viewController: self, textToShare: classDetails?.className ?? "", imageToShare: img, urlShareStr: urlString)
+        })
+        
+        //        Utility.shared.shareSocial(viewController: self, textToShare: "Share to social", imageToShare: AppImages.navLeft ?? UIImage(), urlShareStr: "https://www.google.com/")
     }
     
     
@@ -267,6 +284,20 @@ class ClassDetailsViewController: CommonViewController {
             self.classDescLbl.appendReadLess(after: classDetails?.classDescription ?? "", trailingContent: .readless)
         } else if fullAttributedString.range(of: readLessText) != nil, tappedIndex >= (fullAttributedString.count - readLessText.count) {
             self.classDescLbl.appendReadmore(after: classDetails?.classDescription ?? "", trailingContent: .readmore)
+        }
+    }
+    
+    private func getLocation(){
+        GetLocationManager.shared.requestLocationWithAddress {[weak self] location, addressPart in
+            guard let self = self else { return }
+            
+            appUserDefaults.setLatLong(value: "\(location?.coordinate.latitude ?? 0),\(location?.coordinate.longitude ?? 0)")
+            appUserDefaults.setCurrentAddr(value: addressPart.0)
+            
+            self.inputLat = "\(location?.coordinate.latitude ?? 0)"
+            self.inputLong = "\(location?.coordinate.longitude ?? 0)"
+            
+            self.classDetailsApi()
         }
     }
     

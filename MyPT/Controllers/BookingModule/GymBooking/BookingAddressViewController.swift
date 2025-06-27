@@ -20,11 +20,16 @@ protocol BookingAddressProtocol {
 
 protocol AddMemberProtocol {
     func memberAdd(isDismiss: Bool?)
+    func editReloadData(isReload: Bool?)
 }
 
 class BookingAddressViewController: UIViewController {
 
     //MARK: ------------VARIABLE
+    var addMaxMember:Int?
+    var addedMember:Int?
+    private var currentAddMember:Int = 0
+    
     var hintTxt:[String] = []
     var bookingAddressFlow: BookingAddressFlow = .defaultBooing
     var delegate:BookingAddressProtocol?
@@ -83,6 +88,8 @@ class BookingAddressViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.currentAddMember = self.addedMember ?? 0
         
         self.setupFont()
         //        self.setupHint()
@@ -151,6 +158,41 @@ class BookingAddressViewController: UIViewController {
     @IBAction func addMemebersBtnActn(_ sender: UIButton) {
         if sender.tag == 801 {
             print("save & next btn clicked")
+           
+            print("First time currentAddMember", currentAddMember)
+            
+            if let addMaxMember = addMaxMember,  currentAddMember < addMaxMember {
+                
+                let memberParams = AddMemberParams(name: self.buildingNumTxt.text, age: self.streetNameTxt.text, gender: self.typeStr ?? "", id: "\(addMemberData?.id ?? -1)")
+                
+                //id is getting then meber will be edit ohterwise new member added
+                if CreatePackageVM.isValidMember(inputParams: memberParams) {
+                    currentAddMember += 1
+                    print("currentAddMember", currentAddMember)
+                    CreatePackageVM.addMemberApi(viewController: self, inputParams: memberParams.getParams(), completion: { [weak self] getResultData in
+                        
+                        self?.view.endEditing(true)
+                        self?.addMemberDelegate?.editReloadData(isReload: true)
+                        self?.addMemberData?.id = nil
+                        self?.typeStr = nil
+                        self?.setAddrType(sender: UIButton())
+                        self?.buildingNumTxt.text = nil
+                        self?.streetNameTxt.text = nil
+                        
+                        guard let self = self, let getResultData = getResultData else { return  }
+                        
+                        if getResultData.status == true{
+                            if currentAddMember == addMaxMember {
+                                self.dismiss(animated: true, completion: {
+                                    self.addMemberDelegate?.memberAdd(isDismiss: true)
+                                })
+                            }
+                        }
+                    })
+                }
+            }else{
+                print("max number member added.")
+            }
             
         }else{
             print("save members btn clicked.")
