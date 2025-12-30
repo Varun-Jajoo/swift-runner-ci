@@ -43,6 +43,7 @@ class StepCountViewController: CommonViewController {
         self.statusBarColor(setColor: .clear)
         setNavUI()
     }
+    
     func setNavUI(){
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: ["Steps Count"], setTintColor: .black, setTitleColor: UIColor.appWhite)
         self.setRighMenu(rightImgs: [UIImage(named: "ic_mostPopularchart")], setTitle: [nil], setTintColor: .black, setTitleColor: UIColor.appWhite)

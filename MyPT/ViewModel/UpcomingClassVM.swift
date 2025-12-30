@@ -171,4 +171,81 @@ class UpcomingClassVM {
             }
         })
     }
+    
+    
+    //MARK: ----------------------- api/user-meals
+    class func getuserMealsApi(inputDate:String? , isShowLoader:Bool = true, completion: @escaping(_ resultData:UserMealsBaseModel?) -> Void){
+        /*
+         date: 2025-05-22
+         */
+        
+        let params:[String:String] = [
+           "date": inputDate ?? "",
+        ]
+        
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .user_meals, method: .get , queries: params, parameters:  nil, isShowLoading: isShowLoader, completion: {  ( getResponce, error) in
+            do{
+                print(getResponce as Any)
+                if let responceData = getResponce {
+                    let getResult = try JSONDecoder().decode(UserMealsBaseModel.self, from: responceData)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    }
+                    else{
+                        completion(getResult)
+                    }
+                }
+            }catch {
+                print(error)
+            }
+        })
+    }
+    
+    //MARK: ------------------ api/meal-favourite
+    class  func mealFavoriteApi(inputMealId: String?, completion: @escaping(_ resultData:[String:Any]?) -> Void){
+        
+         let params:[String:Any] = [
+            "meal_id": inputMealId ?? "", //meal_id id is required
+         ]
+         
+        print("inputParams = ", params as Any)
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .meal_favourite, method: .post , parameters: params, isShowLoading: true, completion: {  (getResponce, error) in
+            
+            do{
+
+                if let responceData = getResponce {
+                    let getResult = try JSONSerialization.jsonObject(with: responceData, options: .mutableContainers) as? [String:Any]
+                    guard let getResult = getResult else { return }
+                    if (getResult["status"] as? Bool) == true  {
+                        completion(getResult)
+                    }
+                    else{
+                        
+                        let errorMsg = "\(((getResult["errors"] as? [String : Any])?.values.first as? [Any])?.first as? String ?? (getResult["msg"] as? String ?? ""))"
+                        debugPrint(errorMsg)
+                    }
+                }
+                
+            }catch {
+                print(error)
+            }
+
+            
+//            do{
+//                print(getResponce as Any)
+//                if let responceData = getResponce {
+//                    let getResult = try JSONDecoder().decode(BookClassBaseModel.self, from: responceData)
+//                    if (getResult.status == true)  {
+//                        completion(getResult)
+//                    }
+//                    else{
+//                        let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+//                        AlertHelper.shared.showCustomeAlert(title: "", message: errorMsg ?? "", completion: nil)
+//                    }
+//                }
+//            }catch {
+//                print(error)
+//            }
+        })
+    }
 }

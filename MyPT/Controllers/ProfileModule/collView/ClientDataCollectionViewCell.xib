@@ -19,10 +19,10 @@
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_healthcardGradient" translatesAutoresizingMaskIntoConstraints="NO" id="KCQ-58-zbD">
-                        <rect key="frame" x="0.0" y="0.0" width="417" height="238"/>
+                        <rect key="frame" x="0.0" y="0.0" width="417" height="240"/>
                     </imageView>
                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="7eo-yE-78m">
-                        <rect key="frame" x="0.0" y="0.0" width="417" height="238"/>
+                        <rect key="frame" x="0.0" y="0.0" width="417" height="240"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Cvn-pS-3Tx">
                                 <rect key="frame" x="0.0" y="0.0" width="417" height="76.333333333333329"/>
@@ -30,6 +30,7 @@
                                     <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" semanticContentAttribute="forceRightToLeft" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mx8-ui-BDy">
                                         <rect key="frame" x="6" y="18" width="405" height="22"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <fontDescription key="fontDescription" name=".AppleSystemUIFont" family=".AppleSystemUIFont" pointSize="18"/>
                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                         <state key="normal" title="CHOLESTEROL  " image="ic_info_gray">
                                             <color key="titleColor" name="appWhite"/>
@@ -84,20 +85,29 @@
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iuG-qp-KRF">
-                                <rect key="frame" x="0.0" y="146" width="417" height="92"/>
+                                <rect key="frame" x="0.0" y="146" width="417" height="94"/>
                                 <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_burnKcal" translatesAutoresizingMaskIntoConstraints="NO" id="34b-7D-xD3">
-                                        <rect key="frame" x="1" y="1" width="415" height="90"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="90" id="Tvt-HF-0Mh"/>
-                                        </constraints>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="34b-7D-xD3">
+                                        <rect key="frame" x="1" y="1" width="415" height="92"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     </imageView>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KON-rF-u2P">
+                                        <rect key="frame" x="1" y="2" width="415" height="90"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="90" id="fmi-Zw-nX8"/>
+                                        </constraints>
+                                    </view>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstItem="34b-7D-xD3" firstAttribute="leading" secondItem="iuG-qp-KRF" secondAttribute="leading" constant="1" id="3wC-dN-wlj"/>
+                                    <constraint firstAttribute="trailing" secondItem="KON-rF-u2P" secondAttribute="trailing" constant="1" id="8Oi-3G-dgD"/>
                                     <constraint firstAttribute="bottom" secondItem="34b-7D-xD3" secondAttribute="bottom" constant="1" id="IZl-Ob-8zw"/>
+                                    <constraint firstItem="KON-rF-u2P" firstAttribute="top" secondItem="iuG-qp-KRF" secondAttribute="top" constant="2" id="Idd-sg-30V"/>
+                                    <constraint firstAttribute="bottom" secondItem="KON-rF-u2P" secondAttribute="bottom" constant="2" id="bWY-BK-SpD"/>
                                     <constraint firstItem="34b-7D-xD3" firstAttribute="top" secondItem="iuG-qp-KRF" secondAttribute="top" constant="1" id="fLC-oP-tdR"/>
+                                    <constraint firstItem="KON-rF-u2P" firstAttribute="leading" secondItem="iuG-qp-KRF" secondAttribute="leading" constant="1" id="hWC-lw-Drx"/>
                                     <constraint firstAttribute="trailing" secondItem="34b-7D-xD3" secondAttribute="trailing" constant="1" id="ndK-4i-bxg"/>
                                 </constraints>
                             </view>
@@ -127,6 +137,7 @@
                 <outlet property="doDataDescLbl" destination="yJw-oG-Gu3" id="WRa-gH-NcR"/>
                 <outlet property="noDataMBV" destination="Qvv-X4-cnR" id="zYg-q9-GUZ"/>
                 <outlet property="noDataSubV" destination="Z3R-OE-V9v" id="KPy-UN-cN5"/>
+                <outlet property="subviewProgress" destination="KON-rF-u2P" id="WFu-YH-JCM"/>
                 <outlet property="topTitleBtn" destination="mx8-ui-BDy" id="TfG-Ad-kNk"/>
                 <outlet property="unitLbl" destination="hE3-MT-QNw" id="MIE-qT-z55"/>
             </connections>
@@ -134,7 +145,6 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <image name="ic_burnKcal" width="183" height="80.333335876464844"/>
         <image name="ic_healthcardGradient" width="190" height="115"/>
         <image name="ic_info_gray" width="16" height="16.333333969116211"/>
         <namedColor name="appWhite">

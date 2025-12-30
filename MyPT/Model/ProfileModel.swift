@@ -9,10 +9,10 @@ import Foundation
 
  // MARK: - Profile base model
 struct ProfileBaseModel: Codable {
-     var status: Bool?
-     var msg: String?
+    var status: Bool?
+    var msg: String?
     var data: ProfileDataModel?
- }
+}
 
  // MARK: - Data model
  struct ProfileDataModel: Codable {
@@ -25,10 +25,12 @@ struct ProfileBaseModel: Codable {
      var awards: [AwardsModel]?
      var activityLog: ActivityLogModel?
      var myptChart: [MyptChartModel]?
+     var otherSubscriptions: [OtherSubscriptionsModel]?
+     
      var name, image, cover_image: String?
 
      enum CodingKeys: String, CodingKey {
-         case isActive, location, plan, trainers, healthPrefernce, awards, activityLog
+         case isActive, location, plan, trainers, healthPrefernce, awards, activityLog, otherSubscriptions
          case myptChart = "mypt_chart"
          case name, image, cover_image
      }
@@ -77,6 +79,20 @@ struct LocationModel: Codable {
     var lat: String?
     var address: String?
 }
+
+// MARK: ------- OtherSubscriptionsModel
+struct OtherSubscriptionsModel: Codable {
+    var isPackage : Bool?
+    var getTier : String?
+    var tier_image : String?
+    var isUpgrade : Bool?
+    var remaining_sessions : FlexibleValue?
+    var total_sessions : FlexibleValue?
+    var remaining_days : FlexibleValue?
+    var total_days : FlexibleValue?
+    var plan_id: FlexibleValue?
+}
+
 
 ///--------- ----------------- **********************   User profile information 
 
@@ -146,3 +162,297 @@ struct UpdateUserDataModel: Codable {
         case name, email, gender, location, address, country_id, city_id, address_id, long, lat
     }
 }
+
+
+//MARK: ----------------------- HEALTH STATS
+// MARK: ------------ STATS MODEL
+struct HealthStatsBaseModel: Codable {
+    var status: Bool?
+    var data: HealthStatsDataModel?
+    var msg: String?
+}
+
+// MARK: --------- HealthStatsDataModel
+struct HealthStatsDataModel: Codable {
+    var healthOverview: HealthOverview?
+    var physicalMeasurement: PhysicalMeasurement?
+    var bodyComposition: BodyComposition?
+    var bodyFat: BodyFat?
+    var waistHipRatio: WaistHipRatio?
+    var cardiovascular: Cardiovascular?
+    var healthData: HealthData?
+    var cardioInsights: CardioInsights?
+    var customGoal: String?
+
+    enum CodingKeys: String, CodingKey {
+        case healthOverview, physicalMeasurement, bodyComposition, bodyFat
+        case waistHipRatio = "waist_hip_ratio"
+        case cardiovascular, healthData, cardioInsights, customGoal
+    }
+}
+
+// MARK: - BodyComposition
+struct BodyComposition: Codable {
+    var bodyMass: FlexibleValue?
+    var bodyMassStatus: String?
+
+    enum CodingKeys: String, CodingKey {
+        case bodyMass = "body_mass"
+        case bodyMassStatus = "body_mass_status"
+    }
+}
+
+// MARK: - BodyFat
+struct BodyFat: Codable {
+    var bodyFat: FlexibleValue?
+    var bodyFatStatus, thighs, chest: String?
+    var abdomen, triceps, subscapular, axila: String?
+    var subscapula: String?
+
+    enum CodingKeys: String, CodingKey {
+        case bodyFat = "body_fat"
+        case bodyFatStatus = "body_fat_status"
+        case thighs, chest, abdomen, triceps, subscapular, axila, subscapula
+    }
+}
+
+// MARK: - Cardiovascular
+struct Cardiovascular: Codable {
+    var restingHeartRate, maxHeartRate, diastolicBp, systolicBp: String?
+
+    enum CodingKeys: String, CodingKey {
+        case restingHeartRate = "resting_heart_rate"
+        case maxHeartRate = "max_heart_rate"
+        case diastolicBp = "diastolic_bp"
+        case systolicBp = "systolic_bp"
+    }
+}
+
+// MARK: - HealthOverview
+struct HealthOverview: Codable {
+    var month, activities, calories, exercise: FlexibleValue?
+}
+
+// MARK: - PhysicalMeasurement
+struct PhysicalMeasurement: Codable {
+    var height, weight: String?
+}
+
+// MARK: - WaistHipRatio
+struct WaistHipRatio: Codable {
+    var ratio, hip, waist, status: String?
+}
+
+// MARK: - CardioInsights
+struct CardioInsights: Codable {
+    var cholesterol, hdl: Cholesterol?
+}
+
+// MARK: - Cholesterol
+struct Cholesterol: Codable {
+    var value, status: String?
+}
+
+// MARK: - HealthData
+struct HealthData: Codable {
+    var height, weight: String?
+}
+
+/*
+ // MARK: - Welcome
+ struct Welcome: Codable {
+     var status: Bool?
+     var data: DataClass?
+     var msg: String?
+ }
+
+ // MARK: - DataClass
+ struct DataClass: Codable {
+     var healthOverview: HealthOverview?
+     var physicalMeasurement: PhysicalMeasurement?
+     var bodyComposition: BodyComposition?
+     var bodyFat: BodyFat?
+     var waistHipRatio: WaistHipRatio?
+     var cardiovascular: Cardiovascular?
+
+     enum CodingKeys: String, CodingKey {
+         case healthOverview, physicalMeasurement, bodyComposition, bodyFat
+         case waistHipRatio = "waist_hip_ratio"
+         case cardiovascular
+     }
+ }
+
+ // MARK: - BodyComposition
+ struct BodyComposition: Codable {
+     var bodyMass: Double?
+     var bodyMassStatus: String?
+
+     enum CodingKeys: String, CodingKey {
+         case bodyMass = "body_mass"
+         case bodyMassStatus = "body_mass_status"
+     }
+ }
+
+ // MARK: - BodyFat
+ struct BodyFat: Codable {
+     var bodyFat: Double?
+     var bodyFatStatus, thighs, chest, abdomen: String?
+     var triceps, subscapular, axila, subscapula: String?
+
+     enum CodingKeys: String, CodingKey {
+         case bodyFat = "body_fat"
+         case bodyFatStatus = "body_fat_status"
+         case thighs, chest, abdomen, triceps, subscapular, axila, subscapula
+     }
+ }
+
+ // MARK: - Cardiovascular
+ struct Cardiovascular: Codable {
+     var restingHeartRate, maxHeartRate, diastolicBp, systolicBp: String?
+
+     enum CodingKeys: String, CodingKey {
+         case restingHeartRate = "resting_heart_rate"
+         case maxHeartRate = "max_heart_rate"
+         case diastolicBp = "diastolic_bp"
+         case systolicBp = "systolic_bp"
+     }
+ }
+
+ // MARK: - HealthOverview
+ struct HealthOverview: Codable {
+     var month, activities, calories, exercise: String?
+ }
+
+ // MARK: - PhysicalMeasurement
+ struct PhysicalMeasurement: Codable {
+     var height, weight: String?
+ }
+
+ // MARK: - WaistHipRatio
+ struct WaistHipRatio: Codable {
+     var ratio, hip, waist, status: String?
+ }
+ */
+
+
+// MARK: ------------
+/*
+struct HealthStatsBaseModel: Codable {
+    var status: Bool?
+    var data: HealthStatsDataModel?
+    var msg: String?
+}
+
+// MARK: - DataClass
+struct HealthStatsDataModel: Codable {
+    var healthData: HealthData?
+    var cardioInsights: CardioInsights?
+    var customGoal: String?
+    
+    var healthOverview: HealthOverview?
+    var physicalMeasurement: PhysicalMeasurement?
+    var bodyComposition: BodyComposition?
+    var bodyFat: BodyFat?
+    var waistHipRatio: WaistHipRatio?
+    var cardiovascular: Cardiovascular?
+
+    enum CodingKeys: String, CodingKey {
+        case healthOverview, physicalMeasurement, bodyComposition, bodyFat
+        case waistHipRatio = "waist_hip_ratio"
+        case cardiovascular
+    }
+}
+
+// MARK: - CardioInsights
+struct CardioInsights: Codable {
+    var cholesterol, hdl: Cholesterol?
+}
+
+// MARK: - Cholesterol
+struct Cholesterol: Codable {
+    var value, status: String?
+}
+
+// MARK: - HealthData
+struct HealthData: Codable {
+    var height, weight: String?
+}
+*/
+
+
+
+/*
+ // MARK: - Welcome
+ struct Welcome: Codable {
+     var status: Bool?
+     var data: DataClass?
+     var msg: String?
+ }
+
+ // MARK: - DataClass
+ struct DataClass: Codable {
+     var healthOverview: HealthOverview?
+     var physicalMeasurement: PhysicalMeasurement?
+     var bodyComposition: BodyComposition?
+     var bodyFat: BodyFat?
+     var waistHipRatio: WaistHipRatio?
+     var cardiovascular: Cardiovascular?
+
+     enum CodingKeys: String, CodingKey {
+         case healthOverview, physicalMeasurement, bodyComposition, bodyFat
+         case waistHipRatio = "waist_hip_ratio"
+         case cardiovascular
+     }
+ }
+
+ // MARK: - BodyComposition
+ struct BodyComposition: Codable {
+     var bodyMass: Double?
+     var bodyMassStatus: String?
+
+     enum CodingKeys: String, CodingKey {
+         case bodyMass = "body_mass"
+         case bodyMassStatus = "body_mass_status"
+     }
+ }
+
+ // MARK: - BodyFat
+ struct BodyFat: Codable {
+     var bodyFat, bodyFatStatus, thighs, chest: String?
+     var abdomen, triceps, subscapular, axila: String?
+     var subscapula: String?
+
+     enum CodingKeys: String, CodingKey {
+         case bodyFat = "body_fat"
+         case bodyFatStatus = "body_fat_status"
+         case thighs, chest, abdomen, triceps, subscapular, axila, subscapula
+     }
+ }
+
+ // MARK: - Cardiovascular
+ struct Cardiovascular: Codable {
+     var restingHeartRate, maxHeartRate, diastolicBp, systolicBp: String?
+
+     enum CodingKeys: String, CodingKey {
+         case restingHeartRate = "resting_heart_rate"
+         case maxHeartRate = "max_heart_rate"
+         case diastolicBp = "diastolic_bp"
+         case systolicBp = "systolic_bp"
+     }
+ }
+
+ // MARK: - HealthOverview
+ struct HealthOverview: Codable {
+     var month, activities, calories, exercise: String?
+ }
+
+ // MARK: - PhysicalMeasurement
+ struct PhysicalMeasurement: Codable {
+     var height, weight: String?
+ }
+
+ // MARK: - WaistHipRatio
+ struct WaistHipRatio: Codable {
+     var ratio, hip, waist, status: String?
+ }
+ */

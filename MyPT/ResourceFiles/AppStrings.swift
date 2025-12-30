@@ -12,8 +12,9 @@ import Foundation
 struct AppStrings {
     public static let skip_to_home = "Skip to home"
     public static let skip_Str = "Skip"
+    public static let skipStr = "SKIP"
     public static let continueStr = "Continue"
-    public static let helpStr = "Help"
+    public static let helpStr = "HELP"
     public static let review_Package = "Review Package"
     public static let coupons_Offers = "Coupons & Offers"
     public static let booking_Listings = "Booking Listings"
@@ -108,6 +109,7 @@ struct AppStrings {
     public static let ckeck_network = "Check your internet or wifi"
      
      //-------------------****** Alert
+     public static let enter_full_name = "Please enter full name."
      public static let enter_phone = "Please enter valid phone."
      public static let enter_password = "Please enter password."
      public static let enter_confirm = "Please enter confirm password."

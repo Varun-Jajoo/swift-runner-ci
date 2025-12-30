@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -12,13 +16,27 @@
 				<string>msteams</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.405850399410-3plk6horqe62b9a0t316to75fbm5r1tr</string>
+			</array>
+		</dict>
 	</array>
+	<key>FacebookAdvertiserIDCollectionEnabled</key>
+	<true/>
 	<key>FacebookAppID</key>
 	<string>1311462707653880</string>
+	<key>FacebookAutoLogAppEventsEnabled</key>
+	<true/>
 	<key>FacebookClientToken</key>
 	<string>5814be5585d2012bca11b59a4b09579a</string>
 	<key>FacebookDisplayName</key>
 	<string>MyPT Connect</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>fbapi</string>
@@ -74,6 +92,18 @@
 		<string>overpass-mono-semibold.otf</string>
 		<string>overpass-mono-regular.otf</string>
 		<string>overpass-mono-bold.otf</string>
+		<string>FunnelSans-Bold.ttf</string>
+		<string>FunnelSans-BoldItalic.ttf</string>
+		<string>FunnelSans-ExtraBold.ttf</string>
+		<string>FunnelSans-ExtraBoldItalic.ttf</string>
+		<string>FunnelSans-Italic.ttf</string>
+		<string>FunnelSans-Light.ttf</string>
+		<string>FunnelSans-LightItalic.ttf</string>
+		<string>FunnelSans-Medium.ttf</string>
+		<string>FunnelSans-MediumItalic.ttf</string>
+		<string>FunnelSans-Regular.ttf</string>
+		<string>FunnelSans-SemiBold.ttf</string>
+		<string>FunnelSans-SemiBoldItalic.ttf</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
@@ -100,6 +130,7 @@
 	<array>
 		<string>fetch</string>
 		<string>remote-notification</string>
+		<string>processing</string>
 	</array>
 	<key>UIDeviceFamily</key>
 	<array>

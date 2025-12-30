@@ -61,6 +61,7 @@ struct AddressBaseModel: Codable {
 // MARK: ------ AddressDataModel
 struct AddressDataModel: Codable {
     var user_id: FlexibleValue?
+    var name: FlexibleValue?
     var building_name: FlexibleValue?
     var street: FlexibleValue?
     var city_id: FlexibleValue?
@@ -77,7 +78,7 @@ struct AddressDataModel: Codable {
     var id: FlexibleValue?
     
     enum CodingKeys: String, CodingKey {
-        case user_id, building_name, street, city_id, country_id, landmark, type, mobile_no
+        case user_id, name,building_name, street, city_id, country_id, landmark, type, mobile_no
         case lat, long, updated_at, created_at, id, city_name, country_name
     }
 }

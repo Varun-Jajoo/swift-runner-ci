@@ -31,6 +31,8 @@ struct TagModel: Codable {
     var image: String?
 }
 
+
+
 // MARK: ------------- TrainerModel / StudioModel
 struct TrainerModel: Codable {
     var id: Int?
@@ -61,5 +63,12 @@ struct TrainerModel: Codable {
 struct TrainerTagModel: Codable {
     var id: Int?
     var name: String?
+    var pivot: TrainerPivotModel?
+    
+}
+
+struct TrainerPivotModel: Codable {
+    var trainer_id: FlexibleValue?
+    var speciality_id: FlexibleValue?
 }
 

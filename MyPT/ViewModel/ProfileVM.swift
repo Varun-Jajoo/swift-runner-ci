@@ -8,6 +8,7 @@
 import Foundation
 
 class ProfileVM {
+        
     //MARK: ---------------------- api/user-profile
     class func getUserProfileApi(inputParams:[String:String]? , isShowLoader:Bool = true, completion: @escaping(_ resultData:ProfileBaseModel?) -> Void){
         
@@ -159,6 +160,67 @@ class ProfileVM {
                         let errorMsg = "\(((getResult["errors"] as? [String : Any])?.values.first as? [Any])?.first as? String ?? (getResult["message"] as? String ?? ""))"
                         
                         AlertHelper.shared.showCustomeAlert(title: "", message: errorMsg, completion: nil)
+                    }
+                }
+            }catch {
+                print(error)
+            }
+        })
+    }
+    
+    //-------- api/user-health-stats
+    class func healthStatsApi(inputType:String? , isShowLoader:Bool = true, completion: @escaping(_ resultData:HealthStatsBaseModel?) -> Void){
+        /*
+         type: 2, 1=>health ,2=>stats
+         */
+        
+        let inputParams = [
+            "type": inputType ?? ""
+        ]
+        
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .user_health_stats, method: .get , queries: inputParams, parameters:  nil, isShowLoading: isShowLoader, completion: {  ( getResponce, error) in
+            do{
+                print(getResponce as Any)
+                if let responceData = getResponce {
+                    let getResult = try JSONDecoder().decode(HealthStatsBaseModel.self, from: responceData)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    }
+                    else{
+                        completion(getResult)
+//                        AlertHelper.shared.showCustomeAlert(title: "", message: getResult.errors ?? "", completion: nil)
+                    }
+                }
+            }catch {
+                print(error)
+            }
+        })
+    }
+    
+    
+    //MARK: ---------------------- api/user-trainer
+    class func getUserTrainersApi(inputParams:[String:String]? , isShowLoader:Bool = true, completion: @escaping(_ resultData:GetTrainerBaseModel?) -> Void){
+        
+        /*
+      var params: [String:String]? = [
+            "lat": "",
+            "long":"",
+            "type":"", // 1=>trainer al ,2=>following
+            "is_filter":"", // if filter wise then 1
+            "tag_id":"" // tag id is required if is_filter 1
+        ]
+        */
+        
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .user_trainer, method: .get , queries: inputParams, parameters:  nil, isShowLoading: isShowLoader, completion: {  ( getResponce, error) in
+            do{
+                print(getResponce as Any)
+                if let responceData = getResponce {
+                    let getResult = try JSONDecoder().decode(GetTrainerBaseModel.self, from: responceData)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    }
+                    else{
+                        completion(getResult)
                     }
                 }
             }catch {

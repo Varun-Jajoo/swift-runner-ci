@@ -56,6 +56,12 @@ class DateFormatterHelper {
         return df.string(from: date)
     }
     
+    func dateFromString(from dateString: String, format: String) -> Date? {
+        df.dateFormat = format
+        df.locale = Locale(identifier: "en_US_POSIX")
+        return df.date(from: dateString)
+    }
+    
     private let mediumDateFormatter: DateFormatter = {
         let df = DateFormatter()
         df.dateStyle = .medium
@@ -132,5 +138,73 @@ class DateFormatterHelper {
             return "Night"
         }
     }
+    
+    func getTodayDate(fromFormat: String) -> String{
+        //fromFormat = "yyyy-MM-dd HH:mm:ss zzz"
+        let date = Date()
+        df.dateFormat = fromFormat
+        df.timeZone = TimeZone.current
+        return df.string(from: date)
+    }
+    
+    func getDatesDays() -> [[String: String]] {
+        let calendar = Calendar.current
+        
+        let displayFormatter = DateFormatter()
+        displayFormatter.dateFormat = "dd MMM, EEE"
+        
+        let storageFormatter = DateFormatter()
+        storageFormatter.dateFormat = "yyyy-MM-dd"
+        
+        let today = Date()
+        let dates: [Date] = [
+            calendar.date(byAdding: .day, value: -1, to: today)!, // yesterday
+            today,
+            calendar.date(byAdding: .day, value: 1, to: today)!,  // +1 days
+            calendar.date(byAdding: .day, value: 2, to: today)!   // +2 days
+        ]
+        
+        var result: [[String: String]] = []
+        
+        for date in dates {
+            let display = calendar.isDateInToday(date) ? "Today" : displayFormatter.string(from: date)
+            let storage = storageFormatter.string(from: date)
+            
+            result.append([
+                "displayDate": display,       // For UI: "Today" or "21 Aug, Thu"
+                "storageDate": storage        // For backend: "2025-08-21"
+            ])
+        }
+        
+        return result
+    }
 
+    
+    /*
+    func getDatesDays() -> [String]{
+        let calendar = Calendar.current
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd MMM, EEE"
+        var dateStr:[String] = []
+        let today = Date()
+        let dates: [Date] = [
+            calendar.date(byAdding: .day, value: -1, to: today)!, // yesterday
+            today,
+            calendar.date(byAdding: .day, value: 2, to: today)!,  // +2 days
+            calendar.date(byAdding: .day, value: 3, to: today)!   // +3 days
+        ]
+        
+        dateStr.removeAll()
+        for date in dates {
+            if calendar.isDateInToday(date) {
+                dateStr.append("Today")
+                print("Today")
+            } else {
+                dateStr.append(dateFormatter.string(from: date))
+                print(dateFormatter.string(from: date))
+            }
+        }
+        return dateStr
+    }
+    */
 }

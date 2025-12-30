@@ -14,6 +14,7 @@ enum LocationFlow {
     case editAddress
     case homePage
     case updateProfile
+    case confirmAddAddress
     case defaultLoc
 }
 
@@ -75,7 +76,7 @@ class LocationsViewController: CommonViewController {
         super.viewDidAppear(animated)
         
         switch flowLocation {
-        case .addAddress:
+        case .addAddress, .confirmAddAddress:
             print("add Address..")
             
         case .editAddress:
@@ -103,7 +104,7 @@ class LocationsViewController: CommonViewController {
     func setNavUI(){
      
         switch flowLocation {
-        case .addAddress, .editAddress, .homePage, .updateProfile:
+        case .addAddress, .editAddress, .homePage, .updateProfile, .confirmAddAddress:
             
             self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
             //        self.setNavigationTitle(title: AppStrings.select_plan, color: UIColor.black, font: AppFont.Bold.size(22.0))
@@ -123,7 +124,7 @@ class LocationsViewController: CommonViewController {
     override func rightBtnActn(sender: UIButton) {
        
         switch flowLocation {
-        case .addAddress, .editAddress, .homePage, .updateProfile:
+        case .addAddress, .editAddress, .homePage, .updateProfile, .confirmAddAddress:
             print("address....")
         case .defaultLoc:
             appUserDefaults.setRegistrationSkip(value: true)
@@ -298,6 +299,19 @@ class LocationsViewController: CommonViewController {
             print("update profile..")
             self.sendBackAddr?(self.currentAddr)
             self.navigationController?.popViewController(animated: true)
+            
+        case .confirmAddAddress:
+            
+            if let getAddressData = getAddressData {
+                print(getAddressData)
+//                vc.addressData = self.getAddressData
+                let vc: AddNewAddressViewController = AddNewAddressViewController.instantiate(appStoryboard: .booking)
+                vc.addressData = getAddressData
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+            
+       
+            
         case .defaultLoc:
             
             if let mainAddrLbl = self.mainAddrLbl.text , !mainAddrLbl.isEmpty, let subAddrLbl = self.subAddrLbl.text, !subAddrLbl.isEmpty, let lat = showmapCamera?.latitude as? Double, let long = showmapCamera?.longitude as? Double {

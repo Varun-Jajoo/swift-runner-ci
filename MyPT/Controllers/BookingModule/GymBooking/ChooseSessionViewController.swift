@@ -89,6 +89,7 @@ class ChooseSessionViewController: CommonViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
             
+        self.consultExpertBtn.isHidden = true
         setupUI()
         setUpFont()
         self.setupFlowLoad()
@@ -123,7 +124,8 @@ class ChooseSessionViewController: CommonViewController {
             self.sessionSliderMBV.setGradientMultiBorder(cornerRadius: 12, width: 2.0, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)])
         }
         
-        if let thumbImage = UIImage(named: "ic_Slider")?.resized(to: CGSize(width: 80, height: 80)) {
+        //resized(to: CGSize(width: 80, height: 80))
+        if let thumbImage = UIImage(named: "ic_Slider") {
             self.costSlider.setThumbImage(thumbImage, for: .normal)
         }
                         
@@ -548,7 +550,7 @@ class ChooseSessionViewController: CommonViewController {
         self.perSessionCostLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
         self.totalCostLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
         self.startMonthLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.startMonthLbl.font = AppFont.regular.size(14.0, familyName: familyOverpass)
+//        self.startMonthLbl.font = AppFont.regular.size(14.0, familyName: familyOverpass)
         self.consultExpertBtn.titleLabel?.font = AppFont.semibold.size(16.0, familyName: familyManrope)
         self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
         self.startPointLbl.font = AppFont.semibold.size(10.0, familyName: familyManrope)
@@ -1031,16 +1033,16 @@ struct CreatePackageParamsModel {
  */
 
 
-class CustomSlider: UISlider {
-    
-    // Adjust thumb position
-    override func thumbRect(forBounds bounds: CGRect, trackRect rect: CGRect, value: Float) -> CGRect {
-        let thumbSize = CGSize(width: 40, height: 40) // Adjust based on your image
-        let newThumbRect = super.thumbRect(forBounds: bounds, trackRect: rect, value: value)
-        
-        let adjustedX = newThumbRect.origin.x - (thumbSize.width - newThumbRect.width) / 2
-        let adjustedY = newThumbRect.origin.y - (thumbSize.height - newThumbRect.height) / 2
-        
-        return CGRect(x: adjustedX, y: adjustedY, width: thumbSize.width, height: thumbSize.height)
-    }
-}
+//class CustomSlider: UISlider {
+//    
+//    // Adjust thumb position
+//    override func thumbRect(forBounds bounds: CGRect, trackRect rect: CGRect, value: Float) -> CGRect {
+//        let thumbSize = CGSize(width: 40, height: 40) // Adjust based on your image
+//        let newThumbRect = super.thumbRect(forBounds: bounds, trackRect: rect, value: value)
+//        
+//        let adjustedX = newThumbRect.origin.x - (thumbSize.width - newThumbRect.width) / 2
+//        let adjustedY = newThumbRect.origin.y - (thumbSize.height - newThumbRect.height) / 2
+//        
+//        return CGRect(x: adjustedX, y: adjustedY, width: thumbSize.width, height: thumbSize.height)
+//    }
+//}

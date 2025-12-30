@@ -120,12 +120,13 @@ class CommonViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.statusBarColor(setColor: .clear)
+        //Disable large title
+        navigationController?.navigationBar.prefersLargeTitles = false
+        navigationItem.largeTitleDisplayMode = .never
     }
     
     //MARK: ---------------- Make progressview at nav
-    //background: rgba(249, 199, 141, 1);
-    
-    func setupNavigationBarProgress(progressBarWidth:CGFloat = 120.0,setTintColor : UIColor = UIColor.appDarkGray, settrackTintColor:UIColor = UIColor.appColor(.trackLineColor) ?? .gray, progressBarHeight: CGFloat = 4.0 ) {
+    func setupNavigationBarProgress(progressBarWidth: CGFloat = 120.0, setTintColor: UIColor = UIColor(red: 225/225, green: 225/225, blue: 225/225, alpha: 0.2), settrackTintColor: UIColor = UIColor(red: 178/225, green: 202/225, blue: 1/225, alpha: 1.0), progressBarHeight: CGFloat = 4.0 ) {
         
         self.progressLayer?.removeFromSuperlayer()
         let progressLayer = CAShapeLayer()
@@ -281,7 +282,7 @@ class CommonViewController: UIViewController {
             rightBtn.tintColor = setTintColor
             rightBtn.setTitleColor(setTitleColor, for: .normal)
             
-            rightBtn.titleLabel?.font = AppFont.bold.size(14.0, familyName: familyManrope)
+            rightBtn.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
             // Set spacing between image and title
             rightBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: spacing, bottom: 0, right: -spacing)
             rightBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: -spacing, bottom: 0, right: spacing)
@@ -358,6 +359,14 @@ class CommonViewController: UIViewController {
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
         self.navigationController?.view.backgroundColor = .clear
+       
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithTransparentBackground()
+        appearance.backgroundColor = .clear
+        appearance.shadowColor = .clear
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
     }
     
     //MARK: -------------MAKE TRANSPARENT OF LARGE TITLE BACKGROUND/COLOR

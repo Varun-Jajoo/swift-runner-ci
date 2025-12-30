@@ -62,6 +62,7 @@ class TrainerDescriptionViewController: CommonViewController {
     var detailsFlowSetup:calendarFlow = .defaultFlow
     var isSlotsAvail:Bool?
     var istagMenuHeight: Bool?
+    var isFromMyTrainers: Bool?
     
     
     //MARK: --------------IBOUTLET
@@ -125,6 +126,11 @@ class TrainerDescriptionViewController: CommonViewController {
        
         if let isSlotsAvail = isSlotsAvail, isSlotsAvail {
             self.enableContinueBtn(isSelected: !isSlotsAvail, btn: self.bookSlotBtn)
+        }
+        
+        self.bookSlotBtn.isHidden = false
+        if let _ = isFromMyTrainers {
+            self.bookSlotBtn.isHidden = true
         }
         
         setupUI()
@@ -230,11 +236,11 @@ class TrainerDescriptionViewController: CommonViewController {
         //        self.followersLbl.text = ""
         self.distanceBtn.setTitle(self.detailsModel?.distance, for: .normal)
         self.landMarkAddrLbl.text = self.detailsModel?.location
-        self.ratingBtn.setTitle(self.detailsModel?.noOfRating, for: .normal)
-        self.ratingCountBtn.setTitle(self.detailsModel?.averageRating, for: .normal)
+        self.ratingBtn.setTitle(self.detailsModel?.noOfRating?.value, for: .normal)
+        self.ratingCountBtn.setTitle(self.detailsModel?.averageRating?.value, for: .normal)
         self.descLbl.text = self.detailsModel?.description
         self.expCountLbl.text = self.detailsModel?.experience
-        self.avgRatingCountLbl.text = self.detailsModel?.averageRating
+        self.avgRatingCountLbl.text = self.detailsModel?.averageRating?.value
         
         let clientCoachedTxt = self.detailsModel?.clientCoached ?? ""
         let txtParts = clientCoachedTxt.components(separatedBy: " ")

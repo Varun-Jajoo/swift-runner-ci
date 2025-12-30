@@ -88,5 +88,69 @@ class WorkoutsCollectionViewCell: UICollectionViewCell {
 //        
 //    }
     
+    //MARK: -------------SET feature Cell CELL DATA
+    func featureCell(cellData: FeaturedModel?){
+        guard let cellData = cellData else { return }
+        if let imgBck = cellData.image?.value {
+            self.bckMImgView.loadImage(urlString: "\(imgBck)", placeholder: AppImages.othersGender, resize: CGSize(width: 400.0, height: 400.0))
+        }
+        
+        self.topCategoryLbl.text = cellData.category?.value
+        self.workoutNameLbl.text = cellData.title?.value
+        self.workoutseriesLbl.text = cellData.seriesName?.value
+        
+        self.repsMBV.isHidden = false
+        self.timingMBV.isHidden = false
+        self.kcalMBV.isHidden = true
+        
+        self.timing.image = UIImage(named: "ic_solid_fireGray")
+        self.reps.image = UIImage(named: "ic_clockGray")
+        
+        if let caloriesStr = cellData.calories?.value {
+            self.timingTitleLbl.text = "\(caloriesStr)" + " kcal"
+        }
+        self.repsTitleLbl.text = cellData.duration
+        
+        self.likeBtn.setImage(UIImage(named: "ic_heart"), for: .normal)
+        if let isFavourite = cellData.isFavourite, isFavourite {
+            self.likeBtn.setImage(UIImage(named: "ic_redHeartbeat"), for: .normal)
+        }
+        
+//            featuredCell.timingTitleLbl.text = "\(String(describing: self.gymFeaturedData?[indexPath.row].calories?.value))" + " kcal" //"251 kcal"
+//        self.repsTitleLbl.text = cellData.duration
+    }
+    
+    
+    //MARK: -------------SET workoutsCell CELL DATA
+    func workoutsCell(cellData: GetWorkoutsModel?){
+        guard let cellData = cellData else { return }
+        if let imgBck = cellData.image {
+            self.bckMImgView.loadImage(urlString: "\(imgBck)", placeholder: AppImages.othersGender, resize: CGSize(width: 400.0, height: 400.0))
+        }
+        
+        self.topCategoryLbl.text = cellData.category_name
+        self.workoutNameLbl.text = cellData.name
+        self.workoutseriesLbl.text = nil
+        
+        self.repsMBV.isHidden = false
+        self.timingMBV.isHidden = false
+        self.kcalMBV.isHidden = true
+        
+        self.timing.image = UIImage(named: "ic_solid_fireGray")
+        self.reps.image = UIImage(named: "ic_clockGray")
+        
+        self.repsTitleLbl.text = cellData.time
+        if let exercises = cellData.exercises?.value {
+            self.timingTitleLbl.text = exercises + " Exercises"
+        }else{
+            self.timingTitleLbl.text = nil
+        }
+        
+        self.likeBtn.setImage(UIImage(named: "ic_heart"), for: .normal)
+        if let isFavourite = cellData.isFeatured, isFavourite {
+            self.likeBtn.setImage(UIImage(named: "ic_redHeartbeat"), for: .normal)
+        }
+        
+    }
     
 }

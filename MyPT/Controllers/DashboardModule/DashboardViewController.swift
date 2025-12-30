@@ -18,6 +18,8 @@ enum flowPackageCreate {
 class DashboardViewController: CommonViewController {
     
     //MARK: ------------------VARIABLE
+    var myWorkoutDates: [[String: String]]? = []
+    var myWorkoutsData: [MyWorkoutsDataModel]? = []
     var flowpackage: flowPackageCreate = .defaultPackage
     
     var currentAddrText: String? = "" {
@@ -27,7 +29,7 @@ class DashboardViewController: CommonViewController {
     }
     
     var productCategory:[String]?
-    var workoutDays:[String]?
+//    var workoutDays:[String]?
     private let pageControl = CustomPageControl()
     var upcomingSessionData:[BookingDataModel]? = [] {
         didSet{
@@ -37,8 +39,16 @@ class DashboardViewController: CommonViewController {
     
     var studiosData:[TrainerModel]? = []
     var upcomingClassesData:[UpcomingClassModel]? = []
-    
     var isDayStreakHeight: Bool?
+    var upgradePlan:[PlanDetailsModel]? = []
+   
+    var getNotifications: Int? = 0 {
+        didSet{
+            if let getNotifications = getNotifications, getNotifications > 0 {
+                self.setRighMenu(rightImgs: [AppImages.getNotifications], setTitle: [nil], setTintColor: UIColor.appWhite, setTitleColor: UIColor.appWhite)
+            }
+        }
+    }
     
     
     //MARK: ------------IBOUTLET
@@ -158,13 +168,38 @@ class DashboardViewController: CommonViewController {
     @IBOutlet weak var myActiveChallengesArrowBtn: UIButton!
     @IBOutlet weak var gymNearbyArrowBtn: UIButton!
     @IBOutlet weak var shopProductsArrowBtn: UIButton!
+    @IBOutlet weak var subscriptionMBV: UIView!
+    @IBOutlet weak var subscriptionLstMBV: UIView!
+    @IBOutlet weak var leftlineMBV: UIView!
+    @IBOutlet weak var rightlineMBV: UIView!
+    @IBOutlet weak var validityMBV: UIView!
+    @IBOutlet weak var sessionNumMBV: UIView!
+    @IBOutlet weak var sessionAmtMBV: UIView!
+    @IBOutlet weak var renewPartMBV: UIView!
+    
+    @IBOutlet weak var planGrdntImgView: UIImageView!
+    @IBOutlet weak var subscriptionImgView: UIImageView!
+    @IBOutlet weak var subscriptionTitleLbl: UILabel!
+    @IBOutlet weak var sessionDescLbl: UILabel!
+    @IBOutlet weak var validityTitleLbl: UILabel!
+    @IBOutlet weak var validityShowLbl: UILabel!
+    @IBOutlet weak var numSessionTitleLbl: UILabel!
+    @IBOutlet weak var showNumSessionLbl: UILabel!
+    @IBOutlet weak var sessionAmtTitleLbl: UILabel!
+    @IBOutlet weak var showSessionAmtLbl: UILabel!
+    @IBOutlet weak var renewRemainingDurationBtn: UIButton!
+    @IBOutlet weak var topupUpgrateBtn: UIButton!
+    @IBOutlet weak var renewBtn: UIButton!
+    @IBOutlet weak var subscriptionCollView: UICollectionView!
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
        
+        self.subscriptionMBV.isHidden = true
+        self.subscriptionLstMBV.isHidden = true
         self.getLocation()
-        self.upcomingSessionsCollViewHeightConstrnt.constant = 220
+        self.upcomingSessionsCollViewHeightConstrnt.constant = 240
         self.myActivityCategoryCollViewHeightConstrnt.constant = 1.0
         self.workoutsDayCollViewHeightConstrnt.constant = 35 //1.0
         
@@ -172,20 +207,25 @@ class DashboardViewController: CommonViewController {
                                 "Fitness Equipment",
                                 "Apparel & Accessories"
         ]
-        self.workoutDays = ["Today1","Today2","Today3","Today4","Today5","Today6"]
+//        self.workoutDays = ["Today1","Today2","Today3","Today4","Today5","Today6"]
         self.setupUI()
         self.regiterCollections()
         self.setupFont()
+        self.setupInputData()
+        
+        self.myWorkoutDates?.removeAll()
+        self.myWorkoutDates = DateFormatterHelper.shared.getDatesDays()
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(userProfileTap(_:)))
+        topNameMBV.addGestureRecognizer(tapGesture)
+        topNameMBV.isUserInteractionEnabled = true
+        
 //        setUpCustomPageControl()
 //        self.updatePage(to: 0)
-        
-
         // Use the blurredGrayImage as needed, e.g., display it in an UIImageView:
 //        if let imgView = UIImage(named: "ic_streak_Badage2") {
 ////            self.streakBadage3ImgView.image = createGrayBlurImage(from: imgView, blurRadius: 2.0)
 //        }
-        
-        self.setupInputData()
         
 //        let originalImage = UIImage(named: "ic_streak_Badage2")!
 //        let colors = [UIColor(red: 45/255.0, green: 49/255.0, blue: 45/255.0, alpha: 1.0).cgColor,UIColor(red: 45/255.0, green: 49/255.0, blue: 45/255.0, alpha: 1.0).cgColor,UIColor(red: 45/255.0, green: 49/255.0, blue: 45/255.0, alpha: 1.0).cgColor]
@@ -227,6 +267,7 @@ class DashboardViewController: CommonViewController {
         flowpackage = .notPackage
         setupFlowPackageCreate()
         self.checkPackage()
+        self.getUserPlanUpgrade()
 //        self.upcomingClassesApi()
     }
     
@@ -243,8 +284,19 @@ class DashboardViewController: CommonViewController {
             
             self.workoutsDayCollView.selectItem(at: firstIndexPath, animated: true, scrollPosition: .top)
             // Optional: perform any additional setup for the selected cell
-            self.workoutsDayCollView.delegate?.collectionView?(self.workoutsDayCollView, didSelectItemAt: firstIndexPath)
+//            self.workoutsDayCollView.delegate?.collectionView?(self.workoutsDayCollView, didSelectItemAt: firstIndexPath)
 //            self.workoutsDayCollView.reloadData()
+            
+            if let myWorkoutDates = self.myWorkoutDates, myWorkoutDates.count > 1 {
+                // Automatically select the first cell
+                let firstIndexPath = IndexPath(item: 1, section: 0)
+                DispatchQueue.main.async {
+                    self.workoutsDayCollView.selectItem(at: firstIndexPath, animated: true, scrollPosition: .top)
+                    // Optional: perform any additional setup for the selected cell
+                    self.workoutsDayCollView.delegate?.collectionView?(self.workoutsDayCollView, didSelectItemAt: firstIndexPath)
+//                    self.view.layoutIfNeeded()
+                    }
+            }
             
             self.topUserNameMBV()
             self.view.layoutIfNeeded()
@@ -267,7 +319,7 @@ class DashboardViewController: CommonViewController {
         self.dailyProgressMBV.setComingSoon(mainVTop: 30, mainVBottom: 2, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
         
         
-        self.workoutsMBV.setComingSoon(mainVTop: 35, mainVBottom: 30, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+//        self.workoutsMBV.setComingSoon(mainVTop: 35, mainVBottom: 30, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
        
         self.myActivityMBV.setComingSoon(mainVTop: 35,
                                          mainVBottom: 35, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
@@ -355,39 +407,44 @@ class DashboardViewController: CommonViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        self.topView.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: self.topView.frame.size.height/2.0)
+        self.setUpdateUI()
+        self.updateUI()
         
-        self.calendarMBV.addGradient(colors: [
-            UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 0.3),
-            UIColor(red: 71/255.0, green: 77/255.0, blue:
-                                            96/255.0, alpha: 1.0)
-        ], locations: [0,1], startPoint: CGPoint(x: 0.5, y: 1), endPoint: CGPoint(x: 0, y: 0), cornerRadius: 20.0)
-        
-        [
-            self.sunSubMBV,
-            self.day2MBV,
-            self.day3MBV,
-            self.day4MBV,
-            self.day5MBV,
-            self.day6MBV,
-            self.day7MBV
-        ].forEach({
-            $0.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: $0.frame.size.width/2.0)
-        })
+//        self.topView.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: self.topView.frame.size.height/2.0)
+//        
+//        self.calendarMBV.addGradient(colors: [
+//            UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 0.3),
+//            UIColor(red: 71/255.0, green: 77/255.0, blue:
+//                                            96/255.0, alpha: 1.0)
+//        ], locations: [0,1], startPoint: CGPoint(x: 0.5, y: 1), endPoint: CGPoint(x: 0, y: 0), cornerRadius: 20.0)
+//        
+//        [
+//            self.sunSubMBV,
+//            self.day2MBV,
+//            self.day3MBV,
+//            self.day4MBV,
+//            self.day5MBV,
+//            self.day6MBV,
+//            self.day7MBV
+//        ].forEach({
+//            $0.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: $0.frame.size.width/2.0)
+//        })
     }
     
     private func topUserNameMBV(){
         //---------------------- Navigationview
-        if let navigationController = self.navigationController {
-            let navBarHeight = navigationController.navigationBar.frame.height
-            let topSafeArea = (self.view.safeAreaInsets.top - 10.0)
-            let totalTopHeight = navBarHeight + topSafeArea
-            self.topNameMBVTopConstrnt.constant = totalTopHeight
-            
-            self.topHeaderImgView.setNeedsLayout()
-            self.topHeaderImgView.layoutIfNeeded()
-            self.topNameMBV.setNeedsLayout()
-            self.topNameMBV.layoutIfNeeded()
+        DispatchQueue.main.async {
+            if let navigationController = self.navigationController {
+                let navBarHeight = navigationController.navigationBar.frame.height
+                let topSafeArea = (self.view.safeAreaInsets.top - 10.0)
+                let totalTopHeight = navBarHeight + topSafeArea
+                self.topNameMBVTopConstrnt.constant = totalTopHeight
+                
+                self.topHeaderImgView.setNeedsLayout()
+                self.topHeaderImgView.layoutIfNeeded()
+                self.topNameMBV.setNeedsLayout()
+                self.topNameMBV.layoutIfNeeded()
+            }
         }
     }
     
@@ -404,11 +461,13 @@ class DashboardViewController: CommonViewController {
     
     private func setNavUI(){
         self.setLeftMenu(leftImgs: [AppImages.chooseLocation, AppImages.forward], setTitle: [" \(currentAddrText ?? "")",nil], setTintColor: .appWhite, setTitleColor: .appWhite)
+       
 //        let logout = UIImage(named: "ic_logout")?.resized(to: CGSize(width: 25.0, height: 25.0))?.withRenderingMode(.alwaysTemplate).withTintColor(UIColor.appWhite)
         
-//        self.setRighMenu(rightImgs: [AppImages.notification], setTitle: [nil], setTintColor: UIColor.appWhite, setTitleColor: UIColor.appWhite)
+        self.setRighMenu(rightImgs: [AppImages.notification], setTitle: [nil], setTintColor: UIColor.appWhite, setTitleColor: UIColor.appWhite)
         
 //        self.setRighMenu(rightImgs: [AppImages.notificationCount,AppImages.notification], setTitle: ["10",nil], setTintColor: nil, setTitleColor: UIColor.appWhite)
+        
     }
     
     override func leftBtnActn(sender: UIButton) {
@@ -420,22 +479,10 @@ class DashboardViewController: CommonViewController {
     
     override func rightBtnActn(sender: UIButton) {
         print("right btn tag= ", sender.tag)
-        /*
         if sender.tag == 0 {
-            AlertHelper.shared.showCustomeAlert(title: "", message: AppAlertStrings.logoutAlertMsg, actions: ["Ok", "Cancel"], withCancel: true, completion: { [weak self] tagGet in
-                guard self != nil else { return }
-                
-                if tagGet == 0 {
-                    self?.logoutIfFacebookLoggedIn()
-                    if appUserDefaults.clearUserDefault() {
-                        appSceneDelegate?.goToMainView()
-                    }
-                    
-                }
-            })
+            let vc: BookingNotificationViewController = BookingNotificationViewController.instantiate(appStoryboard: .booking)
+            self.navigationController?.pushViewController(vc, animated: true)
         }
-        */
-        
     }
     
     func logoutIfFacebookLoggedIn() {
@@ -461,8 +508,8 @@ class DashboardViewController: CommonViewController {
             self.dailyProgressMBV.isHidden = true
             self.myActiveChallengeMBV.isHidden = true
             self.dayStreakContainerView.isHidden = true
-            self.memberTypeLbl.isHidden = true
-            self.memberTypeLbl.text = nil
+//            self.memberTypeLbl.isHidden = false
+//            self.memberTypeLbl.text = "Gold Member" //nil
             
             break
         case .packageCreated:
@@ -473,13 +520,13 @@ class DashboardViewController: CommonViewController {
             self.dailyProgressMBV.isHidden = false
             self.myActiveChallengeMBV.isHidden = false
             self.dayStreakContainerView.isHidden = false
-            self.memberTypeLbl.isHidden = false
-            self.memberTypeLbl.text = "Gold Member"
+//            self.memberTypeLbl.isHidden = false
+//            self.memberTypeLbl.text = "Gold Member"
             
             self.myActivityMBV.setComingSoon(mainVTop: 35,
                                              mainVBottom: 35, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
          
-            self.workoutsMBV.setComingSoon(mainVTop: 35, mainVBottom: 30, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
+//            self.workoutsMBV.setComingSoon(mainVTop: 35, mainVBottom: 30, centerY: -35, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
         
             self.myActiveChallengeMBV.setComingSoon(mainVTop: 30, mainVBottom: 0, centerY: -40, bgColor: UIColor.mainBg.withAlphaComponent(0.9),centerImgName: "ic_lock_yellow", lockImgName: "ic_lock_yellow" ,title:  AppStrings.coming_soon, desc: "This feature is locked for now — stay tuned for the next phase of the app rollout!")
             
@@ -493,9 +540,16 @@ class DashboardViewController: CommonViewController {
         }
     }
     
+    //------------------User profile Tap
+    @objc func userProfileTap(_ sender: UITapGestureRecognizer) {
+          print("userProfileTap tapped!")
+        let vc: ProfileViewController = ProfileViewController.instantiate(appStoryboard: .profile)
+        self.navigationController?.pushViewController(vc, animated: true)
+      }
+    
     //MARK: ---------------BTN TAG
     enum Btntag: Int {
-        case bookTrainer = 2201, membership, upcomingSeeion, meals2withoutPackage, meals, dailyProgress, myWorkouts, myActivity, classesNear, MyActiveChallenges, gymNearBy, shopProducts , userProfile
+        case bookTrainer = 2201, membership, upcomingSeeion, meals2withoutPackage, meals, dailyProgress, myWorkouts, myActivity, classesNear, MyActiveChallenges, gymNearBy, shopProducts , userProfile, topupRenew, renew
     }
     
     @IBAction func commonBtnActn(_ sender: UIButton) {
@@ -513,8 +567,6 @@ class DashboardViewController: CommonViewController {
             self.navigationController?.pushViewController(vc, animated: false)
         case Btntag.upcomingSeeion.rawValue:
             print("upcoming session clicked..")
-//            let vc: PaymentMethodsViewController = PaymentMethodsViewController.instantiate(appStoryboard: .booking)
-//            self.navigationController?.pushViewController(vc, animated: false)
             
 //            let vc:PlanPopupViewController = PlanPopupViewController.instantiate(appStoryboard: .calendar)
             
@@ -570,6 +622,19 @@ class DashboardViewController: CommonViewController {
             let vc: ProfileViewController = ProfileViewController.instantiate(appStoryboard: .profile)
             self.navigationController?.pushViewController(vc, animated: true)
             
+        case Btntag.topupRenew.rawValue:
+            print("Modify and Renew")
+            let vc: TopupViewController = TopupViewController.instantiate(appStoryboard: .dashboard)
+            vc.topUpRenewFlow = .upgrade
+            self.navigationController?.pushViewController(vc, animated: true)
+            
+            
+        case Btntag.renew.rawValue:
+            print("Renew")
+            let vc: TopupViewController = TopupViewController.instantiate(appStoryboard: .dashboard)
+            vc.topUpRenewFlow = .renew
+            self.navigationController?.pushViewController(vc, animated: true)
+            
         default:
             print("None.....")
 //            let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
@@ -586,12 +651,31 @@ class DashboardViewController: CommonViewController {
         if let userData = appUserDefaults.getUserFromUserDefaults(as: SubmitDataModel.self), let userName = userData.user?.name {
 //            let greatingTimeStr = DateFormatterHelper.shared.getTimeOfDay()
             
-            self.userNameLbl.text = "Good " + greatingTimeStr + " " + userName
+            self.userNameLbl.text = "Good " + greatingTimeStr + " " + userName + "!"
         }else{
             if let userName = appUserDefaults.getUserName() {
-                self.userNameLbl.text = "Good " + greatingTimeStr + " " + userName
+                self.userNameLbl.text = "Good " + greatingTimeStr + " " + userName + "!"
             }
         }
+        
+        //---------------*******************
+
+        /*
+        let subscriptionDescStr = "Subscription Ending in 30 Days!"
+        self.sessionDescLbl.attributedText = gradientAttr(labl: self.sessionDescLbl, txtStr: subscriptionDescStr, inputFont: AppFont.medium.size(22.0, familyName: familyClashDisplay))
+        self.validityShowLbl.attributedText = gradientAttr(labl: self.validityShowLbl, txtStr: "365 Days")
+        self.showNumSessionLbl.attributedText = gradientAttr(labl: self.showNumSessionLbl, txtStr: "100")
+        self.showSessionAmtLbl.attributedText = gradientAttr(labl: self.showSessionAmtLbl, txtStr: "960 AED")
+        
+        */
+        
+//        self.sessionDescLbl.attributedText = subscriptionDescStr.attributedStringWithGradient([UIColor.appWhite, UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0)], frame: self.sessionDescLbl.bounds, font: AppFont.medium.size(32.0, familyName: familyClashDisplay), startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1))
+    }
+    
+    private func gradientAttr(labl: UILabel, txtStr: String, inputFont: UIFont? = AppFont.medium.size(20.0, familyName: familyClashDisplay)) -> NSAttributedString {
+        let attStr = txtStr.attributedStringWithGradient([UIColor.appWhite, UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0)], frame: labl.bounds, font: inputFont ?? UIFont(), startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1))
+        
+        return attStr
     }
     
     private func regiterCollections(){
@@ -606,6 +690,7 @@ class DashboardViewController: CommonViewController {
         productListCollView.register(UINib(nibName: "ProductsListCollViewCell", bundle: nil), forCellWithReuseIdentifier: "ProductsListCollViewCell")
         workoutsDayCollView.register(UINib(nibName: "ProductCategoryCollViewCell", bundle: nil), forCellWithReuseIdentifier: "ProductCategoryCollViewCell")
         dayStreakCollView.register(UINib(nibName: "DayStreakCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "DayStreakCollectionViewCell")
+        subscriptionCollView.register(UINib(nibName: "PlansUpgradeCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "PlansUpgradeCollectionViewCell")
         
         //----------------------*************UITableview init
         self.workoutTblView.register(UINib(nibName: "MyWorkoutsTableViewCell", bundle: nil), forCellReuseIdentifier: "MyWorkoutsTableViewCell")
@@ -631,6 +716,42 @@ class DashboardViewController: CommonViewController {
         }
     }
     
+    //MARK: ------------UPDATE UI
+    private func setUpdateUI(){
+        self.topView.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: self.topView.frame.size.height/2.0)
+        
+        self.calendarMBV.addGradient(colors: [
+            UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 0.3),
+            UIColor(red: 71/255.0, green: 77/255.0, blue:
+                                            96/255.0, alpha: 1.0)
+        ], locations: [0,1], startPoint: CGPoint(x: 0.5, y: 1), endPoint: CGPoint(x: 0, y: 0), cornerRadius: 20.0)
+        
+        [
+            self.sunSubMBV,
+            self.day2MBV,
+            self.day3MBV,
+            self.day4MBV,
+            self.day5MBV,
+            self.day6MBV,
+            self.day7MBV
+        ].forEach({
+            $0.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: $0.frame.size.width/2.0)
+        })
+      
+        self.leftlineMBV.addGradient(colors: [UIColor(red: 56/255.0, green: 71/255.0, blue: 81/255.0, alpha: 1),UIColor(red: 36/255.0, green: 45/255.0, blue: 50/255.0, alpha: 0)], locations: [0,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0.2)
+        self.rightlineMBV.addGradient(colors: [UIColor(red: 36/255.0, green: 45/255.0, blue: 50/255.0, alpha: 0),UIColor(red: 56/255.0, green: 71/255.0, blue: 81/255.0, alpha: 1)], locations: [0,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0.2)
+        
+        self.topupUpgrateBtn.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appWhite, cornerRadious: 12.0)
+        self.renewBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+        
+        self.renewPartMBV.applyShadow(fillColor: UIColor.clear, shadowColor: UIColor.mainBg.withAlphaComponent(0.6), shadowRadius: 0.4, opacity: 0.8, offset: .zero, cornerRadius: 0)
+          
+        self.renewPartMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 12.0)
+        self.renewPartMBV.setCornerRadius(borderWidth: 0.7, borderColor: UIColor.appBorder, cornerRadious: 12.0)
+        self.renewRemainingDurationBtn.roundSideCorners(radius: 12.0, cornerSide: [.topLeft, .topRight])
+        
+    }
+    
     //MARK: ---------- SET UI
     private func setupUI(){
         
@@ -638,9 +759,11 @@ class DashboardViewController: CommonViewController {
             self.bookTrainerAtHomeBtn.setBackgroundImage(imgView, for: .normal)
             self.bookTrainerAtHomeBtn.clipsToBounds = true
             self.bookTrainerAtHomeBtn.addGradientLayer(colors: [UIColor.mainBg.withAlphaComponent(0.9), UIColor.clear], locations: [0,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 14.0)
+            self.bookTrainerAtHomeBtn.setTitle("Book a Trainer \nat Gym/Home", for: .normal)
         }
         
         self.membershipBtn.addGradientLayer(colors: [UIColor.mainBg.withAlphaComponent(0.9), UIColor.clear], locations: [0,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 12.0)
+        self.membershipBtn.setTitle("Buy MyPT Studio \nMembership", for: .normal)
         
 //        var topInset: CGFloat = 0.0
         
@@ -726,6 +849,23 @@ class DashboardViewController: CommonViewController {
         
     }
     
+    //MARK: ---------- updateUI
+    private func updateUI(){
+        
+        DispatchQueue.main.async {
+            self.topHeaderImgView.addGradientImgV(colors: [UIColor(red: 17.0/255.0, green: 18.0/255.0, blue: 20.0/255.0, alpha: 1), UIColor(red: 0/255.0, green: 5.0/255.0, blue: 2.0/255.0, alpha: 1)], locations: [0,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 0, y: 0))
+            self.topNameMBV.backgroundColor = UIColor.clear
+            self.topNameMBV.addGradient(colors: [UIColor(red: 17.0/255.0, green: 18.0/255.0, blue: 20.0/255.0, alpha: 0.2), UIColor(red: 0/255.0, green: 5.0/255.0, blue: 2.0/255.0, alpha: 1)], locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1))
+            
+            //setGradientMultiBorder
+            self.userImgeView.setCornerRadius(borderWidth: 1.5, borderColor: nil, cornerRadious: 18.0)
+            self.userImgeView.setGradientMultiBorder(cornerRadius: 18.0, width: 1.5, colors: [UIColor(red: 207.0/255.0, green: 171.0/255.0, blue: 104.0/255.0, alpha: 1.0),UIColor(red: 255.0/255.0, green: 241.0/255.0, blue: 216.0/255.0, alpha: 1.0),UIColor(red: 173/255.0, green: 130/255.0, blue: 54/255.0, alpha: 1.0)], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1))
+            
+            self.userImgViewBtn.setGradientMultiBorder(cornerRadius: 18.0, width: 1.5, colors: [UIColor(red: 207.0/255.0, green: 171.0/255.0, blue: 104.0/255.0, alpha: 1.0),UIColor(red: 255.0/255.0, green: 241.0/255.0, blue: 216.0/255.0, alpha: 1.0),UIColor(red: 173/255.0, green: 130/255.0, blue: 54/255.0, alpha: 1.0)], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1))
+        }
+    }
+    
+    
     private func setupFont(){
         
         [
@@ -745,7 +885,8 @@ class DashboardViewController: CommonViewController {
             self.day5CountLbl,
             self.day6CountLbl,
             self.day7CountLbl,
-            self.waterIntekLbl
+            self.waterIntekLbl,
+            self.subscriptionTitleLbl
         ].forEach({[weak self] in
             guard self != nil else { return  }
             $0?.font = AppFont.semibold.size(12.0, familyName: familyManrope)
@@ -765,8 +906,8 @@ class DashboardViewController: CommonViewController {
             self.myWorkoutsLbl,
             self.myActivityLbl,
             self.myActiveChallengeLbl,
-            self.transformationStoryTitleLbl
-            
+            self.transformationStoryTitleLbl,
+            self.renewRemainingDurationBtn.titleLabel
         ].forEach({[weak self] in
             guard self != nil else { return  }
             $0?.font = AppFont.semibold.size(16.0, familyName: familyManrope)
@@ -775,6 +916,8 @@ class DashboardViewController: CommonViewController {
         self.calorieTitleLbl.font = AppFont.regular.size(12.0, familyName: familyManrope)
         self.calorieBurnLbl.font = AppFont.regular.size(12.0, familyName: familyManrope)
         self.plusQuantityBtn.titleLabel?.font = AppFont.semibold.size(13.7, familyName: familyManrope)
+        self.topupUpgrateBtn.titleLabel?.font = AppFont.bold.size(14.0, familyName: familyManrope)
+        self.renewBtn.titleLabel?.font = AppFont.bold.size(14.0, familyName: familyManrope)
         
         
         //-------------------- water intake Attributed
@@ -824,6 +967,19 @@ class DashboardViewController: CommonViewController {
         self.connectBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
         self.thougthLbl.font = AppFont.medium.size(24.0, familyName: familyClashDisplay)
         self.thoughtWriterLbl.font = AppFont.regular.size(12.0, familyName: familyManrope)
+        
+        
+        [
+            self.validityTitleLbl,
+            self.numSessionTitleLbl,
+            self.sessionAmtTitleLbl
+        ].forEach({[weak self] in
+            guard self != nil else {
+                return
+            }
+            
+            $0?.font = AppFont.medium.size(12.0, familyName: familyManrope)
+        })
 
     }
     
@@ -867,9 +1023,17 @@ class DashboardViewController: CommonViewController {
 extension DashboardViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == upcomingSessionsCollView {
-            //            return upcomingSessionData?.count ?? 0
-            
             return collectionView.numberOfRows(count: self.upcomingSessionData?.count, title: AppStrings.no_sessions_found, message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100, height: 100)), messageImageHeight: 100, fromTop: 10)
+            
+            /*
+            if let upcomingSession = self.upcomingSessionData?.count, upcomingSession > 10 {
+                
+                return collectionView.numberOfRows(count: 10, title: AppStrings.no_sessions_found, message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100, height: 100)), messageImageHeight: 100, fromTop: 10)
+            }else{
+                return collectionView.numberOfRows(count: self.upcomingSessionData?.count, title: AppStrings.no_sessions_found, message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100, height: 100)), messageImageHeight: 100, fromTop: 10)
+            }
+            */
+            
         }
         else if collectionView == transformationStoryCollView {
             return 3
@@ -878,7 +1042,7 @@ extension DashboardViewController: UICollectionViewDataSource, UICollectionViewD
             return productCategory?.count ?? 0
         }
         else if collectionView == workoutsDayCollView{
-            return workoutDays?.count ?? 0
+            return myWorkoutDates?.count ?? 0
         }
         else if collectionView == gymsNearbyCollView{
             return collectionView.numberOfRows(count: self.studiosData?.count, title: "No gym found", message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100.0, height: 100.0)), messageImageHeight: 100.0, fromTop: nil)
@@ -891,8 +1055,11 @@ extension DashboardViewController: UICollectionViewDataSource, UICollectionViewD
             
             return collectionView.numberOfRows(count: self.upcomingClassesData?.count, title: "No classes found", message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100.0, height: 100.0)), messageImageHeight: 100.0, fromTop: nil)
         }
+        else if collectionView == subscriptionCollView{
+            return collectionView.numberOfRows(count: self.upgradePlan?.count, title: "No Subscription found!", message: nil, messageImage: UIImage(named: "ic_subscriptionRenew")?.resized(to: CGSize(width: 135, height: 135)), messageImageHeight: 140, fromTop: nil)
+        }
         else{
-            return 5
+            return 2
         }
     }
     
@@ -900,7 +1067,20 @@ extension DashboardViewController: UICollectionViewDataSource, UICollectionViewD
         if collectionView == upcomingSessionsCollView {
             let cell:UpcomingSessionsCollectionViewCell = upcomingSessionsCollView.dequeueReusableCell(withReuseIdentifier: "UpcomingSessionsCollectionViewCell", for: indexPath) as! UpcomingSessionsCollectionViewCell
             //             self.updatePage(to: indexPath.row)
+            cell.sessionTitleLbl.text = "\(indexPath.row+1)".ordinal + " Session"
+            cell.leftUserImg.isHidden = false
+            cell.trackBtn.isHidden = false
             cell.setinputData(data: upcomingSessionData?[indexPath.row])
+            cell.trackBtn.accessibilityHint = "\(upcomingSessionData?[indexPath.row].id?.value ?? "")"
+            cell.trackBtn.addTarget(self, action: #selector(trackBtnActn(sender: )), for: .touchUpInside)
+            
+            
+            //---------------- ****************
+            if let typeStr = upcomingSessionData?[indexPath.row].sessionType?.value, typeStr.lowercased() == "home" {
+                cell.trackBtn.isHidden = false
+            }else{
+                cell.trackBtn.isHidden = true
+            }
             
             return cell
         }
@@ -953,7 +1133,12 @@ extension DashboardViewController: UICollectionViewDataSource, UICollectionViewD
             }
             
             cell.titleLblTopConstrnt.constant = 9.0
-            cell.titleLbl.text = self.workoutDays?[indexPath.row] as? String
+            cell.titleLbl.text = self.myWorkoutDates?[indexPath.row]["displayDate"] as? String
+            
+            /*
+             displayDate
+             storageDate
+             */
             
             return cell
         }
@@ -971,6 +1156,22 @@ extension DashboardViewController: UICollectionViewDataSource, UICollectionViewD
             dayStreakCell.dayCountLbl.text = "\(indexPath.row)"
             
             return  dayStreakCell
+        }
+        else if collectionView == subscriptionCollView {
+            let subscriptionCell: PlansUpgradeCollectionViewCell = subscriptionCollView.dequeueReusableCell(withReuseIdentifier: "PlansUpgradeCollectionViewCell", for: indexPath) as! PlansUpgradeCollectionViewCell
+            subscriptionCell.backgroundColor = UIColor.clear
+            subscriptionCell.renewBtn.isHidden = true
+            subscriptionCell.setCellData(cellData: upgradePlan?[indexPath.row])
+            subscriptionCell.topupUpgrateBtn.accessibilityHint = upgradePlan?[indexPath.row].id?.value
+            subscriptionCell.renewBtn.accessibilityHint = upgradePlan?[indexPath.row].id?.value
+            subscriptionCell.topupUpgrateBtn.addTarget(self, action: #selector(upgradeSubsBtnactn(sender: )), for: .touchUpInside)
+            subscriptionCell.renewBtn.addTarget(self, action: #selector(renewSubsBtnactn(sender: )), for: .touchUpInside)
+            
+            if upgradePlan?[indexPath.row].renew_new == true {
+                subscriptionCell.renewBtn.isHidden = false
+            }
+            
+            return subscriptionCell
         }
         
         else{
@@ -1013,6 +1214,9 @@ extension DashboardViewController: UICollectionViewDataSource, UICollectionViewD
             }
             return CGSize(width: collectionView.frame.width*0.37, height: collectionView.frame.width*0.37)
         }
+        else if collectionView == subscriptionCollView{
+            return CGSize(width: collectionView.frame.width*0.93, height: collectionView.frame.height)
+        }
         return CGSize(width: collectionView.frame.width*0.88, height: collectionView.frame.height)
     }
     
@@ -1026,13 +1230,16 @@ extension DashboardViewController: UICollectionViewDataSource, UICollectionViewD
             }else{
                 vc.detailsFlow = .upcoming
             }
-            vc.bookingIdStr = "\(self.upcomingSessionData?[indexPath.row].id ?? 0)"
+            vc.bookingIdStr = "\(self.upcomingSessionData?[indexPath.row].id?.intValue ?? 0)"
+            vc.typeStr = self.upcomingSessionData?[indexPath.row].sessionType?.value
             self.navigationController?.pushViewController(vc, animated: true)
         }
         else if collectionView == workoutsDayCollView{
             let cell = collectionView.cellForItem(at: indexPath) as? ProductCategoryCollViewCell
             guard let cell = cell else { return }
             cell.cellMBV.backgroundColor = UIColor(red: 28.0/255.0, green: 31.0/255.0, blue: 33.0/255.0, alpha: 1.0)
+            
+            self.myWorkoutsApi(dateStr: self.myWorkoutDates?[indexPath.row]["storageDate"] as? String, displayDate: self.myWorkoutDates?[indexPath.row]["displayDate"] as? String)
         }
         else if collectionView == productCategoryCollView{
             let cell = collectionView.cellForItem(at: indexPath) as? ProductCategoryCollViewCell
@@ -1136,18 +1343,97 @@ extension DashboardViewController: UICollectionViewDataSource, UICollectionViewD
             }
         }
     }
+    
+    //MARK: ---------------- TRACK BTN ACTN OF MY UPCOMING SESSIONS
+    @objc func trackBtnActn(sender: UIButton){
+        let vc:ArrivingViewController = ArrivingViewController.instantiate(appStoryboard: .library)
+        vc.inputBookingId = sender.accessibilityHint ?? ""
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    
+    //MARK: -----------------UPGRADE BTN ACTN
+    @objc func upgradeSubsBtnactn(sender: UIButton){
+        /*
+        let vc: TopupViewController = TopupViewController.instantiate(appStoryboard: .dashboard)
+        vc.topUpRenewFlow = .upgrade
+//        if let currentIndex = self.upgradePlan?.firstIndex(where: { $0.type?.value == "home" }) {
+//            let upgradePlanChange = self.upgradePlan?.remove(at: currentIndex) ?? PlanDetailsModel()
+//            self.upgradePlan?.insert(upgradePlanChange, at: 0)
+//            vc.planDetails = self.upgradePlan
+//        }
+        
+        vc.planDetails = self.upgradePlan
+        
+        self.navigationController?.pushViewController(vc, animated: true)
+        */
+        
+        
+        let getIndx = self.upgradePlan?.firstIndex(where: {
+            $0.id?.value == sender.accessibilityHint
+        })
+        
+        if let getIndx = getIndx {
+            let planDetails:PlanDetailsModel = self.upgradePlan?[getIndx] ?? PlanDetailsModel()
+            print("planDetails: ", planDetails as Any)
+            let vc: TopupViewController = TopupViewController.instantiate(appStoryboard: .dashboard)
+            vc.topUpRenewFlow = .upgrade
+            vc.planDetails = [planDetails]
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+    
+    }
+    
+    //MARK: -----------------RENEW BTN ACTN
+    @objc func renewSubsBtnactn(sender: UIButton){
+        print("planDetails: ", self.upgradePlan as Any)
+        let vc: TopupViewController = TopupViewController.instantiate(appStoryboard: .dashboard)
+        vc.topUpRenewFlow = .renew
+//        vc.planDetails = self.upgradePlan
+        if let currentIndex = self.upgradePlan?.firstIndex(where: { $0.type?.value == "home" }) {
+            let upgradePlanChange = self.upgradePlan?.remove(at: currentIndex) ?? PlanDetailsModel()
+            self.upgradePlan?.insert(upgradePlanChange, at: 0)
+            vc.planDetails = self.upgradePlan
+        }else{
+            vc.planDetails = self.upgradePlan
+        }
+        
+        self.navigationController?.pushViewController(vc, animated: true)
+        
+        /*
+        let getIndx = self.upgradePlan?.firstIndex(where: {
+            $0.id?.value == sender.accessibilityHint
+        })
+        
+        if let getIndx = getIndx {
+            let planDetails = self.upgradePlan?[getIndx]
+            print("planDetails: ", planDetails as Any)
+            let vc: TopupViewController = TopupViewController.instantiate(appStoryboard: .dashboard)
+            vc.topUpRenewFlow = .renew
+            vc.planDetails = planDetails
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+        */
+    }
 }
 
 
 //MARK: ---------------------------EXTENSION FOR UITABLEVIEW DATASOURSE/DELEGATE
 extension DashboardViewController: UITableViewDataSource, UITableViewDelegate{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tableView.numberOfRows(count: 3, title: "Get ready for your new workout plan", message: " Your trainer will get in touch with you to curate a plan tailored to your goals.", messageImage: UIImage(named: "ic_trainer_more")?.resized(to: CGSize(width: 130.0, height: 130.0)), messageImageHeight: nil, reloadBtnBgColor: nil, reloadBtnTitleColor: nil, reloadSetTitle: nil, reloadBtnImg: nil, fromTop: 1) //4
+        return tableView.numberOfRows(count: myWorkoutsData?.count, title: "Get ready for your new workout plan", message: " Your trainer will get in touch with you to curate a plan tailored to your goals.", messageImage: UIImage(named: "ic_trainer_more")?.resized(to: CGSize(width: 130.0, height: 130.0)), messageImageHeight: nil, reloadBtnBgColor: nil, reloadBtnTitleColor: nil, reloadSetTitle: nil, reloadBtnImg: nil, fromTop: 1) //4
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell:MyWorkoutsTableViewCell = workoutTblView.dequeueReusableCell(withIdentifier: "MyWorkoutsTableViewCell", for: indexPath) as! MyWorkoutsTableViewCell
+        cell.completedUserMBV.isHidden = true
+        cell.userMBV.isHidden = true
+        cell.progressView.isHidden = false
+        cell.selectedImgView.isHidden = true
+        cell.setCellData(cellData: myWorkoutsData?[indexPath.row])
         
+        
+        /*
         DispatchQueue.main.async {
 //            cell.cellMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 12.0)
             
@@ -1155,11 +1441,26 @@ extension DashboardViewController: UITableViewDataSource, UITableViewDelegate{
         }
         
         cell.completedUserMBV.isHidden = true
-        cell.setupcellData()
+//        cell.setupcellData()
+        cell.progressView.drawLineProgress(progressfill: 0.5,fillLineColor: UIColor.appYellow, cornerRadius: 2.0)
+        */
         
         return cell
     }
     
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if let isCompleted = myWorkoutsData?[indexPath.row].isCompleted, !isCompleted, let displayDate = myWorkoutsData?[indexPath.row].displayDate , displayDate.lowercased() == "today".lowercased() {
+            
+            let vc:WorkoutDetailsViewController = WorkoutDetailsViewController.instantiate(appStoryboard: .library)
+            vc.workoutNameStr = myWorkoutsData?[indexPath.row].title?.value
+            vc.workoutId = myWorkoutsData?[indexPath.row].id?.value
+            vc.assignmentId = myWorkoutsData?[indexPath.row].assigned_id?.value
+            self.navigationController?.pushViewController(vc, animated: true)
+        }else{
+            print("My workout completed....")
+        }
+
+    }
     
 }
 
@@ -1168,9 +1469,20 @@ extension DashboardViewController{
     
     private func checkPackage(){
         CreatePackageVM.checkPackageCreatedApi(viewController: self, inputParms: [ : ], completion: {[weak self] getResultData in
-            guard let self = self, let getResultData = getResultData else { return }
-            if let getData = getResultData["data"] as? [String:Any], let isPackageCreated = getData["package"] as? Bool {
+            guard let self = self, let getResultData = getResultData, let getData = getResultData["data"] as? [String:Any] else { return }
+            self.memberTypeLbl.isHidden = true
+            self.memberTypeLbl.text = nil
+            
+            if let getNotifications = getData["userHaveRequest"] as? Bool, getNotifications  {
+                self.getNotifications = 1
+            }else{
+                self.getNotifications = 0
+            }
+            
+            if let packageDetails = getData["package"] as? [String:Any], let isPackageCreated = packageDetails["isPackage"] as? Bool {
                 if isPackageCreated {
+                    self.memberTypeLbl.isHidden = false
+                    self.memberTypeLbl.text = (packageDetails["getTier"] as? String ?? "") + " Member"
                     self.flowpackage = .packageCreated
                     self.setupFlowPackageCreate()
                 }else{
@@ -1266,6 +1578,36 @@ extension DashboardViewController{
             self.getLocation()
         }
     }
+    
+    //MARK: -----------SUBSCRIPTION API
+    private func getUserPlanUpgrade(){
+        DashboardVM.getPlansApi(completion: { [weak self] getResultData in
+            guard let self = self else { return }
+            print("Upgrade plan: ", getResultData?.data as Any)
+            self.upgradePlan?.removeAll()
+            self.upgradePlan?.append(contentsOf: getResultData?.data ?? [])
+//            self.upgradePlan = self.upgradePlan?.filter { $0.isShow ?? false } //only show when isShow is true
+            if let upgradePlan = self.upgradePlan, upgradePlan.count > 0 {
+                self.subscriptionLstMBV.isHidden = false
+            }else{
+                self.subscriptionLstMBV.isHidden = true
+            }
+            self.subscriptionCollView.reloadData()
+        })
+    }
+    
+    private func myWorkoutsApi(dateStr: String?, displayDate: String?){
+        WorkoutLibraryVM.myWorkoutsApi(inputDateStr: dateStr, inputStatus: nil, completion: {[weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return }
+            self.myWorkoutsData?.removeAll()
+            //            self.myWorkoutsData?.append(contentsOf: getResultData.data ?? [])
+            
+            self.myWorkoutsData = (getResultData.data ?? []).map { item in
+                var newItem = item
+                newItem.displayDate = displayDate
+                return newItem
+            }
+            self.workoutTblView.reloadData()
+        })
+    }
 }
-
-

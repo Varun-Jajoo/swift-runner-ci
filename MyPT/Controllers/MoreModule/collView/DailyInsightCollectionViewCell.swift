@@ -9,6 +9,8 @@ import UIKit
 
 class DailyInsightCollectionViewCell: UICollectionViewCell {
 
+   var onMenuButtonTapped: ((_ button: UIButton) -> Void)?
+    
     //MARK: -------------IBOUTLET
     @IBOutlet weak var cellMBV: UIView!
     @IBOutlet weak var insightModeBtn: UIButton!
@@ -21,6 +23,7 @@ class DailyInsightCollectionViewCell: UICollectionViewCell {
         // Initialization code
         self.setupUI()
         self.setupFont()
+        
     }
     
     func setupUI(){
@@ -35,6 +38,13 @@ class DailyInsightCollectionViewCell: UICollectionViewCell {
         self.infoBtn.titleLabel?.font = AppFont.semibold.size(14.0, familyName: familyManrope)
         self.rangeBtn.titleLabel?.font = AppFont.semibold.size(14.0, familyName: familyManrope)
         self.timeLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
+        
+        infoBtn.addTarget(self, action: #selector(handleMenuButtonTap), for: .touchUpInside)
     }
+
+    @objc private func handleMenuButtonTap() {
+           // Call the closure and pass the button itself, so the view controller knows the tap came from this button
+           onMenuButtonTapped?(infoBtn)
+       }
 
 }

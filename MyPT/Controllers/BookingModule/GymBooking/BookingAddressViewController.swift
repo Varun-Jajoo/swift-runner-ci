@@ -231,7 +231,8 @@ class BookingAddressViewController: UIViewController {
             "type": (self.typeStr ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
             "mobile_no": phoneNumber,
             "lat": self.inputLat ?? "28.584125",
-            "long": self.inputLong ?? "77.2753162"
+            "long": self.inputLong ?? "77.2753162",
+            "name": ""
         ]
         
    

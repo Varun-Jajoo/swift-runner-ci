@@ -16,6 +16,7 @@ enum UserDefaultsKeys : String {
     case packagerCreated       =  "packageCreated"
     case accessToken           =  "accessToken"
     case refressToken          =  "refreshToken"
+    case fcmToken              =  "fcmToken"
     case latLong               =  "latLong"
     case currendAddr           =  "currentAddr"
     case social_login_userId   =   "social_id"
@@ -183,6 +184,16 @@ extension UserDefaults{
     
     func getRefreshToken() -> String?{
         return string(forKey: UserDefaultsKeys.refressToken.rawValue)
+    }
+    
+    //setRefreshToken
+    func setFCMToken(refreshToken: String?){
+        set(refreshToken, forKey: UserDefaultsKeys.fcmToken.rawValue)
+        synchronize()
+    }
+    
+    func getReFCMToken() -> String?{
+        return string(forKey: UserDefaultsKeys.fcmToken.rawValue)
     }
     
     

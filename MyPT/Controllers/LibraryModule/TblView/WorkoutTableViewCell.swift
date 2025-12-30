@@ -35,14 +35,35 @@ class WorkoutTableViewCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
-    func setupUI(){
+    func setCell(cellData: WorkoutExerciseModel?){
+        guard let cellData = cellData else { return }
+        self.workoutImgView.loadImage(urlString: cellData.image?.value, placeholder: nil, resize: CGSize(width: 100.0, height: 100.0))
+        self.workoutNameLbl.text = cellData.name?.value
+        let repsStr = (cellData.reps?.value ?? "") + " Reps"
+        let setsStr = (cellData.sets?.value ?? "") + " Sets"
+        self.repsTitleLbl.text = repsStr + " x " +  setsStr
+        self.kcalTitleLbl.text = (cellData.calories?.value ?? "") + " kcal"
+        
+        if let exerciseType = cellData.type?.value, exerciseType.lowercased() == "superset".lowercased() || exerciseType.lowercased() == "circuit".lowercased() {
+            self.rightImgView.isHidden = true
+        }else{
+            if let isComplete = cellData.isComplete, isComplete {
+                self.rightImgView.isHidden = true
+            }else{
+                self.rightImgView.isHidden = false
+            }
+        }
+    }
+    
+    
+    private func setupUI(){
         DispatchQueue.main.async {
-            self.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.txtDarkGray, cornerRadious: 12.0)
+//            self.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.txtDarkGray, cornerRadious: 12.0)
             self.workoutImgView.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
         }
     }
     
-    func setupFont(){
+    private func setupFont(){
         self.workoutNameLbl.font = AppFont.semibold.size(20.0, familyName: familyClashDisplay)
         self.repsTitleLbl.font = AppFont.ExtraBold.size(14.0, familyName: familyManrope)
         self.kcalTitleLbl.font = AppFont.ExtraBold.size(14.0, familyName: familyManrope)

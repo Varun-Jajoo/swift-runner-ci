@@ -8,7 +8,7 @@
 import UIKit
 
 class ActiveChallengeViewController: CommonViewController {
-
+    
     //MARK: --------------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
     @IBOutlet weak var workoutNameLbl: UILabel!
@@ -20,7 +20,7 @@ class ActiveChallengeViewController: CommonViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         // Do any additional setup after loading the view.
         self.setupProgress()
         self.setupFont()
@@ -29,7 +29,7 @@ class ActiveChallengeViewController: CommonViewController {
     deinit {
         print("------\(#function)------\(String(describing: Self.self))------" )
     }
-   
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.setNavigationColor(setColor: .clear)
@@ -39,7 +39,7 @@ class ActiveChallengeViewController: CommonViewController {
     
     func setNavUI(){
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: ["Active Challenge"], setTintColor: .black, setTitleColor: UIColor.appWhite)
-//        self.setRighMenu(rightImgs: [AppImages.moreSettings], setTitle: [nil], setTintColor: .black, setTitleColor: UIColor.appWhite)
+        //        self.setRighMenu(rightImgs: [AppImages.moreSettings], setTitle: [nil], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
     
     override func viewDidLayoutSubviews() {
@@ -87,14 +87,14 @@ class ActiveChallengeViewController: CommonViewController {
         dualProgressView.outerTrackColor = UIColor(red: 49.0/255.0, green: 52.0/255.0, blue: 58.0/255.0, alpha: 1)
         dualProgressView.innerTrackColor = UIColor(red: 49.0/255.0, green: 52.0/255.0, blue: 58.0/255.0, alpha: 1)
         //rgba(49, 52, 58, 1)
-          
+        
         // Animate progress after a delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             dualProgressView.outerProgress = 0.8
             dualProgressView.innerProgress = 0.8
         }
     }
-
+    
     @IBAction func workoutResumeBtnActn(_ sender: Any) {
         print("Resume btn clicked..")
         let vc:WorkoutDuringSessionViewController = WorkoutDuringSessionViewController.instantiate(appStoryboard: .library)

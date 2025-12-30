@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -11,7 +11,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" rowHeight="307" id="KGk-i7-Jjw" customClass="SearchWorkoutTableViewCell" customModule="MyPT" customModuleProvider="target">
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" rowHeight="307" id="KGk-i7-Jjw" customClass="SearchWorkoutTableViewCell" customModule="MyPT_Connect" customModuleProvider="target">
             <rect key="frame" x="0.0" y="0.0" width="624" height="307"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
@@ -161,7 +161,7 @@
                                 </subviews>
                             </stackView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GoK-5W-V3I">
-                                <rect key="frame" x="522" y="155.33333333333334" width="42" height="42"/>
+                                <rect key="frame" x="522" y="165.33333333333334" width="42" height="42"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="42" id="R36-As-LHP"/>
                                     <constraint firstAttribute="width" secondItem="GoK-5W-V3I" secondAttribute="height" id="xST-Ut-PEu"/>
@@ -175,7 +175,6 @@
                         <color key="backgroundColor" name="appCard"/>
                         <constraints>
                             <constraint firstAttribute="bottom" secondItem="Zdb-Ol-YFc" secondAttribute="bottom" id="0AM-5L-Nir"/>
-                            <constraint firstItem="GoK-5W-V3I" firstAttribute="bottom" secondItem="JQY-dB-hHg" secondAttribute="bottom" id="2ZZ-by-Npv"/>
                             <constraint firstItem="GoK-5W-V3I" firstAttribute="leading" secondItem="JQY-dB-hHg" secondAttribute="trailing" constant="12" id="2vM-Kv-1dK"/>
                             <constraint firstItem="xfb-ij-6Zn" firstAttribute="leading" secondItem="pLq-hE-TXk" secondAttribute="leading" id="3FW-d4-09q"/>
                             <constraint firstItem="pLq-hE-TXk" firstAttribute="top" secondItem="wkM-C4-zD2" secondAttribute="bottom" constant="12" id="5wi-oL-w7r"/>
@@ -196,6 +195,7 @@
                             <constraint firstItem="hjE-Na-gtz" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="wkM-C4-zD2" secondAttribute="trailing" constant="22" id="tL6-Z6-eaf"/>
                             <constraint firstItem="JQY-dB-hHg" firstAttribute="leading" secondItem="xfb-ij-6Zn" secondAttribute="leading" id="tj3-YG-K7e"/>
                             <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="JQY-dB-hHg" secondAttribute="bottom" constant="23" id="vF2-Ic-8Kt"/>
+                            <constraint firstItem="GoK-5W-V3I" firstAttribute="centerY" secondItem="g9O-Ff-ieV" secondAttribute="centerY" id="w4J-TS-5vA"/>
                             <constraint firstItem="pLq-hE-TXk" firstAttribute="leading" secondItem="wkM-C4-zD2" secondAttribute="leading" id="xS0-cY-5fQ"/>
                             <constraint firstAttribute="trailing" secondItem="TD6-F0-RoX" secondAttribute="trailing" constant="20" id="y4s-iS-ivi"/>
                         </constraints>
@@ -228,7 +228,7 @@
                 <outlet property="timingTitleLbl" destination="WfJ-rB-rEL" id="w88-uw-j52"/>
                 <outlet property="topTitleLbl" destination="lTJ-Bx-enw" id="TOn-XQ-APq"/>
                 <outlet property="topTitleMBV" destination="wkM-C4-zD2" id="Hd5-l3-HD8"/>
-                <outlet property="videoPlauyBtn" destination="GoK-5W-V3I" id="SF7-DF-TPb"/>
+                <outlet property="videoPlayBtn" destination="GoK-5W-V3I" id="f4r-cD-tAA"/>
                 <outlet property="workoutNameLbl" destination="pLq-hE-TXk" id="GCy-Jr-3JF"/>
             </connections>
             <point key="canvasLocation" x="265.64885496183206" y="112.32394366197184"/>

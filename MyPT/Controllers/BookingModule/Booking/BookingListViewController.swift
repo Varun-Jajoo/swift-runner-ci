@@ -11,6 +11,10 @@ class BookingListViewController: CommonViewController {
 
     //MARK: ---------------- VARIABLE
     var isFromTab: Bool? = false
+    private var filterSelectedDate:(filterSelectedDateStr:String?, bookingCatagory:Int?)?
+    private var upcomingSelectedDate: String?
+    private var cancelledSelected: String?
+    private var completedSelected: String?
     
     var selectedIndex:NSIndexPath = NSIndexPath(row: 0, section: 0)
     var bookingData:[BookingDataModel]? = []
@@ -120,10 +124,28 @@ class BookingListViewController: CommonViewController {
         selectedIndex = NSIndexPath(row: sender.selectedSegmentIndex, section: 0)
         
         if let tag = segmentTags[sender.selectedSegmentIndex] {
-               print("Selected tag: \(tag)")
+            print("Selected tag: \(tag)")
             self.loadShowSections?.removeAll()
             self.selectedTags = tag
-           }
+            
+            //---------------Filter Setup data
+            if let cancelledSelected = cancelledSelected, let selectedTags = selectedTags , selectedTags == 0{
+                self.bookingData?.removeAll()
+                self.bookingListTbl.reloadData()
+                self.filterData.month = DateFormatterHelper.shared.getDateFromFormat(fromDate: cancelledSelected, fromFormat: "dd/MM/yyyy", toFormat: "yyyy-MM")
+            }
+            if let completedSelected = completedSelected , let selectedTags = selectedTags, selectedTags == 1{
+                self.bookingData?.removeAll()
+                self.bookingListTbl.reloadData()
+                self.filterData.month = DateFormatterHelper.shared.getDateFromFormat(fromDate: completedSelected, fromFormat: "dd/MM/yyyy", toFormat: "yyyy-MM")
+            }
+            if let upcomingSelectedDate = upcomingSelectedDate ,  let selectedTags = selectedTags, selectedTags == 2{
+                self.bookingData?.removeAll()
+                self.bookingListTbl.reloadData()
+                self.filterData.month = DateFormatterHelper.shared.getDateFromFormat(fromDate: upcomingSelectedDate, fromFormat: "dd/MM/yyyy", toFormat: "yyyy-MM")
+            }
+            
+        }
         
         
 //        self.bookingListTbl.reloadData()
@@ -143,17 +165,39 @@ class BookingListViewController: CommonViewController {
     
     @IBAction func monthsBtnAcn(_ sender: Any) {
         print("month btn clicked...")
+        //type: 0, 1 => completed, 2 => upcoming, 0 => cancel
         let vc:SelectMonthViewController = SelectMonthViewController.instantiate(appStoryboard: .booking)
         vc.modalTransitionStyle = .coverVertical
-        vc.filterMonth = {[weak self] getMonth in
+        vc.filterMonth = {[weak self] getMonth, getSelectedDate in
             guard let self = self else { return  }
             print("getMonth", getMonth as Any)
             self.filterData.month = getMonth
+//            self.filterSelectedDate = (getSelectedDate, selectedTags)
             
-//            if let selectedTags = selectedTags {
-//                self.bookingListApi(typeStr: "\(selectedTags)", dateStr: getMonth, sessionType: nil, location: nil)
-//            }
+            if let selectedTags = selectedTags, selectedTags == 0{
+                self.cancelledSelected = getSelectedDate
+            }
+            if let selectedTags = selectedTags, selectedTags == 1{
+                self.completedSelected = getSelectedDate
+            }
+            if let selectedTags = selectedTags, selectedTags == 2{
+                self.upcomingSelectedDate = getSelectedDate
+            }
+            
         }
+        
+        
+        //-----------------Local selected date
+        if let cancelledSelected = cancelledSelected, let selectedTags = selectedTags , selectedTags == 0{
+            vc.localSelectedDate = cancelledSelected
+        }
+        if let completedSelected = completedSelected , let selectedTags = selectedTags, selectedTags == 1{
+            vc.localSelectedDate = completedSelected
+        }
+        if let upcomingSelectedDate = upcomingSelectedDate ,  let selectedTags = selectedTags, selectedTags == 2{
+            vc.localSelectedDate = upcomingSelectedDate
+        }
+
         self.navigationController?.present(vc, animated: true)
     }
     
@@ -249,7 +293,8 @@ extension BookingListViewController: UITableViewDataSource, UITableViewDelegate{
         } else if selectedTags == 1{
             vc.detailsFlow = .completed
         }
-        vc.bookingIdStr = "\(self.bookingData?[indexPath.row].id ?? 0)"
+        vc.bookingIdStr = "\(self.bookingData?[indexPath.row].id?.value ?? "0")"
+        vc.typeStr = self.bookingData?[indexPath.row].sessionType?.value
         self.navigationController?.pushViewController(vc, animated: true)
         
         

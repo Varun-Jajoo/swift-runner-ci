@@ -9,7 +9,9 @@ import UIKit
 
 class SelectMonthViewController: UIViewController {
 
-    var filterMonth: ((_ monthData: String?) -> Void)?
+    var filterMonth: ((_ monthData: String?, _ selectedDateStr:String?) -> Void)?
+    var localSelectedDate: String? = nil
+    
     
     //MARK: ---------------- IBOUTLET
     @IBOutlet weak var bottomMBV: UIView!
@@ -33,11 +35,32 @@ class SelectMonthViewController: UIViewController {
             // Fallback on earlier versions
             selectDatePicker.datePickerMode = .countDownTimer
         }
+        
+        if let localSelectedDate = localSelectedDate {
+            setSelectedDate(selectedDateStr: localSelectedDate)
+        }
+        
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         self.setUpUI()
+    }
+    
+    private func setSelectedDate(selectedDateStr: String) {
+        //"02/06/2024"
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd/MM/yyyy"
+        if let targetDate = dateFormatter.date(from: selectedDateStr) {
+            selectDatePicker.setDate(targetDate, animated: false)
+        }
+        // Add action if needed
+        selectDatePicker.addTarget(self, action: #selector(dateChanged(_:)), for: .valueChanged)
+    }
+
+    @objc func dateChanged(_ sender: UIDatePicker) {
+        let selectedDate = sender.date
+        print("Selected date: \(selectedDate)")
     }
     
     func setUpUI(){
@@ -69,11 +92,12 @@ class SelectMonthViewController: UIViewController {
             self.dismiss(animated: true)
         case btnTag.clearPop.rawValue:
             print("clearPop btn clicked.")
-            self.filterMonth?(nil)
+            self.filterMonth?(nil, nil)
             self.dismiss(animated: true)
         case btnTag.okPop.rawValue:
             let dateStr = DateFormatterHelper.shared.dateString(from: selectDatePicker.date, format: "yyyy-MM")
-            self.filterMonth?(dateStr)
+            let localDateStr = DateFormatterHelper.shared.dateString(from: selectDatePicker.date, format: "dd/MM/yyyy")
+            self.filterMonth?(dateStr, localDateStr)
             self.dismiss(animated: true)
         default:
             print("none....")

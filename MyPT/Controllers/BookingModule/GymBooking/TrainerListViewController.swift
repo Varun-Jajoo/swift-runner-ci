@@ -10,6 +10,8 @@ import UIKit
 class TrainerListViewController: CommonViewController {
 
     //MARK: --------------VARIBALE
+    var istagMenuHeight: Bool?
+    var isLoadFirst: Bool? = nil
     
     private lazy var searchContainerView: UIView = {
         let container = UIView()
@@ -88,6 +90,11 @@ class TrainerListViewController: CommonViewController {
         return container
     }()
 
+//----------------****** Trainer filgter local
+    var localGenderLstData:[FilterLstDataModel]? = []
+    var localLanguageLstData:[FilterLstDataModel]? = []
+    var localNationalityLstData:[FilterLstDataModel]? = []
+    var localTimeSlotData:[FilterLstDataModel]? = []
     
     var isFromHome:Bool?
     var categorySelectedIndex:IndexPath?
@@ -103,22 +110,36 @@ class TrainerListViewController: CommonViewController {
     var gymTrainerData:[GymTrainerModel]? = []
     var trainerDataLocal: [TrainerModel]? = []
     var gymTrainerDataLocal: [GymTrainerModel]? = []
+    var filterMenu: [String]?
     
     var isGridShow:Bool?
+    private var genderFilterStr : String?
+    private var languageFilterStr : String?
+    private var nationalityFilterStr : String?
+    private var time_slotFilterStr : String?
+    private var is_filterStr : String?
+    private var inpuntTagId: Int?
+    
     
     //MARK: ----------------IBOUTLET
     @IBOutlet weak var searchMBVTopConstrnt: NSLayoutConstraint!
     @IBOutlet weak var searchMBVLeading: NSLayoutConstraint!
     @IBOutlet weak var searchMBVTrailing: NSLayoutConstraint!
     @IBOutlet weak var workoutCategoryCollView: UICollectionView!
+    @IBOutlet weak var filterMenuCollView: UICollectionView!
     @IBOutlet weak var trainerListTblView: UITableView!
     @IBOutlet weak var trainerGridCollView: UICollectionView!
     @IBOutlet weak var tblMBV: UIView!
     @IBOutlet weak var collMBV: UIView!
     
+//    @IBOutlet weak var workoutCategoryCollViewHeightConstrnt: NSLayoutConstraint!
+//    
+//    @IBOutlet weak var filterMenuCollViewHeightConstrnt: NSLayoutConstraint!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        isLoadFirst = true
         self.categorySelectedIndex = IndexPath(row: 0, section: 0)
         self.setupUI()
         self.flowTrainers()
@@ -130,6 +151,7 @@ class TrainerListViewController: CommonViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        self.istagMenuHeight = true
         
 //        if let tagData = tagData?.count, tagData > 0 {
 //            // Automatically select the first cell
@@ -156,8 +178,11 @@ class TrainerListViewController: CommonViewController {
     }
     
     func setNavUI(){
-        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [AppStrings.trainers], setTintColor: .black, setTitleColor: UIColor.appWhite)
-        self.setRighMenu(rightImgs: [AppImages.grid?.resized(to: CGSize(width: 25.0, height: 25.0)), AppImages.menuNav?.resized(to: CGSize(width: 25.0, height: 25.0)),  AppImages.search_normal], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
+        if let _ = isLoadFirst {
+            isLoadFirst = nil
+            self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [AppStrings.trainers], setTintColor: .black, setTitleColor: UIColor.appWhite)
+            self.setRighMenu(rightImgs: [AppImages.grid?.resized(to: CGSize(width: 25.0, height: 25.0)), AppImages.menuNav?.resized(to: CGSize(width: 25.0, height: 25.0)),  AppImages.search_normal], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
+        }
     }
     
     override func rightBtnActn(sender: UIButton) {
@@ -271,11 +296,15 @@ class TrainerListViewController: CommonViewController {
     
     
     private func setupUI(){
+        self.filterMenu = ["Time slot", "Gender", "Language", "Nationality"]
+        
         workoutCategoryCollView.register(UINib(nibName: "WorkoutCategoryCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WorkoutCategoryCollectionViewCell")
         
         trainerGridCollView.register(UINib(nibName: "GridTrainerCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "GridTrainerCollectionViewCell")
         
         trainerListTblView.register(UINib(nibName: "TrainerListTableViewCell", bundle: nil), forCellReuseIdentifier: "TrainerListTableViewCell")
+        
+        self.filterMenuCollView.register(UINib(nibName: "FilterCategoryCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "FilterCategoryCollectionViewCell")
         
         tblMBV.isHidden = false
         collMBV.isHidden = true
@@ -376,7 +405,11 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
                 return collectionView.numberOfRows(count: self.gymTrainerData?.count, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult, messageImageHeight: 200.0, fromTop: 50)
             }
             
-        }else{
+        }else if collectionView == filterMenuCollView{
+            return self.filterMenu?.count ?? 0
+        }
+        
+        else{
             return tagData?.count ?? 0
         }
     }
@@ -401,7 +434,28 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
             }
          
             return cell
-        }else{
+        }else if collectionView == filterMenuCollView{
+            let filterMenuCell: FilterCategoryCollectionViewCell = filterMenuCollView.dequeueReusableCell(withReuseIdentifier: "FilterCategoryCollectionViewCell", for: indexPath) as! FilterCategoryCollectionViewCell
+            
+            DispatchQueue.main.async {
+                filterMenuCell.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 255.0/255.0, green: 255.0/255.0, blue: 255.0/255.0, alpha: 0.15), cornerRadious: 8.0)
+            }
+            filterMenuCell.gymCategoryNameLbl.font = AppFont.semibold.size(11.0, familyName: familyManrope)
+            filterMenuCell.gymCategoryImgView.isHidden = true
+            filterMenuCell.gymCategoryImgWidthConstrnt.constant = 0
+            filterMenuCell.selectionImgView.isHidden = false
+            filterMenuCell.selectionImgViewWidthConstrnt.constant = 15
+            filterMenuCell.selectionImgViewTrainlingConstrnt.constant = 8
+            filterMenuCell.titleTopConstrnt.constant = 8.0
+            filterMenuCell.titleBottomConstrnt.constant = 8.0
+            
+            filterMenuCell.selectionImgView.image = UIImage(named: "ic_downArrow")
+            filterMenuCell.gymCategoryNameLbl.text = self.filterMenu?[indexPath.row] as? String
+            filterMenuCell.gymCategoryNameLbl.textAlignment = .center
+            
+            return filterMenuCell
+        }
+        else{
             let cell:WorkoutCategoryCollectionViewCell = workoutCategoryCollView.dequeueReusableCell(withReuseIdentifier: "WorkoutCategoryCollectionViewCell", for: indexPath) as! WorkoutCategoryCollectionViewCell
             
             DispatchQueue.main.async {
@@ -486,22 +540,155 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
             
         }else if collectionView == workoutCategoryCollView{
             
-            if let isFromHome = isFromHome, isFromHome {
-                if indexPath.row > 0 {
-                    self.getTrainerApi(inputFilter: "1", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+//            if let isFromHome = isFromHome, isFromHome {
+//                if indexPath.row > 0 {
+//                    self.inpuntTagId = self.tagData?[indexPath.row].id
+//                    self.getTrainerApi(inputFilter: "1", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+//                }else{
+//                    self.inpuntTagId = self.tagData?[indexPath.row].id
+//                    self.getTrainerApi(inputFilter: "0", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+//                }
+//            }else{
+//                if indexPath.row > 0 {
+//                    self.inpuntTagId = self.tagData?[indexPath.row].id
+//                    self.getSelectGymList(inputFilter: "1", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+//                }else{
+//                    self.inpuntTagId = self.tagData?[indexPath.row].id
+//                    self.getSelectGymList(inputFilter: "0", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+//                }
+//            }
+            
+            if let is_filterStr = self.is_filterStr , is_filterStr == "1" {
+                if let isFromHome = isFromHome, isFromHome {
+                    if indexPath.row > 0 {
+                        self.inpuntTagId = self.tagData?[indexPath.row].id
+                        self.getFilterTrainerApi(inpuntTagId: self.inpuntTagId)
+                    }else{
+                        self.inpuntTagId = self.tagData?[indexPath.row].id
+                        self.getFilterTrainerApi(inpuntTagId: self.inpuntTagId)
+                    }
                 }else{
-                    self.getTrainerApi(inputFilter: "0", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+                    if indexPath.row > 0 {
+                        self.inpuntTagId = self.tagData?[indexPath.row].id
+                        self.getFilterSelectGymList(inpuntTagId: self.inpuntTagId)
+                       
+                        //                                    self.getSelectGymList(inputFilter: "1", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+                        
+                    }else{
+                        self.inpuntTagId = self.tagData?[indexPath.row].id
+                        self.getFilterSelectGymList(inpuntTagId: self.inpuntTagId)
+                        
+                        //                                    self.getSelectGymList(inputFilter: "0", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+                    }
                 }
             }else{
-                if indexPath.row > 0 {
-                    self.getSelectGymList(inputFilter: "1", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+                if let isFromHome = isFromHome, isFromHome {
+                    if indexPath.row > 0 {
+                        self.inpuntTagId = self.tagData?[indexPath.row].id
+                        self.getTrainerApi(inputFilter: "1", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+                    }else{
+                        self.inpuntTagId = self.tagData?[indexPath.row].id
+                        self.getTrainerApi(inputFilter: "0", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+                    }
                 }else{
-                    self.getSelectGymList(inputFilter: "0", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+                    if indexPath.row > 0 {
+                        self.inpuntTagId = self.tagData?[indexPath.row].id
+                        self.getSelectGymList(inputFilter: "1", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+                    }else{
+                        self.inpuntTagId = self.tagData?[indexPath.row].id
+                        self.getSelectGymList(inputFilter: "0", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
+                    }
                 }
             }
+            
            
             self.categorySelectedIndex = indexPath
             collectionView.reloadData()
+        }else if collectionView == filterMenuCollView{
+            
+            let vc: TrainerFilterViewController = TrainerFilterViewController.instantiate(appStoryboard: .booking)
+            vc.selectedMenuFilterStr = self.filterMenu?[indexPath.row] as? String
+            vc.inputType = self.inputType
+            vc.modalPresentationStyle = .automatic
+            
+            if let _ = self.inpuntTagId{
+            }else{
+                self.inpuntTagId = nil
+            }
+            
+            vc.sendGenderStr = { [weak self] idStr , getData, gernderLstData in
+                guard self != nil else {
+                    return
+                }
+                self?.localGenderLstData = gernderLstData
+                self?.is_filterStr = "1"
+                self?.genderFilterStr = getData
+                
+                if self?.inputType?.capitalized == "home".capitalized {
+                    self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
+                }else{
+                    self?.getFilterSelectGymList(inpuntTagId: self?.inpuntTagId)
+                }
+                
+            }
+            
+            vc.sendLanguageStr = { [weak self] idStr , getData, langLstData in
+                guard self != nil else {
+                    return
+                }
+                  
+                self?.localLanguageLstData = langLstData
+                self?.is_filterStr = "1"
+                self?.languageFilterStr = idStr
+//                self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
+                
+                if self?.inputType?.capitalized == "home".capitalized {
+                    self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
+                }else{
+                    self?.getFilterSelectGymList(inpuntTagId: self?.inpuntTagId)
+                }
+            }
+            
+            vc.sendNationalityStr = { [weak self] idStr , getData, nationalityLstData in
+                guard self != nil else {
+                    return
+                }
+               
+                self?.localNationalityLstData = nationalityLstData
+                self?.is_filterStr = "1"
+                self?.nationalityFilterStr = idStr
+//                self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
+                
+                if self?.inputType?.capitalized == "home".capitalized {
+                    self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
+                }else{
+                    self?.getFilterSelectGymList(inpuntTagId: self?.inpuntTagId)
+                }
+            }
+            
+            vc.sendTime_slotStr = { [weak self] idStr , getData, timeSlotData in
+                guard self != nil else {
+                    return
+                }
+               
+                self?.localTimeSlotData = timeSlotData
+                self?.is_filterStr = "1"
+                self?.time_slotFilterStr = idStr
+//                self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
+                
+                if self?.inputType?.capitalized == "home".capitalized {
+                    self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
+                }else{
+                    self?.getFilterSelectGymList(inpuntTagId: self?.inpuntTagId)
+                }
+            }
+            
+            vc.localGenderLstData =  self.localGenderLstData
+            vc.localLanguageLstData = self.localLanguageLstData
+            vc.localNationalityLstData = self.localNationalityLstData
+            vc.localTimeSlotData = self.localTimeSlotData
+            
+            self.navigationController?.present(vc, animated: true)
         }
         
     }
@@ -511,8 +698,11 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
             let cellWdth = collectionView.frame.size.width*0.46
             return CGSize(width: cellWdth, height: cellWdth * 1.5)
             
-//            return CGSize(width: collectionView.frame.size.width*0.46, height: 340)
-        }else{
+        }else    if collectionView == filterMenuCollView {
+            let cellWdth = collectionView.frame.size.width*0.24
+            return CGSize(width: cellWdth, height: collectionView.frame.size.height)
+        }
+        else{
             return CGSize(width: collectionView.frame.size.width, height: collectionView.frame.size.height)
         }
     }
@@ -775,7 +965,7 @@ extension TrainerListViewController {
             guard let self = self, let getResultData = getResultData else { return  }
             print("get trainer list result data: ", getResultData as Any)
             
-            DispatchQueue.main.async {
+//            DispatchQueue.main.async {
                 self.tagData?.removeAll()
                 self.trainerData?.removeAll()
                 self.tagData?.append(contentsOf: getResultData.data?.tags ?? [])
@@ -788,6 +978,68 @@ extension TrainerListViewController {
                 self.tagData?.insert(tagModelData, at: 0)
                 self.workoutCategoryCollView.reloadData()
                 
+                if let isGridshow = self.isGridShow, isGridshow {
+                    self.trainerGridCollView.reloadData()
+                }else{
+                    self.trainerListTblView.reloadData()
+                }
+//            }
+        })
+    }
+    
+    //-----------------Filter Trainer list(Home)
+    private func getFilterTrainerApi(inpuntTagId: Int?){
+        var params:[String:Any] = [
+            "gender": genderFilterStr ?? "",
+            "language": languageFilterStr ?? "",
+            "nationality": nationalityFilterStr ?? "",
+            "time_slot": time_slotFilterStr ?? "",
+            "is_filter": is_filterStr ?? "",
+            "long": self.inputLong ?? "",
+            "lat": self.inputLat ?? "",
+            "type": self.inputType ?? "",
+//            "tag_id": "\(inpuntTagId ?? 0)" ,
+            
+        ]
+        
+        if let inpuntTagId = inpuntTagId {
+            params["tag_id"] = inpuntTagId
+        }else{
+            
+        }
+        
+        print("params: ", params)
+        /*
+         let params:[String:Any] = [
+         "gender": 1,2,
+         "language": 1,2
+         "is_filter":1
+         "lat": 1.344444
+         "long":4.8999
+         "time_slot":
+         "type": home , type: gym, home, gym based on selection
+         "tag_id":49 , //tag_id: 1, tag id is required when is filter 1
+         "nationality": 1,2
+         ]
+         */
+        
+        TrainerVM.gerFilterTrainerApi(viewController: self, inputParams: params, completion: { [weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return  }
+            print("get trainer list result data: ", getResultData as Any)
+            
+            DispatchQueue.main.async {
+                self.tagData?.removeAll()
+                self.trainerData?.removeAll()
+                self.tagData?.append(contentsOf: getResultData.data?.tags ?? [])
+                self.trainerData?.append(contentsOf: getResultData.data?.trainers ?? [])
+                self.trainerDataLocal?.removeAll()
+                self.trainerDataLocal = self.trainerData
+               
+                //-------------------Reload to set data
+                let tagModelData = TagModel(id: nil, name: "All Workouts", description: "", icon: "", image: "")
+                self.tagData?.insert(tagModelData, at: 0)
+                self.workoutCategoryCollView.reloadData()
+                                
                 if let isGridshow = self.isGridShow, isGridshow {
                     self.trainerGridCollView.reloadData()
                 }else{
@@ -842,6 +1094,55 @@ extension TrainerListViewController {
             }
         })
         
+    }
+    
+    
+    
+    //-----------------Filter Trainer list(from gym)
+    private func getFilterSelectGymList(inpuntTagId: Int?){
+        
+        var params:[String:Any] = [
+            "id": self.studioId ?? "",
+            "gender": genderFilterStr ?? "",
+            "language": languageFilterStr ?? "",
+            "nationality": nationalityFilterStr ?? "",
+            "time_slot": time_slotFilterStr ?? "",
+            "long": self.inputLong ?? "",
+            "lat": self.inputLat ?? "",
+            "type": self.inputType ?? "",
+            
+        ]
+        
+        if let inpuntTagId = inpuntTagId {
+            params["tag_id"] = inpuntTagId
+        }else{
+            
+        }
+        
+        TrainerVM.selectGymFilterTrainerApi(viewController: self, inputParams: params, completion: { [weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return }
+
+            print(getResultData)
+
+            self.gymTrainerData?.removeAll()
+            self.tagData?.removeAll()
+            self.trainerData?.removeAll()
+            self.tagData?.append(contentsOf: getResultData.data?.tags ?? [])
+            self.gymTrainerData?.append(contentsOf: getResultData.data?.trainers ?? [])
+            self.gymTrainerDataLocal?.removeAll()
+            self.gymTrainerDataLocal = self.gymTrainerData
+
+            //-------------------Reload to set data
+            let tagModelData = TagModel(id: nil, name: "All Workouts", description: "", icon: "", image: "")
+            self.tagData?.insert(tagModelData, at: 0)
+            self.workoutCategoryCollView.reloadData()
+
+            if let isGridshow = isGridShow, isGridshow {
+                self.trainerGridCollView.reloadData()
+            }else{
+                self.trainerListTblView.reloadData()
+            }
+        })
     }
 }
 

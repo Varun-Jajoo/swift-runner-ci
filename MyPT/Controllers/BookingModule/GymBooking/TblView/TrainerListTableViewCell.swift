@@ -92,6 +92,58 @@ class TrainerListTableViewCell: UITableViewCell {
         }
     }
     
+    /*
+    //MARK: -------------SET CELL INPUTDATA FOR MY TRAINERS
+    func setMyTrainersCellData(trainerData: TrainerModel?){
+        guard let trainerData = trainerData else { return  }
+        
+//        self.bookSlotBtn.backgroundColor = UIColor.appWhite
+//        self.bookSlotBtn.setTitleColor(UIColor.mainBg, for: .normal)
+        self.noteLbl.text = nil
+        self.numberSlotLbl.text = nil
+        self.bookSlotBtn.isHidden = true
+        self.bookSlotBtn.setTitle(nil, for: .normal)
+        
+        self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: UIImage())
+            self.gymNameLbl.text = trainerData.name
+        
+        self.landMarkBtn.setTitle(trainerData.location, for: .normal)
+        
+            self.distanceBtn.setTitle(trainerData.distance, for: .normal)
+            self.ratingBtn.setTitle("\(trainerData.averageRating?.doubleValue ?? 0.0)", for: .normal)
+            self.avgRatingBtn.setTitle(trainerData.noOfRating ?? "" + "ratings", for: .normal)
+        
+        /*
+        if let isFull = trainerData.isfull, let slotAvail = trainerData.slot?.value, isFull && slotAvail.lowercased() == "no".lowercased() {
+            self.noteLbl.text = "No slots available"
+            self.numberSlotLbl.text = nil
+            self.bookSlotBtn.backgroundColor = UIColor.appDarkGray
+            self.bookSlotBtn.setTitleColor(UIColor.appWhite, for: .normal)
+        }
+        else{
+            self.noteLbl.text = "Hurry Up!"
+            self.numberSlotLbl.text = "Only \(trainerData.slot?.value ?? "") slots available"
+            self.bookSlotBtn.isUserInteractionEnabled = true
+        }
+        */
+        
+//        self.noteLbl.text = nil
+//        self.numberSlotLbl.text = nil
+//        self.bookSlotBtn.isHidden = true
+//        self.bookSlotBtn.setTitle(nil, for: .normal)
+        
+        self.trainerVerifyImgView.isHidden = true
+        if let isVerify = trainerData.isVerified, isVerify {
+            self.trainerVerifyImgView.isHidden = false
+        }
+        
+        self.contentView.setNeedsLayout()
+        self.contentView.layoutIfNeeded()
+        self.setupUI()
+        
+    }
+    */
+    
     //MARK: -------------SET CELL INPUTDATA
     func setCellData(trainerData: TrainerModel?){
         guard let trainerData = trainerData else { return  }

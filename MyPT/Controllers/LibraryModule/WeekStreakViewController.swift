@@ -8,7 +8,11 @@
 import UIKit
 
 class WeekStreakViewController: UIViewController {
-
+    
+    //MAKR: ----------------- VARIABLE
+    var dayStreaksData: UserDayStreakDataModel?
+    
+    
     //MARK: -------------IBOUTLET
     @IBOutlet weak var weekStreakMBV: UIView!
     @IBOutlet weak var weekStreakImgView: UIImageView!
@@ -16,6 +20,7 @@ class WeekStreakViewController: UIViewController {
     @IBOutlet weak var weekStreakTitleLbl: UILabel!
     @IBOutlet weak var weekStreakDescLbl: UILabel!
     @IBOutlet weak var dayStreakLbl: UILabel!
+    @IBOutlet weak var dayStreakContainerV: UIView!
     @IBOutlet weak var calendarMBV: UIView!
     @IBOutlet weak var sunSubMBV: UIView!
     @IBOutlet weak var monSubMBV: UIView!
@@ -55,6 +60,8 @@ class WeekStreakViewController: UIViewController {
         // Do any additional setup after loading the view.
         self.setupFont()
         self.setupAnimation()
+        self.setInputData()
+        self.getDayStreak()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -75,7 +82,7 @@ class WeekStreakViewController: UIViewController {
     
     @IBAction func proceedBtnActn(_ sender: Any) {
         let vc:BadgeEarnedViewController = BadgeEarnedViewController.instantiate(appStoryboard: .library)
-        
+        vc.badgeDayStreaksData = self.dayStreaksData
         self.navigationController?.pushViewController(vc, animated: true)
     }
     
@@ -95,6 +102,10 @@ class WeekStreakViewController: UIViewController {
             print("anomation done..")
         }
         
+        self.dayStreakContainerV.animShow(duration: 0.7, delay: 0.2) {
+            print("anomation done..")
+        }
+        
         self.calendarMBV.animShow(duration: 0.7, delay: 0.2) {
             print("anomation done..")
         }
@@ -103,13 +114,64 @@ class WeekStreakViewController: UIViewController {
         }
     }
     
-    func setupUI(){
-        DispatchQueue.main.async {
+    private func setInputData(){
+        self.streakTopCountBtn.setTitle(dayStreaksData?.weekNumber?.value, for: .normal)
+        self.weekStreakDescLbl.text = dayStreaksData?.message?.value
         
-            self.calendarMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 20.0)
-            self.calendarMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1.0), cornerRadius: 20)
+        let daysImgView: [UIImageView?] = [
+            sunImgView, monImgView, tuesImgView,
+            wedImgView, thuImgView, friImgView, satImgView
+        ]
+        
+        let dayIndexMap = ["sun": 0, "mon": 1, "tue": 2, "wed": 3, "thu": 4, "fri": 5, "sat": 6]
+                
+        (dayStreaksData?.weekDays ?? []).forEach { dayStreak in
+            guard let day = dayStreak.day?.value?.lowercased(),
+                  let index = dayIndexMap[day],
+                  let imgView = daysImgView[index],
+                  let status = dayStreak.status?.value?.lowercased() else { return }
 
+            if status == "completed" {
+                imgView.image = UIImage(named: "ic_checkDay")
+            } else if ["today_pending", "not_started", "upcoming"].contains(status) {
+                imgView.image = UIImage(named: "ic_circle_gray")
+            } else if status == "missed" {
+                imgView.image = UIImage(named: "ic_circle_heck_red")
+            }
+        }
+        
+        /*
+        (dayStreaksData?.weekDays ?? []).forEach { dayStreak in
+            guard let day = dayStreak.day?.value?.lowercased(),
+                  let index = dayIndexMap[day],
+                  let imgView = daysImgView[index] else { return }
+            
+            imgView.image = UIImage(named: (dayStreak.completed ?? false) ? "ic_checkDay" : "ic_circle_heck_red")
+        }
+        */
+        
+        /*
+         "status" = "completed" = "green" "ic_checkDay"
+         "status" = "today_pending" = "grey" "ic_circle_gray"
+         "status" = "not_started" = "grey"
+         "status" = "upcoming" = "grey"
+         "status" = "missed" = "red" "ic_circle_heck_red"
+         */
+
+    }
+    
+    private func setupUI(){
+        DispatchQueue.main.async {
+            
+            self.calendarMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 20.0)
+            
+            self.dayStreakContainerV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 20)
             self.calendarMBV.setGradientBorder(cornerRadious:20.0,width: 2.0, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)])
+            
+            //            self.calendarMBV.addGradient(colors: [UIColor(red: 0, green: 0, blue: 0, alpha: 0.5), UIColor(red: 0, green: 5/255.0, blue: 2/255.0, alpha: 1)], locations: [0,1], startPoint: CGPoint(x: 0.5, y: 1), endPoint: CGPoint(x: 0, y: 0), cornerRadius: 20.0)
+            
+            self.calendarMBV.addGradient(colors: [UIColor(red: 0, green: 0, blue: 0, alpha: 0.5), UIColor(red: 0, green: 5/255.0, blue: 2/255.0, alpha: 1)], locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 20.0)
+            
             
             [self.sunSubMBV,
              self.monSubMBV,
@@ -120,13 +182,13 @@ class WeekStreakViewController: UIViewController {
              self.satSubMBV].forEach({
                 $0?.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 9.0)
             })
-
+            
             self.lineLbl.backgroundColor = UIColor.txtDarkGray //UIColor(red: 49.0/255.0, green: 52.0/255.0, blue: 58.0/255.0, alpha: 1.0)
             self.proceedBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
         }
     }
     
-    func setupFont(){
+    private func setupFont(){
         //-------------------------------
         self.weekStreakTitleLbl.font = AppFont.medium.size(28.0, familyName: familyClashDisplay)
         self.weekStreakDescLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
@@ -135,7 +197,7 @@ class WeekStreakViewController: UIViewController {
         [self.sunTitleLbl,self.monTitleLbl, self.tuesTitleLbl, self.wedTitleLbl, self.thuTitleLbl, self.friTitleLbl, self.satTitleLbl].forEach({
             $0?.font = AppFont.semibold.size(12.0, familyName: familyManrope)
         })
-                
+        
         [self.sunCountLbl, self.monCountLbl, self.tuesCountLbl, self.wedCountLbl, self.thuCountLbl, self.friCountLbl, self.satCountLbl].forEach({
             $0?.font = AppFont.semibold.size(12.0, familyName: familyManrope)
         })
@@ -145,5 +207,16 @@ class WeekStreakViewController: UIViewController {
         self.proceedBtn.titleLabel?.font = AppFont.semibold.size(14.0, familyName: familyManrope)
     }
     
-    
+}
+
+extension WeekStreakViewController{
+    private func getDayStreak(){
+        WorkoutLibraryVM.getUserStreakApi(completion: {[weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return }
+            
+            print("getResultData: ", getResultData)
+            self.dayStreaksData = getResultData.data
+            self.setInputData()
+        })
+    }
 }

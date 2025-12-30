@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="MyTrainerTableViewCell" rowHeight="1039" id="KGk-i7-Jjw" customClass="MyTrainerTableViewCell" customModule="MyPT_Connect" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="870" height="1039"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="870" height="1039"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pHs-Tp-KwH" userLabel="cellMBV">
+                        <rect key="frame" x="19" y="1" width="832" height="904"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_trainer" translatesAutoresizingMaskIntoConstraints="NO" id="Flk-wF-I7J">
+                                <rect key="frame" x="0.0" y="0.0" width="832" height="832"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="Flk-wF-I7J" secondAttribute="height" id="iw4-7s-gN4"/>
+                                </constraints>
+                            </imageView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wYT-A2-Elm" userLabel="TraiinerDetailsMBV">
+                                <rect key="frame" x="0.0" y="761.66666666666663" width="832" height="71.333333333333371"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="MyPT Studio Dubai" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="E9a-YR-khl">
+                                        <rect key="frame" x="20" y="1" width="760" height="24"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                        <color key="textColor" name="appWhite"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_trainerBadge" translatesAutoresizingMaskIntoConstraints="NO" id="bpw-na-BBQ">
+                                        <rect key="frame" x="792" y="5" width="20" height="20"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="20" id="DKi-ld-2CZ"/>
+                                            <constraint firstAttribute="width" secondItem="bpw-na-BBQ" secondAttribute="height" multiplier="1:1" id="dKR-Go-664"/>
+                                        </constraints>
+                                    </imageView>
+                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="OyK-wj-vJd">
+                                        <rect key="frame" x="20" y="37" width="792" height="16.333333333333329"/>
+                                        <subviews>
+                                            <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rkn-5L-eZC">
+                                                <rect key="frame" x="0.0" y="0.0" width="55" height="16.333333333333332"/>
+                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                <inset key="contentEdgeInsets" minX="0.0" minY="0.0" maxX="6" maxY="0.0"/>
+                                                <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-5" maxY="0.0"/>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <state key="normal" title="1.2km" image="ic_chooseLocation">
+                                                    <color key="titleColor" name="appWhite"/>
+                                                </state>
+                                            </button>
+                                            <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="245" verticalHuggingPriority="245" horizontalCompressionResistancePriority="745" verticalCompressionResistancePriority="745" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3mt-n5-pKP">
+                                                <rect key="frame" x="55" y="0.0" width="634" height="16.333333333333332"/>
+                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                <color key="tintColor" systemColor="tintColor"/>
+                                                <inset key="contentEdgeInsets" minX="0.0" minY="1" maxX="6" maxY="1"/>
+                                                <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-5" maxY="0.0"/>
+                                                <state key="normal" image="ic_grayDot">
+                                                    <color key="titleColor" name="appWhite"/>
+                                                    <color key="titleShadowColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                </state>
+                                            </button>
+                                            <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pR9-C6-jKk">
+                                                <rect key="frame" x="689" y="0.0" width="33" height="16.333333333333332"/>
+                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="6"/>
+                                                <inset key="contentEdgeInsets" minX="0.0" minY="0.0" maxX="5" maxY="0.0"/>
+                                                <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-4" maxY="0.0"/>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <state key="normal" title="4.2 " image="ic_star">
+                                                    <color key="titleColor" name="appWhite"/>
+                                                </state>
+                                            </button>
+                                            <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mOf-4i-owR">
+                                                <rect key="frame" x="722" y="0.0" width="70" height="16.333333333333332"/>
+                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                <inset key="contentEdgeInsets" minX="0.0" minY="0.0" maxX="5" maxY="0.0"/>
+                                                <inset key="titleEdgeInsets" minX="4" minY="0.0" maxX="-4" maxY="0.0"/>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <state key="normal" title="12k ratings" image="ic_dashboardCircle">
+                                                    <color key="titleColor" name="txtDarkGray"/>
+                                                </state>
+                                            </button>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="bottom" secondItem="OyK-wj-vJd" secondAttribute="bottom" constant="17.999999999999986" id="1u5-Dj-Kwx"/>
+                                    <constraint firstItem="bpw-na-BBQ" firstAttribute="leading" secondItem="E9a-YR-khl" secondAttribute="trailing" constant="12" id="Awx-v5-exp"/>
+                                    <constraint firstAttribute="trailing" secondItem="bpw-na-BBQ" secondAttribute="trailing" constant="20" id="BrI-Bg-8Dx"/>
+                                    <constraint firstItem="E9a-YR-khl" firstAttribute="top" secondItem="wYT-A2-Elm" secondAttribute="top" constant="1" id="CeN-hg-hhG"/>
+                                    <constraint firstItem="bpw-na-BBQ" firstAttribute="bottom" secondItem="E9a-YR-khl" secondAttribute="bottom" id="adx-Bm-c8l"/>
+                                    <constraint firstItem="OyK-wj-vJd" firstAttribute="leading" secondItem="E9a-YR-khl" secondAttribute="leading" id="fiR-pd-m5L"/>
+                                    <constraint firstAttribute="trailing" secondItem="OyK-wj-vJd" secondAttribute="trailing" constant="20" id="gZa-Tf-Owl"/>
+                                    <constraint firstItem="E9a-YR-khl" firstAttribute="leading" secondItem="wYT-A2-Elm" secondAttribute="leading" constant="20" id="pYn-tU-K4w"/>
+                                    <constraint firstItem="OyK-wj-vJd" firstAttribute="top" secondItem="E9a-YR-khl" secondAttribute="bottom" constant="12" id="plJ-an-2yg"/>
+                                </constraints>
+                            </view>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="OFi-Zy-2vk">
+                                <rect key="frame" x="0.0" y="842" width="832" height="50"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="50" id="0yO-FK-GYp"/>
+                                </constraints>
+                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="bKS-o2-8Re">
+                                    <size key="itemSize" width="128" height="128"/>
+                                    <size key="estimatedItemSize" width="128" height="128"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="20" minY="0.0" maxX="20" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                                <connections>
+                                    <outlet property="dataSource" destination="KGk-i7-Jjw" id="aNJ-QJ-7kf"/>
+                                    <outlet property="delegate" destination="KGk-i7-Jjw" id="P98-TM-cD9"/>
+                                </connections>
+                            </collectionView>
+                        </subviews>
+                        <color key="backgroundColor" name="MainBgColor"/>
+                        <constraints>
+                            <constraint firstAttribute="bottom" secondItem="OFi-Zy-2vk" secondAttribute="bottom" constant="12" id="9aD-6m-iap"/>
+                            <constraint firstItem="OFi-Zy-2vk" firstAttribute="top" secondItem="Flk-wF-I7J" secondAttribute="bottom" constant="10" id="EJQ-5A-VOz"/>
+                            <constraint firstItem="Flk-wF-I7J" firstAttribute="leading" secondItem="pHs-Tp-KwH" secondAttribute="leading" id="NH4-wg-fW8"/>
+                            <constraint firstItem="wYT-A2-Elm" firstAttribute="trailing" secondItem="Flk-wF-I7J" secondAttribute="trailing" id="bNh-zq-tSw"/>
+                            <constraint firstItem="OFi-Zy-2vk" firstAttribute="leading" secondItem="pHs-Tp-KwH" secondAttribute="leading" id="bST-UP-TgG"/>
+                            <constraint firstItem="wYT-A2-Elm" firstAttribute="bottom" secondItem="Flk-wF-I7J" secondAttribute="bottom" constant="1" id="dbO-HL-RH5"/>
+                            <constraint firstAttribute="trailing" secondItem="Flk-wF-I7J" secondAttribute="trailing" id="ent-oE-c8d"/>
+                            <constraint firstAttribute="trailing" secondItem="OFi-Zy-2vk" secondAttribute="trailing" id="mcu-c9-bgR"/>
+                            <constraint firstItem="Flk-wF-I7J" firstAttribute="top" secondItem="pHs-Tp-KwH" secondAttribute="top" id="vvV-Jp-wUA"/>
+                            <constraint firstItem="wYT-A2-Elm" firstAttribute="leading" secondItem="Flk-wF-I7J" secondAttribute="leading" id="xTj-L0-GK3"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="pHs-Tp-KwH" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="19" id="IoB-3I-JSl"/>
+                    <constraint firstItem="pHs-Tp-KwH" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="1" id="Tpl-4p-2Es"/>
+                    <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="pHs-Tp-KwH" secondAttribute="bottom" constant="24" id="fcj-JC-sat"/>
+                    <constraint firstAttribute="trailing" secondItem="pHs-Tp-KwH" secondAttribute="trailing" constant="19" id="qZU-Ol-6bg"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <connections>
+                <outlet property="avgRatingBtn" destination="mOf-4i-owR" id="0BV-Od-cIy"/>
+                <outlet property="cellMBV" destination="pHs-Tp-KwH" id="4xH-58-c4u"/>
+                <outlet property="distanceBtn" destination="Rkn-5L-eZC" id="upY-ud-D0h"/>
+                <outlet property="landMarkBtn" destination="3mt-n5-pKP" id="2yW-hv-oLi"/>
+                <outlet property="ratingBtn" destination="pR9-C6-jKk" id="GFq-d2-zUK"/>
+                <outlet property="trainerCategoryCollView" destination="OFi-Zy-2vk" id="pdE-8l-FOd"/>
+                <outlet property="trainerImgView" destination="Flk-wF-I7J" id="05U-Wz-ldt"/>
+                <outlet property="trainerNameBottomConstrnt" destination="plJ-an-2yg" id="GJd-Sj-fqN"/>
+                <outlet property="trainerNameLbl" destination="E9a-YR-khl" id="xiU-vL-E7V"/>
+                <outlet property="verifyImgView" destination="bpw-na-BBQ" id="qXs-b9-nYd"/>
+            </connections>
+            <point key="canvasLocation" x="47.328244274809158" y="-39.7887323943662"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="ic_chooseLocation" width="16" height="16.333333969116211"/>
+        <image name="ic_dashboardCircle" width="3" height="3.3333332538604736"/>
+        <image name="ic_grayDot" width="3" height="3.3333332538604736"/>
+        <image name="ic_star" width="16" height="16.333333969116211"/>
+        <image name="ic_trainer" width="429.66665649414062" height="437"/>
+        <image name="ic_trainerBadge" width="14.333333015441895" height="14.333333015441895"/>
+        <namedColor name="MainBgColor">
+            <color red="0.0" green="0.019607843137254902" blue="0.0078431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appWhite">
+            <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="txtDarkGray">
+            <color red="0.58431372549019611" green="0.58431372549019611" blue="0.58431372549019611" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="tintColor">
+            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>

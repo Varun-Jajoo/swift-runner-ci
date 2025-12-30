@@ -11,6 +11,7 @@ class ResourceDetailsViewController: CommonViewController {
 
     //----------------------VARIABLE
     var resourceData: ResourceModel? 
+    var inputShreId: String?
     
     
     //-----------------------SHARE BTN
@@ -61,7 +62,19 @@ class ResourceDetailsViewController: CommonViewController {
     
     @objc func shareBtnTapped() {
         print("Custom right button tapped")
-        Utility.shared.shareSocial(viewController: self, textToShare: "Share to social", imageToShare: AppImages.navLeft ?? UIImage(), urlShareStr: "https://www.google.com/")
+//        Utility.shared.shareSocial(viewController: self, textToShare: "Share to social", imageToShare: AppImages.navLeft ?? UIImage(), urlShareStr: "https://www.google.com/")
+        
+        ImageDownloader.shared.downloadImage(from: self.resourceData?.image ?? "", completion: {[weak self] img in
+        guard let self = self , let img = img else {
+        return
+        }
+        let getBaseUrl:String = AppBaseUrl.baseScheme.rawValue + "://" + AppBaseUrl.baseDevUrl.rawValue
+        print(getBaseUrl)
+        //            let urlString = "https://mobileapp.mypt-me.com/\(self.inputType ?? "")/\(studioDetails?.id ?? 0)/\(gymDetailsFlow)"
+        
+            let urlString = "\(getBaseUrl)/\("fitnessResouce")/\(self.inputShreId ?? "")/\("healthPfofile")"
+        Utility.shared.shareSocial(viewController: self, textToShare: self.resourceData?.title ?? "", imageToShare: img, urlShareStr: urlString)
+        })
     }
     
     private func setInputData(){

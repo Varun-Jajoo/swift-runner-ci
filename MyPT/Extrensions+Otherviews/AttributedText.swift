@@ -39,6 +39,13 @@ extension String {
         
         return attributeString
     }
+    
+    //MARK: -----------------MAKE IT LABEL TEXT GRADIENT
+    func gradientAttr(labl: UILabel, txtStr: String, inputFont: UIFont? = AppFont.medium.size(20.0, familyName: familyClashDisplay)) -> NSAttributedString {
+        let attStr = txtStr.attributedStringWithGradient([UIColor.appWhite, UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0)], frame: labl.bounds, font: inputFont ?? UIFont(), startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1))
+        
+        return attStr
+    }
 }
 
 // MARK: NSAttributedString extensions
@@ -51,6 +58,7 @@ extension NSAttributedString: AttributedStringComponent {
         var range = NSRange(location: 0, length: string.count)
         return attributes(at: 0, effectiveRange: &range)
     }
+    
 }
 
 extension NSAttributedString {

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="NoteDescTableViewCell" rowHeight="113" id="KGk-i7-Jjw" customClass="NoteDescTableViewCell" customModule="MyPT_Connect" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="585" height="113"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="585" height="113"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YiX-Uy-rf9">
+                        <rect key="frame" x="0.0" y="1" width="585" height="29.333333333333332"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" text="1." lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GJO-AC-Xbs">
+                                <rect key="frame" x="0.0" y="3" width="11.666666666666666" height="20.333333333333332"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="txtDarkGray"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="1000" verticalCompressionResistancePriority="1000" text="Add exercies" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="czh-iT-fks">
+                                <rect key="frame" x="13.666666666666686" y="1" width="570.33333333333326" height="20.333333333333332"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="txtDarkGray"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="GJO-AC-Xbs" firstAttribute="leading" secondItem="YiX-Uy-rf9" secondAttribute="leading" id="53h-cF-TaH"/>
+                            <constraint firstItem="czh-iT-fks" firstAttribute="top" secondItem="YiX-Uy-rf9" secondAttribute="top" constant="1" id="69S-sa-XOW"/>
+                            <constraint firstAttribute="trailing" secondItem="czh-iT-fks" secondAttribute="trailing" constant="1" id="NEr-rB-lw3"/>
+                            <constraint firstItem="GJO-AC-Xbs" firstAttribute="top" secondItem="czh-iT-fks" secondAttribute="top" constant="2" id="NJ5-im-DP9"/>
+                            <constraint firstItem="czh-iT-fks" firstAttribute="leading" secondItem="GJO-AC-Xbs" secondAttribute="trailing" constant="2" id="Wfq-1c-Bdz"/>
+                            <constraint firstAttribute="bottom" secondItem="czh-iT-fks" secondAttribute="bottom" constant="8" id="fvp-TT-FL9"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                <constraints>
+                    <constraint firstItem="YiX-Uy-rf9" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="1" id="Gvn-eo-eHt"/>
+                    <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="YiX-Uy-rf9" secondAttribute="bottom" constant="1" id="HDP-jf-y0g"/>
+                    <constraint firstItem="YiX-Uy-rf9" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="r8A-Qc-PRO"/>
+                    <constraint firstAttribute="trailing" secondItem="YiX-Uy-rf9" secondAttribute="trailing" id="xay-It-C14"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <connections>
+                <outlet property="cellMBV" destination="YiX-Uy-rf9" id="AL2-Gi-r4Y"/>
+                <outlet property="noteDescLbl" destination="czh-iT-fks" id="LFi-ok-kid"/>
+                <outlet property="noteNumLbl" destination="GJO-AC-Xbs" id="Qg3-sR-hrO"/>
+            </connections>
+            <point key="canvasLocation" x="100" y="44.014084507042256"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <namedColor name="txtDarkGray">
+            <color red="0.58431372549019611" green="0.58431372549019611" blue="0.58431372549019611" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

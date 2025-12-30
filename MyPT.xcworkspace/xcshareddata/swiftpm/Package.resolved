@@ -1,5 +1,5 @@
 {
-  "originHash" : "80c46d5afe959ccfd086729fc6c5ac1ecd3ab3a283a4f7cbdb00eff6ce4eec55",
+  "originHash" : "d28cb0ec6c6fa6da1e9f4e0d13856e1b8e15381fd1fb27bf6a0492782f0d620e",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -62,6 +62,15 @@
       "state" : {
         "revision" : "40ba10aaf175bf50abefd0e518bd3b40862af3b1",
         "version" : "25.0.1"
+      }
+    },
+    {
+      "identity" : "countrypickerview",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kizitonwose/CountryPickerView.git",
+      "state" : {
+        "revision" : "6ecf22145d577411fb97c8c964df0fb5886f035f",
+        "version" : "3.3.0"
       }
     },
     {

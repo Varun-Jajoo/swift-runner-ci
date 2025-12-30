@@ -16,6 +16,8 @@ class CalendarView: UIView {
     
     weak var delegate: CustomCalendarDelegate?
     private var isScroll: Bool = true
+    var isNext30days: Bool? = false
+    
     
     // Properties
     private var dateFormatter: DateFormatter = {
@@ -119,6 +121,36 @@ class CalendarView: UIView {
     // MARK: - getAllDaysOfCurrentMonth
     func getAllDaysOfCurrentMonth() -> [Date] {
         let calendar = Calendar.current
+        let today = Date()
+        
+        if let isNext30days = isNext30days, isNext30days {
+            let dates: [Date] = (0..<31).compactMap {
+                calendar.date(byAdding: .day, value: $0, to: today)
+            }
+
+            return dates
+            
+        }else{
+            // Get the range of days in the current month
+            guard let range = calendar.range(of: .day, in: .month, for: currentMonth),
+                  let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: currentMonth)) else {
+                return []
+            }
+            
+            // Generate all days
+            return range.compactMap { day -> Date? in
+                var components = DateComponents()
+                components.year = calendar.component(.year, from: currentMonth)
+                components.month = calendar.component(.month, from: currentMonth)
+                components.day = day
+                return calendar.date(from: components)
+            }
+        }
+    }
+    
+    /*
+    func getAllDaysOfCurrentMonth() -> [Date] {
+        let calendar = Calendar.current
         
         // Get the range of days in the current month
         guard let range = calendar.range(of: .day, in: .month, for: currentMonth),
@@ -135,6 +167,8 @@ class CalendarView: UIView {
             return calendar.date(from: components)
         }
     }
+    */
+    
     
     // MARK: - Calculations
     private func calculateDaysInMonth() {
@@ -304,6 +338,8 @@ extension CalendarView: UICollectionViewDataSource, UICollectionViewDelegate, UI
                 delegate?.didSelecteed?(withValue: "\(getAllDaysOfCurrentMonth()[indexPath.row])")
             }
         }
+        
+        self.collectionView.reloadData()
         
         // Handle date selection here
         //        let selectedDate = calculateDateForIndexPath(indexPath)

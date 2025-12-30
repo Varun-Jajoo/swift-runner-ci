@@ -268,7 +268,7 @@ class ProfileEditViewController: CommonViewController {
     }
     
     enum editBtnTag: Int {
-    case profileBtn = 2201, bgProfile, saveChange, editGender
+    case profileBtn = 2201, bgProfile, saveChange, editGender, selectCity
     }
     
     @IBAction func editProfileCommonBtnActn(_ sender: UIButton) {
@@ -315,6 +315,9 @@ class ProfileEditViewController: CommonViewController {
             
         case editBtnTag.editGender.rawValue:
             self.genderTxtField.becomeFirstResponder()
+            
+        case editBtnTag.selectCity.rawValue:
+            self.cityTxtField.becomeFirstResponder()
             
         default:
             print("none.........")
@@ -477,7 +480,21 @@ class ProfileEditViewController: CommonViewController {
             }
             $0?.font = AppFont.semibold.size(16.0, familyName: familyManrope)
         })
+       
         
+        [
+            self.fullNameTxtField,
+            self.emailTxtField,
+            self.locTxtField,
+            self.addressTxtField,
+            self.postalCodeTxtField
+        ].enumerated().forEach { index, field in
+            field.tag = 101 + index
+            addRightPaddingImageWithTap(to: field, image: UIImage(named: "ic_curve_edit"), paddingWidth: 25.0)
+        }
+        
+        
+        /*
         [
             self.fullNameTxtField,
             self.emailTxtField,
@@ -496,6 +513,50 @@ class ProfileEditViewController: CommonViewController {
             }
             $0?.setRightPaddingWithImage(25.0, UIImage(named: "ic_curve_edit"))
         })
+        */
+    }
+    
+    func addRightPaddingImageWithTap(to textField: UITextField, image: UIImage?, paddingWidth: CGFloat? = 25.0) {
+        guard let paddingWidth = paddingWidth else { return }
+        
+        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: paddingWidth, height: textField.frame.height))
+
+        let imageView = UIImageView(image: image)
+        imageView.isUserInteractionEnabled = true
+        imageView.contentMode = .center
+        imageView.frame = CGRect(x: (paddingWidth - 24) / 2, y: (textField.frame.height - 24) / 2, width: 24, height: 24)
+
+        // Add tap gesture and assign the textField's tag to the imageView
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(rightImageTapped(_:)))
+        imageView.addGestureRecognizer(tapGesture)
+        imageView.tag = textField.tag  // Pass tag via imageView
+
+        paddingView.addSubview(imageView)
+        textField.rightView = paddingView
+        textField.rightViewMode = .always
+    }
+    
+    @objc func rightImageTapped(_ gesture: UITapGestureRecognizer) {
+        guard let imageView = gesture.view else { return }
+
+        switch imageView.tag {
+        case 101:
+            print("Name TextField......")
+            self.fullNameTxtField.becomeFirstResponder()
+        case 102:
+            print("email text field....")
+            self.emailTxtField.becomeFirstResponder()
+        case 103:
+            print("Loaction Choose..")
+            self.locTxtField.becomeFirstResponder()
+        case 104:
+            print("Edit address manual")
+            self.addressTxtField.becomeFirstResponder()
+            
+        default:
+            break
+        }
+        
     }
     
     private func setupTxtField(){

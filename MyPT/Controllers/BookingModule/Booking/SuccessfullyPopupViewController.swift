@@ -37,8 +37,12 @@ class SuccessfullyPopupViewController: UIViewController {
     }
     
     @IBAction func doneBtnActn(_ sender: Any) {
-        print("done btn clicked....")
-        self.dismiss(animated: true)
+        self.dismiss(animated: true, completion: {[weak self] in
+            guard self != nil else {
+                return
+            }
+//            self?.navCtrl?.popToViewController(ofClass: BookingNotificationViewController.self, animated: false)
+        })
     }
     
     func setupUI(){
@@ -54,5 +58,15 @@ class SuccessfullyPopupViewController: UIViewController {
         self.successDescLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
         self.doneBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
     }
-
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first {
+            let location = touch.location(in: view)
+                  if !self.successfulMBV.frame.contains(location) {
+                      self.dismiss(animated: true, completion: nil)
+                  }else{
+                      print("tap at popup view.")
+                  }
+        }
+    }
 }

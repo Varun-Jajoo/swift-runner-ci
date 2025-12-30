@@ -20,6 +20,7 @@ class UpcomingSessionsCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var addrBtn: UIButton!
     @IBOutlet weak var bottomMBV: UIView!
     @IBOutlet weak var noteLbl: UILabel!
+    @IBOutlet weak var trackBtn: UIButton!
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -44,6 +45,7 @@ class UpcomingSessionsCollectionViewCell: UICollectionViewCell {
         distanceBtn.titleLabel?.font = AppFont.semibold.size(12.0, familyName: familyManrope)
         addrBtn.titleLabel?.font = AppFont.semibold.size(12.0, familyName: familyManrope)
         noteLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
+        trackBtn.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyClashDisplay)
     }
     
     func setinputData(data: BookingDataModel?){
@@ -53,14 +55,37 @@ class UpcomingSessionsCollectionViewCell: UICollectionViewCell {
 //        self.bgImgView.loadImage(urlString: getData.trainer_image, placeholder: UIImage())
 //        self.leftUserImg.loadImage(urlString: getData.trainer_image, placeholder: UIImage())
         
-        self.sessionTitleLbl.text = "8th session"
-        self.sessionDateLbl.text = getData.timing
-        self.userNameLbl.text = getData.trainer
-        self.distanceBtn.setTitle("2km", for: .normal)
-        self.addrBtn.setTitle(getData.location, for: .normal)
+        let dateStr = (DateFormatterHelper.shared.getDateFromFormat(fromDate: (getData.timing?.value ?? ""), fromFormat: "MMM dd, yyyy, h:mm a", toFormat: "dd/MM/yy") ?? "")
+        let slot = (getData.selected_slot?.value ?? "")
+        let bullet = "\u{2022}"
+
+        // Create attributed strings
+        let dateAttr = NSAttributedString(string: dateStr + " ", attributes: [
+            .foregroundColor: UIColor.appWhite
+        ])
+        let bulletAttr = NSAttributedString(string: bullet + " ", attributes: [
+            .foregroundColor: UIColor.txtDarkGray
+        ])
+
+        let slotAttr = NSAttributedString(string: slot, attributes: [
+            .foregroundColor: UIColor.appWhite
+        ])
+
+        // make Attr date time
+        let dateTimeAttr = NSMutableAttributedString()
+        dateTimeAttr.append(dateAttr)
+        dateTimeAttr.append(bulletAttr)
+        dateTimeAttr.append(slotAttr)
+        
+//        self.sessionTitleLbl.text = "4th Session"
+        self.sessionDateLbl.attributedText = dateTimeAttr
+        self.userNameLbl.text = getData.trainer?.value
+        self.distanceBtn.setTitle(getData.distance?.value, for: .normal)
+        self.addrBtn.setTitle(getData.location?.value, for: .normal)
         self.noteLbl.text = "Training Session Details"
         
-        self.bgImgView.image = UIImage(named: "ic_UpcomingSessions")
+//        self.bgImgView.image = UIImage(named: "ic_UpcomingSessions")
+        self.leftUserImg.loadImage(urlString: getData.trainer_image?.value, placeholder: UIImage()) //some time image auto cropped if ratio of image is not getting 0.4 (i.e. width = 0.4 × height)
         
         self.contentView.setNeedsLayout()
         self.contentView.layoutIfNeeded()

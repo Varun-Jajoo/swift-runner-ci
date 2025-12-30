@@ -8,16 +8,49 @@
 import UIKit
 
 class WorkoutFilterViewController: UIViewController {
-
+    
     //MARK: --------------VARIABLE
-    var workTypeData:[Any]?
+    private var WorkoutTypeIds = Set<String>()
+    var sendBckFilters: ((FilterDataParamsModel?) -> Void)?
+    var filterData: FilterDataParamsModel? = FilterDataParamsModel()
+    var workoutFilters:[WorkoutLevelModel]? = []
+    var workLevelData:[WorkoutLevelModel]? = []
+    var workoutsTypeLst: [WorkoutAllcategoryModel]? = []
+    var bodyPartsLst:[WorkoutAllcategoryModel]? = []
     var filterCount:((Int)-> Void)?
     
     var countItems:Int = 0{
         didSet{
-            filterCount?(countItems)
             self.applyFilterBtn.setTitle("APPLY FILTER (\(countItems))", for: .normal)
         }
+    }
+    
+    private var iscalorieBurn: Bool? {
+        didSet{
+            if let iscalorieBurn = iscalorieBurn, iscalorieBurn {
+                countItems += 1
+            }
+        }
+    }
+    
+    private var isDuration: Bool? {
+        didSet{
+            if let isDuration = isDuration, isDuration {
+                countItems += 1
+            }
+        }
+    }
+    
+    private var isFilterBy: Bool? {
+        didSet{
+            if let isFilterBy = isFilterBy, isFilterBy {
+                countItems += 1
+            }
+        }
+    }
+    
+    private var WorkoutTypeIdStr: String {
+        return WorkoutTypeIds.joined(separator: ",")
     }
     
     //MARK: ----------------IBOUTLET
@@ -46,22 +79,22 @@ class WorkoutFilterViewController: UIViewController {
     @IBOutlet weak var workoutTypeCollView: UICollectionView!
     @IBOutlet weak var bodypartsCollView: UICollectionView!
     @IBOutlet weak var workoutLevelCollView: UICollectionView!
-    
     @IBOutlet weak var customThumbSlider: ThumbTextSlider!
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         // Do any additional setup after loading the view.
         self.setupFont()
+        self.getBodyPartsApi()
+        self.getWorkoutTypeApi()
+        self.filterByTxtField.text = "Select" //"Most Popular"
+        self.workoutRangeMBV.delegate = self
         
-        self.filterByTxtField.text = "Most Popular"
-        
-        self.workTypeData = ["ic_filterRunning","ic_Filter_scadling","ic_filter_walking","ic_filter_walking2","ic_filter_cycling","ic_barbell_ diagonal"]
+        //        self.workTypeData = ["ic_filterRunning","ic_Filter_scadling","ic_filter_walking","ic_filter_walking2","ic_filter_cycling","ic_barbell_ diagonal"]
+        //        self.workoutTypeCollView.reloadData()
         
         self.setupCustomSlider()
-       
     }
     
     override func viewDidLayoutSubviews() {
@@ -75,12 +108,106 @@ class WorkoutFilterViewController: UIViewController {
     
     @IBAction func filterByDropDownBtnActn(_ sender: Any) {
         print("Filter by btn actn clicked.....")
+        self.filterByTxtField.becomeFirstResponder()
     }
-
+    
     @IBAction func applyFilterBtnActn(_ sender: Any) {
-        print("applyFilterBtnActn clicked..")
-        self.dismiss(animated: true, completion: nil)
+        self.filterData?.type = WorkoutTypeIdStr
+        print("applyFilterBtnActn clicked..", self.filterData as Any)
+        self.dismiss(animated: true, completion: {[weak self] in
+            self?.filterData?.page = "1"
+            self?.sendBckFilters?(self?.filterData)
+            if let countItems = self?.countItems , countItems != 0 {
+                self?.filterCount?(countItems)
+            }
+        })
     }
+    
+    private func localInputData(){
+        if let filter_by = filterData?.filter_by {
+            print("Local filter data: ", filter_by)
+            if let indx = self.workoutFilters?.firstIndex(where: { $0.id?.value == filter_by }){
+                self.filterByTxtField.text = self.workoutFilters?[indx].name
+                
+                if let name = self.workoutFilters?[indx].name, !name.isEmpty {
+                    if isFilterBy != true {
+                        isFilterBy = true
+                    }
+                }
+            }
+        }
+        
+        if let selectedType = filterData?.type?.components(separatedBy: ",") as? [String] {
+            print("Selected levels: ", selectedType)
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                for level in selectedType {
+                    if let indx = self.workoutsTypeLst?.firstIndex(where: { $0.id?.value == level }) {
+                        let indexPath = IndexPath(item: indx, section: 0)
+                        self.workoutTypeCollView.selectItem(at: indexPath, animated: true, scrollPosition: [])
+                        
+                        // Trigger delegate manually if needed
+                        self.workoutTypeCollView.delegate?.collectionView?(
+                            self.workoutTypeCollView,
+                            didSelectItemAt: indexPath
+                        )
+                    }
+                }
+                self.view.layoutIfNeeded()
+            }
+        }
+        
+        if let bodyPartIds = filterData?.muscle_id {
+            print("Local bodyPartIds: ", bodyPartIds)
+            if let indx = self.bodyPartsLst?.firstIndex(where: { $0.id?.value == bodyPartIds }){
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    let levelIndexPath = IndexPath(item: indx, section: 0)
+                    self.bodypartsCollView.selectItem(at: levelIndexPath, animated: true, scrollPosition: .top)
+                    // Optional: perform any additional setup for the selected cell
+                    self.bodypartsCollView.delegate?.collectionView?(self.bodypartsCollView, didSelectItemAt: levelIndexPath)
+                    self.view.layoutIfNeeded()
+                }
+            }
+        }
+        
+        if let level = filterData?.level {
+            print("Local level: ", level)
+            if let indx = self.workLevelData?.firstIndex(where: { $0.id?.value == level }){
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    let levelIndexPath = IndexPath(item: indx, section: 0)
+                    self.workoutLevelCollView.selectItem(at: levelIndexPath, animated: true, scrollPosition: .top)
+                    // Optional: perform any additional setup for the selected cell
+                    self.workoutLevelCollView.delegate?.collectionView?(self.workoutLevelCollView, didSelectItemAt: levelIndexPath)
+                    self.view.layoutIfNeeded()
+                }
+            }
+        }
+        
+        if let caloriesValue = filterData?.calories, let getValue = Float(caloriesValue) {
+            customThumbSlider.setValue(getValue, animated: false)
+            customThumbSlider.sendActions(for: .valueChanged)
+            
+            if iscalorieBurn != true {
+                iscalorieBurn = true
+            }
+        }
+        
+        if let workoutDuration = filterData?.duration?.components(separatedBy: "-") as? [String],
+           workoutDuration.count == 2,
+           let minDouble = Double(workoutDuration[0].trimmingCharacters(in: .whitespaces)),
+           let maxDouble = Double(workoutDuration[1].trimmingCharacters(in: .whitespaces)) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                self.workoutRangeMBV.selectedMinValue = CGFloat(minDouble)
+                self.workoutRangeMBV.selectedMaxValue =  CGFloat(maxDouble)
+                self.workoutRangeMBV.setNeedsLayout()
+            }
+            
+            if isDuration != true {
+                isDuration = true
+            }
+        }
+    }
+    
     
     func setupCustomSlider(){
         self.customThumbSlider.leftThumbImamge = nil
@@ -92,13 +219,23 @@ class WorkoutFilterViewController: UIViewController {
         self.customThumbSlider.setMaximumValue = 5000
         self.customThumbSlider.setMinvalue = "\u{007E} 1"
         self.customThumbSlider.addTarget(self, action: #selector(sliderValueChanged(slider: )), for: .valueChanged)
+        self.customThumbSlider.addTarget(self, action: #selector(sliderTouchEnded(_:)), for: [.touchUpInside, .touchUpOutside])
     }
     
     //MARK: ------------------Slider action
     @objc func sliderValueChanged(slider:UISlider){
-        print("slider is called..", slider.value)
         self.customThumbSlider.thumbTextLabel.text = "\u{007E}" + "\(Int(slider.value))"
         self.customThumbSlider.value = slider.value
+    }
+    
+    @objc func sliderTouchEnded(_ sender: UISlider) {
+        // Value when user lifts finger
+        let sliderValue = String(format: "%.2f", sender.value)
+        filterData?.calories = sliderValue
+        
+        if iscalorieBurn != true {
+            iscalorieBurn = true
+        }
     }
     
     func setupUI(){
@@ -117,8 +254,9 @@ class WorkoutFilterViewController: UIViewController {
         self.bodypartsCollView.register(UINib(nibName: "FilterCategoryCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "FilterCategoryCollectionViewCell")
         self.workoutLevelCollView.register(UINib(nibName: "FilterCategoryCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "FilterCategoryCollectionViewCell")
         
-        self.bodypartsCollView.allowsMultipleSelection = true
-        self.workoutLevelCollView.allowsMultipleSelection = true
+        self.workoutTypeCollView.allowsMultipleSelection = true
+        self.bodypartsCollView.allowsMultipleSelection = false
+        self.workoutLevelCollView.allowsMultipleSelection = false
         
         //------------------------************
         self.topTitleLbl.font = AppFont.bold.size(24.0, familyName: familyManrope)
@@ -132,16 +270,16 @@ class WorkoutFilterViewController: UIViewController {
         self.KcalLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
         self.applyFilterBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
     }
- 
+    
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let touch = touches.first {
             let location = touch.location(in: view)
-                  if !self.filterPopupMBV.frame.contains(location) {
-                      self.dismiss(animated: true, completion: nil)
-                  }else{
-                      print("tap at popup view.")
-                  }
+            if self.filterPopupMBV.frame.contains(location) {
+                self.dismiss(animated: true, completion: nil)
+            }else{
+                print("tap at popup view.")
+            }
         }
     }
 }
@@ -151,11 +289,15 @@ extension WorkoutFilterViewController: UICollectionViewDelegate, UICollectionVie
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
         if collectionView == workoutTypeCollView {
-            return self.workTypeData?.count ?? 0
+            return self.workoutsTypeLst?.count ?? 0 //self.workTypeData?.count ?? 0
         }
         else if collectionView == bodypartsCollView{
-            return 5
-        }else{
+            return self.bodyPartsLst?.count ?? 0
+        }
+        else if collectionView == workoutLevelCollView{
+            return self.workLevelData?.count ?? 0
+        }
+        else{
             return 5
         }
     }
@@ -164,17 +306,19 @@ extension WorkoutFilterViewController: UICollectionViewDelegate, UICollectionVie
         
         if collectionView == workoutTypeCollView {
             let workoutTypeCell:WithMeCollectionViewCell = workoutTypeCollView.dequeueReusableCell(withReuseIdentifier: "WithMeCollectionViewCell", for: indexPath) as! WithMeCollectionViewCell
-          
+            
             DispatchQueue.main.async {
                 workoutTypeCell.cellMBV.backgroundColor = UIColor(red: 28.0/255.0, green: 31.0/255.0, blue: 33.0/255.0, alpha: 1.0)
                 workoutTypeCell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             }
-           
+            
             workoutTypeCell.videoThumbnailImgView.image = nil
             workoutTypeCell.videoThumbnailImgView.isHidden = true
             workoutTypeCell.centerImgView.isHidden = false
             workoutTypeCell.centerImgView.image = nil
-            workoutTypeCell.centerImgView.image = UIImage(named: self.workTypeData?[indexPath.row] as? String ?? "")
+            workoutTypeCell.centerImgView.loadImage(urlString: workoutsTypeLst?[indexPath.row].icon?.value, placeholder: UIImage(named: "ic_filter_walking2"), resize: CGSize(width: 50.0, height: 50.0))
+            
+            //            workoutTypeCell.centerImgView.image = UIImage(named: self.workTypeData?[indexPath.row] as? String ?? "")
             
             return workoutTypeCell
         }
@@ -184,8 +328,9 @@ extension WorkoutFilterViewController: UICollectionViewDelegate, UICollectionVie
             bodypartCell.gymCategoryImgView.isHidden = true
             bodypartCell.gymCategoryImgView.image = nil
             bodypartCell.gymCategoryImgWidthConstrnt.constant = 1.0
-//            bodypartCell.selectionImgView.image = UIImage(named: "ic_filterChecked")
+            //            bodypartCell.selectionImgView.image = UIImage(named: "ic_filterChecked")
             bodypartCell.selectionImgView.image = UIImage(named: "ic_filterUncheck")
+            bodypartCell.gymCategoryNameLbl.text = self.bodyPartsLst?[indexPath.row].name?.value
             
             return bodypartCell
             
@@ -195,32 +340,32 @@ extension WorkoutFilterViewController: UICollectionViewDelegate, UICollectionVie
             levelCell.gymCategoryImgView.isHidden = true
             levelCell.gymCategoryImgView.image = nil
             levelCell.gymCategoryImgWidthConstrnt.constant = 1.0
-//            levelCell.selectionImgView.image = UIImage(named: "ic_filterChecked")
+            //            levelCell.selectionImgView.image = UIImage(named: "ic_filterChecked")
             levelCell.selectionImgView.image = UIImage(named: "ic_filterUncheck")
+            levelCell.gymCategoryNameLbl.text = self.workLevelData?[indexPath.row].name  // self.workLevelData?[indexPath.row] as? String
             
             return levelCell
         }
     }
     
-//    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-//        
-////        let vc:WorkoutDetailsViewController = WorkoutDetailsViewController.instantiate(appStoryboard: .library)
-////        self.navigationController?.pushViewController(vc, animated: true)
-//    }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-       
-        
         if collectionView == workoutTypeCollView {
             self.countItems += 1
-            
             let selectedCell = collectionView.cellForItem(at: indexPath) as? WithMeCollectionViewCell
             guard let selectedCell = selectedCell else { return }
             selectedCell.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), cornerRadious: 12.0)
+            
+            let ids =  workoutsTypeLst?[indexPath.row].id?.value ?? "0"
+            if WorkoutTypeIds.contains(ids) {
+                WorkoutTypeIds.remove(ids)
+            } else {
+                WorkoutTypeIds.insert(ids)
+            }
         }
         else if collectionView == bodypartsCollView{
             self.countItems += 1
-            
+            self.filterData?.muscle_id = bodyPartsLst?[indexPath.row].id?.value
             let bodypartcell = collectionView.cellForItem(at: indexPath) as? FilterCategoryCollectionViewCell
             guard let bodypartcell = bodypartcell else { return }
             bodypartcell.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), cornerRadious: 12.0)
@@ -228,6 +373,7 @@ extension WorkoutFilterViewController: UICollectionViewDelegate, UICollectionVie
             
         }else{
             self.countItems += 1
+            self.filterData?.level = workLevelData?[indexPath.row].id?.value
             
             let filtercell = collectionView.cellForItem(at: indexPath) as? FilterCategoryCollectionViewCell
             guard let filtercell = filtercell else { return }
@@ -237,22 +383,22 @@ extension WorkoutFilterViewController: UICollectionViewDelegate, UICollectionVie
     }
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-      
         
         if collectionView == workoutTypeCollView {
-           
             let deselectedcell = collectionView.cellForItem(at: indexPath) as? WithMeCollectionViewCell
             guard let deselectedcell = deselectedcell else { return }
             deselectedcell.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appBorder, cornerRadious: 12.0)
-            
-          
             guard self.countItems > 1 else {
                 return
             }
             self.countItems -= 1
+            let ids =  workoutsTypeLst?[indexPath.row].id?.value ?? "0"
+            if WorkoutTypeIds.contains(ids) {
+                WorkoutTypeIds.remove(ids)
+            }
         }
         else if collectionView == bodypartsCollView{
-        
+            
             let bodypartcell = collectionView.cellForItem(at: indexPath) as? FilterCategoryCollectionViewCell
             guard let bodypartcell = bodypartcell else { return }
             bodypartcell.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appBorder, cornerRadious: 12.0)
@@ -277,7 +423,6 @@ extension WorkoutFilterViewController: UICollectionViewDelegate, UICollectionVie
         }
     }
     
-    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
         if collectionView == workoutTypeCollView {
@@ -288,6 +433,109 @@ extension WorkoutFilterViewController: UICollectionViewDelegate, UICollectionVie
         }
     }
     
+    //MARK: -------------FOR DROP DOWN
+    private func openDropDown(inputView: UIView){
+        let popupVC:CityDropDownViewController = CityDropDownViewController.instantiate(appStoryboard: .booking)
+        popupVC.flowData = .filtersWorkout
+        popupVC.modalPresentationStyle = .popover
+        popupVC.getAlltCityData = nil
+        popupVC.workoutFilters?.removeAll()
+        popupVC.workoutFilters?.append(contentsOf: self.workoutFilters ?? [])
+        
+        popupVC.sentBackData = { [weak self] getFilterName , getId, empty1, empty2 in
+            guard let self = self else { return  }
+            self.filterByTxtField.text = getFilterName
+            self.filterData?.filter_by = "\(getId ?? 0)"
+            
+            if let name = getFilterName, !name.isEmpty {
+                if isFilterBy != true {
+                    isFilterBy = true
+                }
+            }
+        }
+        popupVC.view.backgroundColor = UIColor.mainBg
+        if let popoverController = popupVC.popoverPresentationController {
+            popoverController.sourceView = inputView
+            popoverController.sourceRect = CGRect(x: inputView.bounds.minX + 70, y: inputView.bounds.minY, width: inputView.bounds.width - 80, height: inputView.bounds.height)
+            popoverController.permittedArrowDirections = .up
+            popoverController.delegate = self
+            popoverController.backgroundColor = UIColor.mainBg
+        }
+        popupVC.preferredContentSize = CGSize(width: self.view.frame.size.width - 80, height: 150)
+        
+        present(popupVC, animated: true)
+    }
+    
 }
 
+extension WorkoutFilterViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+    }
+    
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        if textField == self.filterByTxtField {
+            view.endEditing(true)
+            self.openDropDown(inputView: textField)
+            return false
+        }
+        return true
+    }
+}
 
+//MARK: ----------------- CUSTOM RANGE SLIDER DELEGATE
+extension WorkoutFilterViewController: RangeSeekSliderDelegate {
+    
+    func didEndTouches(in slider: CustomRangeSlider) {
+        let minValue = String(format: "%.2f", slider.selectedMinValue)
+        let maxValue = String(format: "%.2f", slider.selectedMaxValue)
+        filterData?.duration = "\(minValue)-\(maxValue)"
+        print("filterData duration: ", filterData?.duration as Any)
+        if isDuration != true {
+            isDuration = true
+        }
+    }
+    
+}
+
+//MARK: ---------------------- EXTENSION FOR API
+extension WorkoutFilterViewController{
+    private func getBodyPartsApi(){
+        WorkoutLibraryVM.getBodyPartsApi(completion: {[weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return }
+            
+            if getResultData.success == true {
+                self.bodyPartsLst?.removeAll()
+                self.bodyPartsLst?.append(contentsOf: getResultData.data ?? [])
+                self.bodypartsCollView.reloadData()
+            }
+        })
+    }
+    
+    private func getWorkoutTypeApi(){
+        WorkoutLibraryVM.workoutTypeApi(isShowLoader: true, completion: {[weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return  }
+            
+            if getResultData.status == true {
+                self.workoutFilters?.removeAll()
+                self.workoutFilters?.append(contentsOf: getResultData.data?.filters ?? [])
+                self.workLevelData?.removeAll()
+                self.workLevelData?.append(contentsOf: getResultData.data?.workoutLevels ?? [])
+                self.workoutLevelCollView.reloadData()
+                self.workoutsTypeLst?.removeAll()
+                self.workoutsTypeLst?.append(contentsOf: getResultData.data?.allcategory ?? [])
+                self.workoutTypeCollView.reloadData()
+                
+                //----------------********
+                self.localInputData()
+            }
+        })
+    }
+}
+
+// MARK: ------------ UIPopoverPresentationControllerDelegate
+extension WorkoutFilterViewController: UIPopoverPresentationControllerDelegate {
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .none  // Keeps it as a popover on iPhone instead of full-screen
+    }
+}

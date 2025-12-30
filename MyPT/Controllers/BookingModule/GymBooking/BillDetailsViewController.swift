@@ -56,9 +56,18 @@ class BillDetailsViewController: UIViewController {
     }
     
     private func setInputData(){
-        self.sessionAmtLbl.text = self.sessionCost
-        self.taxesAmtLbl.text = self.taxesStr
+        let amtPart = self.totalPayableStr?.components(separatedBy: " ")
+        let currencyStr:String = amtPart?.first ?? ""
+        
+
+        
+        self.sessionAmtLbl.text = currencyStr + " " + (self.sessionCost ?? "")
+        self.taxesAmtLbl.text = currencyStr + " " + (self.taxesStr ?? "")
         self.totalPayableAmtLbl.text = self.totalPayableStr
+        
+//        self.sessionAmtLbl.text = currencyStr + " " + (self.sessionCost ?? "")
+//        self.taxesAmtLbl.text = currencyStr + " " + (self.taxesStr ?? "")
+//        self.totalPayableAmtLbl.text = self.totalPayableStr
         
         self.payoutBtn.setTitle(self.totalPayableStr, for: .normal)
     }

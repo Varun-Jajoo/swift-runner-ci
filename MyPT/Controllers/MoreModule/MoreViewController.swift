@@ -207,26 +207,38 @@ extension MoreViewController:UICollectionViewDataSource, UICollectionViewDelegat
                 
 //                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
             case .mybookings:
-                self.tabBarController?.selectedIndex = 1
+//                self.tabBarController?.selectedIndex = 1
+                if let tabBarVC = self.tabBarController as? CustomTabViewController {
+                    tabBarVC.selectedIndex = 1
+                    tabBarVC.handleTabSelection(index: 1)
+                }
+                
                 //                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
             case .my_Health_Stats:
                 self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                
+//                        let vc:HydrationViewViewController = HydrationViewViewController.instantiate(appStoryboard: .more)
+//                        self.navigationController?.pushViewController(vc, animated: true)
+                
             case .My_Milestone:
                 self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
             case .workout_library:
+//                self.tabBarController?.selectedIndex = 2
                 
-                self.tabBarController?.selectedIndex = 2
-                //                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                if let tabBarVC = self.tabBarController as? CustomTabViewController {
+                    tabBarVC.selectedIndex = 2
+                    tabBarVC.handleTabSelection(index: 2)
+                }
+                
+//            self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
                 
             case .My_Favourite_Workouts:
                 self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
                 
             case .My_Trainers:
-                
-                //                let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
-                //                self.navigationController?.pushViewController(vc, animated: false)
-                
-                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
+                let vc: FollowersViewController = FollowersViewController.instantiate(appStoryboard: .profile)
+                self.navigationController?.pushViewController(vc, animated: true)
+//                self.comingSoon(NavTitle: info.navTitle, titleStr: info.title, descStr: info.description)
                 
             case .Chats:
                 
@@ -436,23 +448,6 @@ extension MoreViewController:UICollectionViewDataSource, UICollectionViewDelegat
         let vc:DeleteAccPopupViewController = DeleteAccPopupViewController.instantiate(appStoryboard: .more)
         vc.modalPresentationStyle = .automatic
         self.present(vc, animated: true)
-        
-        
-        /*  Only for testing
-        AlertHelper.shared.showCustomeAlert(title: "", message: AppAlertStrings.delete_AlertMsg, actions: ["Ok", "Cancel"], withCancel: true, completion: { [weak self] tagGet in
-            guard let self = self else { return }
-            
-            if tagGet == 0 {
-                RegistrationVM.deleteUserAccApi(viewController: self, completion: {[weak self] getResultData in
-                    guard let self = self else { return  }
-                    print("getResultData account delete", getResultData)
-                    if appUserDefaults.clearUserDefault() {
-                        appSceneDelegate?.goToMainView()
-                    }
-                })
-            }
-        })
-        */
     }
     
     

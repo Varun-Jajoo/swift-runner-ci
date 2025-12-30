@@ -17,12 +17,15 @@ struct ReviewPackageWithoutTrainerBaseModel: Codable {
 struct ReviewDataModel: Codable {
     var packageDetail: ReviewPackageDetailModel?
     var price:String?
+    var main_price, tax_amount: FlexibleValue?
     var studio: ValityStudioDetailModel?
     
     enum CodingKeys: String, CodingKey {
         case packageDetail , price, studio
+        case main_price, tax_amount
     }
 }
+
 
  //MARK: -------------- PackageDetailModel
  struct ReviewPackageDetailModel: Codable {

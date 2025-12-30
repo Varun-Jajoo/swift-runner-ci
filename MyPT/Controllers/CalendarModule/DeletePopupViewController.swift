@@ -9,6 +9,11 @@ import UIKit
 
 class DeletePopupViewController: UIViewController {
 
+    //MARK: -------------VARIABLE
+    var sentBackData: ((_ isDelete: Bool?) -> Void)?
+    var delTilteStr: String?
+    var altMsgStr: String?
+    
     //MARK: --------------IBOUTLET
     @IBOutlet weak var popiupMBV: UIView!
     @IBOutlet weak var alterImgView: UIImageView!
@@ -22,6 +27,15 @@ class DeletePopupViewController: UIViewController {
 
         // Do any additional setup after loading the view.
         setupFont()
+       
+        if let delTilteStr = delTilteStr {
+            self.alterTitleLbl.text = delTilteStr
+        }
+        
+        if let altMsgStr = altMsgStr {
+            self.alterMsgLbl.text = altMsgStr
+        }
+        
     }
     
     override func viewDidLayoutSubviews() {
@@ -38,8 +52,9 @@ class DeletePopupViewController: UIViewController {
             })
         }else{
             print("Delete btn clicked.", sender.tag)
-            self.dismiss(animated: true, completion: {
+            self.dismiss(animated: true, completion: {[weak self] in
                 print("dismiss view")
+                self?.sentBackData?(true)
             })
         }
     }

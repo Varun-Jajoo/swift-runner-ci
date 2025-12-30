@@ -140,6 +140,7 @@ class BookingCalendarViewController: CommonViewController {
     //MARK: --------------- IBOUTLET
     @IBOutlet weak var topTitleMBV: UIView!
     @IBOutlet weak var monthMBV: UIView!
+    @IBOutlet weak var monthSubBckView: UIView!
     @IBOutlet weak var startEndsMBV: UIView!
     @IBOutlet weak var topTitleLbl: UILabel!
     @IBOutlet weak var startTitleLbl: UILabel!
@@ -160,7 +161,7 @@ class BookingCalendarViewController: CommonViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()
+//        setupUI()
         setUpFont()
         
         bookingCalendar.headerHeight = 0.0
@@ -172,7 +173,7 @@ class BookingCalendarViewController: CommonViewController {
         self.startDateBtn.setTitle("--", for: .normal)
         self.endBtn.setTitle("--", for: .normal)
         
-//        self.flowSetup()
+        self.flowSetup()
     }
     
     
@@ -212,7 +213,8 @@ class BookingCalendarViewController: CommonViewController {
         
         //---------------------**************UI
         DispatchQueue.main.async {
-            
+                        
+            self.monthSubBckView.roundSideCorners(radius: 20.0, cornerSide: [.topLeft, .topRight])
             self.bookingCalendar.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 0.0)
             self.calendarMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 20.0)
             
@@ -224,6 +226,24 @@ class BookingCalendarViewController: CommonViewController {
             self.calendarMBV.setGradientBorder(cornerRadious:20.0,width: 1.0, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)])
             
 //            self.bookingCalendar.setGradientBorder(cornerRadious:20.0,width: 1.0, colors: [UIColor(red: 187/255.0, green: 187/255.0, blue: 187/255.0, alpha: 1.0),UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1.0)])
+        }
+    }
+    
+    //MARK: ---------- Create Package SET UI
+    func createpackageSetupUI(){
+        
+        //---------------------**************UI
+        DispatchQueue.main.async {
+            //---------------- Remove Gradient view
+            self.calendarMBV.removeGradientBorder()
+            
+            self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+       
+            self.bookingCalendar.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 0.0)
+            self.bookingCalendar.backgroundColor = UIColor.clear
+            self.calendarMBV.backgroundColor = UIColor.appCard2
+            self.monthSubBckView.roundSideCorners(radius: 20.0, cornerSide: [.topLeft, .topRight])
+            self.calendarMBV.roundSideCorners(radius: 20.0, cornerSide: [.bottomLeft, .bottomRight])
         }
     }
     
@@ -250,7 +270,7 @@ class BookingCalendarViewController: CommonViewController {
     func flowSetup(){
         switch slotBookFlow {
         case .bookTrainerHomeWorkout, .bookTrainerGymWorkout:
-            
+            self.setupUI()
             self.setupBookingView()
             
             /*
@@ -267,12 +287,13 @@ class BookingCalendarViewController: CommonViewController {
             */
                        
         case .createPackage:
+            self.createpackageSetupUI()
+            
             self.topTitleMBV.isHidden = false
             self.startEndsMBV.isHidden = false
             self.continueBtn.isHidden = false
             self.statu1sMBV.isHidden = true
             self.statu2sMBV.isHidden = true
-            
             self.startDateBtn.isSelected = true
             self.endBtn.isSelected = false
             self.startDateBtn.isUserInteractionEnabled = false
@@ -287,16 +308,20 @@ class BookingCalendarViewController: CommonViewController {
             self.bookingCalendar.select(date)
             self.bookingCalendar.delegate?.calendar?(self.bookingCalendar, didSelect: date, at: .current)
             self.monthTitleLbl.text = getMonthName(from: bookingCalendar)
-                        
+            
         case .gymMembership:
             print("gymMembership")
+            self.setupUI()
             
         case .withTrainerMembership:
             print("withTrainerMembership")
+            self.setupUI()
             self.setupBookingView()
             
         case .withoutTrainerMembership:
             print("withoutTrainerMembership")
+            self.createpackageSetupUI()
+            
             self.topTitleMBV.isHidden = false
             self.startEndsMBV.isHidden = false
             self.continueBtn.isHidden = false
@@ -322,6 +347,8 @@ class BookingCalendarViewController: CommonViewController {
     }
     
     private func setupBookingView(){
+        self.setupUI()
+        
         self.topTitleMBV.isHidden = true
         self.startEndsMBV.isHidden = true
         self.continueBtn.isHidden = true

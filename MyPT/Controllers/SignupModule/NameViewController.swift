@@ -21,25 +21,53 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        self.hideNavigationBar()
         fullNameTitleLbl.text = nil
         fullNameTxtField.delegate = self
         self.continueBtn.isUserInteractionEnabled = false
         setUpFont()
+        updateContinueButton(isEnabled: false)
+        setupContinueButtonIcon(isEnabled: false)
         
-        //-----------------
-//        if let retrievedUser = appUserDefaults.getUserFromUserDefaults(){
-//            print("User ID: \(retrievedUser.step ?? 0), Phone: \(retrievedUser.user?.phone ?? "")")
-//        } else {
-//            print("No user found in UserDefaults")
-//        }
+        //        self.setupNavigationBarProgress(
+        //            progressBarWidth: 20,
+        //            settrackTintColor: UIColor(
+        //                red: 178/255,
+        //                green: 202/255,
+        //                blue: 1/255,
+        //                alpha: 1
+        //            )
+        //        )
+        //        self.setProgress(0.2)
         
         if let retrievedUser = appUserDefaults.getUserFromUserDefaults(as: SubmitDataModel.self){
             print("User ID: \(retrievedUser.step?.value ?? ""), Phone: \(retrievedUser.user?.phone ?? "")")
         } else {
             print("No user found in UserDefaults")
         }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.setNavigationColor(setColor: .clear)
+        self.statusBarColor(setColor: .clear)
+        setNavUI()
+    }
+    
+    func setNavUI(){
+        self.setupNavigationBarProgress(
+            progressBarWidth: self.view.frame.size.width*0.37,
+            settrackTintColor: UIColor(
+                red: 178/255,
+                green: 202/255,
+                blue: 1/255,
+                alpha: 1
+            )
+        )
+        //        self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37, settrackTintColor: UIColor(red: 178, green: 202, blue: 1, alpha: 1))
+        self.setProgress(0.2)
         
+        self.setLeftMenu(setTitle: [""], setTintColor: .clear, setTitleColor: .clear)
+        //        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite) skipe remove need of client
     }
     
     override func keyboardWillShow(_ notification: Notification) {
@@ -47,12 +75,12 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
         print("keyboardWillShow")
         self.addBlurWithVibrancyEffect(viewShow: self.mgImgView, alphBlur: 1.0, vibrancyAlphBlur: 0.4)
     }
-        
+    
     override func keyboardWillHide(_ notification: Notification) {
         super.keyboardWillHide(notification)
         self.customBlurViewRemove(viewShow: self.mgImgView)
     }
-        
+    
     deinit {
         NotificationCenter.default.removeObserver(self)
         print("------\(#function)------\(String(describing: Self.self))------" )
@@ -60,17 +88,17 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-      
-    }
         
+    }
+    
     //------------------************Font
     func setUpFont(){
-        self.titleLbl.font = AppFont.semibold.size(12.0, familyName: familyManrope)
+        self.titleLbl.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
         self.descLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
-        self.fullNameTitleLbl.font = AppFont.medium.size(10.0, familyName: familyManrope)
+        self.fullNameTitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
         self.fullNameTxtField.font = AppFont.semibold.size(16.0, familyName: familyManrope)
         self.fullNameTxtField.setPlaceholder(text: "Full name", font: AppFont.semibold.size(14.0, familyName: familyManrope), color: UIColor.txtDarkGray)
-        self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
+        self.continueBtn.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
     }
     
     //MARK: ---------- SET UI
@@ -85,11 +113,45 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
         }
     }
     
+    func updateContinueButton(isEnabled: Bool) {
+        continueBtn.isEnabled = isEnabled
+        continueBtn.isUserInteractionEnabled = isEnabled
+        
+        UIView.animate(withDuration: 0.2) {
+            self.setupContinueButtonIcon(isEnabled: isEnabled)
+            if isEnabled {
+                self.continueBtn.tintColor = .mainBg   // arrow color
+                self.continueBtn.backgroundColor = .appWhite
+                self.continueBtn.setTitleColor(.mainBg, for: .normal)
+            } else {
+                self.continueBtn.tintColor = .appWhite
+                self.continueBtn.backgroundColor = .appDarkGray
+                self.continueBtn.setTitleColor(.appWhite, for: .normal)
+            }
+        }
+    }
+    
+    func setupContinueButtonIcon(isEnabled: Bool) {
+        let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
+            .withRenderingMode(.alwaysTemplate)
+        
+        continueBtn.setImage(arrowImage, for: .normal)
+        
+        // Force image on right side
+        continueBtn.semanticContentAttribute = .forceRightToLeft
+        
+        // Space between text and image
+        continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -12)
+        continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 12)
+        
+        continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+    }
+    
     @IBAction func continueBtnActn(_ sender: Any) {
         print("Continiue btn clicked..")
         self.view.endEditing(true)
-        self.enableContinueBtn(isSelected: false)
-    
+        self.updateContinueButton(isEnabled: false)
+        
         
         //"\(appUserDefaults.getUserFromUserDefaults()?.user?.id ?? 0)"
         RegistrationVM.addNameApi(viewController: self, inputName: self.fullNameTxtField.text, inputId: "\(appUserDefaults.getUserFromUserDefaults(as: SubmitDataModel.self)?.user?.id ?? 0)", completion: { [weak self] getResultData in
@@ -99,49 +161,30 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
                 if let detailsData = getResultData.data {
                     appUserDefaults.saveUserToUserDefaults(detailsData)
                 }
-               
-                let vc:PersoniledViewController = PersoniledViewController.instantiate(appStoryboard: .main)
+                
+                let vc: PersoniledViewController = PersoniledViewController.instantiate(appStoryboard: .main)
                 self.navigationController?.pushViewController(vc, animated: true)
             }
             
-            self.enableContinueBtn(isSelected: true)
+            self.updateContinueButton(isEnabled: true)
         })
-        
-        
-        //        let vc:PersoniledViewController = PersoniledViewController.instantiate(appStoryboard: .main)
-        //        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
     }
     
-    
     @objc func textFieldDidChange(textField: UITextField){
         if  fullNameTxtField == textField {
-            if let isEmptyTxt = textField.text?.isEmpty, !isEmptyTxt{
+            if let isEmptyTxt = textField.text?.isEmpty, !isEmptyTxt {
                 self.fullNameTitleLbl.isHidden = false
                 self.fullNameTitleLbl.text = "Full name"
-                self.enableContinueBtn(isSelected: true)
-            }else{
-                self.enableContinueBtn(isSelected: false)
+                self.updateContinueButton(isEnabled: true)
+            } else {
+                self.updateContinueButton(isEnabled: false)
                 self.fullNameTitleLbl.isHidden = true
                 self.fullNameTitleLbl.text = nil
             }
         }
     }
-    
-    //MARK: -------------- ENABLE CONTINUE
-    func enableContinueBtn(isSelected:Bool = false){
-        if isSelected {
-            self.continueBtn.isUserInteractionEnabled = true
-            self.continueBtn.backgroundColor = UIColor.appWhite
-            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
-        } else {
-            self.continueBtn.isUserInteractionEnabled = false
-            self.continueBtn.backgroundColor = UIColor.appDarkGray
-            self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
-        }
-    }
-    
 }

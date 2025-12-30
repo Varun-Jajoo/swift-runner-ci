@@ -17,11 +17,11 @@ struct BookingBaseModel: Codable {
 
 //MARK: ------------ BookingDataModel
 struct BookingDataModel: Codable {
-    var id: Int?
-    var type, timing, trainer_image, selected_slot: String?
+    var id: FlexibleValue?
+    var type, timing, trainer_image, selected_slot: FlexibleValue?
     var workoutFocus: [String]?
-    var sessionType, duration, trainer, location, distance: String?
-    var isReschedule, isTrainer: Bool?
+    var sessionType, duration, trainer, location, distance, scheduleMsg, averageRating: FlexibleValue?
+    var isReschedule, isTrainer, isSchedule: Bool?
     var msg: String?
 
     enum CodingKeys: String, CodingKey {
@@ -30,8 +30,9 @@ struct BookingDataModel: Codable {
         case sessionType = "session_type"
         case duration, trainer, location, distance
         case isReschedule = "is_reschedule"
+        case isSchedule
         case isTrainer
-        case msg
+        case msg, scheduleMsg, averageRating
     }
 }
 
@@ -46,35 +47,41 @@ struct BookingDetailsBaseModel: Codable {
 
 //MARK: ------------- BookingDetailsDataModel
 struct BookingDetailsDataModel: Codable {
-    var rescheduledStatus, cancelRequest, is_declined, isAction: Bool?
-    var msg, cancellationPolicyMsg, bookingType, bookedAt, cancelledAtBooking: String?
+    var rescheduledStatus, cancelRequest, is_declined, isAction, isPackage, isAlreadyReview: Bool?
+    var msg, cancellationPolicyMsg, bookingType, bookedAt, cancelledAtBooking, bookingPrice, trainingPrefernce, booking_id, slot_id, price, main_price, tax_amount: FlexibleValue?
     var bookingDetail: BookingDetailModel?
     var trainerDetail: TrainerDetailModel?
     var cancellationDetail: CancellationDetailModel?
+    var cancellationPolicy: CancellationPolicyModel?
     
-
     enum CodingKeys: String, CodingKey {
         case rescheduledStatus = "rescheduled_status"
         case cancelRequest = "can_cancel_request"
-        case is_declined, isAction
+        case is_declined, isAction, isPackage, isAlreadyReview
         case cancellationPolicyMsg
         case bookingType = "booking_type"
+        case booking_id, slot_id
         case cancelledAtBooking = "cancelled_at"
         case bookedAt = "booked_at"
-        case bookingDetail, trainerDetail, msg, cancellationDetail
+        case bookingDetail, trainerDetail, msg, cancellationDetail, cancellationPolicy, bookingPrice
+        case trainingPrefernce
+        case price, main_price, tax_amount
     }
 }
 
 
 //MARK: ------------- BookingDetailModel
 struct BookingDetailModel: Codable {
-    var contact, price, location, trainingDate, qr: String?
-    var type: String?
+    var contact, price, location, trainingDate, qr, address_id: FlexibleValue?
+    var type: FlexibleValue?
+    var msg: FlexibleValue?
+    
 
     enum CodingKeys: String, CodingKey {
-        case contact, price, location, qr
+        case contact, price, location, qr, address_id
         case trainingDate = "training_date"
         case type
+        case msg
     }
 }
 
@@ -82,21 +89,47 @@ struct BookingDetailModel: Codable {
 struct TrainerDetailModel: Codable {
     var name, distance, location: String?
     var profile: String?
-    var averageRating, noOfRating: String?
+    var averageRating, noOfRating, trainer_id: FlexibleValue?
 }
 
 //MARK: --------------- Aancellation Detail MODEL
 struct CancellationDetailModel: Codable {
     var cancelledOn: String?
     var reason: String?
-    var refundAmount: String?
+    var refundAmount: FlexibleValue?
+    var msg: FlexibleValue?
     
     enum CodingKeys: String, CodingKey {
         case cancelledOn = "cancelled_on"
         case reason
         case refundAmount = "refund_amount"
+        case msg
     }
 }
+
+
+//MARK: --------------- CancellationPolicy Model
+struct CancellationPolicyModel: Codable {
+    var shortDescription: FlexibleValue?
+    var timeHours: FlexibleValue?
+    var max_cancel_time: FlexibleValue?
+    var freeMsg: FlexibleValue?
+    var cancelMsg: FlexibleValue?
+    var cancelMsgText: FlexibleValue?
+    var freeMsgText: FlexibleValue?
+    
+    
+    enum CodingKeys: String, CodingKey {
+        case shortDescription
+        case timeHours
+        case max_cancel_time
+        case freeMsg
+        case cancelMsg
+        case cancelMsgText
+        case freeMsgText
+    }
+}
+
 
 //MARK: ------------------ TRAINER SLOTS
 struct TrainerSlotsBaseModel: Codable {
@@ -105,3 +138,15 @@ struct TrainerSlotsBaseModel: Codable {
     var msg: String?
 }
 
+//------------ Trainer Details
+struct TrainerDeyRequestModel: Codable {
+    var id: Int?
+    var type, trainer_image: String?
+    var trainer, location, distance, scheduleMsg: String?
+   
+    enum CodingKeys: String, CodingKey {
+        case id, type, trainer_image
+        case trainer, location, distance
+        case scheduleMsg
+    }
+}

@@ -11,11 +11,15 @@ class TrainerTypeTableViewCell: UITableViewCell {
 
     @IBOutlet weak var cellMBV: UIView!
     @IBOutlet weak var titleLbl: UILabel!
+    @IBOutlet weak var descLbl: UILabel!
     @IBOutlet weak var trainerImgView: UIImageView!
     @IBOutlet weak var bgImgView: UIImageView!
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        
+        self.titleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
+        self.descLbl.font = AppFont.semibold.size(12.0, familyName: familyManrope)
         
         DispatchQueue.main.async {
             self.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)

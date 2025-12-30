@@ -232,6 +232,7 @@ class  BookingVM {
         NetworkManager.shared.genericAPICall(serviceEndPoint: .cancel_request, method: .post , parameters: params, isShowLoading: true, completion: {  (getResponce, error) in
             do{
                 print(getResponce as Any)
+                print(getResponce as Any)
                 if let responceData = getResponce {
                     let getResult = try JSONSerialization.jsonObject(with: responceData, options: .mutableContainers) as? [String:Any]
                     guard let getResult = getResult else { return }

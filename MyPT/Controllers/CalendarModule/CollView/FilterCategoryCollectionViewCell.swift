@@ -14,6 +14,11 @@ class FilterCategoryCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var gymCategoryImgWidthConstrnt: NSLayoutConstraint!
     @IBOutlet weak var gymCategoryNameLbl: UILabel!
     @IBOutlet weak var selectionImgView: UIImageView!
+    @IBOutlet weak var selectionImgViewWidthConstrnt: NSLayoutConstraint!
+    @IBOutlet weak var selectionImgViewTrainlingConstrnt: NSLayoutConstraint!
+    
+    @IBOutlet weak var titleTopConstrnt: NSLayoutConstraint!
+    @IBOutlet weak var titleBottomConstrnt: NSLayoutConstraint!
     
     override func awakeFromNib() {
         super.awakeFromNib()

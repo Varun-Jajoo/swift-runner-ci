@@ -126,42 +126,50 @@ extension UIButton {
 
 //MARK: ----------------------- Extension for UIView
 extension UIView{
+    
+    func makeCircular() {
+        self.layoutIfNeeded() // ensures frame is updated
+        let radius = min(self.frame.width, self.frame.height) / 2
+        self.layer.cornerRadius = radius
+        self.layer.masksToBounds = true
+    }
+    
     //-------for getting superview
     func findSuperview<T: UIView>(of type: T.Type) -> T? {
-         var superview = self.superview
-         while let view = superview {
-             if let matchingView = view as? T {
-                 return matchingView
-             }
-             superview = view.superview
-         }
-         return nil
-     }
+        var superview = self.superview
+        while let view = superview {
+            if let matchingView = view as? T {
+                return matchingView
+            }
+            superview = view.superview
+        }
+        return nil
+    }
     
     //MARK: ------------- SET BACKGROUND IMAGE
     
     func setComingSoon(mainVTop: CGFloat? = 0.0, mainVBottom: CGFloat? = 0.0, centerY: CGFloat? = 0.0,
-        bgColor: UIColor? = .clear,
-        centerImgName centerImageName: String,
-        lockImgName: String = "lock_icon",
-        title: String? = "Title",
-        desc: String? = "Description",
-        titleFont: UIFont? = AppFont.medium.size(24.0, familyName: familyClashDisplay),
-        descFont: UIFont? = AppFont.semibold.size(14.0, familyName: familyManrope),
-        titleTextColor: UIColor? = UIColor.appWhite,
-        descTextcolor: UIColor? = UIColor.txtDarkGray
+                       bgColor: UIColor? = .clear,
+                       centerImgName centerImageName: String,
+                       lockImgName: String = "lock_icon",
+                       title: String? = "Title",
+                       desc: String? = "Description",
+                       titleFont: UIFont? = AppFont.medium.size(24.0, familyName: familyClashDisplay),
+                       descFont: UIFont? = AppFont.semibold.size(14.0, familyName: familyManrope),
+                       titleTextColor: UIColor? = UIColor.appWhite,
+                       descTextcolor: UIColor? = UIColor.txtDarkGray
     ) {
         // Remove existing view if already added
         if let existing = self.viewWithTag(backViewTag) {
             existing.removeFromSuperview()
         }
-
+        
         let backView = UIView()
         backView.translatesAutoresizingMaskIntoConstraints = false
         backView.backgroundColor = bgColor
         backView.tag = backViewTag
         self.addSubview(backView)
-
+        
         let centerImageView = UIImageView()
         centerImageView.tag = centerImgTag
         centerImageView.image = UIImage(named: centerImageName)
@@ -170,7 +178,7 @@ extension UIView{
         centerImageView.isUserInteractionEnabled = false
         centerImageView.backgroundColor = .clear
         backView.addSubview(centerImageView)
-
+        
         let lockImageView = UIImageView()
         lockImageView.tag = lockImgTag
         lockImageView.image = UIImage(named: lockImgName)
@@ -179,7 +187,7 @@ extension UIView{
         lockImageView.isUserInteractionEnabled = false
         lockImageView.backgroundColor = .clear
         centerImageView.addSubview(lockImageView)
-
+        
         let titleLbl = UILabel()
         titleLbl.text = title
         titleLbl.font = titleFont
@@ -188,7 +196,7 @@ extension UIView{
         titleLbl.textAlignment = .center
         titleLbl.translatesAutoresizingMaskIntoConstraints = false
         backView.addSubview(titleLbl)
-
+        
         let descLbl = UILabel()
         descLbl.text = desc
         descLbl.font = descFont
@@ -197,33 +205,33 @@ extension UIView{
         descLbl.textAlignment = .center
         descLbl.translatesAutoresizingMaskIntoConstraints = false
         backView.addSubview(descLbl)
-
+        
         NSLayoutConstraint.activate([
-//            backView.topAnchor.constraint(equalTo: self.topAnchor),
-//            backView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            //            backView.topAnchor.constraint(equalTo: self.topAnchor),
+            //            backView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
             backView.topAnchor.constraint(equalTo: self.topAnchor, constant: mainVTop ?? 0.0),
             backView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -(mainVBottom ?? 0.0)),
             backView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             backView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-
+            
             centerImageView.centerXAnchor.constraint(equalTo: backView.centerXAnchor),
-//            centerImageView.centerYAnchor.constraint(equalTo: backView.centerYAnchor),
-
+            //            centerImageView.centerYAnchor.constraint(equalTo: backView.centerYAnchor),
+            
             centerImageView.centerYAnchor.constraint(equalTo: backView.centerYAnchor, constant: centerY ?? 0.0) ,
             lockImageView.centerXAnchor.constraint(equalTo: centerImageView.centerXAnchor),
             lockImageView.centerYAnchor.constraint(equalTo: centerImageView.centerYAnchor),
-
+            
             titleLbl.topAnchor.constraint(equalTo: centerImageView.bottomAnchor, constant: 10),
             titleLbl.leadingAnchor.constraint(equalTo: backView.leadingAnchor, constant: 76),
             titleLbl.trailingAnchor.constraint(equalTo: backView.trailingAnchor, constant: -76),
-
+            
             descLbl.topAnchor.constraint(equalTo: titleLbl.bottomAnchor, constant: 12),
             descLbl.leadingAnchor.constraint(equalTo: backView.leadingAnchor, constant: 76),
             descLbl.trailingAnchor.constraint(equalTo: backView.trailingAnchor, constant: -76),
             descLbl.bottomAnchor.constraint(lessThanOrEqualTo: backView.bottomAnchor, constant: -20)
         ])
     }
-
+    
     
     //MARK: ------------- SET BACKGROUND IMAGE
     func setTopBackgroundImage(named imageName: String) {
@@ -236,9 +244,9 @@ extension UIView{
         backgroundImageView.contentMode = .scaleAspectFill
         backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
         backgroundImageView.isUserInteractionEnabled = false // So it doesn't block touches
-
+        
         self.addSubview(backgroundImageView)
-
+        
         NSLayoutConstraint.activate([
             backgroundImageView.topAnchor.constraint(equalTo: self.topAnchor),
             backgroundImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
@@ -252,28 +260,28 @@ extension UIView{
     func addTopNavigationButton(title: String? = "Back", image: UIImage? = nil, target: Any?, action: Selector? = nil) {
         let button = UIButton(type: .system)
         button.tag = navBtnTag
-
+        
         self.viewWithTag(navBtnTag)?.removeFromSuperview()
-
+        
         button.setTitleColor(UIColor.appWhite, for: .normal)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
-
+        
         if let titleStr = title, let image = image {
             button.setTitle("  " + titleStr, for: .normal)
             button.setImage(image.withRenderingMode(.alwaysOriginal), for: .normal)
         } else {
             button.setTitle(title, for: .normal)
         }
-
+        
         if let action = action, let target = target {
             button.addTarget(target, action: action, for: .touchUpInside)
         }else{
             button.addTarget(target, action: #selector(backButtonTapped(sender: )), for: .touchUpInside)
         }
-
+        
         button.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(button)
-
+        
         NSLayoutConstraint.activate([
             button.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 2),
             button.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
@@ -285,66 +293,66 @@ extension UIView{
     @objc func backButtonTapped(sender: UIButton) {
         if let backView = self.viewWithTag(backViewTag) {
             backView.removeFromSuperview()
-            }
-
-            if let navButton = self.viewWithTag(navBtnTag) {
-                navButton.removeFromSuperview()
-            }
+        }
+        
+        if let navButton = self.viewWithTag(navBtnTag) {
+            navButton.removeFromSuperview()
+        }
         if let imageView = self.viewWithTag(backImageViewTag) {
             imageView.removeFromSuperview()
         }
     }
     
-//    func addTopShadow(to view: UIView) {
-//        view.layer.masksToBounds = false
-//        view.layer.shadowColor = UIColor.white.withAlphaComponent(0.3).cgColor
-//        view.layer.shadowOpacity = 0.3
-//        view.layer.shadowOffset = CGSize(width: 0, height: -3) // Negative Y value for top shadow
-//        view.layer.shadowRadius = 4
-//
-//        // Define the shadow path for the top side
-//        let shadowPath = UIBezierPath()
-//        shadowPath.move(to: CGPoint(x: 0, y: 0)) // Start at top-left
-//        shadowPath.addLine(to: CGPoint(x: view.bounds.width, y: 0)) // Move to top-right
-//        shadowPath.addLine(to: CGPoint(x: view.bounds.width, y: 3)) // Extend down slightly
-//        shadowPath.addLine(to: CGPoint(x: 0, y: 3)) // Move left
-//        shadowPath.close()
-//
-//        view.layer.shadowPath = shadowPath.cgPath
-//    }
+    //    func addTopShadow(to view: UIView) {
+    //        view.layer.masksToBounds = false
+    //        view.layer.shadowColor = UIColor.white.withAlphaComponent(0.3).cgColor
+    //        view.layer.shadowOpacity = 0.3
+    //        view.layer.shadowOffset = CGSize(width: 0, height: -3) // Negative Y value for top shadow
+    //        view.layer.shadowRadius = 4
+    //
+    //        // Define the shadow path for the top side
+    //        let shadowPath = UIBezierPath()
+    //        shadowPath.move(to: CGPoint(x: 0, y: 0)) // Start at top-left
+    //        shadowPath.addLine(to: CGPoint(x: view.bounds.width, y: 0)) // Move to top-right
+    //        shadowPath.addLine(to: CGPoint(x: view.bounds.width, y: 3)) // Extend down slightly
+    //        shadowPath.addLine(to: CGPoint(x: 0, y: 3)) // Move left
+    //        shadowPath.close()
+    //
+    //        view.layer.shadowPath = shadowPath.cgPath
+    //    }
     
-
+    
     
     //MARK: --------- FOR ADD SHADOW
     func applyShadow(
-            fillColor: UIColor = .white,
-            shadowColor: UIColor = .black,
-            shadowRadius: CGFloat = 10.0,
-            opacity: Float = 0.5,
-            offset: CGSize = CGSize(width: 0, height: 2),
-            cornerRadius: CGFloat = 0.0
-        ) {
-            let shadowLayer = CAShapeLayer()
-            // Remove existing shadow layers if needed to avoid duplications
-             layer.sublayers?
-                .filter { $0.name == "apply_Shadow" }.forEach({$0.removeFromSuperlayer()})
-            /*
-            layer.sublayers?
-                .filter { $0 is CAShapeLayer }
-                .forEach { $0.removeFromSuperlayer() }
-            */
-            
-            shadowLayer.path = UIBezierPath(roundedRect: bounds, cornerRadius: cornerRadius).cgPath
-            shadowLayer.name = "apply_Shadow"
-            shadowLayer.fillColor = fillColor.cgColor
-            shadowLayer.shadowColor = shadowColor.cgColor
-            shadowLayer.shadowPath = shadowLayer.path
-            shadowLayer.shadowOffset = offset
-            shadowLayer.shadowOpacity = opacity
-            shadowLayer.shadowRadius = shadowRadius
-            layer.insertSublayer(shadowLayer, at: 0)
-            
-        }
+        fillColor: UIColor = .white,
+        shadowColor: UIColor = .black,
+        shadowRadius: CGFloat = 10.0,
+        opacity: Float = 0.5,
+        offset: CGSize = CGSize(width: 0, height: 2),
+        cornerRadius: CGFloat = 0.0
+    ) {
+        let shadowLayer = CAShapeLayer()
+        // Remove existing shadow layers if needed to avoid duplications
+        layer.sublayers?
+            .filter { $0.name == "apply_Shadow" }.forEach({$0.removeFromSuperlayer()})
+        /*
+         layer.sublayers?
+         .filter { $0 is CAShapeLayer }
+         .forEach { $0.removeFromSuperlayer() }
+         */
+        
+        shadowLayer.path = UIBezierPath(roundedRect: bounds, cornerRadius: cornerRadius).cgPath
+        shadowLayer.name = "apply_Shadow"
+        shadowLayer.fillColor = fillColor.cgColor
+        shadowLayer.shadowColor = shadowColor.cgColor
+        shadowLayer.shadowPath = shadowLayer.path
+        shadowLayer.shadowOffset = offset
+        shadowLayer.shadowOpacity = opacity
+        shadowLayer.shadowRadius = shadowRadius
+        layer.insertSublayer(shadowLayer, at: 0)
+        
+    }
     
     func roundBottomCorners(radius: CGFloat) {
         let maskPath = UIBezierPath(roundedRect: self.bounds,
@@ -365,60 +373,162 @@ extension UIView{
     }
     
     
-    func roundSideCornersWithBorder(radius: CGFloat, cornerSide: UIRectCorner, borderColor: UIColor? = UIColor.clear, borderWidth: CGFloat? = 0, borderSides: UIRectEdge? = nil) {
-        // Create rounded corners mask
-        let maskPath = UIBezierPath(roundedRect: self.bounds, byRoundingCorners: cornerSide, cornerRadii: CGSize(width: radius, height: radius))
-        
-        let maskLayer = CAShapeLayer()
-        // Remove existing shadow layers if needed to avoid duplications
-         layer.sublayers?
-            .filter { $0.name == "round_corner" }.forEach({$0.removeFromSuperlayer()})
-        
-        maskLayer.name = "round_corner"
-        maskLayer.path = maskPath.cgPath
-        self.layer.mask = maskLayer
-        
-        // Create border layer
-        let borderLayer = CAShapeLayer()
-        layer.sublayers?
-           .filter { $0.name == "round_cornerSub" }.forEach({$0.removeFromSuperlayer()})
-        
-        maskLayer.name = "round_cornerSub"
-        borderLayer.path = maskPath.cgPath
-        borderLayer.fillColor = UIColor.clear.cgColor
-        borderLayer.strokeColor = borderColor?.cgColor
-        borderLayer.lineWidth = borderWidth ?? 0
-        borderLayer.frame = self.bounds
-        
-        // Add border to specific sides
-        if let borderSides = borderSides {
+    /*
+     view.cornersWithBorder(radius: 24.0, corners: [.bottomLeft, .bottomRight], borderColor: UIColor(red: 62.0/255.0, green: 132.0/255.0, blue: 255.0/255.0, alpha: 1.0), borderWidth: 1.0)
+     */
+    func cornersWithBorder(
+           radius: CGFloat,
+           corners: UIRectCorner,
+           borderColor: UIColor = .clear,
+           borderWidth: CGFloat = 0
+       ) {
+           // Rounded corner mask
+           let maskPath = UIBezierPath(
+               roundedRect: bounds,
+               byRoundingCorners: corners,
+               cornerRadii: CGSize(width: radius, height: radius)
+           )
+           let maskLayer = CAShapeLayer()
+           maskLayer.path = maskPath.cgPath
+           layer.mask = maskLayer
+
+           // Remove old border layers
+           layer.sublayers?.filter { $0.name == "rounded_border_layer" }
+               .forEach { $0.removeFromSuperlayer() }
+
+           // Border layer that follows the same rounded path
+           let borderLayer = CAShapeLayer()
+           borderLayer.name = "rounded_border_layer"
+           borderLayer.path = maskPath.cgPath
+           borderLayer.fillColor = UIColor.clear.cgColor
+           borderLayer.strokeColor = borderColor.cgColor
+           borderLayer.lineWidth = borderWidth
+           borderLayer.frame = bounds
+
+           layer.addSublayer(borderLayer)
+       }
+    
+    
+    /* usess
+     myView.roundSideCornersWithBorder(
+           radius: 16,
+           cornerSide: [.topLeft, .topRight],
+           borderColor: .red,
+           borderWidth: 2,
+           borderSides: [.left, .right, .bottom]
+       )
+     */
+    
+    func roundSideCornersWithBorder(
+            radius: CGFloat,
+            cornerSide: UIRectCorner,
+            borderColor: UIColor = .clear,
+            borderWidth: CGFloat = 1,   // default 1pt
+            borderSides: UIRectEdge = .all
+        ) {
+            // Rounded corner mask
+            let maskPath = UIBezierPath(
+                roundedRect: bounds,
+                byRoundingCorners: cornerSide,
+                cornerRadii: CGSize(width: radius, height: radius)
+            )
+            
+            let maskLayer = CAShapeLayer()
+            maskLayer.path = maskPath.cgPath
+            layer.mask = maskLayer
+            
+            // Remove old border layers
+            layer.sublayers?.filter { $0.name == "round_corner_border" }
+                .forEach { $0.removeFromSuperlayer() }
+            
+            // Full rounded border path
+            let borderLayer = CAShapeLayer()
+            borderLayer.name = "round_corner_border"
+            borderLayer.path = maskPath.cgPath
+            borderLayer.fillColor = UIColor.clear.cgColor
+            borderLayer.strokeColor = borderColor.cgColor
+            borderLayer.lineWidth = borderWidth
+            borderLayer.frame = bounds
+            
             if borderSides != .all {
-                let borderPath = UIBezierPath()
+                // Mask out only the selected sides
+                let visiblePath = UIBezierPath()
                 
                 if borderSides.contains(.top) {
-                    borderPath.move(to: CGPoint(x: 0, y: 0))
-                    borderPath.addLine(to: CGPoint(x: self.bounds.width, y: 0))
-                }
-                if borderSides.contains(.left) {
-                    borderPath.move(to: CGPoint(x: 0, y: 0))
-                    borderPath.addLine(to: CGPoint(x: 0, y: self.bounds.height))
-                }
-                if borderSides.contains(.right) {
-                    borderPath.move(to: CGPoint(x: self.bounds.width, y: 0))
-                    borderPath.addLine(to: CGPoint(x: self.bounds.width, y: self.bounds.height))
+                    visiblePath.append(UIBezierPath(rect: CGRect(x: 0, y: 0, width: bounds.width, height: borderWidth * 2)))
                 }
                 if borderSides.contains(.bottom) {
-                    borderPath.move(to: CGPoint(x: 0, y: self.bounds.height))
-                    borderPath.addLine(to: CGPoint(x: self.bounds.width, y: self.bounds.height))
+                    visiblePath.append(UIBezierPath(rect: CGRect(x: 0, y: bounds.height - borderWidth * 2, width: bounds.width, height: borderWidth * 2)))
+                }
+                if borderSides.contains(.left) {
+                    visiblePath.append(UIBezierPath(rect: CGRect(x: 0, y: 0, width: borderWidth * 2, height: bounds.height)))
+                }
+                if borderSides.contains(.right) {
+                    visiblePath.append(UIBezierPath(rect: CGRect(x: bounds.width - borderWidth * 2, y: 0, width: borderWidth * 2, height: bounds.height)))
                 }
                 
-                borderLayer.path = borderPath.cgPath
+                let mask = CAShapeLayer()
+                mask.path = visiblePath.cgPath
+                borderLayer.mask = mask
             }
+            
+            layer.addSublayer(borderLayer)
+            
         }
-
-        self.layer.addSublayer(borderLayer)
-    }
     
+//    func roundSideCornersWithBorder(
+//        radius: CGFloat,
+//        cornerSide: UIRectCorner,
+//        borderColor: UIColor = .clear,
+//        borderWidth: CGFloat = 1,
+//        borderSides: UIRectEdge = .all
+//    ) {
+//        // Rounded corner mask
+//        let maskPath = UIBezierPath(
+//            roundedRect: bounds,
+//            byRoundingCorners: cornerSide,
+//            cornerRadii: CGSize(width: radius, height: radius)
+//        )
+//        
+//        let maskLayer = CAShapeLayer()
+//        maskLayer.path = maskPath.cgPath
+//        layer.mask = maskLayer
+//        
+//        // Remove old border layers
+//        layer.sublayers?.filter { $0.name == "round_corner_border" }
+//            .forEach { $0.removeFromSuperlayer() }
+//        
+//        // Draw separate border paths per side
+//        let borderLayer = CAShapeLayer()
+//        borderLayer.name = "round_corner_border"
+//        borderLayer.fillColor = UIColor.clear.cgColor
+//        borderLayer.strokeColor = borderColor.cgColor
+//        borderLayer.lineWidth = borderWidth
+//        borderLayer.frame = bounds
+//        
+//        let visiblePath = UIBezierPath()
+//        
+//        if borderSides.contains(.top) {
+//            visiblePath.move(to: CGPoint(x: 0, y: 0))
+//            visiblePath.addLine(to: CGPoint(x: bounds.width, y: 0))
+//        }
+//        if borderSides.contains(.bottom) {
+//            visiblePath.move(to: CGPoint(x: 0, y: bounds.height))
+//            visiblePath.addLine(to: CGPoint(x: bounds.width, y: bounds.height))
+//        }
+//        if borderSides.contains(.left) {
+//            visiblePath.move(to: CGPoint(x: 0, y: 0))
+//            visiblePath.addLine(to: CGPoint(x: 0, y: bounds.height))
+//        }
+//        if borderSides.contains(.right) {
+//            visiblePath.move(to: CGPoint(x: bounds.width, y: 0))
+//            visiblePath.addLine(to: CGPoint(x: bounds.width, y: bounds.height))
+//        }
+//        
+//        borderLayer.path = visiblePath.cgPath
+//        layer.addSublayer(borderLayer)
+//    }
+        
     func setCornerRadius(borderWidth:CGFloat = 0.0, borderColor:UIColor? = nil, cornerRadious:CGFloat = 0.0){
         self.layer.borderWidth = borderWidth
         self.layer.borderColor = borderColor?.cgColor
@@ -428,12 +538,12 @@ extension UIView{
     
     /*
      func addTopShadow(shadowColor: UIColor, shadowOpacity: Float, shadowRadius: CGFloat, offset: CGSize) {
-            self.layer.shadowColor = shadowColor.cgColor
-            selflayer.shadowOffset = offset
-            self.layer.shadowOpacity = shadowOpacity
-            self.layer.shadowRadius = shadowRadius
-            self.clipsToBounds = false
-        }
+     self.layer.shadowColor = shadowColor.cgColor
+     selflayer.shadowOffset = offset
+     self.layer.shadowOpacity = shadowOpacity
+     self.layer.shadowRadius = shadowRadius
+     self.clipsToBounds = false
+     }
      */
     
     func setCornerWithShadow(borderWidth:CGFloat = 0.0, borderColor:UIColor? = nil, shadowColor:UIColor? = UIColor.black, offSet:CGSize, opacity:Float = 0.4, shadowRadius:CGFloat = 0.0, cornerRadious:CGFloat = 0.0){
@@ -488,7 +598,7 @@ extension UIView{
         layer.removeAllAnimations()
     }
     
-  
+    
     ///     /*----------- uses
     ///      self.backImgView.addRotationAnimation(axis: "y", angle: CGFloat.pi, duration: 1.0, isCumulative: true, repeatCount: 0) {
     ///    print("Y-axis rotation animation completed!")
@@ -512,7 +622,7 @@ extension UIView{
             print("Invalid axis. Use 'x', 'y', or 'z'.")
             return
         }
-
+        
         let rotation = CABasicAnimation(keyPath: "transform.rotation.\(axis.lowercased())")
         rotation.fromValue = 0
         rotation.toValue = angle
@@ -521,9 +631,9 @@ extension UIView{
         rotation.repeatCount = repeatCount
         rotation.fillMode = .forwards
         rotation.isRemovedOnCompletion = false
-
+        
         self.layer.add(rotation, forKey: "\(axis.lowercased())RotationAnimation")
-
+        
         // Execute the completion handler after the animation ends.
         if let completion = completion {
             DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
@@ -536,13 +646,13 @@ extension UIView{
     //MARK: --------------- MAKE GRADIENT BORDER
     
     func setGradientMultiBorder(cornerRadius: CGFloat, width: CGFloat,
-                           colors: [UIColor], startPoint: CGPoint = CGPoint(x: 0.5, y: 0),
-                           endPoint: CGPoint = CGPoint(x: 0.5, y: 1)) {
+                                colors: [UIColor], startPoint: CGPoint = CGPoint(x: 0.5, y: 0),
+                                endPoint: CGPoint = CGPoint(x: 0.5, y: 1)) {
         
         let borderLayerName = "gradientBorderLayer_MultiLayer"
         // Remove the last added gradient border (if it exists)
         layer.sublayers?.removeAll(where: { $0.name == borderLayerName })
-
+        
         // Create a new gradient border layer
         let border = CAGradientLayer()
         border.name = borderLayerName
@@ -564,15 +674,15 @@ extension UIView{
     }
     
     func setGradientCellBorder(cornerRadius: CGFloat, width: CGFloat,
-                                colors: [UIColor],
-                                startPoint: CGPoint = CGPoint(x: 0.5, y: 0),
-                                endPoint: CGPoint = CGPoint(x: 0.5, y: 1)) {
-
+                               colors: [UIColor],
+                               startPoint: CGPoint = CGPoint(x: 0.5, y: 0),
+                               endPoint: CGPoint = CGPoint(x: 0.5, y: 1)) {
+        
         let borderLayerName = "gradientBorderLayer_MultiLayer"
-
+        
         // Remove any existing border layers
         layer.sublayers?.removeAll(where: { $0.name == borderLayerName })
-
+        
         // Gradient layer
         let gradientLayer = CAGradientLayer()
         gradientLayer.name = borderLayerName
@@ -580,7 +690,7 @@ extension UIView{
         gradientLayer.colors = colors.map { $0.cgColor }
         gradientLayer.startPoint = startPoint
         gradientLayer.endPoint = endPoint
-
+        
         // Shape layer (stroke only, no fill)
         let shapeLayer = CAShapeLayer()
         let insetRect = bounds.insetBy(dx: width / 2, dy: width / 2)
@@ -588,13 +698,13 @@ extension UIView{
         shapeLayer.lineWidth = width
         shapeLayer.strokeColor = UIColor.black.cgColor // This doesn't matter; it's overridden by gradient
         shapeLayer.fillColor = UIColor.clear.cgColor
-
+        
         gradientLayer.mask = shapeLayer
-
+        
         // Add to main layer
         layer.addSublayer(gradientLayer)
     }
-
+    
     
     private static let kLayerNameGradientBorder = "GradientBorderLayer"
     
@@ -651,78 +761,78 @@ extension UIView{
      let locations: [NSNumber] = [0.0, 0.2, 1.0]
      
      (0,0) -------- (1,0)
-        |            |
-        |            |
+     |            |
+     |            |
      (0,1) -------- (1,1)
      
-    1-
+     1-
      startPoint = CGPoint(x: 0.0, y: 0.5)  // Left-center
      endPoint = CGPoint(x: 1.0, y: 0.5)    // Right-center
-    
+     
      2-
      startPoint = CGPoint(x: 0.5, y: 0.0)  // Top-center
      endPoint = CGPoint(x: 0.5, y: 1.0)    // Bottom-center
-    
+     
      3-
      startPoint = CGPoint(x: 0.0, y: 1.0)  // Bottom-left
      endPoint = CGPoint(x: 1.0, y: 0.0)    // Top-right
-
+     
      4-
      startPoint = CGPoint(x: 0.0, y: 0.0)  // Top-left
      endPoint = CGPoint(x: 1.0, y: 1.0)    // Bottom-right
      
      */
     
-//    func addGradient(
-//        colors: [UIColor] = [.blue, .white],
-//        locations: [NSNumber] = [0, 1],
-//        startPoint: CGPoint = CGPoint(x: 0.0, y: 1.0),
-//        endPoint: CGPoint = CGPoint(x: 1.0, y: 1.0)
-//    ) {
-//        let gradient = CAGradientLayer()
-//        gradient.frame = self.bounds // Use bounds to match the view's size
-//        gradient.colors = colors.map { $0.cgColor }
-//        gradient.locations = locations
-//        gradient.startPoint = startPoint
-//        gradient.endPoint = endPoint
-//        
-//        // Ensure no duplicate gradient layers are added
-//        if let sublayers = self.layer.sublayers, sublayers.contains(where: { $0 is CAGradientLayer }) {
-//            return
-//        }
-//        
-//        self.layer.insertSublayer(gradient, at: 0)
-//    }
+    //    func addGradient(
+    //        colors: [UIColor] = [.blue, .white],
+    //        locations: [NSNumber] = [0, 1],
+    //        startPoint: CGPoint = CGPoint(x: 0.0, y: 1.0),
+    //        endPoint: CGPoint = CGPoint(x: 1.0, y: 1.0)
+    //    ) {
+    //        let gradient = CAGradientLayer()
+    //        gradient.frame = self.bounds // Use bounds to match the view's size
+    //        gradient.colors = colors.map { $0.cgColor }
+    //        gradient.locations = locations
+    //        gradient.startPoint = startPoint
+    //        gradient.endPoint = endPoint
+    //        
+    //        // Ensure no duplicate gradient layers are added
+    //        if let sublayers = self.layer.sublayers, sublayers.contains(where: { $0 is CAGradientLayer }) {
+    //            return
+    //        }
+    //        
+    //        self.layer.insertSublayer(gradient, at: 0)
+    //    }
     
     
     /*
-    func addGradient(
-        colors: [UIColor] = [.blue, .white],
-        locations: [NSNumber] = [0, 1],
-        startPoint: CGPoint = CGPoint(x: 0.0, y: 1.0),
-        endPoint: CGPoint = CGPoint(x: 1.0, y: 1.0),
-        cornerRadius: CGFloat = 0.0
-    ) {
-        DispatchQueue.main.async {
-            self.layer.sublayers?
-                .filter { $0.name == "addGradient" }
-                .forEach { $0.removeFromSuperlayer() }
-            
-            let gradient = CAGradientLayer()
-            gradient.name = "addGradient"
-            gradient.frame = self.bounds
-            gradient.colors = colors.map { $0.cgColor }
-            gradient.locations = locations
-            gradient.startPoint = startPoint
-            gradient.endPoint = endPoint
-
-            self.layer.insertSublayer(gradient, at: 0)
-            
-            self.layer.cornerRadius = cornerRadius
-            self.layer.masksToBounds = true
-        }
-    }
-    */
+     func addGradient(
+     colors: [UIColor] = [.blue, .white],
+     locations: [NSNumber] = [0, 1],
+     startPoint: CGPoint = CGPoint(x: 0.0, y: 1.0),
+     endPoint: CGPoint = CGPoint(x: 1.0, y: 1.0),
+     cornerRadius: CGFloat = 0.0
+     ) {
+     DispatchQueue.main.async {
+     self.layer.sublayers?
+     .filter { $0.name == "addGradient" }
+     .forEach { $0.removeFromSuperlayer() }
+     
+     let gradient = CAGradientLayer()
+     gradient.name = "addGradient"
+     gradient.frame = self.bounds
+     gradient.colors = colors.map { $0.cgColor }
+     gradient.locations = locations
+     gradient.startPoint = startPoint
+     gradient.endPoint = endPoint
+     
+     self.layer.insertSublayer(gradient, at: 0)
+     
+     self.layer.cornerRadius = cornerRadius
+     self.layer.masksToBounds = true
+     }
+     }
+     */
     
     
     func addGradient(
@@ -744,7 +854,7 @@ extension UIView{
             gradient.locations = locations
             gradient.startPoint = startPoint
             gradient.endPoint = endPoint
-
+            
             if let imageView = self as? UIImageView {
                 imageView.layer.mask = gradient // Set gradient as mask
             } else {
@@ -778,19 +888,19 @@ extension UIView{
         gradientLayer.endPoint = endPoint
         
         /*
-        gradientLayer.frame = self.bounds
-        gradientLayer.colors = [
-            UIColor.blue.cgColor,
-            UIColor.clear.cgColor
-        ]
-        gradientLayer.startPoint = CGPoint(x: 0, y: 1)
-        gradientLayer.endPoint = CGPoint(x: 1, y: 1)
-        */
-
+         gradientLayer.frame = self.bounds
+         gradientLayer.colors = [
+         UIColor.blue.cgColor,
+         UIColor.clear.cgColor
+         ]
+         gradientLayer.startPoint = CGPoint(x: 0, y: 1)
+         gradientLayer.endPoint = CGPoint(x: 1, y: 1)
+         */
+        
         // Optional: round corners
-//            gradientLayer.cornerRadius = 12
-//            bookTrainerAtHomeBtn.layer.cornerRadius = 12
-
+        //            gradientLayer.cornerRadius = 12
+        //            bookTrainerAtHomeBtn.layer.cornerRadius = 12
+        
         // Add gradient on top
         self.layer.addSublayer(gradientLayer)
     }
@@ -827,11 +937,11 @@ extension UIView{
             gradient.endPoint = endPoint
             
             /*
-            // Ensure no duplicate gradient layers are added
-            if let sublayers = self.layer.sublayers, sublayers.contains(where: { $0 is CAGradientLayer }) {
-                return
-            }
-            */
+             // Ensure no duplicate gradient layers are added
+             if let sublayers = self.layer.sublayers, sublayers.contains(where: { $0 is CAGradientLayer }) {
+             return
+             }
+             */
             
             self.layer.insertSublayer(gradient, at: 0)
         }
@@ -858,7 +968,7 @@ extension UIView{
     
     //MARK: --------------- MAKE GRADIENT LAYER
     func layerGradient(startPoint:CAGradientPoint, endPoint:CAGradientPoint ,colorArray:[CGColor], type:CAGradientLayerType ) {
-//        let gradient = CAGradientLayer(start: .topLeft, end: .topRight, colors: colorArray, type: type)
+        //        let gradient = CAGradientLayer(start: .topLeft, end: .topRight, colors: colorArray, type: type)
         let gradient = CAGradientLayer(start: startPoint, end: endPoint, colors: colorArray, type: type)
         gradient.frame.size = self.frame.size
         self.layer.insertSublayer(gradient, at: 0)
@@ -866,53 +976,53 @@ extension UIView{
     
     //MARK: ===================LINE VIEW
     
-//    func drawLineProgress(progressfill: CGFloat = 0.0, fillLineColor: UIColor?, cornerRadius: CGFloat) {
-//        // Create a container view for the progress bar and label
-//        let progressContainer = UIView(frame: bounds)
-//        progressContainer.clipsToBounds = false  // Allow subviews to be visible even when clipping
-//        
-//        // Remove any existing progress layers or subviews
-////        self.subviews.forEach { $0.removeFromSuperview() }
-//        
-//    self.layer.sublayers?.filter { $0.name == "progress_line" || $0.name == "progress_line_mask" }.forEach({$0.removeFromSuperlayer()})
-//        
-//        // Add your label as a subview on top of the container view
-//        let label = UILabel(frame: bounds)
-//        label.text = ""  // Set your label's text
-//        label.textAlignment = .center
-//        label.textColor = .black  // Set label text color
-//        progressContainer.addSubview(label)
-//        
-//        // Create the progress bar layer
-//        let shapeLayer = CAShapeLayer()
-//        shapeLayer.name = "progress_line_mask"
-//        let path = UIBezierPath(roundedRect: bounds, cornerRadius: cornerRadius)
-//        shapeLayer.path = path.cgPath
-//        
-//        // Create the progress bar layer
-//        let progressRect = CGRect(origin: .zero, size: CGSize(width: self.frame.size.width * progressfill, height: self.frame.size.height))
-//        let progressLayer = CALayer()
-//        progressLayer.name = "progress_line"
-//        progressLayer.frame = progressRect
-//        progressLayer.cornerRadius = cornerRadius
-//        progressContainer.layer.addSublayer(progressLayer)
-//        
-//        // Set the background color for the progress bar
-//        guard let fillLineColor = fillLineColor else { return }
-//        progressLayer.backgroundColor = fillLineColor.cgColor
-//        
-//        // Apply the mask only to the progress layer, not the entire container or label
-//        progressLayer.mask = shapeLayer
-//        
-//        // Add the container view (progress bar + label) as a subview to the main view
-//        self.addSubview(progressContainer)
-//    }
+    //    func drawLineProgress(progressfill: CGFloat = 0.0, fillLineColor: UIColor?, cornerRadius: CGFloat) {
+    //        // Create a container view for the progress bar and label
+    //        let progressContainer = UIView(frame: bounds)
+    //        progressContainer.clipsToBounds = false  // Allow subviews to be visible even when clipping
+    //        
+    //        // Remove any existing progress layers or subviews
+    ////        self.subviews.forEach { $0.removeFromSuperview() }
+    //        
+    //    self.layer.sublayers?.filter { $0.name == "progress_line" || $0.name == "progress_line_mask" }.forEach({$0.removeFromSuperlayer()})
+    //        
+    //        // Add your label as a subview on top of the container view
+    //        let label = UILabel(frame: bounds)
+    //        label.text = ""  // Set your label's text
+    //        label.textAlignment = .center
+    //        label.textColor = .black  // Set label text color
+    //        progressContainer.addSubview(label)
+    //        
+    //        // Create the progress bar layer
+    //        let shapeLayer = CAShapeLayer()
+    //        shapeLayer.name = "progress_line_mask"
+    //        let path = UIBezierPath(roundedRect: bounds, cornerRadius: cornerRadius)
+    //        shapeLayer.path = path.cgPath
+    //        
+    //        // Create the progress bar layer
+    //        let progressRect = CGRect(origin: .zero, size: CGSize(width: self.frame.size.width * progressfill, height: self.frame.size.height))
+    //        let progressLayer = CALayer()
+    //        progressLayer.name = "progress_line"
+    //        progressLayer.frame = progressRect
+    //        progressLayer.cornerRadius = cornerRadius
+    //        progressContainer.layer.addSublayer(progressLayer)
+    //        
+    //        // Set the background color for the progress bar
+    //        guard let fillLineColor = fillLineColor else { return }
+    //        progressLayer.backgroundColor = fillLineColor.cgColor
+    //        
+    //        // Apply the mask only to the progress layer, not the entire container or label
+    //        progressLayer.mask = shapeLayer
+    //        
+    //        // Add the container view (progress bar + label) as a subview to the main view
+    //        self.addSubview(progressContainer)
+    //    }
     
     func drawLineProgress(progressfill:CGFloat = 0.0, fillLineColor:UIColor?, cornerRadius:CGFloat) {
-//        self.layer.sublayers?.removeAll()
+        //        self.layer.sublayers?.removeAll()
         
         self.layer.sublayers?
-           .filter { $0.name == "progress_line" }.forEach({$0.removeFromSuperlayer()})
+            .filter { $0.name == "progress_line" }.forEach({$0.removeFromSuperlayer()})
         
         let shapeLayer = CAShapeLayer()
         shapeLayer.name = "progress_line"
@@ -971,73 +1081,73 @@ extension UIView{
     }
     
     
-        /// Animates the view to show by sliding it up.
-        /// - Parameters:
-        ///   - duration: The duration of the animation.
-        ///   - delay: The delay before starting the animation.
-        ///   - completion: An optional completion handler.
-        func animShow(duration: TimeInterval = 0.5, delay: TimeInterval = 0, completion: (() -> Void)? = nil) {
-            self.isHidden = true
-            self.alpha = 0
-            self.layoutIfNeeded() // Ensures the layout is correct before animation
-            UIView.animate(withDuration: duration, delay: delay, options: [.curveEaseIn], animations: {
-                self.alpha += 1
-                self.isHidden = false
-                self.center.y -= self.bounds.height
-                self.layoutIfNeeded()
-            }, completion: { _ in
-                completion?()
-            })
-        }
-        
-//        /// Animates the view to hide by sliding it down.
-//        /// - Parameters:
-//        ///   - duration: The duration of the animation.
-//        ///   - delay: The delay before starting the animation.
-//        ///   - completion: An optional completion handler.
-//        func animHide(duration: TimeInterval = 0.5, delay: TimeInterval = 0, completion: (() -> Void)? = nil) {
-//            UIView.animate(withDuration: duration, delay: delay, options: [.curveLinear], animations: {
-//                self.center.y += self.bounds.height
-//                self.layoutIfNeeded()
-//            }, completion: { _ in
-//                self.isHidden = true
-//                completion?()
-//            })
-//        }
-//    
+    /// Animates the view to show by sliding it up.
+    /// - Parameters:
+    ///   - duration: The duration of the animation.
+    ///   - delay: The delay before starting the animation.
+    ///   - completion: An optional completion handler.
+    func animShow(duration: TimeInterval = 0.5, delay: TimeInterval = 0, completion: (() -> Void)? = nil) {
+        self.isHidden = true
+        self.alpha = 0
+        self.layoutIfNeeded() // Ensures the layout is correct before animation
+        UIView.animate(withDuration: duration, delay: delay, options: [.curveEaseIn], animations: {
+            self.alpha += 1
+            self.isHidden = false
+            self.center.y -= self.bounds.height
+            self.layoutIfNeeded()
+        }, completion: { _ in
+            completion?()
+        })
+    }
+    
+    //        /// Animates the view to hide by sliding it down.
+    //        /// - Parameters:
+    //        ///   - duration: The duration of the animation.
+    //        ///   - delay: The delay before starting the animation.
+    //        ///   - completion: An optional completion handler.
+    //        func animHide(duration: TimeInterval = 0.5, delay: TimeInterval = 0, completion: (() -> Void)? = nil) {
+    //            UIView.animate(withDuration: duration, delay: delay, options: [.curveLinear], animations: {
+    //                self.center.y += self.bounds.height
+    //                self.layoutIfNeeded()
+    //            }, completion: { _ in
+    //                self.isHidden = true
+    //                completion?()
+    //            })
+    //        }
+    //    
     
     /// Animates the view to hide by sliding it down.
-           /// - Parameters:
-           ///   - duration: The duration of the animation.
-           ///   - delay: The delay before starting the animation.
-           ///   - completion: An optional completion handler.
-       func animHide(duration: TimeInterval = 0.5, delay: TimeInterval = 0, isTopDirection:Bool? = false, completion: (() -> Void)? = nil) {
-               UIView.animate(withDuration: duration, delay: delay, options: [.curveLinear], animations: {
-                   if let isTopDirection = isTopDirection {
-                       (isTopDirection ? (self.center.y -= self.bounds.height): (self.center.y += self.bounds.height))
-                   }else{
-                       (self.center.y += self.bounds.height)
-                   }
-                   self.layoutIfNeeded()
-               }, completion: { _ in
-                   self.isHidden = true
-                   completion?()
-               })
-           }
-       
-       func aninLeftRightHide(duration: TimeInterval = 0.5, delay: TimeInterval = 0, isLeftDirection:Bool? = false, completion: (() -> Void)? = nil) {
-           UIView.animate(withDuration: duration, delay: delay, options: [.curveLinear], animations: {
-               if let isLeftDirection = isLeftDirection {
-                   (isLeftDirection ? (self.center.x -= self.bounds.width): (self.center.x += self.bounds.width))
-               }else{
-                   (self.center.y += self.bounds.height)
-               }
-               self.layoutIfNeeded()
-           }, completion: { _ in
-               self.isHidden = true
-               completion?()
-           })
-       }
+    /// - Parameters:
+    ///   - duration: The duration of the animation.
+    ///   - delay: The delay before starting the animation.
+    ///   - completion: An optional completion handler.
+    func animHide(duration: TimeInterval = 0.5, delay: TimeInterval = 0, isTopDirection:Bool? = false, completion: (() -> Void)? = nil) {
+        UIView.animate(withDuration: duration, delay: delay, options: [.curveLinear], animations: {
+            if let isTopDirection = isTopDirection {
+                (isTopDirection ? (self.center.y -= self.bounds.height): (self.center.y += self.bounds.height))
+            }else{
+                (self.center.y += self.bounds.height)
+            }
+            self.layoutIfNeeded()
+        }, completion: { _ in
+            self.isHidden = true
+            completion?()
+        })
+    }
+    
+    func aninLeftRightHide(duration: TimeInterval = 0.5, delay: TimeInterval = 0, isLeftDirection:Bool? = false, completion: (() -> Void)? = nil) {
+        UIView.animate(withDuration: duration, delay: delay, options: [.curveLinear], animations: {
+            if let isLeftDirection = isLeftDirection {
+                (isLeftDirection ? (self.center.x -= self.bounds.width): (self.center.x += self.bounds.width))
+            }else{
+                (self.center.y += self.bounds.height)
+            }
+            self.layoutIfNeeded()
+        }, completion: { _ in
+            self.isHidden = true
+            completion?()
+        })
+    }
     
     
     func animTopBottom(duration: TimeInterval = 0.5, delay: TimeInterval = 0, completion: (() -> Void)? = nil) {
@@ -1053,29 +1163,29 @@ extension UIView{
         })
     }
     
-//    func animBottomTop(duration: TimeInterval = 0.5, delay: TimeInterval = 0, completion: (() -> Void)? = nil) {
-//        self.center.y = self.bounds.height
-//        self.isHidden = true
-//        UIView.animate(withDuration: duration, delay: delay, options: [.curveLinear], animations: {
-//            self.isHidden = false
-//            self.center.y -= self.bounds.height / 2.0
-//            self.layoutIfNeeded()
-//        }, completion: { _ in
-//            completion?()
-//        })
-//    }
-
+    //    func animBottomTop(duration: TimeInterval = 0.5, delay: TimeInterval = 0, completion: (() -> Void)? = nil) {
+    //        self.center.y = self.bounds.height
+    //        self.isHidden = true
+    //        UIView.animate(withDuration: duration, delay: delay, options: [.curveLinear], animations: {
+    //            self.isHidden = false
+    //            self.center.y -= self.bounds.height / 2.0
+    //            self.layoutIfNeeded()
+    //        }, completion: { _ in
+    //            completion?()
+    //        })
+    //    }
+    
     
     //use this someView.applyTransition(type: .fade, duration: 1.0, timingFunction: .easeOut)
-//    func applyTransition(type: CATransitionType = .moveIn, subtype: CATransitionSubtype = .fromTop, duration: TimeInterval = 0.8, timingFunction: CAMediaTimingFunctionName = .easeInEaseOut,completion: (() -> Void)? = nil) {
-//        let transition = CATransition()
-//        transition.duration = duration
-//        transition.timingFunction = CAMediaTimingFunction(name: timingFunction)
-//        transition.type = type
-//        transition.subtype = subtype
-//        self.layer.add(transition, forKey: nil)
-//        completion?()
-//    }
+    //    func applyTransition(type: CATransitionType = .moveIn, subtype: CATransitionSubtype = .fromTop, duration: TimeInterval = 0.8, timingFunction: CAMediaTimingFunctionName = .easeInEaseOut,completion: (() -> Void)? = nil) {
+    //        let transition = CATransition()
+    //        transition.duration = duration
+    //        transition.timingFunction = CAMediaTimingFunction(name: timingFunction)
+    //        transition.type = type
+    //        transition.subtype = subtype
+    //        self.layer.add(transition, forKey: nil)
+    //        completion?()
+    //    }
     
     func applyTransition(type: CATransitionType = .moveIn,
                          subtype: CATransitionSubtype = .fromTop,
@@ -1101,21 +1211,21 @@ extension UIView{
      */
     //MARK: ------------DASHLINE
     func addDashedBorder(_ borderColor: UIColor = UIColor.black, filledColor:UIColor = UIColor.clear , withWidth width: CGFloat = 2, cornerRadius: CGFloat = 5, dashPattern: [NSNumber] = [3,6]) {
-         self.removeDashBorder()
+        self.removeDashBorder()
         let shapeLayer = CAShapeLayer()
-         shapeLayer.name = "Dash_DashBorder"
+        shapeLayer.name = "Dash_DashBorder"
         shapeLayer.bounds = bounds
         shapeLayer.position = CGPoint(x: bounds.width/2, y: bounds.height/2)
         shapeLayer.fillColor = filledColor.cgColor
         shapeLayer.strokeColor = borderColor.cgColor
         shapeLayer.lineWidth = width
-         shapeLayer.lineJoin = .round 
+        shapeLayer.lineJoin = .round 
         shapeLayer.lineDashPattern = dashPattern
         shapeLayer.path = UIBezierPath(roundedRect: bounds, cornerRadius: cornerRadius).cgPath
-         self.layer.masksToBounds = false
+        self.layer.masksToBounds = false
         self.layer.addSublayer(shapeLayer)
-      }
-  
+    }
+    
     func removeDashBorder() {
         _ = self.layer.sublayers?.filter({$0.name == "Dash_DashBorder"}).map({$0.removeFromSuperlayer()})
     }
@@ -1123,32 +1233,32 @@ extension UIView{
     //MARK: ----------------- AddDashedLine
     /*
      // Add dashed line
-        dashedView.addDashedLine(strokeColor: .red, lineWidth: 2, dashPattern: [6, 3])
+     dashedView.addDashedLine(strokeColor: .red, lineWidth: 2, dashPattern: [6, 3])
      */
     
     func addDashedLine(strokeColor: UIColor, lineWidth: CGFloat, dashPattern: [NSNumber]) {
         self.layer.sublayers?
             .filter { $0.name == "dash_line" }.forEach({$0.removeFromSuperlayer()})
-       
+        
         let dashedLayer = CAShapeLayer()
         dashedLayer.name = "dash_line"
-            dashedLayer.strokeColor = strokeColor.cgColor
-            dashedLayer.lineWidth = lineWidth
-            dashedLayer.lineDashPattern = dashPattern
-            
-            // Create a path
-            let path = UIBezierPath()
-            path.move(to: CGPoint(x: 0, y: self.bounds.height / 2)) // Start at the left middle
-            path.addLine(to: CGPoint(x: self.bounds.width, y: self.bounds.height / 2)) // End at the right middle
-            
-            dashedLayer.path = path.cgPath
-            dashedLayer.frame = self.bounds
-            
-            // Remove old dashed layers if needed
-//            self.layer.sublayers?.removeAll(where: { $0 is CAShapeLayer })
-            
-            self.layer.addSublayer(dashedLayer)
-        }
+        dashedLayer.strokeColor = strokeColor.cgColor
+        dashedLayer.lineWidth = lineWidth
+        dashedLayer.lineDashPattern = dashPattern
+        
+        // Create a path
+        let path = UIBezierPath()
+        path.move(to: CGPoint(x: 0, y: self.bounds.height / 2)) // Start at the left middle
+        path.addLine(to: CGPoint(x: self.bounds.width, y: self.bounds.height / 2)) // End at the right middle
+        
+        dashedLayer.path = path.cgPath
+        dashedLayer.frame = self.bounds
+        
+        // Remove old dashed layers if needed
+        //            self.layer.sublayers?.removeAll(where: { $0 is CAShapeLayer })
+        
+        self.layer.addSublayer(dashedLayer)
+    }
     
     //MARK: ---------------ADD BLURE VIEW
     func addBlurView(viewShow:UIView?, alphBlur:Float = 0.2, bgColor:UIColor = .mainBg){
@@ -1492,6 +1602,27 @@ extension UILabel {
 
 
 extension String {
+    
+    var ordinal: String {
+         guard let number = Int(self) else { return self }
+
+         let ones = number % 10
+         let tens = (number / 10) % 10
+
+         let suffix: String
+         if tens == 1 {
+             suffix = "th"
+         } else {
+             switch ones {
+             case 1: suffix = "st"
+             case 2: suffix = "nd"
+             case 3: suffix = "rd"
+             default: suffix = "th"
+             }
+         }
+
+         return "\(number)\(suffix)"
+     }
 
         func attributedStringWithGradient(
             _ gradientColors: [UIColor],
@@ -1568,6 +1699,59 @@ extension UIImageView {
     }
     
     
+//    func addCellImgGradient(colors: [UIColor],
+//                        locations: [NSNumber] = [0, 1],
+//                        startPoint: CGPoint = CGPoint(x: 0, y: 0),
+//                        endPoint: CGPoint = CGPoint(x: 1, y: 1)) {
+//           
+//           // Remove any existing gradient layers
+//           layer.sublayers?.removeAll(where: { $0.name == "cellGradientLayerImgV" })
+//           
+//           let gradientLayer = CAGradientLayer()
+//           gradientLayer.name = "cellGradientLayerImgV"
+//           gradientLayer.colors = colors.map { $0.cgColor }
+//           gradientLayer.locations = locations
+//           gradientLayer.startPoint = startPoint
+//           gradientLayer.endPoint = endPoint
+//           
+//           // Important: set frame in layout cycle
+//           gradientLayer.frame = bounds
+//           
+//           layer.insertSublayer(gradientLayer, at: 0)
+//       }
+    
+    func addCellImgGradient(
+        colors: [UIColor],
+        locations: [NSNumber] = [0, 1],
+        startPoint: CGPoint = CGPoint(x: 0, y: 0),
+        endPoint: CGPoint = CGPoint(x: 1, y: 1),
+        cornerRadius: CGFloat = 12  // default radius
+    ) {
+        // Remove any existing gradient layers
+        layer.sublayers?.removeAll(where: { $0.name == "cellGradientLayerImgV" })
+        
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.name = "cellGradientLayerImgV"
+        gradientLayer.colors = colors.map { $0.cgColor }
+        gradientLayer.locations = locations
+        gradientLayer.startPoint = startPoint
+        gradientLayer.endPoint = endPoint
+        
+        gradientLayer.frame = bounds
+        gradientLayer.cornerRadius = cornerRadius
+        gradientLayer.masksToBounds = true   // ensures corners are clipped
+        
+        layer.insertSublayer(gradientLayer, at: 0)
+    }
+       
+       // Call this in case the view resizes
+       override open func layoutSubviews() {
+           super.layoutSubviews()
+           layer.sublayers?.filter { $0.name == "cellGradientLayerImgV" }
+               .forEach { $0.frame = bounds }
+       }
+    
+    
     //MARK: ---------------IMAGE GETTING FROM URL
     func loadImage(urlString: String?, placeholder: UIImage?, resize: CGSize? = nil) {
         self.image = placeholder
@@ -1577,7 +1761,6 @@ extension UIImageView {
             do {
                 let (data, _) = try await URLSession.shared.data(from: url)
                 if let image = UIImage(data: data) {
-//                    self?.image = image
                     if let resize = resize {
                         self?.image = image.resized(to: resize)
                     }else{
@@ -1598,6 +1781,54 @@ extension UIImageView {
                 }
             }
         }
+    }
+    
+    //MARK: ---------------IMAGE GETTING FROM URL
+    func loadImageWithRatio(urlString: String?, placeholder: UIImage?, resizeRatio: CGFloat? = nil) {
+        self.image = placeholder
+        guard let urlString = urlString, let url = URL(string: urlString) else { return }
+
+        Task { [weak self] in
+            do {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                if let image = UIImage(data: data) {
+//                    self?.image = image
+                    if let resizeRatio = resizeRatio {
+                        self?.image = self?.resizeToRatio(image: image, targetRatio: resizeRatio)
+                    }else{
+                        self?.image = image
+                    }
+                } else {
+                    if let resizeRatio = resizeRatio {
+                        self?.image = self?.resizeToRatio(image: self?.image, targetRatio: resizeRatio)
+                    }else{
+                        self?.image = placeholder
+                    }
+                }
+            } catch {
+                if let resizeRatio = resizeRatio {
+                    self?.image = self?.resizeToRatio(image: self?.image, targetRatio: resizeRatio)
+                }else{
+                    self?.image = placeholder
+                }
+            }
+        }
+    }
+    
+    func resizeToRatio(image: UIImage?, targetRatio: CGFloat?) -> UIImage {
+        guard let image = image, let targetRatio = targetRatio else {
+            return UIImage() // or some placeholder
+        }
+
+        let height = image.size.height
+        let width = height * targetRatio
+        let newSize = CGSize(width: width, height: height)
+
+        UIGraphicsBeginImageContextWithOptions(newSize, false, 0)
+        image.draw(in: CGRect(origin: .zero, size: newSize))
+        let resized = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return resized ?? image
     }
     
     func setImageColor(_ color: UIColor) {
@@ -2299,6 +2530,67 @@ extension UISlider{
             self.setMinimumTrackImage(resizableImage, for: .normal)
         }
     }
+    
+//    var thumbImageCenterX: CGFloat {
+//        let trackRect = trackRect(forBounds: bounds)
+//        let thumbRect = thumbRect(forBounds: bounds, trackRect: trackRect, value: value)
+//         return thumbRect.origin.x + thumbRect.width / 2 - frame.size.width / 2
+//     }
+    
+//    /// Returns the absolute center X position of the thumb image in the slider's superview
+//     var thumbImageCenterX: CGFloat {
+//         let trackRect = self.trackRect(forBounds: self.bounds)
+//         let thumbRect = self.thumbRect(forBounds: self.bounds, trackRect: trackRect, value: self.value)
+//         return self.frame.origin.x + thumbRect.midX
+//     }
+//
+//     /// Returns the absolute center point (X and Y) of the thumb image
+//     var thumbImageCenter: CGPoint {
+//         let trackRect = self.trackRect(forBounds: self.bounds)
+//         let thumbRect = self.thumbRect(forBounds: self.bounds, trackRect: trackRect, value: self.value)
+//         return CGPoint(
+//             x: self.frame.origin.x + thumbRect.midX,
+//             y: self.frame.origin.y + thumbRect.midY
+//         )
+//     }
+    
+//    func setCustomThumbImage(_ image: UIImage, size: CGSize) {
+//          // Resize the image (if needed)
+//          let resized = image.resized(to: size)
+//
+//          // Set image
+//          self.setThumbImage(resized, for: .normal)
+//          self.setThumbImage(resized, for: .highlighted)
+//
+//          // Adjust minimum/maximum track insets (optional for alignment)
+//          let thumbOffset = size.width / 2
+////          self.minimumTrackTintColor = .clear
+////          self.maximumTrackTintColor = .clear
+//
+//        let minTrack = UIImage(color: .systemBlue, size: CGSize(width: 1, height: 4))?.resizableImage(withCapInsets: .zero)
+//        let maxTrack = UIImage(color: .lightGray, size: CGSize(width: 1, height: 4))?.resizableImage(withCapInsets: .zero)
+//
+//          self.setMinimumTrackImage(minTrack, for: .normal)
+//          self.setMaximumTrackImage(maxTrack, for: .normal)
+//      }
+    
+//    func applyLargeThumbFix(thumb: UIImage, size: CGSize) {
+//          // Resize thumb image
+//          let thumbImage = thumb.resized(to: size)
+//          self.setThumbImage(thumbImage, for: .normal)
+//          self.setThumbImage(thumbImage, for: .highlighted)
+//
+//          // Create transparent paddings on track
+//          let leftCap = Int(size.width / 2)
+//        let minTrackImage = UIImage(color: .systemBlue, size: CGSize(width: 1, height: 4))?
+//              .resizableImage(withCapInsets: UIEdgeInsets(top: 0, left: CGFloat(leftCap), bottom: 0, right: 0))
+//
+//        let maxTrackImage = UIImage(color: .lightGray, size: CGSize(width: 1, height: 4))?
+//              .resizableImage(withCapInsets: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: CGFloat(leftCap)))
+//
+//          self.setMinimumTrackImage(minTrackImage, for: .normal)
+//          self.setMaximumTrackImage(maxTrackImage, for: .normal)
+//      }
 }
 
 //MARK: ----------------Extension for UISearchBar

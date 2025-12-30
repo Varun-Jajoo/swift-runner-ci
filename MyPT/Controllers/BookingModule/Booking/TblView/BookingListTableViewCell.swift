@@ -117,12 +117,12 @@ class BookingListTableViewCell: UITableViewCell {
     func setUpCell(inputData: BookingDataModel?, type:Int? = 2){
         guard let inputData = inputData, let type = type else { return }
         self.rescheduledBtn.isHidden = true
-        self.dateLbl.text = inputData.timing
+        self.dateLbl.text = inputData.timing?.value
         self.workoutFocusDescLbl.text = inputData.workoutFocus?.joined(separator: ",")
-        self.sessionDescLbl.text = inputData.sessionType
-        self.timeLbl.text = inputData.duration
-        self.trainerNameLbl.text = inputData.trainer
-        self.trainingLocDesc.text = inputData.location
+        self.sessionDescLbl.text = inputData.sessionType?.value
+        self.timeLbl.text = inputData.duration?.value
+        self.trainerNameLbl.text = inputData.trainer?.value
+        self.trainingLocDesc.text = inputData.location?.value
        
         if type == 2{
             if let isReschedule = inputData.isReschedule, isReschedule {
@@ -130,7 +130,7 @@ class BookingListTableViewCell: UITableViewCell {
                 self.rescheduledBtn.setTitle(inputData.msg, for: .normal)
                 self.addLeftBorder(borderColor: UIColor.appRatingYellow)
                 
-                let text = inputData.timing ?? ""
+                let text = inputData.timing?.value ?? ""
                 let dot = " ●"
                 // Text attributes
                 let textAttributes: [NSAttributedString.Key: Any] = [

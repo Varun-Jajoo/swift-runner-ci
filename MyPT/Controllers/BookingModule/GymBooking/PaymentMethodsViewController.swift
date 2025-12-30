@@ -18,7 +18,17 @@ class PaymentMethodsViewController: CommonViewController {
     var taxesStr: String?
     var totalPayableStr: String? = nil {
         didSet{
-            self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [self.totalPayableStr ?? ""], setTintColor: .appWhite, setTitleColor: .appWhite)
+            let totalAmt = self.totalPayableStr?.components(separatedBy: " ")
+//            let payBal: String = (totalAmt?.last ?? "") + " " + (totalAmt?.first ?? "")
+            
+//            let payBal: String = (totalAmt?.count > 1) ? (totalAmt?.last ?? "") + " " + (totalAmt?.first ?? "") : "AED" + " " + (totalAmt?.first ?? "")
+          
+            var payBal: String = ""
+            if let totalAmt = totalAmt {
+                payBal = (totalAmt.count > 1) ? (totalAmt.last ?? "") + " " + (totalAmt.first ?? " ") : ("AED" + " ") + (totalAmt.first ?? "")
+            }
+            totalPayableStr = payBal
+            self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: ["Total: ", payBal], setTintColor: .appWhite, setTitleColor: .appWhite)
         }
     }
     
@@ -35,6 +45,7 @@ class PaymentMethodsViewController: CommonViewController {
     private var sessionId: String?
     private var paymentId: String?
     private var availableProducts: [TabbyProductType] = []
+    private var selectedPaymentMethod: Int?
     
     //MARK: ------------- IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
@@ -45,7 +56,6 @@ class PaymentMethodsViewController: CommonViewController {
     @IBOutlet weak var tabbySelctionBtn: UIButton!
     @IBOutlet weak var tamaraSelctionBtn: UIButton!
     @IBOutlet weak var paymentBtn: UIButton!
-    
     @IBOutlet weak var cardTitleLbl: UILabel!
     @IBOutlet weak var cardImgView: UIImageView!
     @IBOutlet weak var tabbyLbl: UILabel!
@@ -56,9 +66,13 @@ class PaymentMethodsViewController: CommonViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
                
+        self.enableContinueBtn(isSelected: false)
         self.cardMBV.isHidden = false
+        self.tabbyMBV.isHidden = !isTesting
         self.tamaraMBV.isHidden = true
-        self.paymentBtn.setTitle(self.totalPayableStr, for: .normal)
+        self.selectPaymentMethod(sender: masterCardSelctionBtn) //Make to select default card
+        
+        self.paymentBtn.setTitle("PAY " + (totalPayableStr ?? ""), for: .normal)
         
         self.setupUI()
         self.setupFont()
@@ -75,7 +89,7 @@ class PaymentMethodsViewController: CommonViewController {
     }
     
     private func setNavUI(){
-        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [self.totalPayableStr ?? ""], setTintColor: .appWhite, setTitleColor: .appWhite)
+        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: ["Total: " + (self.totalPayableStr ?? "")], setTintColor: .appWhite, setTitleColor: .appWhite)
         
         let helpIcon = UIImage(named: "ic_help_payment")?.resized(to: CGSize(width: 15.0, height: 15.0))?.withRenderingMode(.alwaysTemplate).withTintColor(UIColor.appWhite)
         
@@ -95,43 +109,69 @@ class PaymentMethodsViewController: CommonViewController {
         }
     }
     
-    enum cardBtnTag: Int {
+    enum CardBtnTag: Int {
         case masterCard = 1101, tabby, tamara, payment
+        
+        var caseValueStr: String {
+             switch self {
+             case .masterCard: return "MasterCard"
+             case .tabby:      return "Tabby"
+             case .tamara:     return "Tamara"
+             case .payment:    return "Payment"
+             }
+         }
     }
     
     @IBAction func cardSelectionCommonBtnActn(_ sender: UIButton) {
         
         switch sender.tag {
-        case cardBtnTag.masterCard.rawValue:
+        case CardBtnTag.masterCard.rawValue:
             print("master card")
             self.selectPaymentMethod(sender: masterCardSelctionBtn)
            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                self.paymentSuccess?(true,"","ccavenue")
-            }
-            
             break
-        case cardBtnTag.tabby.rawValue:
+        case CardBtnTag.tabby.rawValue:
             print("tabby")
             self.selectPaymentMethod(sender: tabbySelctionBtn)
-           
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                self.makeTabbyPaymnet()
-            }
             
             break
-        case cardBtnTag.tamara.rawValue:
+        case CardBtnTag.tamara.rawValue:
             print("Tamara")
             self.selectPaymentMethod(sender: tamaraSelctionBtn)
             break
-        case cardBtnTag.payment.rawValue:
+        case CardBtnTag.payment.rawValue:
             print("payment..")
+            if let paymentTag = self.selectedPaymentMethod {
+                self.selectPaymentMethod(tag: paymentTag)
+            }
+            
         default:
             break
         }
     }
-        
+    
+    private func selectPaymentMethod(tag: Int){
+        if let buttonTag = CardBtnTag(rawValue:tag) {
+            switch buttonTag {
+            case .masterCard:
+                print("MasterCard tapped")
+                self.paymentSuccess?(true,"","ccavenue")
+                //            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                //                self.paymentSuccess?(true,"","ccavenue")
+                //            }
+            case .tabby:
+                print("Tabby tapped")
+                self.makeTabbyPaymnet()
+            case .tamara:
+                print("Tamara tapped")
+            case .payment:
+                print("Payment tapped")
+            }
+        }
+    }
+    
     private func selectPaymentMethod(sender: UIButton){
+    
         [
             masterCardSelctionBtn,
             tabbySelctionBtn,
@@ -141,11 +181,28 @@ class PaymentMethodsViewController: CommonViewController {
             guard let _ = self, let btn = btn else { return }
             
             if btn.tag == sender.tag {
+                self?.selectedPaymentMethod = sender.tag
                 btn.setImage(AppImages.filterChecked, for: .normal)
+                self?.enableContinueBtn(isSelected: true)
             }else{
                 btn.setImage(AppImages.filterUncheck, for: .normal)
             }
         })
+    }
+    
+    //MARK: -------------- ENABLE CONTINUE
+    func enableContinueBtn(isSelected:Bool = false){
+        if isSelected {
+            self.paymentBtn.isUserInteractionEnabled = true
+            self.paymentBtn.backgroundColor = UIColor.appWhite
+            self.paymentBtn.setTitleColor(UIColor.mainBg, for: .normal)
+            self.paymentBtn.setImage(AppImages.arrow_right_black, for: .normal)
+        } else {
+            self.paymentBtn.isUserInteractionEnabled = false
+            self.paymentBtn.backgroundColor = UIColor.appDarkGray
+            self.paymentBtn.setTitleColor(UIColor.appWhite, for: .normal)
+            self.paymentBtn.setImage(AppImages.arrow_rightWhite, for: .normal)
+        }
     }
     
     private func setupUI(){
@@ -214,59 +271,68 @@ extension PaymentMethodsViewController{
 extension PaymentMethodsViewController{
     
     private func configureTabbySession() {
+        let min: UInt64 = 1_000_000_000
+        let max: UInt64 = 9_999_999_999
+        let randomNumber = UInt64.random(in: min...max)
         
         /*
          email: "successful.payment@tabby.ai",
          phone: "500000001",
          name: "Yazan Khalid",
          */
+               
+        let makePayAmtStr = (totalPayableStr ?? "0.0").filter { $0.isNumber || $0 == "." }
+        let payAmt = Float(makePayAmtStr) ?? 0.0
+        
+        let todayDateStr = DateFormatterHelper.shared.getTodayDate(fromFormat: "yyyy-MM-dd HH:mm:ss zzz")
+        
             // Your payment payload
             let customerPayment = Payment(
-                amount: "1",
+                amount: "\(payAmt)",
                 currency: .AED,
-                description: "tabby Store Order #3",
+                description: "",
                 buyer: Buyer(
                     email: "otp.success@tabby.ai", //"successful.payment@tabby.ai",
                     phone: "+971500000001", //"500000001",
-                    name: "Yazan Khalid",
+                    name: "", //"Yazan Khalid"
                     dob: nil
                 ),
                 buyer_history: BuyerHistory(
-                    registered_since: "2019-08-24T14:15:22Z",
+                    registered_since: todayDateStr,//"2019-08-24T14:15:22Z"
                     loyalty_level: 0
                 ),
                 order: Order(
-                    reference_id: "#xxxx-xxxxxx-xxxx",
+                    reference_id: "#\(randomNumber)",
                     items: [
                         OrderItem(
-                            description: "Jersey",
+                            description: "",
                             product_url: "https://tabby.store/p/SKU123",
                             quantity: 1,
                             reference_id: "SKU123",
-                            title: "Pink jersey",
-                            unit_price: "300",
-                            category: "Clothes"
+                            title: "",
+                            unit_price: "\(payAmt)",
+                            category: ""
                         )
                     ],
-                    shipping_amount: "50",
-                    tax_amount: "100"
+                    shipping_amount: "",
+                    tax_amount: self.taxesStr
                 ),
                 order_history: [
                     OrderHistory(
-                        purchased_at: "2019-08-24T14:15:22Z",
-                        amount: "10",
+                        purchased_at: todayDateStr, //"2019-08-24T14:15:22Z"
+                        amount: "",
                         status: .new,
                         shipping_address: ShippingAddress(
-                            address: "Sample Address #2",
-                            city: "Dubai",
-                            zip: "01234"
+                            address: "",
+                            city: "",
+                            zip: ""
                         )
                     )
                 ],
                 shipping_address: ShippingAddress(
-                    address: "Sample Address #2",
-                    city: "Dubai",
-                    zip: "01234"
+                    address: "",
+                    city: "",
+                    zip: ""
                 )
             )
 
@@ -290,7 +356,7 @@ extension PaymentMethodsViewController{
                     self?.availableProducts = sessionInfo.tabbyProductTypes
 
                     self?.isTabbyInstallmentsAvailable = sessionInfo.tabbyProductTypes.contains(.installments)
-
+                   
                 case .failure(let error):
                     print("Tabby configure failed: \(error.localizedDescription)")
                     self?.isTabbyInstallmentsAvailable = false
@@ -314,6 +380,7 @@ extension PaymentMethodsViewController{
                     switch result {
                     case .authorized:
                         print("✅ Payment authorized")
+                    self.paymentSuccess?(true, self.paymentId, "tabby")
                         // TODO: maybe notify user or update UI here
                     case .rejected:
                         print("❌ Payment rejected")

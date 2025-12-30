@@ -21,7 +21,7 @@ struct TrainerDetalsModel: Codable {
     var profile: String?
     var follower, distance, trainWithMe, location: String?
     var description, quote, clientCoached, experience: String?
-    var averageRating, noOfRating: String?
+    var averageRating, noOfRating: FlexibleValue?
     var isVerified:Bool?
     var isFollowing:Bool?
     var certificates: [CertificateModel]?
@@ -61,56 +61,4 @@ struct ReviewModel: Codable {
     var comment: String?
 }
 
-/*
- {
-   "status": true,
-   "data": {
-     "id": 5,
-     "name": "Ultimate Fitness",
-     "address": "G8QX+4VP Foot Over Bridge, Sector 97, Noida, Uttar Pradesh 201313, India",
-     "latitude": "28.537220440184296",
-     "distance": "191.34 km",
-     "longitude": "77.34980676323175",
-     "profile": "http://mypt.test/storage",
-     "facility": [
-       {
-         "id": 1,
-         "name": "Conference Room",
-         "image": "http://mypt.test/storage/facilities/conference_room.png"
-       },
-       {
-         "id": 2,
-         "name": "Swimming Pool",
-         "image": "http://mypt.test/storage/facilities/swimming_pool.png"
-       }
-     ],
-     "amenity": [],
-     "gallery": [
-       {
-         "media_path": "http://mypt.test/storage/studio/gallery/1740814009_download (1).jpg",
-         "is_image": true,
-         "is_video": false
-       },
-       {
-         "media_path": "http://mypt.test/storage/studio/gallery/1740814009_download.jpg",
-         "is_image": true,
-         "is_video": false
-       },
-       {
-         "media_path": "http://mypt.test/storage/studio/gallery/1740814257_SampleVideo_1280x720_10mb.mp4",
-         "is_image": false,
-         "is_video": true
-       }
-     ],
-     "reviews": [
-       {
-         "id": 8,
-         "name": "Tyson Graham Sr.",
-         "image": null,
-         "rating": "4"
-       }
-     ]
-   },
-   "msg": "Data fetched successfully!"
- }
- */
+

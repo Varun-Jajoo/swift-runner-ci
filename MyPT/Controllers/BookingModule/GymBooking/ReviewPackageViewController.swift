@@ -31,6 +31,7 @@ class ReviewPackageViewController: CommonViewController {
     @IBOutlet weak var trainingPrefernceTitleLbl: UILabel!
     @IBOutlet weak var preferenceLbl: UILabel!
     @IBOutlet weak var bookingSlotTitleLbl: UILabel!
+    @IBOutlet weak var bookingTimeBckView: UIView!
     @IBOutlet weak var bookingTimeLbl: UILabel!
     @IBOutlet weak var preferenceEditBtn: UIButton!
     @IBOutlet weak var bookingSlotEditBtn: UIButton!
@@ -257,6 +258,8 @@ class ReviewPackageViewController: CommonViewController {
             self.offerDetailsSubMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appBorder, cornerRadious: 12.0)
             
             self.addressTypeBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: self.addressTypeBtn.frame.height/2.5)
+            self.bookingTimeBckView.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 9.0)
+            
             
             //-------------------
             self.profileMBV.backgroundColor = UIColor.clear
@@ -412,6 +415,7 @@ class ReviewPackageViewController: CommonViewController {
         }
     }
     
+    
 //    //MARK: ------------VIEW OFFER ACT
 //    @objc func viewOffersCoupon(sender:UITapGestureRecognizer){
 //        print("tap to view offers")
@@ -434,9 +438,56 @@ class ReviewPackageViewController: CommonViewController {
             
             print("inputBookSlotParams", inputBookSlotParams as Any)
             
+            //------------********** PAYMENT METHOD FLOW
+            if let pricePackage = self.packagecheckoutData?.packageDetail?.price, let mainPrice = self.packagecheckoutData?.packageDetail?.main_price?.value, let taxesRate = self.packagecheckoutData?.packageDetail?.tax_price?.value {
             
-            //-----------------Called booking Api
+                let vc: PaymentMethodsViewController = PaymentMethodsViewController.instantiate(appStoryboard: .booking)
+                vc.totalPayableStr = pricePackage
+                vc.taxesStr = "\(taxesRate)"
+                vc.sessionCost = "\(mainPrice)"
+                
+                vc.paymentSuccess = {[weak self] (getStatus, getTransactionId, paymetMethod) in
+                    guard let self = self else { return  }
+                    
+                    if paymetMethod == "ccavenue" {
+                        
+                        if let pricePackage = packagecheckoutData?.packageDetail?.price {
+                            let components = pricePackage.split(separator: " ")
+                            let vc: CCAvenuePaymentViewController = CCAvenuePaymentViewController.instantiate(appStoryboard: .booking)
+                            vc.modalPresentationStyle = .overFullScreen
+                            vc.costAmt =  Double(components.first ?? "0.0")
+                            
+                            vc.paymentSuccess = {[weak self] (getStatus, getTransactionId) in
+                                guard let self = self, let getTransactionId = getTransactionId  else { return  }
+                                inputBookSlotParams?.transaction_id = getTransactionId
+                                inputBookSlotParams?.price = pricePackage
+                                inputBookSlotParams?.payment_type = paymetMethod
+                                
+                                print("Slot booking params: ",inputBookSlotParams?.getParams() ?? [:])
+                                self.bookSlot(inputParam: self.inputBookSlotParams?.getParams() ?? [:])
+                            }
+                            self.navigationController?.present(vc, animated: true)
+                        }
+                    }
+                    else if paymetMethod == "tabby" {
+                        inputBookSlotParams?.transaction_id = getTransactionId
+                        inputBookSlotParams?.price = pricePackage
+                        inputBookSlotParams?.payment_type = paymetMethod
+                        
+                        print("Slot booking params: ",inputBookSlotParams?.getParams() ?? [:])
+                        if let slotId = inputBookSlotParams?.slot_id, !slotId.isEmpty {
+                            self.bookSlot(inputParam: inputBookSlotParams?.getParams() ?? [:])
+                        }else{
+                            AlertHelper.shared.alertMesssage(view: self, title: "", message: "Please select slot")
+                        }
+                    }
+                }
+                self.navigationController?.pushViewController(vc, animated: false)
+            }
             
+            
+            //-----------------CCAVENUE Called booking Api
+            /*
             if let pricePackage = packagecheckoutData?.packageDetail?.price {
                 let components = pricePackage.split(separator: " ")
                 let vc: CCAvenuePaymentViewController = CCAvenuePaymentViewController.instantiate(appStoryboard: .booking)
@@ -452,12 +503,65 @@ class ReviewPackageViewController: CommonViewController {
                 self.navigationController?.present(vc, animated: true)
             }
             
+            */
+            
 //            self.bookSlot(inputParam: self.inputBookSlotParams?.getParams() ?? [:])
             
         case .withoutTrainerMembership:
             print("withoutTrainerMembership")
 //            self.bookMembershipWithoutTrainer(inputParams: self.inputParamMembership?.getParamsReviewPackage()) //only for testing
             
+            //------------********** PAYMENT METHOD FLOW
+            if let pricePackage = self.reviewDetailsWithoutTrainer?.price, let mainPrice = self.reviewDetailsWithoutTrainer?.main_price?.value, let taxesRate = self.reviewDetailsWithoutTrainer?.tax_amount?.value {
+            
+                let vc: PaymentMethodsViewController = PaymentMethodsViewController.instantiate(appStoryboard: .booking)
+                vc.totalPayableStr = pricePackage
+                vc.taxesStr = "\(taxesRate)"
+                vc.sessionCost = "\(mainPrice)"
+                
+                vc.paymentSuccess = {[weak self] (getStatus, getTransactionId, paymetMethod) in
+                    guard let self = self else { return  }
+                    
+                    if paymetMethod == "ccavenue" {
+                        
+                        if let pricePackage = reviewDetailsWithoutTrainer?.price {
+                            
+                            let components = pricePackage.split(separator: " ")
+                            let vc: CCAvenuePaymentViewController = CCAvenuePaymentViewController.instantiate(appStoryboard: .booking)
+                            vc.modalPresentationStyle = .overFullScreen
+                            vc.costAmt =  Double(components.first ?? "0.0")
+                            
+                            vc.paymentSuccess = {[weak self] (getStatus, getTransactionId) in
+                                guard let self = self, let getTransactionId = getTransactionId  else { return  }
+                                self.inputParamMembership?.transaction_id = getTransactionId
+                                inputBookSlotParams?.price = pricePackage
+                                inputBookSlotParams?.payment_type = paymetMethod
+                                
+                                print("without membership Slot booking params: ",self.inputParamMembership?.getParamsReviewPackage() ?? [:])
+                                
+                                self.bookMembershipWithoutTrainer(inputParams: self.inputParamMembership?.getParamsReviewPackage())
+                            }
+                            self.navigationController?.present(vc, animated: true)
+                        }
+                    }
+                    else if paymetMethod == "tabby" {
+                        inputBookSlotParams?.transaction_id = getTransactionId
+                        inputBookSlotParams?.price = pricePackage
+                        inputBookSlotParams?.payment_type = paymetMethod
+                        
+                        print("Slot booking params: ",inputBookSlotParams?.getParams() ?? [:])
+                        if let slotId = inputBookSlotParams?.slot_id, !slotId.isEmpty {
+                            self.bookSlot(inputParam: inputBookSlotParams?.getParams() ?? [:])
+                        }else{
+                            AlertHelper.shared.alertMesssage(view: self, title: "", message: "Please select slot")
+                        }
+                    }
+                }
+                self.navigationController?.pushViewController(vc, animated: false)
+            }
+            
+            
+            /* ---------- CCAVENUE PAYMENT METHOD
             if let pricePackage = reviewDetailsWithoutTrainer?.price {
                 
                 let components = pricePackage.split(separator: " ")
@@ -474,9 +578,16 @@ class ReviewPackageViewController: CommonViewController {
                 }
                 self.navigationController?.present(vc, animated: true)
             }
+            */
         }
         
     }
+    
+
+    private func paymentBook(){
+        //------
+    }
+    
     
     override func updateViewConstraints() {
         super.updateViewConstraints()

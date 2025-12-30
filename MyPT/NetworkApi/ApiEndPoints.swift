@@ -24,13 +24,16 @@ var isTesting:Bool                { return true }
 
 //App base urls
 enum AppBaseUrl:String {
-    case baseScheme = "https" //"http"
-    case baseDevUrl = "mobileapp.mypt-me.com"  //"mypt.techsaga.live"
-    case baseProductionUrl = ""
+    case baseScheme = "https"
+    case baseDevUrl = "mobileapp.mypt-me.com" 
+    case baseProductionUrl = "mobileappuat.mypt-me.com"
 }
 
+
 //base url : - https://mobileapp.mypt-me.com -> for live
+//Testin base url : - https://mobileappuat.mypt-me.com/
 //base url : - http://mypt.techsaga.live/
+
 
 //App api end points
 enum ApiEndPoint: String{
@@ -94,9 +97,38 @@ enum ApiEndPoint: String{
     case user_information               =  "api/user-information"
     case update_information             =  "api/update-information"
     case delete_user_profileImage       =  "api/delete-user-profile-image"
+    case trainer_filter_data            =  "api/get-filter-data"
+    case filter_trainer                 =  "api/get-trainers"
+    case filter_gym_trainers            =  "api/gym-trainers"
+    case user_health_stats              =  "api/user-health-stats"
+    case user_meals                     =  "api/user-meals"
+    case meal_favourite                 =  "api/meal-favourite"
+    case get_trainer_time               =  "api/get-trainer-time"
+    case make_favourite                 =  "api/make-favourite"
+    case workout_types                  =  "api/workout-types"
+    case get_workouts                   =  "api/get-workouts"
+    case get_exercises                  =  "api/get-exercises"
+    case body_parts                     =  "api/body-parts"
+    case get_plans                      =  "api/get-plans"
+    case upgrade_plan                   =  "api/upgrade-plan"
+    case review_upgrade_package         =  "api/review-upgrade-package"
+    case make_payment                   =  "api/make-payment"
+    case trainer_review                 =  "api/trainer-review"
+    case wokout_detail                  =  "api/wokout-detail"
+    case workout_start                  =  "api/workout-start"
+    case exercise_complete              =  "api/exercise-complete"
+    case workout_complete               =  "api/workout-complete"
+    case get_workout_summary            =  "api/get-workout-summary"
+    case my_workouts                    =  "api/my-workouts"
+    case get_user_streak                =  "api/get-user-streak"
+    case trainer_remindworkouttime      =  "api/trainer/remindworkouttime"
+    case createworkout                  =  "api/createworkout"
+    case set_edit_workout               =  "api/set-edit-workout"
+    case delete_workout_exercise        =  "api/delete-workout-exercise"
+    case workout_delete                 =  "api/workout-delete"
+    case edit_workout_exercise          =  "api/edit-workout-exercise"
     
-  
-    
+   
     case authLoginOTP = "authLoginOTP"
     case refreshAccessToken = "refreshToken"
     

@@ -38,17 +38,20 @@ class CCAvenuePaymentViewController: CommonViewController, WKNavigationDelegate{
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
     
-    private func payAmt(){
-        ////https://mobileapp.mypt-me.com/api/pay?amount=2
-    }
     
     //MARK: --------------MAKE PAYMENT URL
     func buildPaymentURL(amount: Double) -> URL? {
+        let paymentCCAvenueUrl = ApiEndPoint.ccaavenue_payment.getURL(queries: ["amount":"\(amount)"])
+        print("paymentUrl", paymentCCAvenueUrl as Any)
+        return paymentCCAvenueUrl
+        
+        /*
         var components = URLComponents(string: "https://mobileapp.mypt-me.com/api/pay")
         components?.queryItems = [URLQueryItem(name: "amount", value: "\(amount)")]
         return components?.url
+        */
     }
-    
+        
     override func leftBtnActn(sender: UIButton) {
         self.dismiss(animated: true, completion: nil)
     }
@@ -83,11 +86,6 @@ class CCAvenuePaymentViewController: CommonViewController, WKNavigationDelegate{
                     print("❌ Error: \(error.localizedDescription)")
                 }
             }
-        
-//        guard let costAmt = costAmt, let paymentGatewayURL = buildPaymentURL(amount: costAmt) else { return }
-//        paymentWeb.navigationDelegate = self
-//        let request = URLRequest(url: paymentGatewayURL)
-//        paymentWeb.load(request)
     }
     
     // MARK: - WKNavigationDelegate

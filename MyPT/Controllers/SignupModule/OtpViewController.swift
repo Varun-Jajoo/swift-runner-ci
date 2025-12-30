@@ -38,9 +38,17 @@ enum vcSteps: Int {
     }
 }
 
+enum OtpBoxState {
+    case empty
+    case filled
+    case wrongOtp
+}
+
 class OtpViewController: CommonViewController, UITextFieldDelegate {
     
     //MARK: ---------VARIABLE
+    private var backgroundGradient: CAGradientLayer?
+    private var isWrongOtp = false
     var player: LoopingPlayer?
     var mobilNumStr:String?
     var countryCodeStr:String?
@@ -52,9 +60,9 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         didSet{
             if let timeCouter = timeCouter {
                 receiveOtpLbl.text = nil
-                if timeCouter < 30 {
+                if timeCouter > 0 {
                     resentOtpLbl.text = "\(timeCouter) seconds"
-                }else{
+                } else {
                     self.stopTimer()
                     receiveOtpLbl.text = "Didn’t receive OTP?"
                     self.setupResnd(timeStr: "\(timeCouter)")
@@ -73,27 +81,66 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
     @IBOutlet weak var fourTxTField: UITextField!
     @IBOutlet weak var receiveOtpLbl: UILabel!
     @IBOutlet weak var resentOtpLbl: UILabel!
+    @IBOutlet weak var invalidOtpLbl: UILabel!
+    @IBOutlet weak var oneImgView: UIImageView!
+    @IBOutlet weak var twoImgView: UIImageView!
+    @IBOutlet weak var threeImgView: UIImageView!
+    @IBOutlet weak var fourImgView: UIImageView!
+    @IBOutlet weak var oneContainer: UIView!
+    @IBOutlet weak var twoContainer: UIView!
+    @IBOutlet weak var threeContainer: UIView!
+    @IBOutlet weak var fourContainer: UIView!
+    @IBOutlet weak var viewBackground: UIView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let countryCodeStr = countryCodeStr, let mobilNumStr = mobilNumStr {
-            mobilNumeLbl.text = countryCodeStr + mobilNumStr
-        }
-        
+        self.mobileNumFormat()
+//        if let countryCodeStr = countryCodeStr, let mobilNumStr = mobilNumStr {
+//            mobilNumeLbl.text = countryCodeStr + mobilNumStr
+//        }
         receiveOtpLbl.text = nil
         resentOtpLbl.text  = nil
         self.startTimer()
-        
+        setupBackgroundGradient()
         oneTxtField.delegate = self
         twoTxTField.delegate = self
         threeTxTField.delegate = self
         fourTxTField.delegate = self
-        
+        setupOtpBoxes()
         setupUI()
         setUpFont()
-        setUpVideo()
+//        setUpVideo()
         self.customBlurViewShow(viewShow: self.view)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        view.endEditing(true)   // ⬅️ IMPORTANT
+        updateOtpUI()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        backgroundGradient?.frame = viewBackground.bounds
+    }
+
+    func updateOtpUI() {
+        let mapping: [(UITextField, UIView)] = [
+            (oneTxtField, oneContainer),
+            (twoTxTField, twoContainer),
+            (threeTxTField, threeContainer),
+            (fourTxTField, fourContainer)
+        ]
+
+        mapping.forEach { field, container in
+            if isWrongOtp {
+                container.applyOtpStyle(.wrongOtp)
+            } else {
+                let isFilled = !(field.text?.isEmpty ?? true)
+                container.applyOtpStyle(isFilled ? .filled : .empty)
+            }
+        }
     }
     
     override func keyboardWillHide(_ notification: Notification) {
@@ -121,14 +168,27 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         self.player?.pausePlayback()
     }
     
-    func setNavUI(){
-        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
+    func setNavUI() {
+        self.setLeftMenu(leftImgs: [AppImages.backArrowWithBg], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
         self.setRighMenu(rightImgs: [AppImages.help], setTitle: [AppStrings.helpStr], setTintColor: .black, setTitleColor: UIColor.appWhite,isRightImg: [false])
     }
     
     //MARK: ---------------EDIT MOBILE NUMBER ACTN
     @IBAction func editMobileBtnActn(_ sender: Any) {
         self.navigationController?.popViewController(animated: false)
+    }
+    
+    private func mobileNumFormat(){
+        if let countryCodeStr = countryCodeStr, let mobilNumStr = mobilNumStr {
+            var formattedNum = ""
+            for (index, char) in mobilNumStr.enumerated() {
+                if index == 3 || index == 6 {
+                    formattedNum += "-"
+                }
+                formattedNum += String(char)
+            }
+            mobilNumeLbl.text = "\(countryCodeStr) \(formattedNum)"
+        }
     }
     
     //MARK: ---------------------VIDEO SETUP
@@ -162,13 +222,13 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
     //MARK: --------------------Timer
     func startTimer() {
         self.stopTimer()
-        self.timeCouter = 1
+        self.timeCouter = 30 //1
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(getTime), userInfo: nil, repeats: true)
     }
     
     @objc func getTime() {
-        if let timeCouter = self.timeCouter {
-            self.timeCouter! += 1
+        if let _ = self.timeCouter {
+            self.timeCouter! -= 1
         }else{
             print("Timer",timer?.timeInterval as Any)
             self.timeCouter = 1
@@ -236,17 +296,18 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
     }
     
     func setUpFont(){
-        self.topTitleLbl.font = AppFont.bold.size(24.0, familyName: familyManrope)
-        self.topDescLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.mobilNumeLbl.font = AppFont.bold.size(14.0, familyName: familyManrope)
-        self.oneTxtField.font = AppFont.bold.size(14.0, familyName: familyManrope)
-        self.twoTxTField.font = AppFont.bold.size(14.0, familyName: familyManrope)
-        self.threeTxTField.font = AppFont.bold.size(14.0, familyName: familyManrope)
-        self.fourTxTField.font = AppFont.bold.size(14.0, familyName: familyManrope)
+        self.topTitleLbl.font = AppFont.medium.size(24.0, familyName: familyClashDisplay)
+        self.topDescLbl.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
+        self.mobilNumeLbl.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
+        self.oneTxtField.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
+        self.twoTxTField.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
+        self.threeTxTField.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
+        self.fourTxTField.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
         
-        self.receiveOtpLbl.font = AppFont.regular.size(12.0, familyName: familyManrope)
-        self.resentOtpLbl.font = AppFont.bold.size(12.0, familyName: familyManrope)
+        self.receiveOtpLbl.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
+        self.resentOtpLbl.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
         self.resentOtpLbl.textColor = UIColor.appWhite
+        self.invalidOtpLbl.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
      
         //------------
         if inputType != "3" {
@@ -254,8 +315,6 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         }else{
             self.topTitleLbl.text = "Verify your email"
         }
-        
-        
         //        //-------------------- Attributed Text
         //
         //        let defaultAttributes = [
@@ -276,8 +335,8 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         //        self.resentOtpLbl.attributedText       =  NSAttributedString(from: attributedNickName, defaultAttributes: defaultAttributes)
     }
     
-    func setupUI(){
-        
+    func setupUI() {
+        invalidOtpLbl.isHidden = true
         oneTxtField.addTarget(self, action: #selector(textFieldDidChange(textField:)), for: UIControl.Event.editingChanged)
         twoTxTField.addTarget(self, action: #selector(textFieldDidChange(textField:)), for: UIControl.Event.editingChanged)
         threeTxTField.addTarget(self, action: #selector(textFieldDidChange(textField:)), for: UIControl.Event.editingChanged)
@@ -285,53 +344,62 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         
     }
     
-    @objc func textFieldDidChange(textField: UITextField){
+    private func setupBackgroundGradient() {
+
+        // Remove old gradient if any
+        backgroundGradient?.removeFromSuperlayer()
+
+        let gradient = CAGradientLayer()
+        gradient.colors = UIColor.appMultiColor(.greenBgGradient).map { $0.cgColor }
+
+        // VERY IMPORTANT – match first UI direction
+        gradient.startPoint = CGPoint(x: 0.0, y: 0.0)
+        gradient.endPoint   = CGPoint(x: 1.0, y: 1.0)
+
+        gradient.locations = [0.0, 0.5, 1.0]
+        gradient.cornerRadius = 0
+
+        viewBackground.layer.insertSublayer(gradient, at: 0)
+        backgroundGradient = gradient
+    }
+
+    @objc func textFieldDidChange(textField: UITextField) {
         
+        if isWrongOtp {
+            isWrongOtp = false
+            invalidOtpLbl.isHidden = true
+        }
+
         let text = textField.text
-        
-        if (text?.utf16.count)! >= 1{
-            switch textField{
-            case oneTxtField:
-                twoTxTField.becomeFirstResponder()
-            case twoTxTField:
-                threeTxTField.becomeFirstResponder()
-            case threeTxTField:
-                fourTxTField.becomeFirstResponder()
+
+        if (text?.utf16.count ?? 0) >= 1 {
+            switch textField {
+            case oneTxtField: twoTxTField.becomeFirstResponder()
+            case twoTxTField: threeTxTField.becomeFirstResponder()
+            case threeTxTField: fourTxTField.becomeFirstResponder()
             case fourTxTField:
                 fourTxTField.resignFirstResponder()
-                
-                if let  txt =  fourTxTField.text , !txt.isEmpty {
-                    self.view.endEditing(true)
-                    if  self.isValiadteOtp() {
-                        if let otp1 = self.oneTxtField.text, let otp2 = self.twoTxTField.text, let otp3 = self.threeTxTField.text, let otp4 = self.fourTxTField.text {
-                            let otpStr = otp1 + otp2 + otp3 + otp4
-                            self.submitOtp(inputOtp: otpStr)
-                        }
-                        
-                        
-                        //                        let vc:NameViewController = NameViewController.instantiate(appStoryboard: .main)
-                        //                        self.navigationController?.pushViewController(vc, animated: false)
-                    }
+                if isValiadteOtp() {
+                    let otp = [
+                        oneTxtField.text,
+                        twoTxTField.text,
+                        threeTxTField.text,
+                        fourTxTField.text
+                    ].compactMap { $0 }.joined()
+                    submitOtp(inputOtp: otp)
                 }
-                
-            default:
-                break
+            default: break
             }
-        }else{
-            switch textField{
-            case oneTxtField:
-                oneTxtField.becomeFirstResponder()
-            case twoTxTField:
-                oneTxtField.becomeFirstResponder()
-            case threeTxTField:
-                twoTxTField.becomeFirstResponder()
-            case fourTxTField:
-                threeTxTField.becomeFirstResponder()
-            default:
-                break
+        } else {
+            switch textField {
+            case twoTxTField: oneTxtField.becomeFirstResponder()
+            case threeTxTField: twoTxTField.becomeFirstResponder()
+            case fourTxTField: threeTxTField.becomeFirstResponder()
+            default: break
             }
         }
-        
+        // ✅ THIS IS THE KEY LINE
+        updateOtpUI()
     }
     
     // UITextFieldDelegate method to restrict the input to 1 digits
@@ -364,6 +432,11 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         return true
     }
     
+    private func showIncorrectOtpUI() {
+        invalidOtpLbl.isHidden = false
+        isWrongOtp = true
+        updateOtpUI()
+    }
 }
 
 
@@ -414,8 +487,6 @@ extension OtpViewController {
 //                                appUserDefaults.saveUserToUserDefaults(userData)
 //
 //                            }
-                            
-                            
                             appUserDefaults.saveUserToUserDefaults(userData)
                             appUserDefaults.setUserName(value: userData.user?.name)
                             appUserDefaults.setAccessToken(accessToken: userData.token?.value)
@@ -434,17 +505,20 @@ extension OtpViewController {
                                 // Use the currentVC, which will be the type of the corresponding view controller
                                 let getVC = currentVC.instantiate(appStoryboard: .main)
                                 self.navigationController?.pushViewController(getVC, animated: true)
-                            }
-                            else{
+                            } else {
                                 let vc:NameViewController = NameViewController.instantiate(appStoryboard: .main)
                                 self.navigationController?.pushViewController(vc, animated: false)
                             }
                         }
                         
-                    }else{
+                    } else {
                         //(getResult.errors?.values.first?.first as? String ?? "")
                         let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
                         AlertHelper.shared.alertMesssage(view: self, title: "", message: errorMsg ?? "")
+                        // Show red message
+                        DispatchQueue.main.async {
+                            self.showIncorrectOtpUI()
+                        }
                     }
                 })
             }
@@ -499,6 +573,26 @@ extension OtpViewController {
         }
 
     }
+    
+    func setupOtpBoxes() {
+
+        let containers = [oneContainer, twoContainer, threeContainer, fourContainer]
+        let fields = [oneTxtField, twoTxTField, threeTxTField, fourTxTField]
+
+        containers.forEach {
+            $0?.layer.cornerRadius = 18
+//            $0?.applyOtpGradient()
+        }
+//        self.oneContainer.backgroundColor =  UIColor(red: 53.0/255.0, green: 62.0/255.0, blue:  56.0/255.0, alpha: 1.0)
+        fields.forEach {
+            $0?.backgroundColor = .clear
+            $0?.textAlignment = .center
+            $0?.keyboardType = .numberPad
+            $0?.textColor = .white
+            $0?.tintColor = .white
+        }
+    }
+
 }
 
 extension OtpViewController: LoopingPlayerProgressDelegate{
@@ -509,6 +603,227 @@ extension OtpViewController: LoopingPlayerProgressDelegate{
     func loopingPlayer(loopingPlayer: LoopingPlayer, didFinishLoading succeeded: Bool) {
         print(succeeded ? "Video loaded successfully!" : "Failed to load video.")
     }
-    
-    
 }
+
+extension UIView {
+
+    private static let bgLayerName = "otp.bg"
+    private static let glowLayerName = "otp.glow"
+    private static let topBorderLayerName = "otp.top.border"
+
+    func applyOtpStyle(_ state: OtpBoxState) {
+
+        guard bounds.width > 0 else { return }
+
+        // Remove only glow layer safely
+        layer.sublayers?
+            .filter { $0.name == Self.glowLayerName }
+            .forEach { $0.removeFromSuperlayer() }
+
+        // Background layer (reuse)
+        let bgLayer: CALayer
+        if let existing = layer.sublayers?.first(where: { $0.name == Self.bgLayerName }) {
+            bgLayer = existing
+        } else {
+            let layer = CALayer()
+            layer.name = Self.bgLayerName
+            layer.cornerRadius = 18
+            self.layer.insertSublayer(layer, at: 0)
+            bgLayer = layer
+        }
+
+        bgLayer.frame = bounds
+
+        switch state {
+        //  EMPTY
+        case .empty:
+            bgLayer.backgroundColor = UIColor.clear.cgColor
+            layer.borderWidth = 1
+            layer.borderColor = UIColor.white.withAlphaComponent(0.35).cgColor
+            layer.shadowOpacity = 0
+            layer.sublayers?
+                .filter { $0.name == Self.topBorderLayerName }
+                .forEach { $0.removeFromSuperlayer() }
+
+            
+        // FILLED
+        case .filled:
+            bgLayer.backgroundColor = UIColor.otpBg.cgColor
+
+            layer.borderWidth = 1
+            layer.borderColor = UIColor.otpGlow.withAlphaComponent(0.45).cgColor
+
+            // ───── Smooth curved top highlight (Image-2 style) ─────
+            let highlight = CAGradientLayer()
+            highlight.name = Self.glowLayerName
+
+            highlight.frame = CGRect(
+                x: 0,
+                y: -2,
+                width: bounds.width,
+                height: 4
+            )
+
+            highlight.cornerRadius = 2
+
+            // ⭐ Center strong → sides thin
+            highlight.colors = [
+                UIColor.clear.cgColor,
+                UIColor.otpGlow.withAlphaComponent(0.65).cgColor,
+                UIColor.clear.cgColor
+            ]
+
+            highlight.locations = [0.0, 0.5, 1.0]
+
+            // 🔥 Horizontal fade (THIS is the key)
+            highlight.startPoint = CGPoint(x: 0.0, y: 0.5)
+            highlight.endPoint   = CGPoint(x: 1.0, y: 0.5)
+
+            // Mask so it stays INSIDE rounded corners
+            let mask = CAShapeLayer()
+            mask.path = UIBezierPath(
+                roundedRect: bounds.insetBy(dx: 2, dy: 2),
+                cornerRadius: 16
+            ).cgPath
+
+            highlight.mask = mask
+            layer.addSublayer(highlight)
+            
+        case .wrongOtp:
+            bgLayer.backgroundColor = UIColor.wrongOtpBg.cgColor
+
+            layer.borderWidth = 1
+            layer.borderColor = UIColor.wrongOtpGlow.withAlphaComponent(0.45).cgColor
+
+            let highlight = CAGradientLayer()
+            highlight.name = Self.glowLayerName
+
+            highlight.frame = CGRect(
+                x: 0,
+                y: -1,
+                width: bounds.width,
+                height: 4
+            )
+
+            highlight.cornerRadius = 2
+
+            highlight.colors = [
+                UIColor.clear.cgColor,
+                UIColor.wrongOtpGlow.withAlphaComponent(0.65).cgColor,
+                UIColor.clear.cgColor
+            ]
+
+            highlight.locations = [0.0, 0.5, 1.0]
+            highlight.startPoint = CGPoint(x: 0.0, y: 0.5)
+            highlight.endPoint   = CGPoint(x: 1.0, y: 0.5)
+
+            let mask = CAShapeLayer()
+            mask.path = UIBezierPath(
+                roundedRect: bounds.insetBy(dx: 2, dy: 2),
+                cornerRadius: 16
+            ).cgPath
+
+            highlight.mask = mask
+            layer.addSublayer(highlight)
+
+
+//        case .wrongOtp:
+//            bgLayer.backgroundColor = UIColor.wrongOtpBg.cgColor
+//
+//            layer.borderWidth = 1
+//            layer.borderColor = UIColor.wrongOtpGlow.withAlphaComponent(0.45).cgColor
+//
+//            // ───── Smooth curved top highlight (Image-2 style) ─────
+//            let highlight = CAGradientLayer()
+//            highlight.name = Self.glowLayerName
+//
+//            highlight.frame = CGRect(
+//                x: 0,
+//                y: -2,
+//                width: bounds.width,
+//                height: 4
+//            )
+//
+//            highlight.cornerRadius = 2
+//
+//            // ⭐ Center strong → sides thin
+//            highlight.colors = [
+//                UIColor.clear.cgColor,
+//                UIColor.wrongOtpGlow.withAlphaComponent(0.65).cgColor,
+//                UIColor.clear.cgColor
+//            ]
+//
+//            highlight.locations = [0.0, 0.5, 1.0]
+//
+//            // 🔥 Horizontal fade (THIS is the key)
+//            highlight.startPoint = CGPoint(x: 0.0, y: 0.5)
+//            highlight.endPoint   = CGPoint(x: 1.0, y: 0.5)
+//
+//            // Mask so it stays INSIDE rounded corners
+//            let mask = CAShapeLayer()
+//            mask.path = UIBezierPath(
+//                roundedRect: bounds.insetBy(dx: 2, dy: 2),
+//                cornerRadius: 16
+//            ).cgPath
+//
+//            highlight.mask = mask
+//            layer.addSublayer(highlight)
+        }
+    }
+}
+
+extension UIColor {
+    static let otpBg = UIColor(hex: "#1B270C")
+    static let otpGlow = UIColor(red: 224/255, green: 254/255, blue: 8/255, alpha: 1)
+    static let wrongOtpBg = UIColor(hex: "#221910")
+    static let wrongOtpGlow = UIColor(red: 73/255, green: 39/255, blue: 26/255, alpha: 1)
+}
+
+
+//extension UIView {
+//
+//    func applyOtpGradient(isActive: Bool = false, isError: Bool = false) {
+//        layer.sublayers?.removeAll(where: { $0 is CAGradientLayer })
+//
+//        let gradient = CAGradientLayer()
+//        gradient.frame = bounds
+//        gradient.cornerRadius = 18
+//
+//        if isError {
+////            gradient.colors = [
+////                UIColor(red: 0.25, green: 0, blue: 0, alpha: 1).cgColor,
+////                UIColor.black.cgColor
+////            ]
+//            gradient.colors = [
+//                UIColor.errorRed
+////                UIColor(red: 0.25, green: 0, blue: 0, alpha: 1).cgColor,
+////                UIColor.black.cgColor
+//            ]
+//        } else {
+//            gradient.colors = [
+//                UIColor(red: 53.0/255.0, green: 62.0/255.0, blue:  56.0/255.0, alpha: 1.0).cgColor
+////                UIColor(red: 53.25, green: 0.35, blue: 0.05, alpha: 1).cgColor,
+////                UIColor(red: 0.05, green: 0.08, blue: 0.02, alpha: 1).cgColor
+//            ]
+//        }
+//
+//        gradient.startPoint = CGPoint(x: 0, y: 0)
+//        gradient.endPoint = CGPoint(x: 1, y: 1)
+//
+//        layer.insertSublayer(gradient, at: 0)
+//
+//        layer.borderWidth = isActive ? 1.5 : 0.5
+//        layer.borderColor = isError
+//            ? UIColor.red.cgColor
+//            : UIColor(red: 0.6, green: 0.9, blue: 0.2, alpha: 0.5).cgColor
+//
+//        layer.shadowColor = isError
+//            ? UIColor.red.cgColor
+//            : UIColor(red: 0.6, green: 0.9, blue: 0.2, alpha: 1).cgColor
+//
+//        layer.shadowRadius = isActive ? 10 : 6
+//        layer.shadowOpacity = isActive ? 0.6 : 0.3
+//        layer.shadowOffset = .zero
+//        layer.masksToBounds = false
+//    }
+//}

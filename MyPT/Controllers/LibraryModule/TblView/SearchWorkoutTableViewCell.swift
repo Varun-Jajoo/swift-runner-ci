@@ -27,7 +27,7 @@ class SearchWorkoutTableViewCell: UITableViewCell {
     @IBOutlet weak var timingTitleLbl: UILabel!
     @IBOutlet weak var shareBtn: UIButton!
     @IBOutlet weak var likeBtn: UIButton!
-    @IBOutlet weak var videoPlauyBtn: UIButton!
+    @IBOutlet weak var videoPlayBtn: UIButton!
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -42,7 +42,71 @@ class SearchWorkoutTableViewCell: UITableViewCell {
         self.setupFont()
     }
     
-    func setupUI(){
+    func setExercisesData(cellData: GetWorkoutsModel?){
+        guard let cellData = cellData else { return }
+//        self.bckImgView.loadImage(urlString: cellData.image, placeholder: AppImages.othersGender, resize: CGSize(width: 400.0, height: 400.0))
+        self.topTitleLbl.text = cellData.type
+        self.workoutNameLbl.text = cellData.name
+        
+        self.repsMBV.isHidden = false
+        self.kcalMBV.isHidden = true
+        self.timingMBV.isHidden = false
+        self.repsImgView.image = UIImage(named: "ic_clockGray")
+        self.timingImgView.image = UIImage(named: "ic_solid_fireGray")
+        self.repsTitleLbl.text = cellData.time
+      
+        if let exercises = cellData.exercises?.value {
+            self.timingTitleLbl.text = exercises + " Exercises"
+        }else{
+            self.timingTitleLbl.text = nil
+        }
+        
+        self.likeBtn.setImage(UIImage(named: "ic_heart"), for: .normal)
+        if let isFavourite = cellData.isFeatured, isFavourite {
+            self.likeBtn.setImage(UIImage(named: "ic_redHeartbeat"), for: .normal)
+        }
+        
+        //CGSize(width: 400.0, height: 200.0)
+        self.bckImgView.loadImage(urlString: cellData.image, placeholder: AppImages.othersGender, resize: CGSize(width: (self.frame.width * 0.2), height: self.frame.size.height))
+        
+        self.contentView.setNeedsLayout()
+        self.contentView.layoutIfNeeded()
+    }
+    
+    /*
+     func workoutsCell(cellData: GetWorkoutsModel?){
+         guard let cellData = cellData else { return }
+         if let imgBck = cellData.image {
+             self.bckMImgView.loadImage(urlString: "\(imgBck)", placeholder: UIImage())
+         }
+         
+         self.topCategoryLbl.text = cellData.type
+         self.workoutNameLbl.text = cellData.name
+         self.workoutseriesLbl.text = nil
+         
+         self.repsMBV.isHidden = false
+         self.timingMBV.isHidden = false
+         self.kcalMBV.isHidden = true
+         
+         self.timing.image = UIImage(named: "ic_solid_fireGray")
+         self.reps.image = UIImage(named: "ic_clockGray")
+         
+         self.repsTitleLbl.text = cellData.time
+         if let exercises = cellData.exercises?.value {
+             self.timingTitleLbl.text = exercises + " Exercises"
+         }else{
+             self.timingTitleLbl.text = nil
+         }
+         
+         self.likeBtn.setImage(UIImage(named: "ic_heart"), for: .normal)
+         if let isFavourite = cellData.isFeatured, isFavourite {
+             self.likeBtn.setImage(UIImage(named: "ic_redHeartbeat"), for: .normal)
+         }
+         
+     }
+     */
+    
+    private func setupUI(){
         DispatchQueue.main.async {
             self.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appBorder, cornerRadious: 24.0)
             self.bckImgView.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: 24.0)
@@ -51,7 +115,7 @@ class SearchWorkoutTableViewCell: UITableViewCell {
         }
     }
     
-    func setupFont(){
+    private func setupFont(){
         self.topTitleLbl.font = AppFont.semibold.size(12.0, familyName: familyManrope)
         self.workoutNameLbl.font = AppFont.semibold.size(20.0, familyName: familyClashDisplay)
         self.seriesWorkoutLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)

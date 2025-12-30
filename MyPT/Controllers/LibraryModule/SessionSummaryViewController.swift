@@ -8,7 +8,13 @@
 import UIKit
 
 class SessionSummaryViewController: CommonViewController {
-
+    
+    //MARK: ----------- VARIABLE
+    var workoutId: String?
+    var WorkoutExerciseDetails: WorkoutExerciseModel?
+    var workoutData: WorkoutDetailDataModel?
+    //    var exercisesData:[WorkoutExerciseModel]? = []
+    
     //MARK: ------------IBOUTLET
     @IBOutlet weak var playVideoMBV: UIView!
     @IBOutlet weak var bottomMBV: UIView!
@@ -35,15 +41,16 @@ class SessionSummaryViewController: CommonViewController {
     @IBOutlet weak var completeBtn: UIButton!
     @IBOutlet weak var workoutScrlView: UIScrollView!
     @IBOutlet weak var workoutTblViewHeightConstrnt: NSLayoutConstraint!
-//    @IBOutlet weak var bottomMBVTopConstrnt: NSLayoutConstraint!
-//    @IBOutlet weak var workoutLstMBV: UIStackView!
-//    @IBOutlet weak var totalCountMBVTopConstrnt: NSLayoutConstraint!
+    //    @IBOutlet weak var bottomMBVTopConstrnt: NSLayoutConstraint!
+    //    @IBOutlet weak var workoutLstMBV: UIStackView!
+    //    @IBOutlet weak var totalCountMBVTopConstrnt: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        
         self.setupFont()
+        self.setInputData()
+        self.getWorkoutDetailsApi(id: workoutId, type: "")
     }
     
     override func viewDidLayoutSubviews() {
@@ -54,7 +61,7 @@ class SessionSummaryViewController: CommonViewController {
     deinit {
         print("------\(#function)------\(String(describing: Self.self))------" )
     }
-   
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.setNavigationColor(setColor: .clear)
@@ -67,11 +74,41 @@ class SessionSummaryViewController: CommonViewController {
         self.setRighMenu(rightImgs: [AppImages.moreSettings], setTitle: [nil], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
     
-    func setupUI(){
+    override func leftBtnActn(sender: UIButton) {
+        self.navigationController?.popToViewController(ofClass: WorkoutDetailsViewController.self)
+    }
+    
+    private func setInputData(){
+        
+        self.workoutNameLbl.text = workoutData?.name?.value
+        self.totalCountLbl.text = (workoutData?.exercisesCount?.value ?? "") + " Total"
+        self.durationLbl.text = " "
+        self.caloriesLbl.text = " "
+        self.exercisesLbl.text = " "
+        
+        //-------------- gradient Labels
+        if let timeSec = workoutData?.timeInSeconds?.value {
+            self.durationLbl.attributedText = gradientAttr(labl: self.durationLbl, txtStr: timeSec + "s")
+        }
+        if let caloriesCount = workoutData?.calories?.value {
+            self.caloriesLbl.attributedText = gradientAttr(labl: self.caloriesLbl, txtStr: caloriesCount)
+        }
+        if let exercisesCount = workoutData?.exercisesCount?.value {
+            self.exercisesLbl.attributedText = gradientAttr(labl: self.exercisesLbl, txtStr: exercisesCount)
+        }
+    }
+    
+    private func setupUI(){
         DispatchQueue.main.async {
             self.totalCountMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 8.0)
             
-//            self.bottomMBV.addBlurView(viewShow: self.bottomMBV, alphBlur: 1.0, bgColor: UIColor.mainBg)
+            self.shadowImgView.addGradientImgV(colors: [
+                UIColor(red: 0/255.0, green: 0/255.0, blue: 0/255.0, alpha: 0.8),
+                UIColor(red: 0/255.0, green: 3/255.0, blue: 1/255.0, alpha: 0),
+                UIColor(red: 0/255.0, green: 5/255.0, blue: 2/255.0, alpha: 1)
+            ], locations: [0,0.5,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1))
+            
+            //            self.bottomMBV.addBlurView(viewShow: self.bottomMBV, alphBlur: 1.0, bgColor: UIColor.mainBg)
             
             self.detailsBtn.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appWhite, cornerRadious: 12.0)
             self.completeBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
@@ -86,14 +123,18 @@ class SessionSummaryViewController: CommonViewController {
             
             //------------------Gradient
             
+            //            [self.durationMBV,self.caloriesMBV,self.exercisesMBV].forEach({
+            //                $0.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0.8), endPoint: CGPoint(x: 1.0, y: 0.8))
+            //            })
+            
             [self.durationMBV,self.caloriesMBV,self.exercisesMBV].forEach({
-                $0.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0.8), endPoint: CGPoint(x: 1.0, y: 0.8))
+                $0.addGradient(colors: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 0.6), UIColor(red: 71.0/255.0, green: 77.0/255.0, blue: 96.0/255.0, alpha: 0.5)], locations: [0,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 0, y: 0), cornerRadius: 12)
             })
         }
     }
     
-    func setupFont(){
-       
+    private func setupFont(){
+        
         //----------------************
         self.totalCountLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
         self.workoutNameLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
@@ -108,18 +149,46 @@ class SessionSummaryViewController: CommonViewController {
         self.completeBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
     }
     
-
+    private func gradientAttr(labl: UILabel, txtStr: String, inputFont: UIFont? = AppFont.medium.size(20.0, familyName: familyClashDisplay)) -> NSAttributedString {
+        let attStr = txtStr.attributedStringWithGradient([UIColor.appWhite, UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0)], frame: labl.bounds, font: inputFont ?? UIFont(), startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1))
+        
+        return attStr
+    }
+    
+    
     @IBAction func commonBtnActn(_ sender: UIButton) {
         
         if sender.tag == 801 {
             print("details btn clicked.")
         }else{
             print("complete btn clicked.")
-            let vc:SessionCompleteViewController = SessionCompleteViewController.instantiate(appStoryboard: .library)
-            self.navigationController?.pushViewController(vc, animated: true)
+            WorkoutLibraryVM.workoutCompleteApi(inputSessionId: self.workoutData?.sessionID?.value, completion: {[weak self] getresultData in
+                guard let self = self else { return }
+                let vc:SessionCompleteViewController = SessionCompleteViewController.instantiate(appStoryboard: .library)
+                vc.completeWorkoutData = getresultData?.data
+                self.navigationController?.pushViewController(vc, animated: true)
+            })
+            
+            
+            //            let vc:SessionCompleteViewController = SessionCompleteViewController.instantiate(appStoryboard: .library)
+            //            self.navigationController?.pushViewController(vc, animated: true)
             
         }
     }
     
     
+}
+
+
+//MARK: ------ EXTENSION FOR API
+extension SessionSummaryViewController{
+    
+    private func getWorkoutDetailsApi(id: String?, type: String?){
+        WorkoutLibraryVM.workoutDetailsApi(inputId: id, inputType: type, completion: {[weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return  }
+            self.workoutData = nil
+            self.workoutData = getResultData.data
+            self.setInputData()
+        })
+    }
 }

@@ -15,6 +15,31 @@ class ProfileViewController: CommonViewController, ChartViewDelegate {
     var profileData: ProfileDataModel? 
     var barChartView = BarChartView()
     var chartValues: [Double]? = []
+    var userPlans: [OtherSubscriptionsModel]? = []
+    
+    let planColorMap: [String: [UIColor]] = [
+        "Silver".uppercased(): [
+            UIColor(red: 180.0/255.0, green: 180.0/255.0, blue: 180.0/255.0, alpha: 1.0),
+            UIColor.appWhite,
+            UIColor(red: 180.0/255.0, green: 180.0/255.0, blue: 180.0/255.0, alpha: 1.0)
+        ],
+        "Gold".uppercased(): [
+            UIColor(red: 207.0/255.0, green: 171.0/255.0, blue: 104.0/255.0, alpha: 1.0),
+            UIColor.appWhite.withAlphaComponent(0.7),
+            UIColor(red: 173.0/255.0, green: 130.0/255.0, blue: 54.0/255.0, alpha: 1.0)
+        ],
+        "Platinum".uppercased(): [
+            UIColor(red: 180.0/255.0, green: 180.0/255.0, blue: 180.0/255.0, alpha: 1.0),
+            UIColor.appWhite,
+            UIColor(red: 180.0/255.0, green: 180.0/255.0, blue: 180.0/255.0, alpha: 1.0)
+        ],
+        "VIP".uppercased(): [
+            UIColor(red: 188.0/255.0, green: 140.0/255.0, blue: 210.0/255.0, alpha: 1.0),
+            UIColor.appWhite,
+            UIColor(red: 255.0/255.0, green: 241.0/255.0, blue: 216.0/255.0, alpha: 1.0),
+            UIColor(red: 195.0/255.0, green: 139.0/255.0, blue: 221.0/255.0, alpha: 1.0)
+        ]
+    ]
     
     //MARK: ------------------ IBOUTLET
     @IBOutlet weak var profileHeaderImgView: UIImageView!
@@ -56,11 +81,6 @@ class ProfileViewController: CommonViewController, ChartViewDelegate {
     @IBOutlet weak var infoIconImgView: UIImageView!
     @IBOutlet weak var personalInfoLbl: UILabel!
     @IBOutlet weak var personalInfoBtn: UIButton!
-    @IBOutlet weak var planLogoImg: UIImageView!
-    @IBOutlet weak var planNameLbl: UILabel!
-    @IBOutlet weak var planProgressView: UIView!
-    @IBOutlet weak var planDetailsLbl: UILabel!
-    @IBOutlet weak var saveBtn: UIButton!
     @IBOutlet weak var achievementsTitleLbl: UILabel!
     @IBOutlet weak var myTainerTitleLbl: UILabel!
     @IBOutlet weak var dontHaveTrainerDescLbl: UILabel!
@@ -69,6 +89,7 @@ class ProfileViewController: CommonViewController, ChartViewDelegate {
     @IBOutlet weak var versionBtn: UIButton!
     @IBOutlet weak var healthPreferencesTitleLbl: UILabel!
     @IBOutlet weak var healthPreferencesNoDataLbl: UILabel!
+    @IBOutlet weak var myHealthPrefBtn: UIButton!
     @IBOutlet weak var healthPrefCollView: UICollectionView!
     @IBOutlet weak var healthPrefCollViewHeightConstrnt: NSLayoutConstraint!
     @IBOutlet weak var activityTitleLbl: UILabel!
@@ -98,10 +119,13 @@ class ProfileViewController: CommonViewController, ChartViewDelegate {
     @IBOutlet weak var motivationWriterNameLbl: UILabel!
     @IBOutlet weak var myTrainersCollView: UICollectionView!
     @IBOutlet weak var moreTrainersBtn: UIButton!
+    @IBOutlet weak var userPlanCollView: UICollectionView!
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.moreTrainersBtn.isHidden = true
+        self.myHealthPrefBtn.isUserInteractionEnabled = true
         self.registerCollV()
         self.setupUI()
         self.setupFont()
@@ -131,10 +155,28 @@ class ProfileViewController: CommonViewController, ChartViewDelegate {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        
+        var membershipGrdntColor:[UIColor] = [
+            UIColor(red: 207.0/255.0, green: 171.0/255.0, blue: 104.0/255.0, alpha: 1.0),
+            UIColor(red: 255.0/255.0, green: 241.0/255.0, blue: 216.0/255.0, alpha: 1.0),
+            UIColor(red: 173.0/255.0, green: 130.0/255.0, blue: 54.0/255.0, alpha: 1.0)
+            ]
+        
+        if let userPlansData = self.profileData?.otherSubscriptions {
+            if userPlansData.indices.contains(0) {
+                if let planStr = userPlansData.first?.getTier, let planColor = self.planColorMap[planStr.uppercased()] {
+                    membershipGrdntColor = planColor
+                }
+            }
+        }
+        
         DispatchQueue.main.async {
             self.profileHeaderImgView.addGradientLayer(colors: [UIColor(red: 0, green: 0, blue: 0, alpha: 0), UIColor(red: 0, green: 5/255.0, blue: 2.0/255.0, alpha: 0.1)], locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 0)
             
             self.profileHeaderImgView.addGradientLayer(colors: [UIColor(red: 0, green: 0, blue: 0, alpha: 0), UIColor(red: 0, green: 5/255.0, blue: 2.0/255.0, alpha: 1.0)], locations: [0.92,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 0)
+            self.memberBtn.addGradient(colors: membershipGrdntColor, locations: [0,0.6,1], startPoint: CGPoint(x: 0.4, y: 0), endPoint: CGPoint(x: 1.0, y: 0.4), cornerRadius: 4.0)
+            
+//            self.memberBtn.addGradient(colors: membershipGrdntColor, locations: [0,0.5,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 4.0)
         }
     }
     
@@ -162,8 +204,11 @@ class ProfileViewController: CommonViewController, ChartViewDelegate {
         case btnTag.moreTrainer.rawValue:
             print("moreTrainer ")
         case btnTag.awardsBtn.rawValue:
+            print("Awards details")
+            /*
             let vc: AchievmentsViewController = AchievmentsViewController.instantiate(appStoryboard: .profile)
             self.navigationController?.pushViewController(vc, animated: true)
+            */
         case btnTag.myHealthPreference.rawValue:
             let vc: HealthDataViewController = HealthDataViewController.instantiate(appStoryboard: .profile)
             self.navigationController?.pushViewController(vc, animated: true)
@@ -182,39 +227,50 @@ class ProfileViewController: CommonViewController, ChartViewDelegate {
        
         healthPrefCollView.register(UINib(nibName: "MoreExploreCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "MoreExploreCollectionViewCell")
         awardsCollView.register(UINib(nibName: "AwardsCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "AwardsCollectionViewCell")
+        userPlanCollView.register(UINib(nibName: "UserPlansCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "UserPlansCollectionViewCell")
     }
     
     private func setInputData(){
+        self.bookFirstSessionMBV.isHidden = false
         distanceMBV.isHidden = true
         distanceBtn.isHidden = true
-        planMBV.isHidden = false
+        planMBV.isHidden = true
         memberBtn.isHidden = true
+        self.activityMBV.isHidden = false
+        self.MyPTScoreMBV.isHidden = true
         
         userName.text = profileData?.name
 //        self.profileHeaderImgView.loadImage(urlString: profileData?.cover_image, placeholder: UIImage(named: "ic_profileHeader"))
         userProfileImgView.loadImage(urlString: profileData?.image, placeholder: AppImages.profile_placeholder)
         addrLbl.text = profileData?.location?.address
-            
-        if let planData = profileData?.plan, planData.isPackage == true {
+                    
+        if let otherSubscriptions = self.profileData?.otherSubscriptions, otherSubscriptions.count > 0 || !otherSubscriptions.isEmpty {
             planMBV.isHidden = false
-            memberBtn.isHidden = false
-            memberBtn.setTitle(planData.getTier, for: .normal)
-            planNameLbl.text = planData.getTier
-            if let remainingSession = planData.remaining_sessions, let remainingDays = planData.remaining_days {
-                planDetailsLbl.text = "\(remainingSession) Sessions Remaining ending in \(remainingDays)"
+            self.bookFirstSessionMBV.isHidden = true
+            
+            if let userPlansData = self.profileData?.otherSubscriptions {
+                self.userPlans?.removeAll()
+                self.userPlans?.append(contentsOf: userPlansData)
+                self.userPlanCollView.reloadData()
+                
+                if userPlansData.indices.contains(0) {
+                    self.memberBtn.isHidden = false
+                    self.memberBtn.setTitle((userPlansData.first?.getTier ?? "") + " Member", for: .normal)
+                }
             }
-           
-            saveBtn.setTitle(" save" + " ", for: .normal)
+            
         }else{
-            planMBV.isHidden = false //true only for testing
+            planMBV.isHidden = true
             memberBtn.isHidden = true
+            self.bookFirstSessionMBV.isHidden = false
         }
         
         self.profileHeaderImgView.loadImage(urlString: profileData?.cover_image, placeholder: UIImage(named: "ic_profileHeader"), resize: CGSize(width: self.view.frame.size.width, height: 150))
-                
-//        DispatchQueue.main.async {
-//            self.profileHeaderImgView.addGradientLayer(colors: [UIColor(red: 0, green: 0, blue: 0, alpha: 0), UIColor(red: 0, green: 5/255.0, blue: 2.0/255.0, alpha: 0.1)], locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 0)
-//        }
+                        
+        if let myptChartData = profileData?.myptChart, myptChartData.count > 0 {
+            self.activityMBV.isHidden = true
+            self.MyPTScoreMBV.isHidden = false
+        }
         
         if let activityData = profileData?.activityLog {
             self.msgCount.text = "\(activityData.msg ?? 0)"
@@ -250,7 +306,6 @@ class ProfileViewController: CommonViewController, ChartViewDelegate {
             distanceBtn.titleLabel,
             addressBtn.titleLabel,
             addrLbl,
-            planNameLbl,
             updateNoteLbl,
             helpDescLbl,
             connectYourDeviceDescLbl,
@@ -269,8 +324,6 @@ class ProfileViewController: CommonViewController, ChartViewDelegate {
         
         [
             memberBtn.titleLabel,
-            planDetailsLbl,
-            saveBtn.titleLabel,
             versionBtn.titleLabel,
             motivationWriterNameLbl,
             weeklyTitleBtn.titleLabel,
@@ -305,18 +358,20 @@ class ProfileViewController: CommonViewController, ChartViewDelegate {
         })
     }
     
-    @objc func planViewTap(_ sender: UITapGestureRecognizer) {
-          print("View was tapped!")
-        let vc: UserPlanViewController = UserPlanViewController.instantiate(appStoryboard: .profile)
-        self.navigationController?.pushViewController(vc, animated: true)
-          
-      }
+//    @objc func planViewTap(_ sender: UITapGestureRecognizer) {
+//          print("View was tapped!")
+//        let vc: UserPlanViewController = UserPlanViewController.instantiate(appStoryboard: .profile)
+//        self.navigationController?.pushViewController(vc, animated: true)
+//          
+//      }
     
     private func setupUI(){
         
+        /*
         self.planMBV.isUserInteractionEnabled = true
         let tapPlan = UITapGestureRecognizer(target: self, action: #selector(planViewTap(_ :)))
         self.planMBV.addGestureRecognizer(tapPlan)
+        */
         
         self.bookFirstSessionMBV.isHidden = false
         self.activityMBV.isHidden = false
@@ -350,19 +405,21 @@ class ProfileViewController: CommonViewController, ChartViewDelegate {
             self.moreTrainersBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 6.0)
             self.versionBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 6.0)
             self.memberBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 4.0)
-            self.saveBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: self.saveBtn.frame.size.height/2.0)
+//            self.saveBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: self.saveBtn.frame.size.height/2.0)
             self.addressBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: self.addressBtn.frame.size.height/2.0)
             
             self.memberBtn.addGradient(colors: [
                                                 UIColor(red: 207.0/255.0, green: 171.0/255.0, blue: 104.0/255.0, alpha: 1.0),
                                                 UIColor(red: 255.0/255.0, green: 241.0/255.0, blue: 216.0/255.0, alpha: 1.0),
                                                 UIColor(red: 173.0/255.0, green: 130.0/255.0, blue: 54.0/255.0, alpha: 1.0)
-                                               ], locations: [0,0.3,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 4.0)
+                                               ], locations: [0,0.5,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 4.0)
             
-            self.saveBtn.addGradient(colors: [UIColor(red: 29.0/255.0, green: 215.0/255.0, blue: 148.0/255.0, alpha: 1.0),UIColor(red: 9.0/255.0, green: 46.0/255.0, blue: 46.0/255.0, alpha: 1.0), UIColor(red: 9.0/255.0, green: 46.0/255.0, blue: 46.0/255.0, alpha: 1.0)], locations: [0,0.5,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: self.saveBtn.frame.size.height/2.0)
+            //[0,0.5,1]
             
-            self.planProgressView.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 3.0)
-            self.planProgressView.drawLineProgress(progressfill: 0.2, fillLineColor: UIColor.appWhite, cornerRadius: 3.0)
+//            self.saveBtn.addGradient(colors: [UIColor(red: 29.0/255.0, green: 215.0/255.0, blue: 148.0/255.0, alpha: 1.0),UIColor(red: 9.0/255.0, green: 46.0/255.0, blue: 46.0/255.0, alpha: 1.0), UIColor(red: 9.0/255.0, green: 46.0/255.0, blue: 46.0/255.0, alpha: 1.0)], locations: [0,0.5,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: self.saveBtn.frame.size.height/2.0)
+            
+//            self.planProgressView.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 3.0)
+//            self.planProgressView.drawLineProgress(progressfill: 0.2, fillLineColor: UIColor.appWhite, cornerRadius: 3.0)
             
             self.userProfileImgView.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 16.0)
             self.userProfileImgView.setGradientMultiBorder(cornerRadius: 16.0, width: 3.5, colors: [
@@ -493,6 +550,9 @@ extension ProfileViewController: UICollectionViewDelegate, UICollectionViewDataS
         else if collectionView == awardsCollView{
             return profileData?.awards?.count ?? 0
         }
+        else if collectionView == userPlanCollView {
+            return self.userPlans?.count ?? 0
+        }
         
         return 0
     }
@@ -528,6 +588,13 @@ extension ProfileViewController: UICollectionViewDelegate, UICollectionViewDataS
             awardsCell.awardWeightLbl.text = profileData?.awards?[indexPath.row].title
             return awardsCell
         }
+        else if collectionView == userPlanCollView {
+            let planCell: UserPlansCollectionViewCell = userPlanCollView.dequeueReusableCell(withReuseIdentifier: "UserPlansCollectionViewCell", for: indexPath) as! UserPlansCollectionViewCell
+            planCell.setupCell(cellData: userPlans?[indexPath.row])
+            
+            return planCell
+        }
+        
         
 //        let cell: WithMeCollectionViewCell = myTrainersCollView.dequeueReusableCell(withReuseIdentifier: "WithMeCollectionViewCell", for: indexPath) as! WithMeCollectionViewCell
 //        DispatchQueue.main.async {
@@ -550,10 +617,15 @@ extension ProfileViewController: UICollectionViewDelegate, UICollectionViewDataS
             let vc: FollowersViewController = FollowersViewController.instantiate(appStoryboard: .profile)
             self.navigationController?.pushViewController(vc, animated: true)
         }
+        else if collectionView == userPlanCollView{
+            let vc: UserPlanViewController = UserPlanViewController.instantiate(appStoryboard: .profile)
+            vc.userPlanDetails = self.userPlans?[indexPath.row]
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-                
+            
         if collectionView == healthPrefCollView {
             return CGSize(width: collectionView.frame.size.width, height: collectionView.frame.size.height)
         }else if collectionView == myTrainersCollView {
@@ -569,6 +641,15 @@ extension ProfileViewController: UICollectionViewDelegate, UICollectionViewDataS
         }
         else if collectionView == awardsCollView {
             return CGSize(width: collectionView.frame.size.width, height: collectionView.frame.size.height)
+        }
+        else if collectionView == userPlanCollView {
+            if let userplanCount = self.userPlans?.count, userplanCount == 1 {
+                return CGSize(width: collectionView.frame.size.width * 0.9, height: collectionView.frame.size.height)
+            }else{
+                return CGSize(width: collectionView.frame.size.width * 0.8, height: collectionView.frame.size.height)
+            }
+            
+//            return CGSize(width: collectionView.frame.size.width * 0.8, height: collectionView.frame.size.height)
         }
         
         return CGSize(width: collectionView.frame.size.width, height: collectionView.frame.size.height)
@@ -599,9 +680,8 @@ extension ProfileViewController {
             guard let self = self, var getResultData = getResultData else { return }
             self.profileData = getResultData.data
             print("getResultData", getResultData)
-            
             self.setInputData()
-            
+                        
             if let _ = profileData?.myptChart {
                 self.setData()
             }
@@ -616,12 +696,14 @@ extension ProfileViewController {
             
             if let healthPrefernce = profileData?.healthPrefernce , !healthPrefernce.isEmpty {
 //                self.healthPreferencesMBV.isHidden = false
+                self.myHealthPrefBtn.isUserInteractionEnabled = true
                 self.healthPreferencesNoDataLbl.isHidden = true
                 self.healthPrefCollViewHeightConstrnt.constant = 140.0
                 self.healthPrefCollView.layoutIfNeeded()
                 self.healthPrefCollView.reloadData()
             }else{
 //                self.healthPreferencesMBV.isHidden = true
+                self.myHealthPrefBtn.isUserInteractionEnabled = false
                 self.healthPreferencesNoDataLbl.isHidden = false
                 self.healthPrefCollViewHeightConstrnt.constant = 10.0
                 self.healthPrefCollView.layoutIfNeeded()

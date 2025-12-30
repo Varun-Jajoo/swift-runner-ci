@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="workTypeCollectionViewCell" id="gTV-IL-0wX" customClass="workTypeCollectionViewCell" customModule="MyPT_Connect" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="292" height="149"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="292" height="149"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fr2-1K-iLM">
+                        <rect key="frame" x="0.0" y="0.0" width="292" height="149"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_healthcardGradient" translatesAutoresizingMaskIntoConstraints="NO" id="nNp-pN-HPx">
+                                <rect key="frame" x="0.0" y="0.0" width="292" height="149"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Vtb-ch-QXq">
+                                <rect key="frame" x="20" y="17" width="61" height="35"/>
+                                <color key="backgroundColor" name="appCard2"/>
+                                <inset key="contentEdgeInsets" minX="6.2999999999999998" minY="6.5" maxX="12.6" maxY="6.5"/>
+                                <inset key="titleEdgeInsets" minX="5" minY="0.0" maxX="-5" maxY="0.0"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="Rope">
+                                    <color key="titleColor" red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
+                                </state>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kGN-5p-hzn">
+                                <rect key="frame" x="246.66666666666666" y="18.666666666666671" width="35.333333333333343" height="32"/>
+                                <inset key="contentEdgeInsets" minX="5" minY="5" maxX="10" maxY="5"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" image="ic_moreSettings">
+                                    <color key="titleColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Pbv-gM-TH4">
+                                <rect key="frame" x="20" y="91.666666666666671" width="262" height="22"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <inset key="titleEdgeInsets" minX="5" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="Reps" image="ic_solid_barbell_diagonalGray">
+                                    <color key="titleColor" red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
+                                </state>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Rope Aerobics" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="szN-gT-Tvg">
+                                <rect key="frame" x="20" y="61.666666666666657" width="262" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="appWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" name="appCard"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="nNp-pN-HPx" secondAttribute="trailing" id="0Bj-TX-Wd3"/>
+                            <constraint firstItem="nNp-pN-HPx" firstAttribute="top" secondItem="fr2-1K-iLM" secondAttribute="top" id="1o8-Bs-dAK"/>
+                            <constraint firstItem="kGN-5p-hzn" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Vtb-ch-QXq" secondAttribute="trailing" constant="5" id="2xd-so-M9b"/>
+                            <constraint firstItem="szN-gT-Tvg" firstAttribute="trailing" secondItem="kGN-5p-hzn" secondAttribute="trailing" id="6fE-mV-Cdh"/>
+                            <constraint firstItem="szN-gT-Tvg" firstAttribute="top" secondItem="Vtb-ch-QXq" secondAttribute="bottom" constant="9.8100000000000005" id="8XO-nR-4Mr"/>
+                            <constraint firstItem="Pbv-gM-TH4" firstAttribute="leading" secondItem="szN-gT-Tvg" secondAttribute="leading" id="GtP-Kz-1eh"/>
+                            <constraint firstItem="Pbv-gM-TH4" firstAttribute="trailing" secondItem="szN-gT-Tvg" secondAttribute="trailing" id="JjM-Ib-n1M"/>
+                            <constraint firstItem="szN-gT-Tvg" firstAttribute="leading" secondItem="Vtb-ch-QXq" secondAttribute="leading" id="LaR-ql-hAC"/>
+                            <constraint firstAttribute="trailing" secondItem="kGN-5p-hzn" secondAttribute="trailing" constant="10" id="Q61-c4-vRK"/>
+                            <constraint firstItem="Pbv-gM-TH4" firstAttribute="top" secondItem="szN-gT-Tvg" secondAttribute="bottom" constant="9" id="TRa-Bv-IGA"/>
+                            <constraint firstItem="nNp-pN-HPx" firstAttribute="leading" secondItem="fr2-1K-iLM" secondAttribute="leading" id="ZC4-EX-AJx"/>
+                            <constraint firstAttribute="bottom" secondItem="nNp-pN-HPx" secondAttribute="bottom" id="dzu-fw-jt5"/>
+                            <constraint firstItem="kGN-5p-hzn" firstAttribute="centerY" secondItem="Vtb-ch-QXq" secondAttribute="centerY" id="gL6-iM-Fs4"/>
+                            <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="Pbv-gM-TH4" secondAttribute="bottom" constant="16" id="rnv-yt-1Ns"/>
+                            <constraint firstItem="Vtb-ch-QXq" firstAttribute="top" secondItem="fr2-1K-iLM" secondAttribute="top" constant="17" id="sJh-vZ-xh1"/>
+                            <constraint firstItem="Vtb-ch-QXq" firstAttribute="leading" secondItem="fr2-1K-iLM" secondAttribute="leading" constant="20" id="tDC-Yz-d6h"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="fr2-1K-iLM" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="eJC-yZ-GUU"/>
+                <constraint firstAttribute="trailing" secondItem="fr2-1K-iLM" secondAttribute="trailing" id="kBc-3I-FyF"/>
+                <constraint firstItem="fr2-1K-iLM" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="uLT-O0-AT2"/>
+                <constraint firstAttribute="bottom" secondItem="fr2-1K-iLM" secondAttribute="bottom" id="zMM-zY-Lgo"/>
+            </constraints>
+            <size key="customSize" width="292" height="149"/>
+            <connections>
+                <outlet property="cellMBV" destination="fr2-1K-iLM" id="3cS-Ib-tjB"/>
+                <outlet property="grdntImgView" destination="nNp-pN-HPx" id="lSt-e8-Kuu"/>
+                <outlet property="repsBtn" destination="Pbv-gM-TH4" id="x2Y-30-qGy"/>
+                <outlet property="settingsBtn" destination="kGN-5p-hzn" id="5Gx-4g-PBA"/>
+                <outlet property="workoutCategoryBtn" destination="Vtb-ch-QXq" id="R62-4p-mYL"/>
+                <outlet property="workoutNameLbl" destination="szN-gT-Tvg" id="sv5-Dt-Kdl"/>
+            </connections>
+            <point key="canvasLocation" x="163.35877862595419" y="54.577464788732399"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="ic_healthcardGradient" width="190" height="115"/>
+        <image name="ic_moreSettings" width="20.333333969116211" height="20"/>
+        <image name="ic_solid_barbell_diagonalGray" width="20" height="20.333333969116211"/>
+        <namedColor name="appCard">
+            <color red="0.27843137254901962" green="0.30196078431372547" blue="0.37647058823529411" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appCard2">
+            <color red="0.062745098039215685" green="0.066666666666666666" blue="0.074509803921568626" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="appWhite">
+            <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

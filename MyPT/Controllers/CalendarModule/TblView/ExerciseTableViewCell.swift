@@ -11,10 +11,12 @@ class ExerciseTableViewCell: UITableViewCell {
 
     //MARK: ------------ VARIBALE
     var navCtrl:UINavigationController?
-    
+    var onMenuBtnTapped: ((_ button: UIButton) -> Void)?
     
     //MARK: --------------IBOUTLET
     @IBOutlet weak var cellMBV: UIView!
+    @IBOutlet weak var workoutCellMBV: UIView!
+//    @IBOutlet weak var workoutGroupMBV: UIView!
     @IBOutlet weak var topTitleMBV: UIView!
     @IBOutlet weak var topTitleLbl: UILabel!
     @IBOutlet weak var checkBtn: UIButton!
@@ -29,6 +31,8 @@ class ExerciseTableViewCell: UITableViewCell {
     @IBOutlet weak var editPopupView: UIStackView!
     @IBOutlet weak var editBtn: UIButton!
     @IBOutlet weak var deleteBtn: UIButton!
+//    @IBOutlet weak var selectedWorkoutBtn: UIButton!
+    
     @IBOutlet weak var lineMBV: UIView!
     @IBOutlet weak var lineLbl: UILabel!
     
@@ -37,21 +41,8 @@ class ExerciseTableViewCell: UITableViewCell {
         // Initialization code
         
         self.editPopupView.isHidden = true
-        
         self.setupFont()
-        
-        DispatchQueue.main.async {
-//            self.cellMBV.addGradient(colors: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 1.0), UIColor(red: 71.0/255.0, green: 77.0/255.0, blue: 96.0/255.0, alpha: 1.0)], locations: [0.2, 0.8], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1.0, y: 1.0))
-//            
-//            self.bgImgView.addGradient(colors: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 1.0), UIColor(red: 71.0/255.0, green: 77.0/255.0, blue: 96.0/255.0, alpha: 1.0)], locations: [0.2, 0.8], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1.0, y: 1.0))
-            
-            self.topTitleMBV.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: 8.0)
-            self.cellMBV.setCornerWithShadow(borderWidth: 1.0, borderColor: UIColor.appBorder, shadowColor: UIColor.black, offSet: .zero, opacity: 0.4, shadowRadius: 0.5, cornerRadious: 12.0)
-            self.bgImgView.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: 12.0)
-            self.bgImgView.addBlurView(viewShow: self.bgImgView)
-            self.editPopupView.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: 12.0)
-           
-        }
+        self.setupUI()
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -65,6 +56,50 @@ class ExerciseTableViewCell: UITableViewCell {
 //            self.checkBtn.setImage(UIImage(named: "ic_filterUncheck"), for: .normal)
 ////            self.checkBtn.setCornerRadius(borderWidth: 1.7, borderColor: UIColor.appWhite, cornerRadious: 8.57)
 //        }
+    }
+    
+    func setCellData(cellData: ExercisesDatailsModel?){
+        guard let cellData = cellData else { return }
+        
+        self.topTitleLbl.text = cellData.category?.value
+        self.gymNameLbl.text = cellData.name?.value
+        self.userNameLbl.text = ""
+//        self.categoryLbl.text = (cellData.raps?.value ?? cellData.reps?.value ?? "") + " Reps"
+//        self.categoryLbl.text = (cellData.raps?.value ?? cellData.reps?.value ?? "") + " Reps"
+        
+        if let repsVal = cellData.reps?.value {
+            self.categoryLbl.text = repsVal + " Reps"
+        }else{
+            self.categoryLbl.text = (cellData.raps?.value ?? "") + " Reps"
+        }
+        
+        self.kcalLbl.text = (cellData.calories?.value ?? "") + " kcal"
+        
+        let heightImg = 150.0 //self.frame.size.height * 0.2
+        
+        self.bgImgView.loadImage(urlString: cellData.image?.value, placeholder: UIImage(named: "ic_transWorkout"), resize: CGSize(width: (self.frame.width * 0.2), height: heightImg))
+        self.categoryImgView.image = UIImage(named: "ic_solid_barbell_diagonalGray")
+        self.kcalImgView.image = UIImage(named: "ic_solid_fireGray")
+        
+        self.contentView.setNeedsLayout()
+        self.contentView.layoutIfNeeded()
+    }
+    
+    func setupUI(){
+        
+        DispatchQueue.main.async {
+            self.topTitleMBV.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: 8.0)
+            self.cellMBV.setCornerWithShadow(borderWidth: 1.0, borderColor: UIColor.appBorder, shadowColor: UIColor.black, offSet: .zero, opacity: 0.4, shadowRadius: 0.5, cornerRadious: 24.0)
+            self.editPopupView.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: 12.0)
+            self.bgImgView.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: 24.0)
+            self.bgImgView.addCellImgGradient(colors: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 0.6), UIColor(red: 71.0/255.0, green: 77.0/255.0, blue: 96.0/255.0, alpha: 0.6)], locations: [0, 1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 24.0)
+//            self.workoutGroupMBV.roundSideCorners(radius: 24.0, cornerSide: [.bottomLeft, .bottomRight])
+            
+            //            self.cellMBV.addGradient(colors: [UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 1.0), UIColor(red: 71.0/255.0, green: 77.0/255.0, blue: 96.0/255.0, alpha: 1.0)], locations: [0.2, 0.8], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1.0, y: 1.0), cornerRadius: 24.0)
+            
+            self.contentView.setNeedsLayout()
+            self.contentView.layoutIfNeeded()
+        }
     }
     
     func setupFont(){
@@ -92,6 +127,14 @@ class ExerciseTableViewCell: UITableViewCell {
             self.checkBtn.setImage(nil, for: .normal)
             self.checkBtn.setImage(UIImage(named: "ic_filterUncheck"), for: .normal)
         }
+    }
+    
+    func setupMenuActn(){
+        self.checkBtn.addTarget(self, action: #selector(handleMenuBtnTap), for: .touchUpInside)
+    }
+    
+    @objc private func handleMenuBtnTap() {
+        onMenuBtnTapped?(checkBtn)
     }
     
     func setupEditTarget(){

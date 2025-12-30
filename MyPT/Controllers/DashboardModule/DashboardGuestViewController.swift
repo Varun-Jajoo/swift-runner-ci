@@ -85,6 +85,8 @@ class DashboardGuestViewController: CommonViewController {
         self.userNameLbl.text = "Good " + greatingTimeStr
         
         self.lockFeature()
+        self.setInputData()
+        
     }
     
     deinit {
@@ -120,6 +122,54 @@ class DashboardGuestViewController: CommonViewController {
         self.selectedCell()
         self.topUserNameMBV()
         self.getLocation()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+       
+        
+        [
+            self.bookTrainerBckImgV,
+            self.planWorkoutImgV,
+            self.workoutMBckImgView,
+            self.purchaseGymPassImgV
+        ].forEach({[weak self] in
+            guard self != nil else {
+                return
+            }
+            $0.addGradientLayer(colors: [UIColor(red: 8.0/255.0, green: 18.0/255.0, blue: 22.0/255.0, alpha: 0), UIColor(red: 22.0/255.0, green: 18.0/255.0, blue: 8.0/255.0, alpha: 0.5)], locations: [0, 1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 12.0)
+        })
+                
+        self.differentWorkoutExploreBtn.backgroundColor = UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 0.6)
+        self.planWorkoutExploreBtn.backgroundColor = UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 0.6)
+        self.purchaseGymPassBtn.backgroundColor = UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 0.6)
+       
+        [
+            self.bookTrainerExploreBtn,
+            self.differentWorkoutExploreBtn,
+            self.planWorkoutExploreBtn
+        ].forEach({[weak self] in
+            guard self != nil else {
+                return
+            }
+            $0.roundSideCorners(radius: 16.0, cornerSide: [.topRight])
+        })
+        
+        self.purchaseGymPassBtn.roundSideCorners(radius: 16.0, cornerSide: [.topLeft])
+        
+        self.grabNowMBckImgV.addGradientLayer(colors: [UIColor(red: 0, green: 5/255.0, blue: 2/255.0, alpha: 0.2), UIColor(red: 4.0/255.0, green: 4.0/255.0, blue: 5.0/255.0, alpha: 0), UIColor(red: 0, green: 5/255.0, blue: 2/255.0, alpha: 0.2)], locations: [0, 0.5, 1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 1.0)
+        
+        /*
+        self.grabNowBtn.setGradientMultiBorder(cornerRadius: 12.0, width: 1.0, colors: [
+            UIColor(red: 49.0/255.0, green: 52.0/255.0, blue: 58.0/255.0, alpha: 0),
+            UIColor(red: 255.0/255.0, green: 255.0/255.0, blue: 255.0/255.0, alpha: 1.0),
+            UIColor(red: 255.0/255.0, green: 255.0/255.0, blue: 255.0/255.0, alpha: 0),
+            UIColor(red: 255.0/255.0, green: 255.0/255.0, blue: 255.0/255.0, alpha: 1.0)
+           ], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1))
+        
+        self.grabNowBtn.addGradient(colors: [UIColor(red: 96/255.0, green: 55/255.0, blue: 9/255.0, alpha: 1), UIColor(red: 243/255.0, green: 141/255.0, blue: 27/255.0, alpha: 1), UIColor(red: 96/255.0, green: 55/255.0, blue: 9/255.0, alpha: 1)], locations: [0,0.5, 1.0], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 12.0)
+        */
+        
     }
     
     private func topUserNameMBV(){
@@ -225,37 +275,77 @@ class DashboardGuestViewController: CommonViewController {
         
     }
     
+    private func setInputData(){
+//        self.getFreeSessionTitleLbl.applyGradientLabel(colors: [UIColor.appWhite, UIColor.appWhite, UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0)], locations: [0, 0.3, 1.0])
+//        self.getFreeSessionTitleLbl.text = "Buy 10 Sessions,\nGet 2 Free"
+    
+        let getSessionStr = "Buy 10 Sessions,\nGet 2 Free"
+        self.getFreeSessionTitleLbl.attributedText = getSessionStr.attributedStringWithGradient([UIColor.appWhite, UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0)], frame: self.getFreeSessionTitleLbl.bounds, font: AppFont.medium.size(32.0, familyName: familyClashDisplay), startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1))
+ 
+        self.bodyAnalysisLbl.text = "Body \nAnalysis"
+        self.personalizedWorkoutPlanLbl.text = "Personalized \nWorkout Plan"
+        self.oneCoachingLbl.text = "One-on-one \nCoaching"
+        
+        self.bookTrainerDescLbl.text = "At Home or the Gym, \nWe’ve Got You Covered"
+        self.planWorkoutTitleLbl.text = "Plan Your \nWorkout"
+        self.differentWorkoutTitleLbl.text = "Explore Different \nWorkouts"
+    }
+    
+    
     //------------------************Font
     private func setUpFont(){
         
-        self.bookTrainerTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
         self.bookTrainerDescLbl.font = AppFont.medium.size(11.0, familyName: familyManrope)
-        self.bookTrainerExploreBtn.titleLabel?.font = AppFont.semibold.size(12.0, familyName: familyManrope)
-        
-        self.differentWorkoutTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
-        self.differentWorkoutExploreBtn.titleLabel?.font = AppFont.semibold.size(12.0, familyName: familyManrope)
-        self.planWorkoutTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
-        self.planWorkoutExploreBtn.titleLabel?.font = AppFont.semibold.size(12.0, familyName: familyManrope)
-        self.userNameLbl.font = AppFont.bold.size(18.0, familyName: familyManrope)
-        self.purchaseGymPassTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
         self.purchaseGymPassDescLbl.font = AppFont.medium.size(11.0, familyName: familyManrope)
-        self.purchaseGymPassBtn.titleLabel?.font = AppFont.semibold.size(12.0, familyName: familyManrope)
+        self.userNameLbl.font = AppFont.bold.size(18.0, familyName: familyManrope)
         self.getFreeSessionTitleLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
-        self.bodyAnalysisLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.personalizedWorkoutPlanLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.oneCoachingLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
         self.grabNowPriceLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
-        self.grabNowBtn.titleLabel?.font = AppFont.medium.size(18.0, familyName: familyClashDisplay) //24
+        self.grabNowBtn.titleLabel?.font = AppFont.medium.size(24.0, familyName: familyClashDisplay)
         
-        self.transfromationStoriesTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
-        self.upcomingClassesTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
-        self.shopProductsTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
-        self.nearByGymsTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
-        self.nearByGymsTitleLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
         self.thougthLbl.font = AppFont.medium.size(24.0, familyName: familyClashDisplay)
         self.authorLbl.font = AppFont.regular.size(12.0, familyName: familyClashDisplay)
         self.onTheWayLbl.font = AppFont.semibold.size(18.0, familyName: familyManrope)
         self.startTrackingBtn.titleLabel?.font = AppFont.bold.size(12.0, familyName: familyManrope)
+        
+        [
+            self.bookTrainerTitleLbl,
+            self.purchaseGymPassTitleLbl,
+            self.transfromationStoriesTitleLbl,
+            self.upcomingClassesTitleLbl,
+            self.shopProductsTitleLbl,
+            self.nearByGymsTitleLbl,
+            self.nearByGymsTitleLbl
+        ].forEach({[weak self] in
+            guard self != nil else {
+                return
+            }
+            $0?.font = AppFont.semibold.size(16.0, familyName: familyManrope)
+        })
+        
+        [
+            self.bookTrainerExploreBtn.titleLabel,
+            self.differentWorkoutExploreBtn.titleLabel,
+            self.planWorkoutExploreBtn.titleLabel,
+            self.purchaseGymPassBtn.titleLabel
+        ].forEach({[weak self] in
+            guard self != nil else {
+                return
+            }
+            $0?.font = AppFont.semibold.size(12.0, familyName: familyManrope)
+        })
+        
+        [
+            self.differentWorkoutTitleLbl,
+            self.planWorkoutTitleLbl,
+            self.bodyAnalysisLbl,
+            self.personalizedWorkoutPlanLbl,
+            self.oneCoachingLbl
+        ].forEach({[weak self] in
+            guard self != nil else {
+                return
+            }
+            $0?.font = AppFont.semibold.size(14.0, familyName: familyManrope)
+        })
     }
     
     
@@ -277,24 +367,26 @@ class DashboardGuestViewController: CommonViewController {
             self.userProfileBtn.setGradientMultiBorder(cornerRadius: 18.0, width: 1.5, colors: [UIColor(red: 207.0/255.0, green: 171.0/255.0, blue: 104.0/255.0, alpha: 1.0),UIColor(red: 255.0/255.0, green: 241.0/255.0, blue: 216.0/255.0, alpha: 1.0),UIColor(red: 173/255.0, green: 130/255.0, blue: 54/255.0, alpha: 1.0)], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1))
             
             //            self.topNameMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0)
-            self.bookTrainerExploreBtn.roundSideCorners(radius: 16.0, cornerSide: [.topRight])
-            self.bookTrainerExploreBtn.backgroundColor = UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 0.4)
-            self.differentWorkoutExploreBtn.roundSideCorners(radius: 16.0, cornerSide: [.topRight])
-            self.planWorkoutExploreBtn.backgroundColor = UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 0.4)
-            self.differentWorkoutExploreBtn.roundSideCorners(radius: 16.0, cornerSide: [.topRight])
-            self.planWorkoutExploreBtn.backgroundColor = UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 0.4)
             
-            self.bookTrainerBckImgV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.workoutMBckImgView.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.planWorkoutImgV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.purchaseGymPassImgV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            self.grabNowMBckImgV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+            
+            [
+                self.bookTrainerBckImgV,
+                self.workoutMBckImgView,
+                self.planWorkoutImgV,
+                self.purchaseGymPassImgV,
+                self.grabNowMBckImgV
+            ].forEach({[weak self] in
+                guard self != nil else {
+                    return
+                }
+                $0.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+            })
             
             self.startTrackingBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 8.0)
             
-            self.grabNowBtn.setCornerRadius(borderWidth: 0.6, borderColor: UIColor.appWhite, cornerRadious: 12.0)
-            
-            self.grabNowBtn.layerGradient(startPoint: .topLeft, endPoint: .bottomLeft, colorArray: [UIColor(red: 96/255.0, green: 55/255.0, blue: 9/255.0, alpha: 1).cgColor, UIColor(red: 243/255.0, green: 141/255.0, blue: 27/255.0, alpha: 1).cgColor, UIColor(red: 96/255.0, green: 55/255.0, blue: 9/255.0, alpha: 1).cgColor,], type: .axial)
+            //            self.grabNowBtn.setCornerRadius(borderWidth: 0.6, borderColor: UIColor.appWhite, cornerRadious: 12.0)
+            //
+            //            self.grabNowBtn.layerGradient(startPoint: .topLeft, endPoint: .bottomLeft, colorArray: [UIColor(red: 96/255.0, green: 55/255.0, blue: 9/255.0, alpha: 1).cgColor, UIColor(red: 243/255.0, green: 141/255.0, blue: 27/255.0, alpha: 1).cgColor, UIColor(red: 96/255.0, green: 55/255.0, blue: 9/255.0, alpha: 1).cgColor,], type: .axial)
             
             self.footerLineLbl.backgroundColor = UIColor.clear
             self.footerLineLbl.addGradient(colors: UIColor.appMultiColor(.lineVGradient2), locations: [0,0.5,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0.2)
@@ -306,23 +398,29 @@ class DashboardGuestViewController: CommonViewController {
             .foregroundColor: UIColor.appWhite
         ] as [NSAttributedString.Key : Any]
         
-        let makeAttributes = [
-            .font: AppFont.medium.size(16.0, familyName: familyClashDisplay),
-            .foregroundColor: UIColor.appWhite
-        ] as [NSAttributedString.Key : Any]
+//        let makeAttributes = [
+//            .font: AppFont.medium.size(16.0, familyName: familyClashDisplay),
+//            .foregroundColor: UIColor.appWhite
+//        ] as [NSAttributedString.Key : Any]
+//        
+//        let attributedNickName = [
+//            "299",
+//            NSAttributedString(string: "AED",
+//                               attributes: makeAttributes), "329AED".strikeThrough(with: AppFont.medium.size(16.0, familyName: familyClashDisplay), color: UIColor.txtDarkGray)
+//        ] as [AttributedStringComponent]
+        
         
         let attributedNickName = [
-            "299",
-            NSAttributedString(string: "AED",
-                               attributes: makeAttributes), "329AED".strikeThrough(with: AppFont.medium.size(16.0, familyName: familyClashDisplay), color: UIColor.txtDarkGray)
+            "299".attributedStringWithGradient([UIColor.appWhite, UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0)], frame: self.grabNowPriceLbl.bounds, font: AppFont.medium.size(32.0, familyName: familyClashDisplay), startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 0)),
+            "AED".attributedStringWithGradient([UIColor.appWhite, UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0)], frame: self.grabNowPriceLbl.bounds, font: AppFont.medium.size(16.0, familyName: familyClashDisplay), startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 0)),
+            "329AED".strikeThrough(with: AppFont.medium.size(16.0, familyName: familyClashDisplay), color: UIColor.appLightGray)
         ] as [AttributedStringComponent]
         
-        self.grabNowPriceLbl.attributedText       =  NSAttributedString(from: attributedNickName, defaultAttributes: defaultAttributes)
+        self.grabNowPriceLbl.attributedText =  NSAttributedString(from: attributedNickName, defaultAttributes: defaultAttributes)
         
-        //UIColor(red: 212.0/255.0, green: 212.0/255.0, blue: 212.0/255.0, alpha: 1.0)
         //-------------------------*************
-        
         self.bookTrainerBckImgV.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(bookTrainer(sender: ))))
+        
     }
     
     @objc func bookTrainer(sender:Any){
@@ -339,7 +437,7 @@ class DashboardGuestViewController: CommonViewController {
     
     //MARK: -------------BTN ACTN
     enum CommonBtnTag: Int {
-    case diffSubWorkoutExplore = 101, planWorkoutEplore, purchaseGymPass, userProfile
+    case diffSubWorkoutExplore = 101, planWorkoutEplore, purchaseGymPass, userProfile, GrabNow
     }
     
     
@@ -367,8 +465,19 @@ class DashboardGuestViewController: CommonViewController {
             */
             
         case CommonBtnTag.userProfile.rawValue:
+            if appUserDefaults.clearUserDefault() {
+                appSceneDelegate?.goToMainView()
+            }
+            
+            /*
             let vc: ProfileViewController = ProfileViewController.instantiate(appStoryboard: .profile)
             self.navigationController?.pushViewController(vc, animated: true)
+            */
+            
+        case CommonBtnTag.GrabNow.rawValue:
+            let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
+            vc.flowCreatePackage = .createPackage
+            self.navigationController?.pushViewController(vc, animated: false)
             
         default:
             print("None........")

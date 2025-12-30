@@ -31,6 +31,15 @@ class FitnessResourcesTableViewCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
+    func setupCell(data: ResourceModel?){
+        guard let data = data else { return }
+        self.userImgView.loadImage(urlString: data.image, placeholder: nil)
+        self.fitnessTitleLbl.text = data.title
+        self.fitnessDescLbl.text = data.description
+        self.viewsBtn.setTitle(data.totalView, for: .normal)
+        self.readTimesBtn.setTitle(data.readingTime, for: .normal)
+    }
+    
     private func setupUI(){
         DispatchQueue.main.async {
             self.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)

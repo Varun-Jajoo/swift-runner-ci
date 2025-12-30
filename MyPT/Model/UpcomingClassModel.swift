@@ -69,6 +69,7 @@ struct ClassesWithCategoryModel: Codable {
 
 // MARK: - ResourceModel
 struct ResourceModel: Codable {
+    var id: String? //extra adde
     var image: String?
     var title: String?
     var description:String?
@@ -79,7 +80,7 @@ struct ResourceModel: Codable {
     var totalView, readingTime: String?
 
     enum CodingKeys: String, CodingKey {
-        case image, title, rating, description, date
+        case id, image, title, rating, description, date
         case isSaved = "is_saved"
         case totalSaved = "total_saved"
         case totalView = "total_view"
@@ -114,3 +115,31 @@ struct CategoryWiseClassesBaseModel: Codable {
     var msg: String?
 }
 
+
+// MARK: ------------ UserMealsBaseModel
+struct UserMealsBaseModel: Codable {
+    var status: Bool?
+    var data: [UserMealsDataModel]?
+    var msg: String?
+}
+
+// MARK: - UserMealsDataModel
+struct UserMealsDataModel: Codable {
+    var id: FlexibleValue?
+    var mealName, mealType: String?
+    var calories, proteins: FlexibleValue?
+    var isSaved: Bool?
+    var carbs, fats: FlexibleValue?
+    var mealTime, fitnessGoal: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case mealName = "meal_name"
+        case mealType = "meal_type"
+        case calories, proteins
+        case isSaved = "is_saved"
+        case carbs, fats
+        case mealTime = "meal_time"
+        case fitnessGoal = "fitness_goal"
+    }
+}

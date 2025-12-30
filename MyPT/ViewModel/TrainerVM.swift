@@ -74,6 +74,94 @@ class TrainerVM {
         })
     }
     
+        
+    //MARK: --------------------- api/get-trainers
+    class  func gerFilterTrainerApi(viewController: UIViewController, inputParams: [String:Any], completion: @escaping(_ resultData:GetTrainerBaseModel?) -> Void){
+       
+        /*
+         let params:[String:Any] = [
+         "gender": 1,2,
+         "language": 1,2
+         "is_filter":1
+         "lat": 1.344444
+         "long":4.8999
+         "time_slot":
+         "type": home , type: gym, home, gym based on selection
+         "tag_id":49 , //tag_id: 1, tag id is required when is filter 1
+         "nationality": 1,2
+         ]
+        */
+        
+        print("inputParams = ", inputParams)
+        
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .filter_trainer, method: .post , parameters: inputParams, isShowLoading: true, completion: {  (getResponce, error) in
+            do{
+                print(getResponce as Any)
+                if let responceData = getResponce {
+                    
+                    let getResult = try JSONDecoder().decode(GetTrainerBaseModel.self, from: responceData)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    }
+                    else{
+                        
+                        let errorMsg = getResult.msg
+                        AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg ?? "")
+                    }
+                }
+                
+            }catch {
+                print(error)
+            }
+            
+        })
+    }
+    
+
+    //MARK: --------------------- api/gym-trainers //(selectGymApi)
+    class  func selectGymFilterTrainerApi(viewController: UIViewController, inputParams: [String:Any], completion: @escaping(_ resultData:GymTrainerBaseModel?) -> Void){
+       
+        /*
+         let params:[String:Any] = [
+         "id":"", studio id is required
+         "gender": 1,2,
+         "language": 1,2
+         "is_filter":1
+         "lat": 1.344444
+         "long":4.8999
+         "time_slot":
+         "type": home , type: gym, home, gym based on selection
+         "tag_id":49 , //tag_id: 1, tag id is required when is filter 1
+         "nationality": 1,2
+         ]
+        */
+        
+        print("inputParams = ", inputParams)
+        
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .filter_gym_trainers, method: .post , parameters: inputParams, isShowLoading: true, completion: {  (getResponce, error) in
+            do{
+                print(getResponce as Any)
+                if let responceData = getResponce {
+                    
+                    let getResult = try JSONDecoder().decode(GymTrainerBaseModel.self, from: responceData)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    }
+                    else{
+                        
+                        let errorMsg = getResult.msg
+                        AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg ?? "")
+                    }
+                }
+                
+            }catch {
+                print(error)
+            }
+            
+        })
+    }
+  
+    
     //MARK: ------------------------- api/trainer-details
     class func getTrainerDetailsApi(viewController: UIViewController, inputParms: [String:String]?, isShowLoader:Bool = true, completion: @escaping(_ resultData:TrainerDetailsBaseModel?) -> Void){
         guard let inputParms = inputParms else { return  }
@@ -293,7 +381,8 @@ class TrainerVM {
             "type": "",
             "mobile_no": "",
             "lat": "",
-            "long": ""
+            "long": "",
+            "name": "", hareram field is required
         ]
         */
         
@@ -369,7 +458,6 @@ class TrainerVM {
         NetworkManager.shared.genericAPICall(serviceEndPoint: .ccaavenue_payment, method: .get , queries: params, parameters:  nil, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
           
             do{
-
                 if let responceData = getResponce {
                     let getResult = try JSONSerialization.jsonObject(with: responceData, options: .mutableContainers) as? [String:Any]
                     guard let getResult = getResult else { return }
@@ -405,10 +493,15 @@ class TrainerVM {
          "end_date": "",     //end_date: 2025-04-25, end date is required
          "sessions": "",     //sessions: 12, no of sessions
          "price": "",        //price: 320, price field is required
-         "days": ""          //days: 30, no of days
-         "transaction_id":""
+         "days": ""  ,        //days: 30, no of days
+         "transaction_id":"",
+       
+         "payment_type": ccavenue, tabby/tamara/ccavenue
+         "booking_id": 345, booking id for accept booking
          ]
         */
+       
+        
         
         print("inputParams = ", inputParams)
         
@@ -434,5 +527,56 @@ class TrainerVM {
             
         })
     }
-   
+    
+    //MARK: ----------------------- api/get-resources
+    class func trainerFilterApi(inputParams:[String:String]? , isShowLoader:Bool = true, completion: @escaping(_ resultData:FilterTrainerBaseModel?) -> Void){
+        
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .trainer_filter_data, method: .get , queries: inputParams, parameters:  nil, isShowLoading: isShowLoader, completion: {  ( getResponce, error) in
+            do{
+                print(getResponce as Any)
+                if let responceData = getResponce {
+                    let getResult = try JSONDecoder().decode(FilterTrainerBaseModel.self, from: responceData)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    }
+                    else{
+                        completion(getResult)
+                    }
+                }
+            }catch {
+                print(error)
+            }
+        })
+    }
+    
+    //MARK: ---------------------- api/trainer-review
+    class  func trainerReviewApi(inputParams: [String:Any]?, completion: @escaping(_ resultData: [String:Any]?) -> Void){
+        /*
+         let params:[String:Any] = [
+         "trainer_id":  "",
+         "booking_id": "",
+         "message": "",
+         "rating": ""
+         ]
+         */
+        print("inputParams = ", inputParams as Any)
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .trainer_review, method: .post , parameters: inputParams, isShowLoading: true, completion: {  (getResponce, error) in
+            do{
+                print(getResponce as Any)
+                if let responceData = getResponce {
+                    let getResult = try JSONSerialization.jsonObject(with: responceData, options: .mutableContainers) as? [String:Any]
+                    guard let getResult = getResult else { return }
+                    if (getResult["status"] as? Bool) == true  {
+                        completion(getResult)
+                    }
+                    else{
+                        let errorMsg = "\(((getResult["errors"] as? [String : Any])?.values.first as? [Any])?.first as? String ?? (getResult["msg"] as? String ?? ""))"
+                        debugPrint(errorMsg)
+                    }
+                }
+            }catch {
+                print(error)
+            }
+        })
+    }
 }

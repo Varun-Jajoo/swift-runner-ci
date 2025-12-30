@@ -11,7 +11,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="MyWorkoutsTableViewCell" rowHeight="302" id="KGk-i7-Jjw" customClass="MyWorkoutsTableViewCell" customModule="MyPT" customModuleProvider="target">
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="MyWorkoutsTableViewCell" rowHeight="302" id="KGk-i7-Jjw" customClass="MyWorkoutsTableViewCell" customModule="MyPT_Connect" customModuleProvider="target">
             <rect key="frame" x="0.0" y="0.0" width="711" height="302"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
@@ -21,6 +21,10 @@
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nm1-Sq-esI">
                         <rect key="frame" x="12" y="1" width="687" height="293"/>
                         <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_WorkoutNormalGradient" translatesAutoresizingMaskIntoConstraints="NO" id="Gue-Hr-jiw">
+                                <rect key="frame" x="0.0" y="0.0" width="687" height="293"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_Book_Trainer" translatesAutoresizingMaskIntoConstraints="NO" id="fOc-FR-GoI">
                                 <rect key="frame" x="12" y="101.66666666666669" width="90" height="90"/>
                                 <constraints>
@@ -40,12 +44,12 @@
                                                 <color key="textColor" name="appWhite"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="255" verticalHuggingPriority="255" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="I1r-LJ-xXg">
-                                                <rect key="frame" x="124" y="52" width="50" height="24"/>
+                                            <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="I1r-LJ-xXg">
+                                                <rect key="frame" x="124" y="52" width="16" height="24"/>
                                                 <color key="backgroundColor" red="0.10980392156862745" green="0.12156862745098039" blue="0.12941176470588234" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <inset key="contentEdgeInsets" minX="8" minY="3" maxX="8" maxY="3"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                                <state key="normal" title="Yoga">
+                                                <state key="normal">
                                                     <color key="titleColor" name="appWhite"/>
                                                 </state>
                                             </button>
@@ -63,7 +67,7 @@
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="O9n-fq-hSF">
                                         <rect key="frame" x="0.0" y="127.66666666666666" width="561" height="64.333333333333343"/>
                                         <subviews>
-                                            <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="255" verticalHuggingPriority="255" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="shg-hs-WpU">
+                                            <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="shg-hs-WpU">
                                                 <rect key="frame" x="1" y="1" width="103" height="24"/>
                                                 <color key="backgroundColor" red="0.10980392156862745" green="0.12156862745098039" blue="0.12941176470588234" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <inset key="contentEdgeInsets" minX="8" minY="3" maxX="8" maxY="3"/>
@@ -171,7 +175,10 @@
                         </subviews>
                         <color key="backgroundColor" name="appCard"/>
                         <constraints>
+                            <constraint firstItem="Gue-Hr-jiw" firstAttribute="top" secondItem="nm1-Sq-esI" secondAttribute="top" id="1te-fE-Wvg"/>
                             <constraint firstItem="IFk-Us-rVu" firstAttribute="leading" secondItem="5DG-Uk-xRd" secondAttribute="trailing" constant="12" id="2s8-i6-5Sb"/>
+                            <constraint firstItem="Gue-Hr-jiw" firstAttribute="leading" secondItem="nm1-Sq-esI" secondAttribute="leading" id="Bb3-Fj-VS9"/>
+                            <constraint firstAttribute="bottom" secondItem="Gue-Hr-jiw" secondAttribute="bottom" id="KVt-RF-cje"/>
                             <constraint firstItem="IFk-Us-rVu" firstAttribute="centerY" secondItem="nm1-Sq-esI" secondAttribute="centerY" id="LTm-1S-tZo"/>
                             <constraint firstItem="blG-XO-hwr" firstAttribute="top" secondItem="nm1-Sq-esI" secondAttribute="top" constant="15" id="Vad-Um-bii"/>
                             <constraint firstAttribute="bottom" secondItem="blG-XO-hwr" secondAttribute="bottom" constant="15" id="Wfa-ZW-wER"/>
@@ -180,6 +187,7 @@
                             <constraint firstAttribute="trailing" secondItem="IFk-Us-rVu" secondAttribute="trailing" constant="19" id="ht0-7o-bkZ"/>
                             <constraint firstItem="fOc-FR-GoI" firstAttribute="centerY" secondItem="nm1-Sq-esI" secondAttribute="centerY" id="izs-jf-YBu"/>
                             <constraint firstItem="blG-XO-hwr" firstAttribute="leading" secondItem="fOc-FR-GoI" secondAttribute="trailing" constant="12" id="rGl-lt-Zlu"/>
+                            <constraint firstAttribute="trailing" secondItem="Gue-Hr-jiw" secondAttribute="trailing" id="tzG-Hd-9BU"/>
                         </constraints>
                     </view>
                 </subviews>
@@ -201,6 +209,7 @@
                 <outlet property="dotBtn" destination="7Wb-Np-igQ" id="Yy0-49-NtX"/>
                 <outlet property="fitnesStatusBtn" destination="5GY-hq-BSg" id="Jiw-Rs-UPO"/>
                 <outlet property="fitnessTypeBtn" destination="I1r-LJ-xXg" id="XPf-NH-cMQ"/>
+                <outlet property="gradientImgView" destination="Gue-Hr-jiw" id="z2v-CU-qYZ"/>
                 <outlet property="lineMBV" destination="dZ2-Zi-S32" id="RYy-gj-Hbf"/>
                 <outlet property="progressView" destination="GFY-ic-Moh" id="Tg1-Dq-POb"/>
                 <outlet property="scoreBtn" destination="6Rv-R3-Pn4" id="Zyd-Jt-IGZ"/>
@@ -213,7 +222,8 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="ic_Book_Trainer" width="1380" height="920"/>
+        <image name="ic_Book_Trainer" width="190" height="255"/>
+        <image name="ic_WorkoutNormalGradient" width="390" height="104"/>
         <image name="ic_checkDay" width="28" height="28"/>
         <image name="ic_clock" width="16" height="16.333333969116211"/>
         <image name="ic_document_text" width="16" height="16.333333969116211"/>

@@ -10,9 +10,14 @@ import IQKeyboardManagerSwift
 import GoogleMaps
 import IQTextView
 
+
 class ArrivingViewController: CommonViewController, UITextFieldDelegate {
     
     //MARK: ----------- VARIABLE
+    var inputBookingId: String?
+    var trackDetails: TrackTrainerDataModel?
+    
+    
    weak var mapView: GMSMapView!
     
 //    lazy var mapView: GMSMapView = {
@@ -75,10 +80,14 @@ class ArrivingViewController: CommonViewController, UITextFieldDelegate {
         self.otp2TxtField.delegate = self
         self.otp3TxtField.delegate = self
         self.otp4TxtField.delegate = self
+        self.trainerMsgTxtView.delegate = self
+        self.trainerMsgTxtView.isUserInteractionEnabled = false //bcz of flow and api is pending
         
         self.setupFont()
-        self.setupUI()
+//        self.setupUI()
         self.setMapShowData()
+        self.setInputData()
+        self.trackTimeApi(bookingId: self.inputBookingId)
     }
     
     deinit {
@@ -102,17 +111,24 @@ class ArrivingViewController: CommonViewController, UITextFieldDelegate {
         self.setRighMenu(rightImgs: [AppImages.moreSettings], setTitle: [nil], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
     
-//    override func viewDidLayoutSubviews() {
-//        super.viewDidLayoutSubviews()
-//        self.setupUI()
-//    }
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.setupUI()
+    }
     
     
     @IBAction func beforeArrivesBtnActn(_ sender: Any) {
+        /* for api and also flow is pending 
         let vc:PlanPopupViewController = PlanPopupViewController.instantiate(appStoryboard: .calendar)
         vc.modalPresentationStyle = .automatic
         vc.planFlowSetup = .checkListActiveSession
         self.navigationController?.present(vc, animated: true)
+        */
+        
+        //------------------Only for Testing......
+        let vc:ArrivingLoddingViewController = ArrivingLoddingViewController.instantiate(appStoryboard: .library)
+        self.navigationController?.pushViewController(vc, animated: true)
+        
     }
     
     
@@ -121,8 +137,75 @@ class ArrivingViewController: CommonViewController, UITextFieldDelegate {
     }
     
     @IBAction func phoneBtnActn(_ sender: Any) {
-        self.callNumber(phoneNumber: "1234567899")
+//        self.callNumber(phoneNumber: "1234567899") bcz of flow and api is pending
     }
+    
+    private func setInputData(){
+        let trainerNameStr: String = trackDetails?.trainer?.name ?? ""
+        
+        let arrivingStr = "Things to prepare before \(trainerNameStr) arrives"
+        self.beforeArrivesBtn.setTitle(arrivingStr, for: .normal)
+
+        if let tags = trackDetails?.trainer?.tags {
+            if tags.indices.contains(0) {
+                self.cat1Btn.setTitle(tags[0], for: .normal)
+            }
+            if tags.indices.contains(1) {
+                self.cat2Btn.setTitle(tags[1], for: .normal)
+            }
+            if tags.count > 2 {
+                self.cat3Btn.setTitle("+3", for: .normal)
+            }
+        }
+        
+        let timeStrParts = trackDetails?.booking?.arrivingTime?.components(separatedBy: " ")
+        let timeCount: String = timeStrParts?.first ?? ""
+        let timeHrs: String = timeStrParts?.last ?? ""
+        self.timeCountLbl.text = timeCount
+        self.timeTitleLbl.text = timeHrs
+        self.trainerNameLbl.text = trainerNameStr
+        self.trainerImgView.loadImage(urlString: trackDetails?.trainer?.profile, placeholder: AppImages.profile_placeholder)
+        
+        if let bookingOtp = trackDetails?.booking?.otp {
+            let otpDigits = String(bookingOtp).compactMap { String($0) }
+            if otpDigits.count == 4 {
+                self.otp1TxtField.text = otpDigits[0]
+                self.otp2TxtField.text = otpDigits[1]
+                self.otp3TxtField.text = otpDigits[2]
+                self.otp4TxtField.text = otpDigits[3]
+            }
+        }
+       
+//        self.trainerMsgTxtView.text = "Any message for the trainer?"
+//        self.trainerMsgTxtView.placeholder = "Any message for the trainer?"
+        
+        
+        //-------------------- Attributed text
+        let defaultAttributes = [
+            .font: AppFont.regular.size(16.0, familyName: familyManrope),
+            .foregroundColor: UIColor.appDarkGray
+        ] as [NSAttributedString.Key : Any]
+        
+        let makeAttributes = [
+            .font: AppFont.medium.size(16.0, familyName: familyManrope),
+            .foregroundColor: UIColor.appWhite
+        ] as [NSAttributedString.Key : Any]
+        
+        let attributedNickName = [
+            "Arriving at your home ",
+            NSAttributedString(string: trackDetails?.booking?.address ?? "",
+                               attributes: makeAttributes)
+        ] as [AttributedStringComponent]
+        
+        self.arrivingAddrLbl.attributedText = NSAttributedString(from: attributedNickName, defaultAttributes: defaultAttributes)
+        
+        //------------ TextView
+        self.trainerMsgTxtView.text = "Any message for the trainer?"
+        self.trainerMsgTxtView.textColor = UIColor.txtDarkGray
+        self.trainerMsgTxtView.textContainerInset = UIEdgeInsets(top: (self.trainerMsgTxtView.bounds.height - 20) / 2, left: 16, bottom: 0, right: 16)
+        
+    }
+    
     
     //-----------------Make calling
     private func callNumber(phoneNumber: String) {
@@ -197,7 +280,7 @@ class ArrivingViewController: CommonViewController, UITextFieldDelegate {
             self.trainerMsgTxtView.setCornerRadius(borderWidth: 0.5, borderColor: UIColor.txtDarkGray, cornerRadious: 8.0)
             self.beforeArrivesBtn.addGradient(colors: [UIColor(red: 23.0/255.0, green: 14.0/255.0, blue: 8.0/255.0, alpha: 1.0),UIColor(red: 97.0/255.0, green: 69.0/255.0, blue: 49.0/255.0, alpha: 1.0),UIColor(red: 28.0/255.0, green: 16.0/255.0, blue: 8.0/255.0, alpha: 1.0)], locations: [0,0.5,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 1)
             self.beforeArrivesBtn.roundSideCorners(radius: 20, cornerSide: [.topLeft, .topRight])
-            self.timeMBV.addGradient(colors: [UIColor(red: 91.0/255.0, green: 42.0/255.0, blue: 12.0/255.0, alpha: 1.0),UIColor(red: 191.0/255.0, green: 109.0/255.0, blue: 49.0/255.0, alpha: 1.0),UIColor(red: 91.0/255.0, green: 42.0/255.0, blue: 12.0/255.0, alpha: 1.0)], locations: [0,0.4,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 1)
+            self.timeMBV.addGradient(colors: [UIColor(red: 91.0/255.0, green: 42.0/255.0, blue: 12.0/255.0, alpha: 1.0),UIColor(red: 191.0/255.0, green: 109.0/255.0, blue: 49.0/255.0, alpha: 1.0),UIColor(red: 91.0/255.0, green: 42.0/255.0, blue: 12.0/255.0, alpha: 1.0)], locations: [0,0.4,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 16.0)
             self.timeMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 16.0)
             
             [
@@ -207,6 +290,7 @@ class ArrivingViewController: CommonViewController, UITextFieldDelegate {
                 self.otp4TxtField
             ].forEach({
                 $0?.setGradientBorder(cornerRadious: 8, width: 1.5, colors: [UIColor(red: 0, green: 0, blue: 0, alpha: 1), UIColor(red: 217.0/255.0, green: 217.0/255.0, blue: 217.0/255.0, alpha: 1.0)], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1))
+                $0?.isUserInteractionEnabled = false
             })
         }
     }
@@ -224,7 +308,8 @@ class ArrivingViewController: CommonViewController, UITextFieldDelegate {
         
         
         //---------------------------------
-        self.beforeArrivesBtn.titleLabel?.font = AppFont.regular.size(12.0, familyName: familyOverpass)
+//        self.beforeArrivesBtn.titleLabel?.font = AppFont.regular.size(12.0, familyName: familyOverpass)
+        self.beforeArrivesBtn.titleLabel?.font = AppFont.regular.size(12.0, familyName: familyOverpassMono)
         self.sessionDetailsBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
         
         [self.cat1Btn,
@@ -249,31 +334,32 @@ class ArrivingViewController: CommonViewController, UITextFieldDelegate {
         
         self.trainerMsgTxtView.font = AppFont.semibold.size(14.0, familyName: familyManrope)
         
-        //-------------------- Attributed text
-        let defaultAttributes = [
-            .font: AppFont.regular.size(16.0, familyName: familyManrope),
-            .foregroundColor: UIColor.appDarkGray
-        ] as [NSAttributedString.Key : Any]
-        
-        let makeAttributes = [
-            .font: AppFont.medium.size(16.0, familyName: familyManrope),
-            .foregroundColor: UIColor.appWhite
-        ] as [NSAttributedString.Key : Any]
-        
-        let attributedNickName = [
-            "Arriving at your home ",
-            NSAttributedString(string: "- 23B, Dubai Mall Street Road",
-                               attributes: makeAttributes)
-        ] as [AttributedStringComponent]
-        
-        self.arrivingAddrLbl.attributedText = NSAttributedString(from: attributedNickName, defaultAttributes: defaultAttributes)
+//        //-------------------- Attributed text
+//        let defaultAttributes = [
+//            .font: AppFont.regular.size(16.0, familyName: familyManrope),
+//            .foregroundColor: UIColor.appDarkGray
+//        ] as [NSAttributedString.Key : Any]
+//        
+//        let makeAttributes = [
+//            .font: AppFont.medium.size(16.0, familyName: familyManrope),
+//            .foregroundColor: UIColor.appWhite
+//        ] as [NSAttributedString.Key : Any]
+//        
+//        let attributedNickName = [
+//            "Arriving at your home ",
+//            NSAttributedString(string: "- 23B, Dubai Mall Street Road",
+//                               attributes: makeAttributes)
+//        ] as [AttributedStringComponent]
+//        
+//        self.arrivingAddrLbl.attributedText = NSAttributedString(from: attributedNickName, defaultAttributes: defaultAttributes)
     }
     
     //-----------------------textFieldDidChange
     @objc func textFieldDidChange(textField: UITextField){
         
         let text = textField.text
-        
+      
+        /*
         if (text?.utf16.count)! >= 1{
             switch textField{
             case otp1TxtField:
@@ -312,11 +398,35 @@ class ArrivingViewController: CommonViewController, UITextFieldDelegate {
                 break
             }
         }
+        */
         
     }
     
     // UITextFieldDelegate method to restrict the input to 1 digits
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+       
+        switch textField{
+        case otp1TxtField, otp2TxtField, otp3TxtField, otp4TxtField:
+            // Allow only numeric input
+            let allowedCharacterSet = CharacterSet.decimalDigits
+            let characterSet = CharacterSet(charactersIn: string)
+            
+            if !allowedCharacterSet.isSuperset(of: characterSet) {
+                return false // Disallow non-numeric input
+            }
+            
+            // Check the total length after the proposed change
+            if let currentText = textField.text, let stringRange = Range(range, in: currentText) {
+                let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+                
+                return updatedText.count <= 1 // Allow input only if it results in 1 or fewer digits
+            }
+        
+        default:
+            break
+        }
+        
+        /*
         // Allow only numeric input
         let allowedCharacterSet = CharacterSet.decimalDigits
         let characterSet = CharacterSet(charactersIn: string)
@@ -331,6 +441,7 @@ class ArrivingViewController: CommonViewController, UITextFieldDelegate {
             
             return updatedText.count <= 1 // Allow input only if it results in 1 or fewer digits
         }
+        */
         
         return true
     }
@@ -719,4 +830,56 @@ extension ArrivingViewController: GMSMapViewDelegate, CLLocationManagerDelegate 
     //        mapView.animate(toZoom: currentZoom - 1.4)
     //    }
     
+}
+
+extension ArrivingViewController: UITextViewDelegate{
+    
+    // MARK: - UITextViewDelegate methods
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        print("TextView began editing")
+        
+        if textView == trainerMsgTxtView {
+            // Remove placeholder text on focus
+            if textView.text == "Any message for the trainer?" || textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty  {
+                textView.text = ""
+                textView.textColor = UIColor.appWhite
+                textView.textContainerInset = UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16) // adjust as needed
+            }else{
+                textView.textColor = UIColor.appWhite
+            }
+        }
+    }
+
+    func textViewDidChange(_ textView: UITextView) {
+        print("Text changed: \(textView.text ?? "")")
+    }
+
+    func textViewDidEndEditing(_ textView: UITextView) {
+        print("TextView ended editing")
+        if textView == trainerMsgTxtView {
+            // Restore placeholder if text is empty
+            if textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                textView.text = "Any message for the trainer?"
+                textView.textColor = UIColor.txtDarkGray
+                textView.textContainerInset = UIEdgeInsets(top: (textView.bounds.height - 20) / 2, left: 16, bottom: 0, right: 16)
+            } else {
+                textView.textColor = UIColor.appWhite
+                textView.textContainerInset = UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)
+            }
+        }
+    }
+}
+
+
+//MARK: ---------------EXTENSION FOR API
+extension ArrivingViewController{
+    private func trackTimeApi(bookingId: String?){
+        WorkoutLibraryVM.trackTrainerTimeApi(inputBookingId: bookingId, completion: {[weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return }
+            if getResultData.status == true {
+                self.trackDetails = getResultData.data
+                self.setInputData()
+            }
+        })
+    }
 }

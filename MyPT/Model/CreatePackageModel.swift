@@ -78,7 +78,6 @@ struct ValityStudioDetailModel: Codable {
 }
 
 
-
 //MARK: --------------------- SetDateBaseModel
 struct SetDateBaseModel: Codable {
     var status: Bool?
@@ -91,12 +90,17 @@ struct SetDateBaseModel: Codable {
 struct SetDateModel: Codable {
     var startDate, endDate, packageType, sessions: String?
     var slots: [SlotModel]?
-
+    var isPackage: Bool?  //Extra keys
+    var main_price: FlexibleValue? //Extra keys
+    var price: FlexibleValue? //Extra keys
+    
     enum CodingKeys: String, CodingKey {
         case startDate = "start_date"
         case endDate = "end_date"
         case packageType = "package_type"
         case sessions, slots
+        case isPackage
+        case main_price, price
     }
 }
 
@@ -134,17 +138,20 @@ struct SetDateModel: Codable {
 
  //MARK: -------------- PackageDetailModel
  struct PackageDetailModel: Codable {
-     var package, startDate, endDate, totalSessions: String?
+     var package, startDate, endDate, totalSessions, type: String?
      var price: String?
      var days: Int?
+     var main_price, tax_price: FlexibleValue?
 
      enum CodingKeys: String, CodingKey {
          case package
          case startDate = "start_date"
          case endDate = "end_date"
          case totalSessions, price, days
+         case main_price, tax_price, type
      }
  }
+
 
  //MARK: ------------- PackageCheckoutTrainerModel
  struct PackageCheckoutTrainerModel: Codable {

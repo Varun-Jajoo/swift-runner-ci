@@ -20,6 +20,7 @@ enum AssetsColor {
     case appLigthYellow
     case appGreen
     case appOrange
+    case errorRedBG
 }
 
 enum AssetsMultiColor {
@@ -37,6 +38,8 @@ enum AssetsMultiColor {
     case topBottomGradient
     case cynGradient
     case greenGradient
+    case blackBgGradient
+    case greenBgGradient
 }
 
 
@@ -77,6 +80,8 @@ extension UIColor {
             return UIColor(red: 244.0/255.0, green: 109.0/255.0, blue: 51.0/255.0, alpha: 1.0)
         case .appLigthYellow:
             return UIColor(named: "appLightYellow")
+        case .errorRedBG:
+            return UIColor(named: "errorRedBG")
         }
     }
     
@@ -113,6 +118,18 @@ extension UIColor {
        
         case .greenGradient:
             return [UIColor(red: 29.0/255.0, green: 215.0/255.0, blue: 148.0/255.0, alpha: 1.0), UIColor(red: 9.0/255.0, green: 46.0/255.0, blue: 46.0/255.0, alpha: 1.0)]
+        case .blackBgGradient:
+            return [
+                UIColor(red: 0.0/255.0, green: 5.0/255.0, blue: 2.0/255.0, alpha: 0.6),
+                UIColor(red: 4.0/255.0, green: 4.0/255.0, blue: 4.0/255.0, alpha: 0.0),
+                UIColor(red: 8.0/255.0, green: 8.0/255.0, blue: 8.0/255.0, alpha: 1.0)
+            ]
+        case .greenBgGradient:
+            return [
+                UIColor(red: 27.0/255.0, green: 39.0/255.0, blue: 12.0/255.0, alpha: 1.0),
+                UIColor(red: 0.0/255.0, green: 15.0/255.0, blue: 6.0/255.0, alpha: 1.0),
+                UIColor(red: 8.0/255.0, green: 8.0/255.0, blue: 8.0/255.0, alpha: 1.0)
+            ]
         }
     }
 }
@@ -123,7 +140,9 @@ public struct AppImages {
     
     public static let profile_placeholder = UIImage(named: "ic_profile_placeholder")
     public static let navLeft = UIImage(named: "ic_navLeft")
+    public static let appLogo = UIImage(named: "ic_appLogo")
     public static let backarrow = UIImage(named: "ic_back_arrow")
+    public static let backArrowWithBg = UIImage(named: "ic_backArrowWithBg")
     public static let arrow_right = UIImage(named: "ic_arrow_right")
     public static let arrow_rightWhite = UIImage(named: "ic_arrow_rightWhite")
     public static let arrow_right_black = UIImage(named: "ic_arrow_right_black")
@@ -153,6 +172,7 @@ public struct AppImages {
     public static let withoutTrainerMembership = UIImage(named: "ic_withoutTrainerMembership")
     public static let withTrainerMembership_selected = UIImage(named: "ic_withTrainerMembership_selected")
     public static let withTrainerMembership = UIImage(named: "ic_withTrainerMembership")
+    public static let topUPSelected = UIImage(named: "ic_TopUp_selected")
     
     //MARK: -----------------Bottom tabbar
     public static let bookings = UIImage(named: "ic_bookings")
@@ -207,6 +227,12 @@ public struct AppImages {
     public static let female_selected = UIImage(named: "ic_female_selected")
     public static let male = UIImage(named: "ic_male")
     public static let male_selected = UIImage(named: "ic_male_selected")
+    public static let maleUnselected = UIImage(named: "maleUnselected")
+    public static let maleSelected = UIImage(named: "maleSelected")
+    public static let othersUnselected = UIImage(named: "othersUnselected")
+    public static let othersSelected = UIImage(named: "othersSelected")
+    public static let femaleUnselected = UIImage(named: "femaleUnselected")
+    public static let femaleSelected = UIImage(named: "femaleSelected")
     
     //------------------ *********************Personalized
     public static let Boost_Esteem = UIImage(named: "ic_Boost_Esteem")
@@ -238,6 +264,7 @@ public struct AppImages {
     public static let chooseLocation = UIImage(named: "ic_chooseLocation")
     public static let forward = UIImage(named: "ic_forward")
     public static let notification = UIImage(named: "ic_notification")
+    public static let getNotifications = UIImage(named: "ic_getNotifications")
     public static let notificationCount = UIImage(named: "ic_notificationCount")
     
     //------------------Create trainer
@@ -282,6 +309,7 @@ public let familyManrope               = "Manrope"
 public let familyOverpass              = "Overpass"
 public let familyOverpassMono          = "OverpassMono"
 public let familyClashDisplayVariable  = "ClashDisplayVariable"
+public let familyFunnelSans            = "FunnelSans"
 
 
 enum AppFont: String {

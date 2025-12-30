@@ -9,6 +9,8 @@ import UIKit
 
 class CancellationPolicyViewController: UIViewController {
 
+    var cancellationDetails: CancellationPolicyModel?
+    
     //MARK: ---------------IBOUTLET
     @IBOutlet weak var cancellationPolicyMBV: UIView!
     @IBOutlet weak var camcellationPolicyTitleLbl: UILabel!
@@ -26,7 +28,7 @@ class CancellationPolicyViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        self.inputData()
     }
     
     override func viewDidLayoutSubviews() {
@@ -47,6 +49,13 @@ class CancellationPolicyViewController: UIViewController {
     @IBAction func dissmissBtnActn(_ sendder: UIButton){
         print("dissmiss btn clicked...")
         self.dismiss(animated: true)
+    }
+    
+    private func inputData(){
+        self.cancellationBeforeTimeLbl.text = cancellationDetails?.freeMsg?.value
+        self.timeCancellationWithinTimeLbl.text = cancellationDetails?.cancelMsg?.value
+        self.freeLbl.text = cancellationDetails?.freeMsgText?.value
+        self.chargesLbl.text = cancellationDetails?.cancelMsgText?.value
     }
     
     func setupUI(){
@@ -79,6 +88,17 @@ class CancellationPolicyViewController: UIViewController {
             guard let self = self else { return  }
             $0?.font = AppFont.semibold.size(14.0, familyName: familyManrope)
         })
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first {
+            let location = touch.location(in: view)
+                  if !self.cancellationPolicyMBV.frame.contains(location) {
+                      self.dismiss(animated: true, completion: nil)
+                  }else{
+                      print("tap at popup view.")
+                  }
+        }
     }
     
 }

@@ -167,6 +167,13 @@ class ThumbTextSlider: UISlider {
            thumbView.layer.render(in: rendererContext.cgContext)
        }
    }
+    
+    // MARK: - Improve Touch Responsiveness
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        let thumbRect = self.thumbRect(forBounds: bounds, trackRect: self.trackRect(forBounds: bounds), value: value)
+        let expandedRect = thumbRect.insetBy(dx: -20, dy: -20)
+        return expandedRect.contains(point) || super.point(inside: point, with: event)
+    }
        
    override func trackRect(forBounds bounds: CGRect) -> CGRect {
        return CGRect(origin: bounds.origin, size: CGSize(width: bounds.width, height: 5))

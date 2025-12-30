@@ -12,7 +12,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="UpcomingSessionsCollectionViewCell" id="gTV-IL-0wX" customClass="UpcomingSessionsCollectionViewCell" customModule="MyPT" customModuleProvider="target">
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="UpcomingSessionsCollectionViewCell" id="gTV-IL-0wX" customClass="UpcomingSessionsCollectionViewCell" customModule="MyPT_Connect" customModuleProvider="target">
             <rect key="frame" x="0.0" y="0.0" width="447" height="366"/>
             <autoresizingMask key="autoresizingMask"/>
             <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
@@ -22,32 +22,36 @@
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="J89-3V-Y4a">
                         <rect key="frame" x="1" y="1" width="445" height="364"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_UpcomingSessions" translatesAutoresizingMaskIntoConstraints="NO" id="6eM-Fa-Wep">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="6eM-Fa-Wep">
                                 <rect key="frame" x="0.0" y="0.0" width="445" height="364"/>
                             </imageView>
-                            <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="redraw" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_profile_placeholder" translatesAutoresizingMaskIntoConstraints="NO" id="fdR-jS-EfK">
+                            <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="fdR-jS-EfK">
                                 <rect key="frame" x="267" y="0.0" width="178" height="364"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="fdR-jS-EfK" secondAttribute="height" multiplier="89:182" id="SuF-oc-sFY"/>
+                                </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="4th Session" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NGj-13-ra8">
-                                <rect key="frame" x="20" y="24" width="325" height="14.333333333333336"/>
+                                <rect key="frame" x="20" y="24" width="235" height="14.333333333333336"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                 <color key="textColor" name="txtDarkGray"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="13/12/24 10:00am - 11:00am" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YvX-Tn-lTg">
-                                <rect key="frame" x="20" y="39.333333333333336" width="325" height="17"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YvX-Tn-lTg">
+                                <rect key="frame" x="20" y="39.333333333333336" width="235" height="17"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <color key="textColor" name="appWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Christene De Koning" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zuA-Xn-4WU">
-                                <rect key="frame" x="20" y="230" width="325" height="24"/>
+                                <rect key="frame" x="20" y="222.33333333333334" width="235" height="24"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                 <color key="textColor" name="appWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="PhK-3L-58X">
-                                <rect key="frame" x="20" y="260" width="167" height="16.333333333333314"/>
+                                <rect key="frame" x="20" y="252.33333333333334" width="167" height="16.333333333333343"/>
                                 <subviews>
                                     <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nSg-CY-oel">
                                         <rect key="frame" x="0.0" y="0.0" width="59" height="16.333333333333332"/>
@@ -74,26 +78,40 @@
                                 </subviews>
                             </stackView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JAQ-Y0-rmU">
-                                <rect key="frame" x="0.0" y="300.33333333333331" width="445" height="63.666666666666686"/>
+                                <rect key="frame" x="0.0" y="292.66666666666669" width="445" height="71.333333333333314"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Training Session Details" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YlL-9Y-cVi">
-                                        <rect key="frame" x="20" y="23" width="359.33333333333331" height="20.333333333333329"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <color key="textColor" name="appWhite"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="254" verticalHuggingPriority="251" image="ic_forward" translatesAutoresizingMaskIntoConstraints="NO" id="K4Q-5v-qjL">
-                                        <rect key="frame" x="399.33333333333331" y="20.333333333333371" width="25.666666666666686" height="25.333333333333329"/>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" image="ic_forward" translatesAutoresizingMaskIntoConstraints="NO" id="K4Q-5v-qjL">
+                                        <rect key="frame" x="399.33333333333331" y="24" width="25.666666666666686" height="25.333333333333329"/>
                                     </imageView>
+                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kuq-uO-WLQ">
+                                        <rect key="frame" x="14" y="14" width="376.33333333333331" height="45"/>
+                                        <subviews>
+                                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xVs-tl-CYx">
+                                                <rect key="frame" x="0.0" y="0.0" width="104" height="45"/>
+                                                <inset key="contentEdgeInsets" minX="18.5" minY="11.5" maxX="24.5" maxY="11.5"/>
+                                                <inset key="titleEdgeInsets" minX="6" minY="0.0" maxX="-6" maxY="0.0"/>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <state key="normal" title="Track" image="ic_chooseLocation" backgroundImage="ic_trackGrdnt">
+                                                    <color key="titleColor" name="appWhite"/>
+                                                </state>
+                                            </button>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Training Session Details" textAlignment="right" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YlL-9Y-cVi">
+                                                <rect key="frame" x="0.0" y="0.0" width="376.33333333333331" height="45"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                <color key="textColor" name="appWhite"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                        </subviews>
+                                    </stackView>
                                 </subviews>
                                 <color key="backgroundColor" name="appCard"/>
                                 <constraints>
-                                    <constraint firstAttribute="bottom" secondItem="YlL-9Y-cVi" secondAttribute="bottom" constant="20.5" id="1sV-py-DRo"/>
+                                    <constraint firstItem="K4Q-5v-qjL" firstAttribute="centerY" secondItem="kuq-uO-WLQ" secondAttribute="centerY" id="5GE-5q-aDu"/>
                                     <constraint firstAttribute="trailing" secondItem="K4Q-5v-qjL" secondAttribute="trailing" constant="20" id="5k7-4d-YEf"/>
-                                    <constraint firstItem="K4Q-5v-qjL" firstAttribute="leading" secondItem="YlL-9Y-cVi" secondAttribute="trailing" constant="20" id="6yJ-bv-HCH"/>
-                                    <constraint firstItem="YlL-9Y-cVi" firstAttribute="leading" secondItem="JAQ-Y0-rmU" secondAttribute="leading" constant="20" id="B7d-mv-ihY"/>
-                                    <constraint firstItem="YlL-9Y-cVi" firstAttribute="top" secondItem="JAQ-Y0-rmU" secondAttribute="top" constant="23" id="sQH-LB-DRQ"/>
-                                    <constraint firstItem="K4Q-5v-qjL" firstAttribute="centerY" secondItem="YlL-9Y-cVi" secondAttribute="centerY" id="usk-gu-ijE"/>
+                                    <constraint firstAttribute="bottom" secondItem="kuq-uO-WLQ" secondAttribute="bottom" constant="12.17" id="6pM-1A-KbU"/>
+                                    <constraint firstItem="K4Q-5v-qjL" firstAttribute="leading" secondItem="kuq-uO-WLQ" secondAttribute="trailing" constant="9" id="8s4-Cb-hSc"/>
+                                    <constraint firstItem="kuq-uO-WLQ" firstAttribute="leading" secondItem="JAQ-Y0-rmU" secondAttribute="leading" constant="14" id="u0J-OP-3TA"/>
+                                    <constraint firstItem="kuq-uO-WLQ" firstAttribute="top" secondItem="JAQ-Y0-rmU" secondAttribute="top" constant="14.289999999999999" id="zwv-Eq-QN5"/>
                                 </constraints>
                             </view>
                         </subviews>
@@ -104,12 +122,12 @@
                             <constraint firstItem="JAQ-Y0-rmU" firstAttribute="leading" secondItem="J89-3V-Y4a" secondAttribute="leading" id="2GY-qv-62L"/>
                             <constraint firstItem="NGj-13-ra8" firstAttribute="top" secondItem="J89-3V-Y4a" secondAttribute="top" constant="24" id="2IV-K5-hfD"/>
                             <constraint firstItem="fdR-jS-EfK" firstAttribute="top" secondItem="J89-3V-Y4a" secondAttribute="top" id="5z5-uG-2jl"/>
-                            <constraint firstAttribute="trailing" secondItem="NGj-13-ra8" secondAttribute="trailing" constant="100" id="7oa-c9-KYu"/>
                             <constraint firstItem="zuA-Xn-4WU" firstAttribute="leading" secondItem="NGj-13-ra8" secondAttribute="leading" id="8Jf-Jw-oN0"/>
                             <constraint firstAttribute="bottom" secondItem="6eM-Fa-Wep" secondAttribute="bottom" id="9DR-RI-nY2"/>
                             <constraint firstItem="6eM-Fa-Wep" firstAttribute="top" secondItem="J89-3V-Y4a" secondAttribute="top" id="Otd-HF-Eh8"/>
                             <constraint firstAttribute="trailing" secondItem="fdR-jS-EfK" secondAttribute="trailing" id="QGY-RS-1qa"/>
                             <constraint firstAttribute="trailing" secondItem="6eM-Fa-Wep" secondAttribute="trailing" id="S7h-az-3WG"/>
+                            <constraint firstItem="fdR-jS-EfK" firstAttribute="leading" secondItem="NGj-13-ra8" secondAttribute="trailing" constant="12" id="a51-Sn-ctS"/>
                             <constraint firstItem="zuA-Xn-4WU" firstAttribute="top" relation="greaterThanOrEqual" secondItem="YvX-Tn-lTg" secondAttribute="bottom" constant="20" id="dIQ-fX-VtW"/>
                             <constraint firstItem="NGj-13-ra8" firstAttribute="leading" secondItem="J89-3V-Y4a" secondAttribute="leading" constant="20" id="fQ0-fV-5VH"/>
                             <constraint firstItem="6eM-Fa-Wep" firstAttribute="leading" secondItem="J89-3V-Y4a" secondAttribute="leading" id="fc7-Q9-wjK"/>
@@ -146,17 +164,17 @@
                 <outlet property="noteLbl" destination="YlL-9Y-cVi" id="uWf-ii-0Zs"/>
                 <outlet property="sessionDateLbl" destination="YvX-Tn-lTg" id="sjY-VT-hD7"/>
                 <outlet property="sessionTitleLbl" destination="NGj-13-ra8" id="ieB-jA-kfU"/>
+                <outlet property="trackBtn" destination="xVs-tl-CYx" id="iHv-fY-Zwd"/>
                 <outlet property="userNameLbl" destination="zuA-Xn-4WU" id="IeB-GO-qLF"/>
             </connections>
             <point key="canvasLocation" x="267.93893129770993" y="130.98591549295776"/>
         </collectionViewCell>
     </objects>
     <resources>
-        <image name="ic_UpcomingSessions" width="370" height="230.33332824707031"/>
         <image name="ic_chooseLocation" width="16" height="16.333333969116211"/>
         <image name="ic_dashboardCircle" width="3" height="3.3333332538604736"/>
         <image name="ic_forward" width="25.666666030883789" height="25.333333969116211"/>
-        <image name="ic_profile_placeholder" width="50" height="50"/>
+        <image name="ic_trackGrdnt" width="100" height="32"/>
         <namedColor name="appCard">
             <color red="0.27843137254901962" green="0.30196078431372547" blue="0.37647058823529411" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>

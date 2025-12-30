@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -11,7 +11,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="WorkoutsCollectionViewCell" id="gTV-IL-0wX" customClass="WorkoutsCollectionViewCell" customModule="MyPT" customModuleProvider="target">
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="WorkoutsCollectionViewCell" id="gTV-IL-0wX" customClass="WorkoutsCollectionViewCell" customModule="MyPT_Connect" customModuleProvider="target">
             <rect key="frame" x="0.0" y="0.0" width="638" height="252"/>
             <autoresizingMask key="autoresizingMask"/>
             <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
@@ -59,7 +59,7 @@
                                     <color key="titleColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </state>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Upper Strength 2" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AmG-eT-xhz">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Upper Strength 2" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AmG-eT-xhz">
                                 <rect key="frame" x="20" y="69.333333333333329" width="596" height="24"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                 <color key="textColor" name="appWhite"/>
@@ -68,7 +68,7 @@
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="8 Series Workout" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pDr-rN-onH">
                                 <rect key="frame" x="20" y="101.33333333333333" width="596" height="20.333333333333329"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" name="txtDarkGray"/>
+                                <color key="textColor" name="appLightGray"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="Lf0-RX-arJ">
@@ -161,7 +161,7 @@
                                 </subviews>
                             </stackView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="H1v-Ej-irv">
-                                <rect key="frame" x="574" y="179.66666666666666" width="42" height="42"/>
+                                <rect key="frame" x="574" y="189.66666666666666" width="42" height="42"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="42" id="eLb-2Q-kLC"/>
                                     <constraint firstAttribute="width" secondItem="H1v-Ej-irv" secondAttribute="height" id="mWD-mG-deF"/>
@@ -175,6 +175,7 @@
                         <color key="backgroundColor" name="appCard"/>
                         <constraints>
                             <constraint firstItem="AmG-eT-xhz" firstAttribute="trailing" secondItem="RqW-de-Vxv" secondAttribute="trailing" id="4DO-WZ-xq7"/>
+                            <constraint firstItem="H1v-Ej-irv" firstAttribute="centerY" secondItem="YP2-7J-cFh" secondAttribute="centerY" id="7ra-AI-ctH"/>
                             <constraint firstAttribute="trailing" secondItem="rfl-Il-wo6" secondAttribute="trailing" id="8ER-Mi-BeT"/>
                             <constraint firstItem="9bm-23-Q6Z" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Al7-MB-tHG" secondAttribute="trailing" constant="22" id="Avx-qD-5t5"/>
                             <constraint firstItem="Lf0-RX-arJ" firstAttribute="leading" secondItem="pDr-rN-onH" secondAttribute="leading" id="CZd-fc-gjz"/>
@@ -193,7 +194,6 @@
                             <constraint firstItem="H1v-Ej-irv" firstAttribute="leading" secondItem="Lf0-RX-arJ" secondAttribute="trailing" constant="12" id="gzb-U8-zyA"/>
                             <constraint firstItem="H1v-Ej-irv" firstAttribute="trailing" secondItem="RqW-de-Vxv" secondAttribute="trailing" id="ijp-4s-MMM"/>
                             <constraint firstItem="Al7-MB-tHG" firstAttribute="top" secondItem="7DV-xg-OZp" secondAttribute="top" constant="22" id="jDQ-CG-4je"/>
-                            <constraint firstItem="H1v-Ej-irv" firstAttribute="bottom" secondItem="Lf0-RX-arJ" secondAttribute="bottom" id="kWy-vX-Reh"/>
                             <constraint firstItem="9bm-23-Q6Z" firstAttribute="width" secondItem="RqW-de-Vxv" secondAttribute="height" id="pzP-g1-emg"/>
                             <constraint firstItem="pDr-rN-onH" firstAttribute="top" secondItem="AmG-eT-xhz" secondAttribute="bottom" constant="8" id="tyz-9Y-sr9"/>
                             <constraint firstItem="rfl-Il-wo6" firstAttribute="leading" secondItem="7DV-xg-OZp" secondAttribute="leading" id="uTy-rU-Nzf"/>
@@ -248,11 +248,11 @@
         <namedColor name="appCard">
             <color red="0.27843137254901962" green="0.30196078431372547" blue="0.37647058823529411" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
+        <namedColor name="appLightGray">
+            <color red="0.83137254901960789" green="0.83137254901960789" blue="0.83137254901960789" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
         <namedColor name="appWhite">
             <color red="0.98039215686274506" green="0.98039215686274506" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="txtDarkGray">
-            <color red="0.58431372549019611" green="0.58431372549019611" blue="0.58431372549019611" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>
 </document>

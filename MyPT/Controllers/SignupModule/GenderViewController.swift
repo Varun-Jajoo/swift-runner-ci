@@ -7,12 +7,17 @@
 
 import UIKit
 
+enum selectedBtn: Int {
+    case maleSelect = 301, femaleSelect, othersSelect
+}
+
 class GenderViewController: CommonViewController {
     
     //MARK: ------------ VARIABLE
-    var dataGender:[[String:Any]]?
-    var genderImg:[UIImageView]?
-    var selectedGender:String?
+    var dataGender: [[String: Any]]?
+    var genderImg: [UIImageView]?
+    var selectedGender: String?
+    private var backgroundGradient: CAGradientLayer?
     
     
     //MARK: --------------IBOUTLET
@@ -27,20 +32,28 @@ class GenderViewController: CommonViewController {
     @IBOutlet weak var maleBGImg: UIImageView!
     @IBOutlet weak var femaleBGImg: UIImageView!
     @IBOutlet weak var othersGenderBGImg: UIImageView!
+    @IBOutlet var viewBackground: UIView!
+    @IBOutlet weak var lblHelps: UILabel!
+    @IBOutlet weak var lblMale: UILabel!
+    @IBOutlet weak var lblFemale: UILabel!
+    @IBOutlet weak var lblOthers: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setupUI()
         setUpFont()
-        self.enableContinueBtn(isSelected: false)
+        setupBackgroundGradient()
+//        self.enableContinueBtn(isSelected: false)
+        updateContinueButton(isEnabled: false)
+        setupContinueButtonIcon(isEnabled: false)
        
-        dataGender = [ ["images":AppImages.male as Any,"seleced_images":AppImages.male_selected as Any],
-                       ["images":AppImages.female as Any,"seleced_images":AppImages.female_selected as Any],
-                       ["images":AppImages.othersGender as Any,"seleced_images":AppImages.othersGender_selected as Any]
-                    ]
-        
-        genderImg = [maleBGImg,femaleBGImg,othersGenderBGImg]
+        dataGender = [
+            ["images": AppImages.maleUnselected as Any, "seleced_images": AppImages.maleSelected as Any],
+            ["images": AppImages.femaleUnselected as Any, "seleced_images": AppImages.female_selected as Any],
+            ["images": AppImages.othersUnselected as Any, "seleced_images": AppImages.othersGender_selected as Any]
+        ]
+        genderImg = [maleBGImg, femaleBGImg, othersGenderBGImg]
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -50,13 +63,17 @@ class GenderViewController: CommonViewController {
         setNavUI()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        backgroundGradient?.frame = viewBackground.bounds
+    }
+    
     func setNavUI(){
         self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
         self.setProgress(0.3)
         
-        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
-        
-//        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite) skipe remove need of client
+        self.setLeftMenu(leftImgs: [AppImages.backArrowWithBg], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
+        self.setRighMenu(setTitle: [AppStrings.skipStr], setTintColor: .black, setTitleColor: UIColor.txtSkip)
     }
     
     override func rightBtnActn(sender: UIButton) {
@@ -66,9 +83,13 @@ class GenderViewController: CommonViewController {
     }
     
     //------------------************Font
-    func setUpFont(){
+    func setUpFont() {
+        self.lblMale.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
+        self.lblFemale.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
+        self.lblOthers.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
+        self.lblHelps.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
         self.titleLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
-        self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
+        self.continueBtn.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
     }
     
     //MARK: ---------- SET UI
@@ -81,14 +102,32 @@ class GenderViewController: CommonViewController {
         }
     }
     
+    private func setupBackgroundGradient() {
+        // Remove old gradient if any
+        backgroundGradient?.removeFromSuperlayer()
+
+        let gradient = CAGradientLayer()
+        gradient.colors = UIColor.appMultiColor(.greenBgGradient).map { $0.cgColor }
+
+        // VERY IMPORTANT – match first UI direction
+        gradient.startPoint = CGPoint(x: 0.0, y: 0.0)
+        gradient.endPoint   = CGPoint(x: 1.0, y: 1.0)
+
+        gradient.locations = [0.0, 0.5, 1.0]
+        gradient.cornerRadius = 0
+
+        viewBackground.layer.insertSublayer(gradient, at: 0)
+        backgroundGradient = gradient
+    }
+    
     //MARK: --------> Update View
     func updateUI(selectedView:Int){
         if let genderImg = genderImg {
             for i in genderImg.enumerated() {
                 if i.offset == selectedView {
-                    self.enableContinueBtn(isSelected: true)
+                    updateContinueButton(isEnabled: true)
                     i.element.image = dataGender?[i.offset]["seleced_images"] as? UIImage
-                }else{
+                } else {
                     i.element.image = dataGender?[i.offset]["images"] as? UIImage
                 }
             }
@@ -108,8 +147,38 @@ class GenderViewController: CommonViewController {
 //        }
 //    }
     
-    enum selectedBtn:Int {
-        case maleSelect = 301 , femaleSelect, othersSelect
+    func updateContinueButton(isEnabled: Bool) {
+        continueBtn.isEnabled = isEnabled
+        continueBtn.isUserInteractionEnabled = isEnabled
+        
+        UIView.animate(withDuration: 0.2) {
+            self.setupContinueButtonIcon(isEnabled: isEnabled)
+            if isEnabled {
+                self.continueBtn.tintColor = .mainBg   // arrow color
+                self.continueBtn.backgroundColor = .appWhite
+                self.continueBtn.setTitleColor(.mainBg, for: .normal)
+            } else {
+                self.continueBtn.tintColor = .appWhite
+                self.continueBtn.backgroundColor = .appDarkGray
+                self.continueBtn.setTitleColor(.appWhite, for: .normal)
+            }
+        }
+    }
+    
+    func setupContinueButtonIcon(isEnabled: Bool) {
+        let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
+            .withRenderingMode(.alwaysTemplate)
+        
+        continueBtn.setImage(arrowImage, for: .normal)
+        
+        // Force image on right side
+        continueBtn.semanticContentAttribute = .forceRightToLeft
+        
+        // Space between text and image
+        continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -12)
+        continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 12)
+        
+        continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
     }
     
     @IBAction func genderSewectionBtnActn(_ sender: UIButton) {
@@ -156,15 +225,15 @@ class GenderViewController: CommonViewController {
     }
     
     //MARK: -------------- ENABLE CONTINUE
-    func enableContinueBtn(isSelected:Bool = false){
-        if isSelected {
-            self.continueBtn.isUserInteractionEnabled = true
-            self.continueBtn.backgroundColor = UIColor.appWhite
-            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
-        } else {
-            self.continueBtn.isUserInteractionEnabled = false
-            self.continueBtn.backgroundColor = UIColor.appDarkGray
-            self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
-        }
-    }
+//    func enableContinueBtn(isSelected:Bool = false){
+//        if isSelected {
+//            self.continueBtn.isUserInteractionEnabled = true
+//            self.continueBtn.backgroundColor = UIColor.appWhite
+//            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
+//        } else {
+//            self.continueBtn.isUserInteractionEnabled = false
+//            self.continueBtn.backgroundColor = UIColor.appDarkGray
+//            self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
+//        }
+//    }
 }

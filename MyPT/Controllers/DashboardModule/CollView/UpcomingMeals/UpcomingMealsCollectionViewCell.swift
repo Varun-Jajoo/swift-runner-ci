@@ -76,5 +76,24 @@ class UpcomingMealsCollectionViewCell: UICollectionViewCell {
     }
     
     
+    func setHealthCellData(data: UserMealsDataModel?){
+        guard let data = data else { return }
+        
+        self.titleLbl.text = data.mealName
+        if let calories = data.calories?.value {
+            self.kcalBtn.setTitle(calories + " " + "kcal", for: .normal)
+        }
+
+        if let proteins = data.proteins?.value {
+            self.proteinBtn.setTitle(proteins + " " + "Protien", for: .normal)
+        }
+        if let fats = data.fats?.value {
+            self.fatBtn.setTitle(fats + " " + "Fat", for: .normal)
+        }
+        
+        //        self.kcalBtn.setTitle(data.calories?.value, for: .normal)
+        //        self.proteinBtn.setTitle(data.proteins?.value , for: .normal)
+//        self.fatBtn.setTitle(data.fats?.value, for: .normal)
+    }
 
 }

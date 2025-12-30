@@ -9,6 +9,7 @@ import UIKit
 import AVKit
 import AVFoundation
 import FacebookLogin
+import CountryPickerView
 
 class MainViewController: CommonViewController,UITextFieldDelegate {
     
@@ -16,6 +17,22 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
     var player: LoopingPlayer?
     var countryCodeStr:String?
     var inputType:String?
+    
+    let countryPickerView = CountryPickerView()
+    var selectedCountry: Country?
+    
+    private let mobileMaxLengthByCountryCode: [String: Int] = [
+        "IN": 10,  // India
+        "US": 10,  // United States
+        "AE": 9,   // United Arab Emirates
+        "GB": 10,  // United Kingdom
+        "PK": 10,  // Pakistan
+        "BD": 11,  // Bangladesh
+        "NG": 11,  // Nigeria
+        "DE": 11,  // Germany
+        "FR": 9,   // France
+        "AU": 9    // Australia
+    ]
     
     //MARK: -----------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
@@ -26,34 +43,31 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
     @IBOutlet weak var gloginBtn: UIButton!
     @IBOutlet weak var fbLoginBtn: UIButton!
     @IBOutlet weak var appleLoginBtn: UIButton!
-    
+    @IBOutlet weak var countryCodeBtn: UIButton!
+    @IBOutlet weak var orBtn: UIButton!
+    @IBOutlet weak var viewBackground: UIView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        countryPickerView.delegate = self
+        countryPickerView.dataSource = self
+        
         self.mobileNumTxt.isHidden = false
         self.emailTxtField.isHidden = true
-        
-        self.continueBtn.isUserInteractionEnabled = false
+        updateContinueButton(isEnabled: false)
+        setupContinueButtonIcon(isEnabled: false)
+
+//        self.continueBtn.isUserInteractionEnabled = false
         mobileNumTxt.delegate = self
         setUpFont()
-                
-        //        for family in UIFont.familyNames {
-        //            print("Font family: \(family)")
-        //            for name in UIFont.fontNames(forFamilyName: family) {
-        //                print("Font name: \(name)")
-        //            }
-        //        }
         setupUI()
-        setUpVideo()
-//        loadVideo()
-        
-//        //------------------only for testin for age ui
-//        let currentVC = vcSteps.getCurrentVC(vcRawValue: 3)
-//        if let getVC = currentVC?.instantiate(appStoryboard: .main){
-//            self.navigationController?.pushViewController(getVC, animated: true)
-//        }
-       
+       setUpVideo()
+
+        // Set country to UAE using its country code "AE"
+        if let _ = countryPickerView.getCountryByCode("AE") {
+            countryPickerView.setCountryByCode("AE")
+        }
     }
     
     deinit {
@@ -79,7 +93,7 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
     }
     
     func setNavUI(){
-        self.setLeftMenu(leftImgs: [AppImages.navLeft], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
+        self.setLeftMenu(leftImgs: [AppImages.appLogo], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
         self.setRighMenu(rightImgs: [AppImages.arrow_right], setTitle: [AppStrings.skip_to_home.uppercased()], setTintColor: .black, setTitleColor: UIColor.appWhite,isRightImg: [true])
     }
     
@@ -91,35 +105,39 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
     //------------------************Font
     func setUpFont(){
         self.topTitleLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
-        self.subTitileLbl.font = AppFont.semibold.size(16.0, familyName: familyManrope)
-        self.mobileNumTxt.font = AppFont.semibold.size(20.0, familyName: familyManrope)
-        self.emailTxtField.font = AppFont.semibold.size(20.0, familyName: familyManrope)
-        self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
+        self.subTitileLbl.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
+        self.mobileNumTxt.font = AppFont.medium.size(18.0, familyName: familyFunnelSans)
+        self.emailTxtField.font = AppFont.medium.size(18.0, familyName: familyFunnelSans)
+        self.continueBtn.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
+        self.countryCodeBtn.titleLabel?.font = AppFont.medium.size(18.0, familyName: familyFunnelSans)
+        self.orBtn.titleLabel?.font = AppFont.regular.size(10.0, familyName: familyFunnelSans)
     }
     
     //MARK: ---------- SET UI
-    func setupUI(){
-        self.countryCodeStr = isTesting ? "+91" : "+971" //for country code
+    func setupUI() {
+//        self.countryCodeStr = isTesting ? "+91" : "+971" //for country code
         
         DispatchQueue.main.async {
-            self.mobileNumTxt.setLeftPaddingWithImage(95.0, self.mobileNumTxt.font?.lineHeight.magnitude ?? 1.0, UIImage(named: "ic_countyCode"), self.countryCodeStr ?? "+971")
-            self.mobileNumTxt.placeholderSet(placeHolder: "XXX-XXX-XXX", color: UIColor.txtDarkGray)
+//            self.mobileNumTxt.setLeftPaddingWithImage(95.0, self.mobileNumTxt.font?.lineHeight.magnitude ?? 1.0, UIImage(named: "ic_countyCode"), self.countryCodeStr ?? "+971")
+            self.viewBackground.addGradient(colors: UIColor.appMultiColor(.blackBgGradient), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0)
+//            self..backgroundColor
+            self.mobileNumTxt.placeholderSet(placeHolder: "XXX-XXX-XXXX", color: UIColor.txtDarkGray)
             
             self.emailTxtField.setLeftPaddingWithImage(35, 0, UIImage(named: "ic_email"), "")
             self.emailTxtField.placeholderSet(placeHolder: "Enter you email id", color: UIColor.txtDarkGray)
             
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             
-            [
-                self.gloginBtn,
-                self.fbLoginBtn,
-                self.appleLoginBtn
-            ].forEach({[weak self] in
-                guard self != nil else {
-                    return
-                }
-                $0?.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appBorder, cornerRadious: ($0?.frame.size.height ?? 15)/2.0)
-            })
+//            [
+//                self.gloginBtn,
+//                self.fbLoginBtn,
+//                self.appleLoginBtn
+//            ].forEach({[weak self] in
+//                guard self != nil else {
+//                    return
+//                }
+//                $0?.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.white, cornerRadious: ($0?.frame.size.height ?? 15)/2.0)
+//            })
         }
     }
     
@@ -157,45 +175,6 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
         }
         
     }
-    
-//    private func loadVideo() {
-//        
-//        //this line is important to prevent background music stop
-//        do {
-//            try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.ambient)
-//        } catch { }
-//        
-//        let path = Bundle.main.path(forResource: "landdingVideo", ofType:"mp4")
-//        
-//        player = AVPlayer(url: NSURL(fileURLWithPath: path!) as URL)
-//        let playerLayer = AVPlayerLayer(player: player)
-//        
-//        playerLayer.frame = self.view.frame
-//        playerLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
-//        playerLayer.zPosition = -1
-//        
-//        self.view.layer.addSublayer(playerLayer)
-//        
-//        player?.seek(to: CMTime.zero)
-//        player?.play()
-//        
-//        //-----------------*********
-//        
-//        //        let player = AVPlayer(url: URL(fileURLWithPath: path!) as URL)
-//        //        let playerController = AVPlayerViewController()
-//        //        playerController.modalPresentationStyle = .overFullScreen
-//        //        playerController.player = player
-//        //        playerController.videoGravity = .resizeAspectFill
-//        ////        playerController.showsPlaybackControls = false
-//        //
-//        //        present(playerController, animated: false) {
-//        //            player.play()
-//        //        }
-//        //        self.view.addSubview(playerController.view)
-//        
-//    }
-    
-    
     
     //MARK: ----------CONTINUE BTN ACTN
     @IBAction func continueBtnActn(_ sender: Any) {
@@ -244,18 +223,11 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
                 }
             })
         }
-        
-        
-        /*
-        let vc:OtpViewController = OtpViewController.instantiate(appStoryboard: .main)
-        vc.mobilNumStr = "+971" + " " + (mobileNumTxt.text ?? "XXXXXXXXXX")
-        self.navigationController?.pushViewController(vc, animated: false)
-        */
     }
     
     //MARK: ----------- SOCIAL MEDIA
     enum socialBtnTag:Int {
-        case googleLogin = 101 ,fbLogin,appleLoggin
+        case googleLogin = 101 ,fbLogin,appleLoggin, selectCountryCode
     }
     
     @IBAction func socialLoginBtnActn(_ sender: UIButton){
@@ -267,9 +239,9 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
             GLoginManager.shared.gLogin(viewController: self,completion: { [weak self] userInfo, userProfile in
                 guard self != nil else { return }
                 print("userInfo= ",userInfo as Any,"userProfile= ",userProfile as Any)
-//                appUserDefaults.setUserID(value: userInfo?["uid"] as? String)
-//                appUserDefaults.setUserName(value: (userInfo?["email"] as? String))
-               
+                //                appUserDefaults.setUserID(value: userInfo?["uid"] as? String)
+                //                appUserDefaults.setUserName(value: (userInfo?["email"] as? String))
+                
                 appUserDefaults.setSocialId(value: userInfo?["uid"] as? String)
                 appUserDefaults.setUserName(value: (userInfo?["fullName"] as? String))
                 
@@ -339,7 +311,7 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
                     "device_type": "ios",
                     "device_token": "48r748fjdfbdjdcn"
                 ]
-                                
+                
                 RegistrationVM.socialLoginApi(inputParams: params, completion: {[weak self] getResult in
                     
                     guard let self = self, let getResult = getResult else { return  }
@@ -370,6 +342,11 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
                 })
             }
             
+        case socialBtnTag.selectCountryCode.rawValue:
+            print("Select country code....")
+            // Present the picker
+            countryPickerView.showCountriesList(from: self)
+            
         default:
             print("Default...")
         }
@@ -388,15 +365,19 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
             return false // Disallow non-numeric input
         }
         //restrict the input to 10 digits
-        let countNum:Int = self.countryCodeStr == "+971" ? 11 : 12
+//        let countNum:Int = self.countryCodeStr == "+971" ? 11 : 12
+            
+            let countNum:Int = (mobileMaxLengthByCountryCode[selectedCountry?.code ?? "AE"] ?? 10) + 2
         
             // Check the total length after the proposed change
             if let currentText = textField.text, let stringRange = Range(range, in: currentText) {
                 let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
                 if updatedText.count >= countNum {
-                    self.enableContinueBtn(isSelected: true)
+                    self.updateContinueButton(isEnabled: true)
+//                    self.enableContinueBtn(isSelected: true)
                 }else{
-                    self.enableContinueBtn(isSelected: false)
+                    self.updateContinueButton(isEnabled: false)
+//                    self.enableContinueBtn(isSelected: false)
                 }
                 
                 if let textFieldMobile = self.mobileNumTxt.text, string != "" {
@@ -412,9 +393,11 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
             print(textField.text ?? "")
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 if let validSmail = textField.text?.isValidEmail(), validSmail {
-                    self.enableContinueBtn(isSelected: true)
+                    self.updateContinueButton(isEnabled: true)
+//                    self.enableContinueBtn(isSelected: true)
                 }else{
-                    self.enableContinueBtn(isSelected: false)
+                    self.updateContinueButton(isEnabled: false)
+//                    self.enableContinueBtn(isSelected: false)
                 }
             }
         }
@@ -423,17 +406,52 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
     }
     
     //MARK: -------------- ENABLE CONTINUE
-    func enableContinueBtn(isSelected:Bool = false){
-        if isSelected {
-            self.continueBtn.isUserInteractionEnabled = true
-            self.continueBtn.backgroundColor = UIColor.appWhite
-            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
-        } else {
-            self.continueBtn.isUserInteractionEnabled = false
-            self.continueBtn.backgroundColor = UIColor.appDarkGray
-            self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
+    func updateContinueButton(isEnabled: Bool) {
+        continueBtn.isEnabled = isEnabled
+        continueBtn.isUserInteractionEnabled = isEnabled
+        
+        UIView.animate(withDuration: 0.2) {
+            self.setupContinueButtonIcon(isEnabled: isEnabled)
+            if isEnabled {
+                self.continueBtn.tintColor = .mainBg   // arrow color
+                self.continueBtn.backgroundColor = .appWhite
+                self.continueBtn.setTitleColor(.mainBg, for: .normal)
+            } else {
+                self.continueBtn.tintColor = .appWhite
+                self.continueBtn.backgroundColor = .appDarkGray
+                self.continueBtn.setTitleColor(.appWhite, for: .normal)
+            }
         }
     }
+    
+    func setupContinueButtonIcon(isEnabled: Bool) {
+        let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
+            .withRenderingMode(.alwaysTemplate)
+
+        continueBtn.setImage(arrowImage, for: .normal)
+
+        // Force image on right side
+        continueBtn.semanticContentAttribute = .forceRightToLeft
+
+        // Space between text and image
+        continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -12)
+        continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 12)
+
+        continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+    }
+
+
+//    func enableContinueBtn(isSelected:Bool = false){
+//        if isSelected {
+//            self.continueBtn.isUserInteractionEnabled = true
+//            self.continueBtn.backgroundColor = UIColor.appWhite
+//            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
+//        } else {
+//            self.continueBtn.isUserInteractionEnabled = false
+//            self.continueBtn.backgroundColor = UIColor.appDarkGray
+//            self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
+//        }
+//    }
     
     //MARK: -------------------FACEBOOK LOGIN
     private func fbLogin(){
@@ -545,6 +563,28 @@ extension MainViewController {
             }
             
         })
+    }
+}
+
+extension MainViewController: CountryPickerViewDelegate, CountryPickerViewDataSource{
+    
+//    func preferredCountries(in countryPickerView: CountryPickerView) -> [Country] {
+//        let india = countryPickerView.getCountryByCode("IN")!
+//        let uae = countryPickerView.getCountryByCode("AE")!
+//        return [india, uae]
+//    }
+//    
+//    func showOnlyPreferredCountries(in countryPickerView: CountryPickerView) -> Bool {
+//        return true
+//    }
+    
+    func countryPickerView(_ countryPickerView: CountryPickerView, didSelectCountry country: Country) {
+       //"\(country.flag) \(country.name) \(country.phoneCode)"
+        self.mobileNumTxt.text = nil
+        countryCodeStr = "\(country.phoneCode)"
+        self.selectedCountry = country
+        self.countryCodeBtn.setImage(country.flag.resized(to: CGSize(width: 33, height: 22)), for: .normal)
+        self.countryCodeBtn.setTitle("  \(country.phoneCode)", for: .normal)
     }
 }
 

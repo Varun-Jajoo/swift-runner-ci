@@ -34,6 +34,15 @@ class WorkoutSummaryTableViewCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
+    func setCellData(cellData: SummaryModel?){
+        guard let cellData = cellData else { return }
+        self.workoutNameLbl.text = cellData.exerciseName?.value
+        self.repsLbl.text = (cellData.reps?.value ?? "") + " Reps"
+        self.kcalLbl.text = (cellData.calories?.value ?? "") + " kcal"
+        
+        self.workoutImgView.loadImage(urlString: cellData.image?.value ?? "", placeholder: UIImage(named: "ic_femaleplaceholder"), resize: CGSize(width: (self.frame.width * 0.5), height: self.frame.size.height))
+    }
+    
     func setupUI(){
         DispatchQueue.main.async {
             self.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appBorder, cornerRadious: 24.0)
