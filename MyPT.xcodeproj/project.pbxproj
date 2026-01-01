@@ -487,6 +487,7 @@
 		B8FED8B52E6037F0003CA7DC /* AddRestTimePopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FED8B42E6037F0003CA7DC /* AddRestTimePopupViewController.swift */; };
 		B8FED8B82E605D74003CA7DC /* RestTimePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FED8B72E605D74003CA7DC /* RestTimePickerView.swift */; };
 		B8FFF4202D09CC200097167A /* GymWorkoutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FFF41F2D09CC1F0097167A /* GymWorkoutViewController.swift */; };
+		EEC3D4FD2F070C070045638A /* HorizontalRulerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC3D4FC2F070C070045638A /* HorizontalRulerView.swift */; };
 		EECB61A52F066D7E00B79DD4 /* VerticalRulerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EECB61A42F066D7E00B79DD4 /* VerticalRulerView.swift */; };
 /* End PBXBuildFile section */
 
@@ -959,6 +960,7 @@
 		B8FED8B72E605D74003CA7DC /* RestTimePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestTimePickerView.swift; sourceTree = "<group>"; };
 		B8FFF41F2D09CC1F0097167A /* GymWorkoutViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GymWorkoutViewController.swift; sourceTree = "<group>"; };
 		BF3D5368393FBAC5F3CF9AD2 /* Pods_MyPT.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MyPT.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EEC3D4FC2F070C070045638A /* HorizontalRulerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalRulerView.swift; sourceTree = "<group>"; };
 		EECB61A42F066D7E00B79DD4 /* VerticalRulerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalRulerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1756,19 +1758,11 @@
 			path = TblView;
 			sourceTree = "<group>";
 		};
-		B8ED0EEE2CCB93A7006279B8 /* Tableviewcell */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Tableviewcell;
-			sourceTree = "<group>";
-		};
 		B8ED0EEF2CCB93BC006279B8 /* SignupModule */ = {
 			isa = PBXGroup;
 			children = (
 				B8C791812CDA432400F4E6BD /* RangePicker */,
 				B8ED0EF02CCB9417006279B8 /* collViewCell */,
-				B8ED0EEE2CCB93A7006279B8 /* Tableviewcell */,
 				B8FDEEC62CC8CAD00061639F /* MainViewController.swift */,
 				B8B9A5DB2CCA4C6E00392AD1 /* LanddingViewController.swift */,
 				B8B9A5DF2CCA815700392AD1 /* OtpViewController.swift */,
@@ -2054,6 +2048,7 @@
 				B822BD7A2E05434600213BB2 /* ImageDownloader.swift */,
 				B8AC4A002E06D89A00E66ACA /* SocialShareOpen.swift */,
 				EECB61A42F066D7E00B79DD4 /* VerticalRulerView.swift */,
+				EEC3D4FC2F070C070045638A /* HorizontalRulerView.swift */,
 			);
 			path = ResourceFiles;
 			sourceTree = "<group>";
@@ -2499,6 +2494,7 @@
 				B80A44712CEDF4F300E3A11E /* TrainerListTableViewCell.swift in Sources */,
 				B81996322E6820E80046CB6A /* EditRegularExerciseViewController.swift in Sources */,
 				B8C791852CDA432400F4E6BD /* RangePickerViewDataSource.swift in Sources */,
+				EEC3D4FD2F070C070045638A /* HorizontalRulerView.swift in Sources */,
 				B8FBFE332D26AD4E001041E5 /* CalendarSecondaryViewController.swift in Sources */,
 				B8DFFC882D1C0C5A00EFF09C /* PlanListTableViewCell.swift in Sources */,
 				B83BCC1C2E70380A00166834 /* SupersetExercisesTableViewCell.swift in Sources */,

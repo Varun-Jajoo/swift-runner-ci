@@ -7,34 +7,57 @@
 
 import UIKit
 
-class WeightViewController: CommonViewController {
+class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFieldDelegate {
     
     //MARK: -------------VARIABLE
     var selectedWeight: String?
     var rangeStart = Measurement(value: 1.0, unit: UnitMass.kilograms)
     var rangeLength = Measurement(value: Double(100), unit: UnitMass.kilograms)
-    var segments = Array<RulerSegmentUnit>()
     var colorOverridesEnabled = false
     private var backgroundGradient: CAGradientLayer?
+    private let scrollView = UIScrollView()
+    private let indicatorImageView = UIImageView()
+
+    private let rulerView = HorizontalRulerView()
+    private let valueLabel = ObservableLabel()
+    private let valueTextField = UITextField()
+    let indicator = UIView()
+    private let curvedIndicator = UIView()
+    private let underlineView = UIView()
+    private let moveButton = UIButton(type: .system)
+    var currentIndex = 66
+    var previousText = ""
+    private var isSwitchingUnit = false
+    var isKgSelected = true
+    private var rulerBottomConstraint: NSLayoutConstraint!
     
     //MARK: -------------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
-    @IBOutlet weak var measureTypeSegment: UISegmentedControl!
     @IBOutlet weak var continueBtn: UIButton!
-    @IBOutlet weak var scaleMBV: UIView!
-    @IBOutlet weak var weightRuler: RulerMultiUnitRuler!
     @IBOutlet var viewBackground: UIView!
-    
+    @IBOutlet weak var viewWeightType: UIView!
+    @IBOutlet weak var btnKG: UIButton!
+    @IBOutlet weak var btnLBS: UIButton!
+    @IBOutlet weak var lblNote: UILabel!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setUpFont()
-        setUpSegmet()
-        setupSegmentedControlStyle()
-        self.setupKGRuler()
         setupBackgroundGradient()
         updateContinueButton(isEnabled: true)
         setupContinueButtonIcon(isEnabled: true)
+        setupScrollView()
+        setupIndicator()
+        viewWeightType.layer.cornerRadius = 25
+        btnKG.layer.cornerRadius = 20
+        btnLBS.layer.cornerRadius = 20
+        btnKG.layer.masksToBounds = true
+        btnLBS.layer.masksToBounds = true
+        btnKG.backgroundColor = .white
+        btnKG.setTitleColor(.black, for: .normal)
+        //        setupUI()
+        setupValueTextField()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -47,6 +70,113 @@ class WeightViewController: CommonViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         backgroundGradient?.frame = viewBackground.bounds
+        let contentWidth = rulerView.intrinsicContentSize.width
+        scrollView.contentSize = CGSize(
+            width: contentWidth,
+            height: scrollView.bounds.height
+        )
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        rulerView.scrollToValue(rulerView: rulerView, scrollView: scrollView, currentIndex)
+        self.valueLabel.text = "\(rulerView.selectedValue ?? 0)"
+    }
+    
+    private func setupScrollView() {
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.showsHorizontalScrollIndicator = false
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.alwaysBounceHorizontal = true
+        scrollView.delegate = self
+        scrollView.backgroundColor = .clear
+        scrollView.decelerationRate = .fast
+        
+        indicatorImageView.image = UIImage(named: "verticalSlider")
+        indicatorImageView.contentMode = .scaleAspectFit
+        indicatorImageView.transform = CGAffineTransform(rotationAngle: .pi / 2)
+
+        view.addSubview(scrollView)
+        scrollView.addSubview(rulerView)
+        view.addSubview(indicatorImageView)
+
+        rulerView.translatesAutoresizingMaskIntoConstraints = false
+        indicatorImageView.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            // ScrollView frame
+            scrollView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            scrollView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 68),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.heightAnchor.constraint(equalToConstant: 80),
+
+            // RulerView expands horizontally
+            rulerView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            rulerView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            rulerView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            rulerView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            rulerView.heightAnchor.constraint(equalTo: scrollView.heightAnchor),
+
+            // Indicator
+            indicatorImageView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
+            indicatorImageView.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor, constant: 50),
+            indicatorImageView.widthAnchor.constraint(equalToConstant: 270),
+            indicatorImageView.heightAnchor.constraint(equalToConstant: 400)
+        ])
+    }
+    
+    private func setupIndicator() {
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.backgroundColor = .clear
+        
+        view.addSubview(indicator)
+        
+        NSLayoutConstraint.activate([
+            indicator.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor, constant: 20),
+            indicator.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor, constant: 0),
+            indicator.widthAnchor.constraint(equalToConstant: 2),
+            indicator.heightAnchor.constraint(equalToConstant: 40)
+        ])
+        
+        // Gradient fade layer
+        let gradient = CAGradientLayer()
+        gradient.colors = [
+            UIColor.white.withAlphaComponent(0.6).cgColor,
+            UIColor.white.withAlphaComponent(0.2).cgColor,
+            UIColor.white.withAlphaComponent(0).cgColor
+        ]
+        
+        // Horizontal fade
+        gradient.startPoint = CGPoint(x: 0, y: 0.5)
+        gradient.endPoint   = CGPoint(x: 1, y: 0.5)
+        
+        // Important: frame set after layout
+        DispatchQueue.main.async {
+            gradient.frame = self.indicator.bounds
+        }
+        indicator.layer.addSublayer(gradient)
+        setupValueLabel(indicator: indicator)
+    }
+    
+    
+    private func setupValueLabel(indicator : UIView) {
+        valueLabel.font = .boldSystemFont(ofSize: 22)
+        valueLabel.textAlignment = .center
+        valueLabel.translatesAutoresizingMaskIntoConstraints = false
+        valueLabel.textColor = #colorLiteral(red: 0.8466725945, green: 0.9522742629, blue: 0.276040554, alpha: 1)
+        valueLabel.onTextChange = {
+            text in
+            if let value = text {
+                self.valueTextField.text = value + (self.isKgSelected ? " kg" : " lbs")
+                self.selectedWeight = self.valueTextField.text
+                print(self.valueTextField.text)
+            }
+        }
+        view.addSubview(valueLabel)
+        NSLayoutConstraint.activate([
+            valueLabel.centerYAnchor.constraint(equalTo: indicator.centerYAnchor, constant: -40),
+            valueLabel.centerXAnchor.constraint(equalTo: indicator.centerXAnchor)
+        ])
     }
     
     func setNavUI() {
@@ -54,11 +184,6 @@ class WeightViewController: CommonViewController {
         self.setProgress(0.4)
         self.setLeftMenu(leftImgs: [AppImages.backArrowWithBg], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
         self.setRighMenu(setTitle: [AppStrings.skipStr], setTintColor: .black, setTitleColor: UIColor.txtSkip)
-        
-        //        self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
-        //        self.setProgress(0.4)
-        //        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
-        //        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite) skipe remove need of client
     }
     
     override func rightBtnActn(sender: UIButton) {
@@ -67,161 +192,18 @@ class WeightViewController: CommonViewController {
     }
     
     //MARK: ---------- SET UI
-    func setupUI(){
+    func setupUI() {
         //-----------*************
         DispatchQueue.main.async {
-            self.measureTypeSegment.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 6.0)
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
         }
     }
     
-    //MARK: -----------------MAKE RULER FOR WEIGHT
-    func setupKGRuler(){
-        weightRuler.backgroundColor = UIColor.clear
-        segments = self.createSegments()
-        weightRuler.delegate = self
-        weightRuler.dataSource = self
-        weightRuler.direction = .horizontal
-        let initialValue = (self.rangeForUnit(UnitMass.kilograms).location + self.rangeForUnit(UnitMass.kilograms).length) / 2
-        weightRuler.measurement = NSMeasurement(
-            doubleValue: Double(initialValue),
-            unit: UnitMass.kilograms)
-        
-        self.view.layoutSubviews()
-        self.view.layoutIfNeeded()
-        
-        weightRuler.refresh()
-        if let measurement = weightRuler.measurement {
-            weightRuler.delegate?.valueChanged(measurement: measurement)
-        }
-    }
-    
-    func setupLbsRuler(){
-        weightRuler.backgroundColor = UIColor.clear
-        segments = self.createSegmentsLbs()
-        weightRuler.delegate = self
-        weightRuler.dataSource = self
-        weightRuler.direction = .horizontal
-        let initialValue = (self.rangeForUnit(UnitMass.pounds).location + self.rangeForUnit(UnitMass.pounds).length) / 2
-        weightRuler.measurement = NSMeasurement(
-            doubleValue: Double(initialValue),
-            unit: UnitMass.pounds)
-        self.view.layoutIfNeeded()
-        self.view.layoutSubviews()
-        weightRuler.refresh()
-        if let measurement = weightRuler.measurement {
-            weightRuler.delegate?.valueChanged(measurement: measurement)
-        }
-    }
-    
-    
-    private func createSegments() -> Array<RulerSegmentUnit> {
-        
-        let formatter = MeasurementFormatter()
-        formatter.unitStyle = .medium
-        formatter.unitOptions = .providedUnit
-        let kgSegment = RulerSegmentUnit(name: "kg", unit: UnitMass.kilograms, formatter: formatter)
-        
-        kgSegment.name = "Kilogram"
-        kgSegment.unit = UnitMass.kilograms
-        
-        let kgMarkerTypeMax = RulerRangeMarkerType(color: UIColor.gray, size: CGSize(width: 1.0, height: 55.0), scale: 1.0)
-        kgMarkerTypeMax.labelVisible = true
-        //35 -> 25
-        kgSegment.markerTypes = [
-            RulerRangeMarkerType(color: UIColor(red: 57.0/255.0, green: 60.0/255.0, blue: 67.0/255.0, alpha: 1.0), size: CGSize(width: 1.0, height: 25.0), scale: 0.1),
-            RulerRangeMarkerType(color: UIColor(red: 80.0/255.0, green: 83.0/255.0, blue: 91.0/255.0, alpha: 1.0), size: CGSize(width: 1.0, height: 55.0), scale: 1.0)
-        ]
-        
-        kgSegment.markerTypes.last?.labelVisible = true
-        return [kgSegment]
-    }
-    
-    private func createSegmentsLbs() -> Array<RulerSegmentUnit> {
-        
-        let formatter = MeasurementFormatter()
-        formatter.unitStyle = .medium
-        formatter.unitOptions = .providedUnit
-        let lbsSegment = RulerSegmentUnit(name: "Lbs", unit: UnitVolume.milliliters, formatter: formatter)
-        
-        lbsSegment.name = "Pounds"
-        lbsSegment.unit = UnitMass.pounds
-        
-        let lbsMarkerTypeMax = RulerRangeMarkerType(color: UIColor.white, size: CGSize(width: 1.0, height: 50.0), scale: 10.0)
-        
-        lbsSegment.markerTypes = [
-            RulerRangeMarkerType(color: UIColor(red: 57.0/255.0, green: 60.0/255.0, blue: 67.0/255.0, alpha: 1.0), size: CGSize(width: 1.0, height: 25.0), scale: 0.1),
-            RulerRangeMarkerType(color: UIColor(red: 80.0/255.0, green: 83.0/255.0, blue: 91.0/255.0, alpha: 1.0), size: CGSize(width: 1.0, height: 50.0), scale: 1.0)
-        ]
-        
-        lbsMarkerTypeMax.labelVisible = true
-        lbsSegment.markerTypes.last?.labelVisible = true
-        
-        return [lbsSegment]
-    }
-    
-    //---------------*****-----------------MAKE RULER FOR WEIGHT END PONIT
-    func setUpSegmet() {
-        measureTypeSegment.setTitle("kg", forSegmentAt: 0)
-        measureTypeSegment.setTitle("lbs", forSegmentAt: 1)
-        setUISegmentControlAppearance()
-    }
-    
-    func setUISegmentControlAppearance() {
-        UISegmentedControl.appearance()
-            .setTitleTextAttributes(
-                [.foregroundColor: UIColor.txtDarkGray,
-                 .font: AppFont.semibold.size(14.0, familyName: familyFunnelSans)
-                ], for: .normal)
-        UISegmentedControl.appearance()
-            .setTitleTextAttributes(
-                [.foregroundColor: UIColor.appWhite,
-                    .font:AppFont.semibold.size(14.0, familyName: familyFunnelSans)
-                ], for: .selected)
-    }
-    
     //------------------************Font
-    func setUpFont(){
+    func setUpFont() {
+        self.lblNote.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
         self.topTitleLbl.font = AppFont.medium.size(28.0, familyName: familyClashDisplay)
-        self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
-    }
-    
-    
-    //MARK: ------------setup segmantstyle
-//    func setupSegmentedControlStyle(){
-//        let unselectedBackgroundImage = UIImage(color: UIColor(red: 16/255.0, green: 17/255.0, blue: 19/255.0, alpha: 1))
-//        let selectedBacgroundImage = UIImage(color:UIColor.appYellow)
-//        
-//        measureTypeSegment.setBackgroundImage(unselectedBackgroundImage, for: .normal, barMetrics: .default)
-//        measureTypeSegment.setBackgroundImage(unselectedBackgroundImage, for: .highlighted, barMetrics: .default)
-//        measureTypeSegment.setBackgroundImage(selectedBacgroundImage, for: .selected, barMetrics: .default)
-//        
-//        measureTypeSegment.setDividerImage(selectedBacgroundImage, forLeftSegmentState: .normal, rightSegmentState: .normal, barMetrics: .default)
-//        
-//        measureTypeSegment.layer.borderWidth = 0
-//        measureTypeSegment.layer.borderColor = UIColor.clear.cgColor
-//    }
-    
-    func setupSegmentedControlStyle() {
-
-        let unselectedBackgroundImage = UIImage(color: UIColor(red: 16/255, green: 17/255, blue: 19/255, alpha: 1))?
-            .resizableImage(withCapInsets: UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10))
-
-        let selectedBackgroundImage = UIImage(color: .appWhite)?
-            .resizableImage(withCapInsets: UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10))
-
-        measureTypeSegment.setBackgroundImage(unselectedBackgroundImage, for: .normal, barMetrics: .default)
-        measureTypeSegment.setBackgroundImage(selectedBackgroundImage, for: .selected, barMetrics: .default)
-        measureTypeSegment.setBackgroundImage(unselectedBackgroundImage, for: .highlighted, barMetrics: .default)
-
-        let clearDivider = UIImage(color: .clear)
-        measureTypeSegment.setDividerImage(clearDivider,
-                                           forLeftSegmentState: .normal,
-                                           rightSegmentState: .normal,
-                                           barMetrics: .default)
-
-        measureTypeSegment.layer.borderWidth = 0
-        measureTypeSegment.layer.borderColor = UIColor.clear.cgColor
+        self.continueBtn.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
     }
 
     private func setupBackgroundGradient() {
@@ -276,22 +258,136 @@ class WeightViewController: CommonViewController {
         continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
     }
     
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if isSwitchingUnit { return }
+
+        let centerX = scrollView.contentOffset.x + scrollView.bounds.width / 2
+
+        let rawValue =
+            (centerX - rulerView.edgePaddingUnits.cgFloat * rulerView.lineSpacing)
+            / rulerView.lineSpacing
+
+        let value = Int(round(rawValue))
+
+        let clampedValue = max(
+            rulerView.minValue,
+            min(value, rulerView.maxValue)
+        )
+
+        rulerView.indicatorX = centerX
+        rulerView.selectedValue = clampedValue
+        valueLabel.text = "\(clampedValue)"
+        currentIndex = clampedValue
+    }
+
     
-    @IBAction func measureTypeSegmentActn(_ sender: UISegmentedControl) {
-        print(sender.selectedSegmentIndex)
+    func scrollViewWillEndDragging(
+        _ scrollView: UIScrollView,
+        withVelocity velocity: CGPoint,
+        targetContentOffset: UnsafeMutablePointer<CGPoint>
+    ) {
+        let spacing = rulerView.lineSpacing
+
+        let targetX = round(targetContentOffset.pointee.x / spacing) * spacing
+        targetContentOffset.pointee.x = targetX
+
+        let centerX =
+            targetX
+            + scrollView.bounds.width / 2
+
+        rulerView.indicatorX = centerX
+    }
+
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let currentText = textField.text ?? ""
+               let nsText = currentText as NSString
+               let updatedText = nsText.replacingCharacters(in: range, with: string)
+
+               // Allow delete
+               if updatedText.isEmpty {
+                   return true
+               }
+
+               // Allow only digits
+               if !CharacterSet.decimalDigits.isSuperset(of: CharacterSet(charactersIn: updatedText)) {
+                   return false
+               }
+
+               // Convert to number
+               guard let value = Int(updatedText) else {
+                   return false
+               }
+
+               // Range check: 0–300
+        return value >= 0 && value <= (isKgSelected ? 600 : 1500)
+    }
+    
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        updateSelectedValueFromScroll(scrollView)
+    }
+    
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate {
+            updateSelectedValueFromScroll(scrollView)
+        }
+    }
+    
+    private func updateSelectedValueFromScroll(_ scrollView: UIScrollView) {
+        let centerX =
+            scrollView.contentOffset.x
+            + scrollView.bounds.width / 2
+
+        let rawValue =
+            (centerX - rulerView.edgePaddingUnits.cgFloat * rulerView.lineSpacing)
+            / rulerView.lineSpacing
+
+        let value = Int(round(rawValue))
+
+        let clampedValue = max(
+            rulerView.minValue,
+            min(value, rulerView.maxValue)
+        )
+
+        rulerView.selectedValue = clampedValue
+        rulerView.indicatorX = centerX
+    }
+    
+    @IBAction func heightType(_ sender: UIButton) {
+//        isSwitchingUnit = true
+//        
+//        isKgSelected = sender.tag == 0
+//        
+//        btnKG.backgroundColor = isKgSelected ? .white : .clear
+//        btnKG.setTitleColor(isKgSelected ? .black : .white, for: .normal)
+//        
+//        btnLBS.backgroundColor = isKgSelected ? .clear : .white
+//        btnLBS.setTitleColor(isKgSelected ? .white : .black, for: .normal)
+//        
+//        rulerView.isKgSelected = isKgSelected
+//        
+//        // 🔥 Force contentSize update
+//        let contentWidth = rulerView.intrinsicContentSize.width
+//        scrollView.contentSize.width = contentWidth
+//        
+//        // 🔥 Re-center ruler on same value
+//        rulerView.scrollToValue(
+//            rulerView: rulerView,
+//            scrollView: scrollView,
+//            currentIndex,
+//            animated: false
+//        )
         
-        if sender.selectedSegmentIndex == 0 {
-            rangeStart = Measurement(value: 1.0, unit: UnitMass.kilograms)
-            rangeLength = Measurement(value: Double(100), unit: UnitMass.kilograms)
-            self.setupKGRuler()
-            //            weightRuler.refresh()
-            
-        }else{
-            rangeStart = Measurement(value: 1.0, unit: UnitMass.pounds)
-            rangeLength = Measurement(value: Double(100), unit: UnitMass.pounds)
-            
-            self.setupLbsRuler()
-            //            weightRuler.refresh()
+        isKgSelected = sender.tag == 0
+        btnKG.backgroundColor = sender.tag == 0 ? .white : .clear
+        btnKG.setTitleColor(sender.tag == 0 ? .black : .white, for: .normal)
+        btnLBS.backgroundColor = sender.tag == 0 ? .clear : .white
+        btnLBS.setTitleColor(sender.tag == 0 ? .white : .black, for: .normal)
+        rulerView.isKgSelected = isKgSelected
+        self.valueTextField.text = "\(String(describing: self.valueLabel.text ?? ""))" + (isKgSelected ? " Kg" : " lbs")
+        
+        DispatchQueue.main.async {
+            self.isSwitchingUnit = false
         }
     }
     
@@ -309,72 +405,105 @@ class WeightViewController: CommonViewController {
                     self.navigationController?.pushViewController(vc, animated: true)
                 }
             })
-        }else{
+        } else {
             AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.select_Weight)
+        }
+    }
+    
+    private func setupValueTextField() {
+        valueTextField.text = ""
+        valueTextField.textColor = .white
+        valueTextField.font = AppFont.semibold.size(40.0, familyName: familyClashDisplay)
+        valueTextField.textAlignment = .center
+        valueTextField.keyboardType = .numberPad
+        valueTextField.backgroundColor = .clear
+        valueTextField.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(valueTextField)
+        
+        valueTextField.delegate = self
+        valueTextField.isUserInteractionEnabled = false
+
+        underlineView.backgroundColor = .lightGray.withAlphaComponent(0.1)
+        underlineView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(underlineView)
+        
+        // Button
+        moveButton.setImage(UIImage(systemName: "pencil.line"), for: .normal)
+        moveButton.tintColor = .white.withAlphaComponent(0.5)
+        moveButton.addTarget(self, action: #selector(moveLabelToCenter), for: .touchUpInside)
+        moveButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(moveButton)
+        
+        NSLayoutConstraint.activate([
+
+            valueTextField.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor, constant: -100),
+            valueTextField.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
+            
+            valueTextField.heightAnchor.constraint(equalToConstant: 32),
+            underlineView.topAnchor.constraint(equalTo: valueTextField.bottomAnchor, constant: 6),
+            underlineView.leadingAnchor.constraint(equalTo: valueTextField.leadingAnchor),
+            underlineView.trailingAnchor.constraint(equalTo: valueTextField.trailingAnchor),
+            underlineView.heightAnchor.constraint(equalToConstant: 2),
+            
+            moveButton.leadingAnchor.constraint(equalTo: valueTextField.trailingAnchor, constant: 8),
+            moveButton.centerYAnchor.constraint(equalTo: valueTextField.centerYAnchor)
+        ])
+    }
+    // MARK: Button Tap Function
+    @objc private func moveLabelToCenter() {
+        valueTextField.isUserInteractionEnabled = true
+        setScreenUI(showSlider: false)
+        valueTextField.becomeFirstResponder()
+        UIView.animate(withDuration: 0.35, delay: 0, options: [.curveEaseInOut]) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    private func setScreenUI(showSlider : Bool) {
+        scrollView.isHidden = !showSlider
+        valueLabel.isHidden = !showSlider
+        indicatorImageView.isHidden = !showSlider
+        indicator.isHidden = !showSlider
+        moveButton.isHidden = !showSlider
+        underlineView.isHidden = !showSlider
+        btnKG.isUserInteractionEnabled = showSlider
+        btnLBS.isUserInteractionEnabled = showSlider
+        if showSlider == false {
+            previousText = trimCharacters(from: valueTextField.text ?? "")
+            valueTextField.text = trimCharacters(from: valueTextField.text ?? "")
+        }
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        if previousText == textField.text {
+            valueTextField.text = previousText + (isKgSelected ? "kg" : "lbs")
+            valueTextField.isUserInteractionEnabled = false
+            setScreenUI(showSlider: true)
+        } else {
+            var scrolled = Int(valueTextField.text ?? "") ?? 0
+            rulerView.scrollToValue(rulerView: rulerView, scrollView: scrollView, scrolled)
+            valueTextField.isUserInteractionEnabled = false
+            setScreenUI(showSlider: true)
+        }
+    }
+    
+    func trimCharacters(from text: String) -> String {
+        guard text.count > 2 else { return "" }
+        return String(text.dropLast(isKgSelected ? 2 : 3))
+    }
+}
+
+final class ObservableLabel: UILabel {
+    var onTextChange: ((String?) -> Void)?
+    
+    override var text: String? {
+        didSet {
+            onTextChange?(text)
         }
     }
 }
 
-//MARK: --------------------- RULER DELEGATE
-extension WeightViewController: RulerMultiUnitRulerDelegate, RulerMultiUnitRulerDataSource{
-    func valueChanged(measurement: NSMeasurement) {
-        print("value changed to \(measurement.doubleValue)")
-        self.selectedWeight = nil
-        if let selectedTitle = measureTypeSegment.titleForSegment(at: measureTypeSegment.selectedSegmentIndex) {
-            print("Selected segment title: \(selectedTitle)")
-            let msValue = String(format: "%.2f", measurement.doubleValue)
-            self.selectedWeight = msValue + selectedTitle
-        }
-    }
-    
-    func unitForSegmentAtIndex(index: Int) -> RulerSegmentUnit {
-        //
-        return segments[index]
-    }
-    
-    func rangeForUnit(_ unit: Dimension) -> RulerRange<Float> {
-        
-        if let massUnit = unit as? UnitMass {
-            let locationConverted = rangeStart.converted(to: massUnit)
-            let lengthConverted = rangeLength.converted(to: massUnit)
-            
-            return RulerRange<Float>(location: ceilf(Float(locationConverted.value)),
-                                     length: ceilf(Float(lengthConverted.value)))
-        }
-        else {
-            fatalError("Unsupported unit type: \(unit)")
-        }
-    }
-    
-    var numberOfSegments: Int {
-        get {
-            return segments.count
-        }
-        set {
-            //
-        }
-    }
-    
-    func styleForUnit(_ unit: Dimension) -> RulerSegmentUnitControlStyle {
-        let style: RulerSegmentUnitControlStyle = RulerSegmentUnitControlStyle()
-        style.scrollViewBackgroundColor = UIColor.clear //It is used for background of scroll scale UIColor(red: 0.22, green: 0.74, blue: 0.86, alpha: 1.0)
-        style.TopTextFieldFont = AppFont.bold.size(40, familyName: familyManrope)
-        let range = self.rangeForUnit(unit)
-        if unit == UnitMass.pounds {
-            
-            style.textFieldBackgroundColor = UIColor.red
-            //              color override location:location+40% red , location+60%:location.100% green
-        } else {
-            style.textFieldBackgroundColor = UIColor.black
-        }
-        
-        if (colorOverridesEnabled) {
-            style.colorOverrides = [
-                RulerRange<Float>(location: range.location, length: 0.1 * (range.length)): UIColor.red,
-                RulerRange<Float>(location: range.location + 0.4 * (range.length), length: 0.2 * (range.length)): UIColor.green]
-        }
-        style.textFieldBackgroundColor = UIColor.clear
-        style.textFieldTextColor = UIColor.white
-        return style
-    }
+extension Int {
+    var cgFloat: CGFloat { CGFloat(self) }
 }

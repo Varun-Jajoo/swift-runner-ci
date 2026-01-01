@@ -15,19 +15,20 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     var titleFeetLbl = UILabel()
     private var backgroundGradient: CAGradientLayer?
     private let imgSlider = UIImageView()
-    
-    
     private let scrollView = UIScrollView()
     private let rulerView = VerticalRulerView()
-    private let valueLabel = UILabel()
+    private let valueLabel = ObservableLabel()
+//    private let valueLabel = UILabel()
     private let valueTextField = UITextField()
     let indicator = UIView()
     private let curvedIndicator = UIView()
     private let underlineView = UIView()
     private let moveButton = UIButton(type: .system)
     var currentIndex = 55
+    var previousText = ""
     private var textFieldLeadingConstraint: NSLayoutConstraint!
     private var textFieldCenterConstraint: NSLayoutConstraint!
+    var isFeetSelected = true
     
     //MARK: -------------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
@@ -46,7 +47,6 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         setupBackgroundGradient()
         updateContinueButton(isEnabled: true)
         setupContinueButtonIcon(isEnabled: true)
-        
         setupScrollView()
         setupIndicator()
         rulerView.heightUnit = .feet
@@ -81,7 +81,6 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     override func viewDidAppear(_ animated: Bool) {
         self.rulerView.scrollToValue(rulerView: rulerView, scrollView: scrollView, currentIndex)
         self.valueLabel.text = rulerView.displayText(for: rulerView.selectedValue ?? currentIndex)
-        self.valueTextField.text = rulerView.displayText(for: rulerView.selectedValue ?? currentIndex)
     }
     
     override func viewDidLayoutSubviews() {
@@ -94,9 +93,6 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         self.setProgress(0.5)
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
         self.setRighMenu(setTitle: [AppStrings.skipStr], setTintColor: .black, setTitleColor: UIColor.txtSkip)
-//        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite) skipe remove need of client
-        
-        //        self.setNavigationTitle(title: AppStrings.select_plan, color: UIColor.black, font: AppFont.Bold.size(22.0))
     }
     
     //------------------************Font
@@ -175,182 +171,6 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
     }
     
-    
-    //MARK: -----------------MAKE RULER FOR WEIGHT
-    
-//    func setupFeetRuler(){
-//        heightPicker.removeFromSuperview()
-//        titleFeetLbl.removeFromSuperview()
-//        titleFeetLbl  = UILabel()
-//        titleFeetLbl.text = nil
-//        heightPicker = HeightPickerControl()
-//        heightPicker.translatesAutoresizingMaskIntoConstraints = false
-//        heightPicker.unit = .feetInches
-//        heightPicker.maxFeet = 300
-//        heightPicker.addTarget(self, action: #selector(heightChanged(_:)), for: .valueChanged)
-//        heightPicker.backgroundColor = UIColor.clear
-//        heightPicker.rulerViewBgColor = UIColor.clear
-//        scaleMBV.addSubview(heightPicker)
-//        titleFeetLbl.backgroundColor = UIColor.clear
-//        titleFeetLbl.textColor = UIColor.appWhite
-//        titleFeetLbl.textAlignment = .right
-//        scaleMBV.addSubview(titleFeetLbl)
-//        titleFeetLbl.translatesAutoresizingMaskIntoConstraints = false
-//        NSLayoutConstraint.activate([
-//            heightPicker.trailingAnchor.constraint(equalTo: scaleMBV.trailingAnchor, constant: 10),
-//            heightPicker.centerYAnchor.constraint(equalTo: scaleMBV.centerYAnchor),
-//            heightPicker.widthAnchor.constraint(equalToConstant: 250),
-//            heightPicker.heightAnchor.constraint(equalTo: scaleMBV.heightAnchor, multiplier: 0.96),
-//            titleFeetLbl.leadingAnchor.constraint(equalTo: heightPicker.leadingAnchor, constant: -170),
-//            titleFeetLbl.centerYAnchor.constraint(equalTo: scaleMBV.centerYAnchor),
-//            titleFeetLbl.widthAnchor.constraint(equalTo: heightPicker.widthAnchor, multiplier: 1.0),
-//            titleFeetLbl.heightAnchor.constraint(equalTo: heightPicker.heightAnchor, multiplier: 0.8)
-//        ])
-//        
-//        self.scrollScale(inputView: heightPicker)
-//    }
-    
-    //MARK: -----------------MAKE RULER FOR WEIGHT
-//    func setupCMSRuler(){
-//        heightPicker.removeFromSuperview()
-//        titleFeetLbl.removeFromSuperview()
-//        titleFeetLbl  = UILabel()
-//        titleFeetLbl.text = nil
-//        heightPicker = HeightPickerControl()
-//        heightPicker.translatesAutoresizingMaskIntoConstraints = false
-//        heightPicker.unit = .centimeters
-//        heightPicker.maxCM = 650.0
-//        heightPicker.addTarget(self, action: #selector(heightChanged(_:)), for: .valueChanged)
-//        heightPicker.backgroundColor = UIColor.clear
-//        heightPicker.rulerViewBgColor = UIColor.clear
-//        scaleMBV.addSubview(heightPicker)
-//        titleFeetLbl.backgroundColor = UIColor.clear
-//        titleFeetLbl.textColor = UIColor.appWhite
-//        titleFeetLbl.textAlignment = .right
-//        scaleMBV.addSubview(titleFeetLbl)
-//        titleFeetLbl.translatesAutoresizingMaskIntoConstraints = false
-//        NSLayoutConstraint.activate([
-//            heightPicker.trailingAnchor.constraint(equalTo: scaleMBV.trailingAnchor, constant: 10),
-//            heightPicker.centerYAnchor.constraint(equalTo: scaleMBV.centerYAnchor),
-//            heightPicker.widthAnchor.constraint(equalToConstant: 250),
-//            heightPicker.heightAnchor.constraint(equalTo: scaleMBV.heightAnchor, multiplier: 0.96),
-//            titleFeetLbl.leadingAnchor.constraint(equalTo: heightPicker.leadingAnchor, constant: -170),
-//            titleFeetLbl.centerYAnchor.constraint(equalTo: scaleMBV.centerYAnchor),
-//            titleFeetLbl.widthAnchor.constraint(equalTo: heightPicker.widthAnchor, multiplier: 1.0),
-//            titleFeetLbl.heightAnchor.constraint(equalTo: heightPicker.heightAnchor, multiplier: 0.8)
-//        ])
-//        
-//        self.scrollScale(inputView: heightPicker)
-//    }
-    
-//    func scrollScale(inputView: UIView){
-//        
-//        if let scrollView = inputView.subviews.first(where: { $0 is UIScrollView }) as? UIScrollView {
-//            print("Found scroll view: \(scrollView)")
-//            scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: false)
-//        }
-//        
-////        if let scrollView = inputView.subviews.first(where: { $0 is UIScrollView }) as? UIScrollView {
-////            print("Found scroll view: \(scrollView)")
-////            scrollView.setContentOffset(CGPoint(x: 0, y: 10), animated: true)
-////        }
-//    }
-    
-    //MARK: ----------------GETTING VALUE FROM SCALE
-//    @objc func heightChanged(_ sender: HeightPickerControl) {
-//        print("Selected: \(sender.selectedFeet)ft \(sender.selectedInches)in")
-//        
-//        let feetAttributes = [
-//            .font: AppFont.bold.size(50.0, familyName: familyManrope),
-//            .foregroundColor: UIColor.appWhite
-//        ] as [NSAttributedString.Key : Any]
-//        
-//        let ftAttributes = [
-//            .font: AppFont.medium.size(25.0, familyName: familyManrope),
-//            .foregroundColor: UIColor.txtDarkGray
-//        ] as [NSAttributedString.Key : Any]
-//        
-//        //----------------Getting unit
-//        switch sender.unit {
-//         case .feetInches:
-//             print("Selected: \(sender.selectedFeet) ft \(sender.selectedInches) in")
-//            
-//            self.selectedHeight = nil
-//            self.selectedHeight = "\(sender.selectedFeet)ft\(sender.selectedInches)"
-//                        
-//            var attributedParts: [AttributedStringComponent] = [
-//                NSAttributedString(string: "\(sender.selectedFeet)", attributes: feetAttributes),
-//                NSAttributedString(string: "ft", attributes: ftAttributes)
-//            ]
-//        
-//            if sender.selectedInches > 0 {
-//                attributedParts.append(NSAttributedString(string: "\(sender.selectedInches)", attributes: feetAttributes))
-//                attributedParts.append(NSAttributedString(string: "in", attributes: ftAttributes))
-//            }
-//
-//            self.titleFeetLbl.attributedText = NSAttributedString(from: attributedParts, defaultAttributes: feetAttributes)
-//            
-//         case .centimeters:
-//             print("Selected: \(sender.selectedCM) cm")
-//            
-//            self.selectedHeight = nil
-//            self.selectedHeight = "\(sender.selectedCM)cm"
-//            
-//            let attributedParts: [AttributedStringComponent] = [
-//                NSAttributedString(string: formatNumber(sender.selectedCM), attributes: feetAttributes),
-//                NSAttributedString(string: "cm", attributes: ftAttributes)
-//            ]
-//                        
-//            self.titleFeetLbl.attributedText = NSAttributedString(from: attributedParts, defaultAttributes: feetAttributes)
-//         }
-//    }
-    
-//    private func formatNumber(_ number: Double) -> String {
-//        if number.truncatingRemainder(dividingBy: 1) == 0 {
-//            return String(Int(number)) // Remove decimal
-//        } else {
-//            return String(number) // Keep decimal
-//        }
-//    }
-//    
-//    func setUpSegmet(){
-//        heightMeasureType.setTitle("feet", forSegmentAt: 0)
-//        heightMeasureType.setTitle("cms", forSegmentAt: 1)
-//        setUISegmentControlAppearance()
-//    }
-    
-//    func setUISegmentControlAppearance() {
-////        UISegmentedControl.appearance().selectedSegmentTintColor = .white
-////        UISegmentedControl.appearance().backgroundColor = UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.1)
-//        UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.txtDarkGray, .font:AppFont.semibold.size(14.0, familyName: familyManrope)], for: .normal)
-//        UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.appWhite, .font:AppFont.semibold.size(14.0, familyName: familyManrope)], for: .selected)
-//    }
-    
-    //MARK: ------------setup segmantstyle
-//    func setupSegmentedControlStyle(){
-//        let unselectedBackgroundImage = UIImage(color: UIColor(red: 16/255.0, green: 17/255.0, blue: 19/255.0, alpha: 1))
-//        let selectedBacgroundImage = UIImage(color:UIColor.appYellow)
-//
-//        heightMeasureType.setBackgroundImage(unselectedBackgroundImage, for: .normal, barMetrics: .default)
-//        heightMeasureType.setBackgroundImage(unselectedBackgroundImage, for: .highlighted, barMetrics: .default)
-//        heightMeasureType.setBackgroundImage(selectedBacgroundImage, for: .selected, barMetrics: .default)
-//
-//        heightMeasureType.setDividerImage(selectedBacgroundImage, forLeftSegmentState: .normal, rightSegmentState: .normal, barMetrics: .default)
-//
-//        heightMeasureType.layer.borderWidth = 0
-//        heightMeasureType.layer.borderColor = UIColor.clear.cgColor
-//    }
-    
-//    @IBAction func heightMeasureTypeActn(_ sender: UISegmentedControl) {
-//        print(sender.selectedSegmentIndex )
-//        
-//        if sender.selectedSegmentIndex == 0 {
-//            self.setupFeetRuler()
-//        }else{
-//            self.setupCMSRuler()
-//        }
-//    }
-    
     private func setupScrollView() {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.showsVerticalScrollIndicator = false
@@ -367,7 +187,6 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         rulerView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -70),
             scrollView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 68),
             scrollView.widthAnchor.constraint(equalToConstant: 80),
@@ -426,6 +245,12 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         valueLabel.textAlignment = .center
         valueLabel.translatesAutoresizingMaskIntoConstraints = false
         valueLabel.textColor = #colorLiteral(red: 0.8466725945, green: 0.9522742629, blue: 0.276040554, alpha: 1)
+        valueLabel.onTextChange = {
+            text in
+            if let value = text {
+                self.valueTextField.text = "\(String(describing: value))"
+            }
+        }
         view.addSubview(valueLabel)
         NSLayoutConstraint.activate([
             valueLabel.centerYAnchor.constraint(equalTo: indicator.centerYAnchor),
@@ -439,7 +264,7 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         valueLabel.text = "\(rulerView.displayText(for: value))"
         self.selectedHeight = valueLabel.text
         print(valueLabel.text)
-        valueTextField.text = "\(rulerView.displayText(for: value))"
+//        valueTextField.text = "\(rulerView.displayText(for: value))"
         currentIndex = value
         let centerY = scrollView.contentOffset.y + scrollView.bounds.height / 2
         rulerView.indicatorY = centerY
@@ -487,24 +312,45 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     }
     
     @IBAction func heightType(_ sender: UIButton) {
+        isFeetSelected = sender.tag == 0
         btnFeet.backgroundColor = sender.tag == 0 ? .white : .clear
         btnFeet.setTitleColor(sender.tag == 0 ? .black : .white, for: .normal)
         btnCms.backgroundColor = sender.tag == 0 ? .clear : .white
         btnCms.setTitleColor(sender.tag == 0 ? .white : .black, for: .normal)
         rulerView.heightUnit = sender.tag == 0 ? .feet : .centimeters
-        valueLabel.text = "\(rulerView.displayText(for: currentIndex))"
-        valueTextField.text = "\(rulerView.displayText(for: currentIndex))"
+        valueTextField.keyboardType = sender.tag == 0 ? .decimalPad : .numberPad
+        if valueTextField.isUserInteractionEnabled == true {
+            if sender.tag == 0 {
+                previousText = "\(String(describing: feetInchToDecimal(valueLabel.text ?? "")))"
+                valueTextField.text = "\(String(describing: feetInchToDecimal(valueLabel.text ?? "")))"
+            } else {
+                previousText = ""
+                valueLabel.text = "\(trimLastTwoCharacters(from: rulerView.displayText(for: currentIndex)))"
+                valueTextField.becomeFirstResponder()
+            }
+        } else {
+            valueLabel.text = "\(rulerView.displayText(for: currentIndex))"
+        }
+//        btnFeet.backgroundColor = sender.tag == 0 ? .white : .clear
+//        btnFeet.setTitleColor(sender.tag == 0 ? .black : .white, for: .normal)
+//        btnCms.backgroundColor = sender.tag == 0 ? .clear : .white
+//        btnCms.setTitleColor(sender.tag == 0 ? .white : .black, for: .normal)
+//        rulerView.heightUnit = sender.tag == 0 ? .feet : .centimeters
+//        valueLabel.text = "\(rulerView.displayText(for: currentIndex))"
+//        valueTextField.text = "\(rulerView.displayText(for: currentIndex))"
     }
     
     private func setupValueTextField() {
         valueTextField.text = ""
         valueTextField.textColor = .white
-        valueTextField.font = AppFont.semibold.size(40.0, familyName: familyClashDisplay)
+        valueTextField.font =  AppFont.semibold.size(40.0, familyName: familyClashDisplay)
         valueTextField.textAlignment = .center
         valueTextField.keyboardType = .decimalPad
         valueTextField.backgroundColor = .clear
         valueTextField.translatesAutoresizingMaskIntoConstraints = false
+        
         view.addSubview(valueTextField)
+        
         valueTextField.delegate = self
         valueTextField.isUserInteractionEnabled = false
         
@@ -530,7 +376,6 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
             valueTextField.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor, constant: 12),
             // IMPORTANT: NO fixed width
             valueTextField.heightAnchor.constraint(equalToConstant: 32),
-            // Underline → TEXT WIDTH ONLY
             underlineView.topAnchor.constraint(equalTo: valueTextField.bottomAnchor, constant: 6),
             underlineView.leadingAnchor.constraint(equalTo: valueTextField.leadingAnchor),
             underlineView.trailingAnchor.constraint(equalTo: valueTextField.trailingAnchor),
@@ -540,7 +385,7 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
             moveButton.centerYAnchor.constraint(equalTo: valueTextField.centerYAnchor)
         ])
     }
-    
+    // MARK: Button Tap Function
     @objc private func moveLabelToCenter() {
         valueTextField.isUserInteractionEnabled = true
         textFieldLeadingConstraint.isActive = false
@@ -559,25 +404,91 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         indicator.isHidden = !showSlider
         moveButton.isHidden = !showSlider
         underlineView.isHidden = !showSlider
+        btnFeet.isUserInteractionEnabled = showSlider
+        btnCms.isUserInteractionEnabled = showSlider
         if showSlider == false {
-            valueTextField.text = "\(String(describing: feetInchToDecimal(valueLabel.text ?? "")))"
+            if isFeetSelected {
+                previousText = "\(String(describing: feetInchToDecimal(valueLabel.text ?? "")))"
+                valueTextField.text = "\(String(describing: feetInchToDecimal(valueLabel.text ?? "")))"
+            } else {
+                previousText = ""
+                valueTextField.text = trimLastTwoCharacters(from: valueTextField.text ?? "")
+                valueTextField.isUserInteractionEnabled = true
+            }
         }
     }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        if isFeetSelected {
+            let currentText = textField.text ?? ""
+            let nsText = currentText as NSString
+            let updatedText = nsText.replacingCharacters(in: range, with: string)
+            if updatedText.isEmpty {
+                return true
+            }
+            if updatedText.filter({ $0 == "." }).count > 1 {
+                return false
+            }
+            let parts = updatedText.split(separator: ".")
+            if let beforeDecimal = parts.first, beforeDecimal.count > 1 {
+                return false
+            }
+            if parts.count == 2 {
+                let afterDecimal = parts[1]
+                if afterDecimal.count > 2 {
+                    return false
+                }
+                if let value = Int(afterDecimal), value > 11 {
+                    return false
+                }
+            }
+            return true
+        } else {
+//            return true
+            let currentText = textField.text ?? ""
+                   let nsText = currentText as NSString
+                   let updatedText = nsText.replacingCharacters(in: range, with: string)
+
+                   // Allow delete
+                   if updatedText.isEmpty {
+                       return true
+                   }
+
+                   // Allow only digits
+                   if !CharacterSet.decimalDigits.isSuperset(of: CharacterSet(charactersIn: updatedText)) {
+                       return false
+                   }
+
+                   // Convert to number
+                   guard let value = Int(updatedText) else {
+                       return false
+                   }
+
+                   // Range check: 0–300
+                   return value >= 0 && value <= 300
+        }
+    }
+    
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         textFieldLeadingConstraint.isActive = true
         textFieldCenterConstraint.isActive = false
-        let value = Double(valueTextField.text ?? "") ?? 0.0
-        let rulerInt = rulerValue(from: value)
-//        let rulerInt = calculateTheRulerCount(value)
-//        rulerView.scrollToValue(rulerInt, in: scrollView)
-        rulerView.scrollToValue(rulerView: rulerView, scrollView: scrollView, rulerInt)
-        valueTextField.text = rulerView.displayText(for: rulerInt)
+        if isFeetSelected {
+            let value = Double(valueTextField.text ?? "") ?? 0.0
+            let rulerInt = rulerValue(from: value)
+            if previousText != "\(String(describing: value))" {
+                rulerView.scrollToValue(rulerView: rulerView, scrollView: scrollView, rulerInt)
+            } else {
+                valueTextField.text = valueLabel.text
+            }
+        } else {
+            var finalValue = Int(valueTextField.text ?? "0") ?? 0
+            finalValue -= 1
+            rulerView.scrollToCentimeter(finalValue , scrollView: scrollView)
+        }
         valueTextField.isUserInteractionEnabled = false
         setScreenUI(showSlider: true)
     }
-    
-    // Functions for Updating values
     
     func feetInchToDecimal(_ text: String) -> Double {
         let cleaned = text
@@ -588,40 +499,34 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         let parts = cleaned.split(separator: " ")
         guard parts.count >= 1,
               let feet = Double(parts[0]) else { return 0.0 }
-
+        
         let inches = parts.count > 1 ? Double(parts[1]) ?? 0 : 0
-        let decimal = feet + (inches / 10)
+        let fraction = convertToFractionalDouble(inches)
+        let decimal = feet + fraction
         return decimal
     }
-
-    func decimalToFeetInch(_ value: Double) -> String {
-        let feet = Int(value)
-        let inches = Int(round((value - Double(feet)) * 10))
-        return "\(feet)ft \(inches)in"
-    }
-
-    func cmTextToInt(_ text: String) -> Int? {
-        let cleaned = text
-            .lowercased()
-            .replacingOccurrences(of: "cm", with: "")
-        
-        let value = Double(cleaned)
-        return value.map { Int($0) }
-    }
-
-    func intToCmText(_ value: Int) -> String {
-        return "\(value) cm"
+    
+    func convertToFractionalDouble(_ value: Double) -> Double {
+        let intPart = Int(value)
+        let digits = String(intPart).count
+        let divisor = pow(10.0, Double(digits))
+        return Double(intPart) / divisor
     }
     
     func rulerValue(from height: Double) -> Int {
         let feet = Int(height)
         let inchPart = height - Double(feet)
-
+        
         // Convert decimal to inches (0–11)
         let inches = min(Int(round(inchPart * 10)), 11)
         var value = feet * 12 + inches
         value = value - 1
         return value
+    }
+    
+    func trimLastTwoCharacters(from text: String) -> String {
+        guard text.count > 2 else { return "" }
+        return String(text.dropLast(2))
     }
     
     
@@ -647,3 +552,179 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         }
     }
 }
+
+
+
+//    func setupFeetRuler(){
+//        heightPicker.removeFromSuperview()
+//        titleFeetLbl.removeFromSuperview()
+//        titleFeetLbl  = UILabel()
+//        titleFeetLbl.text = nil
+//        heightPicker = HeightPickerControl()
+//        heightPicker.translatesAutoresizingMaskIntoConstraints = false
+//        heightPicker.unit = .feetInches
+//        heightPicker.maxFeet = 300
+//        heightPicker.addTarget(self, action: #selector(heightChanged(_:)), for: .valueChanged)
+//        heightPicker.backgroundColor = UIColor.clear
+//        heightPicker.rulerViewBgColor = UIColor.clear
+//        scaleMBV.addSubview(heightPicker)
+//        titleFeetLbl.backgroundColor = UIColor.clear
+//        titleFeetLbl.textColor = UIColor.appWhite
+//        titleFeetLbl.textAlignment = .right
+//        scaleMBV.addSubview(titleFeetLbl)
+//        titleFeetLbl.translatesAutoresizingMaskIntoConstraints = false
+//        NSLayoutConstraint.activate([
+//            heightPicker.trailingAnchor.constraint(equalTo: scaleMBV.trailingAnchor, constant: 10),
+//            heightPicker.centerYAnchor.constraint(equalTo: scaleMBV.centerYAnchor),
+//            heightPicker.widthAnchor.constraint(equalToConstant: 250),
+//            heightPicker.heightAnchor.constraint(equalTo: scaleMBV.heightAnchor, multiplier: 0.96),
+//            titleFeetLbl.leadingAnchor.constraint(equalTo: heightPicker.leadingAnchor, constant: -170),
+//            titleFeetLbl.centerYAnchor.constraint(equalTo: scaleMBV.centerYAnchor),
+//            titleFeetLbl.widthAnchor.constraint(equalTo: heightPicker.widthAnchor, multiplier: 1.0),
+//            titleFeetLbl.heightAnchor.constraint(equalTo: heightPicker.heightAnchor, multiplier: 0.8)
+//        ])
+//
+//        self.scrollScale(inputView: heightPicker)
+//    }
+    
+    //MARK: -----------------MAKE RULER FOR WEIGHT
+//    func setupCMSRuler(){
+//        heightPicker.removeFromSuperview()
+//        titleFeetLbl.removeFromSuperview()
+//        titleFeetLbl  = UILabel()
+//        titleFeetLbl.text = nil
+//        heightPicker = HeightPickerControl()
+//        heightPicker.translatesAutoresizingMaskIntoConstraints = false
+//        heightPicker.unit = .centimeters
+//        heightPicker.maxCM = 650.0
+//        heightPicker.addTarget(self, action: #selector(heightChanged(_:)), for: .valueChanged)
+//        heightPicker.backgroundColor = UIColor.clear
+//        heightPicker.rulerViewBgColor = UIColor.clear
+//        scaleMBV.addSubview(heightPicker)
+//        titleFeetLbl.backgroundColor = UIColor.clear
+//        titleFeetLbl.textColor = UIColor.appWhite
+//        titleFeetLbl.textAlignment = .right
+//        scaleMBV.addSubview(titleFeetLbl)
+//        titleFeetLbl.translatesAutoresizingMaskIntoConstraints = false
+//        NSLayoutConstraint.activate([
+//            heightPicker.trailingAnchor.constraint(equalTo: scaleMBV.trailingAnchor, constant: 10),
+//            heightPicker.centerYAnchor.constraint(equalTo: scaleMBV.centerYAnchor),
+//            heightPicker.widthAnchor.constraint(equalToConstant: 250),
+//            heightPicker.heightAnchor.constraint(equalTo: scaleMBV.heightAnchor, multiplier: 0.96),
+//            titleFeetLbl.leadingAnchor.constraint(equalTo: heightPicker.leadingAnchor, constant: -170),
+//            titleFeetLbl.centerYAnchor.constraint(equalTo: scaleMBV.centerYAnchor),
+//            titleFeetLbl.widthAnchor.constraint(equalTo: heightPicker.widthAnchor, multiplier: 1.0),
+//            titleFeetLbl.heightAnchor.constraint(equalTo: heightPicker.heightAnchor, multiplier: 0.8)
+//        ])
+//
+//        self.scrollScale(inputView: heightPicker)
+//    }
+    
+//    func scrollScale(inputView: UIView){
+//
+//        if let scrollView = inputView.subviews.first(where: { $0 is UIScrollView }) as? UIScrollView {
+//            print("Found scroll view: \(scrollView)")
+//            scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: false)
+//        }
+//
+////        if let scrollView = inputView.subviews.first(where: { $0 is UIScrollView }) as? UIScrollView {
+////            print("Found scroll view: \(scrollView)")
+////            scrollView.setContentOffset(CGPoint(x: 0, y: 10), animated: true)
+////        }
+//    }
+    
+    //MARK: ----------------GETTING VALUE FROM SCALE
+//    @objc func heightChanged(_ sender: HeightPickerControl) {
+//        print("Selected: \(sender.selectedFeet)ft \(sender.selectedInches)in")
+//
+//        let feetAttributes = [
+//            .font: AppFont.bold.size(50.0, familyName: familyManrope),
+//            .foregroundColor: UIColor.appWhite
+//        ] as [NSAttributedString.Key : Any]
+//
+//        let ftAttributes = [
+//            .font: AppFont.medium.size(25.0, familyName: familyManrope),
+//            .foregroundColor: UIColor.txtDarkGray
+//        ] as [NSAttributedString.Key : Any]
+//
+//        //----------------Getting unit
+//        switch sender.unit {
+//         case .feetInches:
+//             print("Selected: \(sender.selectedFeet) ft \(sender.selectedInches) in")
+//
+//            self.selectedHeight = nil
+//            self.selectedHeight = "\(sender.selectedFeet)ft\(sender.selectedInches)"
+//
+//            var attributedParts: [AttributedStringComponent] = [
+//                NSAttributedString(string: "\(sender.selectedFeet)", attributes: feetAttributes),
+//                NSAttributedString(string: "ft", attributes: ftAttributes)
+//            ]
+//
+//            if sender.selectedInches > 0 {
+//                attributedParts.append(NSAttributedString(string: "\(sender.selectedInches)", attributes: feetAttributes))
+//                attributedParts.append(NSAttributedString(string: "in", attributes: ftAttributes))
+//            }
+//
+//            self.titleFeetLbl.attributedText = NSAttributedString(from: attributedParts, defaultAttributes: feetAttributes)
+//
+//         case .centimeters:
+//             print("Selected: \(sender.selectedCM) cm")
+//
+//            self.selectedHeight = nil
+//            self.selectedHeight = "\(sender.selectedCM)cm"
+//
+//            let attributedParts: [AttributedStringComponent] = [
+//                NSAttributedString(string: formatNumber(sender.selectedCM), attributes: feetAttributes),
+//                NSAttributedString(string: "cm", attributes: ftAttributes)
+//            ]
+//
+//            self.titleFeetLbl.attributedText = NSAttributedString(from: attributedParts, defaultAttributes: feetAttributes)
+//         }
+//    }
+    
+//    private func formatNumber(_ number: Double) -> String {
+//        if number.truncatingRemainder(dividingBy: 1) == 0 {
+//            return String(Int(number)) // Remove decimal
+//        } else {
+//            return String(number) // Keep decimal
+//        }
+//    }
+//
+//    func setUpSegmet(){
+//        heightMeasureType.setTitle("feet", forSegmentAt: 0)
+//        heightMeasureType.setTitle("cms", forSegmentAt: 1)
+//        setUISegmentControlAppearance()
+//    }
+    
+//    func setUISegmentControlAppearance() {
+////        UISegmentedControl.appearance().selectedSegmentTintColor = .white
+////        UISegmentedControl.appearance().backgroundColor = UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.1)
+//        UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.txtDarkGray, .font:AppFont.semibold.size(14.0, familyName: familyManrope)], for: .normal)
+//        UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.appWhite, .font:AppFont.semibold.size(14.0, familyName: familyManrope)], for: .selected)
+//    }
+    
+    //MARK: ------------setup segmantstyle
+//    func setupSegmentedControlStyle(){
+//        let unselectedBackgroundImage = UIImage(color: UIColor(red: 16/255.0, green: 17/255.0, blue: 19/255.0, alpha: 1))
+//        let selectedBacgroundImage = UIImage(color:UIColor.appYellow)
+//
+//        heightMeasureType.setBackgroundImage(unselectedBackgroundImage, for: .normal, barMetrics: .default)
+//        heightMeasureType.setBackgroundImage(unselectedBackgroundImage, for: .highlighted, barMetrics: .default)
+//        heightMeasureType.setBackgroundImage(selectedBacgroundImage, for: .selected, barMetrics: .default)
+//
+//        heightMeasureType.setDividerImage(selectedBacgroundImage, forLeftSegmentState: .normal, rightSegmentState: .normal, barMetrics: .default)
+//
+//        heightMeasureType.layer.borderWidth = 0
+//        heightMeasureType.layer.borderColor = UIColor.clear.cgColor
+//    }
+    
+//    @IBAction func heightMeasureTypeActn(_ sender: UISegmentedControl) {
+//        print(sender.selectedSegmentIndex )
+//
+//        if sender.selectedSegmentIndex == 0 {
+//            self.setupFeetRuler()
+//        }else{
+//            self.setupCMSRuler()
+//        }
+//    }
+    
