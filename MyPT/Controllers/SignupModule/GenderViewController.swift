@@ -50,8 +50,8 @@ class GenderViewController: CommonViewController {
        
         dataGender = [
             ["images": AppImages.maleUnselected as Any, "seleced_images": AppImages.maleSelected as Any],
-            ["images": AppImages.femaleUnselected as Any, "seleced_images": AppImages.female_selected as Any],
-            ["images": AppImages.othersUnselected as Any, "seleced_images": AppImages.othersGender_selected as Any]
+            ["images": AppImages.femaleUnselected as Any, "seleced_images": AppImages.femaleSelected as Any],
+            ["images": AppImages.othersUnselected as Any, "seleced_images": AppImages.othersSelected as Any]
         ]
         genderImg = [maleBGImg, femaleBGImg, othersGenderBGImg]
     }
@@ -68,10 +68,9 @@ class GenderViewController: CommonViewController {
         backgroundGradient?.frame = viewBackground.bounds
     }
     
-    func setNavUI(){
+    func setNavUI() {
         self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
         self.setProgress(0.3)
-        
         self.setLeftMenu(leftImgs: [AppImages.backArrowWithBg], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
         self.setRighMenu(setTitle: [AppStrings.skipStr], setTintColor: .black, setTitleColor: UIColor.txtSkip)
     }

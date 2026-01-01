@@ -8,32 +8,38 @@
 import UIKit
 import AVFoundation
 
+//add name - step 0,
+//add gender - step 1,
+//add dob - step 2,
+//add weight - step 3,
+//add height - step 4,
+//add goals - step 5,
+//add location - step 6,
+
 enum vcSteps: Int {
-    case one = 1, two, three, four, five, six,seven, eight
+    case one = 1, two, three, four, five, six
     
     static func getCurrentVC(vcRawValue: Int) -> UIViewController.Type? {
         guard let vcEnum = vcSteps(rawValue: vcRawValue) else {
             return nil // Return nil if invalid raw value is passed
         }
-        
         switch vcEnum {
         case .one:
-            return PersoniledViewController.self
-        case .two:
             return GenderViewController.self
-        case .three:
+        case .two:
             return AgeViewController.self
-        case .four:
+        case .three:
             return WeightViewController.self
-        case .five:
+        case .four:
             return HeightViewController.self
-        case .six:
+        case .five:
             return GoalsViewController.self
-        case .seven:
-            return PreferenceViewController.self
-        case .eight:
+        case .six:
             return LocationsViewController.self
-
+//        case .seven:
+//            return PreferenceViewController.self
+//        case .eight:
+//            return .self
         }
     }
 }

@@ -43,7 +43,7 @@ class LocationsViewController: CommonViewController {
     var getAddressData:AddressDataModel? = AddressDataModel()
     var sendBackAddr: ((String?) -> Void)?
     private var currentAddr: String?
-    
+    private var backgroundGradient: CAGradientLayer?
     
     //MARK: -------------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
@@ -53,6 +53,8 @@ class LocationsViewController: CommonViewController {
     @IBOutlet weak var continueBtn: UIButton!
     @IBOutlet weak var currentLocMap: UIView!
     @IBOutlet weak var rightSearchBtn: UIButton!
+    @IBOutlet weak var viewBackground: UIView!
+    @IBOutlet weak var viewBottom: UIView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,9 +62,12 @@ class LocationsViewController: CommonViewController {
         self.locSearch.delegate = self
         setUpFont()
         setupUI()
-        self.enableContinueBtn(isSelected: true)
+//        self.enableContinueBtn(isSelected: true)
         setMapShowData()
         setUISearchbar()
+        setupBackgroundGradient()
+        updateContinueButton(isEnabled: true)
+        setupContinueButtonIcon(isEnabled: true)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -100,6 +105,10 @@ class LocationsViewController: CommonViewController {
         }
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        backgroundGradient?.frame = viewBackground.bounds
+    }
     
     func setNavUI(){
      
@@ -111,9 +120,11 @@ class LocationsViewController: CommonViewController {
             
         case .defaultLoc:
             self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
-            self.setProgress(1.0)
+            self.setProgress(0.8)
             
             self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
+            self.setRighMenu(setTitle: [AppStrings.skipStr], setTintColor: .black, setTitleColor: UIColor.txtSkip)
+          
          
 //            self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite) skipe remove need of client
             
@@ -134,8 +145,60 @@ class LocationsViewController: CommonViewController {
         }
     }
     
+    private func setupBackgroundGradient() {
+        // Remove old gradient if any
+        backgroundGradient?.removeFromSuperlayer()
+
+        let gradient = CAGradientLayer()
+        gradient.colors = UIColor.appMultiColor(.greenBgGradient).map { $0.cgColor }
+
+        // VERY IMPORTANT – match first UI direction
+        gradient.startPoint = CGPoint(x: 0.0, y: 0.0)
+        gradient.endPoint   = CGPoint(x: 1.0, y: 1.0)
+
+        gradient.locations = [0.0, 0.5, 1.0]
+        gradient.cornerRadius = 0
+
+        viewBackground.layer.insertSublayer(gradient, at: 0)
+        backgroundGradient = gradient
+    }
+    
+    func updateContinueButton(isEnabled: Bool) {
+        continueBtn.isEnabled = isEnabled
+        continueBtn.isUserInteractionEnabled = isEnabled
+        
+        UIView.animate(withDuration: 0.2) {
+            self.setupContinueButtonIcon(isEnabled: isEnabled)
+            if isEnabled {
+                self.continueBtn.tintColor = .mainBg   // arrow color
+                self.continueBtn.backgroundColor = .appWhite
+                self.continueBtn.setTitleColor(.mainBg, for: .normal)
+            } else {
+                self.continueBtn.tintColor = .appWhite
+                self.continueBtn.backgroundColor = .appDarkGray
+                self.continueBtn.setTitleColor(.appWhite, for: .normal)
+            }
+        }
+    }
+    
+    func setupContinueButtonIcon(isEnabled: Bool) {
+        let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
+            .withRenderingMode(.alwaysTemplate)
+        
+        continueBtn.setImage(arrowImage, for: .normal)
+        
+        // Force image on right side
+        continueBtn.semanticContentAttribute = .forceRightToLeft
+        
+        // Space between text and image
+        continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -12)
+        continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 12)
+        
+        continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+    }
+    
     //MARK: ---------- SET UI
-    private func setupUI(){
+    private func setupUI() {
         
         self.mainAddrLbl.numberOfLines = 2
         self.subAddrLbl.numberOfLines = 2
@@ -143,38 +206,73 @@ class LocationsViewController: CommonViewController {
         DispatchQueue.main.async {
             self.locSearch.setCornerRadius(borderWidth: 1, borderColor: .appBorder, cornerRadious: 12.0)
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+//            self.viewBottom.addGradient(colors: UIColor.appMultiColor(.locationBgGradient), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0)
         }
     }
     
     //------------------************Font
     private func setUpFont(){
         self.topTitleLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
-        self.mainAddrLbl.font = AppFont.semibold.size(18.0, familyName: familyManrope)
-        self.subAddrLbl.font = AppFont.semibold.size(12.0, familyName: familyManrope)
-        self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
+        self.mainAddrLbl.font = AppFont.medium.size(18.0, familyName: familyFunnelSans)
+        self.subAddrLbl.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
+        self.continueBtn.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
     }
     
     
     //MARK: ---------------- Searchbar Customize
-    func setUISearchbar(){
-        self.locSearch.barTintColor = UIColor.mainBg
-        self.locSearch.tintColor = UIColor.blue
-        self.locSearch.searchTextField.backgroundColor = UIColor.clear
-        self.locSearch.searchTextField.textColor = UIColor.appWhite
-        self.locSearch.isTranslucent = false
-        self.locSearch.placeholder = "Search for area, street name..."
-        self.locSearch.searchTextField.font = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.locSearch.showsCancelButton = false
-        self.locSearch.searchTextField.setRightPaddingPoint(40.0)
-        
-        if let textField = self.locSearch.value(forKey: "searchField") as? UITextField {
-            textField.clearButtonMode = .never
-            textField.attributedPlaceholder = NSAttributedString(
-                string: "Search for area, street name...",
-                attributes: [NSAttributedString.Key.foregroundColor: UIColor.txtDarkGray]
-            )
-        }
+//    func setUISearchbar() {
+//        self.locSearch.barTintColor = UIColor.mainBg
+//        self.locSearch.tintColor = UIColor.blue
+//        self.locSearch.searchTextField.backgroundColor = UIColor.clear
+//        self.locSearch.searchTextField.textColor = UIColor.appWhite
+//        self.locSearch.isTranslucent = false
+//        self.locSearch.placeholder = "Search for area, street name..."
+//        self.locSearch.searchTextField.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
+//        self.locSearch.showsCancelButton = false
+//        self.locSearch.searchTextField.setRightPaddingPoint(40.0)
+//        
+//        if let textField = self.locSearch.value(forKey: "searchField") as? UITextField {
+//            textField.clearButtonMode = .never
+//            textField.attributedPlaceholder = NSAttributedString(
+//                string: "Search for area, street name...",
+//                attributes: [NSAttributedString.Key.foregroundColor: UIColor.txtDarkGray]
+//            )
+//        }
+//    }
+    func setUISearchbar() {
+
+        locSearch.backgroundImage = UIImage()
+        locSearch.isTranslucent = false
+
+        // Outer container style
+//        locSearch.layer.cornerRadius = 18
+        locSearch.layer.masksToBounds = true
+        locSearch.layer.borderWidth = 1
+        locSearch.layer.borderColor = UIColor.white.withAlphaComponent(0.1).cgColor
+
+        let tf = locSearch.searchTextField
+        tf.backgroundColor = UIColor.black.withAlphaComponent(0.35)
+        tf.textColor = .white
+        tf.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
+        tf.attributedPlaceholder = NSAttributedString(
+            string: "Search for area, street name...",
+            attributes: [.foregroundColor: UIColor.txtDarkGray]
+        )
+        tf.clearButtonMode = .never
+//        tf.leftView?.tintColor = .white
+//        tf.layer.cornerRadius = 12
+//        tf.layer.masksToBounds = true
+
+        // 🔥 IMPORTANT – remove iOS default gap
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            tf.leadingAnchor.constraint(equalTo: locSearch.leadingAnchor, constant: 0),
+            tf.trailingAnchor.constraint(equalTo: locSearch.trailingAnchor, constant: 0),
+            tf.topAnchor.constraint(equalTo: locSearch.topAnchor, constant: 0),
+            tf.bottomAnchor.constraint(equalTo: locSearch.bottomAnchor, constant: 0)
+        ])
     }
+
     
     //MARK: ----------------MAP VIEW
     // Set the status bar style to complement night-mode.
@@ -384,17 +482,17 @@ class LocationsViewController: CommonViewController {
     }
     
     //MARK: -------------- ENABLE CONTINUE
-    func enableContinueBtn(isSelected:Bool = false){
-        if isSelected {
-            self.continueBtn.isUserInteractionEnabled = true
-            self.continueBtn.backgroundColor = UIColor.appWhite
-            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
-        } else {
-            self.continueBtn.isUserInteractionEnabled = false
-            self.continueBtn.backgroundColor = UIColor.appDarkGray
-            self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
-        }
-    }
+//    func enableContinueBtn(isSelected:Bool = false){
+//        if isSelected {
+//            self.continueBtn.isUserInteractionEnabled = true
+//            self.continueBtn.backgroundColor = UIColor.appWhite
+//            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
+//        } else {
+//            self.continueBtn.isUserInteractionEnabled = false
+//            self.continueBtn.backgroundColor = UIColor.appDarkGray
+//            self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
+//        }
+//    }
     
     
     private func searchPlace(){

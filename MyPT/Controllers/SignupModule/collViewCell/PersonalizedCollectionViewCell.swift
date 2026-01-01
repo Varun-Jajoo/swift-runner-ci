@@ -16,6 +16,7 @@ class PersonalizedCollectionViewCell: UICollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
+        self.titleLbl.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
         cellMBV.backgroundColor = UIColor.appBorder
         DispatchQueue.main.async {
             self.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 16.0)

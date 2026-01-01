@@ -40,6 +40,7 @@ enum AssetsMultiColor {
     case greenGradient
     case blackBgGradient
     case greenBgGradient
+    case locationBgGradient
 }
 
 
@@ -129,6 +130,11 @@ extension UIColor {
                 UIColor(red: 27.0/255.0, green: 39.0/255.0, blue: 12.0/255.0, alpha: 1.0),
                 UIColor(red: 0.0/255.0, green: 15.0/255.0, blue: 6.0/255.0, alpha: 1.0),
                 UIColor(red: 8.0/255.0, green: 8.0/255.0, blue: 8.0/255.0, alpha: 1.0)
+            ]
+        case .locationBgGradient:
+            return [
+                UIColor(red: 255.0/255.0, green: 255.0/255.0, blue: 255.0/255.0, alpha: 1.0),
+                UIColor(red: 255.0/255.0, green: 255.0/255.0, blue: 255.0/255.0, alpha: 0)
             ]
         }
     }

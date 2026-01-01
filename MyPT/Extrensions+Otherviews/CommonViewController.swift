@@ -9,7 +9,7 @@ import UIKit
 
 class CommonViewController: UIViewController {
     
-    var progressLayer:CAShapeLayer?
+    var progressLayer: CAShapeLayer?
     var leftNavButtons: [UIButton] = []
     var rightNavButtons: [UIButton] = []
     

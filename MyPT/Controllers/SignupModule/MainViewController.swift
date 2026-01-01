@@ -90,6 +90,7 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.checkStep()
+        UIVisualEffectView.disableAllBlur(in: view)
     }
     
     func setNavUI(){

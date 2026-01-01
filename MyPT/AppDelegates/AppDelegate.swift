@@ -31,6 +31,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             didFinishLaunchingWithOptions: launchOptions
         )
         
+        if #available(iOS 15.0, *) {
+            UIButton.appearance().configuration = nil
+        }
+        
         FirebaseApp.configure()
         GMSServices.provideAPIKey(AppConstant.gMap_services_Key)
         GMSPlacesClient.provideAPIKey(AppConstant.gMap_services_Key)

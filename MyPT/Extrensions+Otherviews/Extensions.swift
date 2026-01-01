@@ -2796,3 +2796,16 @@ func popFromLeft() -> CATransition {
     return self
    }
 }
+
+extension UIVisualEffectView {
+    static func disableAllBlur(in view: UIView) {
+        view.subviews.forEach{ subview in
+            if let blur = subview as? UIVisualEffectView {
+                blur.effect = nil
+                blur.backgroundColor = .clear
+                blur.isHidden = true
+            }
+            disableAllBlur(in: subview)
+        }
+    }
+}

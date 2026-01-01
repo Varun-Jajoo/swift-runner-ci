@@ -28,7 +28,7 @@ class AgeViewController: CommonViewController {
         super.viewDidLoad()
         setupUI()
         setUpFont()
-        self.enableContinueBtn(isSelected: true)
+//        self.enableContinueBtn(isSelected: true)
         self.wheelDobSetup()
         setupBackgroundGradient()
 //        addCenterGlow()
@@ -201,28 +201,28 @@ class AgeViewController: CommonViewController {
                         appUserDefaults.saveUserToUserDefaults(detailsData)
                     }
                     
-                    let vc:LoadingViewController = LoadingViewController.instantiate(appStoryboard: .main)
+                    let vc: WeightViewController = WeightViewController.instantiate(appStoryboard: .main)
                     self.navigationController?.pushViewController(vc, animated: true)
                 }
             })
-        }else{
+        } else {
             AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.select_dob)
         }
     }
     
     
     //MARK: -------------- ENABLE CONTINUE
-    func enableContinueBtn(isSelected:Bool = false){
-        if isSelected {
-            self.continueBtn.isUserInteractionEnabled = true
-            self.continueBtn.backgroundColor = UIColor.appWhite
-            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
-        } else {
-            self.continueBtn.isUserInteractionEnabled = false
-            self.continueBtn.backgroundColor = UIColor.appDarkGray
-            self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
-        }
-    }
+//    func enableContinueBtn(isSelected:Bool = false){
+//        if isSelected {
+//            self.continueBtn.isUserInteractionEnabled = true
+//            self.continueBtn.backgroundColor = UIColor.appWhite
+//            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
+//        } else {
+//            self.continueBtn.isUserInteractionEnabled = false
+//            self.continueBtn.backgroundColor = UIColor.appDarkGray
+//            self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
+//        }
+//    }
     
     func wheelDobSetup(){
         

@@ -9,13 +9,14 @@ import UIKit
 
 class GoalsViewController: CommonViewController {
     
-    //MARK: ----------VARIABLE
+    // MARK: ----------VARIABLE
 //    var dataGoals:[[String:Any]]?
-    var dataGoals:[PersonalizedDataModel]? = []
-    var selectIds:[Int]? = []
-    var selecteInd:IndexPath = IndexPath(row: -0, section: 0)
+    var dataGoals: [PersonalizedDataModel]? = []
+    var selectIds: [Int]? = []
+    var selecteInd: IndexPath = IndexPath(row: -0, section: 0)
+    private var backgroundGradient: CAGradientLayer?
     
-    //MARK: -----------IBOUTLET
+    // MARK: -----------IBOUTLET
     @IBOutlet weak var descLbl: UILabel!
     @IBOutlet weak var goalsCollView: UICollectionView!
     @IBOutlet weak var goalsCollViewHeightConstrnt: NSLayoutConstraint!
@@ -23,6 +24,7 @@ class GoalsViewController: CommonViewController {
     @IBOutlet weak var bottomNoteMBV: UIView!
     @IBOutlet weak var bottomNoteLbl: UILabel!
     @IBOutlet weak var continueBtn: UIButton!
+    @IBOutlet var viewBackground: UIView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,6 +34,9 @@ class GoalsViewController: CommonViewController {
         self.continueBtn.isUserInteractionEnabled = false
         bottomContainerMBV.isHidden = true
         bottomNoteMBV.isHidden = true
+        setupBackgroundGradient()
+        updateContinueButton(isEnabled: false)
+        setupContinueButtonIcon(isEnabled: false)
         
         /*
         dataGoals = [ ["title":"Mental Health","images":AppImages.mentalHealth as Any,"seleced_images":AppImages.mentalHealth_selected as Any],
@@ -67,14 +72,72 @@ class GoalsViewController: CommonViewController {
 //        self.getGoalsDataApi()
     }
     
-    func setNavUI(){
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        backgroundGradient?.frame = viewBackground.bounds
+    }
+    
+    func setNavUI() {
         self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
-        self.setProgress(0.6)
+        self.setProgress(0.7)
         
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
+        self.setRighMenu(setTitle: [AppStrings.skipStr], setTintColor: .black, setTitleColor: UIColor.txtSkip)
 //        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite) skipe remove need of client
         
         //        self.setNavigationTitle(title: AppStrings.select_plan, color: UIColor.black, font: AppFont.Bold.size(22.0))
+    }
+    
+    private func setupBackgroundGradient() {
+        // Remove old gradient if any
+        backgroundGradient?.removeFromSuperlayer()
+
+        let gradient = CAGradientLayer()
+        gradient.colors = UIColor.appMultiColor(.greenBgGradient).map { $0.cgColor }
+
+        // VERY IMPORTANT – match first UI direction
+        gradient.startPoint = CGPoint(x: 0.0, y: 0.0)
+        gradient.endPoint   = CGPoint(x: 1.0, y: 1.0)
+
+        gradient.locations = [0.0, 0.5, 1.0]
+        gradient.cornerRadius = 0
+
+        viewBackground.layer.insertSublayer(gradient, at: 0)
+        backgroundGradient = gradient
+    }
+    
+    func updateContinueButton(isEnabled: Bool) {
+        continueBtn.isEnabled = isEnabled
+        continueBtn.isUserInteractionEnabled = isEnabled
+        
+        UIView.animate(withDuration: 0.2) {
+            self.setupContinueButtonIcon(isEnabled: isEnabled)
+            if isEnabled {
+                self.continueBtn.tintColor = .mainBg   // arrow color
+                self.continueBtn.backgroundColor = .appWhite
+                self.continueBtn.setTitleColor(.mainBg, for: .normal)
+            } else {
+                self.continueBtn.tintColor = .appWhite
+                self.continueBtn.backgroundColor = .appDarkGray
+                self.continueBtn.setTitleColor(.appWhite, for: .normal)
+            }
+        }
+    }
+    
+    func setupContinueButtonIcon(isEnabled: Bool) {
+        let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
+            .withRenderingMode(.alwaysTemplate)
+        
+        continueBtn.setImage(arrowImage, for: .normal)
+        
+        // Force image on right side
+        continueBtn.semanticContentAttribute = .forceRightToLeft
+        
+        // Space between text and image
+        continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -12)
+        continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 12)
+        
+        continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
     }
     
     override func rightBtnActn(sender: UIButton) {
@@ -84,14 +147,14 @@ class GoalsViewController: CommonViewController {
     }
     
     //------------------************Font
-    func setUpFont(){
+    func setUpFont() {
         self.descLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
         self.bottomNoteLbl.font = AppFont.regular.size(12.0, familyName: familyOverpassMono)
-        self.continueBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
+        self.continueBtn.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
     }
     
-    //MARK: ---------- SET UI
-    func setupUI(){
+    // MARK: ---------- SET UI
+    func setupUI() {
         goalsCollView.register(UINib(nibName: "PersonalizedCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "PersonalizedCollectionViewCell")
         goalsCollView.allowsMultipleSelection = true
         
@@ -176,15 +239,17 @@ extension GoalsViewController:  UICollectionViewDelegate, UICollectionViewDataSo
         
 //        cell.setSelectdCellUrl(dataGoals?[indexPath.row].image as? String, selectedImgStr: dataGoals?[indexPath.row].selectImage as? String, isSelectedCell: true)
         
-        if cell.isSelected {
-            self.continueBtn.isUserInteractionEnabled = true
-            self.continueBtn.backgroundColor = UIColor.appWhite
-            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
-        } else {
-            self.continueBtn.isUserInteractionEnabled = false
-            self.continueBtn.backgroundColor = UIColor.appLightGray
-            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
-        }
+        updateContinueButton(isEnabled: cell.isSelected)
+        
+//        if cell.isSelected {
+//            self.continueBtn.isUserInteractionEnabled = true
+//            self.continueBtn.backgroundColor = UIColor.appWhite
+//            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
+//        } else {
+//            self.continueBtn.isUserInteractionEnabled = false
+//            self.continueBtn.backgroundColor = UIColor.appLightGray
+//            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
+//        }
     }
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
@@ -202,9 +267,10 @@ extension GoalsViewController:  UICollectionViewDelegate, UICollectionViewDataSo
 //        cell.setSelectdCellUrl(dataGoals?[indexPath.row].image as? String, selectedImgStr: dataGoals?[indexPath.row].selectImage as? String, isSelectedCell: false)
         
         if let selectIds = selectIds, selectIds.isEmpty || selectIds.count == 0 {
-            self.continueBtn.isUserInteractionEnabled = false
-            self.continueBtn.backgroundColor = UIColor.appDarkGray
-            self.continueBtn.setTitleColor(UIColor.appLightGray, for: .normal)
+            updateContinueButton(isEnabled: false)
+//            self.continueBtn.isUserInteractionEnabled = false
+//            self.continueBtn.backgroundColor = UIColor.appDarkGray
+//            self.continueBtn.setTitleColor(UIColor.appLightGray, for: .normal)
         }
         
         /*
@@ -274,7 +340,7 @@ extension GoalsViewController {
                     appUserDefaults.saveUserToUserDefaults(detailsData)
                 }
                 
-                let vc:PreferenceViewController = PreferenceViewController.instantiate(appStoryboard: .main)
+                let vc: LocationsViewController = LocationsViewController.instantiate(appStoryboard: .main)
                 self.navigationController?.pushViewController(vc, animated: true)
             }
         })

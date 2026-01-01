@@ -92,7 +92,7 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
     }
     
     //------------------************Font
-    func setUpFont(){
+    func setUpFont() {
         self.titleLbl.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
         self.descLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
         self.fullNameTitleLbl.font = AppFont.semibold.size(14.0, familyName: familyManrope)
@@ -102,7 +102,7 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
     }
     
     //MARK: ---------- SET UI
-    func setupUI(){
+    func setupUI() {
         
         self.fullNameTxtField.addTarget(self, action: #selector(textFieldDidChange(textField:)), for: UIControl.Event.editingChanged)
         DispatchQueue.main.async {
@@ -162,7 +162,7 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
                     appUserDefaults.saveUserToUserDefaults(detailsData)
                 }
                 
-                let vc: PersoniledViewController = PersoniledViewController.instantiate(appStoryboard: .main)
+                let vc: GenderViewController = GenderViewController.instantiate(appStoryboard: .main)
                 self.navigationController?.pushViewController(vc, animated: true)
             }
             

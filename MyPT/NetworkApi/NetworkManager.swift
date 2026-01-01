@@ -10,7 +10,7 @@ import Alamofire
 import SVProgressHUD
 
 class Connectivity {
-    class var isConnectedToInternet:Bool {
+    class var isConnectedToInternet: Bool {
         return NetworkReachabilityManager()?.isReachable ?? false
     }
 }
@@ -21,7 +21,7 @@ class NetworkManager {
     }()
     private var retryLimit = 1
     
-    //MARK: ----------------- It's used for array of object as parameter to pass to use codable struct as like struct Example:Codable{ var i = 0 }
+    // MARK: ----------------- It's used for array of object as parameter to pass to use codable struct as like struct Example:Codable{ var i = 0 }
     
     func serviceAPICallForArrayObject<T: Encodable>(_ serviceEndPoint: ApiEndPoint, method: HTTPMethod, queries: [String: String]? = nil, parametersEncode: [T]? = nil, interceptor: RequestInterceptor? = nil, isShowLoading: Bool = false, completion: @escaping ((Data?, Error?) -> Void)){
         
@@ -38,7 +38,7 @@ class NetworkManager {
             return
         }
         // Show Loader
-        if isShowLoading{
+        if isShowLoading {
             Utility.showLoader(message:  AppAlertStrings.please_wait)
         }
         

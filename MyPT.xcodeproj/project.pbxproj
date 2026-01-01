@@ -487,6 +487,7 @@
 		B8FED8B52E6037F0003CA7DC /* AddRestTimePopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FED8B42E6037F0003CA7DC /* AddRestTimePopupViewController.swift */; };
 		B8FED8B82E605D74003CA7DC /* RestTimePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FED8B72E605D74003CA7DC /* RestTimePickerView.swift */; };
 		B8FFF4202D09CC200097167A /* GymWorkoutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FFF41F2D09CC1F0097167A /* GymWorkoutViewController.swift */; };
+		EECB61A52F066D7E00B79DD4 /* VerticalRulerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EECB61A42F066D7E00B79DD4 /* VerticalRulerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -958,6 +959,7 @@
 		B8FED8B72E605D74003CA7DC /* RestTimePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestTimePickerView.swift; sourceTree = "<group>"; };
 		B8FFF41F2D09CC1F0097167A /* GymWorkoutViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GymWorkoutViewController.swift; sourceTree = "<group>"; };
 		BF3D5368393FBAC5F3CF9AD2 /* Pods_MyPT.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MyPT.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EECB61A42F066D7E00B79DD4 /* VerticalRulerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalRulerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2051,6 +2053,7 @@
 				B8DCD19A2E000FCE00E160D5 /* ImagePicker.swift */,
 				B822BD7A2E05434600213BB2 /* ImageDownloader.swift */,
 				B8AC4A002E06D89A00E66ACA /* SocialShareOpen.swift */,
+				EECB61A42F066D7E00B79DD4 /* VerticalRulerView.swift */,
 			);
 			path = ResourceFiles;
 			sourceTree = "<group>";
@@ -2640,6 +2643,7 @@
 				B8CEF3072E327B27007C85E5 /* TopReviewPackageViewController.swift in Sources */,
 				B8CDFFFD2CE1EAD9005DEA1C /* ProductsListCollViewCell.swift in Sources */,
 				B822BD7B2E05434600213BB2 /* ImageDownloader.swift in Sources */,
+				EECB61A52F066D7E00B79DD4 /* VerticalRulerView.swift in Sources */,
 				B8BD069A2DFC0FF8005A91DD /* AwardsCollectionViewCell.swift in Sources */,
 				B8C3410D2E26298B00BAD93C /* MyTrainerTableViewCell.swift in Sources */,
 				B8C35FAF2D8066BD00A11A2C /* SearchViewController.swift in Sources */,
@@ -2837,7 +2841,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = LW7P5S9K9P;
+				DEVELOPMENT_TEAM = NVCSQYKYVW;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -2885,7 +2889,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = LW7P5S9K9P;
+				DEVELOPMENT_TEAM = NVCSQYKYVW;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;

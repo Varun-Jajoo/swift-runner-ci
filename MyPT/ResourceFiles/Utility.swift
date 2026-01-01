@@ -8,36 +8,123 @@
 import UIKit
 import SVProgressHUD
 
-
+// MARK: - Utility Loader
 class Utility: NSObject {
+
     static let shared = Utility()
-    private override init() {
+    private override init() {}
+
+    private static var loaderView: UIView?
+    private static var messageLabel: UILabel?
+    private var backgroundGradient: CAGradientLayer?
+
+    class func showLoader(
+        message: String = "We're preparing your personalised training experience",
+        fullScreen: Bool = true
+    ) {
+        guard let window = UIApplication.shared
+            .windows.first(where: { $0.isKeyWindow }) else { return }
+
+        hideLoader()
+
+        let overlay = UIView(frame: window.bounds)
+        overlay.isUserInteractionEnabled = true
+        overlay.backgroundColor = .clear   // important
+
+        // ⭐ Add gradient to overlay
+        addGradientBackground(to: overlay)
+
+        // Loader (TOP)
+        let loader = DotRingLoaderView()
+        loader.translatesAutoresizingMaskIntoConstraints = false
+
+        // Label (BOTTOM)
+        let label = UILabel()
+        label.text = message
+        label.textColor = .lightGray
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        messageLabel = label
+
+        let stack = UIStackView(arrangedSubviews: [loader, label])
+        stack.axis = .vertical
+        stack.alignment = .center
+        stack.spacing = 12
+        stack.translatesAutoresizingMaskIntoConstraints = false
+
+        overlay.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            loader.widthAnchor.constraint(equalToConstant: 60),
+            loader.heightAnchor.constraint(equalToConstant: 60),
+
+            stack.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: overlay.centerYAnchor),
+
+            label.widthAnchor.constraint(lessThanOrEqualToConstant: 260)
+        ])
+
+        window.addSubview(overlay)
+        loaderView = overlay
     }
-    
-    class func showLoader(message: String? = nil) {
-        SVProgressHUD.setOffsetFromCenter(UIOffset(horizontal: 0, vertical: 0))
-        SVProgressHUD.setDefaultStyle(SVProgressHUDStyle.custom)
-        SVProgressHUD.setBackgroundColor(UIColor.appWhite)
-        SVProgressHUD.setForegroundColor(UIColor.appGreen)
-        SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.clear)
-        SVProgressHUD.show(withStatus: message)
-        
-        /*
-        // Auto-dismiss after 90 seconds
-        DispatchQueue.main.asyncAfter(deadline: .now() + 90) {
-            if SVProgressHUD.isVisible() {
-                SVProgressHUD.dismiss()
-                AlertHelper.shared.showCustomeAlert(message: "Request timed out. Please try again.")
-            }
-        }
-        */
-    }
-    
-    
-    // This method hide the MBProgressHUD loader and can be invoked from any ViewController
+
     class func hideLoader() {
-        SVProgressHUD.dismiss()
+        loaderView?.removeFromSuperview()
+        loaderView = nil
+        messageLabel = nil
     }
+
+    class func updateLoaderMessage(_ text: String) {
+        messageLabel?.text = text
+    }
+    
+    private static func addGradientBackground(to view: UIView) {
+
+        // remove old gradient if any
+        view.layer.sublayers?
+            .filter { $0 is CAGradientLayer }
+            .forEach { $0.removeFromSuperlayer() }
+
+        let gradient = CAGradientLayer()
+        gradient.frame = view.bounds
+
+        gradient.colors = [
+            UIColor.black.cgColor,
+            UIColor(hex: "#0A1A10").cgColor,
+            UIColor.black.cgColor
+        ]
+
+        gradient.startPoint = CGPoint(x: 0.5, y: 0.0)
+        gradient.endPoint   = CGPoint(x: 0.5, y: 1.0)
+
+        view.layer.insertSublayer(gradient, at: 0)
+    }
+
+    
+//    class func showLoader(message: String? = nil) {
+//        SVProgressHUD.setOffsetFromCenter(UIOffset(horizontal: 0, vertical: 0))
+//        SVProgressHUD.setDefaultStyle(SVProgressHUDStyle.custom)
+//        SVProgressHUD.setBackgroundColor(UIColor.appWhite)
+//        SVProgressHUD.setForegroundColor(UIColor.appGreen)
+//        SVProgressHUD.setDefaultMaskType(SVProgressHUDMaskType.clear)
+//        SVProgressHUD.show(withStatus: message)
+//        
+//        /*
+//        // Auto-dismiss after 90 seconds
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 90) {
+//            if SVProgressHUD.isVisible() {
+//                SVProgressHUD.dismiss()
+//                AlertHelper.shared.showCustomeAlert(message: "Request timed out. Please try again.")
+//            }
+//        }
+//        */
+//    }
+//    
+//    
+//    // This method hide the MBProgressHUD loader and can be invoked from any ViewController
+//    class func hideLoader() {
+//        SVProgressHUD.dismiss()
+//    }
     
     //MARK: -----------------------MAKING FOR SOCIAL SHARE
     func shareSocial(
@@ -169,3 +256,62 @@ func hideLoadingIndicator() {
     loadingView?.removeFromSuperview()
     loadingView = nil
 }
+
+// MARK: - Dot Ring Loader
+class DotRingLoaderView: UIView {
+
+    private let replicatorLayer = CAReplicatorLayer()
+    private let dot = CALayer()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupLoader()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupLoader()
+    }
+
+    private func setupLoader() {
+
+        let dotCount = 6
+        let angle = (2 * CGFloat.pi) / CGFloat(dotCount)
+
+        layer.addSublayer(replicatorLayer)
+        replicatorLayer.instanceCount = dotCount
+        replicatorLayer.instanceTransform =
+            CATransform3DMakeRotation(angle, 0, 0, 1)
+        replicatorLayer.instanceDelay = 0.1
+
+        dot.backgroundColor = UIColor.white.cgColor
+        dot.cornerRadius = 5
+        replicatorLayer.addSublayer(dot)
+
+        // Fade animation
+        let anim = CABasicAnimation(keyPath: "opacity")
+        anim.fromValue = 1
+        anim.toValue = 0.2
+        anim.duration = 0.8
+        anim.repeatCount = .infinity
+        dot.add(anim, forKey: "opacity")
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        replicatorLayer.frame = bounds
+
+        let radius: CGFloat = 18
+        let dotSize: CGFloat = 10
+
+        dot.frame = CGRect(
+            x: bounds.midX - dotSize/2,
+            y: bounds.midY - radius - dotSize/2,
+            width: dotSize,
+            height: dotSize
+        )
+        dot.cornerRadius = dotSize / 2
+    }
+}
+
