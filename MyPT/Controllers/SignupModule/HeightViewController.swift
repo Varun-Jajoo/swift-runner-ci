@@ -30,9 +30,6 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     private var textFieldCenterConstraint: NSLayoutConstraint!
     
     //MARK: -------------IBOUTLET
-//    @IBOutlet weak var measureScaleMBV: UIView!
-//    @IBOutlet weak var scaleMBV: RulerMultiUnitRuler!
-//    @IBOutlet weak var heightMeasureType: UISegmentedControl!
     @IBOutlet weak var topTitleLbl: UILabel!
     @IBOutlet weak var continueBtn: UIButton!
     @IBOutlet var viewBackground: UIView!
