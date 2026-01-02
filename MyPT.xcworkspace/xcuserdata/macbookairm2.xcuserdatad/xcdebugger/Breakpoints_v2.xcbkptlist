@@ -34,36 +34,6 @@
             endingLineNumber = "269"
             landmarkName = "collectionView(_:didDeselectItemAt:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "14C66898-F687-4F61-9306-47E89026CDE6 - b5c3d8b19506d9a"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "MyPT_Connect.GoalsViewController.collectionView(_: __C.UICollectionView, didDeselectItemAt: Foundation.IndexPath) -&gt; ()"
-                  moduleName = "MyPT Connect.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/macbookairm2/Documents/MyPt_Consumer/MyPT/Controllers/SignupModule/GoalsViewController.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "269"
-                  endingLineNumber = "269">
-               </Location>
-               <Location
-                  uuid = "14C66898-F687-4F61-9306-47E89026CDE6 - b5c3d8b19506d9a"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "MyPT_Connect.GoalsViewController.collectionView(_: __C.UICollectionView, didDeselectItemAt: Foundation.IndexPath) -&gt; ()"
-                  moduleName = "MyPT Connect.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/macbookairm2/Documents/MyPt_Consumer/MyPT/Controllers/SignupModule/GoalsViewController.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "269"
-                  endingLineNumber = "269">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
