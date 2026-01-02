@@ -52,32 +52,32 @@ enum OtpBoxState {
 
 class OtpViewController: CommonViewController, UITextFieldDelegate {
     
-    //MARK: ---------VARIABLE
+    // MARK: ---------VARIABLE
     private var backgroundGradient: CAGradientLayer?
     private var isWrongOtp = false
     var player: LoopingPlayer?
     var mobilNumStr:String?
     var countryCodeStr:String?
     var inputType:String?
-
+    var timeCouter: Int? = 0
     lazy var timer: Timer? = nil
     
-    lazy var timeCouter : Int? = nil {
-        didSet{
-            if let timeCouter = timeCouter {
-                receiveOtpLbl.text = nil
-                if timeCouter > 0 {
-                    resentOtpLbl.text = "\(timeCouter) seconds"
-                } else {
-                    self.stopTimer()
-                    receiveOtpLbl.text = "Didn’t receive OTP?"
-                    self.setupResnd(timeStr: "\(timeCouter)")
-                }
-            }
-        }
-    }
+//    lazy var timeCouter : Int? = nil {
+//        didSet{
+//            if let timeCouter = timeCouter {
+////                receiveOtpLbl.text = nil
+//                if timeCouter > 0 {
+//                    resentOtpLbl.text = "Resend OTP in " + "\(timeCouter) seconds"
+//                } else {
+//                    self.stopTimer()
+//                    receiveOtpLbl.text = "Didn’t receive OTP?"
+//                    self.setupResnd(timeStr: "\(timeCouter)")
+//                }
+//            }
+//        }
+//    }
     
-    //MARK: ---------- IBOUTLET
+    // MARK: ---------- IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
     @IBOutlet weak var topDescLbl: UILabel!
     @IBOutlet weak var mobilNumeLbl: UILabel!
@@ -100,13 +100,15 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        self.resentOtpLbl.isUserInteractionEnabled = false
         self.mobileNumFormat()
 //        if let countryCodeStr = countryCodeStr, let mobilNumStr = mobilNumStr {
 //            mobilNumeLbl.text = countryCodeStr + mobilNumStr
 //        }
-        receiveOtpLbl.text = nil
-        resentOtpLbl.text  = nil
+//        receiveOtpLbl.text = nil
+//        resentOtpLbl.text  = nil
+        resentOtpLbl.text = "Resend OTP in"
+        receiveOtpLbl.text = "Didn’t receive OTP?"
         self.startTimer()
         setupBackgroundGradient()
         oneTxtField.delegate = self
@@ -118,6 +120,10 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         setUpFont()
 //        setUpVideo()
         self.customBlurViewShow(viewShow: self.view)
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(resendTapped))
+            resentOtpLbl.addGestureRecognizer(tap)
+            resentOtpLbl.isUserInteractionEnabled = false
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -130,6 +136,13 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         super.viewDidLayoutSubviews()
         backgroundGradient?.frame = viewBackground.bounds
     }
+    
+    @objc func resendTapped() {
+        guard resentOtpLbl.isUserInteractionEnabled else { return }
+        print("Resend tapped")
+        resendOtp()
+    }
+
 
     func updateOtpUI() {
         let mapping: [(UITextField, UIView)] = [
@@ -179,12 +192,12 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         self.setRighMenu(rightImgs: [AppImages.help], setTitle: [AppStrings.helpStr], setTintColor: .black, setTitleColor: UIColor.appWhite,isRightImg: [false])
     }
     
-    //MARK: ---------------EDIT MOBILE NUMBER ACTN
+    // MARK: ---------------EDIT MOBILE NUMBER ACTN
     @IBAction func editMobileBtnActn(_ sender: Any) {
         self.navigationController?.popViewController(animated: false)
     }
     
-    private func mobileNumFormat(){
+    private func mobileNumFormat() {
         if let countryCodeStr = countryCodeStr, let mobilNumStr = mobilNumStr {
             var formattedNum = ""
             for (index, char) in mobilNumStr.enumerated() {
@@ -197,7 +210,7 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         }
     }
     
-    //MARK: ---------------------VIDEO SETUP
+    // MARK: ---------------------VIDEO SETUP
     func setUpVideo(){
         if let filePath = Bundle.main.path(forResource: "landdingVideo", ofType: "mp4") {
             let fileURL = URL(fileURLWithPath: filePath)
@@ -222,25 +235,46 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         } else {
             print("Video file not found")
         }
-        
     }
     
-    //MARK: --------------------Timer
+    // MARK: --------------------Timer
     func startTimer() {
         self.stopTimer()
         self.timeCouter = 30 //1
+        resentOtpLbl.isUserInteractionEnabled = false
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(getTime), userInfo: nil, repeats: true)
     }
     
     @objc func getTime() {
-        if let _ = self.timeCouter {
-            self.timeCouter! -= 1
-        }else{
-            print("Timer",timer?.timeInterval as Any)
-            self.timeCouter = 1
+        guard let counter = timeCouter else { return }
+
+        if counter > 0 {
+            timeCouter = counter - 1
+            resentOtpLbl.text = "Resend OTP in \(counter) seconds"
+            resentOtpLbl.isUserInteractionEnabled = false   // still running ⛔️
+        } else {
+            stopTimer()
+            timerFinished()
         }
-        
     }
+
+    func timerFinished() {
+        resentOtpLbl.text = "Resend OTP"
+        receiveOtpLbl.text = "Didn’t receive OTP?"
+        resentOtpLbl.isUserInteractionEnabled = true   // ✅ Enable tap
+    }
+
+
+//    @objc func getTime() {
+//        if let _ = self.timeCouter {
+//            self.timeCouter! -= 1
+//            self.resentOtpLbl.isUserInteractionEnabled = false
+//        } else {
+//            print("Timer",timer?.timeInterval as Any)
+//            self.timeCouter = 1
+//            self.resentOtpLbl.isUserInteractionEnabled = true
+//        }
+//    }
     
     func stopTimer() {
         timer?.invalidate()
@@ -265,7 +299,7 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
             NSAttributedString(string: timeStr + " " + "seconds",
                                attributes: makeAttributes)
         ] as [AttributedStringComponent]
-        self.resentOtpLbl.attributedText       =  NSAttributedString(from: attributedNickName, defaultAttributes: defaultAttributes)
+        self.resentOtpLbl.attributedText = NSAttributedString(from: attributedNickName, defaultAttributes: defaultAttributes)
         
         // Add a tap gesture recognizer
         self.resentOtpLbl.isUserInteractionEnabled = true
@@ -301,7 +335,7 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         }
     }
     
-    func setUpFont(){
+    func setUpFont() {
         self.topTitleLbl.font = AppFont.medium.size(24.0, familyName: familyClashDisplay)
         self.topDescLbl.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
         self.mobilNumeLbl.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
@@ -318,7 +352,7 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         //------------
         if inputType != "3" {
             self.topTitleLbl.text = "Verify your mobile number"
-        }else{
+        } else {
             self.topTitleLbl.text = "Verify your email"
         }
         //        //-------------------- Attributed Text
@@ -347,11 +381,9 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
         twoTxTField.addTarget(self, action: #selector(textFieldDidChange(textField:)), for: UIControl.Event.editingChanged)
         threeTxTField.addTarget(self, action: #selector(textFieldDidChange(textField:)), for: UIControl.Event.editingChanged)
         fourTxTField.addTarget(self, action: #selector(textFieldDidChange(textField:)), for: UIControl.Event.editingChanged)
-        
     }
     
     private func setupBackgroundGradient() {
-
         // Remove old gradient if any
         backgroundGradient?.removeFromSuperlayer()
 
@@ -370,7 +402,6 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
     }
 
     @objc func textFieldDidChange(textField: UITextField) {
-        
         if isWrongOtp {
             isWrongOtp = false
             invalidOtpLbl.isHidden = true
@@ -445,10 +476,9 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
     }
 }
 
-
 extension OtpViewController {
     
-    func resendOtp(){
+    func resendOtp() {
         if inputType != "3" {
             if RegistrationVM.isValidePhone(phoneNumStr: self.mobilNumStr) {
                 RegistrationVM.resendOtpApi(inputEmail: "", inputPhoneNum: self.mobilNumStr, inputCountryCode: self.countryCodeStr, loginType: self.inputType, completion: { [weak self] getResult in
@@ -457,12 +487,12 @@ extension OtpViewController {
                     if getResult.status == true {
                         AlertHelper.shared.alertMesssage(view: self, title: "", message: (getResult.msg ?? ""))
                         self.startTimer()
-                    }else{
+                    } else {
                         AlertHelper.shared.alertMesssage(view: self, title: "", message: (getResult.errors?.values.first?.first as? String ?? ""))
                     }
                 })
             }
-        }else{
+        } else {
             RegistrationVM.resendOtpApi(inputEmail: self.mobilNumStr, inputPhoneNum: "", inputCountryCode: self.countryCodeStr, loginType: self.inputType, completion: { [weak self] getResult in
                 guard let self = self, let getResult = getResult else { return  }
                 
@@ -476,7 +506,7 @@ extension OtpViewController {
         }
     }
     
-    func submitOtp(inputOtp: String){
+    func submitOtp(inputOtp: String) {
         if inputType != "3" {
             if RegistrationVM.isValidePhone(phoneNumStr: self.mobilNumStr) {
                 RegistrationVM.submitOtpApi(inputEmail: "", inputPhoneNum: self.mobilNumStr, inputCountryCode: self.countryCodeStr, loginType: self.inputType, otpStr: inputOtp, completion: { [weak self] getResult in
@@ -506,7 +536,7 @@ extension OtpViewController {
                             //                        let vc:PersoniledViewController = PersoniledViewController.instantiate(appStoryboard: .main)
                             //                        self.navigationController?.pushViewController(vc, animated: true)
                             
-                        } else{
+                        } else {
                             if let getStep = getResult.data?.step?.intValue ,  let currentVC = vcSteps.getCurrentVC(vcRawValue: getStep) {
                                 // Use the currentVC, which will be the type of the corresponding view controller
                                 let getVC = currentVC.instantiate(appStoryboard: .main)
@@ -528,7 +558,7 @@ extension OtpViewController {
                     }
                 })
             }
-        }else{
+        } else {
 //            if RegistrationVM.isValidePhone(phoneNumStr: self.mobilNumStr) {
                 RegistrationVM.submitOtpApi(inputEmail: self.mobilNumStr, inputPhoneNum: "", inputCountryCode: self.countryCodeStr, loginType: self.inputType, otpStr: inputOtp, completion: { [weak self] getResult in
                     guard let self = self, let getResult = getResult else { return  }
@@ -557,19 +587,18 @@ extension OtpViewController {
                             //                        let vc:PersoniledViewController = PersoniledViewController.instantiate(appStoryboard: .main)
                             //                        self.navigationController?.pushViewController(vc, animated: true)
                             
-                        } else{
+                        } else {
                             if let getStep = getResult.data?.step?.intValue ,  let currentVC = vcSteps.getCurrentVC(vcRawValue: getStep) {
                                 // Use the currentVC, which will be the type of the corresponding view controller
                                 let getVC = currentVC.instantiate(appStoryboard: .main)
                                 self.navigationController?.pushViewController(getVC, animated: true)
-                            }
-                            else{
+                            } else {
                                 let vc:NameViewController = NameViewController.instantiate(appStoryboard: .main)
                                 self.navigationController?.pushViewController(vc, animated: false)
                             }
                         }
                         
-                    }else{
+                    } else {
                         //(getResult.errors?.values.first?.first as? String ?? "")
                         let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
                         AlertHelper.shared.alertMesssage(view: self, title: "", message: errorMsg ?? "")
@@ -587,9 +616,7 @@ extension OtpViewController {
 
         containers.forEach {
             $0?.layer.cornerRadius = 18
-//            $0?.applyOtpGradient()
         }
-//        self.oneContainer.backgroundColor =  UIColor(red: 53.0/255.0, green: 62.0/255.0, blue:  56.0/255.0, alpha: 1.0)
         fields.forEach {
             $0?.backgroundColor = .clear
             $0?.textAlignment = .center
@@ -598,7 +625,6 @@ extension OtpViewController {
             $0?.tintColor = .white
         }
     }
-
 }
 
 extension OtpViewController: LoopingPlayerProgressDelegate{

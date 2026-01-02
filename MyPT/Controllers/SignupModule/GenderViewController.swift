@@ -76,7 +76,6 @@ class GenderViewController: CommonViewController {
     }
     
     override func rightBtnActn(sender: UIButton) {
-        
         appUserDefaults.setRegistrationSkip(value: true)
         appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
     }
