@@ -1935,13 +1935,8 @@ date of birth ?</string>
                                 <color key="textColor" name="appWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fX0-IV-ILP">
-                                <rect key="frame" x="20" y="179.33333333333334" width="353" height="42"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ahW-XT-QCa">
-                                <rect key="frame" x="88" y="222.33333333333334" width="217" height="44.000000000000028"/>
+                                <rect key="frame" x="88" y="204.33333333333334" width="217" height="44"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="EbM-ho-P2e">
                                         <rect key="frame" x="5" y="5" width="207" height="34"/>
@@ -2005,23 +2000,19 @@ date of birth ?</string>
                             <constraint firstItem="DE8-P3-FVy" firstAttribute="top" secondItem="ca4-gs-yrC" secondAttribute="top" constant="23" id="C1I-Ae-ln4"/>
                             <constraint firstItem="DE8-P3-FVy" firstAttribute="leading" secondItem="ca4-gs-yrC" secondAttribute="leading" constant="20" id="KDb-F2-gQ6"/>
                             <constraint firstItem="ahW-XT-QCa" firstAttribute="height" secondItem="eDn-ZR-ucp" secondAttribute="height" multiplier="48:932" id="Ol1-H6-q0z"/>
-                            <constraint firstItem="fX0-IV-ILP" firstAttribute="leading" secondItem="DE8-P3-FVy" secondAttribute="leading" id="PdQ-fx-C2h"/>
                             <constraint firstAttribute="bottom" secondItem="QDX-Gc-AuR" secondAttribute="bottom" constant="52" id="S52-xX-Ij3"/>
-                            <constraint firstItem="fX0-IV-ILP" firstAttribute="top" secondItem="DE8-P3-FVy" secondAttribute="bottom" id="SAP-nr-M3e"/>
                             <constraint firstAttribute="bottom" secondItem="SDk-wF-Zo9" secondAttribute="bottom" id="UoH-gc-vfh"/>
                             <constraint firstItem="QDX-Gc-AuR" firstAttribute="leading" secondItem="ca4-gs-yrC" secondAttribute="leading" constant="20" id="WnX-te-rvR"/>
                             <constraint firstItem="SDk-wF-Zo9" firstAttribute="trailing" secondItem="eDn-ZR-ucp" secondAttribute="trailing" id="XnQ-2X-imv"/>
                             <constraint firstItem="Vhm-9F-LfU" firstAttribute="leading" secondItem="eDn-ZR-ucp" secondAttribute="leading" id="a6j-jR-eWR"/>
-                            <constraint firstItem="fX0-IV-ILP" firstAttribute="height" secondItem="eDn-ZR-ucp" secondAttribute="height" multiplier="46:932" id="bAm-1W-qnE"/>
                             <constraint firstItem="ca4-gs-yrC" firstAttribute="trailing" secondItem="QDX-Gc-AuR" secondAttribute="trailing" constant="20" id="bZY-8R-nl0"/>
                             <constraint firstItem="ahW-XT-QCa" firstAttribute="centerX" secondItem="DE8-P3-FVy" secondAttribute="centerX" id="bbe-eS-OmM"/>
                             <constraint firstItem="QDX-Gc-AuR" firstAttribute="top" secondItem="zQv-ep-R40" secondAttribute="bottom" constant="27" id="f7C-Hz-NDr"/>
                             <constraint firstItem="ca4-gs-yrC" firstAttribute="trailing" secondItem="DE8-P3-FVy" secondAttribute="trailing" constant="20" id="ge3-HO-5pd"/>
+                            <constraint firstItem="ahW-XT-QCa" firstAttribute="top" secondItem="DE8-P3-FVy" secondAttribute="bottom" constant="25" id="irO-fF-EkH"/>
                             <constraint firstItem="SDk-wF-Zo9" firstAttribute="top" secondItem="eDn-ZR-ucp" secondAttribute="top" id="lNp-a2-o2R"/>
-                            <constraint firstItem="ahW-XT-QCa" firstAttribute="top" secondItem="fX0-IV-ILP" secondAttribute="bottom" constant="1" id="mGN-0I-xSg"/>
                             <constraint firstItem="Vhm-9F-LfU" firstAttribute="trailing" secondItem="eDn-ZR-ucp" secondAttribute="trailing" id="oxN-2Y-mVh"/>
                             <constraint firstItem="Vhm-9F-LfU" firstAttribute="top" secondItem="eDn-ZR-ucp" secondAttribute="top" id="phV-5b-FZh"/>
-                            <constraint firstItem="fX0-IV-ILP" firstAttribute="trailing" secondItem="DE8-P3-FVy" secondAttribute="trailing" id="wne-ES-mLq"/>
                             <constraint firstItem="SDk-wF-Zo9" firstAttribute="leading" secondItem="eDn-ZR-ucp" secondAttribute="leading" id="ycD-Gw-koI"/>
                         </constraints>
                     </view>
@@ -2030,6 +2021,7 @@ date of birth ?</string>
                         <outlet property="btnFeet" destination="H2Z-cO-s4W" id="btO-j8-Xx7"/>
                         <outlet property="continueBtn" destination="QDX-Gc-AuR" id="wTH-eZ-dOL"/>
                         <outlet property="lblNote" destination="zQv-ep-R40" id="iht-Ie-iCC"/>
+                        <outlet property="nextButtonBottomConstraint" destination="S52-xX-Ij3" id="n28-uw-qNf"/>
                         <outlet property="topTitleLbl" destination="DE8-P3-FVy" id="z6e-gK-mkB"/>
                         <outlet property="viewBackground" destination="eDn-ZR-ucp" id="QWW-hg-4So"/>
                         <outlet property="viewHeightType" destination="ahW-XT-QCa" id="pNu-Pc-YHr"/>

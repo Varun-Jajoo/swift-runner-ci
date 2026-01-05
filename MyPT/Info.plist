@@ -132,6 +132,8 @@
 		<string>remote-notification</string>
 		<string>processing</string>
 	</array>
+	<key>UIDesignRequiresCompatibility</key>
+	<true/>
 	<key>UIDeviceFamily</key>
 	<array>
 		<integer>1</integer>

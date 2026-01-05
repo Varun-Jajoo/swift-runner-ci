@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import IQKeyboardManagerSwift
+import IQKeyboardToolbarManager
 
 class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFieldDelegate {
 
@@ -28,6 +30,9 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     var previousText = ""
     private var textFieldLeadingConstraint: NSLayoutConstraint!
     private var textFieldCenterConstraint: NSLayoutConstraint!
+    private var valueTextFieldCenterYConstraint: NSLayoutConstraint!
+    private var textFieldAboveButtonConstraint: NSLayoutConstraint!
+    
     var isFeetSelected = true
     
     //MARK: -------------IBOUTLET
@@ -38,6 +43,7 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     @IBOutlet weak var btnFeet: UIButton!
     @IBOutlet weak var btnCms: UIButton!
     @IBOutlet weak var lblNote: UILabel!
+    @IBOutlet weak var nextButtonBottomConstraint: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,6 +66,7 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         //        setupUI()
         setupValueTextField()
         
+        
 //        setUpSegmet()
 //        setupSegmentedControlStyle()
 //        enableContinueBtn(isSelected: true)
@@ -69,6 +76,20 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
             print("userData", userData)
             print("userData name: ", userName, "Id: ",userData.id ?? "",  userData.phone ?? "")
         }
+        
+//        NotificationCenter.default.addObserver(
+//            self,
+//            selector: #selector(keyboardWillShow),
+//            name: UIResponder.keyboardWillShowNotification,
+//            object: nil
+//        )
+//        
+//        NotificationCenter.default.addObserver(
+//            self,
+//            selector: #selector(keyboardWillHide),
+//            name: UIResponder.keyboardWillHideNotification,
+//            object: nil
+//        )
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -81,6 +102,13 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     override func viewDidAppear(_ animated: Bool) {
         self.rulerView.scrollToValue(rulerView: rulerView, scrollView: scrollView, currentIndex)
         self.valueLabel.text = rulerView.displayText(for: rulerView.selectedValue ?? currentIndex)
+        IQKeyboardManager.shared.isEnabled = false
+        IQKeyboardToolbarManager.shared.isEnabled = false
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        IQKeyboardManager.shared.isEnabled = true
+        IQKeyboardToolbarManager.shared.isEnabled = true
     }
     
     override func viewDidLayoutSubviews() {
@@ -88,7 +116,7 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         backgroundGradient?.frame = viewBackground.bounds
     }
     
-    private func setNavUI(){
+    private func setNavUI() {
         self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
         self.setProgress(0.5)
         self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
@@ -343,7 +371,7 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     private func setupValueTextField() {
         valueTextField.text = ""
         valueTextField.textColor = .white
-        valueTextField.font =  AppFont.semibold.size(40.0, familyName: familyClashDisplay)
+        valueTextField.font = AppFont.semibold.size(40.0, familyName: familyClashDisplay)
         valueTextField.textAlignment = .center
         valueTextField.keyboardType = .decimalPad
         valueTextField.backgroundColor = .clear
@@ -371,20 +399,69 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         textFieldCenterConstraint = valueTextField.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         textFieldCenterConstraint.isActive = false
         
+        textFieldAboveButtonConstraint =
+        valueTextField.bottomAnchor.constraint(equalTo: continueBtn.topAnchor, constant: -12)
+        
+        textFieldAboveButtonConstraint.isActive = false   // only used when editing
+        
+        // Create the constraint and store it
+        valueTextFieldCenterYConstraint =
+        valueTextField.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor,
+                                                constant: 12)
+        
+        // Activate all constraints together
         NSLayoutConstraint.activate([
             textFieldLeadingConstraint,
-            valueTextField.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor, constant: 12),
-            // IMPORTANT: NO fixed width
+            valueTextFieldCenterYConstraint,
             valueTextField.heightAnchor.constraint(equalToConstant: 32),
+            
             underlineView.topAnchor.constraint(equalTo: valueTextField.bottomAnchor, constant: 6),
             underlineView.leadingAnchor.constraint(equalTo: valueTextField.leadingAnchor),
             underlineView.trailingAnchor.constraint(equalTo: valueTextField.trailingAnchor),
             underlineView.heightAnchor.constraint(equalToConstant: 2),
-            // Button → right of text
+            
             moveButton.leadingAnchor.constraint(equalTo: valueTextField.trailingAnchor, constant: 8),
             moveButton.centerYAnchor.constraint(equalTo: valueTextField.centerYAnchor)
         ])
+        
     }
+    
+    
+//    @objc override func keyboardWillShow(_ notification: Notification) {
+//        guard let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+//              let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+//        
+//        let keyboardHeight = frame.height - view.safeAreaInsets.bottom
+//        
+//        // Adaptive keyboard padding (SE vs big phones)
+//        let padding: CGFloat = view.bounds.height < 700 ? 12 : 38
+//        nextButtonBottomConstraint.constant = keyboardHeight + padding
+//        
+//        valueTextFieldCenterYConstraint.isActive = false
+//        textFieldAboveButtonConstraint.isActive = true
+//        
+//        let screenHeight = view.bounds.height
+//        let spacing: CGFloat = screenHeight < 700 ? -12 : -34
+//        textFieldAboveButtonConstraint.constant = spacing
+//        
+//        UIView.animate(withDuration: duration) {
+//            self.view.layoutIfNeeded()
+//        }
+//    }
+    
+//    @objc override func keyboardWillHide(_ notification: Notification) {
+//        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+//        
+//        nextButtonBottomConstraint.constant = 16
+//        textFieldAboveButtonConstraint.isActive = false
+//        valueTextFieldCenterYConstraint.isActive = true
+//        valueTextFieldCenterYConstraint.constant = 12
+//        
+//        UIView.animate(withDuration: duration) {
+//            self.view.layoutIfNeeded()
+//        }
+//    }
+    
     // MARK: Button Tap Function
     @objc private func moveLabelToCenter() {
         valueTextField.isUserInteractionEnabled = true

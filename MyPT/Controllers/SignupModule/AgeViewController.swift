@@ -13,6 +13,9 @@ class AgeViewController: CommonViewController {
     var selectedDate: String?
     private let dobPicker = WheelDob()
     private var backgroundGradient: CAGradientLayer?
+    private let yearCurveIV  = UIImageView(image: UIImage(named: "YearBg"))
+    private let monthCurveIV = UIImageView(image: UIImage(named: "MonthBg"))
+    private let dayCurveIV   = UIImageView(image: UIImage(named: "DateBg"))
     
     //MARK: ----------IBOUTLET
     @IBOutlet weak var bottomNoteMBV: UIView!
@@ -28,13 +31,15 @@ class AgeViewController: CommonViewController {
         super.viewDidLoad()
         setupUI()
         setUpFont()
-//        self.enableContinueBtn(isSelected: true)
-        self.wheelDobSetup()
-        setupBackgroundGradient()
-//        addCenterGlow()
-        addSideFade()
+        setupYearBackground()   // 👈 IMPORTANT
+        setupMonthBackground()
+        wheelDobSetup()
+//        setupBackgroundGradient()
         updateContinueButton(isEnabled: true)
         setupContinueButtonIcon(isEnabled: true)
+        yearsMBV.clipsToBounds = false
+        monthsMBV.clipsToBounds = false
+        addSideFade()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -63,6 +68,50 @@ class AgeViewController: CommonViewController {
         appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
     }
     
+    private func setupYearBackground() {
+
+            yearCurveIV.translatesAutoresizingMaskIntoConstraints = false
+            yearCurveIV.image = UIImage(named: "YearBg")
+            yearCurveIV.contentMode = .scaleToFill   // 👈 IMPORTANT
+            yearCurveIV.clipsToBounds = false
+    //        yearCurveIV.backgroundColor = .red.withAlphaComponent(0.3)
+
+            yearsMBV.insertSubview(yearCurveIV, at: 0)
+
+            NSLayoutConstraint.activate([
+                yearCurveIV.leadingAnchor.constraint(equalTo: yearsMBV.leadingAnchor),
+                yearCurveIV.trailingAnchor.constraint(equalTo: yearsMBV.trailingAnchor),
+
+                // 👇 Half circle ko TOP se hang karna hai
+                yearCurveIV.topAnchor.constraint(equalTo: yearsMBV.topAnchor, constant: -35),
+
+                // 👇 image actual height
+                yearCurveIV.heightAnchor.constraint(equalToConstant: 220)
+            ])
+        }
+        
+        private func setupMonthBackground() {
+
+            monthCurveIV.translatesAutoresizingMaskIntoConstraints = false
+            monthCurveIV.contentMode = .scaleToFill
+            monthCurveIV.clipsToBounds = false
+            monthCurveIV.backgroundColor = .red
+
+            // 👇 background me add karo
+            monthsMBV.insertSubview(monthCurveIV, at: 0)
+
+            NSLayoutConstraint.activate([
+                monthCurveIV.leadingAnchor.constraint(equalTo: monthsMBV.leadingAnchor),
+                monthCurveIV.trailingAnchor.constraint(equalTo: monthsMBV.trailingAnchor),
+
+                // 👇 month arc thoda upar se hang hota hai
+                monthCurveIV.topAnchor.constraint(equalTo: monthsMBV.topAnchor, constant: -30),
+
+                // 👇 SVG ke radius ke according
+                monthCurveIV.heightAnchor.constraint(equalToConstant: 200)
+            ])
+        }
+    
     //MARK: ---------- SET UI
     func setupUI(){
         //-----------*************
@@ -79,78 +128,41 @@ class AgeViewController: CommonViewController {
         self.continueBtn.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
     }
     
-//    private func setupBackgroundGradient() {
-//        // Remove old gradient if any
-//        backgroundGradient?.removeFromSuperlayer()
-//        
-//        let gradient = CAGradientLayer()
-//        gradient.colors = UIColor.appMultiColor(.greenBgGradient).map { $0.cgColor }
-//        
-//        // VERY IMPORTANT – match first UI direction
-//        gradient.startPoint = CGPoint(x: 0.0, y: 0.0)
-//        gradient.endPoint   = CGPoint(x: 1.0, y: 1.0)
-//        
-//        gradient.locations = [0.0, 0.5, 1.0]
-//        gradient.cornerRadius = 0
-//        
-//        viewBackground.layer.insertSublayer(gradient, at: 0)
-//        backgroundGradient = gradient
-//    }
-    
-    private func setupBackgroundGradient() {
-        backgroundGradient?.removeFromSuperlayer()
-
-        let gradient = CAGradientLayer()
-        gradient.frame = viewBackground.bounds
-
-        gradient.colors = [
-            UIColor.black.cgColor,
-            UIColor(hex: "#0A1A10").cgColor,
-            UIColor.black.cgColor
-        ]
-
-        gradient.startPoint = CGPoint(x: 0.5, y: 0.0)
-        gradient.endPoint   = CGPoint(x: 0.5, y: 1.0)
-
-        viewBackground.layer.insertSublayer(gradient, at: 0)
-        backgroundGradient = gradient
-    }
-
     private func addCenterGlow() {
         let glowLayer = CAGradientLayer()
         glowLayer.frame = viewBackground.bounds
-
+        
         glowLayer.colors = [
             UIColor.clear.cgColor,
             UIColor(hex: "#9CFF2E").withAlphaComponent(0.25).cgColor,
             UIColor.clear.cgColor
         ]
-
+        
         glowLayer.locations = [0.4, 0.5, 0.6]
         glowLayer.startPoint = CGPoint(x: 0.0, y: 0.5)
         glowLayer.endPoint   = CGPoint(x: 1.0, y: 0.5)
-
+        
         viewBackground.layer.addSublayer(glowLayer)
     }
-
+    
     private func addSideFade() {
         let sideFade = CAGradientLayer()
         sideFade.frame = viewBackground.bounds
-
+        
         sideFade.colors = [
             UIColor.black.cgColor,
             UIColor.clear.cgColor,
             UIColor.clear.cgColor,
             UIColor.black.cgColor
         ]
-
+        
         sideFade.locations = [0.0, 0.15, 0.85, 1.0]
         sideFade.startPoint = CGPoint(x: 0.0, y: 0.5)
         sideFade.endPoint   = CGPoint(x: 1.0, y: 0.5)
-
+        
         monthsMBV.layer.addSublayer(sideFade)
     }
-
+    
     
     func updateContinueButton(isEnabled: Bool) {
         continueBtn.isEnabled = isEnabled
@@ -210,25 +222,11 @@ class AgeViewController: CommonViewController {
         }
     }
     
-    
-    //MARK: -------------- ENABLE CONTINUE
-//    func enableContinueBtn(isSelected:Bool = false){
-//        if isSelected {
-//            self.continueBtn.isUserInteractionEnabled = true
-//            self.continueBtn.backgroundColor = UIColor.appWhite
-//            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
-//        } else {
-//            self.continueBtn.isUserInteractionEnabled = false
-//            self.continueBtn.backgroundColor = UIColor.appDarkGray
-//            self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
-//        }
-//    }
-    
     func wheelDobSetup(){
-        
         dobPicker.delegate = self
         dobPicker.backgroundColor = UIColor.clear
         self.yearsMBV.addSubview(dobPicker)
+        yearsMBV.bringSubviewToFront(dobPicker)
     }
 }
 
