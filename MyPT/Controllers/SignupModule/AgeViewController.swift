@@ -39,7 +39,7 @@ class AgeViewController: CommonViewController {
         setupContinueButtonIcon(isEnabled: true)
         yearsMBV.clipsToBounds = false
         monthsMBV.clipsToBounds = false
-        addSideFade()
+//        addSideFade()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -48,6 +48,34 @@ class AgeViewController: CommonViewController {
         self.statusBarColor(setColor: .clear)
         setNavUI()
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                let date18 = self.dobPicker.default18YearsAgoDate()
+                let parts = self.components(from: date18)
+
+                self.dobPicker.selectInitialDate(
+                    year: parts.year,
+                    month: parts.month,
+                    day: parts.day
+                )
+            }
+        }
+
+
+        func components(from date: Date) -> (year: String, month: String, day: String) {
+            let calendar = Calendar.current
+            
+            let year  = calendar.component(.year, from: date)
+            let month = calendar.component(.month, from: date)
+            let day   = calendar.component(.day, from: date)
+            
+            let monthName = calendar.shortMonthSymbols[month - 1] // Jan, Feb...
+            
+            return ("\(year)", monthName, "\(day)")
+        }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()

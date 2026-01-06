@@ -125,6 +125,10 @@ class WheelDob: UIView {
         setAttributeAgeLbl(age: 0)
     }
     
+    func default18YearsAgoDate() -> Date {
+            Calendar.current.date(byAdding: .year, value: -18, to: Date()) ?? Date()
+        }
+    
     private func layoutCenterView() {
 
         NSLayoutConstraint.activate([
@@ -212,6 +216,33 @@ class WheelDob: UIView {
             dayBgIV.heightAnchor.constraint(equalToConstant: 200)
         ])
     }
+    
+    func selectInitialDate(year: String, month: String, day: String) {
+
+            // 🔴 auto scroll band
+            yearPicker.allowAutoScrollToLast = false
+            monthPicker.allowAutoScrollToLast = false
+            dayPicker.allowAutoScrollToLast = false
+
+            if let y = yearPicker.values.firstIndex(of: year) {
+                yearPicker.selectedIndex = y
+                yearPicker.scrollToIndex(y)
+                selectedYear = Int(year)
+            }
+
+            if let m = monthPicker.values.firstIndex(of: month) {
+                monthPicker.selectedIndex = m
+                monthPicker.scrollToIndex(m)
+                selectedMonth = month
+            }
+
+            if let d = dayPicker.values.firstIndex(of: day) {
+                dayPicker.selectedIndex = d
+                dayPicker.scrollToIndex(d)
+            }
+
+            getcalendarDate = (year, month, day)
+        }
     
     @objc func getYearChanged(_ sender: WheelDobPicker) {
         let selectedValue = sender.values[sender.selectedIndex]
@@ -346,6 +377,7 @@ class WheelDobPicker: UIControl {
     private let centerIndicator = UIView()
     private let topEclipseView = UIView()
     private let topArcLayer = CAShapeLayer()
+    var allowAutoScrollToLast = true
     
     var topArcShow: Bool = true {
         didSet{
@@ -354,16 +386,16 @@ class WheelDobPicker: UIControl {
     }
     
     public var values: [String] = [] {
-        didSet {
-            setupItems()
-            
-            // Scroll to the last item after updating values
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                self.scrollToLastItem(animated: true)
+            didSet {
+                setupItems()
+
+                guard allowAutoScrollToLast else { return }
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    self.scrollToLastItem(animated: true)
+                }
             }
-            
         }
-    }
     
     public var selectedIndex: Int = 0 {
         didSet {
@@ -576,6 +608,14 @@ extension WheelDobPicker: UIScrollViewDelegate {
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
         isScrolling = false
     }
+    
+    func scrollToIndex(_ index: Int, animated: Bool = false) {
+            guard index >= 0, index < itemLabels.count else { return }
+
+            let label = itemLabels[index]
+            let offsetX = label.center.x - scrollView.bounds.width / 2
+            scrollView.setContentOffset(CGPoint(x: offsetX, y: 0), animated: animated)
+        }
 }
 
 extension WheelDobPicker {
