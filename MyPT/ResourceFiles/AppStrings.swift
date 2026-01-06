@@ -107,6 +107,7 @@ struct AppStrings {
  struct AppAlertStrings {
     public static let please_wait = "Please wait..."
     public static let ckeck_network = "Check your internet or wifi"
+    public static let preparing_your_experience = "We’re preparing your personalised training experience"
      
      //-------------------****** Alert
      public static let enter_full_name = "Please enter full name."

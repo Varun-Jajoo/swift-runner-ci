@@ -6,10 +6,12 @@
 //
 
 import UIKit
+import IQKeyboardManagerSwift
+import IQKeyboardToolbarManager
 
 class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFieldDelegate {
     
-    //MARK: -------------VARIABLE
+    // MARK: -------------VARIABLE
     var selectedWeight: String?
     var rangeStart = Measurement(value: 1.0, unit: UnitMass.kilograms)
     var rangeLength = Measurement(value: Double(100), unit: UnitMass.kilograms)
@@ -17,7 +19,6 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     private var backgroundGradient: CAGradientLayer?
     private let scrollView = UIScrollView()
     private let indicatorImageView = UIImageView()
-
     private let rulerView = HorizontalRulerView()
     private let valueLabel = ObservableLabel()
     private let valueTextField = UITextField()
@@ -30,6 +31,8 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     private var isSwitchingUnit = false
     var isKgSelected = true
     private var rulerBottomConstraint: NSLayoutConstraint!
+    private var valueTextFieldCenterYConstraint: NSLayoutConstraint!
+    private var textFieldAboveButtonConstraint: NSLayoutConstraint!
     
     //MARK: -------------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
@@ -39,7 +42,8 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     @IBOutlet weak var btnKG: UIButton!
     @IBOutlet weak var btnLBS: UIButton!
     @IBOutlet weak var lblNote: UILabel!
-
+    @IBOutlet weak var nextButtonBottomConstraint: NSLayoutConstraint!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -65,6 +69,19 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         self.setNavigationColor(setColor: .clear)
         self.statusBarColor(setColor: .clear)
         setNavUI()
+        NotificationCenter.default.addObserver(
+                    self,
+                    selector: #selector(keyboardWillShow),
+                    name: UIResponder.keyboardWillShowNotification,
+                    object: nil
+                )
+                
+                NotificationCenter.default.addObserver(
+                    self,
+                    selector: #selector(keyboardWillHide),
+                    name: UIResponder.keyboardWillHideNotification,
+                    object: nil
+                )
     }
     
     override func viewDidLayoutSubviews() {
@@ -80,7 +97,16 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     override func viewDidAppear(_ animated: Bool) {
         rulerView.scrollToValue(rulerView: rulerView, scrollView: scrollView, currentIndex)
         self.valueLabel.text = "\(rulerView.selectedValue ?? 0)"
+        IQKeyboardManager.shared.isEnabled = false
+         IQKeyboardToolbarManager.shared.isEnabled = false
     }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+            IQKeyboardManager.shared.isEnabled = true
+            IQKeyboardToolbarManager.shared.isEnabled = true
+            NotificationCenter.default.removeObserver(UIResponder.keyboardWillHideNotification)
+            NotificationCenter.default.removeObserver(UIResponder.keyboardWillShowNotification)
+        }
     
     private func setupScrollView() {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -160,10 +186,11 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     
     
     private func setupValueLabel(indicator : UIView) {
-        valueLabel.font = .boldSystemFont(ofSize: 22)
+        valueLabel.font = AppFont.medium.size(18.0, familyName: familyFunnelSans)
         valueLabel.textAlignment = .center
         valueLabel.translatesAutoresizingMaskIntoConstraints = false
-        valueLabel.textColor = #colorLiteral(red: 0.8466725945, green: 0.9522742629, blue: 0.276040554, alpha: 1)
+//        valueLabel.textColor = #colorLiteral(red: 0.8466725945, green: 0.9522742629, blue: 0.276040554, alpha: 1)
+        valueLabel.textColor = UIColor(red: 214/255, green: 244/255, blue: 7/255, alpha: 1)
         valueLabel.onTextChange = {
             text in
             if let value = text {
@@ -298,29 +325,29 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         rulerView.indicatorX = centerX
     }
 
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        let currentText = textField.text ?? ""
-               let nsText = currentText as NSString
-               let updatedText = nsText.replacingCharacters(in: range, with: string)
-
-               // Allow delete
-               if updatedText.isEmpty {
-                   return true
-               }
-
-               // Allow only digits
-               if !CharacterSet.decimalDigits.isSuperset(of: CharacterSet(charactersIn: updatedText)) {
-                   return false
-               }
-
-               // Convert to number
-               guard let value = Int(updatedText) else {
-                   return false
-               }
-
-               // Range check: 0–300
-        return value >= 0 && value <= (isKgSelected ? 600 : 1500)
-    }
+//    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+//        let currentText = textField.text ?? ""
+//               let nsText = currentText as NSString
+//               let updatedText = nsText.replacingCharacters(in: range, with: string)
+//
+//               // Allow delete
+//               if updatedText.isEmpty {
+//                   return true
+//               }
+//
+//               // Allow only digits
+//               if !CharacterSet.decimalDigits.isSuperset(of: CharacterSet(charactersIn: updatedText)) {
+//                   return false
+//               }
+//
+//               // Convert to number
+//               guard let value = Int(updatedText) else {
+//                   return false
+//               }
+//
+//               // Range check: 0–300
+//        return value >= 0 && value <= (isKgSelected ? 600 : 1500)
+//    }
     
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
@@ -354,6 +381,36 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     }
     
     @IBAction func heightType(_ sender: UIButton) {
+        let switchingToKg = sender.tag == 0
+
+            let currentDigits = extractDigits(from: valueLabel.text ?? "")
+            let currentValue = Int(currentDigits) ?? 0
+
+            isKgSelected = switchingToKg
+
+            btnKG.backgroundColor = switchingToKg ? .white : .clear
+            btnKG.setTitleColor(switchingToKg ? .black : .white, for: .normal)
+            btnLBS.backgroundColor = switchingToKg ? .clear : .white
+            btnLBS.setTitleColor(switchingToKg ? .white : .black, for: .normal)
+
+            let convertedValue: Int
+
+            if switchingToKg {
+                convertedValue = lbsToKg(currentValue)
+            } else {
+                convertedValue = kgToLbs(currentValue)
+            }
+
+            rulerView.isKgSelected = switchingToKg
+            currentIndex = convertedValue
+
+            rulerView.scrollToValue(
+                rulerView: rulerView,
+                scrollView: scrollView,
+                convertedValue
+            )
+
+            valueLabel.text = "\(convertedValue)"
 //        isSwitchingUnit = true
 //        
 //        isKgSelected = sender.tag == 0
@@ -378,17 +435,17 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
 //            animated: false
 //        )
         
-        isKgSelected = sender.tag == 0
-        btnKG.backgroundColor = sender.tag == 0 ? .white : .clear
-        btnKG.setTitleColor(sender.tag == 0 ? .black : .white, for: .normal)
-        btnLBS.backgroundColor = sender.tag == 0 ? .clear : .white
-        btnLBS.setTitleColor(sender.tag == 0 ? .white : .black, for: .normal)
-        rulerView.isKgSelected = isKgSelected
-        self.valueTextField.text = "\(String(describing: self.valueLabel.text ?? ""))" + (isKgSelected ? " Kg" : " lbs")
-        
-        DispatchQueue.main.async {
-            self.isSwitchingUnit = false
-        }
+//        isKgSelected = sender.tag == 0
+//        btnKG.backgroundColor = sender.tag == 0 ? .white : .clear
+//        btnKG.setTitleColor(sender.tag == 0 ? .black : .white, for: .normal)
+//        btnLBS.backgroundColor = sender.tag == 0 ? .clear : .white
+//        btnLBS.setTitleColor(sender.tag == 0 ? .white : .black, for: .normal)
+//        rulerView.isKgSelected = isKgSelected
+//        self.valueTextField.text = "\(String(describing: self.valueLabel.text ?? ""))" + (isKgSelected ? " Kg" : " lbs")
+//        
+//        DispatchQueue.main.async {
+//            self.isSwitchingUnit = false
+//        }
     }
     
     @IBAction func continueBtnActn(_ sender: Any) {
@@ -427,17 +484,24 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         underlineView.backgroundColor = .lightGray.withAlphaComponent(0.1)
         underlineView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(underlineView)
-        
+
         // Button
-        moveButton.setImage(UIImage(systemName: "pencil.line"), for: .normal)
-        moveButton.tintColor = .white.withAlphaComponent(0.5)
+        moveButton.setImage(UIImage(named: "editIcon"), for: .normal)
+        moveButton.tintColor = .white
         moveButton.addTarget(self, action: #selector(moveLabelToCenter), for: .touchUpInside)
         moveButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(moveButton)
         
+        textFieldAboveButtonConstraint =
+                valueTextField.bottomAnchor.constraint(equalTo: continueBtn.topAnchor, constant: -12)
+                textFieldAboveButtonConstraint.isActive = false
+                
+                valueTextFieldCenterYConstraint =
+                valueTextField.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor, constant: -100)
+        
         NSLayoutConstraint.activate([
-
-            valueTextField.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor, constant: -100),
+            valueTextFieldCenterYConstraint,
+//            valueTextField.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor, constant: -100),
             valueTextField.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
             
             valueTextField.heightAnchor.constraint(equalToConstant: 32),
@@ -449,6 +513,7 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
             moveButton.leadingAnchor.constraint(equalTo: valueTextField.trailingAnchor, constant: 8),
             moveButton.centerYAnchor.constraint(equalTo: valueTextField.centerYAnchor)
         ])
+        
     }
     // MARK: Button Tap Function
     @objc private func moveLabelToCenter() {
@@ -470,27 +535,158 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         btnKG.isUserInteractionEnabled = showSlider
         btnLBS.isUserInteractionEnabled = showSlider
         if showSlider == false {
-            previousText = trimCharacters(from: valueTextField.text ?? "")
-            valueTextField.text = trimCharacters(from: valueTextField.text ?? "")
+            let digits = extractDigits(from: valueLabel.text ?? "")
+            valueTextField.keyboardType = .numberPad
+
+            if isKgSelected {
+                previousText = formatKg(from: digits)
+                valueTextField.text = formatKg(from: digits)
+            } else {
+                previousText = formatLbs(from: digits)
+                valueTextField.text = formatLbs(from: digits)
+            }
         }
     }
     
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        if previousText == textField.text {
-            valueTextField.text = previousText + (isKgSelected ? "kg" : "lbs")
-            valueTextField.isUserInteractionEnabled = false
-            setScreenUI(showSlider: true)
-        } else {
-            var scrolled = Int(valueTextField.text ?? "") ?? 0
-            rulerView.scrollToValue(rulerView: rulerView, scrollView: scrollView, scrolled)
-            valueTextField.isUserInteractionEnabled = false
-            setScreenUI(showSlider: true)
+    @objc override func keyboardWillShow(_ notification: Notification) {
+            guard let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+                  let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+            
+            let keyboardHeight = frame.height - view.safeAreaInsets.bottom
+            lblNote.isHidden = true
+            
+            // Adaptive keyboard padding (SE vs big phones)
+            let padding: CGFloat = view.bounds.height < 700 ? 35 : 80
+            nextButtonBottomConstraint.constant = keyboardHeight + padding
+            
+            valueTextFieldCenterYConstraint.isActive = false
+            textFieldAboveButtonConstraint.isActive = true
+            
+            let screenHeight = view.bounds.height
+            let spacing: CGFloat = screenHeight < 700 ? -50 : -90
+            textFieldAboveButtonConstraint.constant = spacing
+            
+            UIView.animate(withDuration: duration) {
+                self.view.layoutIfNeeded()
+            }
         }
+        
+        @objc override func keyboardWillHide(_ notification: Notification) {
+            guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+            
+            nextButtonBottomConstraint.constant = 16
+            textFieldAboveButtonConstraint.isActive = false
+            valueTextFieldCenterYConstraint.isActive = true
+            valueTextFieldCenterYConstraint.constant = -100
+            lblNote.isHidden = false
+            
+            UIView.animate(withDuration: duration) {
+                self.view.layoutIfNeeded()
+            }
+        }
+    
+    func textField(_ textField: UITextField,
+                   shouldChangeCharactersIn range: NSRange,
+                   replacementString string: String) -> Bool {
+
+        let currentText = textField.text ?? ""
+        let rawDigits = extractDigits(from: currentText)
+
+        // BACKSPACE
+        if string.isEmpty {
+            let newDigits = String(rawDigits.dropLast())
+            textField.text = isKgSelected
+                ? formatKg(from: newDigits)
+                : formatLbs(from: newDigits)
+            return false
+        }
+
+        // Allow only digits
+        guard string.allSatisfy({ $0.isNumber }) else { return false }
+
+        let newDigits = rawDigits + string
+
+        // Limits
+        let value = Int(newDigits) ?? 0
+        if isKgSelected {
+            if value > 600 { return false }
+            textField.text = formatKg(from: newDigits)
+        } else {
+            if value > 1500 { return false }
+            textField.text = formatLbs(from: newDigits)
+        }
+
+        return false
     }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+
+        let digits = extractDigits(from: textField.text ?? "")
+        guard let value = Int(digits) else {
+            setScreenUI(showSlider: true)
+            return
+        }
+
+        let finalValue: Int
+
+        if isKgSelected {
+            finalValue = value
+        } else {
+            finalValue = value
+        }
+
+        rulerView.scrollToValue(
+            rulerView: rulerView,
+            scrollView: scrollView,
+            finalValue
+        )
+
+        valueTextField.isUserInteractionEnabled = false
+        setScreenUI(showSlider: true)
+    }
+    
+//    func textFieldDidEndEditing(_ textField: UITextField) {
+//        if previousText == textField.text {
+//            valueTextField.text = previousText + (isKgSelected ? "kg" : "lbs")
+//            valueTextField.isUserInteractionEnabled = false
+//            setScreenUI(showSlider: true)
+//        } else {
+//            var scrolled = Int(valueTextField.text ?? "") ?? 0
+//            rulerView.scrollToValue(rulerView: rulerView, scrollView: scrollView, scrolled)
+//            valueTextField.isUserInteractionEnabled = false
+//            setScreenUI(showSlider: true)
+//        }
+//    }
     
     func trimCharacters(from text: String) -> String {
         guard text.count > 2 else { return "" }
         return String(text.dropLast(isKgSelected ? 2 : 3))
+    }
+    
+    // Digits only
+    func extractDigits(from text: String) -> String {
+        return text.filter { $0.isNumber }
+    }
+
+    // kg formatter
+    func formatKg(from digits: String) -> String {
+        guard !digits.isEmpty else { return "" }
+        return "\(digits) kg"
+    }
+
+    // lbs formatter
+    func formatLbs(from digits: String) -> String {
+        guard !digits.isEmpty else { return "" }
+        return "\(digits) lbs"
+    }
+
+    // Conversions
+    func kgToLbs(_ kg: Int) -> Int {
+        return Int(round(Double(kg) * 2.20462))
+    }
+
+    func lbsToKg(_ lbs: Int) -> Int {
+        return Int(round(Double(lbs) / 2.20462))
     }
 }
 

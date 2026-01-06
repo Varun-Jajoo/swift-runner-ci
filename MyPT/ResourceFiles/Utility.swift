@@ -41,9 +41,10 @@ class Utility: NSObject {
         // Label (BOTTOM)
         let label = UILabel()
         label.text = message
-        label.textColor = .lightGray
+        label.textColor = UIColor(red: 149/255, green: 149/255, blue: 149/255, alpha: 1)
         label.textAlignment = .center
         label.numberOfLines = 0
+        label.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
         messageLabel = label
 
         let stack = UIStackView(arrangedSubviews: [loader, label])
@@ -61,7 +62,7 @@ class Utility: NSObject {
             stack.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
             stack.centerYAnchor.constraint(equalTo: overlay.centerYAnchor),
 
-            label.widthAnchor.constraint(lessThanOrEqualToConstant: 260)
+            label.widthAnchor.constraint(lessThanOrEqualToConstant: 353)
         ])
 
         window.addSubview(overlay)

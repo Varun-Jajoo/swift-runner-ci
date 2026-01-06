@@ -17,6 +17,7 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
     @IBOutlet weak var fullNameTitleLbl: UILabel!
     @IBOutlet weak var fullNameTxtField: UITextField!
     @IBOutlet weak var continueBtn: UIButton!
+    @IBOutlet weak var continueButtonBottomConstraint: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,6 +28,8 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
         setUpFont()
         updateContinueButton(isEnabled: false)
         setupContinueButtonIcon(isEnabled: false)
+        continueBtn.adjustsImageWhenDisabled = false
+        continueBtn.adjustsImageWhenHighlighted = false
         
         //        self.setupNavigationBarProgress(
         //            progressBarWidth: 20,
@@ -73,11 +76,18 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
     override func keyboardWillShow(_ notification: Notification) {
         super.keyboardWillShow(notification)
         print("keyboardWillShow")
+        guard let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+                      let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+                
+                let keyboardHeight = frame.height - view.safeAreaInsets.bottom
+                let padding : CGFloat = view.bounds.height < 700 ? 180 : 220
+                continueButtonBottomConstraint.constant = keyboardHeight - padding
         self.addBlurWithVibrancyEffect(viewShow: self.mgImgView, alphBlur: 1.0, vibrancyAlphBlur: 0.4)
     }
     
     override func keyboardWillHide(_ notification: Notification) {
         super.keyboardWillHide(notification)
+        continueButtonBottomConstraint.constant = 14
         self.customBlurViewRemove(viewShow: self.mgImgView)
     }
     
@@ -108,7 +118,9 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
         DispatchQueue.main.async {
             
             //            self.fullNameTxtField.setLeftRightPadding(16)
-            self.nameTxtMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appBorder, cornerRadious: 12.0)
+            self.nameTxtMBV.setCornerRadius(borderWidth: 0.5,
+                                            borderColor: UIColor(red: 250/255, green: 250/255, blue: 250/255, alpha: 0.1),
+                                            cornerRadious: 12.0)
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
         }
     }
@@ -133,7 +145,7 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
     
     func setupContinueButtonIcon(isEnabled: Bool) {
         let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
-            .withRenderingMode(.alwaysTemplate)
+            .withRenderingMode(.alwaysOriginal)
         
         continueBtn.setImage(arrowImage, for: .normal)
         

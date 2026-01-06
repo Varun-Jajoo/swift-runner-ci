@@ -250,12 +250,12 @@ class LocationsViewController: CommonViewController {
         locSearch.layer.borderWidth = 1
         locSearch.layer.borderColor = UIColor.white.withAlphaComponent(0.1).cgColor
 
-        let tf = locSearch.searchTextField
-        tf.backgroundColor = UIColor.black.withAlphaComponent(0.35)
+       let tf = locSearch.searchTextField
+//        tf.backgroundColor = UIColor.black.withAlphaComponent(0.35)
         tf.textColor = .white
         tf.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
         tf.attributedPlaceholder = NSAttributedString(
-            string: "Search for area, street name...",
+            string: " Search for area, street name...",
             attributes: [.foregroundColor: UIColor.txtDarkGray]
         )
         tf.clearButtonMode = .never
@@ -263,6 +263,20 @@ class LocationsViewController: CommonViewController {
 //        tf.layer.cornerRadius = 12
 //        tf.layer.masksToBounds = true
 
+        // 🔹 ADD your custom icon
+        let icon = UIImageView(image: UIImage(named: "search-normal"))
+        icon.tintColor = .white
+        icon.contentMode = .scaleAspectFit
+        icon.frame = CGRect(x: 10, y: 0, width: 24, height: 24)
+
+        let iconContainer = UIView(frame: CGRect(x: 0, y: 0, width: 28, height: 20))
+        icon.center = iconContainer.center
+        iconContainer.addSubview(icon)
+
+        tf.leftView = iconContainer
+        tf.leftViewMode = .always
+
+        
         // 🔥 IMPORTANT – remove iOS default gap
         tf.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([

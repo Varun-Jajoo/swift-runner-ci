@@ -371,7 +371,7 @@ class WheelDobPicker: UIControl {
     private var isScrolling = false
     private let scrollView = UIScrollView()
     private var itemLabels: [UILabel] = []
-    private let labelSpacing: CGFloat = 5
+    private let labelSpacing: CGFloat = 15
     private let labelHeight: CGFloat = 50
     private let labelFixedWidth: CGFloat = 70
     private let centerIndicator = UIView()

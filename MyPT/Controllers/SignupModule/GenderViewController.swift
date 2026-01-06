@@ -54,6 +54,8 @@ class GenderViewController: CommonViewController {
             ["images": AppImages.othersUnselected as Any, "seleced_images": AppImages.othersSelected as Any]
         ]
         genderImg = [maleBGImg, femaleBGImg, othersGenderBGImg]
+        continueBtn.adjustsImageWhenDisabled = false
+        continueBtn.adjustsImageWhenHighlighted = false
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -165,7 +167,7 @@ class GenderViewController: CommonViewController {
     
     func setupContinueButtonIcon(isEnabled: Bool) {
         let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
-            .withRenderingMode(.alwaysTemplate)
+            .withRenderingMode(.alwaysOriginal)
         
         continueBtn.setImage(arrowImage, for: .normal)
         

@@ -39,7 +39,8 @@ class NetworkManager {
         }
         // Show Loader
         if isShowLoading {
-            Utility.showLoader(message:  AppAlertStrings.please_wait)
+//            Utility.showLoader(message:  AppAlertStrings.please_wait)
+            Utility.showLoader(message: AppAlertStrings.preparing_your_experience)
         }
         
     
@@ -110,7 +111,7 @@ class NetworkManager {
         }
         // Show Loader
         if isShowLoading{
-            Utility.showLoader(message: AppAlertStrings.please_wait)
+            Utility.showLoader(message: AppAlertStrings.preparing_your_experience)
         }
        
         //URLEncoding.default // in get method Standard URL encoding 
@@ -216,7 +217,8 @@ class NetworkManager {
         let headers: HTTPHeaders = ["Content-Type" : "multipart/form-data"]
         
         if isShowLoading {
-            Utility.showLoader(message: AppAlertStrings.please_wait)
+//            Utility.showLoader(message: AppAlertStrings.please_wait)
+            Utility.showLoader(message: AppAlertStrings.preparing_your_experience)
         }
         
         AF.upload(

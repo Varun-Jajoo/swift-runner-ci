@@ -37,6 +37,8 @@ class GoalsViewController: CommonViewController {
         setupBackgroundGradient()
         updateContinueButton(isEnabled: false)
         setupContinueButtonIcon(isEnabled: false)
+        continueBtn.adjustsImageWhenDisabled = false
+        continueBtn.adjustsImageWhenHighlighted = false
         
         /*
         dataGoals = [ ["title":"Mental Health","images":AppImages.mentalHealth as Any,"seleced_images":AppImages.mentalHealth_selected as Any],
@@ -126,7 +128,7 @@ class GoalsViewController: CommonViewController {
     
     func setupContinueButtonIcon(isEnabled: Bool) {
         let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
-            .withRenderingMode(.alwaysTemplate)
+            .withRenderingMode(.alwaysOriginal)
         
         continueBtn.setImage(arrowImage, for: .normal)
         

@@ -32,7 +32,6 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     private var textFieldCenterConstraint: NSLayoutConstraint!
     private var valueTextFieldCenterYConstraint: NSLayoutConstraint!
     private var textFieldAboveButtonConstraint: NSLayoutConstraint!
-    
     var isFeetSelected = true
     
     //MARK: -------------IBOUTLET
@@ -76,20 +75,6 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
             print("userData", userData)
             print("userData name: ", userName, "Id: ",userData.id ?? "",  userData.phone ?? "")
         }
-        
-//        NotificationCenter.default.addObserver(
-//            self,
-//            selector: #selector(keyboardWillShow),
-//            name: UIResponder.keyboardWillShowNotification,
-//            object: nil
-//        )
-//        
-//        NotificationCenter.default.addObserver(
-//            self,
-//            selector: #selector(keyboardWillHide),
-//            name: UIResponder.keyboardWillHideNotification,
-//            object: nil
-//        )
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -97,6 +82,19 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         self.setNavigationColor(setColor: .clear)
         self.statusBarColor(setColor: .clear)
         setNavUI()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -109,6 +107,8 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     override func viewDidDisappear(_ animated: Bool) {
         IQKeyboardManager.shared.isEnabled = true
         IQKeyboardToolbarManager.shared.isEnabled = true
+        NotificationCenter.default.removeObserver(UIResponder.keyboardWillHideNotification)
+        NotificationCenter.default.removeObserver(UIResponder.keyboardWillShowNotification)
     }
     
     override func viewDidLayoutSubviews() {
@@ -216,7 +216,7 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         
         NSLayoutConstraint.activate([
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -70),
-            scrollView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 68),
+            scrollView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 45),
             scrollView.widthAnchor.constraint(equalToConstant: 80),
             scrollView.heightAnchor.constraint(equalToConstant: 300),
             
@@ -269,10 +269,11 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     }
     
     private func setupValueLabel(indicator : UIView) {
-        valueLabel.font = .boldSystemFont(ofSize: 22)
+        valueLabel.font = AppFont.medium.size(18.0, familyName: familyFunnelSans)
         valueLabel.textAlignment = .center
         valueLabel.translatesAutoresizingMaskIntoConstraints = false
-        valueLabel.textColor = #colorLiteral(red: 0.8466725945, green: 0.9522742629, blue: 0.276040554, alpha: 1)
+//        valueLabel.textColor = #colorLiteral(red: 0.8466725945, green: 0.9522742629, blue: 0.276040554, alpha: 1)
+        valueLabel.textColor = UIColor(red: 214/255, green: 244/255, blue: 7/255, alpha: 1)
         valueLabel.onTextChange = {
             text in
             if let value = text {
@@ -340,32 +341,44 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     }
     
     @IBAction func heightType(_ sender: UIButton) {
-        isFeetSelected = sender.tag == 0
-        btnFeet.backgroundColor = sender.tag == 0 ? .white : .clear
-        btnFeet.setTitleColor(sender.tag == 0 ? .black : .white, for: .normal)
-        btnCms.backgroundColor = sender.tag == 0 ? .clear : .white
-        btnCms.setTitleColor(sender.tag == 0 ? .white : .black, for: .normal)
-        rulerView.heightUnit = sender.tag == 0 ? .feet : .centimeters
-        valueTextField.keyboardType = sender.tag == 0 ? .decimalPad : .numberPad
-        if valueTextField.isUserInteractionEnabled == true {
-            if sender.tag == 0 {
-                previousText = "\(String(describing: feetInchToDecimal(valueLabel.text ?? "")))"
-                valueTextField.text = "\(String(describing: feetInchToDecimal(valueLabel.text ?? "")))"
-            } else {
-                previousText = ""
-                valueLabel.text = "\(trimLastTwoCharacters(from: rulerView.displayText(for: currentIndex)))"
-                valueTextField.becomeFirstResponder()
-            }
-        } else {
-            valueLabel.text = "\(rulerView.displayText(for: currentIndex))"
-        }
-//        btnFeet.backgroundColor = sender.tag == 0 ? .white : .clear
-//        btnFeet.setTitleColor(sender.tag == 0 ? .black : .white, for: .normal)
-//        btnCms.backgroundColor = sender.tag == 0 ? .clear : .white
-//        btnCms.setTitleColor(sender.tag == 0 ? .white : .black, for: .normal)
-//        rulerView.heightUnit = sender.tag == 0 ? .feet : .centimeters
-//        valueLabel.text = "\(rulerView.displayText(for: currentIndex))"
-//        valueTextField.text = "\(rulerView.displayText(for: currentIndex))"
+        let switchingToFeet = sender.tag == 0
+                // UI
+                isFeetSelected = switchingToFeet
+                btnFeet.backgroundColor = switchingToFeet ? .white : .clear
+                btnFeet.setTitleColor(switchingToFeet ? .black : .white, for: .normal)
+                btnCms.backgroundColor = switchingToFeet ? .clear : .white
+                btnCms.setTitleColor(switchingToFeet ? .white : .black, for: .normal)
+                
+                if switchingToFeet {
+                    // 🔁 CM → FEET
+                    let cmValue = Int(extractDigits(from: valueLabel.text ?? "")) ?? 0
+                    let converted = cmToFeetInch(cmValue)
+                    
+                    rulerView.heightUnit = .feet
+                    let totalInches = converted.feet * 12 + converted.inches
+                    currentIndex = totalInches
+                    
+                    rulerView.scrollToValue(
+                        rulerView: rulerView,
+                        scrollView: scrollView,
+                        totalInches - 1
+                    )
+                    valueLabel.text = "\(converted.feet) ft \(converted.inches) in"
+                } else {
+                    // 🔁 FEET → CM
+                    let digits = extractDigits(from: valueLabel.text ?? "")
+                    let chars = Array(digits)
+                    let feet = Int(String(chars.first ?? "0")) ?? 0
+                    let inches = chars.count > 1 ? Int(String(chars.dropFirst())) ?? 0 : 0
+                    
+                    let cmValue = heightInCm(feet: feet, inches: inches)
+                    
+                    rulerView.heightUnit = .centimeters
+                    currentIndex = cmValue
+                    
+                    rulerView.scrollToCentimeter(cmValue - 1, scrollView: scrollView)
+                    valueLabel.text = "\(cmValue) cm"
+                }
     }
     
     private func setupValueTextField() {
@@ -373,10 +386,10 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         valueTextField.textColor = .white
         valueTextField.font = AppFont.semibold.size(40.0, familyName: familyClashDisplay)
         valueTextField.textAlignment = .center
-        valueTextField.keyboardType = .decimalPad
+        valueTextField.keyboardType = .numberPad
         valueTextField.backgroundColor = .clear
         valueTextField.translatesAutoresizingMaskIntoConstraints = false
-        
+        valueTextField.tintColor = UIColor(red: 250/255, green: 250/255, blue: 250/255, alpha: 0.55)
         view.addSubview(valueTextField)
         
         valueTextField.delegate = self
@@ -388,8 +401,8 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         view.addSubview(underlineView)
         
         // Button
-        moveButton.setImage(UIImage(systemName: "pencil.line"), for: .normal)
-        moveButton.tintColor = .white.withAlphaComponent(0.5)
+        moveButton.setImage(UIImage(named: "editIcon"), for: .normal)
+        moveButton.tintColor = .white
         moveButton.addTarget(self, action: #selector(moveLabelToCenter), for: .touchUpInside)
         moveButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(moveButton)
@@ -426,41 +439,50 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         
     }
     
+    func cmToFeetInch(_ cm: Int) -> (feet: Int, inches: Int) {
+            let totalInches = Double(cm) / 2.54
+            let rounded = Int(round(totalInches))
+            let feet = rounded / 12
+            let inches = rounded % 12
+            return (feet, inches)
+        }
     
-//    @objc override func keyboardWillShow(_ notification: Notification) {
-//        guard let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
-//              let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
-//        
-//        let keyboardHeight = frame.height - view.safeAreaInsets.bottom
-//        
-//        // Adaptive keyboard padding (SE vs big phones)
-//        let padding: CGFloat = view.bounds.height < 700 ? 12 : 38
-//        nextButtonBottomConstraint.constant = keyboardHeight + padding
-//        
-//        valueTextFieldCenterYConstraint.isActive = false
-//        textFieldAboveButtonConstraint.isActive = true
-//        
-//        let screenHeight = view.bounds.height
-//        let spacing: CGFloat = screenHeight < 700 ? -12 : -34
-//        textFieldAboveButtonConstraint.constant = spacing
-//        
-//        UIView.animate(withDuration: duration) {
-//            self.view.layoutIfNeeded()
-//        }
-//    }
-    
-//    @objc override func keyboardWillHide(_ notification: Notification) {
-//        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
-//        
-//        nextButtonBottomConstraint.constant = 16
-//        textFieldAboveButtonConstraint.isActive = false
-//        valueTextFieldCenterYConstraint.isActive = true
-//        valueTextFieldCenterYConstraint.constant = 12
-//        
-//        UIView.animate(withDuration: duration) {
-//            self.view.layoutIfNeeded()
-//        }
-//    }
+    @objc override func keyboardWillShow(_ notification: Notification) {
+            guard let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+                  let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+            
+            let keyboardHeight = frame.height - view.safeAreaInsets.bottom
+            lblNote.isHidden = true
+            
+            // Adaptive keyboard padding (SE vs big phones)
+            let padding: CGFloat = view.bounds.height < 700 ? 35 : 80
+            nextButtonBottomConstraint.constant = keyboardHeight + padding
+            
+            valueTextFieldCenterYConstraint.isActive = false
+            textFieldAboveButtonConstraint.isActive = true
+            
+            let screenHeight = view.bounds.height
+            let spacing: CGFloat = view.bounds.height < 700 ? -70 : -100
+            textFieldAboveButtonConstraint.constant = spacing
+            
+            UIView.animate(withDuration: duration) {
+                self.view.layoutIfNeeded()
+            }
+        }
+        
+        @objc override func keyboardWillHide(_ notification: Notification) {
+            guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+            
+            nextButtonBottomConstraint.constant = 16
+            textFieldAboveButtonConstraint.isActive = false
+            valueTextFieldCenterYConstraint.isActive = true
+            valueTextFieldCenterYConstraint.constant = 12
+            lblNote.isHidden = false
+            
+            UIView.animate(withDuration: duration) {
+                self.view.layoutIfNeeded()
+            }
+        }
     
     // MARK: Button Tap Function
     @objc private func moveLabelToCenter() {
@@ -475,113 +497,170 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     }
     
     private func setScreenUI(showSlider : Bool) {
-        scrollView.isHidden = !showSlider
-        valueLabel.isHidden = !showSlider
-        imgSlider.isHidden = !showSlider
-        indicator.isHidden = !showSlider
-        moveButton.isHidden = !showSlider
-        underlineView.isHidden = !showSlider
-        btnFeet.isUserInteractionEnabled = showSlider
-        btnCms.isUserInteractionEnabled = showSlider
-        if showSlider == false {
+            scrollView.isHidden = !showSlider
+            valueLabel.isHidden = !showSlider
+            imgSlider.isHidden = !showSlider
+            indicator.isHidden = !showSlider
+            moveButton.isHidden = !showSlider
+            underlineView.isHidden = !showSlider
+            btnFeet.isUserInteractionEnabled = showSlider
+            btnCms.isUserInteractionEnabled = showSlider
+            if showSlider == false {
+                if isFeetSelected {
+                    let digits = extractDigits(from: valueLabel.text ?? "")
+                    valueTextField.keyboardType = .numberPad
+                    previousText = formatFeetInch(from: digits)
+                    valueTextField.text = formatFeetInch(from: digits)
+                    
+                } else {
+                    previousText = ""
+                    let digits = extractDigits(from: valueLabel.text ?? "")
+                    valueTextField.keyboardType = .numberPad
+                    valueTextField.text = formatCentimeter(from: digits)
+                    valueTextField.isUserInteractionEnabled = true
+                }
+            }
+        }
+        
+        func formatFeetInchText(from text: String) -> String {
+            let cleaned = text
+                .lowercased()
+                .replacingOccurrences(of: "ft", with: "")
+                .replacingOccurrences(of: "in", with: "")
+                .trimmingCharacters(in: .whitespaces)
+            
+            let parts = cleaned.split(separator: " ")
+            
+            guard let feet = parts.first else { return text }
+            
+            if parts.count > 1, let inch = parts.last, inch != "0" {
+                return "\(feet) ft \(inch) in"
+            } else {
+                return "\(feet) ft"
+            }
+        }
+        
+        // Convert digits → "XXX cm"
+        func formatCentimeter(from digits: String) -> String {
+            guard !digits.isEmpty else { return "" }
+            return "\(digits) cm"
+        }
+        
+        // Extract only digits from text
+        func extractDigits(from text: String) -> String {
+            return text.filter { $0.isNumber }
+        }
+        
+        // Convert digits → "X ft Y in"
+        func formatFeetInch(from digits: String) -> String {
+            guard !digits.isEmpty else { return "" }
+            
+            if digits.count == 1 {
+                return "\(digits) ft"
+            }
+            
+            let chars = Array(digits)
+            let feet = chars[0]
+            let inchDigits = chars.dropFirst()
+            let inches = min(Int(String(inchDigits)) ?? 0, 11)
+            
+            return "\(feet) ft \(inches) in"
+        }
+        
+        
+        func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
             if isFeetSelected {
-                previousText = "\(String(describing: feetInchToDecimal(valueLabel.text ?? "")))"
-                valueTextField.text = "\(String(describing: feetInchToDecimal(valueLabel.text ?? "")))"
-            } else {
-                previousText = ""
-                valueTextField.text = trimLastTwoCharacters(from: valueTextField.text ?? "")
-                valueTextField.isUserInteractionEnabled = true
-            }
-        }
-    }
-    
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        if isFeetSelected {
-            let currentText = textField.text ?? ""
-            let nsText = currentText as NSString
-            let updatedText = nsText.replacingCharacters(in: range, with: string)
-            if updatedText.isEmpty {
-                return true
-            }
-            if updatedText.filter({ $0 == "." }).count > 1 {
-                return false
-            }
-            let parts = updatedText.split(separator: ".")
-            if let beforeDecimal = parts.first, beforeDecimal.count > 1 {
-                return false
-            }
-            if parts.count == 2 {
-                let afterDecimal = parts[1]
-                if afterDecimal.count > 2 {
+                let currentText = textField.text ?? ""
+                let rawDigits = extractDigits(from: currentText)
+                if string.isEmpty {
+                    let newDigits = String(rawDigits.dropLast())
+                    textField.text = formatFeetInch(from: newDigits)
                     return false
                 }
-                if let value = Int(afterDecimal), value > 11 {
+                
+                // Allow only numbers
+                guard string.allSatisfy({ $0.isNumber }) else { return false }
+                
+                let newDigits = rawDigits + string
+                
+                // Max 3 digits: (5 11)
+                if newDigits.count > 3 { return false }
+                
+                textField.text = formatFeetInch(from: newDigits)
+                return false
+            } else {
+                let currentText = textField.text ?? ""
+                let rawDigits = extractDigits(from: currentText)
+                
+                // BACKSPACE
+                if string.isEmpty {
+                    let newDigits = String(rawDigits.dropLast())
+                    textField.text = formatCentimeter(from: newDigits)
                     return false
                 }
+                
+                // Allow only digits
+                guard string.allSatisfy({ $0.isNumber }) else { return false }
+                
+                let newDigits = rawDigits + string
+                
+                // Optional max: 3 digits (300 cm)
+                if newDigits.count > 3 { return false }
+                
+                let value = Int(newDigits) ?? 0
+                if value > 300 { return false }
+                
+                textField.text = formatCentimeter(from: newDigits)
+                return false
             }
-            return true
-        } else {
-//            return true
-            let currentText = textField.text ?? ""
-                   let nsText = currentText as NSString
-                   let updatedText = nsText.replacingCharacters(in: range, with: string)
-
-                   // Allow delete
-                   if updatedText.isEmpty {
-                       return true
-                   }
-
-                   // Allow only digits
-                   if !CharacterSet.decimalDigits.isSuperset(of: CharacterSet(charactersIn: updatedText)) {
-                       return false
-                   }
-
-                   // Convert to number
-                   guard let value = Int(updatedText) else {
-                       return false
-                   }
-
-                   // Range check: 0–300
-                   return value >= 0 && value <= 300
         }
-    }
-    
-    
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        textFieldLeadingConstraint.isActive = true
-        textFieldCenterConstraint.isActive = false
-        if isFeetSelected {
-            let value = Double(valueTextField.text ?? "") ?? 0.0
-            let rulerInt = rulerValue(from: value)
-            if previousText != "\(String(describing: value))" {
-                rulerView.scrollToValue(rulerView: rulerView, scrollView: scrollView, rulerInt)
+        
+        func textFieldDidEndEditing(_ textField: UITextField) {
+            textFieldLeadingConstraint.isActive = true
+            textFieldCenterConstraint.isActive = false
+            if isFeetSelected {
+                let digits = extractDigits(from: valueTextField.text ?? "")
+                guard !digits.isEmpty else {
+                    setScreenUI(showSlider: true)
+                    return
+                }
+                
+                let chars = Array(digits)
+                let feet = Int(String(chars[0])) ?? 0
+                let inches = chars.count > 1 ? Int(String(chars.dropFirst())) ?? 0 : 0
+                
+                let rulerValue = feet * 12 + min(inches, 11)
+                rulerView.scrollToValue(rulerView: rulerView,
+                                        scrollView: scrollView,
+                                        rulerValue - 1)
             } else {
-                valueTextField.text = valueLabel.text
+                let digits = extractDigits(from: valueTextField.text ?? "")
+                guard let value = Int(digits) else {
+                    setScreenUI(showSlider: true)
+                    return
+                }
+                
+                rulerView.scrollToCentimeter(value - 1, scrollView: scrollView)
             }
-        } else {
-            var finalValue = Int(valueTextField.text ?? "0") ?? 0
-            finalValue -= 1
-            rulerView.scrollToCentimeter(finalValue , scrollView: scrollView)
+            valueTextField.isUserInteractionEnabled = false
+            setScreenUI(showSlider: true)
         }
-        valueTextField.isUserInteractionEnabled = false
-        setScreenUI(showSlider: true)
-    }
-    
-    func feetInchToDecimal(_ text: String) -> Double {
-        let cleaned = text
-            .lowercased()
-            .replacingOccurrences(of: "ft", with: "")
-            .replacingOccurrences(of: "in", with: "")
         
-        let parts = cleaned.split(separator: " ")
-        guard parts.count >= 1,
-              let feet = Double(parts[0]) else { return 0.0 }
-        
-        let inches = parts.count > 1 ? Double(parts[1]) ?? 0 : 0
-        let fraction = convertToFractionalDouble(inches)
-        let decimal = feet + fraction
-        return decimal
-    }
+        func feetInchToDecimal(_ text: String) -> Double {
+            let cleaned = text
+                .lowercased()
+                .replacingOccurrences(of: "ft", with: "")
+                .replacingOccurrences(of: "in", with: "")
+            
+            let parts = cleaned.split(separator: " ")
+            guard parts.count >= 1,
+                  let feet = Double(parts[0]) else { return 0.0 }
+            
+            let inches = parts.count > 1 ? Double(parts[1]) ?? 0 : 0
+            let fraction = convertToFractionalDouble(inches)
+            let decimal = feet + fraction
+            return decimal
+        }
     
     func convertToFractionalDouble(_ value: Double) -> Double {
         let intPart = Int(value)
