@@ -18,7 +18,6 @@ class AgeViewController: CommonViewController {
     private let dayCurveIV   = UIImageView(image: UIImage(named: "DateBg"))
     
     //MARK: ----------IBOUTLET
-    @IBOutlet weak var bottomNoteMBV: UIView!
     @IBOutlet weak var noteLbl: UILabel!
     @IBOutlet weak var continueBtn: UIButton!
     @IBOutlet weak var titleLbl: UILabel!
@@ -154,6 +153,7 @@ class AgeViewController: CommonViewController {
         self.noteLbl.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
         self.titleLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
         self.continueBtn.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
+        self.noteLbl.textColor = UIColor(red: 250/255, green: 250/255, blue: 250/255, alpha: 0.55)
     }
     
     private func addCenterGlow() {
@@ -199,9 +199,9 @@ class AgeViewController: CommonViewController {
         UIView.animate(withDuration: 0.2) {
             self.setupContinueButtonIcon(isEnabled: isEnabled)
             if isEnabled {
-                self.continueBtn.tintColor = .mainBg   // arrow color
-                self.continueBtn.backgroundColor = .appWhite
-                self.continueBtn.setTitleColor(.mainBg, for: .normal)
+//                self.continueBtn.tintColor = .mainBg   // arrow color
+//                self.continueBtn.backgroundColor = .appWhite
+//                self.continueBtn.setTitleColor(.mainBg, for: .normal)
             } else {
                 self.continueBtn.tintColor = .appWhite
                 self.continueBtn.backgroundColor = .appDarkGray
@@ -211,20 +211,44 @@ class AgeViewController: CommonViewController {
     }
     
     func setupContinueButtonIcon(isEnabled: Bool) {
-        let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
-            .withRenderingMode(.alwaysTemplate)
-        
-        continueBtn.setImage(arrowImage, for: .normal)
-        
-        // Force image on right side
-        continueBtn.semanticContentAttribute = .forceRightToLeft
-        
-        // Space between text and image
-        continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -12)
-        continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 12)
-        
-        continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
-    }
+
+            if isEnabled {
+                // 🟢 ENABLED → IMAGE ONLY
+                let image = UIImage(named: "ButtonContinue")?
+                    .withRenderingMode(.alwaysOriginal)
+
+                continueBtn.setImage(image, for: .normal)
+                continueBtn.setTitle("", for: .normal)
+
+                continueBtn.backgroundColor = .clear
+                continueBtn.tintColor = .clear
+
+                continueBtn.imageEdgeInsets = .zero
+                continueBtn.titleEdgeInsets = .zero
+                continueBtn.contentEdgeInsets = .zero
+
+                continueBtn.semanticContentAttribute = .forceLeftToRight
+                continueBtn.adjustsImageWhenHighlighted = false
+                continueBtn.adjustsImageWhenDisabled = false
+
+            } else {
+                // 🔴 DISABLED → TEXT + ARROW
+                continueBtn.setTitle("CONTINUE", for: .normal)
+                continueBtn.setTitleColor(.appWhite, for: .normal)
+
+                let arrowImage = UIImage(named: "whiteRightArrow")?
+                    .withRenderingMode(.alwaysOriginal)
+                continueBtn.setImage(arrowImage, for: .normal)
+
+                continueBtn.semanticContentAttribute = .forceRightToLeft
+
+                // spacing between text & arrow
+                continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
+                continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 8)
+
+                continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+            }
+        }
     
     @IBAction func continueBtnActn(_ sender: Any) {
         print("Continue btn actn.....")

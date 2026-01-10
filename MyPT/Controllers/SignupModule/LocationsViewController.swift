@@ -47,7 +47,7 @@ class LocationsViewController: CommonViewController {
     
     //MARK: -------------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
-    @IBOutlet weak var locSearch: UISearchBar!
+    //    @IBOutlet weak var locSearch: UISearchBar!
     @IBOutlet weak var mainAddrLbl: UILabel!
     @IBOutlet weak var subAddrLbl: UILabel!
     @IBOutlet weak var continueBtn: UIButton!
@@ -55,16 +55,15 @@ class LocationsViewController: CommonViewController {
     @IBOutlet weak var rightSearchBtn: UIButton!
     @IBOutlet weak var viewBackground: UIView!
     @IBOutlet weak var viewBottom: UIView!
+    @IBOutlet weak var viewBgSearch: UIView!
+    @IBOutlet weak var tfSearch: UITextField!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        self.locSearch.delegate = self
         setUpFont()
         setupUI()
-//        self.enableContinueBtn(isSelected: true)
         setMapShowData()
-        setUISearchbar()
+        setupTextFieldSearch()
         setupBackgroundGradient()
         updateContinueButton(isEnabled: true)
         setupContinueButtonIcon(isEnabled: true)
@@ -110,30 +109,30 @@ class LocationsViewController: CommonViewController {
         backgroundGradient?.frame = viewBackground.bounds
     }
     
-    func setNavUI(){
-     
+    func setNavUI() {
+        
         switch flowLocation {
         case .addAddress, .editAddress, .homePage, .updateProfile, .confirmAddAddress:
             
-            self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
+            self.setLeftMenu(leftImgs: [AppImages.backArrowWithBg], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
             //        self.setNavigationTitle(title: AppStrings.select_plan, color: UIColor.black, font: AppFont.Bold.size(22.0))
             
         case .defaultLoc:
             self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
             self.setProgress(0.8)
             
-            self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
+            self.setLeftMenu(leftImgs: [AppImages.backArrowWithBg], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
             self.setRighMenu(setTitle: [AppStrings.skipStr], setTintColor: .black, setTitleColor: UIColor.txtSkip)
-          
-         
-//            self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite) skipe remove need of client
+            
+            
+            //            self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite) skipe remove need of client
             
             //        self.setNavigationTitle(title: AppStrings.select_plan, color: UIColor.black, font: AppFont.Bold.size(22.0))
         }
     }
     
     override func rightBtnActn(sender: UIButton) {
-       
+        
         switch flowLocation {
         case .addAddress, .editAddress, .homePage, .updateProfile, .confirmAddAddress:
             print("address....")
@@ -141,61 +140,108 @@ class LocationsViewController: CommonViewController {
             appUserDefaults.setRegistrationSkip(value: true)
             appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
             
-//            appSceneDelegate?.goToGuestDashboard()
+            //            appSceneDelegate?.goToGuestDashboard()
         }
     }
     
     private func setupBackgroundGradient() {
         // Remove old gradient if any
         backgroundGradient?.removeFromSuperlayer()
-
+        
         let gradient = CAGradientLayer()
         gradient.colors = UIColor.appMultiColor(.greenBgGradient).map { $0.cgColor }
-
+        
         // VERY IMPORTANT – match first UI direction
         gradient.startPoint = CGPoint(x: 0.0, y: 0.0)
         gradient.endPoint   = CGPoint(x: 1.0, y: 1.0)
-
+        
         gradient.locations = [0.0, 0.5, 1.0]
         gradient.cornerRadius = 0
-
+        
         viewBackground.layer.insertSublayer(gradient, at: 0)
         backgroundGradient = gradient
     }
     
+//    func updateContinueButton(isEnabled: Bool) {
+//        continueBtn.isEnabled = isEnabled
+//        continueBtn.isUserInteractionEnabled = isEnabled
+//        
+//        UIView.animate(withDuration: 0.2) {
+//            self.setupContinueButtonIcon(isEnabled: isEnabled)
+//            if isEnabled {
+////                self.continueBtn.tintColor = .mainBg   // arrow color
+////                self.continueBtn.backgroundColor = .appWhite
+////                self.continueBtn.setTitleColor(.mainBg, for: .normal)
+//                self.continueBtn.setImage(UIImage(named: "ButtonConfirm"), for: .normal)
+//                self.continueBtn.semanticContentAttribute = .unspecified
+//                self.continueBtn.imageEdgeInsets = .zero
+//                self.continueBtn.titleEdgeInsets = .zero
+//                self.continueBtn.contentEdgeInsets = .zero
+//            } else {
+//                self.continueBtn.tintColor = .appWhite
+//                self.continueBtn.backgroundColor = .appDarkGray
+//                self.continueBtn.setTitleColor(.appWhite, for: .normal)
+//            }
+//        }
+//    }
+    
     func updateContinueButton(isEnabled: Bool) {
-        continueBtn.isEnabled = isEnabled
-        continueBtn.isUserInteractionEnabled = isEnabled
-        
-        UIView.animate(withDuration: 0.2) {
-            self.setupContinueButtonIcon(isEnabled: isEnabled)
-            if isEnabled {
-                self.continueBtn.tintColor = .mainBg   // arrow color
-                self.continueBtn.backgroundColor = .appWhite
-                self.continueBtn.setTitleColor(.mainBg, for: .normal)
-            } else {
-                self.continueBtn.tintColor = .appWhite
-                self.continueBtn.backgroundColor = .appDarkGray
-                self.continueBtn.setTitleColor(.appWhite, for: .normal)
+            continueBtn.isEnabled = isEnabled
+            continueBtn.isUserInteractionEnabled = isEnabled
+            
+            UIView.animate(withDuration: 0.2) {
+                self.setupContinueButtonIcon(isEnabled: isEnabled)
+                if isEnabled {
+//                    self.continueBtn.tintColor = .mainBg   // arrow color
+//                    self.continueBtn.backgroundColor = .appWhite
+//                    self.continueBtn.setTitleColor(.mainBg, for: .normal)
+                } else {
+                    self.continueBtn.tintColor = .appWhite
+                    self.continueBtn.backgroundColor = .appDarkGray
+                    self.continueBtn.setTitleColor(.appWhite, for: .normal)
+                }
             }
         }
-    }
-    
+
     func setupContinueButtonIcon(isEnabled: Bool) {
-        let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
-            .withRenderingMode(.alwaysTemplate)
-        
-        continueBtn.setImage(arrowImage, for: .normal)
-        
-        // Force image on right side
-        continueBtn.semanticContentAttribute = .forceRightToLeft
-        
-        // Space between text and image
-        continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -12)
-        continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 12)
-        
-        continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
-    }
+
+            if isEnabled {
+                // 🟢 ENABLED → IMAGE ONLY
+                let image = UIImage(named: "ButtonContinue")?
+                    .withRenderingMode(.alwaysOriginal)
+
+                continueBtn.setImage(image, for: .normal)
+                continueBtn.setTitle("", for: .normal)
+
+                continueBtn.backgroundColor = .clear
+                continueBtn.tintColor = .clear
+
+                continueBtn.imageEdgeInsets = .zero
+                continueBtn.titleEdgeInsets = .zero
+                continueBtn.contentEdgeInsets = .zero
+
+                continueBtn.semanticContentAttribute = .forceLeftToRight
+                continueBtn.adjustsImageWhenHighlighted = false
+                continueBtn.adjustsImageWhenDisabled = false
+
+            } else {
+                // 🔴 DISABLED → TEXT + ARROW
+                continueBtn.setTitle("CONTINUE", for: .normal)
+                continueBtn.setTitleColor(.appWhite, for: .normal)
+
+                let arrowImage = UIImage(named: "whiteRightArrow")?
+                    .withRenderingMode(.alwaysOriginal)
+                continueBtn.setImage(arrowImage, for: .normal)
+
+                continueBtn.semanticContentAttribute = .forceRightToLeft
+
+                // spacing between text & arrow
+                continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
+                continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 8)
+
+                continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+            }
+        }
     
     //MARK: ---------- SET UI
     private func setupUI() {
@@ -204,9 +250,9 @@ class LocationsViewController: CommonViewController {
         self.subAddrLbl.numberOfLines = 2
         
         DispatchQueue.main.async {
-            self.locSearch.setCornerRadius(borderWidth: 1, borderColor: .appBorder, cornerRadious: 12.0)
+            self.viewBgSearch.setCornerRadius(borderWidth: 1, borderColor: .appBorder, cornerRadious: 12.0)
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-//            self.viewBottom.addGradient(colors: UIColor.appMultiColor(.locationBgGradient), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0)
+            //            self.viewBottom.addGradient(colors: UIColor.appMultiColor(.locationBgGradient), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0)
         }
     }
     
@@ -220,142 +266,77 @@ class LocationsViewController: CommonViewController {
     
     
     //MARK: ---------------- Searchbar Customize
-//    func setUISearchbar() {
-//        self.locSearch.barTintColor = UIColor.mainBg
-//        self.locSearch.tintColor = UIColor.blue
-//        self.locSearch.searchTextField.backgroundColor = UIColor.clear
-//        self.locSearch.searchTextField.textColor = UIColor.appWhite
-//        self.locSearch.isTranslucent = false
-//        self.locSearch.placeholder = "Search for area, street name..."
-//        self.locSearch.searchTextField.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
-//        self.locSearch.showsCancelButton = false
-//        self.locSearch.searchTextField.setRightPaddingPoint(40.0)
-//        
-//        if let textField = self.locSearch.value(forKey: "searchField") as? UITextField {
-//            textField.clearButtonMode = .never
-//            textField.attributedPlaceholder = NSAttributedString(
-//                string: "Search for area, street name...",
-//                attributes: [NSAttributedString.Key.foregroundColor: UIColor.txtDarkGray]
-//            )
-//        }
-//    }
-    func setUISearchbar() {
-
-        locSearch.backgroundImage = UIImage()
-        locSearch.isTranslucent = false
-
-        // Outer container style
-//        locSearch.layer.cornerRadius = 18
-        locSearch.layer.masksToBounds = true
-        locSearch.layer.borderWidth = 1
-        locSearch.layer.borderColor = UIColor.white.withAlphaComponent(0.1).cgColor
-
-       let tf = locSearch.searchTextField
-//        tf.backgroundColor = UIColor.black.withAlphaComponent(0.35)
-        tf.textColor = .white
-        tf.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
-        tf.attributedPlaceholder = NSAttributedString(
+    func setupTextFieldSearch() {
+        
+        viewBgSearch.setCornerRadius(
+            borderWidth: 1,
+            borderColor: UIColor.white.withAlphaComponent(0.1),
+            cornerRadious: 12
+        )
+        
+        tfSearch.delegate = self
+        tfSearch.backgroundColor = .clear
+        tfSearch.textColor = .white
+        tfSearch.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
+        
+        tfSearch.attributedPlaceholder = NSAttributedString(
             string: " Search for area, street name...",
             attributes: [.foregroundColor: UIColor.txtDarkGray]
         )
-        tf.clearButtonMode = .never
-//        tf.leftView?.tintColor = .white
-//        tf.layer.cornerRadius = 12
-//        tf.layer.masksToBounds = true
-
-        // 🔹 ADD your custom icon
-        let icon = UIImageView(image: UIImage(named: "search-normal"))
-        icon.tintColor = .white
-        icon.contentMode = .scaleAspectFit
-        icon.frame = CGRect(x: 10, y: 0, width: 24, height: 24)
-
-        let iconContainer = UIView(frame: CGRect(x: 0, y: 0, width: 28, height: 20))
-        icon.center = iconContainer.center
-        iconContainer.addSubview(icon)
-
-        tf.leftView = iconContainer
-        tf.leftViewMode = .always
-
         
-        // 🔥 IMPORTANT – remove iOS default gap
-        tf.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            tf.leadingAnchor.constraint(equalTo: locSearch.leadingAnchor, constant: 0),
-            tf.trailingAnchor.constraint(equalTo: locSearch.trailingAnchor, constant: 0),
-            tf.topAnchor.constraint(equalTo: locSearch.topAnchor, constant: 0),
-            tf.bottomAnchor.constraint(equalTo: locSearch.bottomAnchor, constant: 0)
-        ])
+        tfSearch.clearButtonMode = .never
+        tfSearch.returnKeyType = .search
     }
-
     
     //MARK: ----------------MAP VIEW
     // Set the status bar style to complement night-mode.
-     override var preferredStatusBarStyle: UIStatusBarStyle {
-       return .lightContent
-     }
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
     
-//     override func loadView() {
-////       let camera = GMSCameraPosition.camera(withLatitude: -33.86, longitude: 151.20, zoom: 14.0)
-////       let mapView = GMSMapView.map(withFrame: CGRect.zero, camera: camera)
-//
-//       do {
-//         // Set the map style by passing the URL of the local file.
-//         if let styleURL = Bundle.main.url(forResource: "overlay", withExtension: "json") {
-//             self.mapView?.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
-//         } else {
-//           NSLog("Unable to find style.json")
-//         }
-//       } catch {
-//         NSLog("One or more of the map styles failed to load. \(error)")
-//       }
-//
-//       self.currentLocMap = mapView
-//     }
-    
-    
-    func setMapShowData(){
-
-//        let camera = GMSCameraPosition.camera(withLatitude: 28.5854355, longitude: 77.3087411, zoom: 10.0)
+    func setMapShowData() {
+        
+        //        let camera = GMSCameraPosition.camera(withLatitude: 28.5854355, longitude: 77.3087411, zoom: 10.0)
         
         let camera = GMSCameraPosition.camera(withLatitude: 0.0, longitude: 0.0, zoom: 10.0)
-                
+        
         DispatchQueue.main.async {
             // Create a map view using -init
             let mapView = GMSMapView()
             mapView.frame = self.currentLocMap.bounds
             mapView.camera = camera
-
+            
             self.mapView?.removeFromSuperview()
             self.mapView = mapView
             self.mapView.delegate = self
-//            self.mapView.isMyLocationEnabled = false
+            //            self.mapView.isMyLocationEnabled = false
             self.mapView.isUserInteractionEnabled = true
-//            self.mapView.mapType = .terrain // Other types: .normal, .hybrid, .satellite
+            //            self.mapView.mapType = .terrain // Other types: .normal, .hybrid, .satellite
             self.mapView.accessibilityElementsHidden = false
             self.mapView.gestureRecognizers = nil
             self.mapView.padding=UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
             self.mapView.settings.myLocationButton = false
             self.mapView.settings.compassButton = true
-//            self.mapView.isMyLocationEnabled = true
+            //            self.mapView.isMyLocationEnabled = true
             self.mapView.isIndoorEnabled = true
             self.mapView.isMyLocationEnabled = false
             self.currentLocMap.addSubview(self.mapView)
-                        
+            
             do {
-              // Set the map style by passing the URL of the local file.
-              if let styleURL = Bundle.main.url(forResource: "overlay", withExtension: "json") {
-                  print("load json....")
-//                  mapView.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
-                  self.mapView.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
-              } else {
-                NSLog("Unable to find style.json")
-              }
+                // Set the map style by passing the URL of the local file.
+                if let styleURL = Bundle.main.url(forResource: "overlay", withExtension: "json") {
+                    print("load json....")
+                    //                  mapView.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
+                    self.mapView.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
+                } else {
+                    NSLog("Unable to find style.json")
+                }
             } catch {
-              NSLog("One or more of the map styles failed to load. \(error)")
+                NSLog("One or more of the map styles failed to load. \(error)")
             }
-
+            
         }
-                
+        
         self.locationManager = CLLocationManager()
         if let locationManager = self.locationManager {
             locationManager.delegate = self
@@ -406,7 +387,7 @@ class LocationsViewController: CommonViewController {
         case .homePage:
             print("From Home Page.")
             self.navigationController?.popViewController(animated: true)
-       
+            
         case .updateProfile:
             print("update profile..")
             self.sendBackAddr?(self.currentAddr)
@@ -416,13 +397,13 @@ class LocationsViewController: CommonViewController {
             
             if let getAddressData = getAddressData {
                 print(getAddressData)
-//                vc.addressData = self.getAddressData
+                //                vc.addressData = self.getAddressData
                 let vc: AddNewAddressViewController = AddNewAddressViewController.instantiate(appStoryboard: .booking)
                 vc.addressData = getAddressData
                 self.navigationController?.pushViewController(vc, animated: true)
             }
             
-       
+            
             
         case .defaultLoc:
             
@@ -450,36 +431,11 @@ class LocationsViewController: CommonViewController {
                 AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.enter_Location)
             }
         }
-        
-       /*
-        if let mainAddrLbl = self.mainAddrLbl.text , !mainAddrLbl.isEmpty, let subAddrLbl = self.subAddrLbl.text, !subAddrLbl.isEmpty, let lat = showmapCamera?.latitude as? Double, let long = showmapCamera?.longitude as? Double {
-            print(mainAddrLbl, subAddrLbl, lat, long)
-            let fullAddr = mainAddrLbl + " " + subAddrLbl
-            
-            print(fullAddr)
-            
-            RegistrationVM.addLocationApi(viewController: self, inputLat: "\(lat)", inputLong: "\(long)", inputAddress: fullAddr, completion: { [weak self] getResultData in
-                guard let self = self, let getResultData = getResultData else { return  }
-                
-                if getResultData.status == true {
-                    if let detailsData = getResultData.data {
-                        appUserDefaults.saveUserToUserDefaults(detailsData)
-                    }
-                    
-                    let vc:GetStartViewController = GetStartViewController.instantiate(appStoryboard: .main)
-                    self.navigationController?.pushViewController(vc, animated: true)
-                }
-            })
-            
-        }else{
-            AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.enter_Location)
-        }
-        */
     }
     
     @IBAction func rightSearchBtnActn(_ sender: Any) {
         print("rightSearchBtnActn clicked")
-        self.locSearch.text = nil
+        self.tfSearch.text = nil
         self.startUpdating()
     }
     
@@ -495,62 +451,15 @@ class LocationsViewController: CommonViewController {
         }
     }
     
-    //MARK: -------------- ENABLE CONTINUE
-//    func enableContinueBtn(isSelected:Bool = false){
-//        if isSelected {
-//            self.continueBtn.isUserInteractionEnabled = true
-//            self.continueBtn.backgroundColor = UIColor.appWhite
-//            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
-//        } else {
-//            self.continueBtn.isUserInteractionEnabled = false
-//            self.continueBtn.backgroundColor = UIColor.appDarkGray
-//            self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
-//        }
-//    }
-    
-    
-    private func searchPlace(){
+    private func searchPlace() {
         let autocompleteController = GMSAutocompleteViewController()
-             autocompleteController.delegate = self
-             present(autocompleteController, animated: true, completion: nil)
+        autocompleteController.delegate = self
+        present(autocompleteController, animated: true, completion: nil)
     }
     
 }
 
-//MARK: ----------------Extension for searchbar
-extension LocationsViewController:UISearchBarDelegate{
-    // Delegate method to handle search actions
-    
-    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-        self.locSearch.showsCancelButton = false
-        self.locSearch.searchTextField.setRightPaddingPoint(40.0)
-        self.searchPlace()
-       }
-
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-           searchBar.text = nil
-           searchBar.showsCancelButton = false
-
-          dismiss(animated: true, completion: nil)
-           // Remove focus from the search bar.
-           searchBar.endEditing(true)
-
-           // Perform any necessary work.  E.g., repopulating a table view
-           // if the search bar performs filtering.
-       }
-    
-       func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-
-           // Perform search action with the search text
-
-           print("Search text: \(searchBar.text ?? "")")
-           dismiss(animated: true, completion: nil)
-           self.locSearch.endEditing(true)
-       }
-
-}
-
-//MARK: ---------------- Extension for google map delegate
+// MARK: ---------------- Extension for google map delegate
 extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate {
     
     
@@ -583,10 +492,6 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
             self.showmapCamera = centerCoordinate
             self.getCurrentAddr(location: CLLocation(latitude: centerCoordinate.latitude, longitude: centerCoordinate.longitude))
         }
-        
-        //        let centerCoordinate = mapView.projection.coordinate(for: self.mapView.center)
-        //        self.showmapCamera = centerCoordinate
-        //        self.getCurrentAddr(location: CLLocation(latitude: centerCoordinate.latitude, longitude: centerCoordinate.longitude))
     }
     
     func mapView(_ mapView: GMSMapView, willMove gesture: Bool) {
@@ -597,9 +502,9 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         
         switch status {
-         case .authorizedAlways, .authorizedWhenInUse:
-             startUpdatingLocation()
-         case .denied, .restricted:
+        case .authorizedAlways, .authorizedWhenInUse:
+            startUpdatingLocation()
+        case .denied, .restricted:
             AlertHelper.shared.showCustomeAlert(title: AppAlertStrings.location_permission, message: AppAlertStrings.loaction_access, actions: ["Open Settings"], withCancel: false, completion: {[weak self] tag in
                 guard self != nil else { return }
                 if let appSettings = URL(string: UIApplication.openSettingsURLString) {
@@ -607,9 +512,9 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
                 }
             })
             
-         default:
-             break
-         }
+        default:
+            break
+        }
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -621,7 +526,7 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
         self.showmapCamera = location.coordinate
         self.locationManager?.stopUpdatingLocation()
         self.locationManager = nil
-    
+        
         if let isFromEditAddress = self.isFromEditAddress, !isFromEditAddress {
             addMarkers(marker: MarkerModel(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, title: title, snippet: self.mainAddrLbl.text, iconImageName: AppImages.Radius))
             
@@ -630,12 +535,6 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
         }else{
             locationManager?.stopUpdatingLocation()
         }
-        
-//        addMarkers(marker: MarkerModel(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, title: title, snippet: self.mainAddrLbl.text, iconImageName: AppImages.Radius))
-//        
-//        getCurrentAddr(location: location)
-//        locationManager?.stopUpdatingLocation()
-        
         self.setUpMapHeigth()
     }
     
@@ -774,40 +673,53 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
     //            }
     //        }
     //    }
-        
-        /* Using Google Places API for Autocomplete
-        func fetchPlaceDetails(placeID: String) {
-            let placesClient = GMSPlacesClient.shared()
-            placesClient.lookUpPlaceID(placeID) { (place, error) in
-                if let error = error {
-                    print("Error fetching place details: \(error.localizedDescription)")
-                    return
-                }
-                if let place = place {
-                    let buildingNumber = place.addressComponents?.first(where: { $0.types.contains("street_number") })?.name ?? "N/A"
-                    let streetName = place.addressComponents?.first(where: { $0.types.contains("route") })?.name ?? "N/A"
-                    let landmark = place.addressComponents?.first(where: { $0.types.contains("sublocality_level_1") })?.name ?? "N/A"
-                    
-                    print("Building Number: \(buildingNumber)")
-                    print("Street Name: \(streetName)")
-                    print("Landmark: \(landmark)")
-                }
-            }
-        }
-        */
+    
+    /* Using Google Places API for Autocomplete
+     func fetchPlaceDetails(placeID: String) {
+     let placesClient = GMSPlacesClient.shared()
+     placesClient.lookUpPlaceID(placeID) { (place, error) in
+     if let error = error {
+     print("Error fetching place details: \(error.localizedDescription)")
+     return
+     }
+     if let place = place {
+     let buildingNumber = place.addressComponents?.first(where: { $0.types.contains("street_number") })?.name ?? "N/A"
+     let streetName = place.addressComponents?.first(where: { $0.types.contains("route") })?.name ?? "N/A"
+     let landmark = place.addressComponents?.first(where: { $0.types.contains("sublocality_level_1") })?.name ?? "N/A"
+     
+     print("Building Number: \(buildingNumber)")
+     print("Street Name: \(streetName)")
+     print("Landmark: \(landmark)")
+     }
+     }
+     }
+     */
 }
+
+extension LocationsViewController: UITextFieldDelegate {
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        searchPlace()
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+}
+
 
 extension LocationsViewController: GMSAutocompleteViewControllerDelegate{
     func viewController(_ viewController: GMSAutocompleteViewController, didAutocompleteWith place: GMSPlace) {
         print("Place selected: \(place.name ?? "No name")")
-                print("Address: \(place.formattedAddress ?? "")")
-                print("Coordinates: \(place.coordinate.latitude), \(place.coordinate.longitude)")
-   
-        self.locSearch.text = place.name
-//        self.locationManager?.stopUpdatingLocation()
+        print("Address: \(place.formattedAddress ?? "")")
+        print("Coordinates: \(place.coordinate.latitude), \(place.coordinate.longitude)")
+        
+        self.tfSearch.text = place.name
+        //        self.locationManager?.stopUpdatingLocation()
         self.showmapCamera = place.coordinate
         self.getCurrentAddr(location: CLLocation(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude))
-       
+        
         dismiss(animated: true, completion: nil)
     }
     

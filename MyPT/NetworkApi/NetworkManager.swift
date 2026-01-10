@@ -40,7 +40,7 @@ class NetworkManager {
         // Show Loader
         if isShowLoading {
 //            Utility.showLoader(message:  AppAlertStrings.please_wait)
-            Utility.showLoader(message: AppAlertStrings.preparing_your_experience)
+            Utility.showLoader(title: AppAlertStrings.almostDone, subtitle: AppAlertStrings.loaderMsg)
         }
         
     
@@ -111,7 +111,7 @@ class NetworkManager {
         }
         // Show Loader
         if isShowLoading{
-            Utility.showLoader(message: AppAlertStrings.preparing_your_experience)
+            Utility.showLoader(title: AppAlertStrings.almostDone, subtitle: AppAlertStrings.loaderMsg)
         }
        
         //URLEncoding.default // in get method Standard URL encoding 
@@ -218,7 +218,8 @@ class NetworkManager {
         
         if isShowLoading {
 //            Utility.showLoader(message: AppAlertStrings.please_wait)
-            Utility.showLoader(message: AppAlertStrings.preparing_your_experience)
+//            Utility.showLoader(message: AppAlertStrings.preparing_your_experience)
+            Utility.showLoader(title: AppAlertStrings.almostDone, subtitle: AppAlertStrings.loaderMsg)
         }
         
         AF.upload(

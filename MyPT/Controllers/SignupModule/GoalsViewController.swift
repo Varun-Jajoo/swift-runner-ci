@@ -20,9 +20,9 @@ class GoalsViewController: CommonViewController {
     @IBOutlet weak var descLbl: UILabel!
     @IBOutlet weak var goalsCollView: UICollectionView!
     @IBOutlet weak var goalsCollViewHeightConstrnt: NSLayoutConstraint!
-    @IBOutlet weak var bottomContainerMBV: UIView!
-    @IBOutlet weak var bottomNoteMBV: UIView!
-    @IBOutlet weak var bottomNoteLbl: UILabel!
+//    @IBOutlet weak var bottomContainerMBV: UIView!
+//    @IBOutlet weak var bottomNoteMBV: UIView!
+//    @IBOutlet weak var bottomNoteLbl: UILabel!
     @IBOutlet weak var continueBtn: UIButton!
     @IBOutlet var viewBackground: UIView!
     
@@ -32,27 +32,14 @@ class GoalsViewController: CommonViewController {
         setupUI()
         setUpFont()
         self.continueBtn.isUserInteractionEnabled = false
-        bottomContainerMBV.isHidden = true
-        bottomNoteMBV.isHidden = true
+//        bottomContainerMBV.isHidden = true
+//        bottomNoteMBV.isHidden = true
         setupBackgroundGradient()
         updateContinueButton(isEnabled: false)
         setupContinueButtonIcon(isEnabled: false)
         continueBtn.adjustsImageWhenDisabled = false
         continueBtn.adjustsImageWhenHighlighted = false
-        
-        /*
-        dataGoals = [ ["title":"Mental Health","images":AppImages.mentalHealth as Any,"seleced_images":AppImages.mentalHealth_selected as Any],
-                      ["title":"Weight Loss","images":AppImages.weightLoss as Any,"seleced_images":AppImages.weightLoss_selected as Any],
-                      ["title":"Muscle Building","images":AppImages.muscleBuilding as Any,"seleced_images":AppImages.muscleBuilding_selected as Any],
-                      ["title":"Improved CV Endurance","images":AppImages.improvedCVEndurance as Any,"seleced_images":AppImages.improvedCVEndurance_selected as Any],
-                      ["title":"Flexibility & Mobility","images":AppImages.flexibilityMobility as Any,"seleced_images":AppImages.flexibilityMobility_selected as Any],
-                      ["title":"Holistic Fitness","images":AppImages.holisticFitness as Any,"seleced_images":AppImages.holisticFitness_selected as Any],
-                      ["title":"Sports Conditioning","images":AppImages.sportsConditioning as Any,"seleced_images":AppImages.sportsConditioning_selected as Any],
-                      ["title":"Others","images":AppImages.goalsOthers as Any,"seleced_images":AppImages.goalsOthers_Selected as Any]
-        ]
-        */
-        
-        //-----------------------
+    
         if let userData = appUserDefaults.getUserFromUserDefaults(as: UserModel.self), let userName = userData.name, let userHeight = userData.information?.height {
             print("userData", userData)
             print("userData Height: ", userHeight,"userData name: ", userName, "Id: ",userData.id ?? "",  userData.phone ?? "")
@@ -83,7 +70,7 @@ class GoalsViewController: CommonViewController {
         self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
         self.setProgress(0.7)
         
-        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
+        self.setLeftMenu(leftImgs: [AppImages.backArrowWithBg], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
         self.setRighMenu(setTitle: [AppStrings.skipStr], setTintColor: .black, setTitleColor: UIColor.txtSkip)
 //        self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite) skipe remove need of client
         
@@ -115,9 +102,9 @@ class GoalsViewController: CommonViewController {
         UIView.animate(withDuration: 0.2) {
             self.setupContinueButtonIcon(isEnabled: isEnabled)
             if isEnabled {
-                self.continueBtn.tintColor = .mainBg   // arrow color
-                self.continueBtn.backgroundColor = .appWhite
-                self.continueBtn.setTitleColor(.mainBg, for: .normal)
+//                self.continueBtn.tintColor = .mainBg   // arrow color
+//                self.continueBtn.backgroundColor = .appWhite
+//                self.continueBtn.setTitleColor(.mainBg, for: .normal)
             } else {
                 self.continueBtn.tintColor = .appWhite
                 self.continueBtn.backgroundColor = .appDarkGray
@@ -127,20 +114,44 @@ class GoalsViewController: CommonViewController {
     }
     
     func setupContinueButtonIcon(isEnabled: Bool) {
-        let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
-            .withRenderingMode(.alwaysOriginal)
-        
-        continueBtn.setImage(arrowImage, for: .normal)
-        
-        // Force image on right side
-        continueBtn.semanticContentAttribute = .forceRightToLeft
-        
-        // Space between text and image
-        continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -12)
-        continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 12)
-        
-        continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
-    }
+
+            if isEnabled {
+                // 🟢 ENABLED → IMAGE ONLY
+                let image = UIImage(named: "ButtonNext")?
+                    .withRenderingMode(.alwaysOriginal)
+
+                continueBtn.setImage(image, for: .normal)
+                continueBtn.setTitle("", for: .normal)
+
+                continueBtn.backgroundColor = .clear
+                continueBtn.tintColor = .clear
+
+                continueBtn.imageEdgeInsets = .zero
+                continueBtn.titleEdgeInsets = .zero
+                continueBtn.contentEdgeInsets = .zero
+
+                continueBtn.semanticContentAttribute = .forceLeftToRight
+                continueBtn.adjustsImageWhenHighlighted = false
+                continueBtn.adjustsImageWhenDisabled = false
+
+            } else {
+                // 🔴 DISABLED → TEXT + ARROW
+                continueBtn.setTitle("NEXT", for: .normal)
+                continueBtn.setTitleColor(.appWhite, for: .normal)
+
+                let arrowImage = UIImage(named: "whiteRightArrow")?
+                    .withRenderingMode(.alwaysOriginal)
+                continueBtn.setImage(arrowImage, for: .normal)
+
+                continueBtn.semanticContentAttribute = .forceRightToLeft
+
+                // spacing between text & arrow
+                continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
+                continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 8)
+
+                continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+            }
+        }
     
     override func rightBtnActn(sender: UIButton) {
         appUserDefaults.setRegistrationSkip(value: true)
@@ -151,7 +162,7 @@ class GoalsViewController: CommonViewController {
     //------------------************Font
     func setUpFont() {
         self.descLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
-        self.bottomNoteLbl.font = AppFont.regular.size(12.0, familyName: familyOverpassMono)
+//        self.bottomNoteLbl.font = AppFont.regular.size(12.0, familyName: familyOverpassMono)
         self.continueBtn.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
     }
     
@@ -162,7 +173,7 @@ class GoalsViewController: CommonViewController {
         
         //-----------*************
         DispatchQueue.main.async {
-            self.bottomNoteMBV.setCornerRadius(borderWidth: 1, borderColor: UIColor.appBorder, cornerRadious: 8.0)
+//            self.bottomNoteMBV.setCornerRadius(borderWidth: 1, borderColor: UIColor.appBorder, cornerRadious: 8.0)
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
         }
     }

@@ -134,19 +134,6 @@ class GenderViewController: CommonViewController {
         }
     }
     
-//    func updateUI(selectedView:[UIButton]){
-//        for i in selectedView{
-//            if i.isSelected {
-//                self.enableContinueBtn(isSelected: true)
-//                i.backgroundColor = UIColor.appBorder
-//                i.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 158.0/255.0, green: 188/255.0, blue: 255/255.0, alpha: 1.0), cornerRadious: 16.0)
-//            }else{
-//                i.backgroundColor = UIColor.clear
-//                i.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 16.0)
-//            }
-//        }
-//    }
-    
     func updateContinueButton(isEnabled: Bool) {
         continueBtn.isEnabled = isEnabled
         continueBtn.isUserInteractionEnabled = isEnabled
@@ -154,9 +141,9 @@ class GenderViewController: CommonViewController {
         UIView.animate(withDuration: 0.2) {
             self.setupContinueButtonIcon(isEnabled: isEnabled)
             if isEnabled {
-                self.continueBtn.tintColor = .mainBg   // arrow color
-                self.continueBtn.backgroundColor = .appWhite
-                self.continueBtn.setTitleColor(.mainBg, for: .normal)
+//                self.continueBtn.tintColor = .mainBg   // arrow color
+//                self.continueBtn.backgroundColor = .appWhite
+//                self.continueBtn.setTitleColor(.mainBg, for: .normal)
             } else {
                 self.continueBtn.tintColor = .appWhite
                 self.continueBtn.backgroundColor = .appDarkGray
@@ -166,20 +153,44 @@ class GenderViewController: CommonViewController {
     }
     
     func setupContinueButtonIcon(isEnabled: Bool) {
-        let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
-            .withRenderingMode(.alwaysOriginal)
-        
-        continueBtn.setImage(arrowImage, for: .normal)
-        
-        // Force image on right side
-        continueBtn.semanticContentAttribute = .forceRightToLeft
-        
-        // Space between text and image
-        continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -12)
-        continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 12)
-        
-        continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
-    }
+
+            if isEnabled {
+                // 🟢 ENABLED → IMAGE ONLY
+                let image = UIImage(named: "ButtonContinue")?
+                    .withRenderingMode(.alwaysOriginal)
+
+                continueBtn.setImage(image, for: .normal)
+                continueBtn.setTitle("", for: .normal)
+
+                continueBtn.backgroundColor = .clear
+                continueBtn.tintColor = .clear
+
+                continueBtn.imageEdgeInsets = .zero
+                continueBtn.titleEdgeInsets = .zero
+                continueBtn.contentEdgeInsets = .zero
+
+                continueBtn.semanticContentAttribute = .forceLeftToRight
+                continueBtn.adjustsImageWhenHighlighted = false
+                continueBtn.adjustsImageWhenDisabled = false
+
+            } else {
+                // 🔴 DISABLED → TEXT + ARROW
+                continueBtn.setTitle("CONTINUE", for: .normal)
+                continueBtn.setTitleColor(.appWhite, for: .normal)
+
+                let arrowImage = UIImage(named: "whiteRightArrow")?
+                    .withRenderingMode(.alwaysOriginal)
+                continueBtn.setImage(arrowImage, for: .normal)
+
+                continueBtn.semanticContentAttribute = .forceRightToLeft
+
+                // spacing between text & arrow
+                continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
+                continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 8)
+
+                continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+            }
+        }
     
     @IBAction func genderSewectionBtnActn(_ sender: UIButton) {
         switch sender.tag {

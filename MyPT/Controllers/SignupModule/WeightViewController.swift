@@ -258,9 +258,9 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         UIView.animate(withDuration: 0.2) {
             self.setupContinueButtonIcon(isEnabled: isEnabled)
             if isEnabled {
-                self.continueBtn.tintColor = .mainBg   // arrow color
-                self.continueBtn.backgroundColor = .appWhite
-                self.continueBtn.setTitleColor(.mainBg, for: .normal)
+//                self.continueBtn.tintColor = .mainBg   // arrow color
+//                self.continueBtn.backgroundColor = .appWhite
+//                self.continueBtn.setTitleColor(.mainBg, for: .normal)
             } else {
                 self.continueBtn.tintColor = .appWhite
                 self.continueBtn.backgroundColor = .appDarkGray
@@ -270,20 +270,44 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     }
     
     func setupContinueButtonIcon(isEnabled: Bool) {
-        let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
-            .withRenderingMode(.alwaysTemplate)
-        
-        continueBtn.setImage(arrowImage, for: .normal)
-        
-        // Force image on right side
-        continueBtn.semanticContentAttribute = .forceRightToLeft
-        
-        // Space between text and image
-        continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -12)
-        continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 12)
-        
-        continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
-    }
+
+            if isEnabled {
+                // 🟢 ENABLED → IMAGE ONLY
+                let image = UIImage(named: "ButtonNext")?
+                    .withRenderingMode(.alwaysOriginal)
+
+                continueBtn.setImage(image, for: .normal)
+                continueBtn.setTitle("", for: .normal)
+
+                continueBtn.backgroundColor = .clear
+                continueBtn.tintColor = .clear
+
+                continueBtn.imageEdgeInsets = .zero
+                continueBtn.titleEdgeInsets = .zero
+                continueBtn.contentEdgeInsets = .zero
+
+                continueBtn.semanticContentAttribute = .forceLeftToRight
+                continueBtn.adjustsImageWhenHighlighted = false
+                continueBtn.adjustsImageWhenDisabled = false
+
+            } else {
+                // 🔴 DISABLED → TEXT + ARROW
+                continueBtn.setTitle("NEXT", for: .normal)
+                continueBtn.setTitleColor(.appWhite, for: .normal)
+
+                let arrowImage = UIImage(named: "whiteRightArrow")?
+                    .withRenderingMode(.alwaysOriginal)
+                continueBtn.setImage(arrowImage, for: .normal)
+
+                continueBtn.semanticContentAttribute = .forceRightToLeft
+
+                // spacing between text & arrow
+                continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
+                continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 8)
+
+                continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+            }
+        }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if isSwitchingUnit { return }
@@ -324,31 +348,6 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
 
         rulerView.indicatorX = centerX
     }
-
-//    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-//        let currentText = textField.text ?? ""
-//               let nsText = currentText as NSString
-//               let updatedText = nsText.replacingCharacters(in: range, with: string)
-//
-//               // Allow delete
-//               if updatedText.isEmpty {
-//                   return true
-//               }
-//
-//               // Allow only digits
-//               if !CharacterSet.decimalDigits.isSuperset(of: CharacterSet(charactersIn: updatedText)) {
-//                   return false
-//               }
-//
-//               // Convert to number
-//               guard let value = Int(updatedText) else {
-//                   return false
-//               }
-//
-//               // Range check: 0–300
-//        return value >= 0 && value <= (isKgSelected ? 600 : 1500)
-//    }
-    
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         updateSelectedValueFromScroll(scrollView)
@@ -411,41 +410,6 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
             )
 
             valueLabel.text = "\(convertedValue)"
-//        isSwitchingUnit = true
-//        
-//        isKgSelected = sender.tag == 0
-//        
-//        btnKG.backgroundColor = isKgSelected ? .white : .clear
-//        btnKG.setTitleColor(isKgSelected ? .black : .white, for: .normal)
-//        
-//        btnLBS.backgroundColor = isKgSelected ? .clear : .white
-//        btnLBS.setTitleColor(isKgSelected ? .white : .black, for: .normal)
-//        
-//        rulerView.isKgSelected = isKgSelected
-//        
-//        // 🔥 Force contentSize update
-//        let contentWidth = rulerView.intrinsicContentSize.width
-//        scrollView.contentSize.width = contentWidth
-//        
-//        // 🔥 Re-center ruler on same value
-//        rulerView.scrollToValue(
-//            rulerView: rulerView,
-//            scrollView: scrollView,
-//            currentIndex,
-//            animated: false
-//        )
-        
-//        isKgSelected = sender.tag == 0
-//        btnKG.backgroundColor = sender.tag == 0 ? .white : .clear
-//        btnKG.setTitleColor(sender.tag == 0 ? .black : .white, for: .normal)
-//        btnLBS.backgroundColor = sender.tag == 0 ? .clear : .white
-//        btnLBS.setTitleColor(sender.tag == 0 ? .white : .black, for: .normal)
-//        rulerView.isKgSelected = isKgSelected
-//        self.valueTextField.text = "\(String(describing: self.valueLabel.text ?? ""))" + (isKgSelected ? " Kg" : " lbs")
-//        
-//        DispatchQueue.main.async {
-//            self.isSwitchingUnit = false
-//        }
     }
     
     @IBAction func continueBtnActn(_ sender: Any) {
@@ -501,10 +465,9 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         
         NSLayoutConstraint.activate([
             valueTextFieldCenterYConstraint,
-//            valueTextField.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor, constant: -100),
             valueTextField.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
             
-            valueTextField.heightAnchor.constraint(equalToConstant: 32),
+            valueTextField.heightAnchor.constraint(equalToConstant: 40),
             underlineView.topAnchor.constraint(equalTo: valueTextField.bottomAnchor, constant: 6),
             underlineView.leadingAnchor.constraint(equalTo: valueTextField.leadingAnchor),
             underlineView.trailingAnchor.constraint(equalTo: valueTextField.trailingAnchor),
@@ -644,19 +607,6 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         valueTextField.isUserInteractionEnabled = false
         setScreenUI(showSlider: true)
     }
-    
-//    func textFieldDidEndEditing(_ textField: UITextField) {
-//        if previousText == textField.text {
-//            valueTextField.text = previousText + (isKgSelected ? "kg" : "lbs")
-//            valueTextField.isUserInteractionEnabled = false
-//            setScreenUI(showSlider: true)
-//        } else {
-//            var scrolled = Int(valueTextField.text ?? "") ?? 0
-//            rulerView.scrollToValue(rulerView: rulerView, scrollView: scrollView, scrolled)
-//            valueTextField.isUserInteractionEnabled = false
-//            setScreenUI(showSlider: true)
-//        }
-//    }
     
     func trimCharacters(from text: String) -> String {
         guard text.count > 2 else { return "" }

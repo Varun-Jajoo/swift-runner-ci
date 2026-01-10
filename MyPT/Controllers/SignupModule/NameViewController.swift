@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import IQKeyboardManagerSwift
+import IQKeyboardToolbarManager
 
 class NameViewController: CommonViewController, UITextFieldDelegate {
     
@@ -18,9 +20,11 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
     @IBOutlet weak var fullNameTxtField: UITextField!
     @IBOutlet weak var continueBtn: UIButton!
     @IBOutlet weak var continueButtonBottomConstraint: NSLayoutConstraint!
+    @IBOutlet weak var titleLblTopConstraint: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        titleLblTopConstraint.constant = view.bounds.height < 700 ? 300 : view.bounds.height < 900 ? 400 : 500
         setupUI()
         fullNameTitleLbl.text = nil
         fullNameTxtField.delegate = self
@@ -50,11 +54,19 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        self.setNavigationColor(setColor: .clear)
-        self.statusBarColor(setColor: .clear)
-        setNavUI()
-    }
+            super.viewWillAppear(animated)
+            self.setNavigationColor(setColor: .clear)
+            self.statusBarColor(setColor: .clear)
+            setNavUI()
+            IQKeyboardManager.shared.isEnabled = false
+            IQKeyboardToolbarManager.shared.isEnabled = false
+        }
+        
+        override func viewDidDisappear(_ animated: Bool) {
+            IQKeyboardManager.shared.isEnabled = true
+            IQKeyboardToolbarManager.shared.isEnabled = true
+            
+        }
     
     func setNavUI(){
         self.setupNavigationBarProgress(
@@ -74,22 +86,25 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
     }
     
     override func keyboardWillShow(_ notification: Notification) {
-        super.keyboardWillShow(notification)
-        print("keyboardWillShow")
-        guard let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
-                      let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
-                
-                let keyboardHeight = frame.height - view.safeAreaInsets.bottom
-                let padding : CGFloat = view.bounds.height < 700 ? 180 : 220
-                continueButtonBottomConstraint.constant = keyboardHeight - padding
-        self.addBlurWithVibrancyEffect(viewShow: self.mgImgView, alphBlur: 1.0, vibrancyAlphBlur: 0.4)
-    }
+            super.keyboardWillShow(notification)
+            print("keyboardWillShow")
+            guard let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+                  let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+            
+            let keyboardHeight = frame.height - view.safeAreaInsets.bottom
+            let padding : CGFloat = view.bounds.height < 700 ? 180 : 220
+            titleLblTopConstraint.constant = 30
+            continueButtonBottomConstraint.constant = keyboardHeight + 30
+            
+            self.addBlurWithVibrancyEffect(viewShow: self.mgImgView, alphBlur: 1.0, vibrancyAlphBlur: 0.4)
+        }
     
     override func keyboardWillHide(_ notification: Notification) {
-        super.keyboardWillHide(notification)
-        continueButtonBottomConstraint.constant = 14
-        self.customBlurViewRemove(viewShow: self.mgImgView)
-    }
+            super.keyboardWillHide(notification)
+            continueButtonBottomConstraint.constant = 14
+            titleLblTopConstraint.constant = view.bounds.height < 700 ? 300 : view.bounds.height < 900 ? 400 : 500
+            self.customBlurViewRemove(viewShow: self.mgImgView)
+        }
     
     deinit {
         NotificationCenter.default.removeObserver(self)
@@ -132,9 +147,9 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
         UIView.animate(withDuration: 0.2) {
             self.setupContinueButtonIcon(isEnabled: isEnabled)
             if isEnabled {
-                self.continueBtn.tintColor = .mainBg   // arrow color
-                self.continueBtn.backgroundColor = .appWhite
-                self.continueBtn.setTitleColor(.mainBg, for: .normal)
+//                self.continueBtn.tintColor = .mainBg   // arrow color
+//                self.continueBtn.backgroundColor = .appWhite
+//                self.continueBtn.setTitleColor(.mainBg, for: .normal)
             } else {
                 self.continueBtn.tintColor = .appWhite
                 self.continueBtn.backgroundColor = .appDarkGray
@@ -142,22 +157,62 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
             }
         }
     }
-    
+
     func setupContinueButtonIcon(isEnabled: Bool) {
-        let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
-            .withRenderingMode(.alwaysOriginal)
-        
-        continueBtn.setImage(arrowImage, for: .normal)
-        
-        // Force image on right side
-        continueBtn.semanticContentAttribute = .forceRightToLeft
-        
-        // Space between text and image
-        continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -12)
-        continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 12)
-        
-        continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
-    }
+
+            if isEnabled {
+                // 🟢 ENABLED → IMAGE ONLY
+                let image = UIImage(named: "ButtonContinue")?
+                    .withRenderingMode(.alwaysOriginal)
+
+                continueBtn.setImage(image, for: .normal)
+                continueBtn.setTitle("", for: .normal)
+
+                continueBtn.backgroundColor = .clear
+                continueBtn.tintColor = .clear
+
+                continueBtn.imageEdgeInsets = .zero
+                continueBtn.titleEdgeInsets = .zero
+                continueBtn.contentEdgeInsets = .zero
+
+                continueBtn.semanticContentAttribute = .forceLeftToRight
+                continueBtn.adjustsImageWhenHighlighted = false
+                continueBtn.adjustsImageWhenDisabled = false
+
+            } else {
+                // 🔴 DISABLED → TEXT + ARROW
+                continueBtn.setTitle("CONTINUE", for: .normal)
+                continueBtn.setTitleColor(.appWhite, for: .normal)
+
+                let arrowImage = UIImage(named: "whiteRightArrow")?
+                    .withRenderingMode(.alwaysOriginal)
+                continueBtn.setImage(arrowImage, for: .normal)
+
+                continueBtn.semanticContentAttribute = .forceRightToLeft
+
+                // spacing between text & arrow
+                continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
+                continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 8)
+
+                continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+            }
+        }
+    
+//    func setupContinueButtonIcon(isEnabled: Bool) {
+//        let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
+//            .withRenderingMode(.alwaysOriginal)
+//        
+//        continueBtn.setImage(arrowImage, for: .normal)
+//        
+//        // Force image on right side
+//        continueBtn.semanticContentAttribute = .forceRightToLeft
+//        
+//        // Space between text and image
+//        continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -12)
+//        continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 12)
+//        
+//        continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+//    }
     
     @IBAction func continueBtnActn(_ sender: Any) {
         print("Continiue btn clicked..")

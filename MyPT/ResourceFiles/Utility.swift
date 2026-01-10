@@ -7,6 +7,7 @@
 
 import UIKit
 import SVProgressHUD
+import ImageIO
 
 // MARK: - Utility Loader
 class Utility: NSObject {
@@ -18,8 +19,60 @@ class Utility: NSObject {
     private static var messageLabel: UILabel?
     private var backgroundGradient: CAGradientLayer?
 
+//    class func showLoader(
+//        message: String = "We're preparing your personalised training experience",
+//        fullScreen: Bool = true
+//    ) {
+//        guard let window = UIApplication.shared
+//            .windows.first(where: { $0.isKeyWindow }) else { return }
+//
+//        hideLoader()
+//
+//        let overlay = UIView(frame: window.bounds)
+//        overlay.isUserInteractionEnabled = true
+//        overlay.backgroundColor = .clear   // important
+//
+//        // ⭐ Add gradient to overlay
+//        addGradientBackground(to: overlay)
+//
+//        // Loader (TOP)
+//        let loader = DotRingLoaderView()
+//        loader.translatesAutoresizingMaskIntoConstraints = false
+//
+//        // Label (BOTTOM)
+//        let label = UILabel()
+//        label.text = message
+//        label.textColor = UIColor(red: 149/255, green: 149/255, blue: 149/255, alpha: 1)
+//        label.textAlignment = .center
+//        label.numberOfLines = 0
+//        label.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
+//        messageLabel = label
+//
+//        let stack = UIStackView(arrangedSubviews: [loader, label])
+//        stack.axis = .vertical
+//        stack.alignment = .center
+//        stack.spacing = 12
+//        stack.translatesAutoresizingMaskIntoConstraints = false
+//
+//        overlay.addSubview(stack)
+//
+//        NSLayoutConstraint.activate([
+//            loader.widthAnchor.constraint(equalToConstant: 60),
+//            loader.heightAnchor.constraint(equalToConstant: 60),
+//
+//            stack.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
+//            stack.centerYAnchor.constraint(equalTo: overlay.centerYAnchor),
+//
+//            label.widthAnchor.constraint(lessThanOrEqualToConstant: 353)
+//        ])
+//
+//        window.addSubview(overlay)
+//        loaderView = overlay
+//    }
+    
     class func showLoader(
-        message: String = "We're preparing your personalised training experience",
+        title: String = "Almost done",
+        subtitle: String = "Just fine-tuning your training setup",
         fullScreen: Bool = true
     ) {
         guard let window = UIApplication.shared
@@ -29,25 +82,38 @@ class Utility: NSObject {
 
         let overlay = UIView(frame: window.bounds)
         overlay.isUserInteractionEnabled = true
-        overlay.backgroundColor = .clear   // important
+        overlay.backgroundColor = .clear
 
-        // ⭐ Add gradient to overlay
-        addGradientBackground(to: overlay)
+        addImageBackground(to: overlay)
 
-        // Loader (TOP)
-        let loader = DotRingLoaderView()
-        loader.translatesAutoresizingMaskIntoConstraints = false
+        // ⭐ GIF Loader
+        let gifImageView = UIImageView()
+        gifImageView.translatesAutoresizingMaskIntoConstraints = false
+        gifImageView.contentMode = .scaleAspectFit
+        gifImageView.image = UIImage.gif(name: "Cosmos")
 
-        // Label (BOTTOM)
-        let label = UILabel()
-        label.text = message
-        label.textColor = UIColor(red: 149/255, green: 149/255, blue: 149/255, alpha: 1)
-        label.textAlignment = .center
-        label.numberOfLines = 0
-        label.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
-        messageLabel = label
+        // ✅ Title Label
+        let titleLabel = UILabel()
+        titleLabel.text = title
+        titleLabel.textAlignment = .center
+        titleLabel.numberOfLines = 0
+        titleLabel.textColor = UIColor(red: 250/255, green: 250/255, blue: 250/255, alpha: 1)
+        titleLabel.font = UIFont(name: "ClashDisplay-Medium", size: 24)
 
-        let stack = UIStackView(arrangedSubviews: [loader, label])
+        // ✅ Subtitle Label
+        let subtitleLabel = UILabel()
+        subtitleLabel.text = subtitle
+        subtitleLabel.textAlignment = .center
+        subtitleLabel.numberOfLines = 0
+        subtitleLabel.textColor = UIColor(red: 149/255, green: 149/255, blue: 149/255, alpha: 1)
+        subtitleLabel.font = UIFont(name: "Manrope-SemiBold", size: 16)
+
+        // Stack
+        let stack = UIStackView(arrangedSubviews: [
+            gifImageView,
+            titleLabel,
+            subtitleLabel
+        ])
         stack.axis = .vertical
         stack.alignment = .center
         stack.spacing = 12
@@ -56,18 +122,21 @@ class Utility: NSObject {
         overlay.addSubview(stack)
 
         NSLayoutConstraint.activate([
-            loader.widthAnchor.constraint(equalToConstant: 60),
-            loader.heightAnchor.constraint(equalToConstant: 60),
+            gifImageView.widthAnchor.constraint(equalToConstant: 80),
+            gifImageView.heightAnchor.constraint(equalToConstant: 80),
 
             stack.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
             stack.centerYAnchor.constraint(equalTo: overlay.centerYAnchor),
 
-            label.widthAnchor.constraint(lessThanOrEqualToConstant: 353)
+            titleLabel.widthAnchor.constraint(lessThanOrEqualToConstant: 353),
+            subtitleLabel.widthAnchor.constraint(lessThanOrEqualToConstant: 353)
         ])
 
         window.addSubview(overlay)
         loaderView = overlay
     }
+
+
 
     class func hideLoader() {
         loaderView?.removeFromSuperview()
@@ -79,27 +148,53 @@ class Utility: NSObject {
         messageLabel?.text = text
     }
     
-    private static func addGradientBackground(to view: UIView) {
+//    private static func addGradientBackground(to view: UIView) {
+//
+//        // remove old gradient if any
+//        view.layer.sublayers?
+//            .filter { $0 is CAGradientLayer }
+//            .forEach { $0.removeFromSuperlayer() }
+//
+//        let gradient = CAGradientLayer()
+//        gradient.frame = view.bounds
+//
+//        gradient.colors = [
+//            UIColor.black.cgColor,
+//            UIColor(hex: "#0A1A10").cgColor,
+//            UIColor.black.cgColor
+//        ]
+//
+//        gradient.startPoint = CGPoint(x: 0.5, y: 0.0)
+//        gradient.endPoint   = CGPoint(x: 0.5, y: 1.0)
+//
+//        view.layer.insertSublayer(gradient, at: 0)
+//    }
+    
+    private static func addImageBackground(to view: UIView) {
 
-        // remove old gradient if any
-        view.layer.sublayers?
-            .filter { $0 is CAGradientLayer }
-            .forEach { $0.removeFromSuperlayer() }
+        // Remove old background image if any
+        view.subviews
+            .filter { $0.tag == 999 }
+            .forEach { $0.removeFromSuperview() }
 
-        let gradient = CAGradientLayer()
-        gradient.frame = view.bounds
+        let bgImageView = UIImageView()
+        bgImageView.tag = 999
+        bgImageView.frame = view.bounds
+        bgImageView.image = UIImage(named: "loaderBackgroundImg")
+        bgImageView.contentMode = .scaleAspectFill
+        bgImageView.clipsToBounds = true
+        bgImageView.translatesAutoresizingMaskIntoConstraints = false
 
-        gradient.colors = [
-            UIColor.black.cgColor,
-            UIColor(hex: "#0A1A10").cgColor,
-            UIColor.black.cgColor
-        ]
+        view.insertSubview(bgImageView, at: 0)
 
-        gradient.startPoint = CGPoint(x: 0.5, y: 0.0)
-        gradient.endPoint   = CGPoint(x: 0.5, y: 1.0)
-
-        view.layer.insertSublayer(gradient, at: 0)
+        NSLayoutConstraint.activate([
+            bgImageView.topAnchor.constraint(equalTo: view.topAnchor),
+            bgImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            bgImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bgImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
     }
+
 
     
 //    class func showLoader(message: String? = nil) {
@@ -316,3 +411,44 @@ class DotRingLoaderView: UIView {
     }
 }
 
+
+
+extension UIImage {
+
+    static func gifImage(name: String) -> UIImage? {
+        guard let bundleURL = Bundle.main
+            .url(forResource: name, withExtension: "gif"),
+              let data = try? Data(contentsOf: bundleURL) else { return nil }
+
+        return gifImage(data: data)
+    }
+
+    static func gifImage(data: Data) -> UIImage? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil) else { return nil }
+
+        var images: [UIImage] = []
+        var duration: Double = 0
+
+        let count = CGImageSourceGetCount(source)
+        for i in 0..<count {
+            guard let cgImage = CGImageSourceCreateImageAtIndex(source, i, nil) else { continue }
+
+            let frameDuration = frameDuration(from: source, at: i)
+            duration += frameDuration
+            images.append(UIImage(cgImage: cgImage))
+        }
+
+        return UIImage.animatedImage(with: images, duration: duration)
+    }
+
+    private static func frameDuration(from source: CGImageSource, at index: Int) -> Double {
+        let defaultDuration = 0.1
+        guard let properties = CGImageSourceCopyPropertiesAtIndex(source, index, nil) as? [CFString: Any],
+              let gifInfo = properties[kCGImagePropertyGIFDictionary] as? [CFString: Any] else {
+            return defaultDuration
+        }
+        return gifInfo[kCGImagePropertyGIFUnclampedDelayTime] as? Double ??
+               gifInfo[kCGImagePropertyGIFDelayTime] as? Double ??
+               defaultDuration
+    }
+}

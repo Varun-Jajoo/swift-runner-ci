@@ -259,7 +259,6 @@
 		B8C45EC02DD5AE0F000B0790 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C45EBF2DD5AE0F000B0790 /* ProfileViewController.swift */; };
 		B8C45EC22DD5AE42000B0790 /* Profile.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B8C45EC12DD5AE42000B0790 /* Profile.storyboard */; };
 		B8C473E32CD8980F00F5FCC4 /* PreferenceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C473E22CD8980F00F5FCC4 /* PreferenceViewController.swift */; };
-		B8C473E52CD8993E00F5FCC4 /* LocationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C473E42CD8993E00F5FCC4 /* LocationsViewController.swift */; };
 		B8C4E34E2CEC602C0002FCCB /* CustomViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C4E34D2CEC602C0002FCCB /* CustomViewController.swift */; };
 		B8C4E3522CEC85BE0002FCCB /* MoreExploreCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C4E3502CEC85BE0002FCCB /* MoreExploreCollectionViewCell.swift */; };
 		B8C4E3532CEC85BE0002FCCB /* MoreExploreCollectionViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B8C4E3512CEC85BE0002FCCB /* MoreExploreCollectionViewCell.xib */; };
@@ -487,6 +486,8 @@
 		B8FED8B52E6037F0003CA7DC /* AddRestTimePopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FED8B42E6037F0003CA7DC /* AddRestTimePopupViewController.swift */; };
 		B8FED8B82E605D74003CA7DC /* RestTimePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FED8B72E605D74003CA7DC /* RestTimePickerView.swift */; };
 		B8FFF4202D09CC200097167A /* GymWorkoutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FFF41F2D09CC1F0097167A /* GymWorkoutViewController.swift */; };
+		EE3848D92F1249F700D60C0E /* LocationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE3848D82F1249F700D60C0E /* LocationsViewController.swift */; };
+		EE3848DB2F125AE000D60C0E /* Cosmos.gif in Resources */ = {isa = PBXBuildFile; fileRef = EE3848DA2F125AE000D60C0E /* Cosmos.gif */; };
 		EEC3D4FD2F070C070045638A /* HorizontalRulerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC3D4FC2F070C070045638A /* HorizontalRulerView.swift */; };
 		EECB61A52F066D7E00B79DD4 /* VerticalRulerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EECB61A42F066D7E00B79DD4 /* VerticalRulerView.swift */; };
 /* End PBXBuildFile section */
@@ -750,7 +751,6 @@
 		B8C45EBF2DD5AE0F000B0790 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
 		B8C45EC12DD5AE42000B0790 /* Profile.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Profile.storyboard; sourceTree = "<group>"; };
 		B8C473E22CD8980F00F5FCC4 /* PreferenceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferenceViewController.swift; sourceTree = "<group>"; };
-		B8C473E42CD8993E00F5FCC4 /* LocationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationsViewController.swift; sourceTree = "<group>"; };
 		B8C4E34D2CEC602C0002FCCB /* CustomViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomViewController.swift; sourceTree = "<group>"; };
 		B8C4E3502CEC85BE0002FCCB /* MoreExploreCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreExploreCollectionViewCell.swift; sourceTree = "<group>"; };
 		B8C4E3512CEC85BE0002FCCB /* MoreExploreCollectionViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MoreExploreCollectionViewCell.xib; sourceTree = "<group>"; };
@@ -960,6 +960,8 @@
 		B8FED8B72E605D74003CA7DC /* RestTimePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestTimePickerView.swift; sourceTree = "<group>"; };
 		B8FFF41F2D09CC1F0097167A /* GymWorkoutViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GymWorkoutViewController.swift; sourceTree = "<group>"; };
 		BF3D5368393FBAC5F3CF9AD2 /* Pods_MyPT.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MyPT.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EE3848D82F1249F700D60C0E /* LocationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationsViewController.swift; sourceTree = "<group>"; };
+		EE3848DA2F125AE000D60C0E /* Cosmos.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = Cosmos.gif; sourceTree = "<group>"; };
 		EEC3D4FC2F070C070045638A /* HorizontalRulerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalRulerView.swift; sourceTree = "<group>"; };
 		EECB61A42F066D7E00B79DD4 /* VerticalRulerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalRulerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1771,7 +1773,7 @@
 				B8ED0EEC2CCB7D68006279B8 /* GenderViewController.swift */,
 				B8ED0EF72CCBC08A006279B8 /* GoalsViewController.swift */,
 				B8C473E22CD8980F00F5FCC4 /* PreferenceViewController.swift */,
-				B8C473E42CD8993E00F5FCC4 /* LocationsViewController.swift */,
+				EE3848D82F1249F700D60C0E /* LocationsViewController.swift */,
 				B8ED0EF92CCBC258006279B8 /* GetStartViewController.swift */,
 				B8C791162CDA21E100F4E6BD /* WeightViewController.swift */,
 				B8C791182CDA21F100F4E6BD /* HeightViewController.swift */,
@@ -1911,6 +1913,7 @@
 			isa = PBXGroup;
 			children = (
 				B8C6AB0F2DF817F3009257CE /* MyPT.entitlements */,
+				EE3848DA2F125AE000D60C0E /* Cosmos.gif */,
 				B8CF3BF52D4773080005CDCB /* NetworkApi */,
 				B80B882C2CCA1A0100FC798B /* FontFamily */,
 				B8FDEEEC2CC8D5100061639F /* ResourceFiles */,
@@ -2241,6 +2244,7 @@
 				B8F499CC2D71E2290081B166 /* shopBottom.mov in Resources */,
 				B8C704F92E1539B300978E9A /* TrainerFilterTableViewCell.xib in Resources */,
 				B8CDFFF42CE1E1E7005DEA1C /* UpcomingClassCollViewCell.xib in Resources */,
+				EE3848DB2F125AE000D60C0E /* Cosmos.gif in Resources */,
 				B8253EF72E50881300BE53CD /* SampleVideo_Testing.mp4 in Resources */,
 				B80BA8652D9D24BA008E1E94 /* AddMemberTableViewCell.xib in Resources */,
 				B8E55F8B2CCA41FC00AAFAE5 /* overpass-bold-italic.otf in Resources */,
@@ -2435,7 +2439,6 @@
 				B8D2160E2CEEF96B00017930 /* WorkoutCategoryCollectionViewCell.swift in Sources */,
 				B8253EFA2E5098C900BE53CD /* CustomProgressBar.swift in Sources */,
 				B80BA8662D9D24BA008E1E94 /* AddMemberTableViewCell.swift in Sources */,
-				B8C473E52CD8993E00F5FCC4 /* LocationsViewController.swift in Sources */,
 				B8CAF8782E49F6D5003AA332 /* ShowAddressTableViewCell.swift in Sources */,
 				B8C704F52E150FF300978E9A /* TrainerFilterViewController.swift in Sources */,
 				B8F84D4D2D883EF5006C98EF /* SelectLocationTableViewCell.swift in Sources */,
@@ -2655,6 +2658,7 @@
 				B8B9A3D22E41D34400E0FA16 /* BookingNotificationViewController.swift in Sources */,
 				B80A44622CEDAFE400E3A11E /* VideoLoopingPlayer.swift in Sources */,
 				B8F5D2EC2E7EB72000ACC864 /* ArcGaugeView.swift in Sources */,
+				EE3848D92F1249F700D60C0E /* LocationsViewController.swift in Sources */,
 				B8CDFFF32CE1E1E7005DEA1C /* UpcomingClassCollViewCell.swift in Sources */,
 				B8FDEEF42CC8D6550061639F /* UserDefaultsExtns.swift in Sources */,
 				B8FDEEEB2CC8D3700061639F /* AttributedText.swift in Sources */,

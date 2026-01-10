@@ -1,8 +1,19 @@
 {
   "images" : [
     {
-      "filename" : "Selection Card (1).pdf",
-      "idiom" : "universal"
+      "filename" : "Selection Card.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "Selection Card@2x.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "Selection Card@3x.png",
+      "idiom" : "universal",
+      "scale" : "3x"
     }
   ],
   "info" : {

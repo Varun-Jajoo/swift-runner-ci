@@ -119,7 +119,7 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     private func setNavUI() {
         self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
         self.setProgress(0.5)
-        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
+        self.setLeftMenu(leftImgs: [AppImages.backArrowWithBg], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
         self.setRighMenu(setTitle: [AppStrings.skipStr], setTintColor: .black, setTitleColor: UIColor.txtSkip)
     }
     
@@ -172,9 +172,9 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         UIView.animate(withDuration: 0.2) {
             self.setupContinueButtonIcon(isEnabled: isEnabled)
             if isEnabled {
-                self.continueBtn.tintColor = .mainBg   // arrow color
-                self.continueBtn.backgroundColor = .appWhite
-                self.continueBtn.setTitleColor(.mainBg, for: .normal)
+//                self.continueBtn.tintColor = .mainBg   // arrow color
+//                self.continueBtn.backgroundColor = .appWhite
+//                self.continueBtn.setTitleColor(.mainBg, for: .normal)
             } else {
                 self.continueBtn.tintColor = .appWhite
                 self.continueBtn.backgroundColor = .appDarkGray
@@ -184,20 +184,60 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     }
     
     func setupContinueButtonIcon(isEnabled: Bool) {
-        let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
-            .withRenderingMode(.alwaysTemplate)
-        
-        continueBtn.setImage(arrowImage, for: .normal)
-        
-        // Force image on right side
-        continueBtn.semanticContentAttribute = .forceRightToLeft
-        
-        // Space between text and image
-        continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -12)
-        continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 12)
-        
-        continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
-    }
+
+            if isEnabled {
+                // 🟢 ENABLED → IMAGE ONLY
+                let image = UIImage(named: "ButtonNext")?
+                    .withRenderingMode(.alwaysOriginal)
+
+                continueBtn.setImage(image, for: .normal)
+                continueBtn.setTitle("", for: .normal)
+
+                continueBtn.backgroundColor = .clear
+                continueBtn.tintColor = .clear
+
+                continueBtn.imageEdgeInsets = .zero
+                continueBtn.titleEdgeInsets = .zero
+                continueBtn.contentEdgeInsets = .zero
+
+                continueBtn.semanticContentAttribute = .forceLeftToRight
+                continueBtn.adjustsImageWhenHighlighted = false
+                continueBtn.adjustsImageWhenDisabled = false
+
+            } else {
+                // 🔴 DISABLED → TEXT + ARROW
+                continueBtn.setTitle("NEXT", for: .normal)
+                continueBtn.setTitleColor(.appWhite, for: .normal)
+
+                let arrowImage = UIImage(named: "whiteRightArrow")?
+                    .withRenderingMode(.alwaysOriginal)
+                continueBtn.setImage(arrowImage, for: .normal)
+
+                continueBtn.semanticContentAttribute = .forceRightToLeft
+
+                // spacing between text & arrow
+                continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
+                continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 8)
+
+                continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+            }
+        }
+    
+//    func setupContinueButtonIcon(isEnabled: Bool) {
+//        let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
+//            .withRenderingMode(.alwaysTemplate)
+//        
+//        continueBtn.setImage(arrowImage, for: .normal)
+//        
+//        // Force image on right side
+//        continueBtn.semanticContentAttribute = .forceRightToLeft
+//        
+//        // Space between text and image
+//        continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -12)
+//        continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 12)
+//        
+//        continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+//    }
     
     private func setupScrollView() {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -216,7 +256,8 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         
         NSLayoutConstraint.activate([
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -70),
-            scrollView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 45),
+            scrollView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 40),
+//            scrollView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 0),
             scrollView.widthAnchor.constraint(equalToConstant: 80),
             scrollView.heightAnchor.constraint(equalToConstant: 300),
             
@@ -229,7 +270,8 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         
         NSLayoutConstraint.activate([
             imgSlider.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor, constant: 60),
-            imgSlider.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor, constant: 20),
+//            imgSlider.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor, constant: 20),
+            imgSlider.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor, constant: 15),
             imgSlider.widthAnchor.constraint(equalToConstant: 270),
             imgSlider.heightAnchor.constraint(equalToConstant: 400)
         ])
@@ -708,179 +750,3 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         }
     }
 }
-
-
-
-//    func setupFeetRuler(){
-//        heightPicker.removeFromSuperview()
-//        titleFeetLbl.removeFromSuperview()
-//        titleFeetLbl  = UILabel()
-//        titleFeetLbl.text = nil
-//        heightPicker = HeightPickerControl()
-//        heightPicker.translatesAutoresizingMaskIntoConstraints = false
-//        heightPicker.unit = .feetInches
-//        heightPicker.maxFeet = 300
-//        heightPicker.addTarget(self, action: #selector(heightChanged(_:)), for: .valueChanged)
-//        heightPicker.backgroundColor = UIColor.clear
-//        heightPicker.rulerViewBgColor = UIColor.clear
-//        scaleMBV.addSubview(heightPicker)
-//        titleFeetLbl.backgroundColor = UIColor.clear
-//        titleFeetLbl.textColor = UIColor.appWhite
-//        titleFeetLbl.textAlignment = .right
-//        scaleMBV.addSubview(titleFeetLbl)
-//        titleFeetLbl.translatesAutoresizingMaskIntoConstraints = false
-//        NSLayoutConstraint.activate([
-//            heightPicker.trailingAnchor.constraint(equalTo: scaleMBV.trailingAnchor, constant: 10),
-//            heightPicker.centerYAnchor.constraint(equalTo: scaleMBV.centerYAnchor),
-//            heightPicker.widthAnchor.constraint(equalToConstant: 250),
-//            heightPicker.heightAnchor.constraint(equalTo: scaleMBV.heightAnchor, multiplier: 0.96),
-//            titleFeetLbl.leadingAnchor.constraint(equalTo: heightPicker.leadingAnchor, constant: -170),
-//            titleFeetLbl.centerYAnchor.constraint(equalTo: scaleMBV.centerYAnchor),
-//            titleFeetLbl.widthAnchor.constraint(equalTo: heightPicker.widthAnchor, multiplier: 1.0),
-//            titleFeetLbl.heightAnchor.constraint(equalTo: heightPicker.heightAnchor, multiplier: 0.8)
-//        ])
-//
-//        self.scrollScale(inputView: heightPicker)
-//    }
-    
-    //MARK: -----------------MAKE RULER FOR WEIGHT
-//    func setupCMSRuler(){
-//        heightPicker.removeFromSuperview()
-//        titleFeetLbl.removeFromSuperview()
-//        titleFeetLbl  = UILabel()
-//        titleFeetLbl.text = nil
-//        heightPicker = HeightPickerControl()
-//        heightPicker.translatesAutoresizingMaskIntoConstraints = false
-//        heightPicker.unit = .centimeters
-//        heightPicker.maxCM = 650.0
-//        heightPicker.addTarget(self, action: #selector(heightChanged(_:)), for: .valueChanged)
-//        heightPicker.backgroundColor = UIColor.clear
-//        heightPicker.rulerViewBgColor = UIColor.clear
-//        scaleMBV.addSubview(heightPicker)
-//        titleFeetLbl.backgroundColor = UIColor.clear
-//        titleFeetLbl.textColor = UIColor.appWhite
-//        titleFeetLbl.textAlignment = .right
-//        scaleMBV.addSubview(titleFeetLbl)
-//        titleFeetLbl.translatesAutoresizingMaskIntoConstraints = false
-//        NSLayoutConstraint.activate([
-//            heightPicker.trailingAnchor.constraint(equalTo: scaleMBV.trailingAnchor, constant: 10),
-//            heightPicker.centerYAnchor.constraint(equalTo: scaleMBV.centerYAnchor),
-//            heightPicker.widthAnchor.constraint(equalToConstant: 250),
-//            heightPicker.heightAnchor.constraint(equalTo: scaleMBV.heightAnchor, multiplier: 0.96),
-//            titleFeetLbl.leadingAnchor.constraint(equalTo: heightPicker.leadingAnchor, constant: -170),
-//            titleFeetLbl.centerYAnchor.constraint(equalTo: scaleMBV.centerYAnchor),
-//            titleFeetLbl.widthAnchor.constraint(equalTo: heightPicker.widthAnchor, multiplier: 1.0),
-//            titleFeetLbl.heightAnchor.constraint(equalTo: heightPicker.heightAnchor, multiplier: 0.8)
-//        ])
-//
-//        self.scrollScale(inputView: heightPicker)
-//    }
-    
-//    func scrollScale(inputView: UIView){
-//
-//        if let scrollView = inputView.subviews.first(where: { $0 is UIScrollView }) as? UIScrollView {
-//            print("Found scroll view: \(scrollView)")
-//            scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: false)
-//        }
-//
-////        if let scrollView = inputView.subviews.first(where: { $0 is UIScrollView }) as? UIScrollView {
-////            print("Found scroll view: \(scrollView)")
-////            scrollView.setContentOffset(CGPoint(x: 0, y: 10), animated: true)
-////        }
-//    }
-    
-    //MARK: ----------------GETTING VALUE FROM SCALE
-//    @objc func heightChanged(_ sender: HeightPickerControl) {
-//        print("Selected: \(sender.selectedFeet)ft \(sender.selectedInches)in")
-//
-//        let feetAttributes = [
-//            .font: AppFont.bold.size(50.0, familyName: familyManrope),
-//            .foregroundColor: UIColor.appWhite
-//        ] as [NSAttributedString.Key : Any]
-//
-//        let ftAttributes = [
-//            .font: AppFont.medium.size(25.0, familyName: familyManrope),
-//            .foregroundColor: UIColor.txtDarkGray
-//        ] as [NSAttributedString.Key : Any]
-//
-//        //----------------Getting unit
-//        switch sender.unit {
-//         case .feetInches:
-//             print("Selected: \(sender.selectedFeet) ft \(sender.selectedInches) in")
-//
-//            self.selectedHeight = nil
-//            self.selectedHeight = "\(sender.selectedFeet)ft\(sender.selectedInches)"
-//
-//            var attributedParts: [AttributedStringComponent] = [
-//                NSAttributedString(string: "\(sender.selectedFeet)", attributes: feetAttributes),
-//                NSAttributedString(string: "ft", attributes: ftAttributes)
-//            ]
-//
-//            if sender.selectedInches > 0 {
-//                attributedParts.append(NSAttributedString(string: "\(sender.selectedInches)", attributes: feetAttributes))
-//                attributedParts.append(NSAttributedString(string: "in", attributes: ftAttributes))
-//            }
-//
-//            self.titleFeetLbl.attributedText = NSAttributedString(from: attributedParts, defaultAttributes: feetAttributes)
-//
-//         case .centimeters:
-//             print("Selected: \(sender.selectedCM) cm")
-//
-//            self.selectedHeight = nil
-//            self.selectedHeight = "\(sender.selectedCM)cm"
-//
-//            let attributedParts: [AttributedStringComponent] = [
-//                NSAttributedString(string: formatNumber(sender.selectedCM), attributes: feetAttributes),
-//                NSAttributedString(string: "cm", attributes: ftAttributes)
-//            ]
-//
-//            self.titleFeetLbl.attributedText = NSAttributedString(from: attributedParts, defaultAttributes: feetAttributes)
-//         }
-//    }
-    
-//    private func formatNumber(_ number: Double) -> String {
-//        if number.truncatingRemainder(dividingBy: 1) == 0 {
-//            return String(Int(number)) // Remove decimal
-//        } else {
-//            return String(number) // Keep decimal
-//        }
-//    }
-//
-//    func setUpSegmet(){
-//        heightMeasureType.setTitle("feet", forSegmentAt: 0)
-//        heightMeasureType.setTitle("cms", forSegmentAt: 1)
-//        setUISegmentControlAppearance()
-//    }
-    
-//    func setUISegmentControlAppearance() {
-////        UISegmentedControl.appearance().selectedSegmentTintColor = .white
-////        UISegmentedControl.appearance().backgroundColor = UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.1)
-//        UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.txtDarkGray, .font:AppFont.semibold.size(14.0, familyName: familyManrope)], for: .normal)
-//        UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.appWhite, .font:AppFont.semibold.size(14.0, familyName: familyManrope)], for: .selected)
-//    }
-    
-    //MARK: ------------setup segmantstyle
-//    func setupSegmentedControlStyle(){
-//        let unselectedBackgroundImage = UIImage(color: UIColor(red: 16/255.0, green: 17/255.0, blue: 19/255.0, alpha: 1))
-//        let selectedBacgroundImage = UIImage(color:UIColor.appYellow)
-//
-//        heightMeasureType.setBackgroundImage(unselectedBackgroundImage, for: .normal, barMetrics: .default)
-//        heightMeasureType.setBackgroundImage(unselectedBackgroundImage, for: .highlighted, barMetrics: .default)
-//        heightMeasureType.setBackgroundImage(selectedBacgroundImage, for: .selected, barMetrics: .default)
-//
-//        heightMeasureType.setDividerImage(selectedBacgroundImage, forLeftSegmentState: .normal, rightSegmentState: .normal, barMetrics: .default)
-//
-//        heightMeasureType.layer.borderWidth = 0
-//        heightMeasureType.layer.borderColor = UIColor.clear.cgColor
-//    }
-    
-//    @IBAction func heightMeasureTypeActn(_ sender: UISegmentedControl) {
-//        print(sender.selectedSegmentIndex )
-//
-//        if sender.selectedSegmentIndex == 0 {
-//            self.setupFeetRuler()
-//        }else{
-//            self.setupCMSRuler()
-//        }
-//    }
-    
