@@ -108,7 +108,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let navController: UINavigationController? = stroyBoard?.instantiateViewController(withIdentifier: "navigation") as? UINavigationController
       
 //      let vc: MainViewController = MainViewController.instantiate(appStoryboard: .main)
-       let vc: HeightViewController = HeightViewController.instantiate(appStoryboard: .main)
+       let vc: AgeViewController = AgeViewController.instantiate(appStoryboard: .main)
 
 //     let vc: LocationsViewController = LocationsViewController.instantiate(appStoryboard: .main)
 //      let vc: GenderViewController = GenderViewController.instantiate(appStoryboard: .main)

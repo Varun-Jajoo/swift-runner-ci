@@ -25,6 +25,7 @@ class WheelDob: UIView {
     private var selectedYear : Int?
     private var selectedMonth : String?
     private var selectedDays : Int?
+    private let isSmallDevice = UIScreen.main.bounds.height < 700
     
     private let monthBgIV: UIImageView = {
         let iv = UIImageView(image: UIImage(named: "MonthBg"))
@@ -80,8 +81,6 @@ class WheelDob: UIView {
 
         layoutCenterView()
     }
-
-
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -102,7 +101,7 @@ class WheelDob: UIView {
         ] as [NSAttributedString.Key : Any]
         
         let ageAttr = [
-            .font: AppFont.medium.size(25.0, familyName: familyFunnelSans),
+            .font: AppFont.medium.size(24.0, familyName: familyClashDisplay),
             .foregroundColor: UIColor.txtSkip
         ] as [NSAttributedString.Key : Any]
         
@@ -136,7 +135,7 @@ class WheelDob: UIView {
             centerView.centerXAnchor.constraint(equalTo: centerXAnchor),
             centerView.centerYAnchor.constraint(equalTo: dayPicker.centerYAnchor),
             centerView.widthAnchor.constraint(equalTo: widthAnchor),
-            centerView.heightAnchor.constraint(equalToConstant: 120),
+            centerView.heightAnchor.constraint(equalToConstant: isSmallDevice ? 60 : 120),
 
             // 🔴 Use monthPicker instead of dayPicker (more stable)
             centerView.topAnchor.constraint(equalTo: dayPicker.topAnchor, constant: 90),
@@ -149,8 +148,8 @@ class WheelDob: UIView {
 
             // Age label
             ageLable.centerXAnchor.constraint(equalTo: centerView.centerXAnchor),
-            ageLable.topAnchor.constraint(equalTo: triangleImageView.bottomAnchor, constant: 49),
-            ageLable.heightAnchor.constraint(equalToConstant: 40),
+            ageLable.topAnchor.constraint(equalTo: triangleImageView.bottomAnchor, constant: isSmallDevice ? 20 : 48),
+            ageLable.heightAnchor.constraint(equalToConstant: 30),
 //            ageLable.widthAnchor.constraint(greaterThanOrEqualToConstant: 150) // ✅ IMPORTANT
         ])
 
@@ -199,8 +198,8 @@ class WheelDob: UIView {
             monthBgIV.trailingAnchor.constraint(equalTo: trailingAnchor),
 
             // 👇 month text ke peeche alignment
-            monthBgIV.topAnchor.constraint(equalTo: monthPicker.topAnchor, constant: -40),
-            monthBgIV.heightAnchor.constraint(equalToConstant: 200)
+            monthBgIV.topAnchor.constraint(equalTo: monthPicker.topAnchor, constant: -20),
+            monthBgIV.heightAnchor.constraint(equalToConstant: isSmallDevice ? 90 : 110)
         ])
     }
     
@@ -210,10 +209,10 @@ class WheelDob: UIView {
             dayBgIV.trailingAnchor.constraint(equalTo: trailingAnchor),
 
             // 👇 day picker ke peeche
-            dayBgIV.topAnchor.constraint(equalTo: dayPicker.topAnchor, constant: -30),
+            dayBgIV.topAnchor.constraint(equalTo: dayPicker.topAnchor, constant: -20),
 
             // 👇 DateBg SVG ke size ke hisaab se
-            dayBgIV.heightAnchor.constraint(equalToConstant: 200)
+            dayBgIV.heightAnchor.constraint(equalToConstant: isSmallDevice ? 90 : 110)
         ])
     }
     
@@ -301,27 +300,57 @@ class WheelDob: UIView {
         return nil
     }
     
-    
     private func layoutPickers() {
         // Use Auto Layout for flexibility
-        
         [yearPicker, monthPicker, dayPicker].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
         
         NSLayoutConstraint.activate([
             yearPicker.topAnchor.constraint(equalTo: topAnchor),
             yearPicker.leadingAnchor.constraint(equalTo: leadingAnchor),
             yearPicker.trailingAnchor.constraint(equalTo: trailingAnchor),
-            yearPicker.heightAnchor.constraint(equalToConstant: 450),
+            yearPicker.heightAnchor.constraint(equalToConstant: isSmallDevice ? 300 : 450),
+            
             monthPicker.leadingAnchor.constraint(equalTo: leadingAnchor),
             monthPicker.trailingAnchor.constraint(equalTo: trailingAnchor),
-            monthPicker.topAnchor.constraint(equalTo: yearPicker.topAnchor, constant: 90.0),
+            monthPicker.topAnchor.constraint(equalTo: yearPicker.topAnchor, constant: isSmallDevice ? 60 : 80.0),
             monthPicker.bottomAnchor.constraint(equalTo: yearPicker.bottomAnchor, constant: 1.0),
+            
             dayPicker.leadingAnchor.constraint(equalTo: leadingAnchor),
             dayPicker.trailingAnchor.constraint(equalTo: trailingAnchor),
-            dayPicker.topAnchor.constraint(equalTo: monthPicker.topAnchor, constant: 90.0),
+            dayPicker.topAnchor.constraint(equalTo: monthPicker.topAnchor, constant: isSmallDevice ? 60 : 80.0),
             dayPicker.bottomAnchor.constraint(equalTo: yearPicker.bottomAnchor, constant: 1.0)
         ])
     }
+
+//    private func layoutPickers() {
+//
+//        [yearPicker, monthPicker, dayPicker].forEach {
+//            $0.translatesAutoresizingMaskIntoConstraints = false
+//        }
+//        let pickerHeight: CGFloat = 100   // 👈 thickness control
+//        let spacing: CGFloat = 4          // 👈 gap control
+//
+//        NSLayoutConstraint.activate([
+//            // YEAR
+//            yearPicker.topAnchor.constraint(equalTo: topAnchor),
+//            yearPicker.leadingAnchor.constraint(equalTo: leadingAnchor),
+//            yearPicker.trailingAnchor.constraint(equalTo: trailingAnchor),
+//            yearPicker.heightAnchor.constraint(equalToConstant: pickerHeight),
+//
+//            // MONTH
+//            monthPicker.topAnchor.constraint(equalTo: yearPicker.bottomAnchor, constant: spacing),
+//            monthPicker.leadingAnchor.constraint(equalTo: leadingAnchor),
+//            monthPicker.trailingAnchor.constraint(equalTo: trailingAnchor),
+//            monthPicker.heightAnchor.constraint(equalToConstant: pickerHeight),
+//
+//            // DAY
+//            dayPicker.topAnchor.constraint(equalTo: monthPicker.bottomAnchor, constant: spacing),
+//            dayPicker.leadingAnchor.constraint(equalTo: leadingAnchor),
+//            dayPicker.trailingAnchor.constraint(equalTo: trailingAnchor),
+//            dayPicker.heightAnchor.constraint(equalToConstant: pickerHeight),
+//        ])
+//    }
+
     
     func getMonthNumber(for monthAbbreviation: String) -> Int? {
         let dateFormatter = DateFormatter()

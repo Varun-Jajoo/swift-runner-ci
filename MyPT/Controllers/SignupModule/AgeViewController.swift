@@ -16,6 +16,7 @@ class AgeViewController: CommonViewController {
     private let yearCurveIV  = UIImageView(image: UIImage(named: "YearBg"))
     private let monthCurveIV = UIImageView(image: UIImage(named: "MonthBg"))
     private let dayCurveIV   = UIImageView(image: UIImage(named: "DateBg"))
+    let isSmallDevice = UIScreen.main.bounds.height < 700
     
     //MARK: ----------IBOUTLET
     @IBOutlet weak var noteLbl: UILabel!
@@ -33,12 +34,12 @@ class AgeViewController: CommonViewController {
         setupYearBackground()   // 👈 IMPORTANT
         setupMonthBackground()
         wheelDobSetup()
-//        setupBackgroundGradient()
+        //        setupBackgroundGradient()
         updateContinueButton(isEnabled: true)
         setupContinueButtonIcon(isEnabled: true)
         yearsMBV.clipsToBounds = false
         monthsMBV.clipsToBounds = false
-//        addSideFade()
+        //        addSideFade()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -49,32 +50,32 @@ class AgeViewController: CommonViewController {
     }
     
     override func viewDidAppear(_ animated: Bool) {
-            super.viewDidAppear(animated)
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                let date18 = self.dobPicker.default18YearsAgoDate()
-                let parts = self.components(from: date18)
-
-                self.dobPicker.selectInitialDate(
-                    year: parts.year,
-                    month: parts.month,
-                    day: parts.day
-                )
-            }
+        super.viewDidAppear(animated)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            let date18 = self.dobPicker.default18YearsAgoDate()
+            let parts = self.components(from: date18)
+            
+            self.dobPicker.selectInitialDate(
+                year: parts.year,
+                month: parts.month,
+                day: parts.day
+            )
         }
-
-
-        func components(from date: Date) -> (year: String, month: String, day: String) {
-            let calendar = Calendar.current
-            
-            let year  = calendar.component(.year, from: date)
-            let month = calendar.component(.month, from: date)
-            let day   = calendar.component(.day, from: date)
-            
-            let monthName = calendar.shortMonthSymbols[month - 1] // Jan, Feb...
-            
-            return ("\(year)", monthName, "\(day)")
-        }
+    }
+    
+    
+    func components(from date: Date) -> (year: String, month: String, day: String) {
+        let calendar = Calendar.current
+        
+        let year  = calendar.component(.year, from: date)
+        let month = calendar.component(.month, from: date)
+        let day   = calendar.component(.day, from: date)
+        
+        let monthName = calendar.shortMonthSymbols[month - 1] // Jan, Feb...
+        
+        return ("\(year)", monthName, "\(day)")
+    }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -96,48 +97,48 @@ class AgeViewController: CommonViewController {
     }
     
     private func setupYearBackground() {
-
-            yearCurveIV.translatesAutoresizingMaskIntoConstraints = false
-            yearCurveIV.image = UIImage(named: "YearBg")
-            yearCurveIV.contentMode = .scaleToFill   // 👈 IMPORTANT
-            yearCurveIV.clipsToBounds = false
-    //        yearCurveIV.backgroundColor = .red.withAlphaComponent(0.3)
-
-            yearsMBV.insertSubview(yearCurveIV, at: 0)
-
-            NSLayoutConstraint.activate([
-                yearCurveIV.leadingAnchor.constraint(equalTo: yearsMBV.leadingAnchor),
-                yearCurveIV.trailingAnchor.constraint(equalTo: yearsMBV.trailingAnchor),
-
-                // 👇 Half circle ko TOP se hang karna hai
-                yearCurveIV.topAnchor.constraint(equalTo: yearsMBV.topAnchor, constant: -35),
-
-                // 👇 image actual height
-                yearCurveIV.heightAnchor.constraint(equalToConstant: 220)
-            ])
-        }
         
-        private func setupMonthBackground() {
-
-            monthCurveIV.translatesAutoresizingMaskIntoConstraints = false
-            monthCurveIV.contentMode = .scaleToFill
-            monthCurveIV.clipsToBounds = false
-            monthCurveIV.backgroundColor = .red
-
-            // 👇 background me add karo
-            monthsMBV.insertSubview(monthCurveIV, at: 0)
-
-            NSLayoutConstraint.activate([
-                monthCurveIV.leadingAnchor.constraint(equalTo: monthsMBV.leadingAnchor),
-                monthCurveIV.trailingAnchor.constraint(equalTo: monthsMBV.trailingAnchor),
-
-                // 👇 month arc thoda upar se hang hota hai
-                monthCurveIV.topAnchor.constraint(equalTo: monthsMBV.topAnchor, constant: -30),
-
-                // 👇 SVG ke radius ke according
-                monthCurveIV.heightAnchor.constraint(equalToConstant: 200)
-            ])
-        }
+        yearCurveIV.translatesAutoresizingMaskIntoConstraints = false
+        yearCurveIV.image = UIImage(named: "YearBg")
+        yearCurveIV.contentMode = .scaleToFill   // 👈 IMPORTANT
+        yearCurveIV.clipsToBounds = false
+        //        yearCurveIV.backgroundColor = .red.withAlphaComponent(0.3)
+        
+        yearsMBV.insertSubview(yearCurveIV, at: 0)
+        
+        NSLayoutConstraint.activate([
+            yearCurveIV.leadingAnchor.constraint(equalTo: yearsMBV.leadingAnchor),
+            yearCurveIV.trailingAnchor.constraint(equalTo: yearsMBV.trailingAnchor),
+            
+            // 👇 Half circle ko TOP se hang karna hai
+            yearCurveIV.topAnchor.constraint(equalTo: yearsMBV.topAnchor, constant: -2),
+            
+            // 👇 image actual height
+            yearCurveIV.heightAnchor.constraint(equalToConstant: isSmallDevice ? 90 : 110)
+        ])
+    }
+    
+    private func setupMonthBackground() {
+        
+        monthCurveIV.translatesAutoresizingMaskIntoConstraints = false
+        monthCurveIV.contentMode = .scaleToFill
+        monthCurveIV.clipsToBounds = false
+        monthCurveIV.backgroundColor = .red
+        
+        // 👇 background me add karo
+        monthsMBV.insertSubview(monthCurveIV, at: 0)
+        
+        NSLayoutConstraint.activate([
+            monthCurveIV.leadingAnchor.constraint(equalTo: monthsMBV.leadingAnchor),
+            monthCurveIV.trailingAnchor.constraint(equalTo: monthsMBV.trailingAnchor),
+            
+            // 👇 month arc thoda upar se hang hota hai
+            monthCurveIV.topAnchor.constraint(equalTo: monthsMBV.topAnchor, constant: -30),
+            
+            // 👇 SVG ke radius ke according
+            monthCurveIV.heightAnchor.constraint(equalToConstant: isSmallDevice ? 90 : 110)
+        ])
+    }
     
     //MARK: ---------- SET UI
     func setupUI(){
@@ -199,9 +200,9 @@ class AgeViewController: CommonViewController {
         UIView.animate(withDuration: 0.2) {
             self.setupContinueButtonIcon(isEnabled: isEnabled)
             if isEnabled {
-//                self.continueBtn.tintColor = .mainBg   // arrow color
-//                self.continueBtn.backgroundColor = .appWhite
-//                self.continueBtn.setTitleColor(.mainBg, for: .normal)
+                //                self.continueBtn.tintColor = .mainBg   // arrow color
+                //                self.continueBtn.backgroundColor = .appWhite
+                //                self.continueBtn.setTitleColor(.mainBg, for: .normal)
             } else {
                 self.continueBtn.tintColor = .appWhite
                 self.continueBtn.backgroundColor = .appDarkGray
@@ -211,44 +212,44 @@ class AgeViewController: CommonViewController {
     }
     
     func setupContinueButtonIcon(isEnabled: Bool) {
-
-            if isEnabled {
-                // 🟢 ENABLED → IMAGE ONLY
-                let image = UIImage(named: "ButtonContinue")?
-                    .withRenderingMode(.alwaysOriginal)
-
-                continueBtn.setImage(image, for: .normal)
-                continueBtn.setTitle("", for: .normal)
-
-                continueBtn.backgroundColor = .clear
-                continueBtn.tintColor = .clear
-
-                continueBtn.imageEdgeInsets = .zero
-                continueBtn.titleEdgeInsets = .zero
-                continueBtn.contentEdgeInsets = .zero
-
-                continueBtn.semanticContentAttribute = .forceLeftToRight
-                continueBtn.adjustsImageWhenHighlighted = false
-                continueBtn.adjustsImageWhenDisabled = false
-
-            } else {
-                // 🔴 DISABLED → TEXT + ARROW
-                continueBtn.setTitle("CONTINUE", for: .normal)
-                continueBtn.setTitleColor(.appWhite, for: .normal)
-
-                let arrowImage = UIImage(named: "whiteRightArrow")?
-                    .withRenderingMode(.alwaysOriginal)
-                continueBtn.setImage(arrowImage, for: .normal)
-
-                continueBtn.semanticContentAttribute = .forceRightToLeft
-
-                // spacing between text & arrow
-                continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
-                continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 8)
-
-                continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
-            }
+        
+        if isEnabled {
+            // 🟢 ENABLED → IMAGE ONLY
+            let image = UIImage(named: "ButtonContinue")?
+                .withRenderingMode(.alwaysOriginal)
+            
+            continueBtn.setImage(image, for: .normal)
+            continueBtn.setTitle("", for: .normal)
+            
+            continueBtn.backgroundColor = .clear
+            continueBtn.tintColor = .clear
+            
+            continueBtn.imageEdgeInsets = .zero
+            continueBtn.titleEdgeInsets = .zero
+            continueBtn.contentEdgeInsets = .zero
+            
+            continueBtn.semanticContentAttribute = .forceLeftToRight
+            continueBtn.adjustsImageWhenHighlighted = false
+            continueBtn.adjustsImageWhenDisabled = false
+            
+        } else {
+            // 🔴 DISABLED → TEXT + ARROW
+            continueBtn.setTitle("CONTINUE", for: .normal)
+            continueBtn.setTitleColor(.appWhite, for: .normal)
+            
+            let arrowImage = UIImage(named: "whiteRightArrow")?
+                .withRenderingMode(.alwaysOriginal)
+            continueBtn.setImage(arrowImage, for: .normal)
+            
+            continueBtn.semanticContentAttribute = .forceRightToLeft
+            
+            // spacing between text & arrow
+            continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
+            continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 8)
+            
+            continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
         }
+    }
     
     @IBAction func continueBtnActn(_ sender: Any) {
         print("Continue btn actn.....")

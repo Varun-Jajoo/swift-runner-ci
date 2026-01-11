@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="k3g-GE-Ure">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="k3g-GE-Ure">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="collection view cell content view" minToolsVersion="11.0"/>
@@ -15,7 +15,7 @@
             <objects>
                 <navigationController storyboardIdentifier="navigation" useStoryboardIdentifierAsRestorationIdentifier="YES" id="k3g-GE-Ure" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="J6x-wM-6us">
-                        <rect key="frame" x="0.0" y="118" width="393" height="44"/>
+                        <rect key="frame" x="0.0" y="118" width="393" height="54"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -1649,7 +1649,7 @@ date of birth ?</string>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bD1-lQ-5Tv" userLabel="yearsMBV">
-                                <rect key="frame" x="1" y="268.33333333333331" width="391" height="425.99999999999994"/>
+                                <rect key="frame" x="1" y="267.66666666666669" width="391" height="426.00000000000006"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Gar-To-vh6">
@@ -1685,7 +1685,6 @@ date of birth ?</string>
                             <constraint firstAttribute="bottom" secondItem="NX0-9W-7ZA" secondAttribute="bottom" id="2CP-up-EJn"/>
                             <constraint firstItem="KAF-Yb-Q1q" firstAttribute="top" secondItem="vn7-4Y-tzP" secondAttribute="bottom" constant="20" id="2Ue-Yh-yNP"/>
                             <constraint firstItem="12T-IE-reA" firstAttribute="top" secondItem="Guz-81-One" secondAttribute="top" constant="23" id="2g6-73-pQi"/>
-                            <constraint firstItem="Cu3-0y-784" firstAttribute="centerY" secondItem="bD1-lQ-5Tv" secondAttribute="centerY" constant="35" id="3Vu-wq-Mpo"/>
                             <constraint firstAttribute="bottom" secondItem="KAF-Yb-Q1q" secondAttribute="bottom" constant="52" id="7Cm-bK-ebj"/>
                             <constraint firstItem="bD1-lQ-5Tv" firstAttribute="leading" secondItem="Guz-81-One" secondAttribute="leading" constant="1" id="7bl-al-CIk"/>
                             <constraint firstItem="bD1-lQ-5Tv" firstAttribute="height" secondItem="9Lx-fF-jFR" secondAttribute="height" multiplier="0.5" id="7oH-Hc-sze"/>
@@ -1702,6 +1701,7 @@ date of birth ?</string>
                             <constraint firstItem="6JE-g9-5x4" firstAttribute="leading" secondItem="Cu3-0y-784" secondAttribute="leading" id="Xea-oD-Toq"/>
                             <constraint firstItem="Gar-To-vh6" firstAttribute="width" secondItem="6JE-g9-5x4" secondAttribute="width" id="aig-w9-SnE"/>
                             <constraint firstItem="Dvs-Tf-04T" firstAttribute="trailing" secondItem="9Lx-fF-jFR" secondAttribute="trailing" id="dMk-MO-fJL"/>
+                            <constraint firstItem="bD1-lQ-5Tv" firstAttribute="top" secondItem="12T-IE-reA" secondAttribute="bottom" constant="50" id="dcn-L4-5HP"/>
                             <constraint firstItem="Guz-81-One" firstAttribute="trailing" secondItem="bD1-lQ-5Tv" secondAttribute="trailing" constant="1" id="diH-Hc-xmL"/>
                             <constraint firstAttribute="bottom" secondItem="Dvs-Tf-04T" secondAttribute="bottom" id="dyp-6x-fRX"/>
                             <constraint firstItem="Dvs-Tf-04T" firstAttribute="leading" secondItem="9Lx-fF-jFR" secondAttribute="leading" id="g65-Hy-oho"/>
@@ -2005,7 +2005,7 @@ date of birth ?</string>
                                 <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </imageView>
                             <searchBar hidden="YES" contentMode="redraw" text="" placeholder="Search for area, street name" translatesAutoresizingMaskIntoConstraints="NO" id="hTv-Sd-XC7">
-                                <rect key="frame" x="20" y="230.33333333333337" width="353" height="56"/>
+                                <rect key="frame" x="20" y="230.33333333333337" width="353" height="64"/>
                                 <color key="backgroundColor" red="0.078431372550000003" green="0.08235294118" blue="0.078431372550000003" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
                                 <color key="barTintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <textInputTraits key="textInputTraits"/>
