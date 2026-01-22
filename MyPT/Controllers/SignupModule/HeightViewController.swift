@@ -33,6 +33,8 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     private var valueTextFieldCenterYConstraint: NSLayoutConstraint!
     private var textFieldAboveButtonConstraint: NSLayoutConstraint!
     var isFeetSelected = true
+    private let haptic = UISelectionFeedbackGenerator()
+    private var lastHapticValue: Int?
     
     //MARK: -------------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
@@ -64,6 +66,7 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         btnFeet.setTitleColor(.black, for: .normal)
         //        setupUI()
         setupValueTextField()
+        haptic.prepare()
         
         
 //        setUpSegmet()
@@ -332,6 +335,14 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let centerOffset = scrollView.contentOffset.y + scrollView.bounds.height / 2
         let value = Int(round(centerOffset / rulerView.lineSpacing))
+        
+        // ✅ HAPTIC ONLY WHEN VALUE CHANGES
+            if lastHapticValue != value {
+                haptic.selectionChanged()
+                haptic.prepare()
+                lastHapticValue = value
+            }
+        
         valueLabel.text = "\(rulerView.displayText(for: value))"
         self.selectedHeight = valueLabel.text
         print(valueLabel.text)

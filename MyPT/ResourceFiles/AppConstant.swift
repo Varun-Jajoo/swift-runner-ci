@@ -21,6 +21,7 @@ enum AssetsColor {
     case appGreen
     case appOrange
     case errorRedBG
+    case categoryNameColor
 }
 
 enum AssetsMultiColor {
@@ -83,6 +84,8 @@ extension UIColor {
             return UIColor(named: "appLightYellow")
         case .errorRedBG:
             return UIColor(named: "errorRedBG")
+        case .categoryNameColor:
+            return UIColor(named: "categoryNameColor")
         }
     }
     

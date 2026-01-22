@@ -33,6 +33,8 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     private var rulerBottomConstraint: NSLayoutConstraint!
     private var valueTextFieldCenterYConstraint: NSLayoutConstraint!
     private var textFieldAboveButtonConstraint: NSLayoutConstraint!
+    private let haptic = UISelectionFeedbackGenerator()
+    private var lastHapticValue: Int?
     
     //MARK: -------------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
@@ -62,6 +64,7 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         btnKG.setTitleColor(.black, for: .normal)
         //        setupUI()
         setupValueTextField()
+        haptic.prepare()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -324,6 +327,13 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
             rulerView.minValue,
             min(value, rulerView.maxValue)
         )
+        
+        // ✅ HAPTIC ONLY WHEN VALUE CHANGES
+            if lastHapticValue != clampedValue {
+                haptic.selectionChanged()
+                haptic.prepare()
+                lastHapticValue = clampedValue
+            }
 
         rulerView.indicatorX = centerX
         rulerView.selectedValue = clampedValue

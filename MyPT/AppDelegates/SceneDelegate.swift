@@ -107,11 +107,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         stroyBoard = UIStoryboard(name: "Main", bundle: nil)
         let navController: UINavigationController? = stroyBoard?.instantiateViewController(withIdentifier: "navigation") as? UINavigationController
       
-//      let vc: MainViewController = MainViewController.instantiate(appStoryboard: .main)
-       let vc: AgeViewController = AgeViewController.instantiate(appStoryboard: .main)
+      let vc: MainViewController = MainViewController.instantiate(appStoryboard: .main)
+//       let vc: AgeViewController = AgeViewController.instantiate(appStoryboard: .main)
 
 //     let vc: LocationsViewController = LocationsViewController.instantiate(appStoryboard: .main)
-//      let vc: GenderViewController = GenderViewController.instantiate(appStoryboard: .main)
+//      let vc: TrainingTeamViewController = TrainingTeamViewController.instantiate(appStoryboard: .purchase)
         navController?.setViewControllers([vc], animated: false)
         window?.rootViewController = navController
     }

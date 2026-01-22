@@ -16,6 +16,7 @@ enum AppStoryboard: String {
     case more = "More"
     case shop = "Shop"
     case profile = "Profile"
+    case purchase = "Purchase"
 }
 
 private var backgroundImageViewTag: Int { return 9991 }

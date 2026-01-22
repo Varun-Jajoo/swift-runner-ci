@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -488,6 +488,7 @@
 		B8FFF4202D09CC200097167A /* GymWorkoutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FFF41F2D09CC1F0097167A /* GymWorkoutViewController.swift */; };
 		EE3848D92F1249F700D60C0E /* LocationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE3848D82F1249F700D60C0E /* LocationsViewController.swift */; };
 		EE3848DB2F125AE000D60C0E /* Cosmos.gif in Resources */ = {isa = PBXBuildFile; fileRef = EE3848DA2F125AE000D60C0E /* Cosmos.gif */; };
+		EE9D2B8F2F17EB51008A83D1 /* Purchase.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EE9D2B8E2F17EB51008A83D1 /* Purchase.storyboard */; };
 		EEC3D4FD2F070C070045638A /* HorizontalRulerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC3D4FC2F070C070045638A /* HorizontalRulerView.swift */; };
 		EECB61A52F066D7E00B79DD4 /* VerticalRulerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EECB61A42F066D7E00B79DD4 /* VerticalRulerView.swift */; };
 /* End PBXBuildFile section */
@@ -962,9 +963,14 @@
 		BF3D5368393FBAC5F3CF9AD2 /* Pods_MyPT.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MyPT.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE3848D82F1249F700D60C0E /* LocationsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationsViewController.swift; sourceTree = "<group>"; };
 		EE3848DA2F125AE000D60C0E /* Cosmos.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = Cosmos.gif; sourceTree = "<group>"; };
+		EE9D2B8E2F17EB51008A83D1 /* Purchase.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Purchase.storyboard; sourceTree = "<group>"; };
 		EEC3D4FC2F070C070045638A /* HorizontalRulerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalRulerView.swift; sourceTree = "<group>"; };
 		EECB61A42F066D7E00B79DD4 /* VerticalRulerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalRulerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		EE9D2B6B2F17EA93008A83D1 /* PurchaseModule */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = PurchaseModule; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		B8FDEEBC2CC8CAD00061639F /* Frameworks */ = {
@@ -1979,6 +1985,7 @@
 				B84F78972CEB195200FF7D52 /* More.storyboard */,
 				B8D62F042D688FBF00C5BB75 /* Shop.storyboard */,
 				B8C45EC12DD5AE42000B0790 /* Profile.storyboard */,
+				EE9D2B8E2F17EB51008A83D1 /* Purchase.storyboard */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -2001,6 +2008,7 @@
 		B8FDEEDC2CC8CDE80061639F /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				EE9D2B6B2F17EA93008A83D1 /* PurchaseModule */,
 				B8C45EBE2DD5AD7D000B0790 /* ProfileModule */,
 				B8D62F012D688F4600C5BB75 /* ShopModule */,
 				B819589C2D40B12C000FBA16 /* ActiveSession */,
@@ -2088,6 +2096,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EE9D2B6B2F17EA93008A83D1 /* PurchaseModule */,
 			);
 			name = MyPT;
 			packageProductDependencies = (
@@ -2199,6 +2210,7 @@
 				B8CDFFFE2CE1EAD9005DEA1C /* ProductsListCollViewCell.xib in Resources */,
 				B8B9A5D32CCA494B00392AD1 /* ClashDisplay-Light.otf in Resources */,
 				B81676A62D85B4FF00EDB6EF /* TxtFieldTableViewCell.xib in Resources */,
+				EE9D2B8F2F17EB51008A83D1 /* Purchase.storyboard in Resources */,
 				B8E7887B2D2F9C7100F1D5D6 /* strenghtWorkoutVideo.mp4 in Resources */,
 				B80A44682CEDD73800E3A11E /* TrainerTypeTableViewCell.xib in Resources */,
 				B8BABE7B2D0AF5C500CA8E27 /* PointsTableViewCell.xib in Resources */,

@@ -193,6 +193,9 @@ class GenderViewController: CommonViewController {
         }
     
     @IBAction func genderSewectionBtnActn(_ sender: UIButton) {
+        let feedback = UIImpactFeedbackGenerator(style: .medium)
+        feedback.impactOccurred()
+        
         switch sender.tag {
         case selectedBtn.maleSelect.rawValue:
             self.selectedGender = "male"

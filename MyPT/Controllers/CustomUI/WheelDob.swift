@@ -406,6 +406,8 @@ class WheelDobPicker: UIControl {
     private let topEclipseView = UIView()
     private let topArcLayer = CAShapeLayer()
     var allowAutoScrollToLast = true
+    private let haptic = UISelectionFeedbackGenerator()
+    private var lastHapticIndex: Int?
     
     var topArcShow: Bool = true {
         didSet{
@@ -437,6 +439,7 @@ class WheelDobPicker: UIControl {
         //        setupCenterIndicator()
         setupTopEclipseView()
         setupShadow()
+        haptic.prepare()
     }
     
     required init?(coder: NSCoder) {
@@ -445,6 +448,7 @@ class WheelDobPicker: UIControl {
         setupCenterIndicator()
         setupTopEclipseView()
         setupShadow()
+        haptic.prepare()
     }
     
     private func setupShadow() {
@@ -591,6 +595,12 @@ class WheelDobPicker: UIControl {
                 label.font = AppFont.bold.size(30, familyName: familyFunnelSans)
                 label.numberOfLines = 2
                 selectedIndex = index
+                // ✅ HAPTIC ONLY WHEN INDEX CHANGES
+                if lastHapticIndex != index {
+                    haptic.selectionChanged()
+                    haptic.prepare()
+                    lastHapticIndex = index
+                }
             } else {
                 label.textColor = UIColor.appDarkGray
                 label.font = AppFont.medium.size(22, familyName: familyFunnelSans)

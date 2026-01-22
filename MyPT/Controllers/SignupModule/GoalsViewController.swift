@@ -239,6 +239,8 @@ extension GoalsViewController:  UICollectionViewDelegate, UICollectionViewDataSo
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let feedback = UIImpactFeedbackGenerator(style: .medium)
+        feedback.impactOccurred()
         
         let cell = collectionView.cellForItem(at: indexPath) as! PersonalizedCollectionViewCell
         
@@ -266,6 +268,8 @@ extension GoalsViewController:  UICollectionViewDelegate, UICollectionViewDataSo
     }
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        let feedback = UIImpactFeedbackGenerator(style: .medium)
+        feedback.impactOccurred()
         print("Did deselect a cell at \(indexPath.row)")
         let cell = collectionView.cellForItem(at: indexPath) as! PersonalizedCollectionViewCell
         
