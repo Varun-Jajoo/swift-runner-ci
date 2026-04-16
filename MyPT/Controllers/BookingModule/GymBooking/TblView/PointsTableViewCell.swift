@@ -22,7 +22,7 @@ class PointsTableViewCell: UITableViewCell {
         super.awakeFromNib()
         // Initialization code
         
-        titleLbl.font = AppFont.semibold.size(14, familyName: familyManrope)
+        titleLbl.font = AppFont.regular.size(14, familyName: familyFunnelSans)
         
         DispatchQueue.main.async {
             self.leftImgView.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: self.leftImgView.frame.height/2.0)

@@ -22,6 +22,7 @@ enum AssetsColor {
     case appOrange
     case errorRedBG
     case categoryNameColor
+    case divideLineColor
 }
 
 enum AssetsMultiColor {
@@ -86,6 +87,8 @@ extension UIColor {
             return UIColor(named: "errorRedBG")
         case .categoryNameColor:
             return UIColor(named: "categoryNameColor")
+        case .divideLineColor:
+            return UIColor(red: 255.0/255.0, green: 255.0/255.0, blue: 255.0/255.0, alpha: 0.1)
         }
     }
     
@@ -168,6 +171,10 @@ public struct AppImages {
     public static let gym_workout = UIImage(named: "ic_gym_workout")
     public static let Home_workout_selected = UIImage(named: "ic_Home_workout_selected")
     public static let Home_workout = UIImage(named: "ic_Home_workout")
+    public static let gymSelect = UIImage(named: "Gym_Select")
+    public static let gymUnselect = UIImage(named: "Gym_Unselect")
+    public static let homeSelect = UIImage(named: "Home_Select")
+    public static let homeUnselect = UIImage(named: "Home_Unselect")
     
     public static let one_to_one_Selected = UIImage(named: "ic_one_to_one_Selected")
     public static let one_to_one = UIImage(named: "ic_one_to_one")
@@ -175,6 +182,13 @@ public struct AppImages {
     public static let withBuddy = UIImage(named: "ic_withBuddy")
     public static let withGroup_selected = UIImage(named: "ic_withGroup_selected")
     public static let withGroup = UIImage(named: "ic_withGroup")
+    
+    public static let soloSelected = UIImage(named: "Solo_Selected")
+    public static let soloUnselected = UIImage(named: "Solo_Unselected")
+    public static let buddySelected = UIImage(named: "Buddy_Selected")
+    public static let buddyUnselected = UIImage(named: "Buddy_Unselected")
+    public static let groupSelected = UIImage(named: "Group_Selected")
+    public static let groupUnselected = UIImage(named: "Group_Unselected")
     
     //MARK: -----------------MEMBERSHIP
     public static let withoutTrainerMembership_selected = UIImage(named: "ic_withoutTrainerMembership_selected")
@@ -262,6 +276,7 @@ public struct AppImages {
     public static let Navigation = UIImage(named: "ic_Navigation")
     public static let Radius = UIImage(named: "ic_Radius")
     public static let search_normal = UIImage(named: "ic_search_normal")
+    public static let topSearchIcon = UIImage(named: "topSearchIcon")
     public static let noAddress = UIImage(named: "ic_noAddress")
     
     //------------------ *********************Dashboard
@@ -329,6 +344,7 @@ enum AppFont: String {
     case lightItalic       = "LightItalic"
     case mediumItalic      = "MediumItalic"
     case semiboldItalic    = "SemiboldItalic"
+    case variable          = "Variable"
     case medium            = "Medium"
     case bold              = "Bold"
     case semibold          = "Semibold"

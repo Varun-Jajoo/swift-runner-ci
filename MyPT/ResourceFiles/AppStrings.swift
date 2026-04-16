@@ -50,6 +50,7 @@ struct AppStrings {
     public static let reserve_Slot = "Reserve Slot"
     public static let coming_soon = "Coming soon"
     public static let booking_QR_code = "BOOKING QR CODE"
+    public static let reviewYourTrainingPlan = "Review your training plan"
     
     //-------************Bottom Tabbar
     public static let homeStr = "Home"
@@ -59,6 +60,7 @@ struct AppStrings {
     public static let moreStr = "More"
     public static let trainers = "Trainers"
     public static let book_a_Slot = "Book a Slot"
+    public static let reviewYourBooking = "Review your booking"
     
     //-------------******************** More options
     public static let my_Bookings = "My Bookings"

@@ -44,8 +44,9 @@ struct TrainerModel: Codable {
     var averageRating: FlexibleValue?
     var tags: [TrainerTagModel]?
     var address: String?
-    var email, timing: String?
+    var email, timing, trainWithMe: String?
     var totalAvailable: Int?
+    var is_group, isPackage: Bool?
     var activity: [TrainerTagModel]?
 
     enum CodingKeys: String, CodingKey {
@@ -54,12 +55,14 @@ struct TrainerModel: Codable {
         case isVerified = "is_verified"
         case isfull = "is_full"
         case totalAvailable = "total_available"
+        case trainWithMe = "train_with_me"
+        case isPackage = "is_package"
         case location, profile, averageRating, noOfRating, tags, address, email, timing
-        case activity
+        case activity, is_group
     }
 }
 
-//MARK: ---------- TrainerTagModel
+//MARK: ----------
 struct TrainerTagModel: Codable {
     var id: Int?
     var name: String?
@@ -71,4 +74,3 @@ struct TrainerPivotModel: Codable {
     var trainer_id: FlexibleValue?
     var speciality_id: FlexibleValue?
 }
-

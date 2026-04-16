@@ -78,8 +78,10 @@ class GenderViewController: CommonViewController {
     }
     
     override func rightBtnActn(sender: UIButton) {
-        appUserDefaults.setRegistrationSkip(value: true)
-        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
+        skipProfileApi(completion: { data in
+            appUserDefaults.setRegistrationSkip(value: true)
+            appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
+        })
     }
     
     //------------------************Font
@@ -193,9 +195,7 @@ class GenderViewController: CommonViewController {
         }
     
     @IBAction func genderSewectionBtnActn(_ sender: UIButton) {
-        let feedback = UIImpactFeedbackGenerator(style: .medium)
-        feedback.impactOccurred()
-        
+        TapticEngine.selection.feedback()
         switch sender.tag {
         case selectedBtn.maleSelect.rawValue:
             self.selectedGender = "male"
@@ -229,25 +229,26 @@ class GenderViewController: CommonViewController {
                 }
             })
         }
-        
-                
-        /*
-        let vc:AgeViewController = AgeViewController.instantiate(appStoryboard: .main)
-        self.navigationController?.pushViewController(vc, animated: true)
-         */
-        
     }
     
-    //MARK: -------------- ENABLE CONTINUE
-//    func enableContinueBtn(isSelected:Bool = false){
-//        if isSelected {
-//            self.continueBtn.isUserInteractionEnabled = true
-//            self.continueBtn.backgroundColor = UIColor.appWhite
-//            self.continueBtn.setTitleColor(UIColor.mainBg, for: .normal)
-//        } else {
-//            self.continueBtn.isUserInteractionEnabled = false
-//            self.continueBtn.backgroundColor = UIColor.appDarkGray
-//            self.continueBtn.setTitleColor(UIColor.appWhite, for: .normal)
-//        }
-//    }
+    private func skipProfileApi(completion: @escaping (PaymentResponse) -> Void) {
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .skipProfile, method: .get, queries: nil, parameters: nil, isShowLoading: false, isShowLoadingWithoutMsg: true, completion: { (getResponce, error) in
+            do {
+                print(getResponce as Any)
+                if let responceData = getResponce {
+                    
+                    let getResult = try JSONDecoder().decode(PaymentResponse.self, from: responceData)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    } else {
+                        //                        let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+                        //                        AlertHelper.shared.alertMesssage(view: self, title: "", message: errorMsg ?? "")
+                    }
+                }
+            } catch {
+                print(error)
+            }
+        })
+    }
+
 }

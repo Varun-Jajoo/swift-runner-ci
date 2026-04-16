@@ -18,9 +18,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         
-        self.goToSplash()
+//        self.goToSplash()
+//        self.goToMainView()
         
-//        self.checkIsUserLogin()
+        self.checkIsUserLogin()
        
         
         guard let _ = (scene as? UIWindowScene) else { return }
@@ -106,13 +107,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func goToMainView() {
         stroyBoard = UIStoryboard(name: "Main", bundle: nil)
         let navController: UINavigationController? = stroyBoard?.instantiateViewController(withIdentifier: "navigation") as? UINavigationController
-      
-      let vc: MainViewController = MainViewController.instantiate(appStoryboard: .main)
-//       let vc: AgeViewController = AgeViewController.instantiate(appStoryboard: .main)
+    
+//        let vc: ActiveHomepageVCViewController = ActiveHomepageVCViewController.instantiate(appStoryboard: .homepage)
+        let vc: MainViewController = MainViewController.instantiate(appStoryboard: .main)
+//        let vc:NewCalenderViewController = NewCalenderViewController.instantiate(appStoryboard: .calendar)
+//       let vc: TrainingTeamViewController = TrainingTeamViewController.instantiate(appStoryboard: .purchase)
 
 //     let vc: LocationsViewController = LocationsViewController.instantiate(appStoryboard: .main)
-//      let vc: TrainingTeamViewController = TrainingTeamViewController.instantiate(appStoryboard: .purchase)
-        navController?.setViewControllers([vc], animated: false)
+//        let vc: TimeDetailVC = TimeDetailVC.instantiate(appStoryboard: .homepage)
+//        let vc: TrainingTeamViewController = TrainingTeamViewController.instantiate(appStoryboard: .purchase)
+//        let vc: TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+       navController?.setViewControllers([vc], animated: false)
         window?.rootViewController = navController
     }
     
@@ -120,7 +125,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func goToGuestDashboard() {
         stroyBoard = UIStoryboard(name: "Main", bundle: nil)
         let navController: UINavigationController? = stroyBoard?.instantiateViewController(withIdentifier: "navigation") as? UINavigationController
-        let dashboardVC: DashboardGuestViewController = DashboardGuestViewController.instantiate(appStoryboard: .dashboard)
+        let dashboardVC: HomepageVC = HomepageVC.instantiate(appStoryboard: .homepage)
+//        let dashboardVC: DashboardGuestViewController = DashboardGuestViewController.instantiate(appStoryboard: .dashboard)
         navController?.setViewControllers([dashboardVC], animated: false)
         window?.rootViewController = navController
     }
@@ -129,7 +135,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func goToDashboard() {
         stroyBoard = UIStoryboard(name: "Main", bundle: nil)
         let navController: UINavigationController? = stroyBoard?.instantiateViewController(withIdentifier: "navigation") as? UINavigationController
-        let dashboardVC: DashboardViewController = DashboardViewController.instantiate(appStoryboard: .dashboard)
+        let dashboardVC: HomepageVC = HomepageVC.instantiate(appStoryboard: .homepage)
+//        let dashboardVC: DashboardViewController = DashboardViewController.instantiate(appStoryboard: .dashboard)
         navController?.setViewControllers([dashboardVC], animated: false)
         window?.rootViewController = navController
     }
@@ -152,6 +159,4 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 //            DeepLinkRouter.shared.pendingURL = nil // clear after handling
 //          }
     }
-    
 }
-

@@ -72,8 +72,7 @@ class OrderConfirmedViewController: UIViewController {
             let vc: ReturnRequestViewController = ReturnRequestViewController.instantiate(appStoryboard: .shop)
             self.navigationController?.pushViewController(vc, animated: true)
             
-        }
-        else{
+        } else {
             self.navigationController?.popToViewController(ofClass: ProductsViewController.self, animated: true)
         }
     }

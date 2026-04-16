@@ -10,7 +10,8 @@ import Foundation
 class URLBuilder {
     private var components = URLComponents()
     let baseScheme = AppBaseUrl.baseScheme.rawValue
-    let baseURL = isTesting ? AppBaseUrl.baseProductionUrl.rawValue : AppBaseUrl.baseDevUrl.rawValue
+//    let baseURL = AppBaseUrl.baseDevUrl.rawValue
+    let baseURL = isTesting ? AppBaseUrl.baseDevUrl.rawValue : AppBaseUrl.baseProductionUrl.rawValue
     
 //    let baseURL = AppBaseUrl.baseDevUrl.rawValue
 //    let port = 8874

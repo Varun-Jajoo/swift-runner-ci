@@ -117,11 +117,11 @@ class TopReviewPackageViewController: CommonViewController {
                     vc.modalPresentationStyle = .overFullScreen
                     vc.costAmt =  Double(pricePackage)
                     
-                    vc.paymentSuccess = {[weak self] (getStatus, getTransactionId) in
-                        guard let self = self, let getTransactionId = getTransactionId  else { return  }
-                        
-                        self.paymentApi(transactionId: getTransactionId, paymentType: "ccavenue")
-                    }
+//                    vc.paymentSuccess = {[weak self] (getStatus, getTransactionId) in
+//                        guard let self = self, let getTransactionId = getTransactionId  else { return  }
+//                        
+//                        self.paymentApi(transactionId: getTransactionId, paymentType: "ccavenue")
+//                    }
                     self.navigationController?.present(vc, animated: true)
                 }
                 else if paymetMethod == "tabby" {

@@ -457,15 +457,15 @@ class ReviewPackageViewController: CommonViewController {
                             vc.modalPresentationStyle = .overFullScreen
                             vc.costAmt =  Double(components.first ?? "0.0")
                             
-                            vc.paymentSuccess = {[weak self] (getStatus, getTransactionId) in
-                                guard let self = self, let getTransactionId = getTransactionId  else { return  }
-                                inputBookSlotParams?.transaction_id = getTransactionId
-                                inputBookSlotParams?.price = pricePackage
-                                inputBookSlotParams?.payment_type = paymetMethod
-                                
-                                print("Slot booking params: ",inputBookSlotParams?.getParams() ?? [:])
-                                self.bookSlot(inputParam: self.inputBookSlotParams?.getParams() ?? [:])
-                            }
+//                            vc.paymentSuccess = {[weak self] (getStatus, getTransactionId) in
+//                                guard let self = self, let getTransactionId = getTransactionId  else { return  }
+//                                inputBookSlotParams?.transaction_id = getTransactionId
+//                                inputBookSlotParams?.price = pricePackage
+//                                inputBookSlotParams?.payment_type = paymetMethod
+//                                
+//                                print("Slot booking params: ",inputBookSlotParams?.getParams() ?? [:])
+//                                self.bookSlot(inputParam: self.inputBookSlotParams?.getParams() ?? [:])
+//                            }
                             self.navigationController?.present(vc, animated: true)
                         }
                     }
@@ -531,16 +531,16 @@ class ReviewPackageViewController: CommonViewController {
                             vc.modalPresentationStyle = .overFullScreen
                             vc.costAmt =  Double(components.first ?? "0.0")
                             
-                            vc.paymentSuccess = {[weak self] (getStatus, getTransactionId) in
-                                guard let self = self, let getTransactionId = getTransactionId  else { return  }
-                                self.inputParamMembership?.transaction_id = getTransactionId
-                                inputBookSlotParams?.price = pricePackage
-                                inputBookSlotParams?.payment_type = paymetMethod
-                                
-                                print("without membership Slot booking params: ",self.inputParamMembership?.getParamsReviewPackage() ?? [:])
-                                
-                                self.bookMembershipWithoutTrainer(inputParams: self.inputParamMembership?.getParamsReviewPackage())
-                            }
+//                            vc.paymentSuccess = {[weak self] (getStatus, getTransactionId) in
+//                                guard let self = self, let getTransactionId = getTransactionId  else { return  }
+//                                self.inputParamMembership?.transaction_id = getTransactionId
+//                                inputBookSlotParams?.price = pricePackage
+//                                inputBookSlotParams?.payment_type = paymetMethod
+//                                
+//                                print("without membership Slot booking params: ",self.inputParamMembership?.getParamsReviewPackage() ?? [:])
+//                                
+//                                self.bookMembershipWithoutTrainer(inputParams: self.inputParamMembership?.getParamsReviewPackage())
+//                            }
                             self.navigationController?.present(vc, animated: true)
                         }
                     }

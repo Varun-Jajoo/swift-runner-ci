@@ -406,8 +406,7 @@ class WheelDobPicker: UIControl {
     private let topEclipseView = UIView()
     private let topArcLayer = CAShapeLayer()
     var allowAutoScrollToLast = true
-    private let haptic = UISelectionFeedbackGenerator()
-    private var lastHapticIndex: Int?
+    private var lastHapticIndex: Int = -1
     
     var topArcShow: Bool = true {
         didSet{
@@ -439,7 +438,6 @@ class WheelDobPicker: UIControl {
         //        setupCenterIndicator()
         setupTopEclipseView()
         setupShadow()
-        haptic.prepare()
     }
     
     required init?(coder: NSCoder) {
@@ -448,7 +446,6 @@ class WheelDobPicker: UIControl {
         setupCenterIndicator()
         setupTopEclipseView()
         setupShadow()
-        haptic.prepare()
     }
     
     private func setupShadow() {
@@ -589,25 +586,44 @@ class WheelDobPicker: UIControl {
     
     private func highlightCenterLabel() {
         let centerX = scrollView.contentOffset.x + scrollView.bounds.width / 2
+        
         for (index, label) in itemLabels.enumerated() {
             if abs(label.center.x - centerX) < (labelFixedWidth + labelSpacing) / 2 {
+                
                 label.textColor = UIColor.appWhite
                 label.font = AppFont.bold.size(30, familyName: familyFunnelSans)
-                label.numberOfLines = 2
-                selectedIndex = index
-                // ✅ HAPTIC ONLY WHEN INDEX CHANGES
-                if lastHapticIndex != index {
-                    haptic.selectionChanged()
-                    haptic.prepare()
-                    lastHapticIndex = index
+                
+                if selectedIndex != index {
+                    selectedIndex = index
+                    
+                    if lastHapticIndex != index {
+                        TapticEngine.selection.feedback()
+                        lastHapticIndex = index
+                    }
                 }
+                
             } else {
                 label.textColor = UIColor.appDarkGray
                 label.font = AppFont.medium.size(22, familyName: familyFunnelSans)
-                label.numberOfLines = 2
             }
         }
     }
+    
+//    private func highlightCenterLabel() {
+//        let centerX = scrollView.contentOffset.x + scrollView.bounds.width / 2
+//        for (index, label) in itemLabels.enumerated() {
+//            if abs(label.center.x - centerX) < (labelFixedWidth + labelSpacing) / 2 {
+//                label.textColor = UIColor.appWhite
+//                label.font = AppFont.bold.size(30, familyName: familyFunnelSans)
+//                label.numberOfLines = 2
+//                selectedIndex = index
+//            } else {
+//                label.textColor = UIColor.appDarkGray
+//                label.font = AppFont.medium.size(22, familyName: familyFunnelSans)
+//                label.numberOfLines = 2
+//            }
+//        }
+//    }
     
     private func snapToNearest() {
         let centerX = scrollView.contentOffset.x + scrollView.bounds.width / 2

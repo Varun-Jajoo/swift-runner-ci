@@ -235,7 +235,7 @@ class CreatePackageVM{
         
         let params:[String:String] = inputParms
         
-        NetworkManager.shared.genericAPICall(serviceEndPoint: .get_maember_package_group, method: .get , queries: params, parameters:  nil, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .get_maember_package_group, method: .get , queries: params, parameters:  nil, isShowLoading: false, isShowLoadingWithoutMsg: true, completion: {  (getResponce, error) in
             do{
                 if let responceData = getResponce {
                     let getResult = try JSONDecoder().decode(MemberBaseModel.self, from: responceData)
@@ -248,6 +248,37 @@ class CreatePackageVM{
                     }
                 }
             }catch {
+                print(error)
+            }
+        })
+    }
+    
+    class func getBuddyMemberApi(viewController: UIViewController, inputParms: [String:String]?, isShowLoader:Bool = true, completion: @escaping(_ resultData:MemberBaseModel?) -> Void){
+        guard let inputParms = inputParms else { return  }
+        
+        /*
+         let params:[String:String] = [
+         "package_type": "", //package_type: 3, this will always remains
+         "type": "",         //type: gym, gym=>select from studio, home=>direct home
+         "trainer_id": "",   //trainer_id: 1, trainer id is required
+         "studio_id": ""     //studio_id: 1, studio id required if type is gym
+         ]
+         */
+        
+        let params: [String: String] = inputParms
+        
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .get_buddy_member, method: .get , queries: nil, parameters:  nil, isShowLoading: false, isShowLoadingWithoutMsg: true, completion: {  (getResponce, error) in
+            do{
+                if let responceData = getResponce {
+                    let getResult = try JSONDecoder().decode(MemberBaseModel.self, from: responceData)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    } else {
+                        let errorMsg = getResult.msg //(getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+                        AlertHelper.shared.alertMesssage(view: viewController, title: "", message: errorMsg ?? "")
+                    }
+                }
+            } catch {
                 print(error)
             }
         })
@@ -297,7 +328,7 @@ class CreatePackageVM{
             "id": inputId ?? ""
         ]
         
-        NetworkManager.shared.genericAPICall(serviceEndPoint: .delete_member, method: .get , queries: params, parameters:  nil, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .delete_member, method: .get , queries: params, parameters:  nil, isShowLoading: false, isShowLoadingWithoutMsg: true, completion: {  (getResponce, error) in
             do{
                 
                 if let responceData = getResponce {

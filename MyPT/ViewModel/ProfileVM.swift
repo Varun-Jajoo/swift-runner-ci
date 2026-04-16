@@ -12,7 +12,7 @@ class ProfileVM {
     //MARK: ---------------------- api/user-profile
     class func getUserProfileApi(inputParams:[String:String]? , isShowLoader:Bool = true, completion: @escaping(_ resultData:ProfileBaseModel?) -> Void){
         
-        NetworkManager.shared.genericAPICall(serviceEndPoint: .user_profile, method: .get , queries: inputParams, parameters:  nil, isShowLoading: isShowLoader, completion: {  ( getResponce, error) in
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .user_profile, method: .get , queries: inputParams, parameters:  nil, isShowLoading: false, isShowLoadingWithoutMsg: true, completion: {  ( getResponce, error) in
             do{
                 print(getResponce as Any)
                 if let responceData = getResponce {

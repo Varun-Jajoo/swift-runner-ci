@@ -65,8 +65,8 @@ struct AddressDataModel: Codable {
     var building_name: FlexibleValue?
     var street: FlexibleValue?
     var city_id: FlexibleValue?
-    var country_id: FlexibleValue?
-    var city_name: String?
+    var country_id, emirate_id, emirate_name, villa_name: FlexibleValue?
+    var city_name, area_name: String?
     var country_name: String?
     var landmark: String?
     var type: String?
@@ -80,6 +80,7 @@ struct AddressDataModel: Codable {
     enum CodingKeys: String, CodingKey {
         case user_id, name,building_name, street, city_id, country_id, landmark, type, mobile_no
         case lat, long, updated_at, created_at, id, city_name, country_name
+        case area_name, emirate_id, emirate_name, villa_name
     }
 }
 
@@ -127,4 +128,15 @@ struct CityModel: Codable {
     }
 }
 
+//MARK: ------------ CountryBaseModel
+struct CountryBaseModel: Codable {
+    var status: Bool?
+    var data: [CountryDataModel]?
+    var msg: String?
+}
 
+// MARK: - CountryDataModel
+struct CountryDataModel: Codable {
+    var id: Int?
+    var name: String?
+}

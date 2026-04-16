@@ -355,13 +355,20 @@ extension UIView{
     }
     
     func roundBottomCorners(radius: CGFloat) {
-        let maskPath = UIBezierPath(roundedRect: self.bounds,
-                                    byRoundingCorners: [.bottomLeft, .bottomRight],
-                                    cornerRadii: CGSize(width: radius, height: radius))
-        let shape = CAShapeLayer()
-        shape.path = maskPath.cgPath
-        self.layer.mask = shape
+        self.layer.cornerRadius = radius
+        self.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        self.clipsToBounds = true
     }
+
+    
+//    func roundBottomCorners(radius: CGFloat) {
+//        let maskPath = UIBezierPath(roundedRect: self.bounds,
+//                                    byRoundingCorners: [.bottomLeft, .bottomRight],
+//                                    cornerRadii: CGSize(width: radius, height: radius))
+//        let shape = CAShapeLayer()
+//        shape.path = maskPath.cgPath
+//        self.layer.mask = shape
+//    }
     
     func roundSideCorners(radius: CGFloat, cornerSide:UIRectCorner) {
         let maskPath = UIBezierPath(roundedRect: self.bounds,
@@ -371,6 +378,12 @@ extension UIView{
         shape.path = maskPath.cgPath
         self.layer.mask = shape
     }
+        
+    func applyCornerRadius(_ radius: CGFloat = 12) {
+        self.layer.cornerRadius = radius
+        self.layer.masksToBounds = true
+    }
+
     
     
     /*
@@ -1677,7 +1690,7 @@ extension String {
 extension UIImageView {
     
     /// Adds a gradient overlay to the image view
-    func addGradientImgV(colors: [UIColor], locations: [NSNumber] = [0, 1], startPoint: CGPoint = CGPoint(x: 0, y: 0), endPoint: CGPoint = CGPoint(x: 1, y: 1)){
+    func addGradientImgV(colors: [UIColor], locations: [NSNumber] = [0, 1], startPoint: CGPoint = CGPoint(x: 0, y: 0), endPoint: CGPoint = CGPoint(x: 1, y: 1)) {
         let gradientLayer = CAGradientLayer()
         gradientLayer.colors = colors.map { $0.cgColor }
         gradientLayer.locations = locations
@@ -2807,5 +2820,25 @@ extension UIVisualEffectView {
             }
             disableAllBlur(in: subview)
         }
+    }
+}
+
+
+extension UIView {
+    
+    func applyGradient(colors: [UIColor],
+                       startPoint: CGPoint = CGPoint(x: 0.5, y: 0.0),
+                       endPoint: CGPoint = CGPoint(x: 0.5, y: 1.0)) {
+        
+        // Remove old gradient if exists
+        self.layer.sublayers?.removeAll(where: { $0 is CAGradientLayer })
+        
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.frame = self.bounds
+        gradientLayer.colors = colors.map { $0.cgColor }
+        gradientLayer.startPoint = startPoint
+        gradientLayer.endPoint = endPoint
+        
+        self.layer.insertSublayer(gradientLayer, at: 0)
     }
 }

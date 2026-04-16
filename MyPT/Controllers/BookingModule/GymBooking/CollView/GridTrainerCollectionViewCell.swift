@@ -12,6 +12,7 @@ class GridTrainerCollectionViewCell: UICollectionViewCell {
     //MARK: -------------VARIABLE
     // Indexes of restricted items
     var restrictedRange: [ClosedRange<Int>] = [0...4]  // These cells can't be selected
+    var fromHome:Bool = false
     
     //MARK: -------------VARIABLE
     var trainerTagsData:[TrainerTagModel]? = [] {
@@ -31,14 +32,14 @@ class GridTrainerCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var ratingBtn: UIButton!
     @IBOutlet weak var nameMBV: UIView!
     @IBOutlet weak var gymNameLbl: UILabel!
-    @IBOutlet weak var trainerBadgeImgView: UIImageView!
+//    @IBOutlet weak var trainerBadgeImgView: UIImageView!
     @IBOutlet weak var gymCategoryCollView: UICollectionView!
     @IBOutlet weak var distanceBtn: UIButton!
-    @IBOutlet weak var landMarkBtn: UIButton!
+    @IBOutlet weak var viewProfileBtn: UIButton!
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        
+        setUI()
         gymCategoryCollView.register(UINib(nibName: "ProductCategoryCollViewCell", bundle: nil), forCellWithReuseIdentifier: "ProductCategoryCollViewCell")
         
         DispatchQueue.main.async {
@@ -50,36 +51,43 @@ class GridTrainerCollectionViewCell: UICollectionViewCell {
         }
     }
     
+    func setUI() {
+        gymNameLbl.font = AppFont.medium.size(16.0, familyName: familyClashDisplay)
+        ratingBtn.titleLabel?.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
+        distanceBtn.titleLabel?.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
+        viewProfileBtn.titleLabel?.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
+    }
+    
     func setupCellData(trainerData: TrainerModel?){
         guard let trainerData = trainerData else { return }
-        self.trainerBadgeImgView.isHidden = true
+//        self.trainerBadgeImgView.isHidden = true
         
         self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: UIImage())
         self.ratingBtn.setTitle(trainerData.noOfRating, for: .normal)
         self.gymNameLbl.text = trainerData.name
         self.distanceBtn.setTitle(trainerData.distance, for: .normal)
-        self.landMarkBtn.setTitle(trainerData.location, for: .normal)
+//        self.landMarkBtn.setTitle(trainerData.location, for: .normal)
         
-        if let isVerify = trainerData.isVerified, isVerify {
-            self.trainerBadgeImgView.isHidden = false
-        }
+//        if let isVerify = trainerData.isVerified, isVerify {
+//            self.trainerBadgeImgView.isHidden = false
+//        }
     }
     
     //MARK: -------------SET CELL INPUTDATA
     func setGymCellData(trainerData: GymTrainerModel?){
         guard let trainerData = trainerData else { return  }
         
-        DispatchQueue.main.async {
+//        DispatchQueue.main.async {
             
             self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: UIImage())
             self.ratingBtn.setTitle(trainerData.noOfRating, for: .normal)
             self.gymNameLbl.text = trainerData.name
             self.distanceBtn.setTitle(trainerData.distance, for: .normal)
-            self.landMarkBtn.setTitle(trainerData.location, for: .normal)
+//            self.landMarkBtn.setTitle(trainerData.location, for: .normal)
             
-            if let isVerify = trainerData.isVerified, isVerify {
-                self.trainerBadgeImgView.isHidden = false
-            }
+//            if let isVerify = trainerData.isVerified, isVerify {
+//                self.trainerBadgeImgView.isHidden = false
+//            }
             
 //            self.trainerImgView.loadImage(urlString: trainerData.profile, placeholder: AppImages.navLeft)
 //            self.gymNameLbl.text = trainerData.name
@@ -88,7 +96,7 @@ class GridTrainerCollectionViewCell: UICollectionViewCell {
 //            self.avgRatingBtn.setTitle(trainerData.noOfRating ?? "", for: .normal)
 //            self.landMarkBtn.setTitle(trainerData.location, for: .normal)
 //            self.numberSlotLbl.text = "Only \(trainerData.slot ?? "") slots available"
-        }
+//        }
     }
     
 }
@@ -98,7 +106,7 @@ extension GridTrainerCollectionViewCell:UICollectionViewDelegate, UICollectionVi
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if let totalCount = trainerTagsData?.count, totalCount > 2 {
             return 3
-        }else{
+        } else {
             return trainerTagsData?.count ?? 0
         }
     }
@@ -106,22 +114,24 @@ extension GridTrainerCollectionViewCell:UICollectionViewDelegate, UICollectionVi
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell:ProductCategoryCollViewCell = gymCategoryCollView.dequeueReusableCell(withReuseIdentifier: "ProductCategoryCollViewCell", for: indexPath) as! ProductCategoryCollViewCell
         DispatchQueue.main.async {
-            cell.cellMBV.backgroundColor = UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1)
-            cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: 9.0)
-            cell.layoutIfNeeded()
+//            cell.cellMBV.backgroundColor = UIColor(red: 28/255.0, green: 31/255.0, blue: 33/255.0, alpha: 1)
+            cell.cellMBV.setCornerRadius(borderWidth: 1, borderColor: UIColor(red: 255.0/255.0, green: 255.0/255.0, blue: 255.0/255.0, alpha: 0.1), cornerRadious: 8)
+            cell.titleLbl.textColor = UIColor(red: 255.0/255.0, green: 255.0/255.0, blue: 255.0/255.0, alpha: 1)
+//            cell.layoutIfNeeded()
+            
         }
         
         cell.titleLblLeading.constant = 8.0
         cell.titleLblTopConstrnt.constant = 5.0
-        cell.titleLbl.font = AppFont.semibold.size(10.0, familyName: familyManrope)
-        cell.layoutIfNeeded()
+        cell.titleLbl.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
+//        cell.layoutIfNeeded()
     
         if let lastCell = collectionView.isLastCell(), let totalCount = trainerTagsData?.count,( lastCell == indexPath.row && totalCount > 2) {
             cell.titleLbl.text = "+3"
-            cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: 2.0)
-            cell.layoutIfNeeded()
+//            cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: 2.0)
+//            cell.layoutIfNeeded()
         }else{
-            cell.titleLbl.text = trainerTagsData?[indexPath.row].name as? String
+            cell.titleLbl.text = trainerTagsData?[indexPath.row].name?.uppercased() as? String
         }
         return cell
     }
@@ -135,5 +145,4 @@ extension GridTrainerCollectionViewCell:UICollectionViewDelegate, UICollectionVi
         // Check if any range contains the index
         return !restrictedRange.contains { $0.contains(indexPath.item) }
     }
-    
 }

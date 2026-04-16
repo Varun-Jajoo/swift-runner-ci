@@ -7,6 +7,10 @@
 
 import UIKit
 
+enum HomeType {
+    case guest
+    case activePackage
+}
 
 enum vcDashboard: Int {
     case dashboardGuest = 1
@@ -15,360 +19,297 @@ enum vcDashboard: Int {
     func viewController() -> UIViewController {
         switch self {
         case .dashboardGuest:
-            return DashboardGuestViewController.instantiate(appStoryboard: .dashboard)
+            return HomepageVC.instantiate(appStoryboard: .homepage)
+//            return DashboardGuestViewController.instantiate(appStoryboard: .dashboard)
         case .dashboard:
-            return DashboardViewController.instantiate(appStoryboard: .dashboard)
+            return HomepageVC.instantiate(appStoryboard: .homepage)
+//            return ActiveHomepageVCViewController.instantiate(appStoryboard: .homepage)
+//            return DashboardViewController.instantiate(appStoryboard: .dashboard)
         }
     }
 }
 
 
-class CustomTabViewController: UITabBarController, UITabBarControllerDelegate {
+final class CustomTabViewController: UITabBarController, UITabBarControllerDelegate {
 
     //MARK: -----------LINE VIEW
-    private var didSetupTabBar = false
-    var lineView = UIView()
+//    private var didSetupTabBar = false
+//    var lineView = UIView()
+//    var num: Int = 1
+//    private var shapeLayer = CAShapeLayer()
+    private let customTabBar = CustomTabBar()
     var isForGeustDashboard:Bool?
-    var num: Int = 1
-    private var shapeLayer = CAShapeLayer()
     
     //MARK: -------------Controllers
-    let homeVC:DashboardViewController = DashboardViewController.instantiate(appStoryboard: .dashboard)
-    let homeGeustuserVC:DashboardGuestViewController = DashboardGuestViewController.instantiate(appStoryboard: .dashboard)
+//    let homeVC: HomepageVC = HomepageVC.instantiate(appStoryboard: .homepage)
+   let homeVC:ActiveHomepageVCViewController = ActiveHomepageVCViewController.instantiate(appStoryboard: .homepage)
+//    let homeVC:DashboardViewController = DashboardViewController.instantiate(appStoryboard: .dashboard)
+    let homeGeustuserVC: ActiveHomepageVCViewController = ActiveHomepageVCViewController.instantiate(appStoryboard: .homepage)
+//    let homeGeustuserVC:DashboardGuestViewController = DashboardGuestViewController.instantiate(appStoryboard: .dashboard)
     let bookingsVC:BookingListViewController = BookingListViewController.instantiate(appStoryboard: .booking)
     let libraryVC:LibraryViewController = LibraryViewController.instantiate(appStoryboard: .library)
     let calendarVC:CalendarViewController = CalendarViewController.instantiate(appStoryboard: .calendar)
     let moreVC:MoreViewController = MoreViewController.instantiate(appStoryboard: .more)
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
+
         self.delegate = self
-        self.view.backgroundColor = .clear
-        navigationController?.navigationBar.prefersLargeTitles = false
-        navigationItem.largeTitleDisplayMode = .never
-        NotificationCenter.default.addObserver(self, selector: #selector(reloadTabFlow), name: NSNotification.Name("reloadTab"), object: nil)
-        setupTabbar()
+        setValue(customTabBar, forKey: "tabBar")
+
+//        setupTabbar(homeType: <#HomeType#>)
+        setupAppearance()
+        if !(isForGeustDashboard ?? false) {
+            checkPackageAndLoadTabs()
+        }
+        self.setupTabbar(homeType: .guest)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(reloadTabFlow),
+            name: NSNotification.Name("reloadTab"),
+            object: nil
+        )
     }
     
+    override var selectedIndex: Int {
+        didSet {
+            customTabBar.updateIndicatorPosition(index: selectedIndex)
+        }
+    }
+
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.navigationBar.layoutIfNeeded()
-        DispatchQueue.main.async {
-            self.setupHeightTabbar()
-            self.setupCustomTabBar()
-        }
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        customTabBar.updateIndicatorPosition(index: selectedIndex)
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        self.setupTabbar()
-        DispatchQueue.main.async {
-             self.setupHeightTabbar()
-             self.setupCustomTabBar()
-         }
-    }
-    
-    //MARK: --------------FORCLY RELOAD TABVIEW
-    @objc func reloadTabFlow(_ notification: Notification) {
-        if let shouldReload = notification.object as? Bool {
-            print("Reloading tab because object is true")
-            isForGeustDashboard = shouldReload
-            appUserDefaults.setIsPackageCreated(value: !shouldReload)
-//            self.setupTabbar()
-        }
-    }
- 
-    //MARK: --------SET TABBAR
-    func setupTabbar() {
-        let homeTabBarItem = UITabBarItem(title: AppStrings.homeStr, image: AppImages.home, selectedImage: AppImages.homeSelected)
-        let bookingsTabBarItem = UITabBarItem(title: AppStrings.bookingStr, image: AppImages.bookings, selectedImage: AppImages.bookingSelected)
-        let libraryTabBarItem = UITabBarItem(title: AppStrings.libraryStr, image: AppImages.Library, selectedImage: AppImages.LibrarySelected)
-        let calendarTabBarItem = UITabBarItem(title: AppStrings.calendarStr, image: AppImages.calendar, selectedImage: AppImages.calendarSelected)
-        let moreTabBarItem = UITabBarItem(title: AppStrings.moreStr, image: AppImages.more, selectedImage: AppImages.moreSelected)
-        
-        //-------------******************** Add view controllers and tab bar items
-        homeGeustuserVC.tabBarItem = homeTabBarItem
-        homeVC.tabBarItem = homeTabBarItem
-        bookingsVC.tabBarItem = bookingsTabBarItem
-        libraryVC.tabBarItem = libraryTabBarItem
-        calendarVC.tabBarItem = calendarTabBarItem
-        moreVC.tabBarItem = moreTabBarItem
-        
-        //---------*******
-        bookingsVC.isFromTab = true
-        calendarVC.isFromTab = true
-        selectedIndex = 0
-        let vc = ((isForGeustDashboard == true) ? homeGeustuserVC : homeVC)
-        let controllers = [vc, bookingsVC, libraryVC, calendarVC, moreVC]
-        //--------------------*******
-        let navControllers = controllers.map { viewController -> UINavigationController in
-            // Disable large title for each controller
-            viewController.navigationItem.largeTitleDisplayMode = .never
-            let nav = UINavigationController(rootViewController: viewController)
-            nav.navigationBar.prefersLargeTitles = false
-            return nav
-        }
-        viewControllers = navControllers
-        //--------------------------**********
-        tabBar.tintColor = .appYellow
-//        tabBar.backgroundColor = UIColor.white.withAlphaComponent(0.2)
-        
-        //----------****************Setup Appearence/Lineview called
-        setAppearence()
-        setupCustomTabBar()
-    }
-    
-    //MARK: ------------SETUP APPEARENCE
-    func setAppearence(){
-        self.tabBar.isTranslucent = false
-        if #available(iOS 15.0, *) {
-                 let appearance = UITabBarAppearance()
-                 appearance.configureWithOpaqueBackground()
-            appearance.backgroundColor = UIColor(red: 16/255.0, green: 17/255.0, blue: 19/255.0, alpha: 0.5)
-                 tabBar.standardAppearance = appearance
-//                 tabBar.scrollEdgeAppearance = tabBar.standardAppearance
-             }
-        if #available(iOS 13.0, *) {
-            let appearance = UITabBarItemAppearance()
-            let attributes = [NSAttributedString.Key.font: AppFont.semibold.size(12.0, familyName: familyManrope)] //UIFont.boldSystemFont(ofSize: 18.0)
-            appearance.normal.titleTextAttributes = attributes as [NSAttributedString.Key: Any]
-            appearance.normal.titleTextAttributes = [.foregroundColor: UIColor(red: 189/255.0, green: 189/255.0, blue: 189/255.0, alpha: 1) as Any] // attributes as [NSAttributedString.Key: Any]
-            appearance.selected.titleTextAttributes = [.foregroundColor: UIColor.appYellow]  //attributes as [NSAttributedString.Key: Any]
-                        
-            tabBar.standardAppearance.stackedLayoutAppearance = appearance
-            if #available(iOS 15.0, *) {
-                tabBar.scrollEdgeAppearance?.stackedLayoutAppearance = appearance
-            } else {
-                // Fallback on earlier versions
+    private func checkPackageAndLoadTabs() {
+
+        CreatePackageVM.checkPackageCreatedApi(viewController: self, inputParms: [:]) { [weak self] result in
+            guard let self = self,
+                  let data = result?["data"] as? [String:Any] else {
+                self?.setupTabbar(homeType: .guest)
+                return
             }
+
+            // guest logic
+            let isActiveUser = (data["isActive"] as? Bool ?? false)
+            self.setupTabbar(homeType: isActiveUser ? .activePackage : .guest)
         }
     }
-    
-    //-------------------*****************************
-//    override func viewDidLayoutSubviews() {
-//        super.viewDidLayoutSubviews()
-//        self.view.layoutIfNeeded()
-//        DispatchQueue.main.async {
-//            self.setupCustomTabBar()
-//            self.setupHeightTabbar()
-//        }
-//    }
 
-    private func setupHeightTabbar(heightIncrease: CGFloat = 15, imageBottomInset: CGFloat = 20) {
-         self.tabBar.backgroundColor = UIColor.mainBg.withAlphaComponent(1.0)
-         self.tabBar.isTranslucent = false
-         var getFrame: CGRect = self.tabBar.frame
-         getFrame.origin.y -= heightIncrease
-         getFrame.size.height += heightIncrease
-         self.tabBar.frame = getFrame
-        if let items = self.tabBar.items {
-             for (index, item) in items.enumerated() {
-                 item.imageInsets = (index == self.selectedIndex) ?
-                     UIEdgeInsets(top: 0, left: 0, bottom: imageBottomInset, right: 0) : UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-             }
-         }
-         self.tabBar.setNeedsLayout()
-         self.tabBar.layoutIfNeeded()
-     }
+    // MARK: Setup Tabs
+    private func setupTabbar(homeType: HomeType) {
 
-    /*
-    private func createPathCircle() -> CGPath? {
-        guard let items = tabBar.items,
-              let selectedItem = tabBar.selectedItem ?? items.first,
-              let index = items.firstIndex(of: selectedItem) else {
-            print("Error: No tab bar items available.")
-            return nil
-        }
-     
-        let tabWidth = tabBar.frame.width / CGFloat(items.count)
-        let centerX = tabWidth * CGFloat(index) + tabWidth / 2
-        let radius: CGFloat = 35.0
-        let curveDepth: CGFloat = 25.0
-     
-        let path = UIBezierPath()
-     
-        path.move(to: .zero)
-        path.addLine(to: CGPoint(x: centerX - radius, y: 0))
-     
-        // Add smooth upward curve (concave)
-        path.addQuadCurve(
-            to: CGPoint(x: centerX, y: curveDepth),
-            controlPoint: CGPoint(x: centerX - radius / 2, y: 0)
-        )
-     
-        path.addQuadCurve(
-            to: CGPoint(x: centerX + radius, y: 0),
-            controlPoint: CGPoint(x: centerX + radius / 2, y: 0)
-        )
-     
-        path.addLine(to: CGPoint(x: tabBar.frame.width, y: 0))
-        path.addLine(to: CGPoint(x: tabBar.frame.width, y: tabBar.frame.height + 20))
-        path.addLine(to: CGPoint(x: 0, y: tabBar.frame.height + 20))
-        path.close()
-     
-        return path.cgPath
-    }
-     
-    private func setupCustomTabBar() {
-        guard tabBar.superview != nil else { return }
-     
-        // Remove old custom layers
-        self.tabBar.layer.sublayers?
-            .filter { $0.name == "tabbar_layer_Circle" }
-            .forEach { $0.removeFromSuperlayer() }
-     
-        // Setup new shape layer
-        self.shapeLayer.name = "tabbar_layer_Circle"
-        self.shapeLayer.fillColor = UIColor.mainBg.withAlphaComponent(1.0).cgColor
-        self.shapeLayer.strokeColor = UIColor.white.withAlphaComponent(0.1).cgColor
-        self.shapeLayer.lineWidth = 0.3
-     
-        self.shapeLayer.shadowColor = UIColor.black.cgColor
-        self.shapeLayer.shadowOpacity = 0.2
-        self.shapeLayer.shadowOffset = CGSize(width: 0, height: -2)
-        self.shapeLayer.shadowRadius = 6
-     
-        // Clear native tab bar background
-        self.tabBar.backgroundImage = UIImage()
-        self.tabBar.shadowImage = UIImage()
-        self.tabBar.backgroundColor = .clear
-        self.tabBar.layer.borderWidth = 0
-        self.tabBar.layer.borderColor = UIColor.clear.cgColor
-     
-        // Set path
-        if let path = createPathCircle() {
-            self.shapeLayer.path = path
+        let homeController: UIViewController
+
+        if isForGeustDashboard == true {
+            homeController = HomepageVC.instantiate(appStoryboard: .homepage)
         } else {
-            print("Error: Failed to create valid path.")
-            return
-        }
-     
-        // Add shape layer below tab items
-        if self.shapeLayer.superlayer == nil {
-            self.tabBar.layer.insertSublayer(self.shapeLayer, at: 0)
-        }
-    }
-     */
-     
-    
-    
-    private func setupCustomTabBar() {
-        guard self.tabBar.superview != nil else { return }
-        
-        self.shapeLayer.sublayers?
-           .filter { $0.name == "tabbar_layer_Circle" }.forEach({$0.removeFromSuperlayer()})
-        
-        self.shapeLayer.name = "tabbar_layer_Circle"
-        
-        if let path = createPathCircle() {
-             self.shapeLayer.path = path
-         } else {
-             print("Error: Failed to create a valid path for the tab bar.")
-             return
-         }
-        
-//        self.shapeLayer.path = self.createPathCircle()
-        self.shapeLayer.strokeColor = UIColor.white.cgColor
-        self.shapeLayer.fillColor = UIColor.mainBg.withAlphaComponent(1.0).cgColor
-        self.shapeLayer.lineWidth = 0.2 //0.5
-        self.shapeLayer.shadowColor = UIColor.black.withAlphaComponent(0.3).cgColor
-        self.shapeLayer.shadowOffset = CGSize(width: 0, height: -2)
-        
-        self.tabBar.backgroundImage = UIImage()
-        self.tabBar.shadowImage = UIImage()
-        self.tabBar.layer.borderWidth = 0
-        self.tabBar.layer.borderColor = UIColor.clear.cgColor
-        
-        if self.shapeLayer.superlayer == nil {
-            self.tabBar.layer.insertSublayer(self.shapeLayer, at: 0)
-        }
-    }
-    
-    private func createPathCircle() -> CGPath? {
-        guard let items = tabBar.items, let selectedItem = self.tabBar.selectedItem ?? items.first, let index = items.firstIndex(of: selectedItem) else {
-            print("Error: No tab bar items available.")
-            return UIBezierPath().cgPath
-        }
-        
-        let path = UIBezierPath()
-        let tabWidth = self.tabBar.frame.width / CGFloat(items.count)
-        let centerX = tabWidth * CGFloat(index) + tabWidth / 2
-        let radius: CGFloat = 30.0
-        
-        // Start drawing the custom path
-        path.move(to: CGPoint(x: 0, y: 0))
-        path.addLine(to: CGPoint(x: centerX - radius * 2, y: 0))
-        path.addArc(
-            withCenter: CGPoint(x: centerX, y: 0),
-            radius: radius,
-            startAngle: CGFloat(180).degreesToRadians,
-            endAngle: CGFloat(0).degreesToRadians,
-            clockwise: false
-        )
-        path.addLine(to: CGPoint(x: self.tabBar.frame.width, y: 0))
-        path.addLine(to: CGPoint(x: self.tabBar.frame.width, y: self.tabBar.frame.height + 20))
-        path.addLine(to: CGPoint(x: 0, y: self.tabBar.frame.height + 20))
-        path.close()
-        path.lineWidth = 1.0
-        path.stroke()
-        path.fill()
-        self.shapeLayer.path = path.cgPath
-        self.shapeLayer.frame = self.tabBar.bounds
-        
-        return path.cgPath
-    }
-    
-    
-    /*
-    override func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
-//        _ = self.createPathCircle()
-        DispatchQueue.main.async {
-            print("Update layout of tabbar")
-            self.setupCustomTabBar()
-            self.setupHeightTabbar()
-        }
-        
-        if let geustUser = isForGeustDashboard, geustUser == true , let index = tabBar.items?.firstIndex(of: item) {
-            print("Selected tab index: \(index)")
-            if index != 0 {
-                if appUserDefaults.clearUserDefault() {
-                    appSceneDelegate?.goToMainView()
-                }
+            switch homeType {
+            case .guest:
+                homeController = HomepageVC.instantiate(appStoryboard: .homepage)
+
+            case .activePackage:
+                homeController = ActiveHomepageVCViewController.instantiate(appStoryboard: .homepage)
             }
         }
-    }
-    */
-    
-    // This method gets called when tab selection changes
-    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-          let index = tabBarController.selectedIndex
-          print("Selected tab index: \(index)")
-          DispatchQueue.main.async {
-              self.setupCustomTabBar()
-              self.setupHeightTabbar()
-          }
-        
-          if let isGuestUser = isForGeustDashboard, isGuestUser, index != 0 {
-              if appUserDefaults.clearUserDefault() {
-                  appSceneDelegate?.goToMainView()
-              }
-          }
-      }
-    
-    // Central method for handling tab changes
-       func handleTabSelection(index: Int) {
-           print("Tab selected: \(index)")
-           // Update tab bar appearance
-           DispatchQueue.main.async {
-               self.setupCustomTabBar()
-               self.setupHeightTabbar()
-           }
-       }
 
+        // Tab Items
+        homeController.tabBarItem = UITabBarItem(
+            title: "Home",
+            image: UIImage(named: "ic_home")?.withRenderingMode(.alwaysOriginal),
+            selectedImage: UIImage(named: "homeSelected")?.withRenderingMode(.alwaysOriginal)
+        )
+
+        libraryVC.tabBarItem = UITabBarItem(
+            title: "Plans",
+            image: UIImage(named: "ic_bookings")?.withRenderingMode(.alwaysOriginal),
+            selectedImage: UIImage(named: "planSelected")?.withRenderingMode(.alwaysOriginal)
+        )
+
+        bookingsVC.tabBarItem = UITabBarItem(
+            title: "Bookings",
+            image: UIImage(named: "ic_calendar")?.withRenderingMode(.alwaysOriginal),
+            selectedImage: UIImage(named: "bookingSelected")?.withRenderingMode(.alwaysOriginal)
+        )
+
+        moreVC.tabBarItem = UITabBarItem(
+            title: "Menu",
+            image: UIImage(named: "ic_more")?.withRenderingMode(.alwaysOriginal),
+            selectedImage: UIImage(named: "menuSelected")?.withRenderingMode(.alwaysOriginal)
+        )
+
+        viewControllers = [
+            UINavigationController(rootViewController: homeController),
+            UINavigationController(rootViewController: libraryVC),
+            UINavigationController(rootViewController: bookingsVC),
+            UINavigationController(rootViewController: moreVC)
+        ]
+
+        selectedIndex = 0
+        DispatchQueue.main.async {
+            self.customTabBar.updateIndicatorPosition(index: self.selectedIndex)
+        }
+    }
+
+    // MARK: Appearanceprivate
+    func setupAppearance() {
+        
+        let appearance = UITabBarAppearance()
+        appearance.configureWithTransparentBackground()
+        
+        // 🔥 REMOVE system blur & background
+        appearance.backgroundEffect = nil
+        appearance.backgroundColor = .clear
+        appearance.shadowColor = .clear
+        
+        let itemAppearance = appearance.stackedLayoutAppearance
+        
+        // Text style
+        itemAppearance.normal.titleTextAttributes = [
+            .foregroundColor: UIColor(red: 250.0/255.0, green: 250.0/255.0, blue: 250.0/255.0, alpha: 0.55),
+            .font: AppFont.regular.size(12.0, familyName: familyFunnelSans)
+        ]
+        
+        itemAppearance.selected.titleTextAttributes = [
+            .foregroundColor: UIColor(red: 240.0/255.0, green: 240.0/255.0, blue: 240.0/255.0, alpha: 1.0),
+            .font: AppFont.regular.size(12.0, familyName: familyFunnelSans)
+        ]
+        
+        // spacing
+        itemAppearance.normal.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: -6)
+        itemAppearance.selected.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: -6)
+        
+        tabBar.standardAppearance = appearance
+        if #available(iOS 15.0, *) {
+            tabBar.scrollEdgeAppearance = appearance
+        }
+        
+        // extra safety (UIKit sometimes re-adds blur)
+        tabBar.isTranslucent = true
+        tabBar.backgroundImage = UIImage()
+        tabBar.shadowImage = UIImage()
+    }
+
+    // MARK: Tab Selection
+    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+        customTabBar.updateIndicatorPosition(index: selectedIndex)
+
+        if let isGuest = isForGeustDashboard,
+           isGuest,
+           selectedIndex != 0 {
+//            if appUserDefaults.clearUserDefault() {
+//                appSceneDelegate?.goToMainView()
+//            }
+        } else {
+            
+        }
+    }
+
+    // MARK: Reload
+    @objc private func reloadTabFlow(_ notification: Notification) {
+        if let shouldReload = notification.object as? Bool {
+            isForGeustDashboard = shouldReload
+            checkPackageAndLoadTabs() // 🔥 important
+        }
+    }
+}
+
+final class CustomTabBar: UITabBar {
+
+    private let bgImageView = UIImageView()
+    private let indicatorDot = UIView()
+    private let verticalOffset: CGFloat = 5   // change -5, -10, -15 for more top space
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupUI()
+    }
+    
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        var newSize = super.sizeThatFits(size)
+
+        let safeBottom = window?.safeAreaInsets.bottom ?? 0
+        newSize.height = 65 + safeBottom   // ← adjust 70 → 75 → 80 as needed
+    
+        return newSize
+    }
+
+    private func setupUI() {
+        backgroundImage = UIImage()
+        shadowImage = UIImage()
+        backgroundColor = .clear
+        isTranslucent = true
+        
+        bgImageView.backgroundColor = .clear
+        bgImageView.image = UIImage(named: "bottomTabBar")
+        bgImageView.contentMode = .scaleToFill
+        addSubview(bgImageView)
+        sendSubviewToBack(bgImageView)
+
+        indicatorDot.backgroundColor = UIColor(red: 224/255, green: 254/255, blue: 8/255, alpha: 1)
+        indicatorDot.layer.cornerRadius = 3
+        indicatorDot.frame.size = CGSize(width: 6, height: 6)
+        addSubview(indicatorDot)
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        bgImageView.frame = bounds
+
+        // Move tab bar buttons upward
+        let tabButtons = subviews
+            .filter { String(describing: type(of: $0)) == "UITabBarButton" }
+
+        for button in tabButtons {
+            var frame = button.frame
+            frame.origin.y += verticalOffset
+            button.frame = frame
+        }
+
+        updateIndicatorPosition()
+    }
+
+    func updateIndicatorPosition(index: Int? = nil) {
+
+        guard let items = items,
+              let selectedItem = selectedItem,
+              let selectedIndex = items.firstIndex(of: selectedItem)
+        else { return }
+
+        let indexToUse = index ?? selectedIndex
+
+        // Get tab bar buttons
+        let tabButtons = subviews
+            .filter { String(describing: type(of: $0)) == "UITabBarButton" }
+            .sorted { $0.frame.minX < $1.frame.minX }
+
+        guard indexToUse < tabButtons.count else { return }
+
+        let selectedButton = tabButtons[indexToUse]
+
+        // Find title label inside selected button
+        if let titleLabel = selectedButton.subviews.first(where: { $0 is UILabel }) {
+
+            let labelFrame = titleLabel.convert(titleLabel.bounds, to: self)
+
+            // Dot just left of title
+            indicatorDot.center = CGPoint(
+                x: labelFrame.minX - 8,
+                y: labelFrame.midY
+            )
+        }
+    }
 }
 
 extension CGFloat {

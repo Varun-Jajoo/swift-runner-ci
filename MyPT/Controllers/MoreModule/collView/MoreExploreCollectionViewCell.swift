@@ -18,7 +18,7 @@ class MoreExploreCollectionViewCell: UICollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
-        self.titleLbl.font = AppFont.semibold.size(10.0, familyName: familyManrope)
+        self.titleLbl.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
     }
 
     

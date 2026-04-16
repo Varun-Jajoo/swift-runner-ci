@@ -47,12 +47,13 @@ class GymDetailsViewController: CommonViewController {
     var mapView: GMSMapView!
     var locationManager: CLLocationManager?
     var inputType:String?
-    var inputStudioId:String?
-    var inputLat:String?
-    var inputLong:String?
+    var inputStudioId: String?
+    var inputLat:Double?
+    var inputLong:Double?
     var studioDetails: StudioDetailsModel?
     var localDatAmenity: [String]? = []
-    
+    var inputParam: DetailsParam?
+    var hasGymPackage: Bool? = false
     var sectionData:[[String:Any]]?
     var gymDetailsFlow:calendarFlow = .defaultFlow
     
@@ -62,11 +63,11 @@ class GymDetailsViewController: CommonViewController {
     @IBOutlet weak var gymBannerCollView: UICollectionView!
     @IBOutlet weak var gymNameLbl: UILabel!
     @IBOutlet weak var pageContrl: CustomPageControl!
-    @IBOutlet weak var distanceBtn: UIButton!
+//    @IBOutlet weak var distanceBtn: UIButton!
 //    @IBOutlet weak var locAddr: UIButton!
-    @IBOutlet weak var locAddrLbl: UILabel!
-    @IBOutlet weak var ratingBtn: UIButton!
-    @IBOutlet weak var categoryCollView: UICollectionView!
+//    @IBOutlet weak var locAddrLbl: UILabel!
+//    @IBOutlet weak var ratingBtn: UIButton!
+//    @IBOutlet weak var categoryCollView: UICollectionView!
     @IBOutlet weak var descLbl: UILabel!
     @IBOutlet weak var gymOffersMBV: UIView!
     @IBOutlet weak var equipmentInsideGymMBV: UIView!
@@ -80,13 +81,13 @@ class GymDetailsViewController: CommonViewController {
     @IBOutlet weak var gymTimeTitleLbl: UILabel!
     @IBOutlet weak var mediaGalleryTitleLbl: UILabel!
     @IBOutlet weak var gymLocTitleLbl: UILabel!
-    @IBOutlet weak var gymLocAddrLbl: UILabel!
+//    @IBOutlet weak var gymLocAddrLbl: UILabel!
     @IBOutlet weak var gymRatingTitleBtn: UIButton!
     @IBOutlet weak var gymOffersCollView: UICollectionView!
     @IBOutlet weak var mediaGalleryCollView: UICollectionView!
     @IBOutlet weak var gymRatingCollView: UICollectionView!
     @IBOutlet weak var equipmentInsideTblView: UITableView!
-    @IBOutlet weak var gymTimeTblView: UITableView!
+//    @IBOutlet weak var gymTimeTblView: UITableView!
     @IBOutlet weak var showAllEquipmentsBtn: UIButton!
     @IBOutlet weak var showAllReviewsBtn: UIButton!
     @IBOutlet weak var bookASlotBtn: UIButton!
@@ -95,8 +96,20 @@ class GymDetailsViewController: CommonViewController {
     @IBOutlet weak var mediaGalleryCollViewHeightConstrnt: NSLayoutConstraint!
     @IBOutlet weak var showLocMapHeightConstrnt: NSLayoutConstraint!
     @IBOutlet weak var gymRatingCollViewHeightConstrnt: NSLayoutConstraint!
-    @IBOutlet weak var gymTimeTblViewHeightConstrnt: NSLayoutConstraint!
+//    @IBOutlet weak var gymTimeTblViewHeightConstrnt: NSLayoutConstraint!
     @IBOutlet weak var showAllEquipmentsBtnHeightConstrnt: NSLayoutConstraint!
+//    @IBOutlet weak var gymTimeCollView: UICollectionView!
+    @IBOutlet weak var lblDistance: UILabel!
+    @IBOutlet weak var lblLandmark: UILabel!
+//    @IBOutlet weak var lblTime: UILabel!
+    @IBOutlet weak var lblRating: UILabel!
+    @IBOutlet weak var lblNumOfRatings: UILabel!
+    @IBOutlet weak var viewMorning: UIView!
+    @IBOutlet weak var lblMorningTime: UILabel!
+    @IBOutlet weak var lblMorning: UILabel!
+    @IBOutlet weak var viewEvening: UIView!
+    @IBOutlet weak var lblEveningTime: UILabel!
+    @IBOutlet weak var lblEvening: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -105,14 +118,14 @@ class GymDetailsViewController: CommonViewController {
         self.showAllEquipmentsBtn.setTitle(nil, for: .normal)
         self.showAllEquipmentsBtnHeightConstrnt.constant = 1.0
         
-        self.gymRatingMBV.isHidden = true
+//        self.gymRatingMBV.isHidden = true
         self.setUpUI()
         self.setUpFont()
         self.setMapShowData()
      
         if let _ = inputLat, let _ = inputLong{
             self.studioDatialsApi()
-        }else{
+        } else {
             self.getLocation()
         }
     }
@@ -128,22 +141,13 @@ class GymDetailsViewController: CommonViewController {
         setNavUI()
     }
     
-    func setNavUI(){
-        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
-        self.setRighMenu(rightImgs: [AppImages.shareGymWorkout], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
+    func setNavUI() {
+        self.setLeftMenu(leftImgs: [AppImages.backArrowWithBg], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
+//        self.setRighMenu(rightImgs: [AppImages.shareGymWorkout], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        // Automatically select the first cell
-        //        let firstIndexPath = IndexPath(item: 0, section: 0)
-        //        DispatchQueue.main.async {
-        //            self.categoryCollView.selectItem(at: firstIndexPath, animated: true, scrollPosition: .top)
-        //            // Optional: perform any additional setup for the selected cell
-        //            self.categoryCollView.delegate?.collectionView?(self.categoryCollView, didSelectItemAt: firstIndexPath)
-        //            self.view.layoutIfNeeded()
-        //        }
     }
     
     override func rightBtnActn(sender: UIButton) {
@@ -176,15 +180,19 @@ class GymDetailsViewController: CommonViewController {
         self.showAllReviewsBtn.setTitle("SHOW ALL REVIEWS", for: .normal)
         
         self.gymNameLbl.text = studioDetails?.name
-        self.distanceBtn.setTitle(studioDetails?.distance, for: .normal)
-        self.locAddrLbl.text = studioDetails?.address
-        let avgRating = studioDetails?.averageRating ?? "0.0"
-        let noOfRating = studioDetails?.noOfRating ?? "0.0"
+        self.lblDistance.text = studioDetails?.distance
+        self.lblLandmark.text = studioDetails?.address
+        self.lblRating.text = studioDetails?.averageRating ?? "0"
+        self.lblNumOfRatings.text = studioDetails?.noOfRating ?? "0" + " ratings"
+//        self.distanceBtn.setTitle(studioDetails?.distance, for: .normal)
+//        self.locAddrLbl.text = studioDetails?.address
+//        let avgRating = studioDetails?.averageRating ?? "0.0"
+//        let noOfRating = studioDetails?.noOfRating ?? "0.0"
         
-        self.ratingBtn.setTitle( avgRating + "\u{2022}" + noOfRating, for: .normal)
+//        self.ratingBtn.setTitle( avgRating + "\u{2022}" + noOfRating, for: .normal)
         self.descLbl.text = studioDetails?.description
-        self.gymLocAddrLbl.text = studioDetails?.address
-        self.gymRatingTitleBtn.setTitle(avgRating + "\u{2022}" + noOfRating, for: .normal)
+//        self.gymLocAddrLbl.text = studioDetails?.address
+//        self.gymRatingTitleBtn.setTitle(avgRating + "\u{2022}" + noOfRating, for: .normal)
         self.setUpCustomPageControl()
         self.updatePage(to: 0)
         
@@ -195,23 +203,12 @@ class GymDetailsViewController: CommonViewController {
             ["title":"Gallery","img": UIImage(named: "ic_gallery_white") as Any],
             ["title":"Review","img": UIImage(named: "ic_star_white") as Any]
         ]
-        self.categoryCollView.reloadData()
-        
-        //-----------------************
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            if let count =  self.sectionData?.count, count >= 0{
-                self.categoryCollView.selectItem(at: IndexPath(item: 0, section: 0), animated: true, scrollPosition: .top)
-                self.view.layoutIfNeeded()
-            }
-        }
-        
         //------------------**********
         self.descLbl.appendReadmore(after: studioDetails?.description ?? "", trailingContent: .readmore)
-        
         self.descLbl.addReadMoreTapGesture(target: self, action: #selector(handleReadMoreTap(_:)))
     }
     
-    //MARK: ------------------FOR MAKING EXPANDABLE STRING OF UILABEL
+    // MARK: ------------------FOR MAKING EXPANDABLE STRING OF UILABEL
     @objc private func handleReadMoreTap(_ gesture: UITapGestureRecognizer) {
            let tapLocation = gesture.location(in: self.descLbl)
            guard let tappedIndex = self.descLbl.getTappedTextIndex(tapLocation) else { return }
@@ -229,11 +226,10 @@ class GymDetailsViewController: CommonViewController {
     
     override func updateViewConstraints() {
         super.updateViewConstraints()
-        
         if gymOffersCollView.contentSize.height != 0 {
             if gymOffersCollView.contentSize.height < 300 {
                 self.gymOffersCollViewHeightConstrnt.constant = gymOffersCollView.contentSize.height
-            }else{
+            } else {
                 self.gymOffersCollViewHeightConstrnt.constant = 300
             }
         }
@@ -247,52 +243,61 @@ class GymDetailsViewController: CommonViewController {
 //                equipmentInsideTblViewHeightConstrnt.constant = 300
 //            }
         }
-        
-        if gymTimeTblView.contentSize.height != 0 {
-            if gymTimeTblView.contentSize.height < 250 {
-                gymTimeTblViewHeightConstrnt.constant = gymTimeTblView.contentSize.height
-            }else{
-                gymTimeTblViewHeightConstrnt.constant = 250
-            }
-        }
-        
-        view.layoutIfNeeded()
     }
     
-    private func setUpUI(){
+    private func setUpUI() {
         gymBannerCollView.register(UINib(nibName: "WithMeCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WithMeCollectionViewCell")
         gymOffersCollView.register(UINib(nibName: "MoreExploreCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "MoreExploreCollectionViewCell")
-        categoryCollView.register(UINib(nibName: "WorkoutCategoryCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WorkoutCategoryCollectionViewCell")
+//        categoryCollView.register(UINib(nibName: "WorkoutCategoryCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WorkoutCategoryCollectionViewCell")
         mediaGalleryCollView.register(UINib(nibName: "WithMeCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WithMeCollectionViewCell")
         
         gymRatingCollView.register(UINib(nibName: "RatingsCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "RatingsCollectionViewCell")
         
         equipmentInsideTblView.register(UINib(nibName: "PointsTableViewCell", bundle: nil), forCellReuseIdentifier: "PointsTableViewCell")
-        gymTimeTblView.register(UINib(nibName: "PointsTableViewCell", bundle: nil), forCellReuseIdentifier: "PointsTableViewCell")
+//        gymTimeCollView.register(UINib(nibName: "GymTimeCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "GymTimeCollectionViewCell")
+////        gymTimeTblView.register(UINib(nibName: "PointsTableViewCell", bundle: nil), forCellReuseIdentifier: "PointsTableViewCell")
+//        gymTimeCollView.delegate = self
+//        gymTimeCollView.dataSource = self
         
         DispatchQueue.main.async {
-            self.showAllEquipmentsBtn.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appWhite, cornerRadious: 12.0)
+            self.showAllEquipmentsBtn.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 52/255.0, green: 53/255.0, blue: 52/255.0, alpha: 1), cornerRadious: 12.0)
             self.showAllReviewsBtn.setCornerRadius(borderWidth: 1.0, borderColor: UIColor.appWhite, cornerRadious: 12.0)
             self.bookASlotBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
         }
     }
     
     private func setUpFont(){
-        self.gymNameLbl.font = AppFont.medium.size(22, familyName: familyClashDisplay)
-        self.distanceBtn.titleLabel?.font = AppFont.semibold.size(14, familyName: familyManrope)
-        self.locAddrLbl.font = AppFont.semibold.size(14, familyName: familyManrope)
-        self.ratingBtn.titleLabel?.font = AppFont.semibold.size(12, familyName: familyManrope)
-        self.descLbl.font = AppFont.semibold.size(14, familyName: familyManrope)
-        self.gymOffersTitleLbl.font = AppFont.semibold.size(16, familyName: familyManrope)
-        self.equipmentInsideTitleLbl.font = AppFont.semibold.size(16, familyName: familyManrope)
-        self.gymTimeTitleLbl.font = AppFont.semibold.size(16, familyName: familyManrope)
-        self.mediaGalleryTitleLbl.font = AppFont.semibold.size(16, familyName: familyManrope)
-        self.gymLocTitleLbl.font = AppFont.semibold.size(16, familyName: familyManrope)
-        self.gymLocAddrLbl.font = AppFont.semibold.size(14, familyName: familyManrope)
-        self.gymRatingTitleBtn.titleLabel?.font = AppFont.semibold.size(16, familyName: familyManrope)
-        self.showAllEquipmentsBtn.titleLabel?.font = AppFont.bold.size(16, familyName: familyManrope)
-        self.showAllReviewsBtn.titleLabel?.font = AppFont.bold.size(16, familyName: familyManrope)
-        self.bookASlotBtn.titleLabel?.font = AppFont.semibold.size(16, familyName: familyManrope)
+        self.gymNameLbl.font = AppFont.medium.size(24, familyName: familyClashDisplay)
+//        self.distanceBtn.titleLabel?.font = AppFont.semibold.size(14, familyName: familyManrope)
+//        self.locAddrLbl.font = AppFont.semibold.size(14, familyName: familyManrope)
+//        self.ratingBtn.titleLabel?.font = AppFont.semibold.size(12, familyName: familyManrope)
+        [lblDistance, lblLandmark, lblRating, lblNumOfRatings].forEach({[weak self] in
+            guard self != nil else {
+                return
+            }
+            $0?.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
+        })
+        [viewMorning, viewEvening].forEach({[weak self] in
+            guard self != nil else {
+                return
+            }
+            $0?.setCornerRadius(borderWidth: 0.0, borderColor: nil, cornerRadious: 8)
+        })
+        self.lblMorning.font = AppFont.regular.size(12, familyName: familyFunnelSans)
+        self.lblEvening.font = AppFont.regular.size(12, familyName: familyFunnelSans)
+        self.lblMorningTime.font = AppFont.medium.size(16, familyName: familyClashDisplay)
+        self.lblEveningTime.font = AppFont.medium.size(16, familyName: familyClashDisplay)
+        self.descLbl.font = AppFont.regular.size(14, familyName: familyFunnelSans)
+        self.gymOffersTitleLbl.font = AppFont.regular.size(16, familyName: familyFunnelSans)
+        self.equipmentInsideTitleLbl.font = AppFont.regular.size(16, familyName: familyFunnelSans)
+        self.gymTimeTitleLbl.font = AppFont.regular.size(16, familyName: familyFunnelSans)
+        self.mediaGalleryTitleLbl.font = AppFont.regular.size(16, familyName: familyFunnelSans)
+        self.gymLocTitleLbl.font = AppFont.regular.size(16, familyName: familyFunnelSans)
+//        self.gymLocAddrLbl.font = AppFont.semibold.size(14, familyName: familyFunnelSans)
+        self.gymRatingTitleBtn.titleLabel?.font = AppFont.regular.size(16, familyName: familyFunnelSans)
+        self.showAllEquipmentsBtn.titleLabel?.font = AppFont.medium.size(14, familyName: familyFunnelSans)
+        self.showAllReviewsBtn.titleLabel?.font = AppFont.bold.size(16, familyName: familyFunnelSans)
+        self.bookASlotBtn.titleLabel?.font = AppFont.semibold.size(16, familyName: familyFunnelSans)
     }
     
     //MARK: --------------SETUP page controll
@@ -335,38 +340,51 @@ class GymDetailsViewController: CommonViewController {
     }
     
     @IBAction func bookSlotBtnActn(_ sender: Any) {
-        print("book slot btn actn.........")
-        switch gymDetailsFlow {
-            
-        case .withTrainerMembership , .gymMembership:
-            print("gym with membership")
-            let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
-            vc.isFromHome = false
-            vc.studioId = self.inputStudioId
-            vc.inputLat = self.inputLat
-            vc.inputLong = self.inputLong
+        if gymDetailsFlow == .withoutTrainerMembership {
+            let vc: PackagesVC = PackagesVC.instantiate(appStoryboard: .purchase)
+            vc.studioIdStr = self.inputParam?.studio_id
             vc.inputType = self.inputType
-            //--------------Flow for membership
-            vc.flowSlot = gymDetailsFlow
-            self.navigationController?.pushViewController(vc, animated: true)
-            
-        case .withoutTrainerMembership:
-            print("gym without membership")
-            let vc:ChooseSessionViewController = ChooseSessionViewController.instantiate(appStoryboard: .booking)
-            vc.validityMembershipParam = (self.inputStudioId,"1")
-            vc.flowSession = .validityMembership
-            self.navigationController?.pushViewController(vc, animated: true)
-            
-        case .bookTrainerHomeWorkout, .bookTrainerGymWorkout , .createPackage , .defaultFlow:
-            let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
-            vc.flowSlot = gymDetailsFlow
-            vc.isFromHome = false
-            vc.studioId = self.inputStudioId
-            vc.inputLat = self.inputLat
-            vc.inputLong = self.inputLong
-            vc.inputType = self.inputType
-            self.navigationController?.pushViewController(vc, animated: true)
+            vc.package_type = "4" // -> Gym membership
+            var inputData = self.inputParam
+            inputData?.package_type = "4"
+            vc.inputParam = inputData
+            vc.flowGymwork = gymDetailsFlow
+            self.navigationController?.pushViewController(vc, animated: false)
+        } else {
+            if inputParam?.isFreeAssessmentSelected ?? false { // Only for Free Assessment flow
+                let vc: TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
+                vc.flowSlot = .bookTrainerHomeWorkout
+                vc.isFromHome = false
+                vc.inputType = "gym"
+                vc.inputLat = self.inputLat
+                vc.inputLong = self.inputLong
+                vc.studioId = self.inputParam?.studio_id
+                vc.inputParam = self.inputParam
+                navigationController?.pushViewController(vc, animated: true)
+            } else {
+                if hasGymPackage ?? false {
+                    let vc: ChoosePrimaryTrainerVC = ChoosePrimaryTrainerVC.instantiate(appStoryboard: .purchase)
+                    //                vc.packageType = packageType
+                    vc.inputType = "gym"
+                    vc.inputLat = self.inputLat
+                    vc.inputLong = self.inputLong
+                    vc.inputParam = self.inputParam
+                    self.navigationController?.pushViewController(vc, animated: true)
+                } else {
+                    let vc: CreatePackageViewViewController = CreatePackageViewViewController.instantiate(appStoryboard: .booking)
+                    //        let getIndx = self.studiosData?.firstIndex(where: {
+                    //            $0.id == Int(sender.accessibilityHint ?? "0")
+                    //        })
+                    vc.inputType = "gym"
+                    vc.inputLat = self.inputLat
+                    vc.inputLong = self.inputLong
+                    vc.inputParam = self.inputParam
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
+            }
         }
+        
+        print("book slot btn actn.........")
     }
     
     private func setMapShowData(){
@@ -511,8 +529,8 @@ class GymDetailsViewController: CommonViewController {
             appUserDefaults.setLatLong(value: "\(location?.coordinate.latitude ?? 0),\(location?.coordinate.longitude ?? 0)")
             appUserDefaults.setCurrentAddr(value: addressPart.0)
             
-            self.inputLat = "\(location?.coordinate.latitude ?? 0)"
-            self.inputLong = "\(location?.coordinate.longitude ?? 0)"
+            self.inputLat = location?.coordinate.latitude ?? 0.0
+            self.inputLong = location?.coordinate.longitude ?? 0.0
             
             self.studioDatialsApi()
         }
@@ -526,26 +544,27 @@ extension GymDetailsViewController: UICollectionViewDataSource, UICollectionView
         
         if collectionView == gymBannerCollView {
             
-//            return collectionView.numberOfRows(count: studioDetails?.profile?.count ?? 0, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100, height: 100)), messageImageHeight: 80, fromCenter: -10, fromTop: nil)
+            //            return collectionView.numberOfRows(count: studioDetails?.profile?.count ?? 0, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100, height: 100)), messageImageHeight: 80, fromCenter: -10, fromTop: nil)
             
             return collectionView.numberOfRows(count: studioDetails?.profile?.count ?? 0, title: AppAlertStrings.no_results_found, message: nil, messageImage: nil, messageImageHeight: 80, fromCenter: -10, fromTop: nil)
-        }else if collectionView == categoryCollView {
-            
-            return self.sectionData?.count ?? 0
-        }else if collectionView == gymRatingCollView{
+            //        }else if collectionView == categoryCollView {
+            //
+            //            return self.sectionData?.count ?? 0
+        } else if collectionView == gymRatingCollView{
             
             return collectionView.numberOfRows(count: studioDetails?.reviews?.count ?? 0, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100, height: 100)), messageImageHeight: 100, fromCenter: nil, fromTop: 2)
-        }
-        else if collectionView == mediaGalleryCollView{
+        } else if collectionView == mediaGalleryCollView{
             
             return collectionView.numberOfRows(count: studioDetails?.gallery?.count ?? 0, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100, height: 100)), messageImageHeight: 100, fromCenter: nil, fromTop: 2)
             
-        }else if collectionView == gymOffersCollView{
+        } else if collectionView == gymOffersCollView{
             
             return collectionView.numberOfRows(count: studioDetails?.facility?.count ?? 0, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100, height: 100)), messageImageHeight: 100, fromCenter: nil , fromTop: 2)
-        }
-        else{
-            return 5
+//        }else if collectionView == gymTimeCollView {
+//            return 2
+//            return collectionView.numberOfRows(count: 2, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult?.resized(to: CGSize(width: 100, height: 100)), messageImageHeight: 100, fromCenter: nil , fromTop: 2)
+        } else {
+            return 0
         }
     }
     
@@ -555,22 +574,21 @@ extension GymDetailsViewController: UICollectionViewDataSource, UICollectionView
             
             cell.centerImgView.isHidden = true
             cell.videoThumbnailImgView.loadImage(urlString: studioDetails?.profile?[indexPath.row], placeholder: UIImage())
+//            cell.videoThumbnailImgView.image = UIImage()
             
             return cell
-        }
-        else if collectionView == categoryCollView{
-            let categoryCell:WorkoutCategoryCollectionViewCell = categoryCollView.dequeueReusableCell(withReuseIdentifier: "WorkoutCategoryCollectionViewCell", for: indexPath) as! WorkoutCategoryCollectionViewCell
-            
-            DispatchQueue.main.async {
-                categoryCell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: categoryCell.cellMBV.frame.size.height/2.0)
-            }
-            
-            categoryCell.categoryTitleLbl.text = sectionData?[indexPath.row]["title"] as? String
-            categoryCell.categoryImgView.image = sectionData?[indexPath.row]["img"] as? UIImage
-            
-            return categoryCell
-        }
-        else if collectionView == gymOffersCollView{
+//        } else if collectionView == categoryCollView{
+//            let categoryCell:WorkoutCategoryCollectionViewCell = categoryCollView.dequeueReusableCell(withReuseIdentifier: "WorkoutCategoryCollectionViewCell", for: indexPath) as! WorkoutCategoryCollectionViewCell
+//
+//            DispatchQueue.main.async {
+//                categoryCell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: UIColor.appBorder, cornerRadious: categoryCell.cellMBV.frame.size.height/2.0)
+//            }
+//
+//            categoryCell.categoryTitleLbl.text = sectionData?[indexPath.row]["title"] as? String
+//            categoryCell.categoryImgView.image = sectionData?[indexPath.row]["img"] as? UIImage
+//
+//            return categoryCell
+        } else if collectionView == gymOffersCollView{
             let offersCell:MoreExploreCollectionViewCell = gymOffersCollView.dequeueReusableCell(withReuseIdentifier: "MoreExploreCollectionViewCell", for: indexPath) as! MoreExploreCollectionViewCell
             
             DispatchQueue.main.async {
@@ -582,16 +600,14 @@ extension GymDetailsViewController: UICollectionViewDataSource, UICollectionView
             
             return offersCell
             
-        }
-        else if collectionView == gymRatingCollView{
+        } else if collectionView == gymRatingCollView{
             let ratingCell:RatingsCollectionViewCell = gymRatingCollView.dequeueReusableCell(withReuseIdentifier: "RatingsCollectionViewCell", for: indexPath) as! RatingsCollectionViewCell
             
             ratingCell.userImgView.loadImage(urlString: studioDetails?.reviews?[indexPath.row].image, placeholder: UIImage())
             ratingCell.userNameLbl.text = studioDetails?.reviews?[indexPath.row].name
             //            ratingCell.reviewMsgLbl.text = studioDetails?.reviews?[indexPath.row].rating
             return ratingCell
-        }
-        else if collectionView == mediaGalleryCollView{
+        } else if collectionView == mediaGalleryCollView {
             let mediaCell:WithMeCollectionViewCell = mediaGalleryCollView.dequeueReusableCell(withReuseIdentifier: "WithMeCollectionViewCell", for: indexPath) as! WithMeCollectionViewCell
             
             if let getUrl = URL(string: studioDetails?.gallery?[indexPath.row].mediaPath ?? "") {
@@ -601,56 +617,62 @@ extension GymDetailsViewController: UICollectionViewDataSource, UICollectionView
                     mediaCell.centerImgView.image = UIImage(named: "ic_play_white")
                     //ic_thumbnailVideo
                 })
-            } else{
+            } else {
                 mediaCell.centerImgView.isHidden = true
             }
             
             return mediaCell
-        }
-        
-        
-        else{
+//        } else if collectionView == gymTimeCollView {
+//            let mediaCell: WithMeCollectionViewCell = mediaGalleryCollView.dequeueReusableCell(withReuseIdentifier: "WithMeCollectionViewCell", for: indexPath) as! WithMeCollectionViewCell
+//            
+//            if let getUrl = URL(string: studioDetails?.gallery?[indexPath.row].mediaPath ?? "") {
+//                getThumbnailImageFromVideoUrl(url: getUrl, completion: { (thumbNailImage) in
+//                    mediaCell.videoThumbnailImgView.image = thumbNailImage
+//                    mediaCell.centerImgView.isHidden = false
+//                    mediaCell.centerImgView.image = UIImage(named: "ic_play_white")
+//                    //ic_thumbnailVideo
+//                })
+//            } else {
+//                mediaCell.centerImgView.isHidden = true
+//            }
+//            
+//            return mediaCell
+        } else {
             return UICollectionViewCell()
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
-        if collectionView == categoryCollView {
-            if (sectionData?[indexPath.row]["title"] as? String)?.uppercased() == "About The Gym".uppercased() {
-                scrollToView(self.descLbl)
-            }else  if (sectionData?[indexPath.row]["title"] as? String)?.uppercased() == "Gym Features".uppercased() {
-                scrollToView(self.gymOffersCollView)
-            }else  if (sectionData?[indexPath.row]["title"] as? String)?.uppercased() == "Equipment".uppercased() {
-                scrollToView(self.equipmentInsideTblView)
-            }else  if (sectionData?[indexPath.row]["title"] as? String)?.uppercased() == "Gallery".uppercased() {
-                scrollToView(self.mediaGalleryCollView)
-            }
-            else  if (sectionData?[indexPath.row]["title"] as? String)?.uppercased() == "Review".uppercased() {
-                scrollToView(self.gymRatingCollView)
-            }
-        }
-        else if collectionView == mediaGalleryCollView{
+//        if collectionView == categoryCollView {
+//            if (sectionData?[indexPath.row]["title"] as? String)?.uppercased() == "About The Gym".uppercased() {
+//                scrollToView(self.descLbl)
+//            }else  if (sectionData?[indexPath.row]["title"] as? String)?.uppercased() == "Gym Features".uppercased() {
+//                scrollToView(self.gymOffersCollView)
+//            }else  if (sectionData?[indexPath.row]["title"] as? String)?.uppercased() == "Equipment".uppercased() {
+//                scrollToView(self.equipmentInsideTblView)
+//            }else  if (sectionData?[indexPath.row]["title"] as? String)?.uppercased() == "Gallery".uppercased() {
+//                scrollToView(self.mediaGalleryCollView)
+//            }
+//            else  if (sectionData?[indexPath.row]["title"] as? String)?.uppercased() == "Review".uppercased() {
+//                scrollToView(self.gymRatingCollView)
+//            }
+//        }
+//        else
+        if collectionView == mediaGalleryCollView{
             self.videoUrl = studioDetails?.gallery?[indexPath.row].mediaPath  //detailsModel?.galleries?[indexPath.row].mediaPath
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if collectionView == gymOffersCollView{
-            return CGSize(width: collectionView.frame.width*0.22, height: collectionView.frame.width*0.3)
-            
-        }
-        else if collectionView == mediaGalleryCollView{
-            return CGSize(width: collectionView.frame.width*0.45, height: collectionView.frame.height)
-            
-        }
-        else if collectionView == gymRatingCollView{
-            return CGSize(width: collectionView.frame.width*0.78, height: collectionView.frame.height)
-            
-        }
-        else{
+            return CGSize(width: collectionView.frame.width * 0.22, height: collectionView.frame.width * 0.3)
+        } else if collectionView == mediaGalleryCollView{
+            return CGSize(width: collectionView.frame.width * 0.45, height: collectionView.frame.height)
+        } else if collectionView == gymRatingCollView{
+            return CGSize(width: collectionView.frame.width * 0.78, height: collectionView.frame.height)
+        } else {
             return CGSize(width: collectionView.frame.width, height: collectionView.frame.height)
-            
         }
     }
     
@@ -667,11 +689,9 @@ extension GymDetailsViewController: UICollectionViewDataSource, UICollectionView
         
         if let indexPath = gymBannerCollView.indexPathForItem(at: centerPoint) {
             print("Currently visible index: \(indexPath.row)")
-            
             self.updatePage(to: indexPath.row)
         }
     }
-    
 }
 
 
@@ -681,8 +701,7 @@ extension GymDetailsViewController: UITableViewDataSource, UITableViewDelegate{
         
         if tableView == equipmentInsideTblView {
             return localDatAmenity?.count ?? 00  //studioDetails?.amenity?.count ?? 0
-        }
-        else{
+        } else {
             return 1
         }
     }
@@ -693,22 +712,23 @@ extension GymDetailsViewController: UITableViewDataSource, UITableViewDelegate{
             equipmentCell.leftImgView.backgroundColor = UIColor.appWhite
             equipmentCell.leftImgView.tintColor = UIColor.appWhite
             equipmentCell.leftImgView.image = nil
-            equipmentCell.widthImgViewConstrnt.constant = 10.0
+            equipmentCell.widthImgViewConstrnt.constant = 5.0
             equipmentCell.titleLbl.text = studioDetails?.amenity?[indexPath.row] as? String
             
             return equipmentCell
         }
-        else{
-            let gymTimeCell:PointsTableViewCell = gymTimeTblView.dequeueReusableCell(withIdentifier: "PointsTableViewCell", for: indexPath) as! PointsTableViewCell
-            
-            gymTimeCell.titleLbl.text = studioDetails?.timing as? String //"Morning 6AM - 13:00 PM \nEvening 16 PM  - 23:00 PM"
-            
-            gymTimeCell.leftImgView.isHidden = true
-            gymTimeCell.leftIgViewTrailingConstrnt.constant = 1.0
-            gymTimeCell.widthImgViewConstrnt.constant = 0.0
-            
-            return gymTimeCell
-        }
+//        else{
+//            let gymTimeCell:PointsTableViewCell = gymTimeTblView.dequeueReusableCell(withIdentifier: "PointsTableViewCell", for: indexPath) as! PointsTableViewCell
+//
+//            gymTimeCell.titleLbl.text = studioDetails?.timing as? String //"Morning 6AM - 13:00 PM \nEvening 16 PM  - 23:00 PM"
+//
+//            gymTimeCell.leftImgView.isHidden = true
+//            gymTimeCell.leftIgViewTrailingConstrnt.constant = 1.0
+//            gymTimeCell.widthImgViewConstrnt.constant = 0.0
+//
+//            return gymTimeCell
+//        }
+        return UITableViewCell()
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
@@ -837,8 +857,8 @@ extension GymDetailsViewController {
     private func studioDatialsApi(){
         let params:[String:String] = [
             "id": self.inputStudioId ?? "",
-            "long": self.inputLong ?? "",
-            "lat": self.inputLat ?? "",
+            "long": "\(self.inputLong ?? 0.0)",
+            "lat": "\(self.inputLat ?? 0.0)"
         ]
         
         TrainerVM.studioDetailsApi(viewController: self, inputParms: params, completion: { [weak self] getResultData in
@@ -851,7 +871,8 @@ extension GymDetailsViewController {
             self.gymBannerCollView.reloadData()
             self.gymOffersCollView.reloadData()
 //            self.equipmentInsideTblView.reloadData()
-            self.gymTimeTblView.reloadData()
+//            self.gymTimeTblView.reloadData()
+//            self.gymTimeCollView.reloadData()
             self.gymRatingCollView.reloadData()
             self.mediaGalleryCollView.reloadData()
             

@@ -333,7 +333,7 @@ class ProfileEditViewController: CommonViewController {
         popupVC.cityData?.removeAll()
         popupVC.cityData?.append(contentsOf: self.getAlltCityData?.cities ?? [])
         
-        popupVC.sentBackData = { [weak self] getCityName , getId, getCountryName, getCountryId in
+        popupVC.sentBackData = { [weak self] getCityName , getId, getCountryName, getCountryId, emiratesName, emiratesId in
             guard let self = self else { return  }
             print("name", getCityName as Any, "id", getId as Any)
             self.cityTxtField.text = getCityName
@@ -382,7 +382,7 @@ class ProfileEditViewController: CommonViewController {
         
         popupVC.cityData?.append(contentsOf: citiyModel)
         
-        popupVC.sentBackData = { [weak self] getCityName , getId, getCountryName, getCountryId in
+        popupVC.sentBackData = { [weak self] getCityName , getId, getCountryName, getCountryId, _, _ in
             guard let self = self else { return  }
             print("name", getCityName as Any, "id", getId as Any)
             self.genderTxtField.text = getCityName

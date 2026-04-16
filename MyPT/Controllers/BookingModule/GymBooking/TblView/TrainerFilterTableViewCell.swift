@@ -26,6 +26,13 @@ class TrainerFilterTableViewCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        cellMBV.removeGradient()
+        removeLeftBorder(named: "left_border")
+        titleLbl.textColor = UIColor.appWhite
+    }
+    
     func addLeftBorder(borderColor: UIColor? = UIColor.clear, cornerRadius: CGFloat = 2.5, borderWidth: CGFloat = 5.0) {
         /*
         let leftBorder = CALayer()

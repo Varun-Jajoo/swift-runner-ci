@@ -336,10 +336,9 @@ class BookingDetailsViewController: CommonViewController {
             
             if self.acceptBtn.accessibilityHint == AppStrings.find_Trainers {
                 print("find Trainers btn clicked..")
-                let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
+                let vc: CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
                 self.navigationController?.pushViewController(vc, animated: false)
-                
-            }else{
+            } else {
                 self.bookingAcceptReject(inputIdStr: self.bookingIdStr, inputType: 1)
                 
                 /*
@@ -459,16 +458,16 @@ class BookingDetailsViewController: CommonViewController {
                                 vc.modalPresentationStyle = .overFullScreen
                                 vc.costAmt =  Double(components.first ?? "0.0")
                                 
-                                vc.paymentSuccess = {[weak self] (getStatus, getTransactionId) in
-                                    guard let self = self, let getTransactionId = getTransactionId  else { return  }
-                                    inputBookSlotParams?.transaction_id = getTransactionId
-                                    inputBookSlotParams?.price = pricePackage
-                                    inputBookSlotParams?.payment_type = paymetMethod
-                                   
-                                    print("booking Confirm Params: ",inputBookSlotParams?.getParams() ?? [:])
-                                    
-                                    self.bookSlot(inputParam: inputBookSlotParams?.getParams() ?? [:])
-                                }
+//                                vc.paymentSuccess = {[weak self] (getStatus, getTransactionId) in
+//                                    guard let self = self, let getTransactionId = getTransactionId  else { return  }
+//                                    inputBookSlotParams?.transaction_id = getTransactionId
+//                                    inputBookSlotParams?.price = pricePackage
+//                                    inputBookSlotParams?.payment_type = paymetMethod
+//                                   
+//                                    print("booking Confirm Params: ",inputBookSlotParams?.getParams() ?? [:])
+//                                    
+//                                    self.bookSlot(inputParam: inputBookSlotParams?.getParams() ?? [:])
+//                                }
                                 self.navigationController?.present(vc, animated: true)
                             }
                         }
@@ -537,13 +536,14 @@ class BookingDetailsViewController: CommonViewController {
         self.trainingLocLbl.text = bookingDetailsData?.bookingDetail?.location?.value
         self.trainingDateLbl.text = bookingDetailsData?.bookingDetail?.trainingDate?.value
         
-        self.bookingQRBtn.loadImage(urlString: bookingDetailsData?.bookingDetail?.qr?.value, placeholder: nil, imageSize: CGSize(width: 25.0, height: 25.0))
-        self.bookingQRBtn.setTitle("  " + AppStrings.booking_QR_code, for: .normal)
+//        self.bookingQRBtn.loadImage(urlString: bookingDetailsData?.bookingDetail?.qr?.value, placeholder: nil, imageSize: CGSize(width: 25.0, height: 25.0))
+//        self.bookingQRBtn.setTitle("  " + AppStrings.booking_QR_code, for: .normal)
+        bookingQRBtn.isUserInteractionEnabled = false
+        self.bookingQRBtn.setTitle("Session OTP: " + (bookingDetailsData?.bookingDetail?.otp?.value ?? ""), for: .normal)
     }
     
     //MARK: ------------INPUT DATA SETUP
     private func setInputData(){
-               
         switch detailsFlow {
         case .reschedule:
             print("reschedule flow")

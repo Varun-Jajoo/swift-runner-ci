@@ -153,4 +153,83 @@ class DashboardVM {
 //        })
 //    }
     
+    
+    class func getHomePagePlansApi(type: String,
+                           isShowLoader: Bool = true,
+                           completion: @escaping(_ resultData: UserPlanBaseModel?) -> Void) {
+        
+        let queryParams: [String: String] = [
+            "type": type
+        ]
+        
+        NetworkManager.shared.genericAPICall(
+            serviceEndPoint: .get_plans,
+            method: .get,
+            queries: queryParams,
+            parameters: nil,
+            isShowLoading: false,
+            isShowLoadingWithoutMsg: true
+        ) { (getResponse, error) in
+            do {
+                if let responseData = getResponse {
+                    let result = try JSONDecoder().decode(UserPlanBaseModel.self, from: responseData)
+                    completion(result)
+                }
+            } catch {
+                print(error)
+                completion(nil)
+            }
+        }
+    }
+    
+    
+//    class func getSubscriptionSlotsApi(isShowLoader:Bool = true, completion: @escaping(_ resultData:SubscriptionSlotModel?) -> Void){
+//
+//        NetworkManager.shared.genericAPICall(serviceEndPoint: .getSubscriptionSlots, method: .get , queries: nil, parameters:  nil, isShowLoading: isShowLoader, completion: {  ( getResponce, error) in
+//            do{
+//                print(getResponce as Any)
+//                if let responceData = getResponce {
+//                    let getResult = try JSONDecoder().decode(SubscriptionSlotModel.self, from: responceData)
+//                    if (getResult.status == true)  {
+//                        completion(getResult)
+//                    }
+//                    else{
+//                        completion(getResult)
+//                    }
+//                }
+//            }catch {
+//                print(error)
+//            }
+//        })
+//    }
+    
+    class func getSubscriptionSlotsApi(
+        date: String,
+        isShowLoader: Bool = true,
+        completion: @escaping (_ resultData: SubscriptionSlotModel?) -> Void
+    ) {
+        
+        let query: [String: String] = ["date": date]
+        
+        NetworkManager.shared.genericAPICall(
+            serviceEndPoint: .getSubscriptionSlots,
+            method: .get,
+            queries: query,
+            parameters: nil,
+            isShowLoading: false,
+            isShowLoadingWithoutMsg: true
+        ) { (getResponse, error) in
+            
+            do {
+                if let responseData = getResponse {
+                    let getResult = try JSONDecoder().decode(SubscriptionSlotModel.self, from: responseData)
+                    completion(getResult)
+                }
+            } catch {
+                print(error)
+            }
+        }
+    }
+
+
 }

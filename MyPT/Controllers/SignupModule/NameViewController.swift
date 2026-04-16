@@ -198,22 +198,6 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
             }
         }
     
-//    func setupContinueButtonIcon(isEnabled: Bool) {
-//        let arrowImage = UIImage(named: isEnabled ? "blackRightArrow" : "whiteRightArrow")?
-//            .withRenderingMode(.alwaysOriginal)
-//        
-//        continueBtn.setImage(arrowImage, for: .normal)
-//        
-//        // Force image on right side
-//        continueBtn.semanticContentAttribute = .forceRightToLeft
-//        
-//        // Space between text and image
-//        continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -12)
-//        continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 12)
-//        
-//        continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
-//    }
-    
     @IBAction func continueBtnActn(_ sender: Any) {
         print("Continiue btn clicked..")
         self.view.endEditing(true)

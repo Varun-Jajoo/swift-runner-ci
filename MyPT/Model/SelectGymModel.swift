@@ -18,10 +18,12 @@ struct GymTrainerBaseModel: Codable {
 struct GymTrainerDataModel: Codable {
     var tags: [TagModel]?
     var trainers: [GymTrainerModel]?
+    var trainer: GymTrainerModel?
     var type, studioID: String?
+    var studios: [StudioModel]?
 
     enum CodingKeys: String, CodingKey {
-        case tags, trainers, type
+        case tags, trainers, type, studios, trainer
         case studioID = "studio_id"
     }
 }
@@ -33,9 +35,10 @@ struct GymTrainerModel: Codable {
     var slot: String?
     var isVerified, isfull: Bool?
     var profile: String?
-    var averageRating: Int?
-    var noOfRating: String?
+    var averageRating: FlexibleValue?
+    var noOfRating, trainWithMe: String?
     var tags: [TrainerTagModel]?
+    var is_group, isPackage:Bool?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -43,7 +46,20 @@ struct GymTrainerModel: Codable {
         case isfull = "is_full"
         case name, location, distance, slot
         case isVerified = "is_verified"
-        case profile, averageRating, noOfRating, tags
+        case trainWithMe = "train_with_me"
+        case isPackage = "is_package"
+        case profile, averageRating, noOfRating, tags, is_group
+    }
+}
+
+struct StudioModel: Codable {
+    var id: Int?
+    var address, distance, image, name: String?
+    var isSelected: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case id, isSelected
+        case address, distance, image, name
     }
 }
 

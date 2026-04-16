@@ -33,8 +33,7 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     private var valueTextFieldCenterYConstraint: NSLayoutConstraint!
     private var textFieldAboveButtonConstraint: NSLayoutConstraint!
     var isFeetSelected = true
-    private let haptic = UISelectionFeedbackGenerator()
-    private var lastHapticValue: Int?
+    private var lastHapticValue: Int = -1
     
     //MARK: -------------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
@@ -66,7 +65,6 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         btnFeet.setTitleColor(.black, for: .normal)
         //        setupUI()
         setupValueTextField()
-        haptic.prepare()
         
         
 //        setUpSegmet()
@@ -136,8 +134,12 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     }
     
     override func rightBtnActn(sender: UIButton) {
-        appUserDefaults.setRegistrationSkip(value: true)
-        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
+        skipProfileApi(completion: { data in
+            appUserDefaults.setRegistrationSkip(value: true)
+            appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
+        })
+//        appUserDefaults.setRegistrationSkip(value: true)
+//        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
     }
     
     //MARK: ---------- SET UI
@@ -335,14 +337,6 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let centerOffset = scrollView.contentOffset.y + scrollView.bounds.height / 2
         let value = Int(round(centerOffset / rulerView.lineSpacing))
-        
-        // ✅ HAPTIC ONLY WHEN VALUE CHANGES
-            if lastHapticValue != value {
-                haptic.selectionChanged()
-                haptic.prepare()
-                lastHapticValue = value
-            }
-        
         valueLabel.text = "\(rulerView.displayText(for: value))"
         self.selectedHeight = valueLabel.text
         print(valueLabel.text)
@@ -350,6 +344,11 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         currentIndex = value
         let centerY = scrollView.contentOffset.y + scrollView.bounds.height / 2
         rulerView.indicatorY = centerY
+        // 🔥 HAPTIC WHEN VALUE CHANGES
+           if lastHapticValue != value {
+               TapticEngine.selection.feedback()
+               lastHapticValue = value
+           }
     }
     
     func scrollViewWillEndDragging(_ scrollView: UIScrollView,
@@ -394,6 +393,7 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     }
     
     @IBAction func heightType(_ sender: UIButton) {
+        TapticEngine.selection.feedback()
         let switchingToFeet = sender.tag == 0
                 // UI
                 isFeetSelected = switchingToFeet
@@ -696,6 +696,7 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
                 rulerView.scrollToCentimeter(value - 1, scrollView: scrollView)
             }
             valueTextField.isUserInteractionEnabled = false
+            TapticEngine.selection.feedback()
             setScreenUI(showSlider: true)
         }
         
@@ -759,5 +760,25 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         } else {
             AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.select_Height)
         }
+    }
+    
+    private func skipProfileApi(completion: @escaping (PaymentResponse) -> Void) {
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .skipProfile, method: .get, queries: nil, parameters: nil, isShowLoading: false, isShowLoadingWithoutMsg: true, completion: { (getResponce, error) in
+            do {
+                print(getResponce as Any)
+                if let responceData = getResponce {
+                    
+                    let getResult = try JSONDecoder().decode(PaymentResponse.self, from: responceData)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    } else {
+                        //                        let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+                        //                        AlertHelper.shared.alertMesssage(view: self, title: "", message: errorMsg ?? "")
+                    }
+                }
+            } catch {
+                print(error)
+            }
+        })
     }
 }

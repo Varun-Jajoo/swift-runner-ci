@@ -13,13 +13,13 @@ class  BookingVM {
     class func getBookingApi(inputType: String?, inputDate: String?, inputSessionType: String?, inputLocation: String?, isShowLoader:Bool = true, completion: @escaping(_ resultData:BookingBaseModel?) -> Void){
         
          let params:[String:String] = [
-            "type": inputType ?? "",                 //type: 0, 1 => completed, 2 => upcoming, 0 => cancel
-            "session_type": inputSessionType ?? "",  //session_type : home , gym
-            "location": inputLocation ?? "",         //location: home ,gym
-            "date": inputDate ?? ""                  //date: 2025-05
+            "type": inputType ?? ""               //type: 0, 1 => completed, 2 => upcoming, 0 => cancel
+//            "session_type": inputSessionType ?? ""  //session_type : home , gym
+//            "location": inputLocation ?? "",         //location: home ,gym
+//            "date": inputDate ?? ""                  //date: 2025-05
          ]
         
-        NetworkManager.shared.genericAPICall(serviceEndPoint: .get_booking, method: .get , queries: params, parameters:  nil, isShowLoading: isShowLoader, completion: {  ( getResponce, error) in
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .get_booking, method: .get , queries: params, parameters:  nil, isShowLoading: false, isShowLoadingWithoutMsg: true, completion: {  ( getResponce, error) in
             do{
                 print(getResponce as Any)
                 if let responceData = getResponce {

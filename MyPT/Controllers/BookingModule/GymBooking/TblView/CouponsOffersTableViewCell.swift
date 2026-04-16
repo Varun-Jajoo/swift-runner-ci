@@ -7,26 +7,39 @@
 
 import UIKit
 
+protocol CouponsOffersTableViewCellDelegate: AnyObject {
+    func didTapApplyCoupon()
+}
+
+
 class CouponsOffersTableViewCell: UITableViewCell {
 
+    weak var delegate: CouponsOffersTableViewCellDelegate?
+    var applyAction: (() -> Void)?
+    
     @IBOutlet weak var cellMBV: UIView!
-    @IBOutlet weak var checkBtn: UIButton!
-    @IBOutlet weak var couponMBV: UIView!
-    @IBOutlet weak var couponLbl: UILabel!
-    @IBOutlet weak var savedLbl: UILabel!
-    @IBOutlet weak var dateLbl: UILabel!
+    @IBOutlet weak var lblCouonName: UILabel!
+    @IBOutlet weak var lblExpireDate: UILabel!
+    @IBOutlet weak var lblSavedAED: UILabel!
+    @IBOutlet weak var btnApply: UIButton!
     
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
-//        checkBtn.addTarget(self, action: #selector(checkBtnActn(sender: )), for: .touchUpInside)
         
         DispatchQueue.main.async {
-            self.couponMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 3.0)
-            self.couponMBV.addDashedBorder(UIColor.txtDarkGray, filledColor: UIColor.clear, withWidth: 1.5, cornerRadius: 3.0, dashPattern: [6,2])
+            self.cellMBV.setCornerRadius(borderWidth: 1, borderColor: UIColor(red: 255/255, green: 255/255, blue: 255/255, alpha: 0.1), cornerRadious: 16)
+            self.lblCouonName.font =  AppFont.regular.size(16, familyName: familyFunnelSans)
+            self.lblExpireDate.font =  AppFont.regular.size(14, familyName: familyFunnelSans)
+            self.lblSavedAED.font =  AppFont.semibold.size(12, familyName: familyFunnelSans)
         }
     }
-
+    
+    
+    @IBAction func onTapApply(_ sender: UIButton) {
+        applyAction?()
+    }
+    
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
@@ -52,5 +65,7 @@ class CouponsOffersTableViewCell: UITableViewCell {
 ////            self.checkBtn.isSelected = false
 ////        }
 //    }
+
     
 }
+

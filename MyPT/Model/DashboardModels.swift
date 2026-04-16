@@ -9,7 +9,7 @@ import Foundation
 
 struct UserPlanBaseModel: Codable {
     var status: Bool?
-    var data:[PlanDetailsModel]?
+    var data: [PlanDetailsModel]?
     var msg:String?
 }
 
@@ -23,9 +23,11 @@ struct PlanDetailsModel: Codable {
     var sessions: FlexibleValue?
     var amount: FlexibleValue?
     var isUpgrade: Bool?
-    var isShow: Bool?
+    var isShow, is_expired, is_date_expired: Bool?
     var renew_new: Bool?
     var msg: FlexibleValue?
+    var end_date: FlexibleValue?
+    var image: String?
 }
 
 

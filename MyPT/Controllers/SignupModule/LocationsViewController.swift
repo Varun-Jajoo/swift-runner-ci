@@ -16,13 +16,13 @@ enum LocationFlow {
     case updateProfile
     case confirmAddAddress
     case defaultLoc
+    case fromReviewPackage
 }
 
 class LocationsViewController: CommonViewController {
     
     //MARK: ----------- VARIABLE
-    var flowLocation:LocationFlow = .defaultLoc
-    
+    var flowLocation: LocationFlow = .defaultLoc
     var mapView: GMSMapView!
     var locationManager: CLLocationManager?
     var showmapCamera: CLLocationCoordinate2D? = nil {
@@ -40,10 +40,14 @@ class LocationsViewController: CommonViewController {
     }
     
     var isFromEditAddress:Bool? = false
-    var getAddressData:AddressDataModel? = AddressDataModel()
+    var getAddressData: AddressDataModel? = AddressDataModel()
     var sendBackAddr: ((String?) -> Void)?
     private var currentAddr: String?
     private var backgroundGradient: CAGradientLayer?
+    var isFreeAssessmentSelected: Bool?
+    var inputType = String()
+    var inputLat: String?
+    var inputLong: String?
     
     //MARK: -------------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
@@ -57,6 +61,7 @@ class LocationsViewController: CommonViewController {
     @IBOutlet weak var viewBottom: UIView!
     @IBOutlet weak var viewBgSearch: UIView!
     @IBOutlet weak var tfSearch: UITextField!
+    @IBOutlet weak var btnCurrentLocation: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,8 +70,7 @@ class LocationsViewController: CommonViewController {
         setMapShowData()
         setupTextFieldSearch()
         setupBackgroundGradient()
-        updateContinueButton(isEnabled: true)
-        setupContinueButtonIcon(isEnabled: true)
+//        setupContinueButtonIcon(isEnabled: true)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -82,7 +86,11 @@ class LocationsViewController: CommonViewController {
         switch flowLocation {
         case .addAddress, .confirmAddAddress:
             print("add Address..")
-            
+            rightSearchBtn.isHidden = true
+            btnCurrentLocation.isHidden = false
+            continueBtn.setTitle(inputType == "home" ? "ADD ADDRESS DETAILS" : "CHECK NEARBY GYMS", for: .normal)
+            updateContinueButton(isEnabled: true, withoutImage: true)
+
         case .editAddress:
             if let lat = getAddressData?.lat, let long = getAddressData?.long {
                 print("from edit: ", lat, long, Double(lat.value ?? "0.0") ?? 0.0, Double(long.value ?? "0.0") ?? 0.0)
@@ -95,12 +103,18 @@ class LocationsViewController: CommonViewController {
             }else{
                 print("New add address...")
             }
+            updateContinueButton(isEnabled: true, withoutImage: false)
         case .homePage:
             print("Home form")
+            updateContinueButton(isEnabled: true, withoutImage: false)
         case .updateProfile:
             print("update Profile")
+            updateContinueButton(isEnabled: true, withoutImage: false)
         case .defaultLoc:
             print("none.....")
+            updateContinueButton(isEnabled: true, withoutImage: false)
+        case .fromReviewPackage:
+            break
         }
     }
     
@@ -112,7 +126,12 @@ class LocationsViewController: CommonViewController {
     func setNavUI() {
         
         switch flowLocation {
-        case .addAddress, .editAddress, .homePage, .updateProfile, .confirmAddAddress:
+        case .addAddress:
+            self.setLeftMenu(leftImgs: [AppImages.backArrowWithBg], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
+            self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
+            self.setProgress(0.3)
+            
+        case .editAddress, .homePage, .updateProfile, .confirmAddAddress:
             
             self.setLeftMenu(leftImgs: [AppImages.backArrowWithBg], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
             //        self.setNavigationTitle(title: AppStrings.select_plan, color: UIColor.black, font: AppFont.Bold.size(22.0))
@@ -128,6 +147,8 @@ class LocationsViewController: CommonViewController {
             //            self.setRighMenu(rightImgs: [nil], setTitle: [AppStrings.skip_Str], setTintColor: .black, setTitleColor: UIColor.appWhite) skipe remove need of client
             
             //        self.setNavigationTitle(title: AppStrings.select_plan, color: UIColor.black, font: AppFont.Bold.size(22.0))
+        case .fromReviewPackage:
+            break
         }
     }
     
@@ -137,12 +158,23 @@ class LocationsViewController: CommonViewController {
         case .addAddress, .editAddress, .homePage, .updateProfile, .confirmAddAddress:
             print("address....")
         case .defaultLoc:
-            appUserDefaults.setRegistrationSkip(value: true)
-            appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
+            skipProfileApi(completion: { data in
+                appUserDefaults.setRegistrationSkip(value: true)
+                appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
+            })
+//            appUserDefaults.setRegistrationSkip(value: true)
+//            appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
             
             //            appSceneDelegate?.goToGuestDashboard()
+        case .fromReviewPackage:
+            break
         }
     }
+    
+    @IBAction func onTapSearchBtnAction(_ sender: UIButton) {
+        searchPlace()
+    }
+    
     
     private func setupBackgroundGradient() {
         // Remove old gradient if any
@@ -162,39 +194,16 @@ class LocationsViewController: CommonViewController {
         backgroundGradient = gradient
     }
     
-//    func updateContinueButton(isEnabled: Bool) {
-//        continueBtn.isEnabled = isEnabled
-//        continueBtn.isUserInteractionEnabled = isEnabled
-//        
-//        UIView.animate(withDuration: 0.2) {
-//            self.setupContinueButtonIcon(isEnabled: isEnabled)
-//            if isEnabled {
-////                self.continueBtn.tintColor = .mainBg   // arrow color
-////                self.continueBtn.backgroundColor = .appWhite
-////                self.continueBtn.setTitleColor(.mainBg, for: .normal)
-//                self.continueBtn.setImage(UIImage(named: "ButtonConfirm"), for: .normal)
-//                self.continueBtn.semanticContentAttribute = .unspecified
-//                self.continueBtn.imageEdgeInsets = .zero
-//                self.continueBtn.titleEdgeInsets = .zero
-//                self.continueBtn.contentEdgeInsets = .zero
-//            } else {
-//                self.continueBtn.tintColor = .appWhite
-//                self.continueBtn.backgroundColor = .appDarkGray
-//                self.continueBtn.setTitleColor(.appWhite, for: .normal)
-//            }
-//        }
-//    }
-    
-    func updateContinueButton(isEnabled: Bool) {
+    func updateContinueButton(isEnabled: Bool, withoutImage: Bool = false) {
             continueBtn.isEnabled = isEnabled
             continueBtn.isUserInteractionEnabled = isEnabled
             
             UIView.animate(withDuration: 0.2) {
-                self.setupContinueButtonIcon(isEnabled: isEnabled)
-                if isEnabled {
-//                    self.continueBtn.tintColor = .mainBg   // arrow color
-//                    self.continueBtn.backgroundColor = .appWhite
-//                    self.continueBtn.setTitleColor(.mainBg, for: .normal)
+                self.setupContinueButtonIcon(isEnabled: isEnabled, withoutImage: withoutImage)
+                if isEnabled && withoutImage {
+                    self.continueBtn.tintColor = .mainBg   // arrow color
+                    self.continueBtn.backgroundColor = .appWhite
+                    self.continueBtn.setTitleColor(.mainBg, for: .normal)
                 } else {
                     self.continueBtn.tintColor = .appWhite
                     self.continueBtn.backgroundColor = .appDarkGray
@@ -203,45 +212,47 @@ class LocationsViewController: CommonViewController {
             }
         }
 
-    func setupContinueButtonIcon(isEnabled: Bool) {
-
+    func setupContinueButtonIcon(isEnabled: Bool, withoutImage: Bool = false) {
+        
+        if !withoutImage {
             if isEnabled {
                 // 🟢 ENABLED → IMAGE ONLY
                 let image = UIImage(named: "ButtonContinue")?
                     .withRenderingMode(.alwaysOriginal)
-
+                
                 continueBtn.setImage(image, for: .normal)
                 continueBtn.setTitle("", for: .normal)
-
+                
                 continueBtn.backgroundColor = .clear
                 continueBtn.tintColor = .clear
-
+                
                 continueBtn.imageEdgeInsets = .zero
                 continueBtn.titleEdgeInsets = .zero
                 continueBtn.contentEdgeInsets = .zero
-
+                
                 continueBtn.semanticContentAttribute = .forceLeftToRight
                 continueBtn.adjustsImageWhenHighlighted = false
                 continueBtn.adjustsImageWhenDisabled = false
-
+                
             } else {
                 // 🔴 DISABLED → TEXT + ARROW
                 continueBtn.setTitle("CONTINUE", for: .normal)
                 continueBtn.setTitleColor(.appWhite, for: .normal)
-
+                
                 let arrowImage = UIImage(named: "whiteRightArrow")?
                     .withRenderingMode(.alwaysOriginal)
                 continueBtn.setImage(arrowImage, for: .normal)
-
+                
                 continueBtn.semanticContentAttribute = .forceRightToLeft
-
+                
                 // spacing between text & arrow
                 continueBtn.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
                 continueBtn.titleEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 8)
-
+                
                 continueBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
             }
         }
+    }
     
     //MARK: ---------- SET UI
     private func setupUI() {
@@ -252,12 +263,14 @@ class LocationsViewController: CommonViewController {
         DispatchQueue.main.async {
             self.viewBgSearch.setCornerRadius(borderWidth: 1, borderColor: .appBorder, cornerRadious: 12.0)
             self.continueBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+            self.btnCurrentLocation.setCornerRadius(borderWidth: 1, borderColor: UIColor(hex: "#5C6901"), cornerRadious: 8.0)
+            self.btnCurrentLocation.backgroundColor = UIColor(hex: "#0B1B06")
             //            self.viewBottom.addGradient(colors: UIColor.appMultiColor(.locationBgGradient), locations: [0,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 1, y: 1), cornerRadius: 0)
         }
     }
     
     //------------------************Font
-    private func setUpFont(){
+    private func setUpFont() {
         self.topTitleLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
         self.mainAddrLbl.font = AppFont.medium.size(18.0, familyName: familyFunnelSans)
         self.subAddrLbl.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
@@ -280,7 +293,7 @@ class LocationsViewController: CommonViewController {
         tfSearch.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
         
         tfSearch.attributedPlaceholder = NSAttributedString(
-            string: " Search for area, street name...",
+            string: inputType != "" ? " Search for your building, street name..." : " Search for area, street name...",
             attributes: [.foregroundColor: UIColor.txtDarkGray]
         )
         
@@ -350,37 +363,129 @@ class LocationsViewController: CommonViewController {
         addMarkers(marker: MarkerModel(latitude: 28.5854355, longitude: 77.3087411, title: title, snippet: self.mainAddrLbl.text, iconImageName: AppImages.Radius))
     }
     
+    private func isLocationInUAE(lat: Double, long: Double, country: String?) -> Bool {
+        // UAE Bounding Box
+        let uaeBounds = (
+            minLat: 22.6,
+            maxLat: 26.1,
+            minLong: 51.5,
+            maxLong: 56.4
+        )
+        
+        let isInBounds = lat >= uaeBounds.minLat &&
+                         lat <= uaeBounds.maxLat &&
+                         long >= uaeBounds.minLong &&
+                         long <= uaeBounds.maxLong
+        
+        // Double check with country name from geocoder
+        let isUAECountry = country?.lowercased().contains("united arab emirates") ?? false
+        
+        return isInBounds && isUAECountry
+    }
+    
+    private func showOutsideUAEError() {
+        let alert = UIAlertController(
+            title: "Location Not Supported",
+            message: "We currently only operate within the UAE. Please select a location inside the UAE.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+            // Optional: map reset karein
+            self.mainAddrLbl.text = ""
+            self.subAddrLbl.text = ""
+            self.getAddressData = AddressDataModel()
+            self.updateContinueButton(isEnabled: false, withoutImage: false)
+        })
+        self.present(alert, animated: true)
+    }
+    
     @IBAction func continueBtnActn(_ sender: Any) {
         print("Continue btn actn...")
         
         switch flowLocation {
         case .addAddress:
-            
             if let getAddressData = getAddressData {
                 print(getAddressData)
-                
-                let vc:BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
-                vc.modalPresentationStyle = .automatic
-                vc.bookingAddressFlow = .addAddress
-                vc.addressData = self.getAddressData
-                vc.navCtrnl = self.navigationController
-                self.present(vc, animated: true)
-                
-            }else{
+//                if isFreeAssessmentSelected ?? false {
+//                    if inputType == "home" { // For Home
+//                        let vc: TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
+//                        vc.flowSlot = .bookTrainerHomeWorkout
+//                        vc.isFromHome = true
+//                        vc.inputType = "home"
+//                        vc.inputLat = Double(self.getAddressData?.lat?.value ?? "0.0")
+//                        vc.inputLong = Double(self.getAddressData?.long?.value ?? "0.0")
+//                        vc.inputParam = DetailsParam(
+//                            type: "home",
+//                            long: self.getAddressData?.long?.value,
+//                            lat: self.getAddressData?.lat?.value,
+//                            addressId: self.getAddressData?.id?.value,
+//                            addressData: self.getAddressData,
+//                            isFreeAssessmentSelected: isFreeAssessmentSelected
+//                        )
+//                        navigationController?.pushViewController(vc, animated: true)
+//                    } else { // For Gym
+//                        let vc: GymWorkoutViewController =
+//                        GymWorkoutViewController.instantiate(appStoryboard: .booking)
+//                        vc.flowGymwork = .bookTrainerGymWorkout
+//                        vc.inputParam = DetailsParam(
+//                            type: "gym",
+//                            long: self.getAddressData?.long?.value ?? "0.0",
+//                            lat: self.getAddressData?.lat?.value ?? "0.0",
+//                            addressId: self.getAddressData?.id?.value,
+//                            addressData: self.getAddressData,
+//                            isFreeAssessmentSelected: isFreeAssessmentSelected
+//                        )
+//                        vc.inputType = "gym"
+//                        vc.inputLat = Double(self.getAddressData?.lat?.value ?? "") ?? 0.0
+//                        vc.inputLong = Double(self.getAddressData?.long?.value ?? "") ?? 0.0
+//                        self.navigationController?.pushViewController(vc, animated: true)
+//                    }
+//                } else {
+                    if inputType == "gym" {
+                        if isFreeAssessmentSelected ?? false {
+                            let vc: GymWorkoutViewController =
+                            GymWorkoutViewController.instantiate(appStoryboard: .booking)
+                            vc.flowGymwork = .bookTrainerGymWorkout
+                            vc.inputParam = DetailsParam(
+                                type: "gym",
+                                long: self.getAddressData?.long?.value ?? "0.0",
+                                lat: self.getAddressData?.lat?.value ?? "0.0",
+                                addressId: self.getAddressData?.id?.value,
+                                addressData: self.getAddressData,
+                                isFreeAssessmentSelected: isFreeAssessmentSelected
+                            )
+                            vc.inputType = "gym"
+                            vc.inputLat = Double(self.getAddressData?.lat?.value ?? "") ?? 0.0
+                            vc.inputLong = Double(self.getAddressData?.long?.value ?? "") ?? 0.0
+                            self.navigationController?.pushViewController(vc, animated: true)
+                        } else {
+                            let vc:GreatNewsVC = GreatNewsVC.instantiate(appStoryboard: .booking)
+                            vc.getAddressData = self.getAddressData
+                            navigationController?.pushViewController(vc, animated: true)
+                        }
+                    } else {
+                        let vc:BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
+                        vc.modalPresentationStyle = .automatic
+                        vc.bookingAddressFlow = .addAddress
+                        vc.isFreeAssessmentSelected = isFreeAssessmentSelected
+                        vc.addressData = self.getAddressData
+                        vc.navCtrnl = self.navigationController
+                        self.present(vc, animated: true)
+                    }
+//                }
+            } else {
                 AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.enter_Location)
             }
         case .editAddress:
             if let getAddressData = getAddressData {
                 print(getAddressData)
-                
                 let vc:BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
                 vc.modalPresentationStyle = .automatic
                 vc.bookingAddressFlow = .editAddress
                 vc.addressData = self.getAddressData
                 vc.navCtrnl = self.navigationController
                 self.present(vc, animated: true)
-                
-            }else{
+            } else {
                 AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.enter_Location)
             }
             
@@ -394,7 +499,6 @@ class LocationsViewController: CommonViewController {
             self.navigationController?.popViewController(animated: true)
             
         case .confirmAddAddress:
-            
             if let getAddressData = getAddressData {
                 print(getAddressData)
                 //                vc.addressData = self.getAddressData
@@ -402,11 +506,8 @@ class LocationsViewController: CommonViewController {
                 vc.addressData = getAddressData
                 self.navigationController?.pushViewController(vc, animated: true)
             }
-            
-            
-            
+
         case .defaultLoc:
-            
             if let mainAddrLbl = self.mainAddrLbl.text , !mainAddrLbl.isEmpty, let subAddrLbl = self.subAddrLbl.text, !subAddrLbl.isEmpty, let lat = showmapCamera?.latitude as? Double, let long = showmapCamera?.longitude as? Double {
                 print(mainAddrLbl, subAddrLbl, lat, long)
                 let fullAddr = mainAddrLbl + " " + subAddrLbl
@@ -426,10 +527,11 @@ class LocationsViewController: CommonViewController {
                         self.navigationController?.pushViewController(vc, animated: true)
                     }
                 })
-                
-            }else{
+            } else {
                 AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.enter_Location)
             }
+        case .fromReviewPackage:
+            break
         }
     }
     
@@ -437,6 +539,19 @@ class LocationsViewController: CommonViewController {
         print("rightSearchBtnActn clicked")
         self.tfSearch.text = nil
         self.startUpdating()
+    }
+    
+    @IBAction func currentLocationAction(_ sender: UIButton) {
+//        startUpdatingLocation()
+        self.locationManager = CLLocationManager()
+        if let locationManager = self.locationManager {
+            locationManager.delegate = self
+            locationManager.requestWhenInUseAuthorization()
+            locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+            locationManager.requestAlwaysAuthorization()
+            locationManager.distanceFilter = 50
+            locationManager.startUpdatingLocation()
+        }
     }
     
     func startUpdating() {
@@ -454,16 +569,39 @@ class LocationsViewController: CommonViewController {
     private func searchPlace() {
         let autocompleteController = GMSAutocompleteViewController()
         autocompleteController.delegate = self
-        present(autocompleteController, animated: true, completion: nil)
+        if flowLocation == .defaultLoc {
+            present(autocompleteController, animated: true, completion: nil)
+        } else {
+            let vc: LocationDetailsVC = LocationDetailsVC.instantiate(appStoryboard: .main)
+            vc.isModalInPresentation = true
+            vc.modalPresentationStyle = .pageSheet
+            if #available(iOS 15.0, *) {
+                if let sheet = vc.sheetPresentationController {
+                    sheet.detents = [.medium(), .large()]
+                    sheet.selectedDetentIdentifier = .medium
+                    sheet.prefersGrabberVisible = true
+                    sheet.preferredCornerRadius = 20
+                }
+            } else {
+                // Fallback on earlier versions
+            }
+            vc.callBackSetLocation = { (location, title , subtitle) in
+                self.addMarkers(marker: MarkerModel(latitude: location.latitude, longitude: location.longitude, title: title, snippet: subtitle, iconImageName: AppImages.Radius))
+                self.mainAddrLbl.text = title
+                self.subAddrLbl.text = subtitle
+                let camera = GMSCameraPosition.camera(withLatitude: location.latitude, longitude: location.longitude, zoom: 10.0)
+                self.mapView?.camera = camera
+            }
+            present(vc, animated: true)
+        }
     }
-    
 }
 
 // MARK: ---------------- Extension for google map delegate
 extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate {
     
     
-    private func startUpdatingLocation() {
+    func startUpdatingLocation() {
         locationManager?.desiredAccuracy = kCLLocationAccuracyBest
         locationManager?.startUpdatingLocation()
     }
@@ -554,7 +692,7 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
     
     //MARK: ------------GET CURRENT ADDRESS
     
-    func getCurrentAddr(location:CLLocation?){
+    func getCurrentAddr(location:CLLocation?) {
         if let getLcation = location {
             let geocoder = GMSGeocoder()
             geocoder.reverseGeocodeCoordinate((CLLocationCoordinate2DMake((getLcation.coordinate.latitude), (getLcation.coordinate.longitude)))) { response, error in
@@ -564,8 +702,6 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
                 } else {
                     if let places = response?.results() {
                         if let place = places.first {
-                            
-                            
                             if let lines = place.lines {
                                 print("GEOCODE: Formatted Address: \(lines)")
                                 
@@ -592,6 +728,22 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
                                 }
                                 
                                 self.subAddrLbl.text = subAddrStr
+                                
+                                // ✅ UAE Validation yahan add karo
+                                let isValid = self.isLocationInUAE(
+                                    lat: getLcation.coordinate.latitude,
+                                    long: getLcation.coordinate.longitude,
+                                    country: places.first?.country
+                                )
+                                
+                                if !isValid {
+                                    DispatchQueue.main.async {
+                                        self.showOutsideUAEError()
+                                    }
+                                    return // aage mat badho
+                                } else {
+                                    self.updateContinueButton(isEnabled: true, withoutImage: false)
+                                }
                                 
                                 //----------------Get Address
                                 
@@ -650,6 +802,26 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
         }
     }
     
+    private func skipProfileApi(completion: @escaping (PaymentResponse) -> Void) {
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .skipProfile, method: .get, queries: nil, parameters: nil, isShowLoading: false, isShowLoadingWithoutMsg: true, completion: { (getResponce, error) in
+            do {
+                print(getResponce as Any)
+                if let responceData = getResponce {
+                    
+                    let getResult = try JSONDecoder().decode(PaymentResponse.self, from: responceData)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    } else {
+                        //                        let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+                        //                        AlertHelper.shared.alertMesssage(view: self, title: "", message: errorMsg ?? "")
+                    }
+                }
+            } catch {
+                print(error)
+            }
+        })
+    }
+    
     //    func getAddressFromLatLon(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
     //        let geocoder = CLGeocoder()
     //        let location = CLLocation(latitude: latitude, longitude: longitude)
@@ -699,7 +871,9 @@ extension LocationsViewController: GMSMapViewDelegate, CLLocationManagerDelegate
 extension LocationsViewController: UITextFieldDelegate {
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        searchPlace()
+        if flowLocation == .defaultLoc {
+            searchPlace()
+        }
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

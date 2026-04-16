@@ -148,7 +148,7 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
     
     func setNavUI(){
         self.setLeftMenu(leftImgs: [AppImages.appLogo], setTitle: [""], setTintColor: .black, setTitleColor: .clear)
-        self.setRighMenu(rightImgs: [AppImages.arrow_right], setTitle: [AppStrings.skip_to_home.uppercased()], setTintColor: .black, setTitleColor: UIColor.appWhite,isRightImg: [true])
+//        self.setRighMenu(rightImgs: [AppImages.arrow_right], setTitle: [AppStrings.skip_to_home.uppercased()], setTintColor: .black, setTitleColor: UIColor.appWhite,isRightImg: [true])
     }
     
     override func rightBtnActn(sender: UIButton) {
@@ -157,7 +157,7 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
     }
     
     //------------------************Font
-    func setUpFont(){
+    func setUpFont() {
         self.topTitleLbl.font = AppFont.medium.size(32.0, familyName: familyClashDisplay)
         self.subTitileLbl.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
         self.mobileNumTxt.font = AppFont.medium.size(18.0, familyName: familyFunnelSans)

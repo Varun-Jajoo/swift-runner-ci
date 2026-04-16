@@ -126,7 +126,7 @@ class SlotDurationViewController: CommonViewController {
         
         self.paymentBtn.setTitle("MAKE PAYMENT", for: .normal)
         
-        if let isPackage = self.slotsData?.isPackage, isPackage{
+        if let isPackage = self.slotsData?.isPackage, isPackage {
             getAmount = "1"
             currencyStr = "PT"
             self.paymentBtn.setTitle("PROCEED TO BOOK", for: .normal)
@@ -461,7 +461,7 @@ class SlotDurationViewController: CommonViewController {
         let vc:CreatePackageViewViewController = CreatePackageViewViewController.instantiate(appStoryboard: .booking)
         vc.createParams = CreatePackageParamsModel(package_type: "", sessions: "", type: inputGetSlotParams?.type, timing: inputGetSlotParams?.timing, trainer_id: inputGetSlotParams?.trainer_id, studio_id: inputGetSlotParams?.studio_id, month: "\(Int(self.getMonth(inputDateStr: selectedDate ?? "").0) ?? 0)", address_id: inputGetSlotParams?.address_id)
         vc.avialCalanderparams = self.avialCalanderparams
-        vc.isFirst = false
+//        vc.isFirst = false
         self.navigationController?.pushViewController(vc, animated: true)
         
     }
@@ -487,45 +487,45 @@ class SlotDurationViewController: CommonViewController {
                 vc.taxesStr = "\(taxesRate)"
                 vc.sessionCost = "\(mainPrice)"
                 
-                vc.paymentSuccess = {[weak self] (getStatus, getTransactionId, paymetMethod) in
-                    guard let self = self else { return  }
-                    
-                    if paymetMethod == "ccavenue" {
-                        if let pricePackage = self.slotsData?.price {
-                            let components = pricePackage.split(separator: " ")
-                            let vc: CCAvenuePaymentViewController = CCAvenuePaymentViewController.instantiate(appStoryboard: .booking)
-                            vc.modalPresentationStyle = .overFullScreen
-                            vc.costAmt =  Double(components.first ?? "0.0")
-                            
-                            vc.paymentSuccess = {[weak self] (getStatus, getTransactionId) in
-                                guard let self = self, let getTransactionId = getTransactionId  else { return  }
-                                inputBookSlotParams?.transaction_id = getTransactionId
-                                inputBookSlotParams?.price = pricePackage
-                                inputBookSlotParams?.payment_type = paymetMethod
-                                
-                                print("Slot booking params: ",inputBookSlotParams?.getParams() ?? [:])
-                                if let slotId = inputBookSlotParams?.slot_id, !slotId.isEmpty {
-                                    self.bookSlot(inputParam: inputBookSlotParams?.getParams() ?? [:])
-                                }else{
-                                    AlertHelper.shared.alertMesssage(view: self, title: "", message: "Please select slot")
-                                }
-                            }
-                            self.navigationController?.present(vc, animated: true)
-                        }
-                    }
-                    else if paymetMethod == "tabby" {
-                        inputBookSlotParams?.transaction_id = getTransactionId
-                        inputBookSlotParams?.price = pricePackage
-                        inputBookSlotParams?.payment_type = paymetMethod
-                        
-                        print("Slot booking params: ",inputBookSlotParams?.getParams() ?? [:])
-                        if let slotId = inputBookSlotParams?.slot_id, !slotId.isEmpty {
-                            self.bookSlot(inputParam: inputBookSlotParams?.getParams() ?? [:])
-                        }else{
-                            AlertHelper.shared.alertMesssage(view: self, title: "", message: "Please select slot")
-                        }
-                    }
-                }
+//                vc.paymentSuccess = {[weak self] (getStatus, getTransactionId, paymetMethod) in
+//                    guard let self = self else { return  }
+//                    
+//                    if paymetMethod == "ccavenue" {
+//                        if let pricePackage = self.slotsData?.price {
+//                            let components = pricePackage.split(separator: " ")
+//                            let vc: CCAvenuePaymentViewController = CCAvenuePaymentViewController.instantiate(appStoryboard: .booking)
+//                            vc.modalPresentationStyle = .overFullScreen
+//                            vc.costAmt =  Double(components.first ?? "0.0")
+//                            
+//                            vc.paymentSuccess = {[weak self] (getStatus, getTransactionId) in
+//                                guard let self = self, let getTransactionId = getTransactionId  else { return  }
+////                                inputBookSlotParams?.transaction_id = getTransactionId
+////                                inputBookSlotParams?.price = pricePackage
+////                                inputBookSlotParams?.payment_type = paymetMethod
+//                                
+//                                print("Slot booking params: ",inputBookSlotParams?.getParams() ?? [:])
+//                                if let slotId = inputBookSlotParams?.slot_id, !slotId.isEmpty {
+//                                    self.bookSlot(inputParam: inputBookSlotParams?.getParams() ?? [:])
+//                                }else{
+//                                    AlertHelper.shared.alertMesssage(view: self, title: "", message: "Please select slot")
+//                                }
+//                            }
+//                            self.navigationController?.present(vc, animated: true)
+//                        }
+//                    }
+//                    else if paymetMethod == "tabby" {
+//                        inputBookSlotParams?.transaction_id = getTransactionId
+//                        inputBookSlotParams?.price = pricePackage
+//                        inputBookSlotParams?.payment_type = paymetMethod
+//                        
+//                        print("Slot booking params: ",inputBookSlotParams?.getParams() ?? [:])
+//                        if let slotId = inputBookSlotParams?.slot_id, !slotId.isEmpty {
+//                            self.bookSlot(inputParam: inputBookSlotParams?.getParams() ?? [:])
+//                        }else{
+//                            AlertHelper.shared.alertMesssage(view: self, title: "", message: "Please select slot")
+//                        }
+//                    }
+//                }
                 self.navigationController?.pushViewController(vc, animated: false)
             }
         }
@@ -872,6 +872,9 @@ struct BookSlotParamsModel {
     var transaction_id: String?
     var payment_type: String?
     var booking_id: String?
+//    var payment_id: Int?
+    var order_ref: String?
+    var status: String?
     
     
     func getParams() -> [String: String] {
@@ -892,6 +895,8 @@ struct BookSlotParamsModel {
         if let transaction_id = transaction_id { dict["transaction_id"] = transaction_id }
         if let payment_type = payment_type { dict["payment_type"] = payment_type }
         if let booking_id = booking_id { dict["booking_id"] = booking_id }
+//        if let payment_id = payment_id { dict["payment_id"] = payment_id }
+        if let order_ref = order_ref { dict["order_ref"] = order_ref }
         
         return dict
     }

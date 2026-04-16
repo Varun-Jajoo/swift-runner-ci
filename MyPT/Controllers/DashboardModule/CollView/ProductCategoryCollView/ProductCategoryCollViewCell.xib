@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -11,7 +11,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="ProductCategoryCollViewCell" id="gTV-IL-0wX" customClass="ProductCategoryCollViewCell" customModule="MyPT" customModuleProvider="target">
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="ProductCategoryCollViewCell" id="gTV-IL-0wX" customClass="ProductCategoryCollViewCell" customModule="MyPT_Connect" customModuleProvider="target">
             <rect key="frame" x="0.0" y="0.0" width="295" height="117"/>
             <autoresizingMask key="autoresizingMask"/>
             <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
@@ -21,6 +21,9 @@
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ydv-iN-kKy">
                         <rect key="frame" x="1" y="1" width="293" height="115"/>
                         <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="i3A-qX-dbt">
+                                <rect key="frame" x="0.0" y="0.0" width="293" height="115"/>
+                            </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="All  Equipment" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZuI-X9-NZ2">
                                 <rect key="frame" x="12" y="12" width="269" height="91"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
@@ -28,12 +31,16 @@
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
-                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" red="0.16862745098039217" green="0.17254901960784313" blue="0.1764705882352941" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                         <constraints>
+                            <constraint firstAttribute="bottom" secondItem="i3A-qX-dbt" secondAttribute="bottom" id="1UM-VU-YTU"/>
                             <constraint firstItem="ZuI-X9-NZ2" firstAttribute="top" secondItem="Ydv-iN-kKy" secondAttribute="top" constant="12" id="5Qj-rk-P9i"/>
+                            <constraint firstItem="i3A-qX-dbt" firstAttribute="top" secondItem="Ydv-iN-kKy" secondAttribute="top" id="6kV-xN-zbI"/>
                             <constraint firstItem="ZuI-X9-NZ2" firstAttribute="centerY" secondItem="Ydv-iN-kKy" secondAttribute="centerY" id="HdN-JY-HMJ"/>
                             <constraint firstItem="ZuI-X9-NZ2" firstAttribute="leading" secondItem="Ydv-iN-kKy" secondAttribute="leading" constant="12" id="OJj-AQ-otF"/>
+                            <constraint firstItem="i3A-qX-dbt" firstAttribute="leading" secondItem="Ydv-iN-kKy" secondAttribute="leading" id="UZS-qh-qg5"/>
                             <constraint firstItem="ZuI-X9-NZ2" firstAttribute="centerX" secondItem="Ydv-iN-kKy" secondAttribute="centerX" id="ffA-4r-uYc"/>
+                            <constraint firstAttribute="trailing" secondItem="i3A-qX-dbt" secondAttribute="trailing" id="mR3-vM-6Hq"/>
                         </constraints>
                     </view>
                 </subviews>
@@ -49,6 +56,7 @@
             <size key="customSize" width="295" height="117"/>
             <connections>
                 <outlet property="cellMBV" destination="Ydv-iN-kKy" id="1UU-nH-z5a"/>
+                <outlet property="imgBackground" destination="i3A-qX-dbt" id="dCj-jH-u0J"/>
                 <outlet property="titleLbl" destination="ZuI-X9-NZ2" id="IPY-Jh-6uW"/>
                 <outlet property="titleLblLeading" destination="OJj-AQ-otF" id="0Em-xN-ojQ"/>
                 <outlet property="titleLblTopConstrnt" destination="5Qj-rk-P9i" id="sD3-EB-16t"/>

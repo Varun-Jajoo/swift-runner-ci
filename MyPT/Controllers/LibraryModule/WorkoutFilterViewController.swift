@@ -442,7 +442,7 @@ extension WorkoutFilterViewController: UICollectionViewDelegate, UICollectionVie
         popupVC.workoutFilters?.removeAll()
         popupVC.workoutFilters?.append(contentsOf: self.workoutFilters ?? [])
         
-        popupVC.sentBackData = { [weak self] getFilterName , getId, empty1, empty2 in
+        popupVC.sentBackData = { [weak self] getFilterName , getId, empty1, empty2, _, _ in
             guard let self = self else { return  }
             self.filterByTxtField.text = getFilterName
             self.filterData?.filter_by = "\(getId ?? 0)"

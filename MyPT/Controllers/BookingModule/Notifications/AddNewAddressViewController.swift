@@ -369,7 +369,7 @@ class AddNewAddressViewController: CommonViewController {
         popupVC.cityData?.removeAll()
         popupVC.cityData?.append(contentsOf: self.getAlltCityData?.cities ?? [])
         
-        popupVC.sentBackData = { [weak self] getCityName , getId, getCountryName, getCountryId in
+        popupVC.sentBackData = { [weak self] getCityName , getId, getCountryName, getCountryId, emiratesName, emiratesId in
             guard let self = self else { return  }
             print("name", getCityName as Any, "id", getId as Any)
             self.cityTxt.text = getCityName

@@ -18,12 +18,12 @@ struct TrainerDetailsBaseModel: Codable {
 struct TrainerDetalsModel: Codable {
     var id: Int?
     var name: String?
-    var profile: String?
+    var profile, slot: String?
     var follower, distance, trainWithMe, location: String?
     var description, quote, clientCoached, experience: String?
     var averageRating, noOfRating: FlexibleValue?
-    var isVerified:Bool?
-    var isFollowing:Bool?
+    var isVerified, is_group, isPackage, isfull: Bool?
+    var isFollowing: Bool?
     var certificates: [CertificateModel]?
     var tags: [TrainerTagModel]?
     var reviews: [ReviewModel]?
@@ -32,7 +32,10 @@ struct TrainerDetalsModel: Codable {
     enum CodingKeys: String, CodingKey {
         case id, name, profile, follower, distance
         case trainWithMe = "train_with_me"
+        case isPackage = "is_package"
+        case isfull = "is_full"
         case location, description, quote, clientCoached, experience, averageRating, noOfRating, certificates, tags, reviews, galleries, isVerified, isFollowing
+        case is_group, slot
     }
 }
 

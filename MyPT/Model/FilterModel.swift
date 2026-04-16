@@ -66,3 +66,16 @@ struct NationalityModel: Codable {
     var nationality: String?
 }
 */
+
+// MARK: - Welcome
+struct HomepgaeBanner: Codable {
+    let status: Bool?
+    let data: [HomepageBannerData]?
+    let msg: String?
+}
+
+// MARK: - Datum
+struct HomepageBannerData: Codable {
+    let id: Int?
+    let image: String?
+}

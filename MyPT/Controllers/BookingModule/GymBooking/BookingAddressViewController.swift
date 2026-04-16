@@ -35,16 +35,21 @@ class BookingAddressViewController: UIViewController {
     var delegate:BookingAddressProtocol?
     var addMemberDelegate: AddMemberProtocol?
     var getAlltCityData: CityDataModel?
+    var getAlltCountryData: [CountryDataModel]?
     
     var idStr: String?
     var city_idStr: String?
     var country_idStr: String?
-    var typeStr: String?
+    var emirates_idStr: String?
+    var typeStr: String? = "home"
     var inputLat: String?
     var inputLong: String?
     var addressData:AddressDataModel?
     var navCtrnl:UINavigationController?
     var addMemberData:MemberModel?
+    var isFromHome:Bool?
+    var isFreeAssessmentSelected: Bool?
+//    var inputParam: DetailsParam?
     
 
     //MARK: --------------IBOUTLET
@@ -53,7 +58,7 @@ class BookingAddressViewController: UIViewController {
     @IBOutlet weak var buildingNumMBV: UIView!
     @IBOutlet weak var streetNameMBV: UIView!
     @IBOutlet weak var landmarkMBV: UIView!
-    @IBOutlet weak var mobilMBV: UIView!
+    @IBOutlet weak var apartmentMBV: UIView!
     @IBOutlet weak var cityMBV: UIView!
     @IBOutlet weak var countryMBV: UIView!
     @IBOutlet weak var typeAddressMBV: UIView!
@@ -62,14 +67,14 @@ class BookingAddressViewController: UIViewController {
     @IBOutlet weak var buildingNumHintLbl: UILabel!
     @IBOutlet weak var streetNameHintLbl: UILabel!
     @IBOutlet weak var landmarkHintLbl: UILabel!
-    @IBOutlet weak var mobileHintLbl: UILabel!
+    @IBOutlet weak var apartmentNumLbl: UILabel!
     @IBOutlet weak var cityHintLbl: UILabel!
     @IBOutlet weak var countryHintLbl: UILabel!
     @IBOutlet weak var typeAddrTitleLbl: UILabel!
     @IBOutlet weak var buildingNumTxt: UITextField!
     @IBOutlet weak var streetNameTxt: UITextField!
     @IBOutlet weak var landmarkTxt: UITextField!
-    @IBOutlet weak var mobileTxt: UITextField!
+    @IBOutlet weak var apartmentTxt: UITextField!
     @IBOutlet weak var cityTxt: UITextField!
     @IBOutlet weak var countryTxt: UITextField!
     @IBOutlet weak var selectCityBtn: UIButton!
@@ -85,6 +90,8 @@ class BookingAddressViewController: UIViewController {
     @IBOutlet weak var saveUpdateBtnBottomConstrnt: NSLayoutConstraint!
     @IBOutlet weak var scrollVBottomConstrnt: NSLayoutConstraint!
     @IBOutlet weak var popupMBVHeightConstrnt: NSLayoutConstraint!
+    @IBOutlet weak var countrySideMBV: UIView!
+    @IBOutlet weak var countrySideTxt: UITextField!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -107,7 +114,8 @@ class BookingAddressViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.getCityListApi()
+//        self.getCityListApi()
+        self.getEmiratesApi()
     }
 
     override func viewDidLayoutSubviews() {
@@ -219,22 +227,23 @@ class BookingAddressViewController: UIViewController {
     @IBAction func saveUpdateBtnActn(_ sender: Any) {
         print("save and update btn..")
         
-        let phoneNumber = (self.mobileTxt.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "-", with: "")
-        
+        let phoneNumber = (self.apartmentTxt.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "-", with: "")
         let params:[String:Any] = [
             "id" : (self.idStr ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
-            "building_name": (self.buildingNumTxt.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
+            "building_name": phoneNumber,
+            "villa_name": (self.buildingNumTxt.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
             "street": (self.streetNameTxt.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
-            "city_id": (self.city_idStr ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
-            "country_id": (self.country_idStr ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
-            "landmark": (self.landmarkTxt.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
+//            "city_id": (self.city_idStr ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
+            "country_id": "231",
+            "emirate_id": self.emirates_idStr,
+//            "landmark": (self.landmarkTxt.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
+            "area_name": (self.landmarkTxt.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
             "type": (self.typeStr ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
-            "mobile_no": phoneNumber,
+//            "mobile_no": "9876543210",
             "lat": self.inputLat ?? "28.584125",
             "long": self.inputLong ?? "77.2753162",
-            "name": ""
+//            "name": ""
         ]
-        
    
         if TrainerVM.isValideAddres(inputParams: params) {
             print("api is called..")
@@ -243,12 +252,15 @@ class BookingAddressViewController: UIViewController {
                 guard let self = self, let getResultData = getResultData else { return  }
                 
                 print("Add Adrress successfully: ",getResultData)
-                
+                self.addressData = getResultData.data?.first
+                self.inputLat = getResultData.data?.first?.lat?.value
+                self.inputLong = getResultData.data?.first?.long?.value
                 NotificationCenter.default.post(name: NSNotification.Name("UpdateAddress"), object: nil, userInfo: ["newValue": "True"])
                 
                 self.delegate?.onDismiss(isDismiss: true)
                 self.dismiss(animated: true, completion: {
-                    self.navCtrnl?.popToViewController(ofClass: SelectYourLocationViewController.self, animated: true)
+//                    self.navCtrnl?.popToViewController(ofClass: SelectYourLocationViewController.self, animated: true)
+                    self.goToNextVC()
                 })
             })
         }
@@ -256,14 +268,14 @@ class BookingAddressViewController: UIViewController {
     }
     
     enum btnTag: Int {
-    case dismiss = 401, home, office, other, selectCity, selectCounrty
+    case dismiss = 401, home, work, other, selectCity, selectCounrty
     }
     
     @IBAction func commonBtnActn(_ sender: UIButton) {
         switch sender.tag {
         case btnTag.dismiss.rawValue:
             self.dismiss(animated: true, completion: nil)
-        case btnTag.home.rawValue, btnTag.office.rawValue, btnTag.other.rawValue:
+        case btnTag.home.rawValue, btnTag.work.rawValue, btnTag.other.rawValue:
             self.setAddrType(sender: sender)
         case btnTag.selectCity.rawValue:
             self.cityTxt.becomeFirstResponder()
@@ -276,16 +288,15 @@ class BookingAddressViewController: UIViewController {
     }
     
     //--------------------SETUP INPUT DATA
-    private func setInputData(data: AddressDataModel){
-        
-        
+    private func setInputData(data: AddressDataModel) {
         let textFields: [(UITextField, String)] = [
             (buildingNumTxt, data.building_name?.value ?? ""),
             (streetNameTxt, data.street?.value ?? ""),
             (landmarkTxt, data.landmark ?? ""),
-            (mobileTxt, data.mobile_no?.value ?? ""),
-            (cityTxt, data.city_name ?? ""),
-            (countryTxt, data.country_name ?? "")
+            (apartmentTxt, data.mobile_no?.value ?? ""),
+//            (cityTxt, data.city_name ?? ""),
+//            (countrySideTxt, data.country_name ?? "")
+//            (countryTxt, data.country_name ?? "")
         ]
 
         textFields.forEach { (textField, txtStr) in
@@ -310,26 +321,25 @@ class BookingAddressViewController: UIViewController {
             
             if type.uppercased() == "Home".uppercased() {
                 self.homeBtn.isSelected = true
-            }else  if type.uppercased() == "Office".uppercased() {
+            } else if type.uppercased() == "Work".uppercased() {
                 self.officeBtn.isSelected = true
-            }else  if type.uppercased() == "Others".uppercased() {
+            } else if type.uppercased() == "Others".uppercased() {
                 self.otherBtn.isSelected = true
             }
         }
     }
     
     //------------------SETUP FLOW ADDRESS
-    private func setFlowAddress(){
+    private func setFlowAddress() {
         
         switch bookingAddressFlow {
         case .addAddress:
-            
             popupMBVHeightConstrnt.constant = view.frame.size.height * 0.8
-            
             [
                 landmarkMBV,
                 cityMBV,
-                countryMBV,
+//                countrySideMBV,
+//                countryMBV,
                 typeAddressMBV,
                 saveUpdateBtn
             ].forEach({
@@ -339,14 +349,14 @@ class BookingAddressViewController: UIViewController {
             self.countryTxt.isUserInteractionEnabled = false
             self.selectCountryBtn.isHidden = true
             saveAddMemberMBV.isHidden = true
-            saveUpdateBtnHeightConstrnt.constant = 56.0
+            saveUpdateBtnHeightConstrnt.constant = 48.0
             saveUpdateBtnTopConstrnt.constant = 20.0
             saveUpdateBtnBottomConstrnt.constant = 20.0
             
-            self.topTitleLbl.text = "Add New Address"
-            self.homeBtn.setTitle("Home", for: .normal)
-            self.officeBtn.setTitle("Office", for: .normal)
-            self.otherBtn.setTitle("Others", for: .normal)
+            self.topTitleLbl.text = "Enter your full address details"
+            self.homeBtn.setTitle("HOME", for: .normal)
+            self.officeBtn.setTitle("WORK", for: .normal)
+            self.otherBtn.setTitle("OTHER", for: .normal)
             
             //----------------------Text fields
             self.setupTxtField()
@@ -366,7 +376,6 @@ class BookingAddressViewController: UIViewController {
             if let addressData = addressData {
                 self.idStr = addressData.id?.value
                 self.setInputData(data: addressData)
-                
                 //-----------------setup input data
                 self.inputLat = "\(addressData.lat?.value ?? "0.0")"
                 self.inputLong = "\(addressData.long?.value ?? "0.0")"
@@ -379,7 +388,8 @@ class BookingAddressViewController: UIViewController {
             [
                 landmarkMBV,
                 cityMBV,
-                countryMBV,
+                countrySideMBV,
+//                countryMBV,
                 typeAddressMBV,
                 saveUpdateBtn
             ].forEach({
@@ -389,27 +399,29 @@ class BookingAddressViewController: UIViewController {
             self.countryTxt.isUserInteractionEnabled = false
             self.selectCountryBtn.isHidden = true
             saveAddMemberMBV.isHidden = true
-            saveUpdateBtnHeightConstrnt.constant = 56.0
+            saveUpdateBtnHeightConstrnt.constant = 48.0
             saveUpdateBtnTopConstrnt.constant = 20.0
             saveUpdateBtnBottomConstrnt.constant = 20.0
             
-            self.homeBtn.setTitle("Home", for: .normal)
-            self.officeBtn.setTitle("Office", for: .normal)
-            self.otherBtn.setTitle("Others", for: .normal)
+            self.homeBtn.setTitle("HOME", for: .normal)
+            self.officeBtn.setTitle("WORK", for: .normal)
+            self.otherBtn.setTitle("OTHER", for: .normal)
                         
         case .addMember:
             
             popupMBVHeightConstrnt.constant = view.frame.size.height * 0.6
             
-            DispatchQueue.main.async {
-                self.typeAddressMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            }
+//            DispatchQueue.main.async {
+//                self.typeAddressMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+//            }
             
             [
+                apartmentMBV,
                 landmarkMBV,
                 cityMBV,
-                countryMBV,
-                mobilMBV,
+                countrySideMBV,
+//                countryMBV,
+//                mobilMBV,
                 saveUpdateBtn
             ].forEach({
                 $0?.isHidden = true
@@ -427,7 +439,7 @@ class BookingAddressViewController: UIViewController {
             self.otherBtn.setTitle("Others", for: .normal)
             
             //----------------------Text fields
-            self.streetNameTxt.keyboardType = .decimalPad
+//            self.streetNameTxt.keyboardType = .decimalPad
             
             [
                 buildingNumTxt: "Enter Full Name",
@@ -471,8 +483,54 @@ class BookingAddressViewController: UIViewController {
         }
     }
     
+    private func goToNextVC() {
+        if isFreeAssessmentSelected ?? false {
+//            if inputType == "home" { // For Home
+                let vc: TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
+                vc.flowSlot = .bookTrainerHomeWorkout
+                vc.isFromHome = true
+                vc.inputType = "home"
+                vc.inputLat = Double(self.inputLat ?? "0.0")
+                vc.inputLong = Double(self.inputLong ?? "0.0")
+                vc.inputParam = DetailsParam(
+                    type: "home",
+                    long: self.inputLong ?? "0.0",
+                    lat: self.inputLat ?? "0.0",
+                    addressId: self.addressData?.id?.value,
+                    addressData: self.addressData,
+                    isFreeAssessmentSelected: isFreeAssessmentSelected
+                )
+            self.navCtrnl?.pushViewController(vc, animated: true)
+//            } else { // For Gym
+//                let vc: GymWorkoutViewController =
+//                GymWorkoutViewController.instantiate(appStoryboard: .booking)
+//                vc.flowGymwork = .bookTrainerGymWorkout
+//                vc.inputParam = DetailsParam(
+//                    type: "gym",
+//                    long: self.getAddressData?.long?.value ?? "0.0",
+//                    lat: self.getAddressData?.lat?.value ?? "0.0",
+//                    addressId: self.getAddressData?.id?.value,
+//                    addressData: self.getAddressData,
+//                    isFreeAssessmentSelected: isFreeAssessmentSelected
+//                )
+//                vc.inputType = "gym"
+//                vc.inputLat = Double(self.inputLat ?? "0.0")
+//                vc.inputLong = Double(self.inputLong ?? "0.0")
+//                self.navigationController?.pushViewController(vc, animated: true)
+//            }
+        } else {
+            let vc:CreatePackageViewViewController = CreatePackageViewViewController.instantiate(appStoryboard: .booking)
+            let param = DetailsParam(type: "home", long: self.inputLong, lat: self.inputLat, addressData: self.addressData)
+            vc.inputParam = param
+            vc.inputType = "home"
+            vc.inputLat = Double(self.inputLat ?? "0.0")
+            vc.inputLong = Double(self.inputLong ?? "0.0")
+            self.navCtrnl?.pushViewController(vc, animated: true)
+        }
+    }
+    
     //------------------
-    private func setAddrType(sender: UIButton){
+    private func setAddrType(sender: UIButton) {
         [
             self.homeBtn,
             self.officeBtn,
@@ -482,10 +540,14 @@ class BookingAddressViewController: UIViewController {
             guard let self = self, let btn = btn else { return }
             
             if btn.tag == sender.tag {
-                btn.isSelected = true
+//                btn.isSelected = true
+                btn.backgroundColor = UIColor(hex: "#1B1D13")
+                btn.setCornerRadius(borderWidth: 1, borderColor: UIColor(hex: "#6C7627"), cornerRadious: 8.0)
                 self.typeStr = (btn.titleLabel?.text)?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-            }else{
-                btn.isSelected = false
+            } else {
+//                btn.isSelected = false
+                btn.backgroundColor = UIColor(hex: "#101113")
+                btn.setCornerRadius(borderWidth: 1, borderColor: UIColor(hex: "#28292B"), cornerRadious: 8.0)
             }
         })
     }
@@ -493,19 +555,19 @@ class BookingAddressViewController: UIViewController {
     private func setupTxtField(){
         //----------------------Text fields
         [
-            buildingNumTxt: "Building/Villa Name or Number",
-            streetNameTxt: "Street Name & Number",
-            landmarkTxt: "Landmark (Optional)",
-            mobileTxt: "Mobile",
-            cityTxt: "City",
-            countryTxt: "Country"
+            apartmentTxt: "Apartment / Villa Number",
+            buildingNumTxt: "Building Name / Villa Name",
+            streetNameTxt: "Street Name (Optional)",
+            landmarkTxt: "Area / Community Name",
+            cityTxt: "Emirate",
+            countryTxt: "Emirates"
         ].forEach({[weak self] (key, value) in
             guard let self = self, let key = key else {
                 return
             }
             
             key.placeholderSet(placeHolder: value, color: UIColor.txtDarkGray)
-            key.font = AppFont.semibold.size(16.0, familyName: familyManrope)
+            key.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
             key.delegate = self
             key.addTarget(self, action: #selector(textFieldDidChange(textField:)), for: UIControl.Event.editingChanged)
         })
@@ -513,29 +575,33 @@ class BookingAddressViewController: UIViewController {
     
     //MARK: -------------FOR DROP DOWN
     private func openDropDown(inputView: UIView){
-        let popupVC:CityDropDownViewController = CityDropDownViewController.instantiate(appStoryboard: .booking)
+        let popupVC: CityDropDownViewController = CityDropDownViewController.instantiate(appStoryboard: .booking)
         popupVC.modalPresentationStyle = .popover
-        popupVC.getAlltCityData = nil
-        popupVC.getAlltCityData = self.getAlltCityData
-        popupVC.cityData?.removeAll()
-        popupVC.cityData?.append(contentsOf: self.getAlltCityData?.cities ?? [])
-        
-        popupVC.sentBackData = { [weak self] getCityName , getId, getCountryName, getCountryId in
+//        popupVC.getAlltCityData = nil
+//        popupVC.getAlltCityData = self.getAlltCityData
+        popupVC.getAlltCountryData = self.getAlltCountryData
+//        popupVC.cityData?.removeAll()
+//        popupVC.cityData?.append(contentsOf: self.getAlltCityData?.cities ?? [])
+
+        popupVC.sentBackData = { [weak self] getCityName , getId, getCountryName, getCountryId, emiratesName, emiratesId in
             guard let self = self else { return  }
             print("name", getCityName as Any, "id", getId as Any)
-            self.cityTxt.text = getCityName
-            self.countryTxt.text = getCountryName
-            self.city_idStr = "\(getId ?? 0)"
-            self.country_idStr = "\(getCountryId ?? 0)"
+            self.cityTxt.text = emiratesName
+//            self.countrySideTxt.text = getCountryName
+//            self.countryTxt.text = getCountryName
+//            self.city_idStr = "\(emiratesId ?? 0)"
+            self.emirates_idStr = "\(emiratesId ?? 0)"
+            self.country_idStr = "231"
+//            self.country_idStr = "\(getCountryId ?? 0)"
             
-            if let city = self.cityTxt.text, !city.isEmpty{
+            if let city = self.cityTxt.text, !city.isEmpty {
                 self.cityHintLbl.isHidden = false
                 self.cityHintLbl.text = "City"
             }
-            if let country = self.countryTxt.text, !country.isEmpty {
-                self.countryHintLbl.isHidden = false
-                self.countryHintLbl.text = "Country"
-            }
+//            if let country = self.countryTxt.text, !country.isEmpty {
+//                self.countryHintLbl.isHidden = false
+//                self.countryHintLbl.text = "Country"
+//            }
         }
     
         popupVC.view.backgroundColor = UIColor.mainBg
@@ -551,55 +617,59 @@ class BookingAddressViewController: UIViewController {
 
         present(popupVC, animated: true)
     }
-        
-    private func setupUI(){
+
+    private func setupUI() {
         DispatchQueue.main.async {
             self.popupMBV.roundSideCorners(radius: 12.0, cornerSide: [.topLeft, .topRight])
             self.popupMBV.applyShadow(fillColor: UIColor.appCard2, shadowColor: UIColor.black, shadowRadius: 12, opacity: 0.8, offset: .zero, cornerRadius: 12)
             self.saveUpdateBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             self.addMemeberSaveBtn.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
-            
+            self.homeBtn.backgroundColor = UIColor(hex: "#1B1D13")
+            self.homeBtn.setCornerRadius(borderWidth: 1, borderColor: UIColor(hex: "#6C7627"), cornerRadious: 8.0)
+            self.officeBtn.backgroundColor = UIColor(hex: "#101113")
+            self.officeBtn.setCornerRadius(borderWidth: 1, borderColor: UIColor(hex: "#28292B"), cornerRadious: 8.0)
+            self.otherBtn.backgroundColor = UIColor(hex: "#101113")
+            self.otherBtn.setCornerRadius(borderWidth: 1, borderColor: UIColor(hex: "#28292B"), cornerRadious: 8.0)
             [
+                self.apartmentMBV,
                 self.buildingNumMBV,
                 self.streetNameMBV,
                 self.landmarkMBV,
-                self.mobilMBV,
+//                self.mobilMBV,
                 self.cityMBV,
-                self.countryMBV,
-                self.typeAddressMBV,
+                self.countrySideMBV,
+//                self.countryMBV,
                 self.addMemeberSaveNextBtn
             ].forEach({
-                $0.setCornerRadius(borderWidth: 0.5, borderColor: UIColor.appWhite, cornerRadious: 12.0)
+                $0?.setCornerRadius(borderWidth: 1, borderColor: UIColor(hex: "#2C2C2C"), cornerRadious: 12.0)
+                $0?.backgroundColor = UIColor(hex: "#141514")
             })
             
             //---------------------------**************
             if self.getEnumCaseName(self.bookingAddressFlow).uppercased() == "addMember".uppercased() {
-                self.typeAddressMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
+//                self.typeAddressMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
             }
         }
         view.layoutIfNeeded()
-        
 //        let hh = bookingAddressFlow.hashValue
-        
     }
     
     private func getEnumCaseName(_ flow: BookingAddressFlow) -> String {
         return String(describing: flow)
     }
     
-    private func setupFont(){
-        self.topTitleLbl.font  = AppFont.semibold.size(18.0, familyName: familyManrope)
-        self.typeAddrTitleLbl.font  = AppFont.semibold.size(14.0, familyName: familyManrope)
-        self.saveUpdateBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
+    private func setupFont() {
+        self.topTitleLbl.font  = AppFont.medium.size(20.0, familyName: familyClashDisplay)
+        self.typeAddrTitleLbl.font  = AppFont.regular.size(14.0, familyName: familyFunnelSans)
+        self.saveUpdateBtn.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
         self.addMemeberSaveNextBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
         self.addMemeberSaveBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
-        
         [
             self.homeBtn.titleLabel,
             self.officeBtn.titleLabel,
             self.otherBtn.titleLabel
         ].forEach({
-            $0?.font = AppFont.medium.size(12.0, familyName: familyManrope)
+            $0?.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
         })
         
         //-----------------Hint Label
@@ -607,11 +677,11 @@ class BookingAddressViewController: UIViewController {
             buildingNumHintLbl,
             streetNameHintLbl,
             landmarkHintLbl,
-            mobileHintLbl,
+            apartmentNumLbl,
             cityHintLbl,
             countryHintLbl,
         ].forEach({
-            $0.font = AppFont.medium.size(10.0, familyName: familyManrope)
+            $0.font = AppFont.regular.size(10.0, familyName: familyFunnelSans)
             $0.text = nil
         })
         
@@ -620,14 +690,14 @@ class BookingAddressViewController: UIViewController {
             buildingNumTxt,
             streetNameTxt,
             landmarkTxt,
-            mobileTxt,
+            apartmentTxt,
             cityTxt,
             countryTxt
         ].forEach({[weak self] key in
             guard let self = self, let key = key else {
                 return
             }
-            key.font = AppFont.semibold.size(16.0, familyName: familyManrope)
+            key.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
             key.delegate = self
             key.addTarget(self, action: #selector(textFieldDidChange(textField:)), for: UIControl.Event.editingChanged)
         })
@@ -667,33 +737,33 @@ extension BookingAddressViewController: UITextFieldDelegate{
     }
     
     // UITextFieldDelegate method to restrict the input to 10 digits
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        
-        if textField == self.mobileTxt {
-            // Allow only numeric input
-            let allowedCharacterSet = CharacterSet.decimalDigits
-            let characterSet = CharacterSet(charactersIn: string)
-            
-            if !allowedCharacterSet.isSuperset(of: characterSet) {
-                return false // Disallow non-numeric input
-            }
-            
-            // Check the total length after the proposed change
-            if let currentText = textField.text, let stringRange = Range(range, in: currentText) {
-                let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
-               
-                if let textFieldMobile = self.mobileTxt.text, string != "" {
-                    if textFieldMobile.count == 3 || textFieldMobile.count == 7 {
-                        self.mobileTxt.text = textFieldMobile.text + "-"
-                    }
-                }
-                
-                return updatedText.count <= 12 // Allow input only if it results in 10 or fewer digits
-            }
-        }
-        
-        return true
-    }
+//    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+//
+//        if textField == self.apartmentTxt {
+//            // Allow only numeric input
+//            let allowedCharacterSet = CharacterSet.decimalDigits
+//            let characterSet = CharacterSet(charactersIn: string)
+//
+//            if !allowedCharacterSet.isSuperset(of: characterSet) {
+//                return false // Disallow non-numeric input
+//            }
+//
+//            // Check the total length after the proposed change
+//            if let currentText = textField.text, let stringRange = Range(range, in: currentText) {
+//                let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+//
+//                if let textFieldMobile = self.mobileTxt.text, string != "" {
+//                    if textFieldMobile.count == 3 || textFieldMobile.count == 7 {
+//                        self.mobileTxt.text = textFieldMobile.text + "-"
+//                    }
+//                }
+//
+//                return updatedText.count <= 12 // Allow input only if it results in 10 or fewer digits
+//            }
+//        }
+//
+//        return true
+//    }
     
     @objc func textFieldDidChange(textField: UITextField) {
         
@@ -710,10 +780,10 @@ extension BookingAddressViewController: UITextFieldDelegate{
     
     func getHintLbl(inputTxtField: UITextField) -> UILabel? {
         let textFieldsWithLabels: [UITextField: UILabel] = [
+            self.apartmentTxt: apartmentNumLbl,
             self.buildingNumTxt: buildingNumHintLbl,
             self.streetNameTxt: streetNameHintLbl,
             self.landmarkTxt: landmarkHintLbl,
-            self.mobileTxt: mobileHintLbl,
             self.cityTxt: cityHintLbl,
             self.countryTxt: countryHintLbl
            ]
@@ -723,12 +793,12 @@ extension BookingAddressViewController: UITextFieldDelegate{
     
     func hintTxtGet(inputLabel: UILabel) -> String {
         let hintTxtAddAddress: [UILabel: String] = [
-            self.buildingNumHintLbl: "Building/Villa Name or Number",
-            self.streetNameHintLbl: "Street Name & Number",
-            self.landmarkHintLbl: "Landmark (Optional)",
-            self.mobileHintLbl: "Mobile",
-            self.cityHintLbl: "City",
-            self.countryHintLbl: "Country",
+            self.apartmentNumLbl: "Apartment / Villa Number",
+            self.buildingNumHintLbl: "Building Name / Villa Name",
+            self.streetNameHintLbl: "Street Name (Optional)",
+            self.landmarkHintLbl: "Area / Community Name",
+            self.cityHintLbl: "Emirate",
+            self.countryHintLbl: "Emirate",
         ]
         
         let hintTxtAddMember: [UILabel: String] = [
@@ -753,18 +823,18 @@ extension BookingAddressViewController: UITextFieldDelegate{
 
 
 //MARK: --------------EXTENSION FOR API
-extension BookingAddressViewController{
+extension BookingAddressViewController {
     
 //    private func getAddressListApi(){
 //        TrainerVM.getAddressApi(viewController: self, inputParms: [:], completion: { [weak self] getResultData in
 //            guard let self = self, let getResultData = getResultData else { return  }
-//            
+//
 //            print("getResultData", getResultData)
-//          
+//
 //        })
 //    }
     
-    private func getCityListApi(){
+    private func getCityListApi() {
         TrainerVM.getCityApi(viewController: self, inputParms: [:], isShowLoader: false, completion: { [weak self] getResultData in
             guard let self = self, let getResultData = getResultData else { return  }
             print("getResultData", getResultData)
@@ -773,6 +843,14 @@ extension BookingAddressViewController{
         })
     }
     
+    private func getEmiratesApi() {
+        TrainerVM.getEmiratesApi(viewController: self, inputParms: [:], isShowLoader: false, completion: { [weak self] getResultData in
+            guard let self = self, let getResultData = getResultData else { return  }
+            print("getResultData", getResultData)
+            self.getAlltCountryData = nil
+            self.getAlltCountryData = getResultData.data
+        })
+    }
 }
 
 // MARK: ------------ UIPopoverPresentationControllerDelegate
@@ -783,12 +861,14 @@ extension BookingAddressViewController: UIPopoverPresentationControllerDelegate 
 }
 
 
-//MARK: ------------------ADD MEMBER PARAMS
+// MARK: ------------------ADD MEMBER PARAMS
 struct AddMemberParams {
     var name: String?
     var age: String?
     var gender: String?
     var id: String?
+    var isGroup : Bool?
+    var isBuddy : Bool?
     
     func getParams() -> [String:Any] {
         var dictVar: [String:Any] =  [:]
@@ -797,6 +877,8 @@ struct AddMemberParams {
         if let age = age { dictVar["age"] = age }
         if let gender = gender { dictVar["gender"] = gender }
         if let id = id { dictVar["id"] = id }
+        if let isGroup = isGroup { dictVar["is_group"] = isGroup }
+        if let isBuddy = isBuddy { dictVar["is_buddy"] = isBuddy }
         
         return dictVar
     }

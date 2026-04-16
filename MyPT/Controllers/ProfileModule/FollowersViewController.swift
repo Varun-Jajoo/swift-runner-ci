@@ -413,9 +413,9 @@ extension FollowersViewController: UICollectionViewDelegate, UICollectionViewDat
         if collectionView == trainersGridCollView {
             let cell:GridTrainerCollectionViewCell = trainersGridCollView.dequeueReusableCell(withReuseIdentifier: "GridTrainerCollectionViewCell", for: indexPath) as! GridTrainerCollectionViewCell
             
-            cell.landMarkBtn.titleLabel?.numberOfLines = 1
+//            cell.landMarkBtn.titleLabel?.numberOfLines = 1
             cell.distanceBtn.titleLabel?.numberOfLines = 1
-            cell.landMarkBtn.titleLabel?.lineBreakMode = .byClipping
+//            cell.landMarkBtn.titleLabel?.lineBreakMode = .byClipping
             cell.distanceBtn.titleLabel?.lineBreakMode = .byClipping
             
             cell.trainerTagsData = self.trainerData?[indexPath.row].tags

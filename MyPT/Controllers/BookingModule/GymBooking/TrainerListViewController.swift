@@ -8,8 +8,8 @@
 import UIKit
 
 class TrainerListViewController: CommonViewController {
-
-    //MARK: --------------VARIBALE
+    
+    // MARK: --------------VARIBALE
     var istagMenuHeight: Bool?
     var isLoadFirst: Bool? = nil
     
@@ -19,7 +19,7 @@ class TrainerListViewController: CommonViewController {
         container.layer.cornerRadius = 8
         container.layer.masksToBounds = true
         container.setCornerRadius(borderWidth: 1, borderColor: UIColor.appCard, cornerRadious: 12.0)
-
+        
         let searchBar = UISearchBar()
         searchBar.tag = 101
         searchBar.searchBarStyle = .minimal
@@ -43,7 +43,7 @@ class TrainerListViewController: CommonViewController {
         searchBar.setBackgroundImage(UIImage.init(), for: UIBarPosition.any, barMetrics: UIBarMetrics.default)
         searchBar.backgroundImage = UIImage()
         searchBar.addDoneButtonOnKeyboard()
-            
+        
         if let textField = searchBar.value(forKey: "searchField") as? UITextField {
             //            textField.clearButtonMode = .never
             textField.leftView = nil
@@ -63,7 +63,7 @@ class TrainerListViewController: CommonViewController {
                 textField.bottomAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 0)
             ])
         }
-
+        
         let clearButton = UIButton()
         clearButton.setImage(UIImage(named: "ic_cross"), for: .normal)
         clearButton.tintColor = UIColor.mainBg
@@ -76,7 +76,7 @@ class TrainerListViewController: CommonViewController {
         stack.spacing = 4
         stack.alignment = .center
         stack.translatesAutoresizingMaskIntoConstraints = false
-
+        
         container.addSubview(stack)
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 4),
@@ -86,11 +86,10 @@ class TrainerListViewController: CommonViewController {
             clearButton.widthAnchor.constraint(equalToConstant: 20),
             clearButton.heightAnchor.constraint(equalToConstant: 20)
         ])
-
         return container
     }()
-
-//----------------****** Trainer filgter local
+    
+    //----------------****** Trainer filgter local
     var localGenderLstData:[FilterLstDataModel]? = []
     var localLanguageLstData:[FilterLstDataModel]? = []
     var localNationalityLstData:[FilterLstDataModel]? = []
@@ -101,9 +100,11 @@ class TrainerListViewController: CommonViewController {
     var flowSlot:calendarFlow = .defaultFlow
     var inputType:String?
     var inputIs_filter:String?
-    var inputLat:String?
-    var inputLong:String?
+    var inputLat: Double?
+    var inputLong: Double?
     var studioId:String?
+    var package_type: String?
+    var inputParam: DetailsParam?
     
     var tagData:[TagModel]? = []
     var trainerData:[TrainerModel]? = []
@@ -120,25 +121,16 @@ class TrainerListViewController: CommonViewController {
     private var is_filterStr : String?
     private var inpuntTagId: Int?
     
-    
-    //MARK: ----------------IBOUTLET
-    @IBOutlet weak var searchMBVTopConstrnt: NSLayoutConstraint!
-    @IBOutlet weak var searchMBVLeading: NSLayoutConstraint!
-    @IBOutlet weak var searchMBVTrailing: NSLayoutConstraint!
+    // MARK: ----------------IBOUTLET
     @IBOutlet weak var workoutCategoryCollView: UICollectionView!
-    @IBOutlet weak var filterMenuCollView: UICollectionView!
     @IBOutlet weak var trainerListTblView: UITableView!
     @IBOutlet weak var trainerGridCollView: UICollectionView!
     @IBOutlet weak var tblMBV: UIView!
     @IBOutlet weak var collMBV: UIView!
-    
-//    @IBOutlet weak var workoutCategoryCollViewHeightConstrnt: NSLayoutConstraint!
-//    
-//    @IBOutlet weak var filterMenuCollViewHeightConstrnt: NSLayoutConstraint!
+    @IBOutlet weak var btnFilter: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         isLoadFirst = true
         self.categorySelectedIndex = IndexPath(row: 0, section: 0)
         self.setupUI()
@@ -152,17 +144,6 @@ class TrainerListViewController: CommonViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.istagMenuHeight = true
-        
-//        if let tagData = tagData?.count, tagData > 0 {
-//            // Automatically select the first cell
-//            let firstIndexPath = IndexPath(item: 0, section: 0)
-//            DispatchQueue.main.async {
-//                self.workoutCategoryCollView.selectItem(at: firstIndexPath, animated: true, scrollPosition: .top)
-//                // Optional: perform any additional setup for the selected cell
-//                self.workoutCategoryCollView.delegate?.collectionView?(self.workoutCategoryCollView, didSelectItemAt: firstIndexPath)
-//                self.view.layoutIfNeeded()
-//            }
-//        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -177,20 +158,33 @@ class TrainerListViewController: CommonViewController {
         self.searchContainerView.removeFromSuperview()
     }
     
-    func setNavUI(){
+    func setNavUI() {
         if let _ = isLoadFirst {
             isLoadFirst = nil
-            self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: [AppStrings.trainers], setTintColor: .black, setTitleColor: UIColor.appWhite)
-            self.setRighMenu(rightImgs: [AppImages.grid?.resized(to: CGSize(width: 25.0, height: 25.0)), AppImages.menuNav?.resized(to: CGSize(width: 25.0, height: 25.0)),  AppImages.search_normal], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
+            self.setLeftMenu(leftImgs: [AppImages.backArrowWithBg], setTitle: [AppStrings.trainers], setTintColor: .black, setTitleColor: UIColor.appWhite)
+            self.setRighMenu(
+                rightImgs: [
+                    AppImages.grid?.resized(to: CGSize(width: 20.0, height: 20.0)),
+                    AppImages.menuNav?.resized(to: CGSize(width: 20.0, height: 20.0)),
+                    AppImages.topSearchIcon
+                ], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite
+            )
         }
     }
     
     override func rightBtnActn(sender: UIButton) {
+        TapticEngine.selection.feedback()
         if sender.tag != 2 {
             let grid: UIImage? = (sender.tag == 0 ? AppImages.selected_grid : AppImages.grid)
             let list: UIImage? = (sender.tag == 1 ? AppImages.menuNav : AppImages.unselectedList)
             
-            self.setRighMenu(rightImgs: [grid?.resized(to: CGSize(width: 25.0, height: 25.0)), list?.resized(to: CGSize(width: 25.0, height: 25.0)), AppImages.search_normal], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
+            self.setRighMenu(
+                rightImgs: [
+                    grid?.resized(to: CGSize(width: 20.0, height: 20.0)),
+                    list?.resized(to: CGSize(width: 20.0, height: 20.0)),
+                    AppImages.topSearchIcon
+                ], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite
+            )
             
             if sender.tag == 0 {
                 print("Gridlayout")
@@ -208,59 +202,41 @@ class TrainerListViewController: CommonViewController {
                 
             }else{
                 print("cliecked at search...")
-                
-                /*
-                 if let isFromHome = isFromHome, isFromHome {
-                 let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
-                 vc.searchStr = "Trainers"
-                 vc.searchTrainerData = self.trainerData
-                 vc.seacrhGymTrainerData = nil
-                 self.navigationController?.pushViewController(vc, animated: true)
-                 }else{
-                 let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
-                 vc.searchStr = "Trainers"
-                 vc.searchTrainerData = nil
-                 vc.seacrhGymTrainerData = self.gymTrainerData
-                 self.navigationController?.pushViewController(vc, animated: true)
-                 }
-                 */
-                
-                //            let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
-                //            vc.searchStr = "Trainers"
-                //            vc.searchTrainerData = self.trainerData
-                //            vc.seacrhGymTrainerData = self.gymTrainerData
-                //            self.navigationController?.pushViewController(vc, animated: true)
             }
-        }else if sender.tag == 2{
-            self.navSearchUI()
-            
-                        
-            /*
+        } else if sender.tag == 2 {
             if let isFromHome = isFromHome, isFromHome {
-            let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
-            vc.searchStr = "Trainers"
-            vc.searchTrainerData = self.trainerData
-            vc.seacrhGymTrainerData = nil
-            self.navigationController?.pushViewController(vc, animated: true)
-            }else{
-            let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
-            vc.searchStr = "Trainers"
-            vc.searchTrainerData = nil
-            vc.seacrhGymTrainerData = self.gymTrainerData
-            self.navigationController?.pushViewController(vc, animated: true)
+                let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
+                vc.isFromHome = isFromHome
+                vc.searchStr = "Trainers"
+                vc.searchStudiosData = self.trainerData
+                vc.seacrhGymTrainerData = nil
+                vc.inputType = self.inputType
+                vc.inputLong = "\(self.inputLong ?? 0.0)"
+                vc.inputLat = "\(self.inputLat ?? 0.0)"
+                vc.inputParam = inputParam
+                self.navigationController?.pushViewController(vc, animated: true)
+            } else {
+                let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
+                vc.isFromHome = isFromHome
+                vc.searchStr = "Trainers"
+                vc.searchStudiosData = nil
+                vc.inputType = self.inputType
+                vc.inputLong = "\(self.inputLong ?? 0.0)"
+                vc.inputLat = "\(self.inputLat ?? 0.0)"
+                vc.seacrhGymTrainerData = self.gymTrainerData
+                vc.inputParam = inputParam
+                self.navigationController?.pushViewController(vc, animated: true)
             }
-            
-            */
         }
     }
     
-    private func flowTrainers(){
+    private func flowTrainers() {
         switch flowSlot {
         case .bookTrainerHomeWorkout, .bookTrainerGymWorkout, .createPackage:
             
             if let isFromHome = isFromHome, isFromHome {
                 self.getTrainerApi(inputFilter: "0", inpuntTagId: 0)
-            }else{
+            } else {
                 self.getSelectGymList(inputFilter: "0", inpuntTagId: 0)
             }
             
@@ -268,26 +244,21 @@ class TrainerListViewController: CommonViewController {
             self.getSelectGymList(inputFilter: "0", inpuntTagId: 0)
             
         case .defaultFlow:
-            print("Book trainer flow...")
-//            if let isFromHome = isFromHome, isFromHome {
-//                self.getTrainerApi(inputFilter: "0", inpuntTagId: 0)
-//            }else{
-//                self.getSelectGymList(inputFilter: "0", inpuntTagId: 0)
-//            }
+            break
         }
     }
     
     
-    @objc func clearSearch(sender: UIButton){
+    @objc func clearSearch(sender: UIButton) {
         print("lcear search bar")
         self.removeSearch()
-//        self.searchContainerView.applyTransition(type: .moveIn, subtype: .fromLeft, duration: 0.5, timingFunction: .easeInEaseOut, completion: {[weak self] in
-//            
-//            self?.searchContainerView.removeFromSuperview()
-//        })
+        //        self.searchContainerView.applyTransition(type: .moveIn, subtype: .fromLeft, duration: 0.5, timingFunction: .easeInEaseOut, completion: {[weak self] in
+        //
+        //            self?.searchContainerView.removeFromSuperview()
+        //        })
     }
     
-    private func removeSearch(){
+    private func removeSearch() {
         self.searchContainerView.applyTransition(type: .moveIn, subtype: .fromLeft, duration: 0.5, timingFunction: .easeInEaseOut, completion: {[weak self] in
             
             self?.searchContainerView.removeFromSuperview()
@@ -295,8 +266,9 @@ class TrainerListViewController: CommonViewController {
     }
     
     
-    private func setupUI(){
-        self.filterMenu = ["Time slot", "Gender", "Language", "Nationality"]
+    private func setupUI() {
+        //        self.filterMenu = ["Time slot", "Gender", "Language", "Nationality"]
+        self.filterMenu = ["Nationality", "Gender", "Language"]
         
         workoutCategoryCollView.register(UINib(nibName: "WorkoutCategoryCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WorkoutCategoryCollectionViewCell")
         
@@ -304,17 +276,15 @@ class TrainerListViewController: CommonViewController {
         
         trainerListTblView.register(UINib(nibName: "TrainerListTableViewCell", bundle: nil), forCellReuseIdentifier: "TrainerListTableViewCell")
         
-        self.filterMenuCollView.register(UINib(nibName: "FilterCategoryCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "FilterCategoryCollectionViewCell")
-        
         tblMBV.isHidden = false
         collMBV.isHidden = true
+        btnFilter.setCornerRadius(borderWidth: 1, borderColor: UIColor(red: 32/255, green: 41/255, blue: 32/255, alpha: 1), cornerRadious: 8.0)
+        btnFilter.titleLabel?.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
         trainerListTblView.reloadData()
     }
     
-    private func navSearchUI(){
+    private func navSearchUI() {
         guard let navBar = self.navigationController?.navigationBar else { return }
-        
-        //        animShowFromRightToLeft(duration: 0.7)
         searchContainerView.alpha = 0
         searchContainerView.isHidden = true
         navBar.addSubview(searchContainerView)
@@ -352,10 +322,9 @@ class TrainerListViewController: CommonViewController {
                     textField.becomeFirstResponder()
                 }
             }
-//            self.animShowFromRightToLeft(duration: 0.7)
         }
     }
-        
+    
     func animShowFromRightToLeft(duration: TimeInterval = 1, completion: (() -> Void)? = nil) {
         let container = self.searchContainerView
         self.view.layoutIfNeeded()
@@ -371,193 +340,170 @@ class TrainerListViewController: CommonViewController {
         container.alpha = 1
         container.isHidden = false
         self.searchContainerView.isHidden = false
-//        DispatchQueue.main.async {
-            UIView.animate(withDuration: duration, animations: {
-                container.frame = finalFrame
-//                self.searchContainerView.isHidden = false
-            }, completion: { _ in
-                completion?()
-            })
-//        }
+        //        DispatchQueue.main.async {
+        UIView.animate(withDuration: duration, animations: {
+            container.frame = finalFrame
+            //                self.searchContainerView.isHidden = false
+        }, completion: { _ in
+            completion?()
+        })
+        //        }
     }
-
-//    private func firstCellSelect(getCount: Int?){
-//        if let tagData = getCount, tagData > 0 {
-//            let firstIndexPath = IndexPath(item: 0, section: 0)
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-//                self.workoutCategoryCollView.selectItem(at: firstIndexPath, animated: true, scrollPosition: .top)
-//                self.workoutCategoryCollView.delegate?.collectionView?(self.workoutCategoryCollView, didSelectItemAt: firstIndexPath)
-//                self.view.layoutIfNeeded()
-//            }
-//        }
-//    }
     
+    @IBAction func onTapFilter(_ sender: UIButton) {
+        let vc: TrainerFilterViewController = TrainerFilterViewController.instantiate(appStoryboard: .booking)
+        vc.selectedMenuFilterStr = "Nationality"
+        vc.inputType = self.inputType
+        vc.modalPresentationStyle = .automatic
+        if let _ = self.inpuntTagId {
+        } else {
+            self.inpuntTagId = nil
+        }
+        vc.sendGenderStr = { [weak self] idStr , getData, gernderLstData in
+            guard self != nil else { return }
+            self?.localGenderLstData = gernderLstData
+            self?.is_filterStr = "1"
+            self?.genderFilterStr = getData
+            
+            if self?.inputType?.capitalized == "home".capitalized {
+                self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
+            } else {
+                self?.getFilterSelectGymList(inpuntTagId: self?.inpuntTagId)
+            }
+            DispatchQueue.main.async {
+                if let isGridshow = self?.isGridShow, isGridshow {
+                    self?.trainerGridCollView.reloadData()
+                } else {
+                    self?.trainerListTblView.reloadData()
+                }
+            }
+        }
+        
+        vc.sendLanguageStr = { [weak self] idStr , getData, langLstData in
+            guard self != nil else { return }
+            
+            self?.localLanguageLstData = langLstData
+            self?.is_filterStr = "1"
+            self?.languageFilterStr = idStr
+            //                self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
+            
+            if self?.inputType?.capitalized == "home".capitalized {
+                self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
+            }else{
+                self?.getFilterSelectGymList(inpuntTagId: self?.inpuntTagId)
+            }
+            DispatchQueue.main.async {
+                if let isGridshow = self?.isGridShow, isGridshow {
+                    self?.trainerGridCollView.reloadData()
+                } else {
+                    self?.trainerListTblView.reloadData()
+                }
+            }
+        }
+        
+        vc.sendNationalityStr = { [weak self] idStr , getData, nationalityLstData in
+            guard self != nil else { return }
+            
+            self?.localNationalityLstData = nationalityLstData
+            self?.is_filterStr = nationalityLstData.count == 0 ? "0" : "1"
+            self?.nationalityFilterStr = idStr
+            //                self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
+            
+            if self?.inputType?.capitalized == "home".capitalized {
+                self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
+            } else {
+                self?.getFilterSelectGymList(inpuntTagId: self?.inpuntTagId)
+            }
+            DispatchQueue.main.async {
+                if let isGridshow = self?.isGridShow, isGridshow {
+                    self?.trainerGridCollView.reloadData()
+                } else {
+                    self?.trainerListTblView.reloadData()
+                }
+            }
+        }
+        //        vc.sendTime_slotStr = { [weak self] idStr , getData, timeSlotData in
+        //            guard self != nil else {
+        //                return
+        //            }
+        //
+        //            self?.localTimeSlotData = timeSlotData
+        //            self?.is_filterStr = "1"
+        //            self?.time_slotFilterStr = idStr
+        //            //                self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
+        //
+        //            if self?.inputType?.capitalized == "home".capitalized {
+        //                self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
+        //            }else{
+        //                self?.getFilterSelectGymList(inpuntTagId: self?.inpuntTagId)
+        //            }
+        //        }
+        vc.localGenderLstData =  self.localGenderLstData
+        vc.localLanguageLstData = self.localLanguageLstData
+        vc.localNationalityLstData = self.localNationalityLstData
+        //        vc.localTimeSlotData = self.localTimeSlotData
+        
+        self.navigationController?.present(vc, animated: true)
+    }
 }
 
 //MARK: --------------UICOLLECTIONVIEW DELEGATE/DATASOURCE
 extension TrainerListViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-       
         if collectionView == trainerGridCollView {
             if let isFromHome = isFromHome, isFromHome {
                 return collectionView.numberOfRows(count: self.trainerData?.count, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult, messageImageHeight: 200.0, fromTop: 50)
-            }else{
+            } else {
                 return collectionView.numberOfRows(count: self.gymTrainerData?.count, title: AppAlertStrings.no_results_found, message: nil, messageImage: AppImages.search_NoResult, messageImageHeight: 200.0, fromTop: 50)
             }
-            
-        }else if collectionView == filterMenuCollView{
-            return self.filterMenu?.count ?? 0
-        }
-        
-        else{
+        } else {
             return tagData?.count ?? 0
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
         if collectionView == trainerGridCollView {
             let cell:GridTrainerCollectionViewCell = trainerGridCollView.dequeueReusableCell(withReuseIdentifier: "GridTrainerCollectionViewCell", for: indexPath) as! GridTrainerCollectionViewCell
-            
-            cell.landMarkBtn.titleLabel?.numberOfLines = 1
+            //            cell.landMarkBtn.titleLabel?.numberOfLines = 1
             cell.distanceBtn.titleLabel?.numberOfLines = 1
-            cell.landMarkBtn.titleLabel?.lineBreakMode = .byClipping
+            //            cell.landMarkBtn.titleLabel?.lineBreakMode = .byClipping
             cell.distanceBtn.titleLabel?.lineBreakMode = .byClipping
             
             if let isFromHome = isFromHome, isFromHome {
                 cell.trainerTagsData = self.trainerData?[indexPath.row].tags
                 cell.setupCellData(trainerData: self.trainerData?[indexPath.row])
+                cell.viewProfileBtn.accessibilityHint = "\(self.trainerData?[indexPath.row].id ?? 0)"
                 
-            }else{
+            } else {
                 cell.trainerTagsData = self.gymTrainerData?[indexPath.row].tags
                 cell.setGymCellData(trainerData: self.gymTrainerData?[indexPath.row])
             }
-         
+            cell.viewProfileBtn.addTarget(self, action: #selector(viewProfileBtnActn(sender: )), for: .touchUpInside)
             return cell
-        }else if collectionView == filterMenuCollView{
-            let filterMenuCell: FilterCategoryCollectionViewCell = filterMenuCollView.dequeueReusableCell(withReuseIdentifier: "FilterCategoryCollectionViewCell", for: indexPath) as! FilterCategoryCollectionViewCell
             
-            DispatchQueue.main.async {
-                filterMenuCell.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 255.0/255.0, green: 255.0/255.0, blue: 255.0/255.0, alpha: 0.15), cornerRadious: 8.0)
-            }
-            filterMenuCell.gymCategoryNameLbl.font = AppFont.semibold.size(11.0, familyName: familyManrope)
-            filterMenuCell.gymCategoryImgView.isHidden = true
-            filterMenuCell.gymCategoryImgWidthConstrnt.constant = 0
-            filterMenuCell.selectionImgView.isHidden = false
-            filterMenuCell.selectionImgViewWidthConstrnt.constant = 15
-            filterMenuCell.selectionImgViewTrainlingConstrnt.constant = 8
-            filterMenuCell.titleTopConstrnt.constant = 8.0
-            filterMenuCell.titleBottomConstrnt.constant = 8.0
-            
-            filterMenuCell.selectionImgView.image = UIImage(named: "ic_downArrow")
-            filterMenuCell.gymCategoryNameLbl.text = self.filterMenu?[indexPath.row] as? String
-            filterMenuCell.gymCategoryNameLbl.textAlignment = .center
-            
-            return filterMenuCell
         }
-        else{
+        else {
             let cell:WorkoutCategoryCollectionViewCell = workoutCategoryCollView.dequeueReusableCell(withReuseIdentifier: "WorkoutCategoryCollectionViewCell", for: indexPath) as! WorkoutCategoryCollectionViewCell
-            
             DispatchQueue.main.async {
                 if self.categorySelectedIndex?.row == indexPath.row {
+                    cell.cellMBV.backgroundColor = UIColor(red: 19.0/255.0, green: 31.0/255.0, blue: 10.0/255.0, alpha: 1.0)
+                    cell.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 103.0/255.0, green: 119.0/255.0, blue: 36.0/255.0, alpha: 1.0), cornerRadious: 8.0)
+                } else {
                     cell.cellMBV.backgroundColor = UIColor.clear
-                    cell.cellMBV.setCornerRadius(borderWidth: 1.0, borderColor: UIColor(red: 158.0/255.0, green: 188.0/255.0, blue: 255.0/255.0, alpha: 1.0), cornerRadious: cell.cellMBV.frame.size.height/2.0)//12.0
-                }else{
-                    cell.cellMBV.backgroundColor = UIColor.clear
-                    cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: cell.cellMBV.frame.size.height/2.0)
+                    cell.cellMBV.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 8.0)
                 }
             }
             
-            cell.categoryImgView.loadImage(urlString: self.tagData?[indexPath.row].image as? String, placeholder: UIImage(named: "ic_barbell_ diagonal"))
-            cell.categoryTitleLbl.text = self.tagData?[indexPath.row].name as? String
-        
+            cell.categoryImgView.loadImage(urlString: self.tagData?[indexPath.row].image as? String, placeholder: UIImage())
+            cell.categoryTitleLbl.text = self.tagData?[indexPath.row].name?.uppercased() as? String
+            
             return cell
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if collectionView == trainerGridCollView {
-            
-            switch flowSlot {
-            case .bookTrainerHomeWorkout, .bookTrainerGymWorkout, .createPackage:
-              
-                //----------------From book trainer
-                if let isFromHome = isFromHome, isFromHome {
-                    
-                    let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
-//                    vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.trainerData?[indexPath.row].id ?? 0)", type: self.inputType, long: self.inputLat, lat: self.inputLong)
-                    
-                    vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "", type: self.inputType, long: self.inputLong, lat: self.inputLat)
-                    vc.detailsFlowSetup = flowSlot //.bookTrainerHomeWorkout
-//                    vc.isSlotsAvail = self.trainerData?[indexPath.row].isfull
-                    
-                    if let isFull = self.trainerData?[indexPath.row].isfull, let slotAvail = self.trainerData?[indexPath.row].slot?.value, isFull && slotAvail.lowercased() == "no".lowercased() {
-                        vc.isSlotsAvail = true
-                    }else{
-                        vc.isSlotsAvail = false
-                    }
-                    
-                    self.navigationController?.pushViewController(vc, animated: true)
-                    
-                }else{
-                    
-                    let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
-                    
-                    vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "0")", type: self.inputType, long: self.inputLong, lat: self.inputLat )
-                    vc.detailsFlowSetup = flowSlot //.bookTrainerGymWorkout
-//                    vc.isSlotsAvail = self.gymTrainerData?[indexPath.row].isfull
-                    
-                    if let isFull = self.gymTrainerData?[indexPath.row].isfull, let slotAvail = self.gymTrainerData?[indexPath.row].slot, isFull && slotAvail.lowercased() == "no".lowercased() {
-                        vc.isSlotsAvail = true
-                    }else{
-                        vc.isSlotsAvail = false
-                    }
-                    
-                    self.navigationController?.pushViewController(vc, animated: true)
-                    
-                }
-                
-            case .gymMembership, .withTrainerMembership, .withoutTrainerMembership:
-                //----------------
-                let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
-                vc.detailsFlowSetup = flowSlot //.gymMembership
-                vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "")", type: self.inputType, long: self.inputLong, lat: self.inputLat)
-//                vc.isSlotsAvail = self.gymTrainerData?[indexPath.row].isfull
-                
-                if let isFull = self.gymTrainerData?[indexPath.row].isfull, let slotAvail = self.gymTrainerData?[indexPath.row].slot, isFull && slotAvail.lowercased() == "no".lowercased() {
-                    vc.isSlotsAvail = true
-                }else{
-                    vc.isSlotsAvail = false
-                }
-                
-                self.navigationController?.pushViewController(vc, animated: true)
-                
-            case .defaultFlow:
-                print("default .......")
-                break
-            }
-            
-            
-        }else if collectionView == workoutCategoryCollView{
-            
-//            if let isFromHome = isFromHome, isFromHome {
-//                if indexPath.row > 0 {
-//                    self.inpuntTagId = self.tagData?[indexPath.row].id
-//                    self.getTrainerApi(inputFilter: "1", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
-//                }else{
-//                    self.inpuntTagId = self.tagData?[indexPath.row].id
-//                    self.getTrainerApi(inputFilter: "0", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
-//                }
-//            }else{
-//                if indexPath.row > 0 {
-//                    self.inpuntTagId = self.tagData?[indexPath.row].id
-//                    self.getSelectGymList(inputFilter: "1", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
-//                }else{
-//                    self.inpuntTagId = self.tagData?[indexPath.row].id
-//                    self.getSelectGymList(inputFilter: "0", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
-//                }
-//            }
-            
+        TapticEngine.selection.feedback()
+        if collectionView == workoutCategoryCollView {
             if let is_filterStr = self.is_filterStr , is_filterStr == "1" {
                 if let isFromHome = isFromHome, isFromHome {
                     if indexPath.row > 0 {
@@ -571,7 +517,7 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
                     if indexPath.row > 0 {
                         self.inpuntTagId = self.tagData?[indexPath.row].id
                         self.getFilterSelectGymList(inpuntTagId: self.inpuntTagId)
-                       
+                        
                         //                                    self.getSelectGymList(inputFilter: "1", inpuntTagId: self.tagData?[indexPath.row].id as? Int)
                         
                     }else{
@@ -600,97 +546,29 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
                     }
                 }
             }
-            
-           
             self.categorySelectedIndex = indexPath
             collectionView.reloadData()
-        }else if collectionView == filterMenuCollView{
-            
-            let vc: TrainerFilterViewController = TrainerFilterViewController.instantiate(appStoryboard: .booking)
-            vc.selectedMenuFilterStr = self.filterMenu?[indexPath.row] as? String
-            vc.inputType = self.inputType
-            vc.modalPresentationStyle = .automatic
-            
-            if let _ = self.inpuntTagId{
-            }else{
-                self.inpuntTagId = nil
+        } else {
+            if let isFromHome = isFromHome, isFromHome {
+                let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+                //                let getIndx = self.trainerData?.firstIndex(where: {
+                //                    $0.id == Int(sender.accessibilityHint ?? "0")
+                //                })
+                var inputData = inputParam
+                inputData?.trainer_id = "\(self.trainerData?[indexPath.row].id ?? 0)"
+                vc.inputParam = inputData
+                self.navigationController?.pushViewController(vc, animated: true)
+            } else {
+                let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+                //                let getIndx = self.gymTrainerData?.firstIndex(where: {
+                //                    $0.id == Int(sender.accessibilityHint ?? "0")
+                //                })
+                var inputData = inputParam
+                inputData?.trainer_id = "\(self.gymTrainerData?[indexPath.row].id ?? 0)"
+                vc.inputParam = inputData
+                self.navigationController?.pushViewController(vc, animated: true)
             }
-            
-            vc.sendGenderStr = { [weak self] idStr , getData, gernderLstData in
-                guard self != nil else {
-                    return
-                }
-                self?.localGenderLstData = gernderLstData
-                self?.is_filterStr = "1"
-                self?.genderFilterStr = getData
-                
-                if self?.inputType?.capitalized == "home".capitalized {
-                    self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
-                }else{
-                    self?.getFilterSelectGymList(inpuntTagId: self?.inpuntTagId)
-                }
-                
-            }
-            
-            vc.sendLanguageStr = { [weak self] idStr , getData, langLstData in
-                guard self != nil else {
-                    return
-                }
-                  
-                self?.localLanguageLstData = langLstData
-                self?.is_filterStr = "1"
-                self?.languageFilterStr = idStr
-//                self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
-                
-                if self?.inputType?.capitalized == "home".capitalized {
-                    self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
-                }else{
-                    self?.getFilterSelectGymList(inpuntTagId: self?.inpuntTagId)
-                }
-            }
-            
-            vc.sendNationalityStr = { [weak self] idStr , getData, nationalityLstData in
-                guard self != nil else {
-                    return
-                }
-               
-                self?.localNationalityLstData = nationalityLstData
-                self?.is_filterStr = "1"
-                self?.nationalityFilterStr = idStr
-//                self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
-                
-                if self?.inputType?.capitalized == "home".capitalized {
-                    self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
-                }else{
-                    self?.getFilterSelectGymList(inpuntTagId: self?.inpuntTagId)
-                }
-            }
-            
-            vc.sendTime_slotStr = { [weak self] idStr , getData, timeSlotData in
-                guard self != nil else {
-                    return
-                }
-               
-                self?.localTimeSlotData = timeSlotData
-                self?.is_filterStr = "1"
-                self?.time_slotFilterStr = idStr
-//                self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
-                
-                if self?.inputType?.capitalized == "home".capitalized {
-                    self?.getFilterTrainerApi(inpuntTagId: self?.inpuntTagId)
-                }else{
-                    self?.getFilterSelectGymList(inpuntTagId: self?.inpuntTagId)
-                }
-            }
-            
-            vc.localGenderLstData =  self.localGenderLstData
-            vc.localLanguageLstData = self.localLanguageLstData
-            vc.localNationalityLstData = self.localNationalityLstData
-            vc.localTimeSlotData = self.localTimeSlotData
-            
-            self.navigationController?.present(vc, animated: true)
         }
-        
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -698,9 +576,9 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
             let cellWdth = collectionView.frame.size.width*0.46
             return CGSize(width: cellWdth, height: cellWdth * 1.5)
             
-        }else    if collectionView == filterMenuCollView {
-            let cellWdth = collectionView.frame.size.width*0.24
-            return CGSize(width: cellWdth, height: collectionView.frame.size.height)
+            //        }else    if collectionView == filterMenuCollView {
+            //            let cellWdth = collectionView.frame.size.width*0.24
+            //            return CGSize(width: cellWdth, height: collectionView.frame.size.height)
         }
         else{
             return CGSize(width: collectionView.frame.size.width, height: collectionView.frame.size.height)
@@ -721,117 +599,143 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell:TrainerListTableViewCell = trainerListTblView.dequeueReusableCell(withIdentifier: "TrainerListTableViewCell", for: indexPath) as! TrainerListTableViewCell
-      
-//        cell.isUserInteractionEnabled = false
         
         if let isFromHome = isFromHome, isFromHome {
             cell.trainerTagsData = self.trainerData?[indexPath.row].tags
-            cell.setCellData(trainerData: self.trainerData?[indexPath.row])
-            
-            cell.bookSlotBtn.accessibilityHint = "\(self.trainerData?[indexPath.row].id ?? 0)"
-        }else{
+            cell.setCellData(trainerData: self.trainerData?[indexPath.row], indexPath: indexPath)
+            cell.btnSelectTrainer.accessibilityHint = "\(self.trainerData?[indexPath.row].id ?? 0)"
+            cell.viewDetailsBtn.accessibilityHint = "\(self.trainerData?[indexPath.row].id ?? 0)"
+        } else {
             cell.trainerTagsData = self.gymTrainerData?[indexPath.row].tags
-            cell.setGymCellData(trainerData: self.gymTrainerData?[indexPath.row])
-           
-            cell.bookSlotBtn.accessibilityHint = "\(self.gymTrainerData?[indexPath.row].id ?? 0)"
+            cell.setGymCellData(trainerData: self.gymTrainerData?[indexPath.row], indexPath: indexPath)
+            cell.viewDetailsBtn.accessibilityHint = "\(self.gymTrainerData?[indexPath.row].id ?? 0)"
+            cell.btnSelectTrainer.accessibilityHint = "\(self.gymTrainerData?[indexPath.row].id ?? 0)"
         }
+        //        cell.viewDetailsBtn.accessibilityHint = "\(self.gymTrainerData?[indexPath.row].id ?? 0)"
+        cell.btnSelectTrainer.addTarget(self, action: #selector(bookSlotBtnActn(sender: )), for: .touchUpInside)
+        cell.viewDetailsBtn.addTarget(self, action: #selector(viewProfileBtnActn(sender: )), for: .touchUpInside)
         
-        cell.bookSlotBtn.addTarget(self, action: #selector(bookSlotBtnActn(sender: )), for: .touchUpInside)
-                
         return cell
+        
+    }
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        
+        guard let cell = cell as? TrainerListTableViewCell else { return }
+        
+        stopAllVisibleVideos()
+        
+        cell.playVideoAfterDelay()
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    // Screen se hatne par video band
+    func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        
+        guard let cell = cell as? TrainerListTableViewCell else { return }
+        cell.stopVideo()
+    }
     
-        switch flowSlot {
-        case .bookTrainerHomeWorkout, .bookTrainerGymWorkout, .createPackage:
-            //----------------From book trainer
-            if let isFromHome = isFromHome, isFromHome {
-                let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
-//                vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.trainerData?[indexPath.row].id ?? 0)", type: self.inputType, long: self.inputLat, lat: self.inputLong)
-                vc.inputParam = DetailsParam(trainer_id: "\(self.trainerData?[indexPath.row].id ?? 0)", studio_id: "", type: self.inputType, long: self.inputLong, lat: self.inputLat)
-//                vc.isSlotsAvail = self.trainerData?[indexPath.row].isfull
-                
-                if let isFull = self.trainerData?[indexPath.row].isfull, let slotAvail = self.trainerData?[indexPath.row].slot?.value, isFull && slotAvail.lowercased() == "no".lowercased() {
-                    vc.isSlotsAvail = true
-                }else{
-                    vc.isSlotsAvail = false
-                }
-                
-                vc.detailsFlowSetup = flowSlot
-                self.navigationController?.pushViewController(vc, animated: true)
-            }else{
-                let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
-                vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "")", type: self.inputType, long: self.inputLong, lat: self.inputLat)
-//                vc.isSlotsAvail = self.gymTrainerData?[indexPath.row].isfull
-                
-                if let isFull = self.gymTrainerData?[indexPath.row].isfull, let slotAvail = self.gymTrainerData?[indexPath.row].slot, isFull && slotAvail.lowercased() == "no".lowercased() {
-                    vc.isSlotsAvail = true
-                }else{
-                    vc.isSlotsAvail = false
-                }
-                
-                vc.detailsFlowSetup = flowSlot //.bookTrainerGymWorkout
-                self.navigationController?.pushViewController(vc, animated: true)
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        playMostVisibleCell()
+    }
+    
+    func playMostVisibleCell() {
+        
+        let visibleCells = trainerListTblView.visibleCells.compactMap { $0 as? TrainerListTableViewCell }
+        
+        guard visibleCells.count > 0 else { return }
+        
+        var maxVisibleCell: TrainerListTableViewCell?
+        var maxVisiblePercentage: CGFloat = 0
+        
+        for cell in visibleCells {
+            
+            let cellFrameInTable = trainerListTblView.convert(cell.frame, to: trainerListTblView.superview)
+            
+            let visibleFrame = trainerListTblView.frame.intersection(cellFrameInTable)
+            
+            let visibleHeight = visibleFrame.height
+            let totalHeight = cell.frame.height
+            
+            let visiblePercentage = visibleHeight / totalHeight
+            
+            if visiblePercentage > maxVisiblePercentage {
+                maxVisiblePercentage = visiblePercentage
+                maxVisibleCell = cell
             }
-            
-        case .gymMembership, .withTrainerMembership, .withoutTrainerMembership:
-            //----------------
-            let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
-//            vc.isSlotsAvail = self.gymTrainerData?[indexPath.row].isfull
-            
-            if let isFull = self.gymTrainerData?[indexPath.row].isfull, let slotAvail = self.gymTrainerData?[indexPath.row].slot, isFull && slotAvail.lowercased() == "no".lowercased() {
-                vc.isSlotsAvail = true
-            }else{
-                vc.isSlotsAvail = false
-            }
-            vc.detailsFlowSetup = flowSlot
-            vc.inputParam = DetailsParam(trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)", studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "")", type: self.inputType, long: self.inputLong, lat: self.inputLat )
-            self.navigationController?.pushViewController(vc, animated: true)
-            
-            /*
-             if let isFull = trainerDetails?.isfull, let slotAvail = trainerDetails?.slot?.value, isFull && slotAvail.lowercased() == "no".lowercased() {
-             */
-            
-        case .defaultFlow:
-            print("default....")
-            break
         }
-                
+        
+        stopAllVisibleVideos()
+        
+        if let cellToPlay = maxVisibleCell,
+           maxVisiblePercentage >= 0.7 {
+            
+            cellToPlay.playVideoAfterDelay()
+        }
+    }
+    
+    func stopAllVisibleVideos() {
+        for visibleCell in trainerListTblView.visibleCells {
+            if let videoCell = visibleCell as? TrainerListTableViewCell {
+                videoCell.stopVideo()
+            }
+        }
     }
     
     @objc func bookSlotBtnActn(sender:UIButton) {
-        
         if let isFromHome = isFromHome, isFromHome {
             let getIndx = self.trainerData?.firstIndex(where: {
                 $0.id == Int(sender.accessibilityHint ?? "0")
             })
-            
             if let getIndx = getIndx {
                 let trainerDetails = self.trainerData?[getIndx]
-                
-                
-//                if let isFull = trainerDetails?.isfull, isFull {
-                
-                if let isFull = trainerDetails?.isfull, let slotAvail = trainerDetails?.slot?.value, isFull && slotAvail.lowercased() == "no".lowercased() {
-                    print("No slots available")
-                }
-                else{
-                    let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
+                if self.inputParam?.isFreeAssessmentSelected ?? false { // only for Free Assessment
+                    let vc: NewCalenderViewController = NewCalenderViewController.instantiate(appStoryboard: .calendar)
                     vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
                     vc.studioIdStr = studioId
                     vc.inputType = self.inputType
+                    vc.package_type = self.package_type
+                    var newData = self.inputParam
+                    newData?.trainer_id = "\(trainerDetails?.id ?? 0)"
+                    vc.inputParam = newData
                     self.navigationController?.pushViewController(vc, animated: true)
+                } else {
+                    if trainerDetails?.isPackage ?? false { // Old Flow to book a slot
+                        if let isFull = trainerDetails?.isfull, let slotAvail = trainerDetails?.slot?.value, isFull && slotAvail.lowercased() == "no".lowercased() {
+                            AlertHelper.shared.alertMesssage(view: self, title: "", message: "No slots available")
+                            print("No slots available")
+                        } else {
+                            let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
+                            vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
+                            vc.studioIdStr = studioId
+                            vc.inputType = self.inputType
+                            self.navigationController?.pushViewController(vc, animated: true)
+                        }
+                    } else { // New Flow without slot booking
+                        if trainerDetails?.is_group ?? false {
+                            let vc:TrainingTeamViewController = TrainingTeamViewController.instantiate(appStoryboard: .purchase)
+                            vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
+                            vc.studioIdStr = studioId
+                            vc.inputType = self.inputType
+                            vc.package_type = self.package_type
+                            var newData = self.inputParam
+                            newData?.trainer_id = "\(trainerDetails?.id ?? 0)"
+                            vc.inputParam = newData
+                            self.navigationController?.pushViewController(vc, animated: true)
+                        } else {
+                            let vc:PackagesVC = PackagesVC.instantiate(appStoryboard: .purchase)
+                            vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
+                            vc.studioIdStr = studioId
+                            vc.inputType = self.inputType
+                            vc.package_type = self.package_type
+                            var newData = self.inputParam
+                            newData?.trainer_id = "\(trainerDetails?.id ?? 0)"
+                            vc.inputParam = newData
+                            self.navigationController?.pushViewController(vc, animated: false)
+                        }
+                    }
                 }
-                
-//                let vc:SelectYourLocationViewController = SelectYourLocationViewController.instantiate(appStoryboard: .booking)
-//                vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
-//                vc.studioIdStr = studioId
-//                vc.inputType = self.inputType
-//                self.navigationController?.pushViewController(vc, animated: true)
             }
-        }else{
-            
+        } else {
             let getIndx = self.gymTrainerData?.firstIndex(where: {
                 $0.id == Int(sender.accessibilityHint ?? "0")
             })
@@ -839,54 +743,107 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
             if let getIndx = getIndx {
                 let trainerDetails = self.gymTrainerData?[getIndx]
                 let currentMonth = Calendar.current.component(.month, from: Date())
-                
-//                if let isFull = trainerDetails?.isfull, isFull {
-                
-                if let isFull = trainerDetails?.isfull , let slotAvail = trainerDetails?.slot, isFull && slotAvail.lowercased() == "no".lowercased() {
-                    print("No slots available")
-                }
-                else{
-                    let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
-                    vc.slotBookFlow = .bookTrainerGymWorkout
-                    vc.params = AvailParmsModel(type: self.inputType, trainer_id: "\(trainerDetails?.id ?? 0)", studio_id: studioId, month: "\(currentMonth)", address_id: "")
+                if self.inputParam?.isFreeAssessmentSelected ?? false { // only for Free Assessment
+                    let vc: NewCalenderViewController = NewCalenderViewController.instantiate(appStoryboard: .calendar)
+                    vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
+                    vc.studioIdStr = studioId
+                    vc.inputType = self.inputType
+                    vc.package_type = self.package_type
+                    var newData = self.inputParam
+                    newData?.trainer_id = "\(trainerDetails?.id ?? 0)"
+                    vc.inputParam = newData
                     self.navigationController?.pushViewController(vc, animated: true)
+                } else {
+                    if trainerDetails?.isPackage ?? false {  // Old Flow to book a slot
+                        if let isFull = trainerDetails?.isfull , let slotAvail = trainerDetails?.slot, isFull && slotAvail.lowercased() == "no".lowercased() {
+                            AlertHelper.shared.alertMesssage(view: self, title: "", message: "No slots available")
+                            print("No slots available")
+                        } else {
+                            let vc: BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
+                            vc.slotBookFlow = .bookTrainerGymWorkout
+                            vc.studioIdStr = self.inputParam?.studio_id
+                            vc.params = AvailParmsModel(type: self.inputType, trainer_id: "\(trainerDetails?.id ?? 0)", studio_id: self.inputParam?.studio_id, month: "\(currentMonth)", address_id: "")
+                            self.navigationController?.pushViewController(vc, animated: true)
+                        }
+                    } else { // New Flow without slot booking
+                        if trainerDetails?.is_group ?? false {
+                            let vc:TrainingTeamViewController = TrainingTeamViewController.instantiate(appStoryboard: .purchase)
+                            vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
+                            vc.studioIdStr = self.inputParam?.studio_id
+                            vc.inputType = self.inputType
+                            vc.package_type = self.package_type
+                            var newData = self.inputParam
+                            newData?.trainer_id = "\(trainerDetails?.id ?? 0)"
+                            vc.inputParam = newData
+                            self.navigationController?.pushViewController(vc, animated: true)
+                        } else {
+                            let vc: PackagesVC = PackagesVC.instantiate(appStoryboard: .purchase)
+                            vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
+                            vc.studioIdStr = self.inputParam?.studio_id
+                            vc.inputType = self.inputType
+                            vc.package_type = self.package_type
+                            var newData = self.inputParam
+                            newData?.trainer_id = "\(trainerDetails?.id ?? 0)"
+                            vc.inputParam = newData
+                            self.navigationController?.pushViewController(vc, animated: false)
+                        }
+                    }
                 }
-                
-                
-//                let vc:BookingCalendarViewController = BookingCalendarViewController.instantiate(appStoryboard: .booking)
-//                vc.slotBookFlow = .bookTrainerGymWorkout
-//                vc.params = AvailParmsModel(type: self.inputType, trainer_id: "\(trainerDetails?.id ?? 0)", studio_id: studioId, month: "\(currentMonth)", address_id: "")
-//                self.navigationController?.pushViewController(vc, animated: true)
             }
         }
     }
+    
+    
+    @objc func viewProfileBtnActn(sender:UIButton) {
+        if let isFromHome = isFromHome, isFromHome {
+            
+            let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+            let getIndx = self.trainerData?.firstIndex(where: {
+                $0.id == Int(sender.accessibilityHint ?? "0")
+            })
+            var inputData = inputParam
+            inputData?.trainer_id = "\(self.trainerData?[getIndx ?? 0].id ?? 0)"
+            vc.inputParam = inputData
+            self.navigationController?.pushViewController(vc, animated: true)
+        }else{
+            let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+            let getIndx = self.gymTrainerData?.firstIndex(where: {
+                $0.id == Int(sender.accessibilityHint ?? "0")
+            })
+            var inputData = inputParam
+            inputData?.trainer_id = "\(self.gymTrainerData?[getIndx ?? 0].id ?? 0)"
+            vc.inputParam = inputData
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+    }
 }
+
 
 //MARK: ---------------- SEARCHBAR DELEAGTE
 extension TrainerListViewController: UISearchBarDelegate{
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.text = nil
-//        searchBar.showsCancelButton = false
+        //        searchBar.showsCancelButton = false
         // Remove focus from the search bar.
         searchBar.endEditing(true)
         searchBar.resignFirstResponder()
         
         /*
-        if let isFromHome = isFromHome, isFromHome {
-                self.trainerData?.removeAll()
-                self.trainerData = self.trainerDataLocal
-        }else{
-                self.gymTrainerDataLocal?.removeAll()
-                self.gymTrainerData = self.gymTrainerDataLocal
-        }
-        
-        if let isGridshow = isGridShow, isGridshow {
-            self.trainerGridCollView.reloadData()
-        }else{
-            self.trainerListTblView.reloadData()
-        }
-        */
+         if let isFromHome = isFromHome, isFromHome {
+         self.trainerData?.removeAll()
+         self.trainerData = self.trainerDataLocal
+         }else{
+         self.gymTrainerDataLocal?.removeAll()
+         self.gymTrainerData = self.gymTrainerDataLocal
+         }
+         
+         if let isGridshow = isGridShow, isGridshow {
+         self.trainerGridCollView.reloadData()
+         }else{
+         self.trainerListTblView.reloadData()
+         }
+         */
         
         // Perform any necessary work.  E.g., repopulating a table view
         // if the search bar performs filtering.
@@ -899,53 +856,51 @@ extension TrainerListViewController: UISearchBarDelegate{
     }
     
     // SearchBar Delegate
-      func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-//          if searchText.isEmpty {
-//                   filteredPeople = people
-//               } else {
-//                   filteredPeople = people.filter { $0.name.lowercased().contains(searchText.lowercased()) }
-//               }
-          
-          if let isFromHome = isFromHome, isFromHome {
-              if searchText.isEmpty {
-                  self.trainerData?.removeAll()
-                  self.trainerData = self.trainerDataLocal
-                  print("in empty self.trainerData: ", self.trainerData?.count as Any)
-              } else {
-                  if let trainerData = self.trainerDataLocal {
-                      self.trainerData = trainerData.filter { ($0.name ?? "").lowercased().contains(searchText.lowercased()) }
-                      print("in filter trainerData: ", self.trainerData?.count as Any)
-                  }else{
-                      print("in outer trainerData: ", self.trainerData?.count as Any)
-                  }
-              }
-          }else{
-              if searchText.isEmpty {
-                  self.gymTrainerDataLocal?.removeAll()
-                  self.gymTrainerData = self.gymTrainerDataLocal
-              } else {
-                  if let trainerData = self.gymTrainerData {
-                      self.gymTrainerData = trainerData.filter { ($0.name ?? "").lowercased().contains(searchText.lowercased()) }
-                  }
-              }
-          }
-          
-          if let isGridshow = isGridShow, isGridshow {
-              self.trainerGridCollView.reloadData()
-          }else{
-              self.trainerListTblView.reloadData()
-          }
-      }
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        //          if searchText.isEmpty {
+        //                   filteredPeople = people
+        //               } else {
+        //                   filteredPeople = people.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+        //               }
+        
+        if let isFromHome = isFromHome, isFromHome {
+            if searchText.isEmpty {
+                self.trainerData?.removeAll()
+                self.trainerData = self.trainerDataLocal
+                print("in empty self.trainerData: ", self.trainerData?.count as Any)
+            } else {
+                if let trainerData = self.trainerDataLocal {
+                    self.trainerData = trainerData.filter { ($0.name ?? "").lowercased().contains(searchText.lowercased()) }
+                    print("in filter trainerData: ", self.trainerData?.count as Any)
+                }else{
+                    print("in outer trainerData: ", self.trainerData?.count as Any)
+                }
+            }
+        } else {
+            if searchText.isEmpty {
+                self.gymTrainerDataLocal?.removeAll()
+                self.gymTrainerData = self.gymTrainerDataLocal
+            } else {
+                if let trainerData = self.gymTrainerDataLocal {
+                    self.gymTrainerData = trainerData.filter { ($0.name ?? "").lowercased().contains(searchText.lowercased()) }
+                }
+            }
+        }
+        if let isGridshow = isGridShow, isGridshow {
+            self.trainerGridCollView.reloadData()
+        }else{
+            self.trainerListTblView.reloadData()
+        }
+    }
     
- 
-     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-         print(searchBar.text as Any)
-         }
     
-     
-         func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-                searchBar.resignFirstResponder()
-         }
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        print(searchBar.text as Any)
+    }
+    
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+    }
 }
 
 //MARK: -----------------------EXTENSION FOR API
@@ -953,26 +908,26 @@ extension TrainerListViewController {
     
     //MARK: --------------------GET TRAINER LIST API
     private func getTrainerApi(inputFilter: String?, inpuntTagId: Int?){
-        let params:[String:String] = [
+        let params:[String: String] = [
             "type": self.inputType ?? "",
             "is_filter": inputFilter ?? "",
             "tag_id": "\(inpuntTagId ?? 0)" ,
-            "long": self.inputLong ?? "",
-            "lat": self.inputLat ?? ""
+            "long": "\(self.inputLong ?? 0.0)",
+            "lat": "\(self.inputLat ?? 0.0)"
         ]
         
         TrainerVM.gerTrainerApi(viewController: self, inputParms: params, completion: { [weak self] getResultData in
             guard let self = self, let getResultData = getResultData else { return  }
             print("get trainer list result data: ", getResultData as Any)
             
-//            DispatchQueue.main.async {
+            DispatchQueue.main.async {
                 self.tagData?.removeAll()
                 self.trainerData?.removeAll()
                 self.tagData?.append(contentsOf: getResultData.data?.tags ?? [])
                 self.trainerData?.append(contentsOf: getResultData.data?.trainers ?? [])
                 self.trainerDataLocal?.removeAll()
                 self.trainerDataLocal = self.trainerData
-               
+                
                 //-------------------Reload to set data
                 let tagModelData = TagModel(id: 1, name: "All Workouts", description: "", icon: "", image: "")
                 self.tagData?.insert(tagModelData, at: 0)
@@ -983,13 +938,13 @@ extension TrainerListViewController {
                 }else{
                     self.trainerListTblView.reloadData()
                 }
-//            }
+            }
         })
     }
     
     //-----------------Filter Trainer list(Home)
     private func getFilterTrainerApi(inpuntTagId: Int?){
-        var params:[String:Any] = [
+        var params: [String: Any] = [
             "gender": genderFilterStr ?? "",
             "language": languageFilterStr ?? "",
             "nationality": nationalityFilterStr ?? "",
@@ -998,7 +953,7 @@ extension TrainerListViewController {
             "long": self.inputLong ?? "",
             "lat": self.inputLat ?? "",
             "type": self.inputType ?? "",
-//            "tag_id": "\(inpuntTagId ?? 0)" ,
+            //            "tag_id": "\(inpuntTagId ?? 0)" ,
             
         ]
         
@@ -1034,12 +989,12 @@ extension TrainerListViewController {
                 self.trainerData?.append(contentsOf: getResultData.data?.trainers ?? [])
                 self.trainerDataLocal?.removeAll()
                 self.trainerDataLocal = self.trainerData
-               
+                
                 //-------------------Reload to set data
                 let tagModelData = TagModel(id: nil, name: "All Workouts", description: "", icon: "", image: "")
                 self.tagData?.insert(tagModelData, at: 0)
                 self.workoutCategoryCollView.reloadData()
-                                
+                
                 if let isGridshow = self.isGridShow, isGridshow {
                     self.trainerGridCollView.reloadData()
                 }else{
@@ -1061,9 +1016,9 @@ extension TrainerListViewController {
     private func getSelectGymList(inputFilter: String?, inpuntTagId: Int?){
         
         let params:[String:String] = [
-            "id": self.studioId ?? "",
-            "long": self.inputLong ?? "",
-            "lat": self.inputLat ?? "",
+            "id": self.inputParam?.studio_id ?? "",
+            "long": self.inputParam?.long ?? "",
+            "lat": self.inputParam?.lat ?? "",
             "is_filter": inputFilter ?? "",
             "tag_id": "\(inpuntTagId ?? 0)"
         ]
@@ -1072,78 +1027,71 @@ extension TrainerListViewController {
             guard let self = self, let getResultData = getResultData else { return }
             
             print(getResultData)
-            
-            self.gymTrainerData?.removeAll()
-            self.tagData?.removeAll()
-            self.trainerData?.removeAll()
-            self.tagData?.append(contentsOf: getResultData.data?.tags ?? [])
-            self.gymTrainerData?.append(contentsOf: getResultData.data?.trainers ?? [])
-            self.gymTrainerDataLocal?.removeAll()
-            self.gymTrainerDataLocal = self.gymTrainerData
-            
-            //-------------------Reload to set data
-            let tagModelData = TagModel(id: 1, name: "All Workouts", description: "", icon: "", image: "")
-            self.tagData?.insert(tagModelData, at: 0)
-            self.workoutCategoryCollView.reloadData()
-//            self.trainerListTblView.reloadData()
-            
-            if let isGridshow = isGridShow, isGridshow {
-                self.trainerGridCollView.reloadData()
-            }else{
-                self.trainerListTblView.reloadData()
+            DispatchQueue.main.async {
+                self.gymTrainerData?.removeAll()
+                self.tagData?.removeAll()
+                self.trainerData?.removeAll()
+                self.tagData?.append(contentsOf: getResultData.data?.tags ?? [])
+                self.gymTrainerData?.append(contentsOf: getResultData.data?.trainers ?? [])
+                self.gymTrainerDataLocal?.removeAll()
+                self.gymTrainerDataLocal = self.gymTrainerData
+                
+                //-------------------Reload to set data
+                let tagModelData = TagModel(id: 1, name: "All Workouts", description: "", icon: "", image: "")
+                self.tagData?.insert(tagModelData, at: 0)
+                self.workoutCategoryCollView.reloadData()
+                //            self.trainerListTblView.reloadData()
+                
+                if let isGridshow = self.isGridShow, isGridshow {
+                    self.trainerGridCollView.reloadData()
+                }else{
+                    self.trainerListTblView.reloadData()
+                }
             }
         })
-        
     }
     
-    
-    
     //-----------------Filter Trainer list(from gym)
-    private func getFilterSelectGymList(inpuntTagId: Int?){
-        
+    private func getFilterSelectGymList(inpuntTagId: Int?) {
         var params:[String:Any] = [
-            "id": self.studioId ?? "",
+            "id": self.inputParam?.studio_id ?? "",
             "gender": genderFilterStr ?? "",
             "language": languageFilterStr ?? "",
             "nationality": nationalityFilterStr ?? "",
             "time_slot": time_slotFilterStr ?? "",
-            "long": self.inputLong ?? "",
-            "lat": self.inputLat ?? "",
-            "type": self.inputType ?? "",
+            "long": self.inputParam?.long ?? "",
+            "lat": self.inputParam?.lat ?? "",
+            "type":self.inputParam?.type ?? "",
             
         ]
-        
         if let inpuntTagId = inpuntTagId {
             params["tag_id"] = inpuntTagId
-        }else{
-            
         }
         
         TrainerVM.selectGymFilterTrainerApi(viewController: self, inputParams: params, completion: { [weak self] getResultData in
             guard let self = self, let getResultData = getResultData else { return }
-
+            
             print(getResultData)
-
-            self.gymTrainerData?.removeAll()
-            self.tagData?.removeAll()
-            self.trainerData?.removeAll()
-            self.tagData?.append(contentsOf: getResultData.data?.tags ?? [])
-            self.gymTrainerData?.append(contentsOf: getResultData.data?.trainers ?? [])
-            self.gymTrainerDataLocal?.removeAll()
-            self.gymTrainerDataLocal = self.gymTrainerData
-
-            //-------------------Reload to set data
-            let tagModelData = TagModel(id: nil, name: "All Workouts", description: "", icon: "", image: "")
-            self.tagData?.insert(tagModelData, at: 0)
-            self.workoutCategoryCollView.reloadData()
-
-            if let isGridshow = isGridShow, isGridshow {
-                self.trainerGridCollView.reloadData()
-            }else{
-                self.trainerListTblView.reloadData()
+            DispatchQueue.main.async {
+                self.gymTrainerData?.removeAll()
+                self.tagData?.removeAll()
+                self.trainerData?.removeAll()
+                self.tagData?.append(contentsOf: getResultData.data?.tags ?? [])
+                self.gymTrainerData?.append(contentsOf: getResultData.data?.trainers ?? [])
+                self.gymTrainerDataLocal?.removeAll()
+                self.gymTrainerDataLocal = self.gymTrainerData
+                
+                //-------------------Reload to set data
+                let tagModelData = TagModel(id: nil, name: "All Workouts", description: "", icon: "", image: "")
+                self.tagData?.insert(tagModelData, at: 0)
+                self.workoutCategoryCollView.reloadData()
+                
+                if let isGridshow = self.isGridShow, isGridshow {
+                    self.trainerGridCollView.reloadData()
+                } else {
+                    self.trainerListTblView.reloadData()
+                }
             }
         })
     }
 }
-
-

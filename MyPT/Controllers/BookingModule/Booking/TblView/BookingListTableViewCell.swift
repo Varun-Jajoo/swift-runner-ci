@@ -118,7 +118,8 @@ class BookingListTableViewCell: UITableViewCell {
         guard let inputData = inputData, let type = type else { return }
         self.rescheduledBtn.isHidden = true
         self.dateLbl.text = inputData.timing?.value
-        self.workoutFocusDescLbl.text = inputData.workoutFocus?.joined(separator: ",")
+//        self.workoutFocusDescLbl.text = inputData.workoutFocus?.joined(separator: ",")
+        self.workoutFocusDescLbl.text = inputData.bookingType
         self.sessionDescLbl.text = inputData.sessionType?.value
         self.timeLbl.text = inputData.duration?.value
         self.trainerNameLbl.text = inputData.trainer?.value

@@ -154,8 +154,12 @@ class GoalsViewController: CommonViewController {
         }
     
     override func rightBtnActn(sender: UIButton) {
-        appUserDefaults.setRegistrationSkip(value: true)
-        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
+        skipProfileApi(completion: { data in
+            appUserDefaults.setRegistrationSkip(value: true)
+            appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
+        })
+//        appUserDefaults.setRegistrationSkip(value: true)
+//        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
 //        appSceneDelegate?.goToGuestDashboard()
     }
     
@@ -204,7 +208,6 @@ class GoalsViewController: CommonViewController {
                 self.goalsCollView.layoutIfNeeded()
             }
         }
-     
         self.view.layoutIfNeeded()
     }
 }
@@ -239,8 +242,6 @@ extension GoalsViewController:  UICollectionViewDelegate, UICollectionViewDataSo
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let feedback = UIImpactFeedbackGenerator(style: .medium)
-        feedback.impactOccurred()
         
         let cell = collectionView.cellForItem(at: indexPath) as! PersonalizedCollectionViewCell
         
@@ -268,8 +269,7 @@ extension GoalsViewController:  UICollectionViewDelegate, UICollectionViewDataSo
     }
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        let feedback = UIImpactFeedbackGenerator(style: .medium)
-        feedback.impactOccurred()
+        TapticEngine.selection.feedback()
         print("Did deselect a cell at \(indexPath.row)")
         let cell = collectionView.cellForItem(at: indexPath) as! PersonalizedCollectionViewCell
         
@@ -363,4 +363,23 @@ extension GoalsViewController {
         })
     }
     
+    private func skipProfileApi(completion: @escaping (PaymentResponse) -> Void) {
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .skipProfile, method: .get, queries: nil, parameters: nil, isShowLoading: false, isShowLoadingWithoutMsg: true, completion: { (getResponce, error) in
+            do {
+                print(getResponce as Any)
+                if let responceData = getResponce {
+                    
+                    let getResult = try JSONDecoder().decode(PaymentResponse.self, from: responceData)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    } else {
+                        //                        let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+                        //                        AlertHelper.shared.alertMesssage(view: self, title: "", message: errorMsg ?? "")
+                    }
+                }
+            } catch {
+                print(error)
+            }
+        })
+    }
 }

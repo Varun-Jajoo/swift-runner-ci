@@ -18,11 +18,11 @@ struct BookingBaseModel: Codable {
 //MARK: ------------ BookingDataModel
 struct BookingDataModel: Codable {
     var id: FlexibleValue?
-    var type, timing, trainer_image, selected_slot: FlexibleValue?
+    var type, timing, starts_in, trainer_image, selected_slot: FlexibleValue?
     var workoutFocus: [String]?
     var sessionType, duration, trainer, location, distance, scheduleMsg, averageRating: FlexibleValue?
-    var isReschedule, isTrainer, isSchedule: Bool?
-    var msg: String?
+    var isReschedule, isTrainer, isSchedule, isCheckinAvailable: Bool?
+    var msg, bookingType: String?
 
     enum CodingKeys: String, CodingKey {
         case id, type, timing, trainer_image, selected_slot
@@ -30,9 +30,10 @@ struct BookingDataModel: Codable {
         case sessionType = "session_type"
         case duration, trainer, location, distance
         case isReschedule = "is_reschedule"
+        case bookingType = "booking_type"
         case isSchedule
         case isTrainer
-        case msg, scheduleMsg, averageRating
+        case msg, scheduleMsg, averageRating, starts_in
     }
 }
 
@@ -74,14 +75,14 @@ struct BookingDetailsDataModel: Codable {
 struct BookingDetailModel: Codable {
     var contact, price, location, trainingDate, qr, address_id: FlexibleValue?
     var type: FlexibleValue?
-    var msg: FlexibleValue?
+    var msg, otp: FlexibleValue?
     
 
     enum CodingKeys: String, CodingKey {
         case contact, price, location, qr, address_id
         case trainingDate = "training_date"
         case type
-        case msg
+        case msg, otp
     }
 }
 

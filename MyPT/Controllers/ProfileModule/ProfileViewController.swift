@@ -269,7 +269,7 @@ class ProfileViewController: CommonViewController, ChartViewDelegate {
                         
         if let myptChartData = profileData?.myptChart, myptChartData.count > 0 {
             self.activityMBV.isHidden = true
-            self.MyPTScoreMBV.isHidden = false
+//            self.MyPTScoreMBV.isHidden = false
         }
         
         if let activityData = profileData?.activityLog {
@@ -365,7 +365,7 @@ class ProfileViewController: CommonViewController, ChartViewDelegate {
 //          
 //      }
     
-    private func setupUI(){
+    private func setupUI() {
         
         /*
         self.planMBV.isUserInteractionEnabled = true
@@ -436,6 +436,12 @@ class ProfileViewController: CommonViewController, ChartViewDelegate {
             //rgba(29, 215, 148, 1)
             //rgba(9, 46, 46, 1)
         }
+        
+        achievementsMBV.isHidden = true
+        healthPreferencesMBV.isHidden = true
+        MyPTScoreMBV.isHidden = true
+        awardsMBV.isHidden = true
+        awardsEmptyMBV.isHidden = true
     }
     
     //-------------------Make Chart
@@ -675,7 +681,7 @@ extension ProfileViewController: UICollectionViewDelegate, UICollectionViewDataS
 }
 
 extension ProfileViewController {
-    private func getUserProfileApi(){
+    private func getUserProfileApi() {
         ProfileVM.getUserProfileApi(inputParams: nil, completion: {[weak self] getResultData in
             guard let self = self, var getResultData = getResultData else { return }
             self.profileData = getResultData.data
@@ -686,12 +692,12 @@ extension ProfileViewController {
                 self.setData()
             }
             if let awardsData = profileData?.awards , !awardsData.isEmpty {
-                self.awardsMBV.isHidden = false
-                self.awardsEmptyMBV.isHidden = true
+//                self.awardsMBV.isHidden = false
+//                self.awardsEmptyMBV.isHidden = true
                 self.awardsCollView.reloadData()
             }else{
-                self.awardsMBV.isHidden = true
-                self.awardsEmptyMBV.isHidden = false
+//                self.awardsMBV.isHidden = true
+//                self.awardsEmptyMBV.isHidden = false
             }
             
             if let healthPrefernce = profileData?.healthPrefernce , !healthPrefernce.isEmpty {

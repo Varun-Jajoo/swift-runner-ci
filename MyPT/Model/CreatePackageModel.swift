@@ -65,6 +65,7 @@ struct MembershipValityDataModel: Codable {
 struct ValityPackageDetailModel: Codable {
     var price : FlexibleValue?
     var validity : FlexibleValue?
+    var image, name, special_msg: String?
 }
 
 
@@ -192,7 +193,9 @@ struct MemberBaseModel: Codable {
 //MARK: ------------- MemberDataModel
 struct MemberDataModel: Codable {
     var members: [MemberModel]?
-    var minMember, maxMember, limit: String?
+    var minMember : FlexibleValue?
+    var maxMember: FlexibleValue?
+    var limit: String?
 
     enum CodingKeys: String, CodingKey {
         case members
@@ -207,11 +210,164 @@ struct MemberModel: Codable {
     var id: Int?
     var name, gender: String?
     var age: FlexibleValue?
-    var memberSelf: Bool?
+    var memberSelf, isBuddy, isGroup: Bool?
 
     enum CodingKeys: String, CodingKey {
         case id, name, age, gender
         case memberSelf = "self"
+        case isBuddy = "is_buddy"
+        case isGroup = "is_group"
     }
 }
 
+
+// MARK: - PaymentStatusResponseModel
+struct PaymentStatusResponseModel: Codable {
+    let status: Bool?
+    let data: PaymentStatusData?
+    let msg: String?
+}
+
+struct PaymentStatusData: Codable {
+    let paymentId: Int?
+    let orderRef: String?
+    let transactionId: String?
+    let gateway: String?
+    let amount: String?
+    let currency: String?
+    let status: String?
+    let isSuccess: Bool?
+    let paymentFor: String?
+    let statusMessage: String?
+    let subscription: Subscription?
+    let planDetails: PlanDetails?
+    
+    enum CodingKeys: String, CodingKey {
+        case paymentId = "payment_id"
+        case orderRef = "order_ref"
+        case transactionId = "transaction_id"
+        case gateway
+        case amount
+        case currency
+        case status
+        case isSuccess = "is_success"
+        case paymentFor = "payment_for"
+        case statusMessage = "status_message"
+        case subscription
+        case planDetails = "plan_details"
+    }
+}
+
+struct Subscription: Codable {
+    
+    let id: Int?
+    let type: String?
+    let sessions: Int?
+    let remainingSessions: Int?
+    let sessionsDisplay: String?
+    let validityDisplay: String?
+    let status: String?
+    let startDate: String?
+    let endDate: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case type
+        case sessions
+        case remainingSessions = "remaining_sessions"
+        case sessionsDisplay = "sessions_display"
+        case validityDisplay = "validity_display"
+        case status
+        case startDate = "start_date"
+        case endDate = "end_date"
+    }
+}
+
+struct PlanDetails: Codable {
+    
+    let planName: String?
+    let sessions: Int?
+    let sessionsDisplay: String?
+    let validity: String?
+    let validityDisplay: String?
+    let primaryTrainer: String?
+    let workoutType: String?
+    let trainingMode: String?
+    let activationNote: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case planName = "plan_name"
+        case sessions
+        case sessionsDisplay = "sessions_display"
+        case validity
+        case validityDisplay = "validity_display"
+        case primaryTrainer = "primary_trainer"
+        case workoutType = "workout_type"
+        case trainingMode = "training_mode"
+        case activationNote = "activation_note"
+    }
+}
+
+
+struct PaymentResponse: Codable {
+    let status: Bool?
+    let data: CCPaymentData?
+    let msg: String?
+}
+
+struct CCPaymentData: Codable {
+    let amount: String?
+    let status: String?
+    let paymentID: Int?
+    let transactionID: String?
+    let isSuccess: Bool?
+    let orderRef: String?
+    let paymentFor: String?
+    let statusMessage: String?
+    let gateway: String?
+    let currency: String?
+    let planDetails: CCPlanDetails?
+    
+    enum CodingKeys: String, CodingKey {
+        case amount, status, gateway, currency
+        case paymentID = "payment_id"
+        case transactionID = "transaction_id"
+        case isSuccess = "is_success"
+        case orderRef = "order_ref"
+        case paymentFor = "payment_for"
+        case statusMessage = "status_message"
+        case planDetails = "plan_details"
+    }
+}
+
+struct CCPlanDetails: Codable {
+    let validityDisplay: String?
+    let workoutType: String?
+    let trainingMode: String?
+    let failureReason: String?
+    let isMembership: Bool?
+    let planName: String?
+    let activationNote: String?
+    let primaryTrainer: String?
+    let failureNote: String?
+    let sessions: Int?
+    let validity: String?
+    let sessionsDisplay, startDate, endDate: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case validityDisplay = "validity_display"
+        case workoutType = "workout_type"
+        case trainingMode = "training_mode"
+        case failureReason = "failure_reason"
+        case isMembership = "is_membership"
+        case planName = "plan_name"
+        case activationNote = "activation_note"
+        case primaryTrainer = "primary_trainer"
+        case failureNote = "failure_note"
+        case sessions
+        case validity
+        case sessionsDisplay = "sessions_display"
+        case startDate = "start_date"
+        case endDate = "end_date"
+    }
+}

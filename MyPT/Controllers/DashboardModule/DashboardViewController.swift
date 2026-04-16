@@ -602,8 +602,8 @@ class DashboardViewController: CommonViewController {
                 
                 let vc:GymWorkoutViewController = GymWorkoutViewController.instantiate(appStoryboard: .booking)
                 vc.inputType = "gym"
-                vc.inputLat = lat
-                vc.inputLong = long
+                vc.inputLat = Double(lat) ?? 0.0
+                vc.inputLong = Double(long) ?? 0.0
                 
                 appUserDefaults.setGymPackage(value: "gym")
                 
@@ -1249,8 +1249,8 @@ extension DashboardViewController: UICollectionViewDataSource, UICollectionViewD
         else if collectionView == gymsNearbyCollView{
             let vc:GymDetailsViewController = GymDetailsViewController.instantiate(appStoryboard: .booking)
             vc.inputStudioId = "\(self.studiosData?[indexPath.row].id ?? 0)"
-            vc.inputLat = appUserDefaults.getLatLong()?.components(separatedBy: ",").first //self.inputLat
-            vc.inputLong = appUserDefaults.getLatLong()?.components(separatedBy: ",").last //self.inputLong
+            vc.inputLat = Double(appUserDefaults.getLatLong()?.components(separatedBy: ",").first ?? "") //self.inputLat
+            vc.inputLong = Double(appUserDefaults.getLatLong()?.components(separatedBy: ",").last ?? "") //self.inputLong
             vc.inputType = "gym"
             vc.gymDetailsFlow = .bookTrainerGymWorkout
             self.navigationController?.pushViewController(vc, animated: true)

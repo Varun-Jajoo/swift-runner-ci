@@ -266,7 +266,7 @@ class CommonViewController: UIViewController {
     }
     
     //MARK: ---------------- SET IMAGE RIGHT MENU BUTTONS WITH OPTIONAL TITLE
-    func setRighMenu(rightImgs:[UIImage?] = [nil], setTitle:[String?] = [nil] , setTintColor:UIColor? = .clear, setTitleColor:UIColor? = .black, isRightImg:[Bool?] = [false], spacing: CGFloat = 5.0){
+    func setRighMenu(rightImgs:[UIImage?] = [nil], setTitle:[String?] = [nil] , setTintColor:UIColor? = .clear, setTitleColor:UIColor? = .black, isRightImg:[Bool?] = [false], spacing: CGFloat = 5.0) {
         self.navigationController?.isNavigationBarHidden = false
         
         var rightButton:[UIButton] = []
@@ -316,8 +316,6 @@ class CommonViewController: UIViewController {
         navigationItem.rightBarButtonItems = rightBarButtonsArray
     }
     
-    
-    
     //MARK: ---------------- SET IMAGE LEFT MENU BUTTONS ACTION
     @objc func rightBtnActn(sender:UIButton){
         print("Back Nav Tag",sender.tag)
@@ -326,7 +324,6 @@ class CommonViewController: UIViewController {
     func setNavigationColor(setColor colorBG:UIColor? = nil){
         self.navigationController?.navigationBar.backgroundColor = colorBG
     }
-    
     
     func statusBarColor(setColor statusbarColor:UIColor? = nil)
     {
@@ -397,5 +394,4 @@ class CommonViewController: UIViewController {
         navBar.standardAppearance = standardAppearance
         navBar.scrollEdgeAppearance = scrollEdgeAppearance
     }
-
 }

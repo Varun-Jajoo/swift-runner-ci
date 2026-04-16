@@ -105,8 +105,8 @@ extension GymSearchViewController: UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let vc:GymDetailsViewController = GymDetailsViewController.instantiate(appStoryboard: .booking)
         vc.inputStudioId = String(self.searchStudiosData?[indexPath.row].id ?? 0)
-        vc.inputLat = self.inputLat
-        vc.inputLong = self.inputLong
+        vc.inputLat = Double(self.inputLat ?? "")
+        vc.inputLong = Double(self.inputLong ?? "")
         vc.inputType = self.inputType
         vc.gymDetailsFlow = gymStudioFlow
         self.navigationController?.pushViewController(vc, animated: true)

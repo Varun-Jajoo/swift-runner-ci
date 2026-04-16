@@ -17,16 +17,16 @@ var success: Int                  { return 2000 }
 var failure: Int                  { return 2999 }
 var recordFound: Int              { return 2001 }
 var noRecordFound: Int            { return 2002 }
-var recordAlreadyExist: Int       { return 2003}
+var recordAlreadyExist: Int       { return 2003 }
 
-var isTesting:Bool                { return true }
+var isTesting: Bool               { return false }
 
 
 //App base urls
-enum AppBaseUrl:String {
+enum AppBaseUrl: String {
     case baseScheme = "https"
-    case baseDevUrl = "mobileapp.mypt-me.com" 
-    case baseProductionUrl = "mobileappuat.mypt-me.com"
+    case baseDevUrl = "mobileappuat.mypt-me.com" // Staging URL
+    case baseProductionUrl = "mobileapp.mypt-me.com" // Live URL
 }
 
 
@@ -40,7 +40,8 @@ enum ApiEndPoint: String{
     case readMessage
     case login                          =  "api/login"
     case resend_Otp                     =  "api/resendotp"
-    case submit_Otp                     =  "api/submit-otp"
+//    case submit_Otp                     =  "api/submit-otp"
+    case submit_Otp                     =  "api/submit-otp_new"
     case check_Step                     =  "api/step"
     case add_name                       =  "api/add-name"
     case get_prefrences                 =  "api/get-prefrences"
@@ -59,15 +60,19 @@ enum ApiEndPoint: String{
     case select_gym                     =  "api/select/gym"
     case studio_details                 =  "api/studio-details"
     case get_availability               =  "api/get-availability"
+    case getSlotsByTime                 =  "api/get-slots-by-time"
     case add_address                    =  "api/add-address"
     case get_cities                     =  "api/get-cities"
+    case get_emirates                   =  "api/get-emirates"
     case get_address                    =  "api/get-address"
     case get_slots                      =  "/api/get-slots"
     case book_slot                      =  "api/book-slot"
     case package_create_one_buddy       =  "api/package-create"
+//    case customiseGymMembership         =  "api/membership-validity"
     case package_setdate                =  "api/package-setdate"
     case package_checkout               =  "api/package-checkout"
     case get_maember_package_group      =  "api/package-group"
+    case get_buddy_member               =  "api/member-buddy-get"
     case add_member                     =  "api/add-member"
     case delete_member                  =  "api/delete-member"
     case trainer_follow                 =  "api/trainer-follow"
@@ -89,9 +94,12 @@ enum ApiEndPoint: String{
     case viewall_classes                =  "api/viewall-classes"
     case class_category                 =  "api/class-category"
     case book_class                     =  "api/book-class"
-    case ccaavenue_payment              =  "api/pay"
+//    case ccaavenue_payment              =  "api/pay"
+    case ccaavenue_payment              =  "api/payment/session"
+    case paymentStatus                  =  "api/payment/verify-status"
     case account_delete                 =  "api/account-delete"
-    case social_login                   =  "api/social-login"
+//    case social_login                   =  "api/social-login"
+    case social_login                   =  "api/social-login-new"
     case user_trainer                   =  "api/user-trainer"
     case user_profile                   =  "api/user-profile"
     case user_information               =  "api/user-information"
@@ -127,8 +135,22 @@ enum ApiEndPoint: String{
     case delete_workout_exercise        =  "api/delete-workout-exercise"
     case workout_delete                 =  "api/workout-delete"
     case edit_workout_exercise          =  "api/edit-workout-exercise"
-    
-   
+    case getTrainerGroup                =   "api/get-trainer-group"
+    case bestPlans                      =   "api/best-plans"
+   case reviewPackageCheckout           =   "api/review-package-checkout"
+   case homeGetContents                 =   "api/get-contents"
+   case homeGetStories                  =   "api/get-stories"
+   case getSubscriptionSlots            =   "api/get-subscription-slots"
+   case getGroupDetail                  =   "api/get-group-detail"
+   case bookAssessment                  =   "api/book-assessment"
+   case reviewAssessment                =   "api/review-assessment"
+   case checkAssesmentStatus            =   "api/check-assesment-status"
+   case getBanners                      =   "api/get-banners"
+   case getGymTrainers                  =   "api/get-gym-trainers"
+   case getTrainerStudios               =   "api/get-trainer-studios"
+   case clientPtTerms               =   "api/get-legal-document/client_pt_terms"
+   case skipProfile               =   "api/skip-profile"
+  
     case authLoginOTP = "authLoginOTP"
     case refreshAccessToken = "refreshToken"
     

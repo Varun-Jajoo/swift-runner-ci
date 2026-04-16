@@ -84,7 +84,7 @@ class BookingListViewController: CommonViewController {
             navBckBtn = (isFromTab ? nil : AppImages.backarrow)
         }
        
-        self.setLeftMenu(leftImgs: [navBckBtn], setTitle: [AppStrings.booking_Listings], setTintColor: .black, setTitleColor: UIColor.appWhite)
+        self.setLeftMenu(leftImgs: [nil], setTitle: [AppStrings.booking_Listings], setTintColor: .black, setTitleColor: UIColor.appWhite)
 //        self.setRighMenu(rightImgs: [AppImages.shareGymWorkout], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
     

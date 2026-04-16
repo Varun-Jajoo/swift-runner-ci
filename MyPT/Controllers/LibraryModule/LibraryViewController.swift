@@ -25,13 +25,13 @@ class LibraryViewController: CommonViewController {
     
     var typeId: String? {
         didSet{
-            self.getWorkoutsApi(inputType: typeId, page: pageNum)
+//            self.getWorkoutsApi(inputType: typeId, page: pageNum)
         }
     }
     
     var pageNum: Int? {
         didSet{
-            self.getWorkoutsApi(inputType: typeId, page: pageNum)
+//            self.getWorkoutsApi(inputType: typeId, page: pageNum)
         }
     }
     
@@ -87,7 +87,7 @@ class LibraryViewController: CommonViewController {
         self.myWorkoutDates?.removeAll()
         self.myWorkoutDates = DateFormatterHelper.shared.getDatesDays()
         
-        //        self.view.setComingSoon(bgColor: UIColor(red: 0, green: 5/255.0, blue: 2/255.0, alpha: 0.7),centerImgName: "ic_upcomingStripe", lockImgName: "ic_upcomingLock" ,title: AppStrings.coming_soon, desc: "Your personal library of workouts is almost ready. Hang tight — it's coming soon!.")
+        self.view.setComingSoon(bgColor: UIColor(red: 0, green: 5/255.0, blue: 2/255.0, alpha: 0.7),centerImgName: "ic_upcomingStripe", lockImgName: "ic_upcomingLock" ,title: AppStrings.coming_soon, desc: "Your plan of workouts is almost ready. Hang tight — it's coming soon!.")
         
         
         //        self.setBackgroundImage(named: "ic_upcoming_Library")
@@ -180,9 +180,9 @@ class LibraryViewController: CommonViewController {
         super.viewWillAppear(animated)
         self.setNavigationColor(setColor: .clear)
         self.statusBarColor(setColor: .clear)
-        setNavUI()
-        self.exploreWorkoutApi()
-        self.getWorkoutTypeApi()
+//        setNavUI()
+//        self.exploreWorkoutApi()
+//        self.getWorkoutTypeApi()
         
         getDate()
     }
@@ -572,13 +572,6 @@ extension LibraryViewController: UICollectionViewDelegate, UICollectionViewDataS
             let vc:SearchWorkoutViewController = SearchWorkoutViewController.instantiate(appStoryboard: .library)
             vc.categoryIdStr = self.gymCategoryData?[indexPath.row].id?.value
             self.navigationController?.pushViewController(vc, animated: true)
-            
-            /*
-             let vc:WorkoutDetailsViewController = WorkoutDetailsViewController.instantiate(appStoryboard: .library)
-             vc.workoutNameStr = categoryCell?.titlLbl.text
-             vc.workoutId = self.gymCategoryData?[indexPath.row].id?.value
-             self.navigationController?.pushViewController(vc, animated: true)
-             */
         }
         else if collectionView == featuredCollView{
             let featuredCell = collectionView.cellForItem(at: indexPath) as? WorkoutsCollectionViewCell
@@ -586,12 +579,6 @@ extension LibraryViewController: UICollectionViewDelegate, UICollectionViewDataS
             featuredIndex = indexPath
             
             featuredCell?.videoPlayBtn.accessibilityLabel = featuredCell?.workoutNameLbl.text
-            
-            //            featuredCell?.videoPlayBtn.addTarget(self, action: #selector(workoutDetialsPlayBtnActn(sender: )), for: .touchUpInside)
-            
-            //            let vc:WorkoutDetailsViewController = WorkoutDetailsViewController.instantiate(appStoryboard: .library)
-            //           vc.workoutNameStr = featuredCell?.workoutNameLbl.text
-            //            self.navigationController?.pushViewController(vc, animated: true)
         }
         else if collectionView == workoutsCategoryCollView{
             self.typeId = self.workoutsCategory?[indexPath.row].id?.value
@@ -600,21 +587,13 @@ extension LibraryViewController: UICollectionViewDelegate, UICollectionViewDataS
             let workoutsCell = collectionView.cellForItem(at: indexPath) as? WorkoutsCollectionViewCell
             
             workoutsCell?.videoPlayBtn.accessibilityLabel = workoutsCell?.workoutNameLbl.text
-            
-            
-            //            workoutsCell?.videoPlayBtn.addTarget(self, action: #selector(workoutDetialsPlayBtnActn(sender: )), for: .touchUpInside)
-            
-            //            let vc:WorkoutDetailsViewController = WorkoutDetailsViewController.instantiate(appStoryboard: .library)
-            //            vc.workoutNameStr = workoutsCell?.workoutNameLbl.text
-            
-            //            self.navigationController?.pushViewController(vc, animated: true)
         }
         else if collectionView == myworkoutsDaysCollView{
             let cell = collectionView.cellForItem(at: indexPath) as? ProductCategoryCollViewCell
             guard let cell = cell else { return }
             cell.cellMBV.backgroundColor = UIColor(red: 28.0/255.0, green: 31.0/255.0, blue: 33.0/255.0, alpha: 1.0)
             
-            self.myWorkoutsApi(dateStr: self.myWorkoutDates?[indexPath.row]["storageDate"] as? String, displayDate: self.myWorkoutDates?[indexPath.row]["displayDate"] as? String)
+//            self.myWorkoutsApi(dateStr: self.myWorkoutDates?[indexPath.row]["storageDate"] as? String, displayDate: self.myWorkoutDates?[indexPath.row]["displayDate"] as? String)
         }
     }
     

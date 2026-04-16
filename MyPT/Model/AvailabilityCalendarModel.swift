@@ -58,3 +58,66 @@ struct SlotModel: Codable {
     var time: String?
 }
 
+// MARK: - SlotsByTimeModel
+struct SlotsByTimeModel: Codable {
+    let status: Bool?
+    let data: SlotsByTimeModelData?
+    let msg: String?
+}
+
+// MARK: - SlotsByTimeModelData
+struct SlotsByTimeModelData: Codable {
+    let selectedSlot: SelectedSlot?
+    let slots: [SelectedSlot]?
+    let otherTrainers: [OtherTrainer]?
+
+    enum CodingKeys: String, CodingKey {
+        case selectedSlot = "selected_slot"
+        case slots
+        case otherTrainers = "other_trainers"
+    }
+}
+
+// MARK: - OtherTrainer
+struct OtherTrainer: Codable {
+    var id: FlexibleValue?
+    var name: String?
+    var profile, distance, averageRating: String?
+    var tags: [String]?
+    var isSelected: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case id, isSelected
+//        case trainerID = "trainer_id"
+        case name, profile, tags, distance, averageRating
+    }
+}
+
+// MARK: - SelectedSlot
+struct SelectedSlot: Codable {
+    var startTime, endTime: String?
+    var status, name: String?
+    var id: FlexibleValue?
+    var isSelected: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case startTime = "start_time"
+        case endTime = "end_time"
+        case status, id, name, isSelected
+    }
+}
+
+struct ReviewAssessmentBaseModel: Codable {
+    var status: Bool?
+    var data: ReviewAssessmentModel?
+    var msg: String?
+    let errors: [String: [String]]?
+}
+
+struct ReviewAssessmentModel: Codable {
+    var date: String?
+    var location_name: String?
+    var timing: String?
+    var trainer_name: String?
+    var type: String?
+}

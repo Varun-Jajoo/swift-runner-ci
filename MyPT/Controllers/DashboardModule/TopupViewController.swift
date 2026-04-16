@@ -121,8 +121,8 @@ class TopupViewController: CommonViewController {
                             let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
                             vc.flowSlot = .bookTrainerHomeWorkout
                             vc.inputType = "home"
-                            vc.inputLat = "\(getLat)"
-                            vc.inputLong = "\(getLong)"
+                            vc.inputLat = getLat
+                            vc.inputLong = getLong
                             vc.isFromHome = true
                             self.navigationController?.pushViewController(vc, animated: true)
                             
@@ -131,8 +131,8 @@ class TopupViewController: CommonViewController {
                             let vc:GymWorkoutViewController = GymWorkoutViewController.instantiate(appStoryboard: .booking)
                             vc.flowGymwork = .bookTrainerGymWorkout
                             vc.inputType = "gym"
-                            vc.inputLat = "\(getLat)"
-                            vc.inputLong = "\(getLong)"
+                            vc.inputLat = getLat
+                            vc.inputLong = getLong
                             self.navigationController?.pushViewController(vc, animated: true)
                         }
                     }else{
@@ -148,8 +148,8 @@ class TopupViewController: CommonViewController {
                         let vc:TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
                         vc.flowSlot = .bookTrainerHomeWorkout
                         vc.inputType = "home"
-                        vc.inputLat = "\(getLat)"
-                        vc.inputLong = "\(getLong)"
+                        vc.inputLat = getLat
+                        vc.inputLong = getLong
                         vc.isFromHome = true
                         self.navigationController?.pushViewController(vc, animated: true)
                         
@@ -158,8 +158,8 @@ class TopupViewController: CommonViewController {
                         let vc:GymWorkoutViewController = GymWorkoutViewController.instantiate(appStoryboard: .booking)
                         vc.flowGymwork = .bookTrainerGymWorkout
                         vc.inputType = "gym"
-                        vc.inputLat = "\(getLat)"
-                        vc.inputLong = "\(getLong)"
+                        vc.inputLat = getLat
+                        vc.inputLong = getLong
                         self.navigationController?.pushViewController(vc, animated: true)
                     }
                 }else{

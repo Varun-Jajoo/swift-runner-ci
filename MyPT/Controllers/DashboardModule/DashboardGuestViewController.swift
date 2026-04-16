@@ -172,7 +172,7 @@ class DashboardGuestViewController: CommonViewController {
         
     }
     
-    private func topUserNameMBV(){
+    private func topUserNameMBV() {
         //---------------------- Navigationview
         if let navigationController = self.navigationController {
             let navBarHeight = navigationController.navigationBar.frame.height

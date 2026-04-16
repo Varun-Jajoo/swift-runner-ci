@@ -11,7 +11,7 @@ class WorkoutLibraryVM {
     
     //MARK: --------------------- workouts
     class func workoutsApi(params: [String:Any]?, isShowLoader:Bool = true, completion: @escaping(_ resultData:WorkoutBaseModel?) -> Void){
-        NetworkManager.shared.genericAPICall(serviceEndPoint: .workouts, method: .get , parameters: params, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .workouts, method: .get , parameters: params,  isShowLoading: false, isShowLoadingWithoutMsg: true, completion: {  (getResponce, error) in
             do{
                 if let responceData = getResponce {
                     let getResult = try JSONDecoder().decode(WorkoutBaseModel.self, from: responceData)
@@ -56,14 +56,14 @@ class WorkoutLibraryVM {
     }
     
     //MARK: ------------------ api/make-favourite
-    class  func makeFavouriteWorkoutApi(inputFeatureId: String?, completion: @escaping(_ resultData: [String:Any]?) -> Void){
+    class  func makeFavouriteWorkoutApi(inputFeatureId: String?, isShowLoader:Bool = true, completion: @escaping(_ resultData: [String:Any]?) -> Void){
       
          let params:[String:Any]? = [
             "featured_id" : inputFeatureId ?? ""
          ]
         
         print("inputParams = ", params as Any)
-        NetworkManager.shared.genericAPICall(serviceEndPoint: .make_favourite, method: .post , parameters: params, isShowLoading: true, completion: {  (getResponce, error) in
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .make_favourite, method: .post , parameters: params,  isShowLoading: false, isShowLoadingWithoutMsg: true, completion: {  (getResponce, error) in
             do{
                 print(getResponce as Any)
                 if let responceData = getResponce {
@@ -90,7 +90,7 @@ class WorkoutLibraryVM {
     //------------------- api/workout-types
     class func workoutTypeApi(isShowLoader:Bool = true, completion: @escaping(_ resultData:WorkoutTypeBaseModel?) -> Void){
         
-        NetworkManager.shared.genericAPICall(serviceEndPoint: .workout_types, method: .get , queries: nil, parameters:  nil, isShowLoading: isShowLoader, completion: {  ( getResponce, error) in
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .workout_types, method: .get , queries: nil, parameters:  nil,  isShowLoading: false, isShowLoadingWithoutMsg: true, completion: {  ( getResponce, error) in
             do{
                 print(getResponce as Any)
                 if let responceData = getResponce {
@@ -110,7 +110,7 @@ class WorkoutLibraryVM {
     }
    
     //MARK: ------------------ api/get-workouts
-    class  func getWorkoutApi(inputParams: [String:Any]?, completion: @escaping(_ resultData: GetWorkoutsBaseModel?) -> Void){
+    class  func getWorkoutApi(inputParams: [String:Any]?,  isShowLoader:Bool = true, completion: @escaping(_ resultData: GetWorkoutsBaseModel?) -> Void){
       
         /*
          let params:[String:Any]? = [
@@ -127,7 +127,7 @@ class WorkoutLibraryVM {
         */
         
         print("inputParams = ", inputParams as Any)
-        NetworkManager.shared.genericAPICall(serviceEndPoint: .get_workouts, method: .post , parameters: inputParams, isShowLoading: true, completion: {  (getResponce, error) in
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .get_workouts, method: .post , parameters: inputParams, isShowLoading: false, isShowLoadingWithoutMsg: true, completion: {  (getResponce, error) in
             do{
                 print(getResponce as Any)
                 if let responceData = getResponce {
@@ -347,7 +347,7 @@ class WorkoutLibraryVM {
             "date": inputDateStr ?? "", //date=2025-08-21
             "status": inputStatus ?? ""
         ]
-        NetworkManager.shared.genericAPICall(serviceEndPoint: .my_workouts, method: .get , queries: params, parameters:  nil, isShowLoading: isShowLoader, completion: {  ( getResponce, error) in
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .my_workouts, method: .get , queries: params, parameters:  nil, isShowLoading: false, isShowLoadingWithoutMsg: true, completion: {  ( getResponce, error) in
             do{
                 print(getResponce as Any)
                 if let responceData = getResponce {

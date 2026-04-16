@@ -59,6 +59,32 @@ struct AvailParmsModel {
       }
 }
 
+struct SlotsParmsModel {
+    var type: String?
+    var trainer_id, date: String?
+    var studio_id: String?
+    var month: String?
+    var address_id, preferred_start_time: String?
+    var preferred_end_time, lat, long, other_trainer_id: String?
+    
+    func getParams() -> [String: String] {
+          var dict: [String: String] = [:]
+
+          if let type = type { dict["type"] = type }
+          if let trainer_id = trainer_id { dict["trainer_id"] = trainer_id }
+          if let date = date { dict["date"] = date }
+          if let preferred_start_time = preferred_start_time { dict["preferred_start_time"] = preferred_start_time }
+          if let preferred_end_time = preferred_end_time { dict["preferred_end_time"] = preferred_end_time }
+          if let studio_id = studio_id { dict["studio_id"] = studio_id }
+          if let month = month { dict["month"] = month }
+          if let address_id = address_id { dict["address_id"] = address_id }
+          if let lat = lat { dict["lat"] = lat }
+          if let long = long { dict["long"] = long }
+          if let other_trainer_id = other_trainer_id { dict["other_trainer_id"] = other_trainer_id }
+          return dict
+      }
+}
+
 class BookingCalendarViewController: CommonViewController {
 
     //MARK: -------------- VARIABLE

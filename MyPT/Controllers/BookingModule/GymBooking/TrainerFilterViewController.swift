@@ -13,7 +13,7 @@ class TrainerFilterViewController: UIViewController {
     var sendGenderStr: ((String, String, [FilterLstDataModel]) -> Void)?
     var sendLanguageStr: ((String, String, [FilterLstDataModel]) -> Void)?
     var sendNationalityStr: ((String, String, [FilterLstDataModel]) -> Void)?
-    var sendTime_slotStr: ((String, String, [FilterLstDataModel]) -> Void)?
+//    var sendTime_slotStr: ((String, String, [FilterLstDataModel]) -> Void)?
     
     var inputType:String?
     var selectedMenuFilterStr: String?
@@ -28,12 +28,12 @@ class TrainerFilterViewController: UIViewController {
     var genderLstData:[FilterLstDataModel]? = []
     var languageLstData:[FilterLstDataModel]? = []
     var nationalityLstData:[FilterLstDataModel]? = []
-    var timeSlotData:[FilterLstDataModel]? = []
+//    var timeSlotData:[FilterLstDataModel]? = []
     
     var localGenderLstData:[FilterLstDataModel]? = []
     var localLanguageLstData:[FilterLstDataModel]? = []
     var localNationalityLstData:[FilterLstDataModel]? = []
-    var localTimeSlotData:[FilterLstDataModel]? = []
+//    var localTimeSlotData:[FilterLstDataModel]? = []
     
     //MARK: ---------------- IBOUTLET
     @IBOutlet weak var trainerFilterPopupMBV: UIView!
@@ -59,7 +59,7 @@ class TrainerFilterViewController: UIViewController {
         //-----------------*************
         filterMenuTblView.allowsMultipleSelection = false
         filterLstTblView.allowsMultipleSelection = false
-        filterMenu = ["Gender", "Time slot", "Language", "Nationality"]
+        filterMenu = ["Nationality", "Gender", "Language"]
         self.filterMenuTblView.reloadData()
         
     }
@@ -94,76 +94,19 @@ class TrainerFilterViewController: UIViewController {
     }
     
     @IBAction func filterCommonBtnActn(_ sender: UIButton) {
-        
         switch sender.tag {
         case filterBtnTag.help.rawValue:
             print("Help filter btn clicked.")
+            self.dismiss(animated: true)
             break
         case filterBtnTag.resetFilter.rawValue:
             print("resetFilter btn clicked.")
             if let selectedMenuIndexPath = selectedMenuIndexPath {
-                if selectedMenuIndexPath.row == 0 {
-                    self.genderLstData?.removeAll()
-                    self.localGenderLstData?.removeAll()
-                    self.sendGenderStr?("","", self.genderLstData ?? [])
-                                        
-                    if let genderList = self.filterData?.gender {
-                        let updatedGenderList = genderList.map { gender in
-                            var mutableGender = gender
-                            mutableGender.isSelected = false
-                            return mutableGender
-                        }
-                        self.filterData?.gender = updatedGenderList
-                        self.filterLstData = updatedGenderList
-                    }
-                    
-                    self.filterLstTblView.reloadData()
-                   
-//                    self.filterLstData = self.filterData?.gender?.map { gender in
-//                        var updatedGender = gender
-//                        updatedGender.isSelected = false
-//                        return updatedGender
-//                    }
-                    
-                }else  if selectedMenuIndexPath.row == 1 {
-                    self.timeSlotData?.removeAll()
-                    self.localTimeSlotData?.removeAll()
-                    self.sendTime_slotStr?("", "", self.timeSlotData ?? [])
-                
-                    if let timeSlotsList = self.filterData?.time_slots {
-                        let timeSlotsLst = timeSlotsList.map { timeSlots in
-                            var mutableTimeSlots = timeSlots
-                            mutableTimeSlots.isSelected = false
-                            return mutableTimeSlots
-                        }
-                        self.filterData?.time_slots = timeSlotsLst
-                        self.filterLstData = timeSlotsLst
-                    }
-                    
-                    self.filterLstTblView.reloadData()
-                    
-                }else  if selectedMenuIndexPath.row == 2 {
-                    self.languageLstData?.removeAll()
-                    self.localLanguageLstData?.removeAll()
-                    self.sendLanguageStr?("", "", self.languageLstData ?? [])
-                   
-                    if let languagesList = self.filterData?.languages {
-                        let languageLst = languagesList.map { languages in
-                            var mutableLanguages = languages
-                            mutableLanguages.isSelected = false
-                            return mutableLanguages
-                        }
-                        self.filterData?.languages = languageLst
-                        self.filterLstData = languageLst
-                    }
-                    
-                    self.filterLstTblView.reloadData()
-                    
-                }else  if selectedMenuIndexPath.row == 3 {
+                if selectedMenuIndexPath.row == 0 { // Nationality
                     self.nationalityLstData?.removeAll()
                     self.localNationalityLstData?.removeAll()
                     self.sendNationalityStr?("", "", self.nationalityLstData ?? [])
-
+                    
                     if let nationalitiesList = self.filterData?.languages {
                         let nationalltiesLst = nationalitiesList.map { nationalities in
                             var mutableNationality = nationalities
@@ -175,38 +118,94 @@ class TrainerFilterViewController: UIViewController {
                     }
                     
                     self.filterLstTblView.reloadData()
+                    
+                } else if selectedMenuIndexPath.row == 1 { // Gender
+                    self.genderLstData?.removeAll()
+                    self.localGenderLstData?.removeAll()
+                    self.sendGenderStr?("","", self.genderLstData ?? [])
+                    
+                    if let genderList = self.filterData?.gender {
+                        let updatedGenderList = genderList.map { gender in
+                            var mutableGender = gender
+                            mutableGender.isSelected = false
+                            return mutableGender
+                        }
+                        self.filterData?.gender = updatedGenderList
+                        self.filterLstData = updatedGenderList
+                    }
+                    
+                    self.filterLstTblView.reloadData()
+                    
+                    //                    self.filterLstData = self.filterData?.gender?.map { gender in
+                    //                        var updatedGender = gender
+                    //                        updatedGender.isSelected = false
+                    //                        return updatedGender
+                    //                    }
+                    
+                } else if selectedMenuIndexPath.row == 2 { // Language
+                    self.languageLstData?.removeAll()
+                    self.localLanguageLstData?.removeAll()
+                    self.sendLanguageStr?("", "", self.languageLstData ?? [])
+                    
+                    if let languagesList = self.filterData?.languages {
+                        let languageLst = languagesList.map { languages in
+                            var mutableLanguages = languages
+                            mutableLanguages.isSelected = false
+                            return mutableLanguages
+                        }
+                        self.filterData?.languages = languageLst
+                        self.filterLstData = languageLst
+                    }
+                    self.filterLstTblView.reloadData()
                 }
+                //                else  if selectedMenuIndexPath.row == 3 {
+                ////                    self.timeSlotData?.removeAll()
+                ////                    self.localTimeSlotData?.removeAll()
+                ////                    self.sendTime_slotStr?("", "", self.timeSlotData ?? [])
+                //
+                //                    if let timeSlotsList = self.filterData?.time_slots {
+                //                        let timeSlotsLst = timeSlotsList.map { timeSlots in
+                //                            var mutableTimeSlots = timeSlots
+                //                            mutableTimeSlots.isSelected = false
+                //                            return mutableTimeSlots
+                //                        }
+                //                        self.filterData?.time_slots = timeSlotsLst
+                //                        self.filterLstData = timeSlotsLst
+                //                    }
+                //
+                //                    self.filterLstTblView.reloadData()
+                //                }
             }
- 
+            
             break
             
         case filterBtnTag.applyFilter.rawValue:
             print("applyFilter btn clicked.")
-          
+            
             self.dismiss(animated: true, completion: {[weak self] in
-                if let genderLstData = self?.genderLstData {
+                if let genderLstData = self?.genderLstData, genderLstData.count != 0 {
                     let idList = genderLstData.map { "\($0.id?.value ?? "")" }.joined(separator: ",")
                     let nameStr = genderLstData.map { "\($0.name ?? "")".lowercased() }.joined(separator: ",")
-                    self?.sendGenderStr?(idList,nameStr, self?.genderLstData ?? [])
+                    self?.sendGenderStr?(idList, nameStr, self?.genderLstData ?? [])
                 }
                 
-                if let languageLstData = self?.languageLstData {
+                if let languageLstData = self?.languageLstData, languageLstData.count != 0  {
                     let idList = languageLstData.map { "\($0.id?.value ?? "")" }.joined(separator: ",")
                     let nameStr = languageLstData.map { "\($0.name ?? "")" }.joined(separator: ",")
                     self?.sendLanguageStr?(idList, nameStr, self?.languageLstData ?? [])
                 }
                 
-                if let nationalityLstData = self?.nationalityLstData {
+                if let nationalityLstData = self?.nationalityLstData, nationalityLstData.count != 0  {
                     let idList = nationalityLstData.map { "\($0.id?.value ?? "")" }.joined(separator: ",")
                     let nameStr = nationalityLstData.map { "\($0.name ?? "")" }.joined(separator: ",")
                     self?.sendNationalityStr?(idList, nameStr, self?.nationalityLstData ?? [])
                 }
                 
-                if let timeSlotLstData = self?.timeSlotData {
-                    let idList = timeSlotLstData.map { "\($0.id?.value ?? "")" }.joined(separator: ",")
-                    let nameStr = timeSlotLstData.map { "\($0.name ?? "")" }.joined(separator: ",")
-                    self?.sendTime_slotStr?(idList, nameStr, self?.timeSlotData ?? [])
-                }
+//                if let timeSlotLstData = self?.timeSlotData {
+//                    let idList = timeSlotLstData.map { "\($0.id?.value ?? "")" }.joined(separator: ",")
+//                    let nameStr = timeSlotLstData.map { "\($0.name ?? "")" }.joined(separator: ",")
+//                    self?.sendTime_slotStr?(idList, nameStr, self?.timeSlotData ?? [])
+//                }
             })
             
             break
@@ -216,8 +215,7 @@ class TrainerFilterViewController: UIViewController {
         }
     }
     
-    private func setupUI(){
-    
+    private func setupUI() {
         DispatchQueue.main.async {
             self.trainerFilterPopupMBV.roundSideCorners(radius: 12.0, cornerSide: [.topLeft, .topRight])
             self.trainerFilterPopupMBV.applyShadow(fillColor: UIColor(red: 35.0/255.0, green: 35.0/255.0, blue: 35.0/255.0, alpha: 0.25), shadowColor: UIColor.black, shadowRadius: 12, opacity: 0.8, offset: .zero, cornerRadius: 12)
@@ -226,15 +224,14 @@ class TrainerFilterViewController: UIViewController {
         }
     }
     
-    private func setupFont(){
-        
+    private func setupFont() {
         filterMenuTblView.register(UINib(nibName: "TrainerFilterTableViewCell", bundle: nil), forCellReuseIdentifier: "TrainerFilterTableViewCell")
         filterLstTblView.register(UINib(nibName: "TrainerFilterTableViewCell", bundle: nil), forCellReuseIdentifier: "TrainerFilterTableViewCell")
         
         //--------------------------------
-        filterTitleLbl.font = AppFont.bold.size(24.0, familyName: familyManrope)
-        resetBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
-        applyBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
+        filterTitleLbl.font = AppFont.medium.size(20, familyName: familyClashDisplay)
+//        resetBtn.titleLabel?.font = AppFont.bold.size(16.0, familyName: familyManrope)
+        applyBtn.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -242,12 +239,11 @@ class TrainerFilterViewController: UIViewController {
             let location = touch.location(in: view)
             if !self.trainerFilterPopupMBV.frame.contains(location) {
                 self.dismiss(animated: true, completion: nil)
-            }else{
+            } else {
                 print("tap at popup view.")
             }
         }
     }
-
 }
 
 //MARK: -------------------UITABLEVIEW DELEGATE/DATASOURCE
@@ -255,7 +251,7 @@ extension TrainerFilterViewController: UITableViewDelegate, UITableViewDataSourc
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if tableView == filterMenuTblView {
             return filterMenu?.count ?? 0
-        }else{
+        } else {
             return filterLstData?.count ?? 0
         }
     }
@@ -268,7 +264,7 @@ extension TrainerFilterViewController: UITableViewDelegate, UITableViewDataSourc
             menuCell.selectionBtn.setImage(nil, for: .normal)
             menuCell.titleLbl.text = filterMenu?[indexPath.row] as? String
             return menuCell
-        }else{
+        } else {
             let filterCell: TrainerFilterTableViewCell = filterLstTblView.dequeueReusableCell(withIdentifier: "TrainerFilterTableViewCell", for: indexPath) as! TrainerFilterTableViewCell
             filterCell.selectionBtn.isHidden = false
             filterCell.selectionBtn.isUserInteractionEnabled = false
@@ -286,35 +282,46 @@ extension TrainerFilterViewController: UITableViewDelegate, UITableViewDataSourc
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("Select: ", indexPath.row)
-        
         if tableView == filterMenuTblView {
+            // 🔥 remove gradient from all visible cells
+            for cell in tableView.visibleCells {
+                if let menuCell = cell as? TrainerFilterTableViewCell {
+                    menuCell.cellMBV.removeGradient()
+                    menuCell.removeLeftBorder(named: "left_border")
+                    menuCell.titleLbl.textColor = UIColor.appWhite
+                }
+            }
             let selectedCell = tableView.cellForRow(at: indexPath) as? TrainerFilterTableViewCell
             guard let selectedCell = selectedCell else { return }
-            selectedCell.backgroundColor = UIColor(red: 16.0/255.0, green: 17.0/255.0, blue: 19.0/255.0, alpha: 1.0)
-            selectedCell.titleLbl.textColor = UIColor(red: 243.0/255.0, green: 141.0/255.0, blue: 27.0/255.0, alpha: 0.8)
-           
-            selectedCell.addLeftBorder(borderColor: UIColor(red: 243.0/255.0, green: 141.0/255.0, blue: 27.0/255.0, alpha: 0.9), cornerRadius: 3.0)
-           
+            
+            selectedCell.cellMBV.addGradient(
+                colors: [
+                    UIColor(red: 224/255, green: 254/255, blue: 8/255, alpha: 0.2), // yellow glow
+                    UIColor(red: 20/255, green: 20/255, blue: 20/255, alpha: 0.1)   // dark
+                ],
+                locations: [0, 1],
+                startPoint: CGPoint(x: 0, y: 0.5),
+                endPoint: CGPoint(x: 1, y: 0.5),
+                cornerRadius: 0
+            )
+            selectedCell.titleLbl.textColor = UIColor.white
+            selectedCell.addLeftBorder(borderColor: UIColor(red: 224.0/255.0, green: 254.0/255.0, blue: 8.0/255.0, alpha: 1), cornerRadius: 1.0)
             self.selectedMenuIndexPath = indexPath
             guard let lstData = filterMenu?[indexPath.row] as? String else { return }
             self.selectedMenuFilterStr = lstData
             self.getAllData(item: lstData.localizedCapitalized)
-            
-        }else{
+        } else {
             print("filterLstTblView selected")
             selectedIndexPaths.append(indexPath)
-            
             let filterCell = tableView.cellForRow(at: indexPath) as? TrainerFilterTableViewCell
             filterCell?.selectionBtn.setImage(UIImage(named: "ic_filter_tick"), for: .normal)
           
             if let cellSelected = self.filterLstData?[indexPath.row].isSelected {
                 self.filterLstData?[indexPath.row].isSelected = !cellSelected
-            }else{
+            } else {
                 self.filterLstData?[indexPath.row].isSelected = true
             }
-            
             self.filterLstTblView.reloadData()
-            
             let str = filterLstData?[indexPath.row].name ?? filterLstData?[indexPath.row].nationality
             self.getSelectedFilter(selectedMenu: selectedMenuFilterStr ?? "", selectedFilter: str ?? "")
         }
@@ -324,9 +331,10 @@ extension TrainerFilterViewController: UITableViewDelegate, UITableViewDataSourc
         print("Deselect: ",indexPath.row)
         if tableView == filterMenuTblView {
             let deSelectedCell = tableView.cellForRow(at: indexPath) as? TrainerFilterTableViewCell
+            deSelectedCell?.cellMBV.removeGradient()   // 🔥 THIS
+            deSelectedCell?.removeLeftBorder(named: "left_border")
             deSelectedCell?.backgroundColor = UIColor.clear
             deSelectedCell?.titleLbl.textColor = UIColor.appWhite
-            deSelectedCell?.removeLeftBorder(named: "left_border")
             
             
             guard let lstData = filterMenu?[indexPath.row] as? String else { return }
@@ -342,7 +350,7 @@ extension TrainerFilterViewController: UITableViewDelegate, UITableViewDataSourc
 //                deSelectedCell?.addLeftBorder(borderColor: UIColor(red: 243.0/255.0, green: 141.0/255.0, blue: 27.0/255.0, alpha: 0.9), cornerRadius: 3.0)
 //            }
             
-        }else{
+        } else {
             print("filterLstTblView selected")
             
             let filterCell = tableView.cellForRow(at: indexPath) as? TrainerFilterTableViewCell
@@ -360,7 +368,6 @@ extension TrainerFilterViewController: UITableViewDelegate, UITableViewDataSourc
         switch selectedMenu.capitalized {
         case "Gender".capitalized:
             print("Gender")
-            
             if let genderLstDataLocal = localGenderLstData , genderLstDataLocal.count != 0 {
                 for name in genderLstDataLocal {
                     if let index = filterLstData?.firstIndex(where: {$0.name == name.name}){
@@ -368,12 +375,11 @@ extension TrainerFilterViewController: UITableViewDelegate, UITableViewDataSourc
                         self.filterLstData?[index].isSelected = self.filterData?.gender?[index].isSelected
                     }
                 }
-                
                 self.genderLstData = self.filterData?.gender?.filter({ $0.isSelected == true })
                 self.localGenderLstData?.removeAll()
                 self.filterLstTblView.reloadData()
                 
-            }else{
+            } else {
                 if let index = filterLstData?.firstIndex(where: { $0.name?.capitalized == selectedFilter.capitalized }),
                    let filterGernder = filterLstData?[index] {
                     
@@ -407,33 +413,33 @@ extension TrainerFilterViewController: UITableViewDelegate, UITableViewDataSourc
         case "Time slot".capitalized:
             print("Time slot")
             
-            if let timeSlotLstDataLocal = localTimeSlotData , timeSlotLstDataLocal.count != 0 {
-                for name in timeSlotLstDataLocal {
-                    if let index = filterLstData?.firstIndex(where: {$0.name == name.name}){
-                        self.filterData?.time_slots?[index].isSelected = true
-                        self.filterLstData?[index].isSelected = self.filterData?.time_slots?[index].isSelected
-                    }
-                }
-                
-                self.timeSlotData = self.filterData?.time_slots?.filter({ $0.isSelected == true })
-                self.localTimeSlotData?.removeAll()
-                self.filterLstTblView.reloadData()
-                
-            }else{
-                if let index = filterLstData?.firstIndex(where: { $0.name?.capitalized == selectedFilter.capitalized }),
-                   let filterTimeSlot = filterLstData?[index] {
-                    
-                    if let existingIndex = timeSlotData?.firstIndex(where: { $0.name?.capitalized == filterTimeSlot.name?.capitalized }) {
-                        // Already exists → remove it
-                        self.filterData?.time_slots?[index].isSelected = false
-                        timeSlotData?.remove(at: existingIndex)
-                    } else {
-                        // Not exists → append it
-                        self.filterData?.time_slots?[index].isSelected = true
-                        timeSlotData = filterLstData?.filter({ $0.isSelected == true })
-                    }
-                }
-            }
+//            if let timeSlotLstDataLocal = localTimeSlotData , timeSlotLstDataLocal.count != 0 {
+//                for name in timeSlotLstDataLocal {
+//                    if let index = filterLstData?.firstIndex(where: {$0.name == name.name}){
+//                        self.filterData?.time_slots?[index].isSelected = true
+//                        self.filterLstData?[index].isSelected = self.filterData?.time_slots?[index].isSelected
+//                    }
+//                }
+//                
+//                self.timeSlotData = self.filterData?.time_slots?.filter({ $0.isSelected == true })
+//                self.localTimeSlotData?.removeAll()
+//                self.filterLstTblView.reloadData()
+//                
+//            }else{
+//                if let index = filterLstData?.firstIndex(where: { $0.name?.capitalized == selectedFilter.capitalized }),
+//                   let filterTimeSlot = filterLstData?[index] {
+//                    
+//                    if let existingIndex = timeSlotData?.firstIndex(where: { $0.name?.capitalized == filterTimeSlot.name?.capitalized }) {
+//                        // Already exists → remove it
+//                        self.filterData?.time_slots?[index].isSelected = false
+//                        timeSlotData?.remove(at: existingIndex)
+//                    } else {
+//                        // Not exists → append it
+//                        self.filterData?.time_slots?[index].isSelected = true
+//                        timeSlotData = filterLstData?.filter({ $0.isSelected == true })
+//                    }
+//                }
+//            }
 
         case "Language".capitalized:
             print("Language")
@@ -533,7 +539,7 @@ extension TrainerFilterViewController: UITableViewDelegate, UITableViewDataSourc
         }
     }
     
-    private func getAllData(item:String){
+    private func getAllData(item: String) {
         switch item.capitalized {
         case "Gender".capitalized:
             print("Gender")
@@ -550,13 +556,13 @@ extension TrainerFilterViewController: UITableViewDelegate, UITableViewDataSourc
         case "Time slot".capitalized:
             print("Time slot")
             
-            self.filterLstData?.removeAll()
-            self.filterLstData?.append(contentsOf: self.filterData?.time_slots ?? [])
-            if let timeSlotData = localTimeSlotData, timeSlotData.count != 0 || !timeSlotData.isEmpty {
-                self.getSelectedFilter(selectedMenu: item , selectedFilter: "Time slot")
-            }
-            
-            self.filterLstTblView.reloadData()
+//            self.filterLstData?.removeAll()
+//            self.filterLstData?.append(contentsOf: self.filterData?.time_slots ?? [])
+//            if let timeSlotData = localTimeSlotData, timeSlotData.count != 0 || !timeSlotData.isEmpty {
+//                self.getSelectedFilter(selectedMenu: item , selectedFilter: "Time slot")
+//            }
+//            
+//            self.filterLstTblView.reloadData()
 
         case "Language".capitalized:
             print("Language")
@@ -606,4 +612,10 @@ extension TrainerFilterViewController{
     }
 }
 
-
+extension UIView {
+    func removeGradient() {
+        self.layer.sublayers?
+            .filter { $0.name == "addGradient" }
+            .forEach { $0.removeFromSuperlayer() }
+    }
+}

@@ -54,7 +54,7 @@ class AddMemberViewController: CommonViewController {
     @IBAction func continueBtnActn(_ sender: Any) {
         print("Continue btn clicked...")
         
-        if let minMember = memberData?.minMember, let maxMember = memberData?.maxMember, let totalAddMember =  self.memberList?.count,(Int(minMember) ?? 0) <= totalAddMember, (Int(maxMember) ?? 0) >= totalAddMember {
+        if let minMember = memberData?.minMember?.value, let maxMember = memberData?.maxMember?.value, let totalAddMember =  self.memberList?.count,(Int(minMember) ?? 0) <= totalAddMember, (Int(maxMember) ?? 0) >= totalAddMember {
             let vc:ChooseSessionViewController = ChooseSessionViewController.instantiate(appStoryboard: .booking)
             vc.inputParams = self.createPackageParamsAddMember
             vc.availParams = self.avialCalanderparamsAddMember
@@ -80,7 +80,7 @@ class AddMemberViewController: CommonViewController {
     @IBAction func addMemberBtnActn(_ sender: Any) {
         print("Add member btn clicked......")
         
-        if let maxMember = memberData?.maxMember, let totalAddMember =  self.memberList?.count, (Int(maxMember) ?? 0) > totalAddMember {
+        if let maxMember = memberData?.maxMember?.value, let totalAddMember =  self.memberList?.count, (Int(maxMember) ?? 0) > totalAddMember {
             
             let vc: BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
             vc.bookingAddressFlow = .addMember
@@ -114,7 +114,6 @@ class AddMemberViewController: CommonViewController {
     }
     
     private func setupInputData(){
-        
         if let memberList = self.memberList, memberList.count == 0 {
             self.addMemberMBV.isHidden = true
             self.noteMemberBtn.isHidden = true
@@ -124,7 +123,6 @@ class AddMemberViewController: CommonViewController {
             self.noteMemberBtn.isHidden = false
             self.enableContinueBtn(isSelected: true)
         }
-        
         //---------------****************
         self.noteMemberBtn.setTitle(self.memberData?.limit, for: .normal)
     }
@@ -215,7 +213,7 @@ extension AddMemberViewController: UITableViewDelegate, UITableViewDataSource{
             let memberDetailsData = memberList?[indx]
             print("memberData: ",memberData as Any)
             
-            if let maxMember = memberData?.maxMember, let totalAddMember =  self.memberList?.count{
+            if let maxMember = memberData?.maxMember?.value, let totalAddMember =  self.memberList?.count{
                 
                 let vc: BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
                 vc.bookingAddressFlow = .addMember
@@ -275,7 +273,7 @@ extension AddMemberViewController: AddMemberProtocol{
 
 extension AddMemberViewController{
 
-    private func getMemberApi(params: [String:String]){
+    private func getMemberApi(params: [String: String]) {
         CreatePackageVM.getMemberPackagegroupApi(viewController: self, inputParms: params, completion: { [weak self] getResultData in
             guard let self = self, let getResultData = getResultData else { return  }
             print(getResultData)
@@ -287,7 +285,6 @@ extension AddMemberViewController{
                 self.membersTblView.reloadData()
                 self.setupInputData()
             }
-           
         })
     }
     
@@ -307,12 +304,13 @@ extension AddMemberViewController{
 }
 
 
-//MARK: ----------- GET MEMBER PARAM MODEL
+// MARK: ----------- GET MEMBER PARAM MODEL
 struct MemberParamsModel {
     var package_type: String?
     var type: String?
     var trainer_id: String?
     var studio_id: String?
+    var is_group: String?
     
     func getParams() -> [String: String] {
         var dict: [String: String] = [:]
@@ -321,6 +319,7 @@ struct MemberParamsModel {
         if let type = type { dict["type"] = type }
         if let trainer_id = trainer_id { dict["trainer_id"] = trainer_id }
         if let studio_id = studio_id { dict["studio_id"] = studio_id }
+        if let is_group = is_group { dict["is_group"] = is_group }
         
         return dict
     }

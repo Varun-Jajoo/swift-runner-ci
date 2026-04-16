@@ -33,8 +33,7 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     private var rulerBottomConstraint: NSLayoutConstraint!
     private var valueTextFieldCenterYConstraint: NSLayoutConstraint!
     private var textFieldAboveButtonConstraint: NSLayoutConstraint!
-    private let haptic = UISelectionFeedbackGenerator()
-    private var lastHapticValue: Int?
+    private var lastHapticValue: Int = -1
     
     //MARK: -------------IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
@@ -62,9 +61,7 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         btnLBS.layer.masksToBounds = true
         btnKG.backgroundColor = .white
         btnKG.setTitleColor(.black, for: .normal)
-        //        setupUI()
         setupValueTextField()
-        haptic.prepare()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -101,7 +98,7 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         rulerView.scrollToValue(rulerView: rulerView, scrollView: scrollView, currentIndex)
         self.valueLabel.text = "\(rulerView.selectedValue ?? 0)"
         IQKeyboardManager.shared.isEnabled = false
-         IQKeyboardToolbarManager.shared.isEnabled = false
+        IQKeyboardToolbarManager.shared.isEnabled = false
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -199,7 +196,7 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
             if let value = text {
                 self.valueTextField.text = value + (self.isKgSelected ? " kg" : " lbs")
                 self.selectedWeight = self.valueTextField.text
-                print(self.valueTextField.text)
+//                print(self.valueTextField.text)
             }
         }
         view.addSubview(valueLabel)
@@ -217,8 +214,12 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     }
     
     override func rightBtnActn(sender: UIButton) {
-        appUserDefaults.setRegistrationSkip(value: true)
-        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
+        skipProfileApi(completion: { data in
+            appUserDefaults.setRegistrationSkip(value: true)
+            appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
+        })
+//        appUserDefaults.setRegistrationSkip(value: true)
+//        appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
     }
     
     //MARK: ---------- SET UI
@@ -327,18 +328,16 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
             rulerView.minValue,
             min(value, rulerView.maxValue)
         )
-        
-        // ✅ HAPTIC ONLY WHEN VALUE CHANGES
-            if lastHapticValue != clampedValue {
-                haptic.selectionChanged()
-                haptic.prepare()
-                lastHapticValue = clampedValue
-            }
 
         rulerView.indicatorX = centerX
         rulerView.selectedValue = clampedValue
         valueLabel.text = "\(clampedValue)"
         currentIndex = clampedValue
+        // 🔥 HAPTIC WHEN VALUE CHANGES
+            if lastHapticValue != clampedValue {
+                TapticEngine.selection.feedback()
+                lastHapticValue = clampedValue
+            }
     }
 
     
@@ -390,6 +389,7 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     }
     
     @IBAction func heightType(_ sender: UIButton) {
+        TapticEngine.selection.feedback()
         let switchingToKg = sender.tag == 0
 
             let currentDigits = extractDigits(from: valueLabel.text ?? "")
@@ -490,6 +490,7 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     }
     // MARK: Button Tap Function
     @objc private func moveLabelToCenter() {
+        TapticEngine.selection.feedback()
         valueTextField.isUserInteractionEnabled = true
         setScreenUI(showSlider: false)
         valueTextField.becomeFirstResponder()
@@ -615,6 +616,7 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
         )
 
         valueTextField.isUserInteractionEnabled = false
+        TapticEngine.selection.feedback()
         setScreenUI(showSlider: true)
     }
     
@@ -647,6 +649,26 @@ class WeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
 
     func lbsToKg(_ lbs: Int) -> Int {
         return Int(round(Double(lbs) / 2.20462))
+    }
+    
+    private func skipProfileApi(completion: @escaping (PaymentResponse) -> Void) {
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .skipProfile, method: .get, queries: nil, parameters: nil, isShowLoading: false, isShowLoadingWithoutMsg: true, completion: { (getResponce, error) in
+            do {
+                print(getResponce as Any)
+                if let responceData = getResponce {
+                    
+                    let getResult = try JSONDecoder().decode(PaymentResponse.self, from: responceData)
+                    if (getResult.status == true)  {
+                        completion(getResult)
+                    } else {
+                        //                        let errorMsg = (getResult.errors != nil) ? (getResult.errors?.values.first?.first as? String ?? "") :  (getResult.msg)
+                        //                        AlertHelper.shared.alertMesssage(view: self, title: "", message: errorMsg ?? "")
+                    }
+                }
+            } catch {
+                print(error)
+            }
+        })
     }
 }
 
