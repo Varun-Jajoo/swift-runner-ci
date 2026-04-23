@@ -61,6 +61,14 @@ class QuickTrainerBookVC: UIViewController, UITableViewDelegate, UITableViewData
             self.lblAmount.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
             self.lblDeductedSession.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
             self.lblRemainingSession.font = AppFont.regular.size(14.0, familyName: familyFunnelSans)
+            self.btnContinue.setTitle("CONFIRM BOOKING  ", for: .normal)
+            self.btnContinue.setImage(UIImage(named: "blackRightArrow"), for: .normal)
+            self.btnContinue.semanticContentAttribute = .forceRightToLeft
+            self.btnContinue.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
+            self.btnContinue.tintColor = .mainBg   // arrow color
+            self.btnContinue.backgroundColor = .appWhite
+            self.btnContinue.setTitleColor(.mainBg, for: .normal)
+            self.btnContinue.cornersWithBorder(radius: 8, corners: .allCorners)
         }
     }
     
