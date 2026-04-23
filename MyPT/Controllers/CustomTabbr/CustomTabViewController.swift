@@ -61,8 +61,9 @@ final class CustomTabViewController: UITabBarController, UITabBarControllerDeleg
         setupAppearance()
         if !(isForGeustDashboard ?? false) {
             checkPackageAndLoadTabs()
+        } else {
+            setupTabbar(homeType: .guest)
         }
-        self.setupTabbar(homeType: .guest)
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(reloadTabFlow),

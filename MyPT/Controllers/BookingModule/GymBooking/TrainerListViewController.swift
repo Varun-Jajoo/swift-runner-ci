@@ -156,6 +156,12 @@ class TrainerListViewController: CommonViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         self.searchContainerView.removeFromSuperview()
+        stopAllVisibleVideos()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        stopAllVisibleVideos()
     }
     
     func setNavUI() {
@@ -174,6 +180,7 @@ class TrainerListViewController: CommonViewController {
     
     override func rightBtnActn(sender: UIButton) {
         TapticEngine.selection.feedback()
+        stopAllVisibleVideos()
         if sender.tag != 2 {
             let grid: UIImage? = (sender.tag == 0 ? AppImages.selected_grid : AppImages.grid)
             let list: UIImage? = (sender.tag == 1 ? AppImages.menuNav : AppImages.unselectedList)
@@ -649,9 +656,9 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
         
         for cell in visibleCells {
             
-            let cellFrameInTable = trainerListTblView.convert(cell.frame, to: trainerListTblView.superview)
-            
-            let visibleFrame = trainerListTblView.frame.intersection(cellFrameInTable)
+            // Calculate visibility in tableView's own coordinate space for stable ratio.
+            let cellFrameInTable = trainerListTblView.convert(cell.frame, from: cell.superview)
+            let visibleFrame = trainerListTblView.bounds.intersection(cellFrameInTable)
             
             let visibleHeight = visibleFrame.height
             let totalHeight = cell.frame.height
@@ -664,12 +671,18 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
             }
         }
         
-        stopAllVisibleVideos()
+        // Keep currently playing cell as long as it remains the top-visible one.
+        let currentlyPlayingCell = visibleCells.first(where: { ($0.player?.rate ?? 0) > 0 })
         
         if let cellToPlay = maxVisibleCell,
            maxVisiblePercentage >= 0.7 {
-            
-            cellToPlay.playVideoAfterDelay()
+            if currentlyPlayingCell !== cellToPlay {
+                stopAllVisibleVideos()
+                cellToPlay.playVideoAfterDelay()
+            }
+        } else {
+            // No cell has enough visibility, then stop all.
+            stopAllVisibleVideos()
         }
     }
     

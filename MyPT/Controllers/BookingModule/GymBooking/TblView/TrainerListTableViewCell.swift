@@ -65,6 +65,7 @@ class TrainerListTableViewCell: UITableViewCell {
         playerLayer = nil
 
         trainerImgView.isHidden = false
+        btnMute.isHidden = true
     }
     
     override func layoutSubviews() {
@@ -77,6 +78,7 @@ class TrainerListTableViewCell: UITableViewCell {
     
     @objc func videoFailed() {
         trainerImgView.isHidden = false
+        btnMute.isHidden = true
         player?.pause()
         playerLayer?.removeFromSuperlayer()
         player = nil
@@ -116,6 +118,7 @@ class TrainerListTableViewCell: UITableViewCell {
         player = nil
         playerLayer = nil
         trainerImgView.isHidden = false
+        btnMute.isHidden = true
 
         if let videoUrl = trainerData.trainWithMe,
            !videoUrl.trimmingCharacters(in: .whitespaces).isEmpty,
@@ -156,6 +159,7 @@ class TrainerListTableViewCell: UITableViewCell {
 
         } else {
             trainerImgView.isHidden = false
+            btnMute.isHidden = true
         }
         self.contentView.setNeedsLayout()
         self.contentView.layoutIfNeeded()
@@ -180,6 +184,7 @@ class TrainerListTableViewCell: UITableViewCell {
         player = nil
         playerLayer = nil
         trainerImgView.isHidden = false
+        btnMute.isHidden = true
 
         if let videoUrl = trainerData.trainWithMe,
            !videoUrl.trimmingCharacters(in: .whitespaces).isEmpty,
@@ -220,6 +225,7 @@ class TrainerListTableViewCell: UITableViewCell {
 
         } else {
             trainerImgView.isHidden = false
+            btnMute.isHidden = true
         }
         self.contentView.setNeedsLayout()
         self.contentView.layoutIfNeeded()
@@ -245,6 +251,7 @@ class TrainerListTableViewCell: UITableViewCell {
         playWorkItem?.cancel()
 
         trainerImgView.isHidden = false
+        btnMute.isHidden = true
 
         let workItem = DispatchWorkItem { [weak self] in
             guard let self = self,
@@ -252,6 +259,7 @@ class TrainerListTableViewCell: UITableViewCell {
                   self.window != nil else { return }
 
             self.trainerImgView.isHidden = true
+            self.btnMute.isHidden = false
             player.play()
         }
 
@@ -277,7 +285,7 @@ class TrainerListTableViewCell: UITableViewCell {
     
     @IBAction func btnMuteTapped(_ sender: UIButton) {
         sender.isSelected.toggle()
-        sender.setImage(UIImage(named: sender.isSelected ? "UnmuteIcon" : "MuteIcon"), for: .normal)
+        sender.setImage(UIImage(named: sender.isSelected ? "unmuteIcon" : "muteIcon"), for: .normal)
 
         if sender.isSelected {
             player?.isMuted = false   // unmute

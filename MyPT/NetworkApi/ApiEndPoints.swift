@@ -36,7 +36,7 @@ enum AppBaseUrl: String {
 
 
 //App api end points
-enum ApiEndPoint: String{
+enum ApiEndPoint: String {
     case readMessage
     case login                          =  "api/login"
     case resend_Otp                     =  "api/resendotp"

@@ -40,9 +40,9 @@ struct TrainerDetalsModel: Codable {
 }
 
 
-//MARK: --------- CertificateModel
+// MARK: --------- CertificateModel
 struct CertificateModel: Codable {
-    var name, level: String?
+    var name, level, certificate_path: String?
 }
 
 //MARK: - Gallery

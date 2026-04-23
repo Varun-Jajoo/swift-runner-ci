@@ -1,0 +1,23 @@
+{
+  "images" : [
+    {
+      "filename" : "Believe you can and you're halfway there.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "Believe you can and you're halfway there@2x.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "Believe you can and you're halfway there@3x.png",
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

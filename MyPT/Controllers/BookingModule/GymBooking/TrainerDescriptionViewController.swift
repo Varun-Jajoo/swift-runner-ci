@@ -127,7 +127,8 @@ class TrainerDescriptionViewController: CommonViewController {
         specialitiesCollView.register(UINib(nibName: "ProductCategoryCollViewCell", bundle: nil), forCellWithReuseIdentifier: "ProductCategoryCollViewCell")
         trainMeCollView.register(UINib(nibName: "WithMeCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WithMeCollectionViewCell")
         mediaGalleryCollView.register(UINib(nibName: "WithMeCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "WithMeCollectionViewCell")
-        certificationsCollView.register(UINib(nibName: "CertificatesCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "CertificatesCollectionViewCell")
+//        certificationsCollView.register(UINib(nibName: "CertificatesCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "CertificatesCollectionViewCell")
+        certificationsCollView.register(UINib(nibName: "BannerHomepageCVCell", bundle: nil), forCellWithReuseIdentifier: "BannerHomepageCVCell")
         
         setupUI()
         setUpFont()
@@ -502,14 +503,21 @@ extension TrainerDescriptionViewController: UICollectionViewDataSource, UICollec
                   certificates.count > 0 else {
                 return UICollectionViewCell()
             }
-
-            let cell = certificationsCollView.dequeueReusableCell(withReuseIdentifier: "CertificatesCollectionViewCell",for: indexPath) as! CertificatesCollectionViewCell
-
-            let item = certificates[indexPath.row]
-            cell.lavelTitleLbl.text = item.level
-            cell.certificateNameLbl.text = item.name
-
+            
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "BannerHomepageCVCell", for: indexPath) as? BannerHomepageCVCell else { return UICollectionViewCell() }
+            
+            cell.imgBanner.sd_setImage(with: URL(string: certificates[indexPath.row].certificate_path ?? ""), placeholderImage: UIImage(named: "placeholder"))
+            //            cell.cellConfigure(customData: self.customisePlans)
+            //
             return cell
+
+//            let cell = certificationsCollView.dequeueReusableCell(withReuseIdentifier: "CertificatesCollectionViewCell",for: indexPath) as! CertificatesCollectionViewCell
+//
+//            let item = certificates[indexPath.row]
+//            cell.lavelTitleLbl.text = item.level
+//            cell.certificateNameLbl.text = item.name
+//
+//            return cell
         }
 
         else if collectionView == mediaGalleryCollView {
@@ -546,9 +554,9 @@ extension TrainerDescriptionViewController: UICollectionViewDataSource, UICollec
         else if collectionView == mediaGalleryCollView{
             return CGSize(width: collectionView.frame.width*0.41, height: collectionView.frame.height)
             
-        }
-        else if collectionView == certificationsCollView{
-            return CGSize(width: collectionView.frame.width*0.32, height: collectionView.frame.height)
+        } else if collectionView == certificationsCollView {
+            return CGSize(width: 283, height: collectionView.frame.height)
+//            return CGSize(width: collectionView.frame.width/2, height: collectionView.frame.height)
         } else if collectionView == specialitiesCollView{
             return CGSize(width: collectionView.frame.width, height: collectionView.frame.height)
 //            return CGSize(width: collectionView.frame.width*0.32, height: 24)
