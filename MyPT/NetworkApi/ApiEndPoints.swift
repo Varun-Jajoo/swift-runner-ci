@@ -94,8 +94,17 @@ enum ApiEndPoint: String {
     case viewall_classes                =  "api/viewall-classes"
     case class_category                 =  "api/class-category"
     case book_class                     =  "api/book-class"
+    case join_waitlist                  =  "api/join-waitlist"
 //    case ccaavenue_payment              =  "api/pay"
     case ccaavenue_payment              =  "api/payment/session"
+    /// Raw-HTML CCAvenue gateway page for group-class card payments — Android's
+    /// `ApiURL.payamount` (`api/pay?amount=`), the exact contract
+    /// `CCavenueWebCLassActivity.kt` uses today. Deliberately separate from
+    /// `ccaavenue_payment` above: that endpoint is the newer JSON-wrapped
+    /// contract used by subscription purchases, with no confirmed support for a
+    /// class-booking `payment_for`/`schedule_id` — see Phase 8 of the migration
+    /// plan for why this ports Android's raw endpoint instead of extending that one.
+    case class_ccavenue_pay             =  "api/pay"
     case paymentStatus                  =  "api/payment/verify-status"
     case account_delete                 =  "api/account-delete"
 //    case social_login                   =  "api/social-login"

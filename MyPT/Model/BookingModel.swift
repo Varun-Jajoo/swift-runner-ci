@@ -35,6 +35,17 @@ struct BookingDataModel: Codable {
         case isTrainer
         case msg, scheduleMsg, averageRating, starts_in
     }
+
+    /// Port of the `isGroupClass` check in Android's `UpcomingAdapter.kt` /
+    /// `UpcomingSessionsAdapter.kt` (both onBindViewHolder and the click
+    /// listener build the identical condition inline): `type == "group_class"`,
+    /// or `booking_type`/`session_type` containing "group", case-insensitive.
+    var isGroupClass: Bool {
+        if type?.value?.compare("group_class", options: .caseInsensitive) == .orderedSame { return true }
+        if let bookingType = bookingType, bookingType.range(of: "group", options: .caseInsensitive) != nil { return true }
+        if let sessionType = sessionType?.value, sessionType.range(of: "group", options: .caseInsensitive) != nil { return true }
+        return false
+    }
 }
 
 //MARK: --------------------------- BOOKING DETAILS FLOW

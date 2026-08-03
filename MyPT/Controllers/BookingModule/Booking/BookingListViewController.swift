@@ -278,9 +278,25 @@ extension BookingListViewController: UITableViewDataSource, UITableViewDelegate{
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
+
+        // Group-class rows push the read-only Slot Confirmed receipt instead of
+        // the generic BookingDetailsViewController, matching Android's
+        // UpcomingAdapter/UpcomingSessionsAdapter click listeners (both branch on
+        // the identical isGroupClass condition, regardless of the selected tab).
+        if let row = self.bookingData?[indexPath.row], row.isGroupClass {
+            let bookingType = row.bookingType?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let controller = SlotConfirmedViewController()
+            controller.classTitle = (bookingType?.isEmpty == false ? bookingType : row.sessionType?.value) ?? ""
+            controller.classTime = row.timing?.value ?? ""
+            controller.classLocation = row.location?.value ?? ""
+            controller.trainerName = row.trainer?.value ?? ""
+            controller.isReadOnly = true
+            self.navigationController?.pushViewController(controller, animated: true)
+            return
+        }
+
         let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
-        
+
         if selectedTags == 2{
             if let isReschedule = self.bookingData?[indexPath.row].isReschedule, isReschedule, let isTrainerReschedule = self.bookingData?[indexPath.row].isTrainer {
                 vc.detailsFlow = (isTrainerReschedule ? .reschedule : .rescheduleConsumer)

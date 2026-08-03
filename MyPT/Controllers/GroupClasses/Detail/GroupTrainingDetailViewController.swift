@@ -1,0 +1,1833 @@
+//
+//  GroupTrainingDetailViewController.swift
+//  MyPT
+//
+//  Group Training Detail — the core screen of the Group Classes module.
+//
+//  Android reference (ground truth for every rule in here):
+//    app/src/main/java/co/com/mypt/UpComingClasses/GroupTrainingDetailActivity.kt
+//    app/src/main/res/layout/activity_group_training_detail.xml
+//
+//  The screen paints itself instantly from the tap-through payload the home
+//  carousel hands over (`GroupClassTapThroughData`, Phase 3) and *then* refreshes
+//  from `GET api/class-detail` — the same two-stage population Android performs
+//  with its intent extras.
+//
+//  CTA state machine (ported 1:1 from `GroupTrainingDetailActivity`):
+//    1. `isAlreadyBooked`   -> "BOOKED"            -> Slot Confirmed, read-only (Phase 6, LIVE)
+//    2. `isWaitlistMode`    -> "JOIN WAITLIST"     -> join-waitlist flow    (Phase 9)
+//    3. `!isFreeForUser`    -> "PROCEED TO PAYMENT"-> Class Payment screen  (Phase 7)
+//    4. otherwise           -> "BOOK SLOT"         -> Confirm Slot sheet    (Phase 5, LIVE)
+//  States 1 and 4 are wired to their real destinations; states 2-3 each carry an
+//  explicit, clearly-marked stub below (never a silently wrong navigation).
+//
+
+import UIKit
+
+final class GroupTrainingDetailViewController: CommonViewController {
+
+    // MARK: - Input
+
+    /// Payload handed over by `GroupClassNavigator.pushDetail(from:data:)`.
+    /// Set before the screen is pushed; everything below reads from it until the
+    /// `class-detail` refresh lands.
+    var tapThrough = GroupClassTapThroughData()
+
+    // MARK: - Mutable class state
+    //
+    // Field-for-field mirror of `GroupTrainingDetailActivity`'s properties so the
+    // ported logic stays readable next to the Kotlin.
+
+    private var scheduleId: String = ""
+    private var classTitle: String = ""
+    private var classTime: String = ""
+    private var classLocation: String = ""
+    private var classImage: String = ""
+    private var trainerName: String = ""
+    private var trainerImage: String = ""
+    private var classPrice: String = ""
+    private var classAccess: String = "mixed"
+    private var bookedCount: Int = 0
+    private var totalCapacity: Int = 20
+    private var startEnd: String = ""
+    private var lat: Double = GroupClassCardFormatter.fallbackLatitude
+    private var lng: Double = GroupClassCardFormatter.fallbackLongitude
+    private var studioLat: Double = 0
+    private var studioLng: Double = 0
+    private var isAlreadyBooked: Bool = false
+    private var isAlreadyWaitlisted: Bool = false
+    private var isWaitlistMode: Bool = false
+    private var isFreeForUser: Bool = false
+    /// Distance without the trailing " away" — the value Android forwards to the
+    /// downstream booking screens.
+    private var currentDistance: String = ""
+
+    // MARK: - Layout constants
+
+    private enum Metric {
+        static let heroHeight: CGFloat = 364
+        static let heroFadeHeight: CGFloat = 140
+        static let horizontalInset: CGFloat = 16
+        static let navButtonDiameter: CGFloat = 40
+        static let iconTileSide: CGFloat = 38
+        static let progressBarWidth: CGFloat = 71
+        static let whyCardWidth: CGFloat = 190
+        static let galleryCardSize = CGSize(width: 180, height: 250)
+        static let ctaHeight: CGFloat = 48
+        static let ctaMinWidth: CGFloat = 140
+    }
+
+    /// Hex values taken straight from `activity_group_training_detail.xml`; only
+    /// the module-wide slots (backgrounds, progress ramps, badge golds) live in
+    /// `GroupClassColor` — these are local to this screen.
+    private enum Palette {
+        static let hairline = UIColor.white.withAlphaComponent(0.07)      // #12FFFFFF
+        static let moreHairline = UIColor.white.withAlphaComponent(0.10)  // #1AFFFFFF
+        static let dateTime = UIColor(hex: "#FAFAFA").withAlphaComponent(0.55) // #8CFAFAFA
+        static let spotsText = UIColor(hex: "#F0F0F0")
+        static let rowTitle = UIColor(hex: "#F0F0F0")
+        static let distance = UIColor.white.withAlphaComponent(0.4)       // #66FFFFFF
+        static let doorsNote = UIColor(hex: "#9B9B9C")
+        static let cardSurface = UIColor(hex: "#131416")
+        static let cardStroke = UIColor(hex: "#101113")
+        static let cardBody = UIColor(hex: "#898384")
+        static let aboutText = UIColor.white.withAlphaComponent(0.6)      // #99FFFFFF
+        static let aboutFade = UIColor(hex: "#0C0C0C")
+        static let readMoreFill = UIColor(hex: "#1D1E1D")
+        static let pillStroke = UIColor(hex: "#FAFAFA").withAlphaComponent(0.2) // #33FAFAFA
+        static let pillText = UIColor(hex: "#F0F0F0")
+        static let bottomBarTopBorder = UIColor(hex: "#2A8DFF")
+        static let perSession = UIColor.white.withAlphaComponent(0.4)     // #66FFFFFF
+        static let ctaInk = UIColor(hex: "#141514")
+        static let waitlistBannerFill = UIColor(hex: "#FFF8DF")
+        static let waitlistBannerInk = UIColor(hex: "#663800")
+        /// `spot_progress_bar_gold` (`#FFCC33 -> #586400`) differs from the module
+        /// badge gold that `SpotAvailabilityState.gold` carries, so the gold state
+        /// is overridden through `SpotProgressBarView.setFillColors(_:)` — exactly
+        /// what `GroupClassCardCollectionViewCell` does for the same reason.
+        static let goldProgressFill = [UIColor(hex: "#FFCC33"), UIColor(hex: "#586400")]
+    }
+
+    /// Copy that is hard-coded in the Android layout (no API backing).
+    private enum Copy {
+        static let aboutFallback = "What to Expect (this will be displayed as about this class in the app if not use current default)"
+        static let aboutPlaceholder = "Start your day with intention. This 60-minute vinyasa flow builds core strength, improves flexibility, and clears the mind before the day begins. Suitable for all levels — modifications provided."
+        static let readMore = "READ MORE ABOUT THE CLASS"
+        static let trainerSubtitle = "Certified Trainer · MyPT"
+        static let waitlistBanner = "We'll notify you as soon as a spot becomes available"
+        static let perSession = "PER SESSION"
+        static let defaultPillType = "GROUP CLASS"
+    }
+
+    // MARK: - Views
+
+    private let scrollView = UIScrollView()
+    private let contentStack = UIStackView()
+
+    private let heroContainer = UIView()
+    private let heroImageView = UIImageView()
+    private let heroFadeView = GradientFadeView()
+    private let backButton = GlassCircularIconButton()
+    private let favouriteButton = GlassCircularIconButton()
+    private let shareButton = GlassCircularIconButton()
+    private var heroNavTopConstraint: NSLayoutConstraint?
+
+    private let categoryPill = PillChipView()
+    private let locationPill = PillChipView()
+    private let typePill = PillChipView()
+
+    private let titleLabel = UILabel()
+    private let dateTimeLabel = UILabel()
+    private let spotsLabel = UILabel()
+    private let progressBar = SpotProgressBarView(barHeight: 2)
+
+    private let locationRow = UIView()
+    private let locationTitleLabel = UILabel()
+    private let locationDistanceLabel = UILabel()
+    private let doorsOpenLabel = UILabel()
+
+    private let whyScrollView = UIScrollView()
+    private let whyDotsView = GroupClassCarouselDotsView()
+    private let whyDotsPill = UIView()
+
+    private let aboutLabel = UILabel()
+
+    private let trainerAvatarView = UIImageView()
+    private let trainerNameLabel = UILabel()
+
+    private let waitlistBanner = UIView()
+    private let bottomBar = UIView()
+    private let priceLabel = UILabel()
+    private let ctaButton = GradientCTAButton()
+
+    // MARK: - Lifecycle
+
+    override var preferredStatusBarStyle: UIStatusBarStyle { return .lightContent }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        view.backgroundColor = GroupClassColor.bg.color
+        readTapThroughData()
+        buildLayout()
+        populateUI()
+        setupWhyCarouselIndicator()
+
+        // Android: `if (scheduleId.isNotBlank()) fetchClassDetail()`.
+        if !scheduleId.isEmpty {
+            fetchClassDetail()
+        }
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.isNavigationBarHidden = true
+    }
+
+    override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+        // The nav row lives inside the hero (so it scrolls away with it, matching
+        // Android's `layout_marginTop="40dp"` inside the hero FrameLayout), which
+        // means it cannot use the safe-area guide directly.
+        heroNavTopConstraint?.constant = view.safeAreaInsets.top + 12
+    }
+
+    // MARK: - Tap-through ingestion
+
+    /// Port of the `intent.getStringExtra(...)` block in `onCreate`.
+    private func readTapThroughData() {
+        scheduleId = tapThrough.scheduleId
+        classTitle = tapThrough.title.isEmpty ? GroupClassCardFormatter.defaultTitle : tapThrough.title
+        classTime = tapThrough.time
+        classLocation = tapThrough.location
+        classImage = tapThrough.image
+        trainerName = tapThrough.trainedBy
+        trainerImage = tapThrough.trainerImage
+        classPrice = tapThrough.price
+        classAccess = GroupClassCardFormatter.resolvedAccess(tapThrough.access)
+
+        // Android: free -> true, paid -> false, anything else (mixed) -> is_member.
+        isFreeForUser = resolveIsFreeForUser(access: classAccess, isMember: tapThrough.isMember)
+
+        bookedCount = tapThrough.bookedCount
+        totalCapacity = tapThrough.totalCapacity
+        startEnd = tapThrough.startEnd
+        lat = tapThrough.userLat == 0 ? GroupClassCardFormatter.fallbackLatitude : tapThrough.userLat
+        lng = tapThrough.userLng == 0 ? GroupClassCardFormatter.fallbackLongitude : tapThrough.userLng
+        studioLat = tapThrough.studioLat
+        studioLng = tapThrough.studioLng
+    }
+
+    /// `access == "free"` -> free, `access == "paid"` -> paid, `mixed` (or an
+    /// unknown value) -> free only for active members.
+    private func resolveIsFreeForUser(access: String, isMember: Bool) -> Bool {
+        let access = access.lowercased()
+        if access == "free" { return true }
+        if access == "paid" { return false }
+        return isMember
+    }
+
+    // MARK: - Populate (instant, from tap-through data)
+
+    /// Port of `populateUI()`.
+    private func populateUI() {
+        titleLabel.text = classTitle
+
+        let rawTime = startEnd.isEmpty ? classTime : startEnd
+        dateTimeLabel.text = GroupClassCardFormatter.formatTimeForUI(rawTime)
+
+        locationTitleLabel.text = classLocation
+        if !classLocation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            locationPill.text = GroupClassCardFormatter.cleanStudioName(classLocation).uppercased()
+        }
+
+        doorsOpenLabel.attributedText = doorsOpenText(for: rawTime)
+
+        applyHeroImage(classImage)
+
+        if !trainerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            trainerNameLabel.text = trainerName
+        }
+        applyTrainerImage(trainerImage)
+
+        // Android recomputes the distance from the studio coordinates and only
+        // falls back to the string it was handed.
+        updateDetailDistance(studioLat: studioLat, studioLng: studioLng, fallback: tapThrough.distance)
+
+        applyInitialPriceLabel()
+
+        updateProgressAndWaitlistState(booked: bookedCount, totalCapacity: totalCapacity)
+    }
+
+    /// Android's initial (intent-driven) price branch — note it is *not* the same
+    /// ladder the API branch uses (that one also treats plain `is_member` as free).
+    private func applyInitialPriceLabel() {
+        let cleanInitialPrice = cleanedPrice(classPrice)
+        if isFreeForUser {
+            priceLabel.text = "Free for members"
+        } else if classAccess.lowercased() == "free" {
+            priceLabel.text = "FREE"
+        } else if !cleanInitialPrice.isEmpty, cleanInitialPrice != "0", cleanInitialPrice != "0.00" {
+            priceLabel.text = "AED \(cleanInitialPrice)"
+        } else {
+            priceLabel.text = ""
+        }
+    }
+
+    private func cleanedPrice(_ raw: String) -> String {
+        return raw.replacingOccurrences(of: "AED", with: "")
+            .replacingOccurrences(of: " ", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func applyHeroImage(_ path: String) {
+        // The app bundles no group-class cover placeholder (the home card cell has
+        // the same gap); the hero's solid fill is the empty state.
+        if let url = GroupClassCardFormatter.absoluteImageURL(path) {
+            heroImageView.loadImage(urlString: url, placeholder: nil)
+        } else {
+            heroImageView.image = nil
+        }
+    }
+
+    private func applyTrainerImage(_ path: String) {
+        // Android hands the raw value straight to Glide; `absoluteImageURL` passes
+        // absolute URLs through untouched and additionally resolves bare storage
+        // paths, so it is a strict superset of that behaviour.
+        if let url = GroupClassCardFormatter.absoluteImageURL(path) {
+            trainerAvatarView.loadImage(urlString: url, placeholder: nil)
+        }
+    }
+
+    // MARK: - Capacity -> progress bar + CTA label
+
+    /// Port of `updateProgressAndWaitlistState(booked, totalCap)`.
+    ///
+    /// Android derives `remaining` from `capacity - booked` here (it deliberately
+    /// does **not** read the list model's `remaining_seats`), so that derived value
+    /// is what gets fed to the shared threshold helper. The thresholds themselves —
+    /// `>= 100% or remaining <= 0` red + waitlist, `> 80%` red, `> 40%` gold, else
+    /// green — already live in `GroupClassCardFormatter.availability`.
+    private func updateProgressAndWaitlistState(booked: Int, totalCapacity: Int) {
+        let remaining = totalCapacity - booked
+        let percentage = totalCapacity > 0 ? (Double(booked) / Double(totalCapacity)) * 100.0 : 0.0
+
+        let availability = GroupClassCardFormatter.availability(bookedCount: booked,
+                                                               totalCapacity: totalCapacity,
+                                                               remainingSeats: remaining)
+        spotsLabel.text = availability.text
+        progressBar.setProgress(availability.progress, state: availability.state)
+        if case .gold = availability.state {
+            progressBar.setFillColors(Palette.goldProgressFill)
+        }
+
+        // Android's default label flips purely on `isFreeForUser`.
+        let defaultBookingText = isFreeForUser ? "BOOK SLOT" : "PROCEED TO PAYMENT"
+
+        if percentage >= 100 || remaining <= 0 {
+            isWaitlistMode = true
+            waitlistBanner.isHidden = false
+            setCTATitle("JOIN WAITLIST")
+        } else {
+            isWaitlistMode = false
+            waitlistBanner.isHidden = true
+            setCTATitle(defaultBookingText)
+        }
+    }
+
+    private func setCTATitle(_ title: String) {
+        ctaButton.configure(title: title,
+                            font: AppFont.medium.size(14.0, familyName: familyFunnelSans),
+                            titleColor: Palette.ctaInk)
+    }
+
+    // MARK: - Distance
+
+    /// Port of `updateDetailDistance(sLat, sLng, fallback)`.
+    private func updateDetailDistance(studioLat: Double, studioLng: Double, fallback: String) {
+        let text = GroupClassCardFormatter.distanceText(userLat: lat,
+                                                        userLng: lng,
+                                                        studioLat: studioLat,
+                                                        studioLng: studioLng,
+                                                        fallback: fallback)
+        locationDistanceLabel.text = text
+        currentDistance = text.replacingOccurrences(of: " away", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    // MARK: - Doors open (class start − 10 minutes, computed client-side)
+
+    /// Port of `getDynamicDoorsOpenHtml(timeStr)`. The HTML Android renders is
+    /// `Doors open at <b><font color='#FFFFFF'>hh:mm a</font></b> — arrive 10 min early`.
+    private func doorsOpenText(for timeStr: String) -> NSAttributedString {
+        let time = doorsOpenTime(for: timeStr)
+
+        let baseAttributes: [NSAttributedString.Key: Any] = [
+            .font: AppFont.semibold.size(14.0, familyName: familyFunnelSans),
+            .foregroundColor: Palette.doorsNote
+        ]
+        let emphasisAttributes: [NSAttributedString.Key: Any] = [
+            .font: AppFont.bold.size(14.0, familyName: familyFunnelSans),
+            .foregroundColor: UIColor.white
+        ]
+
+        let result = NSMutableAttributedString(string: "Doors open at ", attributes: baseAttributes)
+        result.append(NSAttributedString(string: time, attributes: emphasisAttributes))
+        result.append(NSAttributedString(string: " — arrive 10 min early", attributes: baseAttributes))
+        return result
+    }
+
+    /// Extracts the class start hour from the display string and subtracts 10
+    /// minutes, wrapping across midnight exactly like the Kotlin
+    /// `(hr * 60 + min - 10 + 1440) % 1440`.
+    private func doorsOpenTime(for timeStr: String) -> String {
+        let trimmed = timeStr.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return "06:50 AM" }
+
+        // `Wed, 9 Jul • 7-8 AM` -> `7-8 AM`; a bullet-less string is used as-is.
+        let timePart: String
+        if let bullet = trimmed.range(of: "•") {
+            timePart = String(trimmed[bullet.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
+        } else {
+            timePart = trimmed
+        }
+
+        let isPm = timePart.range(of: "PM", options: .caseInsensitive) != nil
+
+        // Kotlin's `substringBefore("-")` yields the whole string when absent.
+        let beforeDash: String
+        if let dash = timePart.range(of: "-") {
+            beforeDash = String(timePart[..<dash.lowerBound])
+        } else {
+            beforeDash = timePart
+        }
+
+        // Equivalent of `replace("[^0-9:]".toRegex(), "")`.
+        let startPart = String(beforeDash.filter { $0.isNumber || $0 == ":" })
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        var hour = 7
+        var minute = 0
+        if startPart.contains(":") {
+            let parts = startPart.split(separator: ":", omittingEmptySubsequences: false)
+            hour = Int(parts[0]) ?? 7
+            minute = parts.count > 1 ? (Int(parts[1]) ?? 0) : 0
+        } else {
+            hour = Int(startPart) ?? 7
+        }
+
+        if isPm && hour < 12 { hour += 12 }
+        if !isPm && hour == 12 { hour = 0 }
+
+        let totalMinutes = (hour * 60 + minute - 10 + 1440) % 1440
+        let doorsHour = totalMinutes / 60
+        let doorsMinute = totalMinutes % 60
+        let amPm = doorsHour >= 12 ? "PM" : "AM"
+        let hour12 = (doorsHour % 12 == 0) ? 12 : (doorsHour % 12)
+
+        return String(format: "%02d:%02d %@", hour12, doorsMinute, amPm)
+    }
+
+    // MARK: - Network
+
+    /// `GET api/class-detail?lat=&long=&schdule_id=` — the exact query trio Android
+    /// builds, issued through the app's existing `UpcomingClassVM` wrapper.
+    func fetchClassDetail() {
+        let params: [String: String] = [
+            "lat": "\(lat)",
+            "long": "\(lng)",
+            "schdule_id": scheduleId
+        ]
+
+        UpcomingClassVM.classDetailsApi(inputParams: params, isShowLoader: false) { [weak self] result in
+            guard let self = self,
+                  result?.status == true,
+                  let detail = result?.data else { return }
+
+            DispatchQueue.main.async {
+                self.apply(detail: detail)
+            }
+        }
+    }
+
+    /// Port of the `runOnUiThread { ... }` body inside `fetchClassDetail()`.
+    /// Ordering matters: capacity is folded in first, then the booked/waitlisted
+    /// overrides, then price/access — and only then is the capacity-driven label
+    /// recomputed with the freshly-resolved `isFreeForUser`.
+    private func apply(detail: ClassDetailsModel) {
+
+        let name = (detail.className ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if !name.isEmpty {
+            classTitle = name
+            titleLabel.text = name
+        }
+
+        let apiTime = (detail.time ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let effectiveTime = apiTime.isEmpty ? (startEnd.isEmpty ? classTime : startEnd) : apiTime
+        if !effectiveTime.isEmpty {
+            dateTimeLabel.text = GroupClassCardFormatter.formatTimeForUI(effectiveTime)
+        }
+
+        let apiTrainerName = (detail.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if !apiTrainerName.isEmpty {
+            trainerName = apiTrainerName
+            trainerNameLabel.text = apiTrainerName
+        }
+
+        let apiTrainerImage = (detail.profile ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if !apiTrainerImage.isEmpty {
+            trainerImage = apiTrainerImage
+            applyTrainerImage(apiTrainerImage)
+        }
+
+        let apiImage = (detail.classProfile ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if !apiImage.isEmpty {
+            classImage = apiImage
+            applyHeroImage(apiImage)
+        } else {
+            heroImageView.image = nil
+        }
+
+        let description = (detail.classDescription ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        aboutLabel.text = description.isEmpty ? Copy.aboutFallback : description
+
+        let apiCategory = (detail.classCategory ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if !apiCategory.isEmpty {
+            categoryPill.text = apiCategory.uppercased()
+        }
+
+        let apiLocation = (detail.location ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if !apiLocation.isEmpty {
+            classLocation = apiLocation
+            locationTitleLabel.text = apiLocation
+            locationPill.text = GroupClassCardFormatter.cleanStudioName(apiLocation).uppercased()
+        }
+
+        // Android: `optString("class_type", "GROUP CLASS")` — the default applies
+        // when the key is missing, and the value is skipped when it is blank.
+        let apiClassType = (detail.classType ?? Copy.defaultPillType).trimmingCharacters(in: .whitespacesAndNewlines)
+        if !apiClassType.isEmpty {
+            typePill.text = apiClassType.uppercased()
+        }
+
+        let apiStudioLat = GroupClassCardFormatter.doubleValue(detail.studioLat, defaultValue: studioLat)
+        let apiStudioLng = GroupClassCardFormatter.doubleValue(detail.studioLng, defaultValue: studioLng)
+        studioLat = apiStudioLat
+        studioLng = apiStudioLng
+        // Android passes the API's `distance` straight through; keeping the
+        // tap-through value as a second fallback avoids regressing a good distance
+        // to a placeholder when the detail response omits the field.
+        let apiDistance = (detail.distance ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        updateDetailDistance(studioLat: apiStudioLat,
+                             studioLng: apiStudioLng,
+                             fallback: apiDistance.isEmpty ? tapThrough.distance : apiDistance)
+
+        let apiCapacity = detail.capacity ?? totalCapacity
+        let apiBookedCount = GroupClassCardFormatter.intValue(detail.bookedCount, defaultValue: bookedCount)
+        if apiCapacity > 0 {
+            totalCapacity = apiCapacity
+            bookedCount = apiBookedCount
+            updateProgressAndWaitlistState(booked: apiBookedCount, totalCapacity: apiCapacity)
+        }
+
+        isAlreadyBooked = detail.isBooked ?? false
+        isAlreadyWaitlisted = detail.isWaitlisted ?? false
+        if isAlreadyBooked {
+            setCTATitle("BOOKED")
+            // A booked user never sees the amber waitlist banner.
+            waitlistBanner.isHidden = true
+        } else if isAlreadyWaitlisted {
+            setCTATitle("ON WAITLIST")
+        } else {
+            // A booking may have been removed server-side; recompute from capacity.
+            updateProgressAndWaitlistState(booked: bookedCount, totalCapacity: totalCapacity)
+        }
+
+        doorsOpenLabel.attributedText = doorsOpenText(for: effectiveTime)
+
+        let isMember = detail.isMember ?? false
+        let access = (detail.access ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedAccess = access.isEmpty ? (classAccess.isEmpty ? "mixed" : classAccess) : access
+        classAccess = resolvedAccess
+
+        let price = (detail.price ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if !price.isEmpty { classPrice = price }
+        let cleanPrice = cleanedPrice(classPrice)
+
+        isFreeForUser = resolveIsFreeForUser(access: resolvedAccess, isMember: isMember)
+
+        if isFreeForUser || isMember {
+            priceLabel.text = "Free for members"
+        } else if resolvedAccess.lowercased() == "free" {
+            priceLabel.text = "FREE"
+        } else if !cleanPrice.isEmpty, cleanPrice != "0", cleanPrice != "0.00" {
+            priceLabel.text = "AED \(cleanPrice)"
+        } else {
+            priceLabel.text = ""
+        }
+
+        if !isAlreadyBooked && !isAlreadyWaitlisted {
+            updateProgressAndWaitlistState(booked: bookedCount, totalCapacity: totalCapacity)
+        }
+    }
+
+    // MARK: - Login gate
+
+    /// The app's existing auth check: a missing/blank access token means the user
+    /// is browsing as a guest (same token read `NetworkManager`'s request adapter
+    /// and `CCAvenuePaymentViewController` perform).
+    private var isAuthenticated: Bool {
+        let token = (appUserDefaults.getAccessToken() ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        return !token.isEmpty && token != "-1"
+    }
+
+    /// Routes a guest to the app's existing login entry point (`MainViewController`,
+    /// the phone-number screen — the iOS counterpart of Android's
+    /// `PhoneNumberScreenActivity`). This is the same idiom the rest of the app
+    /// uses for a guest-gated action, e.g. `ClassDetailsViewController`'s
+    /// `.guestUser` branch.
+    ///
+    /// - Returns: `true` when the caller may proceed, `false` when the user was
+    ///            sent to login.
+    @discardableResult
+    private func requireLogin() -> Bool {
+        guard !isAuthenticated else { return true }
+        AlertHelper.shared.showCustomeAlert(title: "", message: "Please log in to proceed", actions: ["OK"]) { _ in
+            if appUserDefaults.clearUserDefault() {
+                appSceneDelegate?.goToMainView()
+            }
+        }
+        return false
+    }
+
+    // MARK: - Actions
+
+    @objc private func backTapped() {
+        navigationController?.popViewController(animated: true)
+    }
+
+    @objc private func favouriteTapped() {
+        // Android's `btnHeart` has no click listener — the control is decorative
+        // there too. Left as an explicit no-op rather than inventing behaviour.
+        debugPrint("[GroupTrainingDetail] Favourite tapped — no destination defined on Android either.")
+    }
+
+    @objc private func shareTapped() {
+        // Android's `btnShare` likewise has no click listener.
+        debugPrint("[GroupTrainingDetail] Share tapped — no destination defined on Android either.")
+    }
+
+    @objc private func locationTapped() {
+        openMapsDirections()
+    }
+
+    /// Port of `openGoogleMapsDirections()`, using the app's existing Google-Maps
+    /// URL scheme + web-fallback pattern (see `GymDetailsViewController`).
+    private func openMapsDirections() {
+        guard studioLat != 0, studioLng != 0 else {
+            AlertHelper.shared.showCustomeAlert(title: "", message: "Location not available", actions: ["OK"], completion: nil)
+            return
+        }
+
+        let schemeURLString = "comgooglemaps://?daddr=\(studioLat),\(studioLng)&directionsmode=driving"
+        if let url = URL(string: schemeURLString), UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            return
+        }
+
+        let webURLString = "https://www.google.com/maps/dir/?api=1&destination=\(studioLat),\(studioLng)"
+        if let webURL = URL(string: webURLString) {
+            UIApplication.shared.open(webURL, options: [:], completionHandler: nil)
+        }
+    }
+
+    /// The 4-state CTA. Branch order is Android's, verbatim.
+    @objc private func ctaTapped() {
+        TapticEngine.selection.feedback()
+
+        if isAlreadyBooked {
+            pushSlotConfirmedReadOnly()
+            return
+        }
+
+        if isWaitlistMode {
+            // Android performs the token check inside `joinWaitlistDirectly` before
+            // anything else, so the gate stays on this path.
+            guard requireLogin() else { return }
+            joinWaitlist()
+            return
+        }
+
+        if !isFreeForUser {
+            guard requireLogin() else { return }
+            pushClassPayment()
+            return
+        }
+
+        // Android does *not* gate this branch here: the login check lives inside the
+        // Confirm Slot bottom sheet's confirm button (`ConfirmSlotSheetViewController`).
+        presentConfirmSlotSheet()
+    }
+
+    /// Port of the `isFreeForUser == false` branch of `btnBookSlot.setOnClickListener`:
+    /// Android pushes `ClassPaymentScreenActivity` directly for a paid class,
+    /// bypassing the Confirm Slot sheet entirely.
+    private func pushClassPayment() {
+        let controller = ClassPaymentViewController()
+        controller.scheduleId = scheduleId
+        controller.classTitle = classTitle
+        controller.classTime = dateTimeLabel.text ?? ""
+        controller.classLocation = classLocation
+        controller.trainerName = trainerName
+        controller.classPrice = classPrice
+        controller.distance = locationDistanceLabel.text ?? currentDistance
+        navigationController?.pushViewController(controller, animated: true)
+    }
+
+    /// Port of `joinWaitlistDirectly`: `POST join-waitlist` with schedule_id /
+    /// transaction_id="" / price, then either refresh + push Waitlist Confirmed
+    /// (success), stub to Phase 10 (blacklisted), or surface the server message.
+    private func joinWaitlist() {
+        UpcomingClassVM.joinWaitlistApi(scheduleId: scheduleId,
+                                        transactionId: "",
+                                        price: classPrice) { [weak self] result in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.handleWaitlistResponse(result)
+            }
+        }
+    }
+
+    private func handleWaitlistResponse(_ result: BookClassBaseModel?) {
+        guard let result = result else {
+            AlertHelper.shared.showCustomeAlert(title: "", message: "Could not join waitlist. Please try again.", actions: ["OK"], completion: nil)
+            return
+        }
+
+        if result.status == true {
+            // Android calls fetchClassDetail() before navigating so this screen
+            // reflects the new waitlist state when the user comes back.
+            fetchClassDetail()
+            let controller = WaitlistConfirmedViewController()
+            controller.classTitle = classTitle
+            controller.classTime = dateTimeLabel.text ?? ""
+            controller.classLocation = classLocation
+            controller.trainerName = trainerName
+            controller.distance = currentDistance
+            navigationController?.pushViewController(controller, animated: true)
+            return
+        }
+
+        if isWaitlistBlacklisted(result) {
+            let controller = BookingPausedViewController()
+            controller.reason = result.blacklistDetail?.reason ?? "2 consecutive no-shows for group classes"
+            controller.resumesOn = result.blacklistDetail?.resumesOn ?? "12 August 2026"
+            controller.daysRemaining = result.blacklistDetail?.daysRemaining?.value ?? "6"
+            navigationController?.pushViewController(controller, animated: true)
+            return
+        }
+
+        let trimmedMessage = (result.msg ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let message = trimmedMessage.isEmpty ? "Could not join waitlist. Please try again." : trimmedMessage
+        AlertHelper.shared.showCustomeAlert(title: "", message: message, actions: ["OK"], completion: nil)
+    }
+
+    private func isWaitlistBlacklisted(_ model: BookClassBaseModel) -> Bool {
+        if model.isBlacklisted == true { return true }
+        if model.code == "BLACKLISTED" { return true }
+        let lowered = (model.msg ?? "").lowercased()
+        return lowered.contains("blacklisted") || lowered.contains("paused")
+    }
+
+    /// Port of the `isAlreadyBooked` branch of `btnBookSlot.setOnClickListener`.
+    ///
+    /// Android starts `SlotConfirmedActivity` with exactly these six extras —
+    /// `title`, `time` (the *label* text, already formatted), `location`,
+    /// `trainer_name`, `distance` (`tvLocationDistance`'s text, falling back to
+    /// `currentDistance` only if the view is missing) and `price` — and pointedly
+    /// omits `schedule_id`, so the success screen does not re-POST `book-class` for
+    /// a booking that already exists.
+    ///
+    /// `isReadOnly` is the iOS-side belt to that braces: it hard-disables the POST
+    /// regardless of `scheduleId`, and makes Slot Confirmed's glass back button
+    /// return *here* instead of unwinding the whole stack to the tab root (which is
+    /// what the fresh-booking flow does, mirroring Android's `FLAG_ACTIVITY_CLEAR_TOP`).
+    private func pushSlotConfirmedReadOnly() {
+        let controller = SlotConfirmedViewController()
+        controller.classTitle = classTitle
+        controller.classTime = dateTimeLabel.text ?? ""
+        controller.classLocation = classLocation
+        controller.trainerName = trainerName
+        controller.distance = locationDistanceLabel.text ?? currentDistance
+        controller.classPrice = classPrice
+        controller.isReadOnly = true
+        navigationController?.pushViewController(controller, animated: true)
+    }
+
+    /// Port of `showConfirmSlotBottomSheet(classTitle, tvClassDateTime.text, classLocation)`.
+    ///
+    /// Android passes those three explicitly and lets the sheet body read the rest
+    /// off the Activity, so the same fields are forwarded here. `distance` is the
+    /// *label* text (which still carries the trailing " away") rather than the
+    /// stripped `currentDistance` — Android's
+    /// `findViewById(R.id.tvLocationDistance)?.text ?: currentDistance` only falls
+    /// back when the view itself is missing.
+    private func presentConfirmSlotSheet() {
+        var input = ConfirmSlotSheetInput()
+        input.scheduleId = scheduleId
+        input.title = classTitle
+        input.time = dateTimeLabel.text ?? ""
+        input.location = classLocation
+        input.distance = locationDistanceLabel.text ?? currentDistance
+        input.trainerName = trainerName
+        input.price = classPrice
+        input.isFreeForUser = isFreeForUser
+
+        ConfirmSlotSheetViewController.present(from: self, input: input) { [weak self] in
+            // Android calls `fetchClassDetail()` right before it leaves for Slot
+            // Confirmed, so this screen shows "BOOKED" when the user comes back.
+            self?.fetchClassDetail()
+        }
+    }
+
+    @objc private func readMoreTapped() {
+        // Android's `btnReadMore` has no click listener (confirmed open question in
+        // the migration plan: keep static unless specified).
+        debugPrint("[GroupTrainingDetail] READ MORE tapped — static on Android, intentionally unwired.")
+    }
+
+    // MARK: - Why-this-class-stands-out carousel indicator
+
+    /// Port of `setupCarouselIndicator()`: two pages, switching at the 50% scroll mark.
+    private func setupWhyCarouselIndicator() {
+        whyDotsView.setPageCount(2)
+        whyDotsView.setSelectedPage(0)
+    }
+}
+
+// MARK: - UIScrollViewDelegate
+
+extension GroupTrainingDetailViewController: UIScrollViewDelegate {
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard scrollView === whyScrollView else { return }
+        let maxScroll = max(scrollView.contentSize.width - scrollView.bounds.width, 1)
+        let ratio = min(max(scrollView.contentOffset.x / maxScroll, 0), 1)
+        whyDotsView.setSelectedPage(ratio > 0.5 ? 1 : 0)
+    }
+}
+
+// MARK: - Layout
+
+private extension GroupTrainingDetailViewController {
+
+    func buildLayout() {
+        buildBottomBar()
+        buildWaitlistBanner()
+        buildScrollView()
+    }
+
+    // MARK: Scroll container
+
+    func buildScrollView() {
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.backgroundColor = .clear
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.contentInsetAdjustmentBehavior = .never
+        view.insertSubview(scrollView, at: 0)
+
+        contentStack.translatesAutoresizingMaskIntoConstraints = false
+        contentStack.axis = .vertical
+        contentStack.alignment = .fill
+        contentStack.spacing = 0
+        scrollView.addSubview(contentStack)
+
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: bottomBar.topAnchor),
+
+            contentStack.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            contentStack.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
+            contentStack.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+            contentStack.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            contentStack.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
+        ])
+
+        contentStack.addArrangedSubview(makeHeroSection())
+        contentStack.addArrangedSubview(makeContentColumn())
+    }
+
+    // MARK: Hero
+
+    func makeHeroSection() -> UIView {
+        heroContainer.translatesAutoresizingMaskIntoConstraints = false
+        heroContainer.backgroundColor = GroupClassColor.bg.color
+        heroContainer.clipsToBounds = true
+
+        heroImageView.translatesAutoresizingMaskIntoConstraints = false
+        heroImageView.contentMode = .scaleAspectFill
+        heroImageView.clipsToBounds = true
+        heroImageView.backgroundColor = GroupClassColor.bg2.color
+        heroContainer.addSubview(heroImageView)
+
+        heroFadeView.translatesAutoresizingMaskIntoConstraints = false
+        heroFadeView.setColors([GroupClassColor.bg.color.withAlphaComponent(0.0),
+                                GroupClassColor.bg.color])
+        heroContainer.addSubview(heroFadeView)
+
+        backButton.translatesAutoresizingMaskIntoConstraints = false
+        backButton.configure(icon: GroupTrainingDetailViewController.icon(["ic_back_chevron_20", "ic_back_arrow", "ic_arrow_left"]),
+                             diameter: Metric.navButtonDiameter)
+        backButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
+
+        favouriteButton.translatesAutoresizingMaskIntoConstraints = false
+        favouriteButton.configure(icon: GroupTrainingDetailViewController.icon(["ic_heart_20", "ic_heart"]),
+                                  diameter: Metric.navButtonDiameter)
+        favouriteButton.addTarget(self, action: #selector(favouriteTapped), for: .touchUpInside)
+
+        shareButton.translatesAutoresizingMaskIntoConstraints = false
+        shareButton.configure(icon: GroupTrainingDetailViewController.icon(["ic_share_20", "ic_share"]),
+                              diameter: Metric.navButtonDiameter)
+        shareButton.addTarget(self, action: #selector(shareTapped), for: .touchUpInside)
+
+        heroContainer.addSubview(backButton)
+        heroContainer.addSubview(favouriteButton)
+        heroContainer.addSubview(shareButton)
+
+        let navTop = backButton.topAnchor.constraint(equalTo: heroContainer.topAnchor, constant: 52)
+        heroNavTopConstraint = navTop
+
+        NSLayoutConstraint.activate([
+            heroContainer.heightAnchor.constraint(equalToConstant: Metric.heroHeight),
+
+            heroImageView.topAnchor.constraint(equalTo: heroContainer.topAnchor),
+            heroImageView.leadingAnchor.constraint(equalTo: heroContainer.leadingAnchor),
+            heroImageView.trailingAnchor.constraint(equalTo: heroContainer.trailingAnchor),
+            heroImageView.bottomAnchor.constraint(equalTo: heroContainer.bottomAnchor),
+
+            heroFadeView.leadingAnchor.constraint(equalTo: heroContainer.leadingAnchor),
+            heroFadeView.trailingAnchor.constraint(equalTo: heroContainer.trailingAnchor),
+            heroFadeView.bottomAnchor.constraint(equalTo: heroContainer.bottomAnchor),
+            heroFadeView.heightAnchor.constraint(equalToConstant: Metric.heroFadeHeight),
+
+            navTop,
+            backButton.leadingAnchor.constraint(equalTo: heroContainer.leadingAnchor,
+                                                constant: Metric.horizontalInset),
+            backButton.widthAnchor.constraint(equalToConstant: Metric.navButtonDiameter),
+            backButton.heightAnchor.constraint(equalToConstant: Metric.navButtonDiameter),
+
+            shareButton.centerYAnchor.constraint(equalTo: backButton.centerYAnchor),
+            shareButton.trailingAnchor.constraint(equalTo: heroContainer.trailingAnchor,
+                                                  constant: -Metric.horizontalInset),
+            shareButton.widthAnchor.constraint(equalToConstant: Metric.navButtonDiameter),
+            shareButton.heightAnchor.constraint(equalToConstant: Metric.navButtonDiameter),
+
+            favouriteButton.centerYAnchor.constraint(equalTo: backButton.centerYAnchor),
+            favouriteButton.trailingAnchor.constraint(equalTo: shareButton.leadingAnchor, constant: -8),
+            favouriteButton.widthAnchor.constraint(equalToConstant: Metric.navButtonDiameter),
+            favouriteButton.heightAnchor.constraint(equalToConstant: Metric.navButtonDiameter)
+        ])
+
+        return heroContainer
+    }
+
+    // MARK: Content column
+
+    func makeContentColumn() -> UIView {
+        let column = UIStackView()
+        column.translatesAutoresizingMaskIntoConstraints = false
+        column.axis = .vertical
+        column.alignment = .fill
+        column.spacing = 0
+        column.isLayoutMarginsRelativeArrangement = true
+        column.layoutMargins = UIEdgeInsets(top: 0,
+                                            left: Metric.horizontalInset,
+                                            bottom: 32,
+                                            right: Metric.horizontalInset)
+
+        // 1 — three glass pills
+        let pillsRow = makePillsRow()
+        column.addArrangedSubview(pillsRow)
+        column.setCustomSpacing(16, after: pillsRow)
+
+        // 2 — class title
+        titleLabel.font = AppFont.medium.size(24.0, familyName: familyClashDisplay)
+        titleLabel.textColor = .white
+        titleLabel.numberOfLines = 0
+        column.addArrangedSubview(titleLabel)
+        column.setCustomSpacing(16, after: titleLabel)
+
+        // 3 — date/time + spots progress
+        let dateSpotsRow = makeDateAndSpotsRow()
+        column.addArrangedSubview(dateSpotsRow)
+        column.setCustomSpacing(16, after: dateSpotsRow)
+
+        // 4 — location row (tap -> Maps)
+        let locationRowView = makeLocationRow()
+        column.addArrangedSubview(locationRowView)
+
+        let locationDivider = makeHairline(color: Palette.hairline)
+        column.addArrangedSubview(locationDivider)
+        column.setCustomSpacing(16, after: locationDivider)
+
+        // 5 — doors-open row
+        let doorsRow = makeDoorsOpenRow()
+        column.addArrangedSubview(doorsRow)
+        column.addArrangedSubview(makeHairline(color: Palette.hairline))
+
+        // 6 — why this class stands out
+        let whyTitle = makeSectionTitle("Why this class stands out")
+        column.setCustomSpacing(24, after: column.arrangedSubviews[column.arrangedSubviews.count - 1])
+        column.addArrangedSubview(whyTitle)
+        column.setCustomSpacing(12, after: whyTitle)
+
+        let whyCarousel = makeWhyCarousel()
+        column.addArrangedSubview(whyCarousel)
+        column.setCustomSpacing(12, after: whyCarousel)
+
+        let dotsRow = makeWhyDotsRow()
+        column.addArrangedSubview(dotsRow)
+        column.setCustomSpacing(24, after: dotsRow)
+
+        // 7 — about the class
+        let aboutTitle = makeSectionTitle("About the class")
+        column.addArrangedSubview(aboutTitle)
+        column.setCustomSpacing(8, after: aboutTitle)
+
+        let aboutBlock = makeAboutBlock()
+        column.addArrangedSubview(aboutBlock)
+        column.setCustomSpacing(12, after: aboutBlock)
+
+        let readMoreButton = makeReadMoreButton()
+        column.addArrangedSubview(readMoreButton)
+        column.setCustomSpacing(24, after: readMoreButton)
+
+        // 8 — what to bring
+        let bringTitle = makeSectionTitle("What to bring")
+        column.addArrangedSubview(bringTitle)
+        column.setCustomSpacing(12, after: bringTitle)
+        appendInfoRows(GroupTrainingDetailViewController.whatToBringRows, to: column)
+
+        // 9 — things to know
+        let knowTitle = makeSectionTitle("Things to know")
+        column.setCustomSpacing(24, after: column.arrangedSubviews[column.arrangedSubviews.count - 1])
+        column.addArrangedSubview(knowTitle)
+        column.setCustomSpacing(12, after: knowTitle)
+        appendInfoRows(GroupTrainingDetailViewController.thingsToKnowRows, to: column)
+
+        // 10 — media gallery (static placeholders, matching Android)
+        let galleryHeader = makeGalleryHeader()
+        column.setCustomSpacing(24, after: column.arrangedSubviews[column.arrangedSubviews.count - 1])
+        column.addArrangedSubview(galleryHeader)
+        column.setCustomSpacing(12, after: galleryHeader)
+
+        let gallery = makeMediaGallery()
+        column.addArrangedSubview(gallery)
+        column.setCustomSpacing(24, after: gallery)
+
+        // 11 — trainer card
+        let trainerTitle = makeSectionTitle("Your trainer")
+        column.addArrangedSubview(trainerTitle)
+        column.setCustomSpacing(12, after: trainerTitle)
+
+        let trainerCard = makeTrainerCard()
+        column.addArrangedSubview(trainerCard)
+        column.setCustomSpacing(24, after: trainerCard)
+
+        // 12 — policy rows
+        let moreTitle = makeSectionTitle("More")
+        column.addArrangedSubview(moreTitle)
+        column.setCustomSpacing(12, after: moreTitle)
+
+        let cancellationRow = makePolicyRow(icon: GroupTrainingDetailViewController.icon(["ic_person_age_18", "ic_profile"]),
+                                            title: "Cancellation policy")
+        column.addArrangedSubview(cancellationRow)
+        column.setCustomSpacing(8, after: cancellationRow)
+
+        let termsRow = makePolicyRow(icon: GroupTrainingDetailViewController.icon(["ic_clock_18", "ic_clock"]),
+                                     title: "Terms and conditions")
+        column.addArrangedSubview(termsRow)
+
+        return column
+    }
+
+    func makePillsRow() -> UIView {
+        [categoryPill, locationPill, typePill].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.fillColor = .clear
+            $0.strokeColor = Palette.pillStroke
+            $0.contentInsets = UIEdgeInsets(top: 4, left: 12, bottom: 4, right: 12)
+            $0.configure(text: nil,
+                         font: AppFont.medium.size(12.0, familyName: familyFunnelSans),
+                         textColor: Palette.pillText)
+            // Three long API-driven labels can exceed the 16pt-inset column; let
+            // them truncate rather than push each other off screen.
+            $0.titleLabel.lineBreakMode = .byTruncatingTail
+            $0.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+            $0.heightAnchor.constraint(greaterThanOrEqualToConstant: 24).isActive = true
+        }
+
+        // Android ships literal placeholder text in the layout; the API refresh
+        // overwrites all three.
+        categoryPill.text = "YOGA"
+        locationPill.text = "DSO CLUB"
+        typePill.text = Copy.defaultPillType
+
+        let pillStack = UIStackView(arrangedSubviews: [categoryPill, locationPill, typePill])
+        pillStack.translatesAutoresizingMaskIntoConstraints = false
+        pillStack.axis = .horizontal
+        pillStack.alignment = .center
+        pillStack.spacing = 6
+
+        // Wrapper keeps the pills hugging the leading edge inside a .fill column.
+        let wrapper = UIView()
+        wrapper.translatesAutoresizingMaskIntoConstraints = false
+        wrapper.addSubview(pillStack)
+        NSLayoutConstraint.activate([
+            pillStack.topAnchor.constraint(equalTo: wrapper.topAnchor),
+            pillStack.bottomAnchor.constraint(equalTo: wrapper.bottomAnchor),
+            pillStack.leadingAnchor.constraint(equalTo: wrapper.leadingAnchor),
+            pillStack.trailingAnchor.constraint(lessThanOrEqualTo: wrapper.trailingAnchor)
+        ])
+        return wrapper
+    }
+
+    func makeDateAndSpotsRow() -> UIView {
+        dateTimeLabel.translatesAutoresizingMaskIntoConstraints = false
+        dateTimeLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
+        dateTimeLabel.textColor = Palette.dateTime
+        dateTimeLabel.numberOfLines = 1
+        dateTimeLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        spotsLabel.translatesAutoresizingMaskIntoConstraints = false
+        spotsLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
+        spotsLabel.textColor = Palette.spotsText
+        spotsLabel.textAlignment = .right
+        spotsLabel.numberOfLines = 1
+        spotsLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+
+        progressBar.translatesAutoresizingMaskIntoConstraints = false
+
+        let spotStack = UIStackView(arrangedSubviews: [spotsLabel, progressBar])
+        spotStack.translatesAutoresizingMaskIntoConstraints = false
+        spotStack.axis = .vertical
+        spotStack.alignment = .trailing
+        spotStack.spacing = 4
+        spotStack.setContentHuggingPriority(.required, for: .horizontal)
+        spotStack.setContentCompressionResistancePriority(.required, for: .horizontal)
+
+        let row = UIStackView(arrangedSubviews: [dateTimeLabel, spotStack])
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.axis = .horizontal
+        row.alignment = .center
+        row.spacing = 12
+
+        progressBar.widthAnchor.constraint(equalToConstant: Metric.progressBarWidth).isActive = true
+        return row
+    }
+
+    func makeLocationRow() -> UIView {
+        locationRow.translatesAutoresizingMaskIntoConstraints = false
+
+        let iconTile = makeIconTile(image: GroupTrainingDetailViewController.icon(["ic_location_pin_small", "ic_Location", "greenLocation"]),
+                                    iconSide: 14)
+
+        locationTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        locationTitleLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
+        locationTitleLabel.textColor = .white
+        locationTitleLabel.numberOfLines = 1
+        locationTitleLabel.lineBreakMode = .byTruncatingTail
+
+        locationDistanceLabel.translatesAutoresizingMaskIntoConstraints = false
+        locationDistanceLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
+        locationDistanceLabel.textColor = Palette.distance
+        locationDistanceLabel.numberOfLines = 1
+        locationDistanceLabel.lineBreakMode = .byTruncatingTail
+
+        // `.fill` so a long studio name truncates inside the available width
+        // instead of overflowing past the chevron.
+        let textStack = UIStackView(arrangedSubviews: [locationTitleLabel, locationDistanceLabel])
+        textStack.translatesAutoresizingMaskIntoConstraints = false
+        textStack.axis = .vertical
+        textStack.alignment = .fill
+        textStack.spacing = 2
+        textStack.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        textStack.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        let chevron = makeChevron()
+
+        let row = UIStackView(arrangedSubviews: [iconTile, textStack, chevron])
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.axis = .horizontal
+        row.alignment = .center
+        row.spacing = 12
+        locationRow.addSubview(row)
+
+        NSLayoutConstraint.activate([
+            locationRow.heightAnchor.constraint(greaterThanOrEqualToConstant: 54),
+            row.leadingAnchor.constraint(equalTo: locationRow.leadingAnchor),
+            row.trailingAnchor.constraint(equalTo: locationRow.trailingAnchor),
+            row.topAnchor.constraint(equalTo: locationRow.topAnchor, constant: 12),
+            row.bottomAnchor.constraint(equalTo: locationRow.bottomAnchor, constant: -12)
+        ])
+
+        // Android attaches the same handler to the container, the gym name and the
+        // distance label — a single container tap covers all three on iOS.
+        locationRow.isUserInteractionEnabled = true
+        locationRow.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(locationTapped)))
+        return locationRow
+    }
+
+    func makeDoorsOpenRow() -> UIView {
+        let container = UIView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+
+        let iconTile = makeIconTile(image: GroupTrainingDetailViewController.icon(["ic_clock_18", "ic_clock"]),
+                                    iconSide: 18)
+
+        doorsOpenLabel.translatesAutoresizingMaskIntoConstraints = false
+        doorsOpenLabel.numberOfLines = 0
+        doorsOpenLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        doorsOpenLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        let row = UIStackView(arrangedSubviews: [iconTile, doorsOpenLabel])
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.axis = .horizontal
+        row.alignment = .center
+        row.spacing = 12
+        container.addSubview(row)
+
+        NSLayoutConstraint.activate([
+            container.heightAnchor.constraint(greaterThanOrEqualToConstant: 54),
+            row.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            row.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            row.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
+            row.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -12)
+        ])
+        return container
+    }
+
+    func makeWhyCarousel() -> UIView {
+        whyScrollView.translatesAutoresizingMaskIntoConstraints = false
+        whyScrollView.showsHorizontalScrollIndicator = false
+        whyScrollView.backgroundColor = .clear
+        whyScrollView.delegate = self
+
+        let card1 = makeWhyCard(icon: GroupTrainingDetailViewController.icon(["ic_expert_instructor_28", "ic_trainer"]),
+                                title: "Expert Instructor",
+                                body: "Certified trainer with hundreds of delivered classes")
+        let card2 = makeWhyCard(icon: GroupTrainingDetailViewController.icon(["ic_small_group_28", "ic_withGroup"]),
+                                title: "Small Group",
+                                body: "Capped sessions — never a crowd")
+
+        // A horizontal stack with `.fill` alignment gives both cards the height of
+        // the tallest — Android's `measureWithLargestChild`.
+        let stack = UIStackView(arrangedSubviews: [card1, card2])
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .horizontal
+        stack.alignment = .fill
+        stack.spacing = 12
+        whyScrollView.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: whyScrollView.contentLayoutGuide.topAnchor),
+            stack.leadingAnchor.constraint(equalTo: whyScrollView.contentLayoutGuide.leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: whyScrollView.contentLayoutGuide.trailingAnchor),
+            stack.bottomAnchor.constraint(equalTo: whyScrollView.contentLayoutGuide.bottomAnchor),
+            whyScrollView.heightAnchor.constraint(equalTo: stack.heightAnchor),
+
+            card1.widthAnchor.constraint(equalToConstant: Metric.whyCardWidth),
+            card2.widthAnchor.constraint(equalToConstant: Metric.whyCardWidth)
+        ])
+        return whyScrollView
+    }
+
+    func makeWhyCard(icon: UIImage?, title: String, body: String) -> UIView {
+        let card = GlassCardView(cornerRadius: 12)
+        card.translatesAutoresizingMaskIntoConstraints = false
+        card.fillColor = Palette.cardSurface
+        card.fillAlpha = 1.0
+        card.strokeColor = Palette.cardStroke
+        card.strokeAlpha = 1.0
+        // Android's radial highlight is anchored at the top-centre of the card.
+        card.sheenOrigin = .topCenter
+        card.sheenAlpha = 0.10
+
+        let iconView = UIImageView(image: icon)
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+        iconView.contentMode = .scaleAspectFit
+
+        // The stack is `.fill` (so both labels get the card width and wrap), which
+        // would also stretch a bare image view — hence the leading-aligned wrapper.
+        let iconContainer = UIView()
+        iconContainer.translatesAutoresizingMaskIntoConstraints = false
+        iconContainer.addSubview(iconView)
+
+        let cardTitleLabel = UILabel()
+        cardTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        cardTitleLabel.font = AppFont.medium.size(16.0, familyName: familyClashDisplay)
+        cardTitleLabel.textColor = Palette.rowTitle
+        cardTitleLabel.numberOfLines = 0
+        cardTitleLabel.text = title
+
+        let cardBodyLabel = UILabel()
+        cardBodyLabel.translatesAutoresizingMaskIntoConstraints = false
+        cardBodyLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
+        cardBodyLabel.textColor = Palette.cardBody
+        cardBodyLabel.numberOfLines = 0
+        cardBodyLabel.text = body
+
+        let stack = UIStackView(arrangedSubviews: [iconContainer, cardTitleLabel, cardBodyLabel])
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .vertical
+        stack.alignment = .fill
+        stack.spacing = 4
+        stack.setCustomSpacing(8, after: iconContainer)
+        card.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            iconView.widthAnchor.constraint(equalToConstant: 28),
+            iconView.heightAnchor.constraint(equalToConstant: 28),
+            iconView.topAnchor.constraint(equalTo: iconContainer.topAnchor),
+            iconView.bottomAnchor.constraint(equalTo: iconContainer.bottomAnchor),
+            iconView.leadingAnchor.constraint(equalTo: iconContainer.leadingAnchor),
+            iconView.trailingAnchor.constraint(lessThanOrEqualTo: iconContainer.trailingAnchor),
+
+            stack.topAnchor.constraint(equalTo: card.topAnchor, constant: 14),
+            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
+            stack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -14)
+        ])
+        return card
+    }
+
+    func makeWhyDotsRow() -> UIView {
+        whyDotsPill.translatesAutoresizingMaskIntoConstraints = false
+        whyDotsPill.backgroundColor = GroupClassColor.bg3.color
+        whyDotsPill.layer.cornerRadius = 9
+        whyDotsPill.layer.masksToBounds = true
+
+        whyDotsView.translatesAutoresizingMaskIntoConstraints = false
+        whyDotsPill.addSubview(whyDotsView)
+
+        let container = UIView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(whyDotsPill)
+
+        NSLayoutConstraint.activate([
+            whyDotsView.topAnchor.constraint(equalTo: whyDotsPill.topAnchor, constant: 4),
+            whyDotsView.bottomAnchor.constraint(equalTo: whyDotsPill.bottomAnchor, constant: -4),
+            whyDotsView.leadingAnchor.constraint(equalTo: whyDotsPill.leadingAnchor, constant: 12),
+            whyDotsView.trailingAnchor.constraint(equalTo: whyDotsPill.trailingAnchor, constant: -12),
+            whyDotsView.heightAnchor.constraint(equalToConstant: 10),
+
+            whyDotsPill.topAnchor.constraint(equalTo: container.topAnchor),
+            whyDotsPill.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+            whyDotsPill.centerXAnchor.constraint(equalTo: container.centerXAnchor)
+        ])
+        return container
+    }
+
+    func makeAboutBlock() -> UIView {
+        let container = UIView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+        container.clipsToBounds = true
+
+        aboutLabel.translatesAutoresizingMaskIntoConstraints = false
+        aboutLabel.font = AppFont.regular.size(14.0, familyName: familyFunnelSans)
+        aboutLabel.textColor = Palette.aboutText
+        aboutLabel.numberOfLines = 0
+        aboutLabel.text = Copy.aboutPlaceholder
+        container.addSubview(aboutLabel)
+
+        // Android overlays a 93dp bottom fade over the copy; the "READ MORE" button
+        // below is the affordance for the hidden tail.
+        let fade = GradientFadeView()
+        fade.translatesAutoresizingMaskIntoConstraints = false
+        fade.setColors([Palette.aboutFade.withAlphaComponent(0.0),
+                        Palette.aboutFade.withAlphaComponent(0.85),
+                        Palette.aboutFade],
+                       locations: [0.0, 0.5, 1.0])
+        container.addSubview(fade)
+
+        NSLayoutConstraint.activate([
+            aboutLabel.topAnchor.constraint(equalTo: container.topAnchor),
+            aboutLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            aboutLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            aboutLabel.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+
+            fade.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            fade.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            fade.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+            fade.heightAnchor.constraint(equalToConstant: 93)
+        ])
+        return container
+    }
+
+    func makeReadMoreButton() -> UIView {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle(Copy.readMore, for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
+        button.backgroundColor = Palette.readMoreFill
+        button.layer.cornerRadius = 8
+        button.layer.borderWidth = 1
+        button.layer.borderColor = Palette.moreHairline.cgColor
+        button.addTarget(self, action: #selector(readMoreTapped), for: .touchUpInside)
+        button.heightAnchor.constraint(equalToConstant: 42).isActive = true
+        return button
+    }
+
+    func appendInfoRows(_ rows: [(icons: [String], text: String)], to column: UIStackView) {
+        for (index, row) in rows.enumerated() {
+            let view = makeInfoRow(icon: GroupTrainingDetailViewController.icon(row.icons), text: row.text)
+            column.addArrangedSubview(view)
+            // Android: first row 12dp under the heading, subsequent rows 10dp apart.
+            if index < rows.count - 1 {
+                column.setCustomSpacing(10, after: view)
+            }
+        }
+    }
+
+    func makeInfoRow(icon: UIImage?, text: String) -> UIView {
+        let iconTile = makeIconTile(image: icon, iconSide: 18)
+
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
+        label.textColor = Palette.rowTitle
+        label.numberOfLines = 0
+        label.text = text
+        label.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        // A centre-aligned stack keeps the row height correct whether the copy is
+        // one line or wraps, without hand-rolled inequality constraints.
+        let row = UIStackView(arrangedSubviews: [iconTile, label])
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.axis = .horizontal
+        row.alignment = .center
+        row.spacing = 12
+        return row
+    }
+
+    func makeGalleryHeader() -> UIView {
+        let header = UIView()
+        header.translatesAutoresizingMaskIntoConstraints = false
+
+        let title = makeSectionTitle("Media Gallery")
+        title.translatesAutoresizingMaskIntoConstraints = false
+        header.addSubview(title)
+
+        let chevron = makeChevron()
+        header.addSubview(chevron)
+
+        NSLayoutConstraint.activate([
+            title.leadingAnchor.constraint(equalTo: header.leadingAnchor),
+            title.topAnchor.constraint(equalTo: header.topAnchor),
+            title.bottomAnchor.constraint(equalTo: header.bottomAnchor),
+
+            chevron.trailingAnchor.constraint(equalTo: header.trailingAnchor),
+            chevron.centerYAnchor.constraint(equalTo: title.centerYAnchor),
+            chevron.leadingAnchor.constraint(greaterThanOrEqualTo: title.trailingAnchor, constant: 12)
+        ])
+        // Android's chevron here has no click listener — the gallery is static.
+        return header
+    }
+
+    /// Static placeholder gallery, exactly as Android ships it (the migration plan
+    /// explicitly says NOT to wire this to `media_gallery` unless asked).
+    func makeMediaGallery() -> UIView {
+        let scroll = UIScrollView()
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.showsHorizontalScrollIndicator = false
+        scroll.backgroundColor = .clear
+
+        let placeholders = ["ic_gym_workout", "ic_chestpressdark", "ic_gymWorkout"]
+        let cards = placeholders.map { makeGalleryCard(imageName: $0) }
+
+        let stack = UIStackView(arrangedSubviews: cards)
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .horizontal
+        stack.alignment = .fill
+        stack.spacing = 12
+        scroll.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: scroll.contentLayoutGuide.topAnchor),
+            stack.leadingAnchor.constraint(equalTo: scroll.contentLayoutGuide.leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: scroll.contentLayoutGuide.trailingAnchor),
+            stack.bottomAnchor.constraint(equalTo: scroll.contentLayoutGuide.bottomAnchor),
+            scroll.heightAnchor.constraint(equalToConstant: Metric.galleryCardSize.height)
+        ])
+        return scroll
+    }
+
+    func makeGalleryCard(imageName: String) -> UIView {
+        let card = UIView()
+        card.translatesAutoresizingMaskIntoConstraints = false
+        card.backgroundColor = Palette.cardSurface
+        card.layer.cornerRadius = 16
+        card.layer.masksToBounds = true
+
+        let imageView = UIImageView(image: UIImage(named: imageName))
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        card.addSubview(imageView)
+
+        NSLayoutConstraint.activate([
+            card.widthAnchor.constraint(equalToConstant: Metric.galleryCardSize.width),
+            card.heightAnchor.constraint(equalToConstant: Metric.galleryCardSize.height),
+            imageView.topAnchor.constraint(equalTo: card.topAnchor),
+            imageView.leadingAnchor.constraint(equalTo: card.leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: card.trailingAnchor),
+            imageView.bottomAnchor.constraint(equalTo: card.bottomAnchor)
+        ])
+        return card
+    }
+
+    func makeTrainerCard() -> UIView {
+        let card = GlassCardView(cornerRadius: 20)
+        card.translatesAutoresizingMaskIntoConstraints = false
+        card.fillColor = Palette.cardSurface
+        card.fillAlpha = 1.0
+        card.strokeColor = Palette.cardStroke
+        card.strokeAlpha = 1.0
+        card.sheenOrigin = .topCenter
+        card.sheenAlpha = 0.10
+
+        trainerAvatarView.translatesAutoresizingMaskIntoConstraints = false
+        trainerAvatarView.contentMode = .scaleAspectFill
+        trainerAvatarView.clipsToBounds = true
+        trainerAvatarView.layer.cornerRadius = 16
+        trainerAvatarView.backgroundColor = GroupClassColor.bg3.color
+        trainerAvatarView.image = GroupTrainingDetailViewController.icon(["dummy_trainer", "ic_trainer", "ic_profile_placeholder"])
+        card.addSubview(trainerAvatarView)
+
+        trainerNameLabel.translatesAutoresizingMaskIntoConstraints = false
+        trainerNameLabel.font = AppFont.medium.size(24.0, familyName: familyClashDisplay)
+        trainerNameLabel.textColor = .white
+        trainerNameLabel.numberOfLines = 1
+        trainerNameLabel.lineBreakMode = .byTruncatingTail
+        trainerNameLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        let subtitleLabel = UILabel()
+        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        subtitleLabel.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
+        subtitleLabel.textColor = Palette.cardBody
+        subtitleLabel.numberOfLines = 1
+        subtitleLabel.lineBreakMode = .byTruncatingTail
+        subtitleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        subtitleLabel.text = Copy.trainerSubtitle
+
+        // `.fill`: the stack has a definite width here, so the labels must take it
+        // and truncate rather than overflow the card.
+        let textStack = UIStackView(arrangedSubviews: [trainerNameLabel, subtitleLabel])
+        textStack.translatesAutoresizingMaskIntoConstraints = false
+        textStack.axis = .vertical
+        textStack.alignment = .fill
+        textStack.spacing = 4
+        card.addSubview(textStack)
+
+        NSLayoutConstraint.activate([
+            trainerAvatarView.widthAnchor.constraint(equalToConstant: 64),
+            trainerAvatarView.heightAnchor.constraint(equalToConstant: 64),
+            trainerAvatarView.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 16.5),
+            trainerAvatarView.centerYAnchor.constraint(equalTo: card.centerYAnchor),
+            trainerAvatarView.topAnchor.constraint(greaterThanOrEqualTo: card.topAnchor, constant: 12),
+            trainerAvatarView.bottomAnchor.constraint(lessThanOrEqualTo: card.bottomAnchor, constant: -12),
+
+            textStack.leadingAnchor.constraint(equalTo: trainerAvatarView.trailingAnchor, constant: 20),
+            textStack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16.5),
+            textStack.centerYAnchor.constraint(equalTo: card.centerYAnchor),
+            textStack.topAnchor.constraint(greaterThanOrEqualTo: card.topAnchor, constant: 12),
+            textStack.bottomAnchor.constraint(lessThanOrEqualTo: card.bottomAnchor, constant: -12),
+
+            card.heightAnchor.constraint(greaterThanOrEqualToConstant: 88)
+        ])
+        return card
+    }
+
+    /// "Cancellation policy" / "Terms and conditions": icon tile + title + chevron,
+    /// with a hairline underneath. Neither row has a destination on Android.
+    func makePolicyRow(icon: UIImage?, title: String) -> UIView {
+        let container = UIStackView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+        container.axis = .vertical
+        container.alignment = .fill
+        container.spacing = 0
+
+        let iconTile = makeIconTile(image: icon, iconSide: 18)
+
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
+        label.textColor = .white
+        label.numberOfLines = 0
+        label.text = title
+        label.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        let chevron = makeChevron()
+
+        let row = UIStackView(arrangedSubviews: [iconTile, label, chevron])
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.axis = .horizontal
+        row.alignment = .center
+        row.spacing = 10
+        // Android's `paddingBottom="8dp"` above the hairline.
+        row.isLayoutMarginsRelativeArrangement = true
+        row.layoutMargins = UIEdgeInsets(top: 0, left: 0, bottom: 8, right: 0)
+
+        container.addArrangedSubview(row)
+        container.addArrangedSubview(makeHairline(color: Palette.moreHairline))
+        return container
+    }
+
+    // MARK: Waitlist banner + sticky bottom bar
+
+    func buildWaitlistBanner() {
+        waitlistBanner.translatesAutoresizingMaskIntoConstraints = false
+        waitlistBanner.backgroundColor = Palette.waitlistBannerFill
+        waitlistBanner.layer.cornerRadius = 16
+        waitlistBanner.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        waitlistBanner.layer.masksToBounds = true
+        waitlistBanner.isHidden = true
+        // Inserted below the bottom bar so the bar covers the 16pt tuck-under
+        // (Android's `layout_marginBottom="-16dp"`).
+        view.insertSubview(waitlistBanner, belowSubview: bottomBar)
+
+        let bellView = UIImageView(image: GroupTrainingDetailViewController.icon(["ic_bell_brown", "bell"])?
+            .withRenderingMode(.alwaysTemplate))
+        bellView.translatesAutoresizingMaskIntoConstraints = false
+        bellView.tintColor = Palette.waitlistBannerInk
+        bellView.contentMode = .scaleAspectFit
+
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
+        label.textColor = Palette.waitlistBannerInk
+        label.numberOfLines = 0
+        label.text = Copy.waitlistBanner
+
+        let row = UIStackView(arrangedSubviews: [bellView, label])
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.axis = .horizontal
+        row.alignment = .center
+        row.spacing = 8
+        waitlistBanner.addSubview(row)
+
+        NSLayoutConstraint.activate([
+            bellView.widthAnchor.constraint(equalToConstant: 16),
+            bellView.heightAnchor.constraint(equalToConstant: 16),
+
+            row.topAnchor.constraint(equalTo: waitlistBanner.topAnchor, constant: 10),
+            row.leadingAnchor.constraint(equalTo: waitlistBanner.leadingAnchor, constant: 20),
+            row.trailingAnchor.constraint(equalTo: waitlistBanner.trailingAnchor, constant: -20),
+            row.bottomAnchor.constraint(equalTo: waitlistBanner.bottomAnchor, constant: -24),
+
+            waitlistBanner.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            waitlistBanner.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            waitlistBanner.bottomAnchor.constraint(equalTo: bottomBar.topAnchor, constant: 16)
+        ])
+    }
+
+    func buildBottomBar() {
+        bottomBar.translatesAutoresizingMaskIntoConstraints = false
+        // Top 2pt blue border, then the #131416 surface with a top-down white wash.
+        bottomBar.backgroundColor = Palette.bottomBarTopBorder
+        bottomBar.layer.cornerRadius = 16
+        bottomBar.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        bottomBar.layer.masksToBounds = true
+        view.addSubview(bottomBar)
+
+        let surface = GradientFadeView()
+        surface.translatesAutoresizingMaskIntoConstraints = false
+        surface.setColors([UIColor.white.withAlphaComponent(0.1),
+                           Palette.cardSurface,
+                           Palette.cardSurface],
+                          locations: [0.0, 0.5, 1.0])
+        surface.backgroundColor = Palette.cardSurface
+        surface.layer.cornerRadius = 14
+        surface.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        surface.layer.masksToBounds = true
+        bottomBar.addSubview(surface)
+
+        let perSessionLabel = UILabel()
+        perSessionLabel.translatesAutoresizingMaskIntoConstraints = false
+        perSessionLabel.attributedText = NSAttributedString(
+            string: Copy.perSession,
+            attributes: [
+                .font: AppFont.regular.size(10.0, familyName: familyFunnelSans),
+                .foregroundColor: Palette.perSession,
+                // Android `letterSpacing="0.06"` is in em: 0.06 * 10sp.
+                .kern: 0.6
+            ]
+        )
+
+        priceLabel.translatesAutoresizingMaskIntoConstraints = false
+        priceLabel.font = AppFont.semibold.size(18.0, familyName: familyClashDisplay)
+        priceLabel.textColor = .white
+        priceLabel.numberOfLines = 1
+        priceLabel.lineBreakMode = .byTruncatingTail
+
+        let priceStack = UIStackView(arrangedSubviews: [perSessionLabel, priceLabel])
+        priceStack.translatesAutoresizingMaskIntoConstraints = false
+        priceStack.axis = .vertical
+        priceStack.alignment = .leading
+        priceStack.spacing = 2
+        bottomBar.addSubview(priceStack)
+
+        ctaButton.translatesAutoresizingMaskIntoConstraints = false
+        ctaButton.bandThickness = 2
+        setCTATitle("BOOK SLOT")
+        ctaButton.setImage(GroupTrainingDetailViewController.icon(["ic_chevron_right_16_dark", "chevron-right"])?
+            .withRenderingMode(.alwaysTemplate), for: .normal)
+        ctaButton.tintColor = Palette.ctaInk
+        ctaButton.semanticContentAttribute = .forceRightToLeft
+        ctaButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
+        ctaButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 8)
+        // Set after `bandThickness` so the component's own inset pass cannot undo it.
+        ctaButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 2, right: 12)
+        ctaButton.addTarget(self, action: #selector(ctaTapped), for: .touchUpInside)
+        ctaButton.setContentHuggingPriority(.required, for: .horizontal)
+        ctaButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        bottomBar.addSubview(ctaButton)
+
+        NSLayoutConstraint.activate([
+            bottomBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bottomBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bottomBar.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            surface.topAnchor.constraint(equalTo: bottomBar.topAnchor, constant: 2),
+            surface.leadingAnchor.constraint(equalTo: bottomBar.leadingAnchor),
+            surface.trailingAnchor.constraint(equalTo: bottomBar.trailingAnchor),
+            surface.bottomAnchor.constraint(equalTo: bottomBar.bottomAnchor),
+
+            priceStack.leadingAnchor.constraint(equalTo: bottomBar.leadingAnchor, constant: 20),
+            priceStack.centerYAnchor.constraint(equalTo: ctaButton.centerYAnchor),
+            priceStack.trailingAnchor.constraint(lessThanOrEqualTo: ctaButton.leadingAnchor, constant: -12),
+
+            ctaButton.trailingAnchor.constraint(equalTo: bottomBar.trailingAnchor, constant: -20),
+            ctaButton.topAnchor.constraint(equalTo: bottomBar.topAnchor, constant: 14),
+            ctaButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
+            ctaButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight),
+            ctaButton.widthAnchor.constraint(greaterThanOrEqualToConstant: Metric.ctaMinWidth)
+        ])
+    }
+
+    // MARK: Small builders
+
+    func makeSectionTitle(_ text: String) -> UILabel {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
+        label.textColor = .white
+        label.numberOfLines = 0
+        label.text = text
+        return label
+    }
+
+    func makeHairline(color: UIColor) -> UIView {
+        let line = UIView()
+        line.translatesAutoresizingMaskIntoConstraints = false
+        line.backgroundColor = color
+        line.heightAnchor.constraint(equalToConstant: 1).isActive = true
+        return line
+    }
+
+    func makeChevron() -> UIImageView {
+        let chevron = UIImageView(image: GroupTrainingDetailViewController.icon(["ic_chevron_right_16", "chevron-right", "ic_arrow_right"])?
+            .withRenderingMode(.alwaysTemplate))
+        chevron.translatesAutoresizingMaskIntoConstraints = false
+        chevron.tintColor = .white
+        chevron.contentMode = .scaleAspectFit
+        chevron.setContentHuggingPriority(.required, for: .horizontal)
+        chevron.setContentCompressionResistancePriority(.required, for: .horizontal)
+        NSLayoutConstraint.activate([
+            chevron.widthAnchor.constraint(equalToConstant: 16),
+            chevron.heightAnchor.constraint(equalToConstant: 16)
+        ])
+        return chevron
+    }
+
+    /// Android's `location_icon_bg`: 38dp rounded square, top-down
+    /// `#1AFFFFFF -> #101113` wash with a `#101113` hairline.
+    func makeIconTile(image: UIImage?, iconSide: CGFloat) -> UIView {
+        let tile = GradientFadeView()
+        tile.translatesAutoresizingMaskIntoConstraints = false
+        tile.setColors([UIColor.white.withAlphaComponent(0.1),
+                        Palette.cardStroke,
+                        Palette.cardStroke],
+                       locations: [0.0, 0.5, 1.0])
+        tile.layer.cornerRadius = 12
+        tile.layer.masksToBounds = true
+        tile.layer.borderWidth = 1
+        tile.layer.borderColor = Palette.cardStroke.cgColor
+
+        let iconView = UIImageView(image: image?.withRenderingMode(.alwaysTemplate))
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+        iconView.tintColor = .white
+        iconView.contentMode = .scaleAspectFit
+        tile.addSubview(iconView)
+
+        NSLayoutConstraint.activate([
+            tile.widthAnchor.constraint(equalToConstant: Metric.iconTileSide),
+            tile.heightAnchor.constraint(equalToConstant: Metric.iconTileSide),
+            iconView.centerXAnchor.constraint(equalTo: tile.centerXAnchor),
+            iconView.centerYAnchor.constraint(equalTo: tile.centerYAnchor),
+            iconView.widthAnchor.constraint(equalToConstant: iconSide),
+            iconView.heightAnchor.constraint(equalToConstant: iconSide)
+        ])
+        return tile
+    }
+}
+
+// MARK: - Static content + icon resolution
+
+private extension GroupTrainingDetailViewController {
+
+    /// First bundled asset wins.
+    ///
+    /// Every candidate list leads with the *Android* drawable name, so importing
+    /// the real glyphs later under those exact names upgrades the screen with no
+    /// code change; the tail entries are the closest already-bundled iOS assets.
+    ///
+    /// TODO: the following Android glyphs have no iOS equivalent yet and currently
+    /// fall through to a stand-in — `ic_back_chevron_20`, `ic_heart_20`,
+    /// `ic_share_20`, `ic_location_pin_small`, `ic_clock_18`, `ic_towel_18`,
+    /// `ic_skipping_18`, `ic_shoes_18`, `ic_clothes_18`, `ic_person_age_18`,
+    /// `ic_booking_18`, `ic_glove_18`, `ic_expert_instructor_28`,
+    /// `ic_small_group_28`, `ic_chevron_right_16`, `ic_chevron_right_16_dark`,
+    /// `ic_bell_brown`, `dummy_trainer`.
+    static func icon(_ names: [String]) -> UIImage? {
+        for name in names {
+            if let image = UIImage(named: name) { return image }
+        }
+        return nil
+    }
+
+    /// Static "What to bring" list — hard-coded in the Android layout.
+    static var whatToBringRows: [(icons: [String], text: String)] {
+        return [
+            (["ic_towel_18", "ic_person_workout"], "Bring a towel — sweating is guaranteed"),
+            (["ic_skipping_18", "ic_running_ jogging"], "Bring your skipping rope"),
+            (["ic_shoes_18", "ic_Solid_barbell_diagonal"], "Training shoes with lateral support"),
+            (["ic_clothes_18", "ic_transWorkout"], "Comfortable workout clothing")
+        ]
+    }
+
+    /// Static "Things to know" list — hard-coded in the Android layout.
+    static var thingsToKnowRows: [(icons: [String], text: String)] {
+        return [
+            (["ic_person_age_18", "ic_profile"], "Ages 16 and above"),
+            (["ic_clock_18", "ic_clock"], "Arrive 10 minutes early"),
+            (["ic_booking_18", "ic_bookings"], "Bookings non-refundable within 24 hours"),
+            (["ic_glove_18", "ic_strength"], "Gloves provided for boxing classes")
+        ]
+    }
+}

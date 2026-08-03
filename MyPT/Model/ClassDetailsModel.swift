@@ -36,6 +36,13 @@ struct ClassDetailsModel: Codable {
     var isFollow: Bool?
     var certificates: [CertificateModel]?
     var mediaGallery: [GalleryModel]?
+    // FlexibleValue: backend types are inconsistent (Android reads these with the coercing
+    // optInt/optDouble accessors). Read via `.intValue` / `.doubleValue` / `.value`.
+    var bookedCount: FlexibleValue?
+    var isBooked, isWaitlisted: Bool?
+    var access: String?
+    var studioLat, studioLng: FlexibleValue?
+    var classType: String?
 
     enum CodingKeys: String, CodingKey {
         case schduleID = "schdule_id"
@@ -50,5 +57,12 @@ struct ClassDetailsModel: Codable {
         case trainWithMe = "train_with_me"
         case quote, sessions, clientCoached, averageRating, noOfRating, tags, isFollow, certificates
         case mediaGallery = "media_gallery"
+        case bookedCount = "booked_count"
+        case isBooked = "is_booked"
+        case isWaitlisted = "is_waitlisted"
+        case access
+        case studioLat = "studio_lat"
+        case studioLng = "studio_lng"
+        case classType = "class_type"
     }
 }

@@ -171,8 +171,88 @@ class UpcomingClassVM {
             }
         })
     }
-    
-    
+
+    //MARK: ------------------ api/book-class  (Group Classes booking flow)
+    /*
+     Android reference: GroupTrainingDetailActivity.kt lines 545-603 (free path) —
+     PostMethod(ApiURL.bookclass, {schedule_id, transaction_id, payment_type}).
+
+     Deliberately NOT the same as `bookingClassApi` above:
+     - it sends the full `schedule_id` / `transaction_id` / `payment_type` trio, and
+     - it forwards EVERY decoded response to the caller (including `status == false`)
+       instead of swallowing failures into an alert, because the group-class flow has
+       to inspect a failed response for the blacklist/pause payload before deciding
+       where to navigate. See `BookClassBaseModel` in Model/BookedSlotModel.swift.
+
+     Caveat inherited from `NetworkManager.genericAPICall`: its completion only fires
+     on a 2xx (or with `nil` when there is no internet). A non-2xx never calls back,
+     so callers must not rely on this closure for teardown that has to happen on any
+     outcome.
+     */
+    class func bookGroupClassApi(scheduleId: String?,
+                                 transactionId: String = "",
+                                 paymentType: String = "free",
+                                 isShowLoader: Bool = true,
+                                 completion: @escaping(_ resultData: BookClassBaseModel?) -> Void){
+
+        let params:[String:Any] = [
+            "schedule_id": scheduleId ?? "",
+            "transaction_id": transactionId,
+            "payment_type": paymentType
+        ]
+
+        print("inputParams = ", params as Any)
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .book_class, method: .post , parameters: params, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
+            do{
+                print(getResponce as Any)
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
+                }
+                let getResult = try JSONDecoder().decode(BookClassBaseModel.self, from: responceData)
+                completion(getResult)
+            }catch {
+                print(error)
+                completion(nil)
+            }
+        })
+    }
+
+    //MARK: ----------------------- api/join-waitlist
+    /// Port of `GroupTrainingDetailActivity.joinWaitlistDirectly`'s param trio —
+    /// note `price`, not `payment_type` (joining a waitlist isn't a payment).
+    /// Reuses `BookClassBaseModel`: the response shape (status/msg/code/
+    /// is_blacklisted/data) is identical to `book-class`.
+    class func joinWaitlistApi(scheduleId: String?,
+                               transactionId: String = "",
+                               price: String = "",
+                               isShowLoader: Bool = true,
+                               completion: @escaping(_ resultData: BookClassBaseModel?) -> Void){
+
+        let params:[String:Any] = [
+            "schedule_id": scheduleId ?? "",
+            "transaction_id": transactionId,
+            "price": price
+        ]
+
+        print("inputParams = ", params as Any)
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .join_waitlist, method: .post , parameters: params, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
+            do{
+                print(getResponce as Any)
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
+                }
+                let getResult = try JSONDecoder().decode(BookClassBaseModel.self, from: responceData)
+                completion(getResult)
+            }catch {
+                print(error)
+                completion(nil)
+            }
+        })
+    }
+
+
     //MARK: ----------------------- api/user-meals
     class func getuserMealsApi(inputDate:String? , isShowLoader:Bool = true, completion: @escaping(_ resultData:UserMealsBaseModel?) -> Void){
         /*

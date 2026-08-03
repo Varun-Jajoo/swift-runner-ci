@@ -1006,6 +1006,7 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		38F98A3D2F5C819C00144C33 /* FreeAssessment */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = FreeAssessment; sourceTree = "<group>"; };
+		D7A4C1E82F6B34D700B71E45 /* GroupClasses */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = GroupClasses; sourceTree = "<group>"; };
 		D7B0B6C52F37AE4C00A0579E /* Homepage */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Homepage; sourceTree = "<group>"; };
 		EE9D2B6B2F17EA93008A83D1 /* PurchaseModule */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = PurchaseModule; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -2050,6 +2051,7 @@
 		B8FDEEDC2CC8CDE80061639F /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				D7A4C1E82F6B34D700B71E45 /* GroupClasses */,
 				38F98A3D2F5C819C00144C33 /* FreeAssessment */,
 				D7B0B6C52F37AE4C00A0579E /* Homepage */,
 				EE9D2B6B2F17EA93008A83D1 /* PurchaseModule */,
@@ -2145,6 +2147,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				D7A4C1E82F6B34D700B71E45 /* GroupClasses */,
 				38F98A3D2F5C819C00144C33 /* FreeAssessment */,
 				D7B0B6C52F37AE4C00A0579E /* Homepage */,
 				EE9D2B6B2F17EA93008A83D1 /* PurchaseModule */,

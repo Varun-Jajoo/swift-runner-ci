@@ -123,8 +123,19 @@ class BookingListTableViewCell: UITableViewCell {
         self.sessionDescLbl.text = inputData.sessionType?.value
         self.timeLbl.text = inputData.duration?.value
         self.trainerNameLbl.text = inputData.trainer?.value
-        self.trainingLocDesc.text = inputData.location?.value
-       
+
+        // Group-class rows show only the studio name, matching Android's
+        // `UpcomingAdapter.onBindViewHolder`: `location.substringBefore(",")`
+        // when the row is a group class and the location actually contains a
+        // comma (e.g. "DSO Club, Dubai" -> "DSO Club"). Every other row keeps
+        // the full location string.
+        let rawLocation = inputData.location?.value ?? ""
+        if inputData.isGroupClass, let commaRange = rawLocation.range(of: ",") {
+            self.trainingLocDesc.text = String(rawLocation[..<commaRange.lowerBound]).trimmingCharacters(in: .whitespaces)
+        } else {
+            self.trainingLocDesc.text = rawLocation
+        }
+
         if type == 2{
             if let isReschedule = inputData.isReschedule, isReschedule {
                 self.rescheduledBtn.isHidden = false

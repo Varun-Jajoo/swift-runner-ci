@@ -64,10 +64,15 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     @IBOutlet weak var lblTrainingTeamHeading: UILabel!
     @IBOutlet weak var btnNameInitial: UIButton!
     @IBOutlet weak var pageController: UIPageControl!
-    
+
+    /// Group Classes carousel, inserted into the storyboard's content stack view
+    /// at runtime (see `setupGroupClassesSection()`).
+    private var groupClassesCarousel: GroupClassesCarouselView?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         uiSetup()
+        setupGroupClassesSection()
         generateDates()
         collectionDate.reloadData()
         //        lblSuggestionNoData.isHidden = true
@@ -106,6 +111,7 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         bookingListApi()
         getPlansApi()
         getBannerApi()
+        loadGroupClasses()
         if let firstDate = dates.first {
             let todayDate = getFormattedDate(from: firstDate)
             callSlotsApi(date: todayDate)
@@ -188,9 +194,38 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             getStoriesApi()
             bookingListApi()
             getPlansApi()
+            loadGroupClasses()
         }
     }
-    
+
+    // MARK: - Group Classes carousel
+
+    /// Inserts the Group Classes carousel directly below the "Smart Suggestions"
+    /// section, matching Android's `fragment_active_user_home_new.xml` where
+    /// `groupClassesSection` sits between the smart-suggestion block and the
+    /// "Your Training Team" header.
+    ///
+    /// The anchor is resolved from the already-wired `lblSmartSuggestion` outlet:
+    /// its enclosing section view (label + date strip + suggestions carousel) is a
+    /// direct arranged subview of the screen's vertical content stack view, so no
+    /// storyboard XML has to change.
+    private func setupGroupClassesSection() {
+        guard groupClassesCarousel == nil else { return }
+
+        groupClassesCarousel = GroupClassesCarouselView.insert(after: lblSmartSuggestion) { [weak self] tapThroughData in
+            guard let self = self else { return }
+            GroupClassNavigator.pushDetail(from: self, data: tapThroughData)
+        }
+
+        if groupClassesCarousel == nil {
+            print("GroupClasses: Smart Suggestions anchor not found — carousel not inserted")
+        }
+    }
+
+    private func loadGroupClasses() {
+        groupClassesCarousel?.loadClasses(lat: getLat, long: getLong)
+    }
+
     private func setUpData() {
         
         // Background Image (id 4)

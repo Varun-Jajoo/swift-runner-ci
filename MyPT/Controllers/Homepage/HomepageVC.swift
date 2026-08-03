@@ -64,13 +64,46 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
     @IBOutlet weak var btnGymTrainers: UIButton!
     @IBOutlet weak var pageController: UIPageControl!
     @IBOutlet weak var btnBookFreeAss: UIButton!
-    
+
+    /// Group Classes carousel, inserted into the storyboard's content stack view
+    /// at runtime (see `setupGroupClassesSection()`).
+    private var groupClassesCarousel: GroupClassesCarouselView?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         uiSetup()
+        setupGroupClassesSection()
         lblAddress.isUserInteractionEnabled = true
         view.isUserInteractionEnabled = true
-        
+
+    }
+
+    // MARK: - Group Classes carousel
+
+    /// Inserts the Group Classes carousel directly below the banner section,
+    /// matching Android's `fragment_guest_user_home_new.xml` where
+    /// `groupClassesSection` sits between the banner/dots block and the
+    /// "Meet Your Match" trainer tabs.
+    ///
+    /// This is the guest / no-active-package home screen — a *different*
+    /// controller from `ActiveHomepageVCViewController`, so it needs its own
+    /// wiring (Android wires both `GuestUserHomeFragmentNew` and
+    /// `ActiveUserHomeFragmentNew` the same way).
+    private func setupGroupClassesSection() {
+        guard groupClassesCarousel == nil else { return }
+
+        groupClassesCarousel = GroupClassesCarouselView.insert(after: viewBanner) { [weak self] tapThroughData in
+            guard let self = self else { return }
+            GroupClassNavigator.pushDetail(from: self, data: tapThroughData)
+        }
+
+        if groupClassesCarousel == nil {
+            print("GroupClasses: banner anchor not found — carousel not inserted")
+        }
+    }
+
+    private func loadGroupClasses() {
+        groupClassesCarousel?.loadClasses(lat: getLat, long: getLong)
     }
     
     private func uiSetup() {
@@ -173,6 +206,7 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         getStoriesApi()
         getBannerApi()
         checkAssessmentStatusApi()
+        loadGroupClasses()
         updateTrainerSelection(isHomeTrainerSelected: true)
     }
 
@@ -195,10 +229,11 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
             }
             
             self.getTrainerApi(inputFilter: "0", inpuntTagId: 0)
+            self.loadGroupClasses()
             //            self.upcomingClassesApi()
         }
     }
-    
+
     private func hasPlan(type: String) -> Bool {
         return self.userPlans.contains {
             $0.type?.value == type
