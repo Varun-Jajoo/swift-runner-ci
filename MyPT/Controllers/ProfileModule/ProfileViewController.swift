@@ -8,6 +8,7 @@
 import UIKit
 import Charts
 import DGCharts
+import Mixpanel
 
 class ProfileViewController: CommonViewController, ChartViewDelegate {
 
@@ -124,6 +125,10 @@ class ProfileViewController: CommonViewController, ChartViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        Mixpanel.mainInstance().track(
+            event: "Profile_Viewed",
+            properties: [:]
+        )
         self.moreTrainersBtn.isHidden = true
         self.myHealthPrefBtn.isUserInteractionEnabled = true
         self.registerCollV()

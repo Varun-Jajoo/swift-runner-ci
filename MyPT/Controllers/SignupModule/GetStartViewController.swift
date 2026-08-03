@@ -7,6 +7,7 @@
 
 import UIKit
 import AVFoundation
+import Mixpanel
 
 class GetStartViewController: CommonViewController , LoopingPlayerProgressDelegate {
     
@@ -144,7 +145,10 @@ class GetStartViewController: CommonViewController , LoopingPlayerProgressDelega
     
     @IBAction func continueBtnActn(_ sender: Any) {
         print("continue btn clicked.")
-        
+        Mixpanel.mainInstance().track(
+            event: "Homepage_Reached",
+            properties: [:]
+        )
         appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: appUserDefaults.getIsPackageCreated())
         
 //        appSceneDelegate?.setupTab(selectedTab: 0)

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Mixpanel
 
 class CreatePackageViewViewController: CommonViewController {
 
@@ -94,6 +95,12 @@ class CreatePackageViewViewController: CommonViewController {
         print("continue btn clicked..")
         var data = inputParam
         data?.package_type = packageType
+        Mixpanel.mainInstance().track(
+            event: inputType == "home" ? "HomePT_Service_Type_Selected" : "GymPT_Service_Type_Selected",
+            properties: [
+                "training_type": packageType == "1" ? "Solo" : packageType == "2" ? "Buddy" : "Group"
+            ]
+        )
         if packageType == "1" { // Solo
             let vc: ChoosePrimaryTrainerVC = ChoosePrimaryTrainerVC.instantiate(appStoryboard: .purchase)
             vc.packageType = packageType
@@ -141,7 +148,7 @@ class CreatePackageViewViewController: CommonViewController {
 //        }
     }
     
-    //MARK: -------------- ENABLE CONTINUE
+    // MARK: -------------- ENABLE CONTINUE
     func updateContinueButton(isEnabled: Bool) {
         continueBtn.isEnabled = isEnabled
         continueBtn.isUserInteractionEnabled = isEnabled
@@ -227,5 +234,4 @@ extension CreatePackageViewViewController:UITableViewDelegate, UITableViewDataSo
         
         deSelectedCell.setSelectdBGCell(packageData?[indexPath.row]["trainerImg"] as? UIImage, selectedImg: packageData?[indexPath.row]["trainerImg_selected"] as? UIImage, isSelectedCell: false)
     }
-
 }

@@ -50,14 +50,22 @@ class PlanCVCell: UICollectionViewCell {
     
     func configure(with model: PlanDetailsModel) {
         
-        let total = CGFloat(model.sessions?.intValue ?? 0)
-        let remaining = CGFloat(model.remaining_sessions?.intValue ?? 0)
-        let used = total - remaining
+        let totalSession = CGFloat(model.sessions?.intValue ?? 0)
+        let remainingSession = CGFloat(model.remaining_sessions?.intValue ?? 0)
+        let usedSession = totalSession - remainingSession
+        
+        let totalDays = CGFloat(model.validity_days?.intValue ?? 0)
+        let remainingDays = CGFloat(model.remaining_days?.intValue ?? 0)
+        let usedDays = totalDays - remainingDays
         
         // Labels
         lblPlanImg.text = model.name?.value
-        lblRemainingSession.text = "\(Int(remaining)) sessions remaining"
-        lblTotalSesion.text = "Total \(Int(total)) sessions"
+//        lblRemainingSession.text = "\(Int(remaining)) sessions remaining"
+//        lblTotalSesion.text = "Total \(Int(total)) sessions"
+        
+        lblRemainingSession.text = model.is_membership ?? false ? "\(Int(usedDays)) days remaining" : "\(Int(remainingSession)) sessions remaining"
+        lblTotalSesion.text = model.is_membership ?? false ? "Total \(Int(totalDays)) days" : "Total \(Int(totalSession)) sessions"
+        lblSessionUtilization.text = model.is_membership ?? false ? "Days Utilization" : "Session Utilization"
         
         if let remainingDays = model.remaining_days?.intValue {
             lblValidDate.text = "Valid for \(remainingDays) days"
@@ -67,17 +75,13 @@ class PlanCVCell: UICollectionViewCell {
             self.imgPlan.loadImage(urlString: imageUrl, placeholder: nil)
         }
         // Progress
-        progressBar.total = total
-        progressBar.setProgress(used)
+        progressBar.total = model.is_membership ?? false ? totalDays : totalSession
+        progressBar.setProgress(model.is_membership ?? false ? usedDays : usedSession)
     }
 
-    
     @IBAction func onTapUseSession(_ sender: UIButton) {
-        
     }
-    
     
     @IBAction func onTapBuyMOre(_ sender: UIButton) {
     }
-    
 }

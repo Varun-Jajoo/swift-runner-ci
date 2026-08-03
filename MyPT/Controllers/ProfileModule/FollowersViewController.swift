@@ -135,6 +135,9 @@ class FollowersViewController: CommonViewController {
     @IBOutlet weak var gridMBV: UIView!
     @IBOutlet weak var trainerListTblView: UITableView!
     @IBOutlet weak var trainersGridCollView: UICollectionView!
+    @IBOutlet weak var heightOfTableView: NSLayoutConstraint!
+    
+    private var contentSizeObservation: NSKeyValueObservation?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -150,6 +153,8 @@ class FollowersViewController: CommonViewController {
     }
     
     deinit {
+        contentSizeObservation?.invalidate()
+        contentSizeObservation = nil
         print("------\(#function)------\(String(describing: Self.self))------" )
     }
     
@@ -239,6 +244,19 @@ class FollowersViewController: CommonViewController {
         trainersGridCollView.register(UINib(nibName: "GridTrainerCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "GridTrainerCollectionViewCell")
         trainerListTblView.register(UINib(nibName: "MyTrainerTableViewCell", bundle: nil), forCellReuseIdentifier: "MyTrainerTableViewCell")
 //        trainerListTblView.register(UINib(nibName: "TrainerListTableViewCell", bundle: nil), forCellReuseIdentifier: "TrainerListTableViewCell")
+        
+        trainerListTblView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 80, right: 0)
+        trainersGridCollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 80, right: 0)
+        
+        // Disable internal scrolling — the parent UIScrollView handles all scrolling.
+        // This prevents the table/collection from capturing the gesture on the first touch.
+        trainerListTblView.isScrollEnabled = false
+        trainersGridCollView.isScrollEnabled = false
+        
+        contentSizeObservation = trainerListTblView.observe(\.contentSize, options: [.new]) { [weak self] (tv, change) in
+            guard let self = self else { return }
+            self.heightOfTableView.constant = tv.contentSize.height
+        }
         
         self.isGridShow = false
         trainerListTblView.reloadData()
@@ -480,6 +498,7 @@ extension FollowersViewController: UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
                 
         return tableView.numberOfRows(count: self.trainerData?.count, title: emptyTitle, message: emptyDesc, messageImage: emptyImg, messageImageHeight: 200.0, reloadSetTitle: "EXPLORE TRAINERS", target: self, action: #selector(exploreTrainerBtnAtcn(sender: )), fromTop: 10)
+//        return 10
     
     }
     

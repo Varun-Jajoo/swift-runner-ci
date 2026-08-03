@@ -16,6 +16,7 @@ import GoogleSignIn
 import FacebookCore
 import UserNotifications
 import FirebaseMessaging
+import Mixpanel
 
 
 @main
@@ -34,6 +35,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if #available(iOS 15.0, *) {
             UIButton.appearance().configuration = nil
         }
+        
+        // Initialize Mixpanel
+        Mixpanel.initialize(token: "6ef019008995f6e716fcc60e56aa50a1", trackAutomaticEvents: true)
         
         FirebaseApp.configure()
         GMSServices.provideAPIKey(AppConstant.gMap_services_Key)

@@ -52,6 +52,11 @@ class CustomTimePickerView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         positionHighlightViews()
+        
+        // Remove the default grey background highlight box added by iOS
+        picker.subviews.forEach { subview in
+            subview.backgroundColor = .clear
+        }
     }
 }
 

@@ -11,6 +11,8 @@ enum PlanType {
     case topup
     case renew
     case upgrade
+    case myTrainers
+    case groupClasses
 }
 
 class TopPlanVC: UIViewController {

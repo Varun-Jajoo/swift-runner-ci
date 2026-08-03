@@ -12,6 +12,7 @@ import FacebookLogin
 import CountryPickerView
 import IQKeyboardManagerSwift
 import IQKeyboardToolbarManager
+import Mixpanel
 
 class MainViewController: CommonViewController,UITextFieldDelegate {
     
@@ -52,7 +53,10 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        Mixpanel.mainInstance().track(
+            event: "Login_Screen_Viewed",
+            properties: [:]
+        )
         countryPickerView.delegate = self
         countryPickerView.dataSource = self
         
@@ -232,7 +236,10 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
     
     //MARK: ----------CONTINUE BTN ACTN
     @IBAction func continueBtnActn(_ sender: Any) {
-        
+        Mixpanel.mainInstance().track(
+            event: "OTP_Requested",
+            properties: [:]
+        )
         if let mobileStr = mobileNumTxt.text , !mobileStr.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             let phoneNumber = mobileStr.replacingOccurrences(of: "-", with: "")
             

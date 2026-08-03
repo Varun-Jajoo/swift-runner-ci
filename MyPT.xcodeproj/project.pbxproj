@@ -7,15 +7,35 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3826D2AD2FA906D2001C5C64 /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = 3826D2AC2FA906D2001C5C64 /* Mixpanel */; };
+		3869CA522FB4E1FE0012D199 /* NewBookingModule.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3869CA512FB4E1FE0012D199 /* NewBookingModule.storyboard */; };
+		3869CA552FB4E2A80012D199 /* NewBookingModuleVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3869CA542FB4E2A80012D199 /* NewBookingModuleVC.swift */; };
+		386E8A0B2FFA6F8C00D1E13E /* ReviewBookingTVCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 386E8A0A2FFA6F8C00D1E13E /* ReviewBookingTVCell.xib */; };
+		386E8A0C2FFA6F8C00D1E13E /* ReviewBookingTVCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 386E8A092FFA6F8C00D1E13E /* ReviewBookingTVCell.swift */; };
+		3877113C3011333200C83312 /* ChooseBestPlanVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3877113B3011333200C83312 /* ChooseBestPlanVC.swift */; };
+		3878C4EC30093F73000E50C2 /* PackageExpireVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3878C4EB30093F73000E50C2 /* PackageExpireVC.swift */; };
+		3878C4EF30094458000E50C2 /* ChoosePlanTVCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3878C4ED30094458000E50C2 /* ChoosePlanTVCell.swift */; };
+		3878C4F030094458000E50C2 /* ChoosePlanTVCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3878C4EE30094458000E50C2 /* ChoosePlanTVCell.xib */; };
+		388128522FF1076600E115BF /* NewBookingVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 388128512FF1076600E115BF /* NewBookingVM.swift */; };
+		388128542FF1088F00E115BF /* NewBookingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 388128532FF1088F00E115BF /* NewBookingModel.swift */; };
+		388188542FBF3A88004F4CDE /* ChooseTrainWithVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 388188532FBF3A88004F4CDE /* ChooseTrainWithVC.swift */; };
+		388188562FBF534C004F4CDE /* PickTimeForBooking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 388188552FBF534C004F4CDE /* PickTimeForBooking.swift */; };
+		3889F8932FC0B35D002DEA0D /* ReviewBookingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3889F8922FC0B35D002DEA0D /* ReviewBookingViewController.swift */; };
+		3889F8952FC0B3BD002DEA0D /* BookingConfirmViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3889F8942FC0B3BD002DEA0D /* BookingConfirmViewController.swift */; };
+		388B2E223014B86500514255 /* BookingReviewPurchaseVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 388B2E213014B86500514255 /* BookingReviewPurchaseVC.swift */; };
+		388B2E2430164FDC00514255 /* MyTrainersVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 388B2E2330164FDC00514255 /* MyTrainersVC.swift */; };
 		389224862F295C4000DCF982 /* GreatNewsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 389224852F295C4000DCF982 /* GreatNewsVC.swift */; };
 		389224882F295EFF00DCF982 /* TrainerTypeTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 389224872F295EFF00DCF982 /* TrainerTypeTableViewCell.xib */; };
 		3892248A2F295FFD00DCF982 /* GymWorkoutTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 389224892F295FFD00DCF982 /* GymWorkoutTableViewCell.xib */; };
 		3892248C2F29606D00DCF982 /* ProductCategoryCollViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3892248B2F29606D00DCF982 /* ProductCategoryCollViewCell.xib */; };
 		3892248E2F29610800DCF982 /* WorkoutCategoryCollectionViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3892248D2F29610800DCF982 /* WorkoutCategoryCollectionViewCell.xib */; };
+		389E5F212FD8035000DB3A1C /* PreferedTimeTVCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 389E5F202FD8035000DB3A1C /* PreferedTimeTVCell.xib */; };
+		389E5F222FD8035000DB3A1C /* PreferedTimeTVCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 389E5F1F2FD8035000DB3A1C /* PreferedTimeTVCell.swift */; };
 		38BF8D0F2F2FD42E0043FC1B /* AddMemberDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38BF8D0E2F2FD42E0043FC1B /* AddMemberDetailVC.swift */; };
 		38BF8D112F30474B0043FC1B /* AddMembersVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38BF8D102F30474B0043FC1B /* AddMembersVC.swift */; };
 		38CB47732F42C5FC004F1748 /* Trainer Animation.gif in Resources */ = {isa = PBXBuildFile; fileRef = 38CB47722F42C5FC004F1748 /* Trainer Animation.gif */; };
 		38CBBFF52F29474A004D7A5C /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = 38CBBFF42F29474A004D7A5C /* FSCalendar */; };
+		38D55B692FE7E61500BAE1A9 /* AvailableTrainerPresentVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D55B682FE7E61500BAE1A9 /* AvailableTrainerPresentVC.swift */; };
 		38F98A3C2F5B341700144C33 /* NewCalenderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38F98A3B2F5B341700144C33 /* NewCalenderViewController.swift */; };
 		38FE27C32EFEC1860017DBAF /* FunnelSans-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 38FE27BA2EFEC1860017DBAF /* FunnelSans-ExtraBoldItalic.ttf */; };
 		38FE27C42EFEC1860017DBAF /* FunnelSans-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 38FE27BD2EFEC1860017DBAF /* FunnelSans-LightItalic.ttf */; };
@@ -29,6 +49,8 @@
 		38FE27CC2EFEC1860017DBAF /* FunnelSans-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 38FE27BF2EFEC1860017DBAF /* FunnelSans-MediumItalic.ttf */; };
 		38FE27CD2EFEC1860017DBAF /* FunnelSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 38FE27B72EFEC1860017DBAF /* FunnelSans-Bold.ttf */; };
 		38FE27CE2EFEC1860017DBAF /* FunnelSans-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 38FE27B82EFEC1860017DBAF /* FunnelSans-BoldItalic.ttf */; };
+		AA0000012FF200A100E115BF /* BookingDateState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000002FF200A100E115BF /* BookingDateState.swift */; };
+		AA0000032FF200A200E115BF /* PickTimeForBookingVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000022FF200A200E115BF /* PickTimeForBookingVM.swift */; };
 		B80038AE2D8A94A900245123 /* StudioDetailsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80038AD2D8A94A900245123 /* StudioDetailsModel.swift */; };
 		B8016D772DE994FF002141D5 /* Cards.gif in Resources */ = {isa = PBXBuildFile; fileRef = B8016D762DE994FF002141D5 /* Cards.gif */; };
 		B8025F8F2E02F3FA00968436 /* BookingDetailsQRViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8025F8E2E02F3FA00968436 /* BookingDetailsQRViewController.swift */; };
@@ -158,6 +180,8 @@
 		B885D65D2DD201F500D594D0 /* ClassesNearControllerTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B885D65B2DD201F500D594D0 /* ClassesNearControllerTableViewCell.xib */; };
 		B885D65F2DD205D500D594D0 /* ResourceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B885D65E2DD205D500D594D0 /* ResourceViewController.swift */; };
 		B885D6612DD2165100D594D0 /* ClassCategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B885D6602DD2165100D594D0 /* ClassCategoryViewController.swift */; };
+		B88CBACE2FED3B92001479BC /* PrimaryDateTimeCVCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B88CBACC2FED3B92001479BC /* PrimaryDateTimeCVCell.swift */; };
+		B88CBACF2FED3B92001479BC /* PrimaryDateTimeCVCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B88CBACD2FED3B92001479BC /* PrimaryDateTimeCVCell.xib */; };
 		B8931B6F2D6EDB7000EA1FC3 /* CheckoutCartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8931B6E2D6EDB7000EA1FC3 /* CheckoutCartViewController.swift */; };
 		B8931B712D6EEBBD00EA1FC3 /* ProductsFilterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8931B702D6EEBBD00EA1FC3 /* ProductsFilterViewController.swift */; };
 		B89D01702D1D418B00834FB7 /* ExerciseFilterPopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89D016F2D1D418B00834FB7 /* ExerciseFilterPopupViewController.swift */; };
@@ -514,14 +538,33 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3869CA512FB4E1FE0012D199 /* NewBookingModule.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = NewBookingModule.storyboard; sourceTree = "<group>"; };
+		3869CA542FB4E2A80012D199 /* NewBookingModuleVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewBookingModuleVC.swift; sourceTree = "<group>"; };
+		386E8A092FFA6F8C00D1E13E /* ReviewBookingTVCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewBookingTVCell.swift; sourceTree = "<group>"; };
+		386E8A0A2FFA6F8C00D1E13E /* ReviewBookingTVCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ReviewBookingTVCell.xib; sourceTree = "<group>"; };
+		3877113B3011333200C83312 /* ChooseBestPlanVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseBestPlanVC.swift; sourceTree = "<group>"; };
+		3878C4EB30093F73000E50C2 /* PackageExpireVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackageExpireVC.swift; sourceTree = "<group>"; };
+		3878C4ED30094458000E50C2 /* ChoosePlanTVCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoosePlanTVCell.swift; sourceTree = "<group>"; };
+		3878C4EE30094458000E50C2 /* ChoosePlanTVCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ChoosePlanTVCell.xib; sourceTree = "<group>"; };
+		388128512FF1076600E115BF /* NewBookingVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewBookingVM.swift; sourceTree = "<group>"; };
+		388128532FF1088F00E115BF /* NewBookingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewBookingModel.swift; sourceTree = "<group>"; };
+		388188532FBF3A88004F4CDE /* ChooseTrainWithVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseTrainWithVC.swift; sourceTree = "<group>"; };
+		388188552FBF534C004F4CDE /* PickTimeForBooking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickTimeForBooking.swift; sourceTree = "<group>"; };
+		3889F8922FC0B35D002DEA0D /* ReviewBookingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewBookingViewController.swift; sourceTree = "<group>"; };
+		3889F8942FC0B3BD002DEA0D /* BookingConfirmViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingConfirmViewController.swift; sourceTree = "<group>"; };
+		388B2E213014B86500514255 /* BookingReviewPurchaseVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingReviewPurchaseVC.swift; sourceTree = "<group>"; };
+		388B2E2330164FDC00514255 /* MyTrainersVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyTrainersVC.swift; sourceTree = "<group>"; };
 		389224852F295C4000DCF982 /* GreatNewsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GreatNewsVC.swift; sourceTree = "<group>"; };
 		389224872F295EFF00DCF982 /* TrainerTypeTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TrainerTypeTableViewCell.xib; sourceTree = "<group>"; };
 		389224892F295FFD00DCF982 /* GymWorkoutTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GymWorkoutTableViewCell.xib; sourceTree = "<group>"; };
 		3892248B2F29606D00DCF982 /* ProductCategoryCollViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ProductCategoryCollViewCell.xib; sourceTree = "<group>"; };
 		3892248D2F29610800DCF982 /* WorkoutCategoryCollectionViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = WorkoutCategoryCollectionViewCell.xib; sourceTree = "<group>"; };
+		389E5F1F2FD8035000DB3A1C /* PreferedTimeTVCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferedTimeTVCell.swift; sourceTree = "<group>"; };
+		389E5F202FD8035000DB3A1C /* PreferedTimeTVCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PreferedTimeTVCell.xib; sourceTree = "<group>"; };
 		38BF8D0E2F2FD42E0043FC1B /* AddMemberDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMemberDetailVC.swift; sourceTree = "<group>"; };
 		38BF8D102F30474B0043FC1B /* AddMembersVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMembersVC.swift; sourceTree = "<group>"; };
 		38CB47722F42C5FC004F1748 /* Trainer Animation.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "Trainer Animation.gif"; sourceTree = "<group>"; };
+		38D55B682FE7E61500BAE1A9 /* AvailableTrainerPresentVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailableTrainerPresentVC.swift; sourceTree = "<group>"; };
 		38F98A3B2F5B341700144C33 /* NewCalenderViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCalenderViewController.swift; sourceTree = "<group>"; };
 		38FE27B72EFEC1860017DBAF /* FunnelSans-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "FunnelSans-Bold.ttf"; sourceTree = "<group>"; };
 		38FE27B82EFEC1860017DBAF /* FunnelSans-BoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "FunnelSans-BoldItalic.ttf"; sourceTree = "<group>"; };
@@ -535,6 +578,8 @@
 		38FE27C02EFEC1860017DBAF /* FunnelSans-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "FunnelSans-Regular.ttf"; sourceTree = "<group>"; };
 		38FE27C12EFEC1860017DBAF /* FunnelSans-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "FunnelSans-SemiBold.ttf"; sourceTree = "<group>"; };
 		38FE27C22EFEC1860017DBAF /* FunnelSans-SemiBoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "FunnelSans-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
+		AA0000002FF200A100E115BF /* BookingDateState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingDateState.swift; sourceTree = "<group>"; };
+		AA0000022FF200A200E115BF /* PickTimeForBookingVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickTimeForBookingVM.swift; sourceTree = "<group>"; };
 		B80038AD2D8A94A900245123 /* StudioDetailsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudioDetailsModel.swift; sourceTree = "<group>"; };
 		B8016D762DE994FF002141D5 /* Cards.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = Cards.gif; sourceTree = "<group>"; };
 		B8025F8E2E02F3FA00968436 /* BookingDetailsQRViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookingDetailsQRViewController.swift; sourceTree = "<group>"; };
@@ -691,6 +736,8 @@
 		B885D65B2DD201F500D594D0 /* ClassesNearControllerTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ClassesNearControllerTableViewCell.xib; sourceTree = "<group>"; };
 		B885D65E2DD205D500D594D0 /* ResourceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResourceViewController.swift; sourceTree = "<group>"; };
 		B885D6602DD2165100D594D0 /* ClassCategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassCategoryViewController.swift; sourceTree = "<group>"; };
+		B88CBACC2FED3B92001479BC /* PrimaryDateTimeCVCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryDateTimeCVCell.swift; sourceTree = "<group>"; };
+		B88CBACD2FED3B92001479BC /* PrimaryDateTimeCVCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PrimaryDateTimeCVCell.xib; sourceTree = "<group>"; };
 		B8931B6E2D6EDB7000EA1FC3 /* CheckoutCartViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutCartViewController.swift; sourceTree = "<group>"; };
 		B8931B702D6EEBBD00EA1FC3 /* ProductsFilterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductsFilterViewController.swift; sourceTree = "<group>"; };
 		B89D016F2D1D418B00834FB7 /* ExerciseFilterPopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseFilterPopupViewController.swift; sourceTree = "<group>"; };
@@ -1021,6 +1068,7 @@
 				B8B351BD2DF844F20029450D /* FirebaseCore in Frameworks */,
 				B8387FA82DF96A180079E2E2 /* FacebookLogin in Frameworks */,
 				D7B1DFDD2F44E17A003533B9 /* SDWebImage in Frameworks */,
+				3826D2AD2FA906D2001C5C64 /* Mixpanel in Frameworks */,
 				B8ACB6E82CDCEAB200042BC5 /* GoogleMaps in Frameworks */,
 				B8C35F9C2D80034B00A11A2C /* Alamofire in Frameworks */,
 				B8C25A262E250D7E0090500A /* CountryPickerView in Frameworks */,
@@ -1040,6 +1088,47 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3869CA532FB4E2370012D199 /* NewBookingModule */ = {
+			isa = PBXGroup;
+			children = (
+				389E5F1E2FD8030400DB3A1C /* TableviewCell */,
+				389E5F1D2FD802DB00DB3A1C /* CollectionCell */,
+				3869CA542FB4E2A80012D199 /* NewBookingModuleVC.swift */,
+				388188532FBF3A88004F4CDE /* ChooseTrainWithVC.swift */,
+				388188552FBF534C004F4CDE /* PickTimeForBooking.swift */,
+				3889F8922FC0B35D002DEA0D /* ReviewBookingViewController.swift */,
+				3889F8942FC0B3BD002DEA0D /* BookingConfirmViewController.swift */,
+				38D55B682FE7E61500BAE1A9 /* AvailableTrainerPresentVC.swift */,
+				3878C4EB30093F73000E50C2 /* PackageExpireVC.swift */,
+				3877113B3011333200C83312 /* ChooseBestPlanVC.swift */,
+				388B2E213014B86500514255 /* BookingReviewPurchaseVC.swift */,
+				388B2E2330164FDC00514255 /* MyTrainersVC.swift */,
+			);
+			path = NewBookingModule;
+			sourceTree = "<group>";
+		};
+		389E5F1D2FD802DB00DB3A1C /* CollectionCell */ = {
+			isa = PBXGroup;
+			children = (
+				389E5F1F2FD8035000DB3A1C /* PreferedTimeTVCell.swift */,
+				389E5F202FD8035000DB3A1C /* PreferedTimeTVCell.xib */,
+				B88CBACC2FED3B92001479BC /* PrimaryDateTimeCVCell.swift */,
+				B88CBACD2FED3B92001479BC /* PrimaryDateTimeCVCell.xib */,
+			);
+			path = CollectionCell;
+			sourceTree = "<group>";
+		};
+		389E5F1E2FD8030400DB3A1C /* TableviewCell */ = {
+			isa = PBXGroup;
+			children = (
+				386E8A092FFA6F8C00D1E13E /* ReviewBookingTVCell.swift */,
+				386E8A0A2FFA6F8C00D1E13E /* ReviewBookingTVCell.xib */,
+				3878C4ED30094458000E50C2 /* ChoosePlanTVCell.swift */,
+				3878C4EE30094458000E50C2 /* ChoosePlanTVCell.xib */,
+			);
+			path = TableviewCell;
+			sourceTree = "<group>";
+		};
 		38FE27B62EFEC15F0017DBAF /*  Funnel Sans */ = {
 			isa = PBXGroup;
 			children = (
@@ -2009,6 +2098,8 @@
 				D72F841B2F278E2F00182049 /* PurchaseModel.swift */,
 				EE4613162F2BD1F6008FCEA3 /* BestPlanModel.swift */,
 				D720CBE02F3CFF9000AFBA5C /* HomepageModel.swift */,
+				388128532FF1088F00E115BF /* NewBookingModel.swift */,
+				AA0000002FF200A100E115BF /* BookingDateState.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -2026,6 +2117,7 @@
 				B8C45EC12DD5AE42000B0790 /* Profile.storyboard */,
 				EE9D2B8E2F17EB51008A83D1 /* Purchase.storyboard */,
 				D7B0B6C32F37AE3E00A0579E /* Homepage.storyboard */,
+				3869CA512FB4E1FE0012D199 /* NewBookingModule.storyboard */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -2043,6 +2135,8 @@
 				B8BC4E0A2E210A0900E96C10 /* WorkoutLibraryVM.swift */,
 				D72F841D2F27903B00182049 /* PurchaseViewModel.swift */,
 				D720CBE22F3CFFDA00AFBA5C /* HomePageViewModel.swift */,
+				388128512FF1076600E115BF /* NewBookingVM.swift */,
+				AA0000022FF200A200E115BF /* PickTimeForBookingVM.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -2050,6 +2144,7 @@
 		B8FDEEDC2CC8CDE80061639F /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				3869CA532FB4E2370012D199 /* NewBookingModule */,
 				38F98A3D2F5C819C00144C33 /* FreeAssessment */,
 				D7B0B6C52F37AE4C00A0579E /* Homepage */,
 				EE9D2B6B2F17EA93008A83D1 /* PurchaseModule */,
@@ -2170,6 +2265,7 @@
 				38CBBFF42F29474A004D7A5C /* FSCalendar */,
 				EEDB95762F2952DB00CBA304 /* Cosmos */,
 				D7B1DFDC2F44E17A003533B9 /* SDWebImage */,
+				3826D2AC2FA906D2001C5C64 /* Mixpanel */,
 			);
 			productName = MyPT;
 			productReference = B8FDEEBF2CC8CAD00061639F /* MyPT Connect.app */;
@@ -2183,7 +2279,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1540;
-				LastUpgradeCheck = 1620;
+				LastUpgradeCheck = 2640;
 				TargetAttributes = {
 					B8FDEEBE2CC8CAD00061639F = {
 						CreatedOnToolsVersion = 15.4;
@@ -2215,6 +2311,7 @@
 				38CBBFF32F29474A004D7A5C /* XCRemoteSwiftPackageReference "FSCalendar" */,
 				EEDB95752F2952DB00CBA304 /* XCRemoteSwiftPackageReference "Cosmos" */,
 				D7B1DFDB2F44E17A003533B9 /* XCRemoteSwiftPackageReference "SDWebImage" */,
+				3826D2AB2FA906D2001C5C64 /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
 			);
 			productRefGroup = B8FDEEC02CC8CAD00061639F /* Products */;
 			projectDirPath = "";
@@ -2253,9 +2350,11 @@
 				B8C45EC22DD5AE42000B0790 /* Profile.storyboard in Resources */,
 				B87526932D5F50A100BDB642 /* MealsTypeTableViewCell.xib in Resources */,
 				B8BD0BCD2D367B3B005F19CA /* WorkoutSummaryTableViewCell.xib in Resources */,
+				389E5F212FD8035000DB3A1C /* PreferedTimeTVCell.xib in Resources */,
 				B84F78922CEB192000FF7D52 /* Booking.storyboard in Resources */,
 				B8A3A1DB2E3776760072E260 /* PlansUpgradeCollectionViewCell.xib in Resources */,
 				B8B9A5D22CCA494B00392AD1 /* ClashDisplay-Bold.otf in Resources */,
+				B88CBACF2FED3B92001479BC /* PrimaryDateTimeCVCell.xib in Resources */,
 				B8FBFE2C2D267ED3001041E5 /* InnerTableViewCell.xib in Resources */,
 				B8A677782DCE278D00007DAB /* UpcomingClassesNearCollectionViewCell.xib in Resources */,
 				B8F84D4C2D883EF5006C98EF /* SelectLocationTableViewCell.xib in Resources */,
@@ -2265,6 +2364,7 @@
 				EE9D2B8F2F17EB51008A83D1 /* Purchase.storyboard in Resources */,
 				B8E7887B2D2F9C7100F1D5D6 /* strenghtWorkoutVideo.mp4 in Resources */,
 				B8BABE7B2D0AF5C500CA8E27 /* PointsTableViewCell.xib in Resources */,
+				3869CA522FB4E1FE0012D199 /* NewBookingModule.storyboard in Resources */,
 				B8FC90F92D100F5E00C7A222 /* BookingListTableViewCell.xib in Resources */,
 				B84F78942CEB193300FF7D52 /* Calendar.storyboard in Resources */,
 				B8C663B22E0ACD4100538317 /* BadgesTableViewCell.xib in Resources */,
@@ -2273,6 +2373,7 @@
 				B8FBFE282D2673EB001041E5 /* AddSetsTableViewCell.xib in Resources */,
 				B8CBEB1F2E2006B100939C3F /* UserPlansCollectionViewCell.xib in Resources */,
 				B885D65D2DD201F500D594D0 /* ClassesNearControllerTableViewCell.xib in Resources */,
+				3878C4F030094458000E50C2 /* ChoosePlanTVCell.xib in Resources */,
 				B8DB10982CDDF7D100B414B9 /* Dashboard.storyboard in Resources */,
 				B8C4E3532CEC85BE0002FCCB /* MoreExploreCollectionViewCell.xib in Resources */,
 				B8B9A5D52CCA494B00392AD1 /* Manrope-ExtraBold.otf in Resources */,
@@ -2378,6 +2479,7 @@
 				B8E55F9D2CCA420500AAFAE5 /* ClashDisplay-Semibold.otf in Resources */,
 				B816229D2D2BD98400849A2E /* WorkoutsCollectionViewCell.xib in Resources */,
 				B8E55F9E2CCA420500AAFAE5 /* ClashDisplay-Regular.otf in Resources */,
+				386E8A0B2FFA6F8C00D1E13E /* ReviewBookingTVCell.xib in Resources */,
 				B8FDEECA2CC8CAD00061639F /* Base in Resources */,
 				B8EAA0D62D6318A2005CC6B7 /* HydrationDataTableViewCell.xib in Resources */,
 			);
@@ -2393,6 +2495,7 @@
 				B83BCC182E7028BF00166834 /* SupersetTableViewCell.swift in Sources */,
 				B8F747A92D9BECBD0014C5A8 /* DateFormatterHelper.swift in Sources */,
 				B8FBFE292D2673EB001041E5 /* AddSetsTableViewCell.swift in Sources */,
+				B88CBACE2FED3B92001479BC /* PrimaryDateTimeCVCell.swift in Sources */,
 				B8F719A42D34DD64006A8925 /* SessionSummaryViewController.swift in Sources */,
 				B8D216122CEF11BA00017930 /* GridTrainerCollectionViewCell.swift in Sources */,
 				B8C547652E39F87800D6D6BD /* HalfBillShape.swift in Sources */,
@@ -2412,6 +2515,8 @@
 				B8CB63CD2E0D79990012F6A5 /* ClientDataCollectionViewCell.swift in Sources */,
 				B8BABE7A2D0AF5C500CA8E27 /* PointsTableViewCell.swift in Sources */,
 				B80571422D796E2C00B7BF93 /* SelectAddressPopupViewController.swift in Sources */,
+				388128522FF1076600E115BF /* NewBookingVM.swift in Sources */,
+				AA0000032FF200A200E115BF /* PickTimeForBookingVM.swift in Sources */,
 				B85B4AD22D01A5BE00E8AC5E /* CouponsOffersTableViewCell.swift in Sources */,
 				B8F959BE2E5F3A9000480835 /* WorkoutTypeViewController.swift in Sources */,
 				B8BD0BC32D365BF2005F19CA /* SessionCompleteViewController.swift in Sources */,
@@ -2473,6 +2578,7 @@
 				B8CF3BFB2D478E2B0005CDCB /* NetworkManager.swift in Sources */,
 				B8EAA0D52D6318A2005CC6B7 /* HydrationDataTableViewCell.swift in Sources */,
 				B8CF04932DD3275F003FAB6F /* ClassDetailsViewController.swift in Sources */,
+				3889F8952FC0B3BD002DEA0D /* BookingConfirmViewController.swift in Sources */,
 				B8FE31822CF6FD7100B25860 /* PaymentSuccessViewController.swift in Sources */,
 				B8C97A2E2D77143C009F31AC /* CheckoutViewController.swift in Sources */,
 				B8ACB6E52CDCC54600042BC5 /* LoadingViewController.swift in Sources */,
@@ -2487,6 +2593,7 @@
 				B8F8B0152E5C78F3003B1D10 /* NoteDescTableViewCell.swift in Sources */,
 				B8C22AB62E1E7FA2003F2D74 /* TopupViewController.swift in Sources */,
 				B8FED8B82E605D74003CA7DC /* RestTimePickerView.swift in Sources */,
+				389E5F222FD8035000DB3A1C /* PreferedTimeTVCell.swift in Sources */,
 				B8B9A5E02CCA815700392AD1 /* OtpViewController.swift in Sources */,
 				B8CB63C92E0D6F1D0012F6A5 /* FitnessResourcesTableViewCell.swift in Sources */,
 				B8A6776E2DCE21E700007DAB /* UpcomingClassesViewController.swift in Sources */,
@@ -2510,6 +2617,7 @@
 				B80571442D79C62300B7BF93 /* ProductCancelPopupViewController.swift in Sources */,
 				B819589E2D40B172000FBA16 /* ArrivingViewController.swift in Sources */,
 				38BF8D0F2F2FD42E0043FC1B /* AddMemberDetailVC.swift in Sources */,
+				388B2E223014B86500514255 /* BookingReviewPurchaseVC.swift in Sources */,
 				B8FE31842CF702AA00B25860 /* BillShape.swift in Sources */,
 				D72BD87B2F2DD9F700EC57E3 /* SessionsRulerView.swift in Sources */,
 				B8FD346D2DC4F3BB00AFABF4 /* UpcomingSoonViewController.swift in Sources */,
@@ -2538,15 +2646,19 @@
 				B81357B52D7EB4E300D0BF1A /* ReturnRequestViewController.swift in Sources */,
 				B86589F72D646C6F00C00603 /* UnitPopupViewController.swift in Sources */,
 				B87526942D5F50A100BDB642 /* MealsTypeTableViewCell.swift in Sources */,
+				3869CA552FB4E2A80012D199 /* NewBookingModuleVC.swift in Sources */,
 				B8C4E3522CEC85BE0002FCCB /* MoreExploreCollectionViewCell.swift in Sources */,
 				B8EE26012D145684006A732E /* ReschedulePopViewController.swift in Sources */,
 				B8AAE1F32D23D30B00C349C3 /* EditExerciseViewController.swift in Sources */,
 				B8C4E3582CEC8C050002FCCB /* MoreExploreTableViewCell.swift in Sources */,
+				388188542FBF3A88004F4CDE /* ChooseTrainWithVC.swift in Sources */,
 				B8ED38732D2E731D00312116 /* WorkoutFilterViewController.swift in Sources */,
 				B8AE86B12D12B8260028166D /* BookingDetailsViewController.swift in Sources */,
 				B8FDEEF22CC8D6000061639F /* ShowAlertMessage.swift in Sources */,
 				B82E512D2DC8B4DE006837D3 /* MoreLogoutCollectionReusableView.swift in Sources */,
 				B8C5AC242D7B15F7006DF31A /* GetTrainerModel.swift in Sources */,
+				3889F8932FC0B35D002DEA0D /* ReviewBookingViewController.swift in Sources */,
+				38D55B692FE7E61500BAE1A9 /* AvailableTrainerPresentVC.swift in Sources */,
 				B8F175CC2E16543F00D58558 /* FilterModel.swift in Sources */,
 				B80A44692CEDD73800E3A11E /* TrainerTypeTableViewCell.swift in Sources */,
 				B84D86782DD71D1200948930 /* DayStreakCollectionViewCell.swift in Sources */,
@@ -2588,7 +2700,9 @@
 				B8F719B42D350EDE006A8925 /* ThumbTextSlider.swift in Sources */,
 				D720CBE32F3CFFDA00AFBA5C /* HomePageViewModel.swift in Sources */,
 				B812067C2D5DDC600026B65F /* SleepGoalsViewController.swift in Sources */,
+				388188562FBF534C004F4CDE /* PickTimeForBooking.swift in Sources */,
 				B81676A72D85B4FF00EDB6EF /* TxtFieldTableViewCell.swift in Sources */,
+				386E8A0C2FFA6F8C00D1E13E /* ReviewBookingTVCell.swift in Sources */,
 				B80A446B2CEDDC6900E3A11E /* CreateTrainerViewController.swift in Sources */,
 				B8CCAF2D2D6D983C009D66A3 /* FooterProductsCollectionReusableView.swift in Sources */,
 				B854EDCA2D97D7C0004D048F /* CreatePackageVM.swift in Sources */,
@@ -2621,6 +2735,7 @@
 				B8C663A72E0A73E200538317 /* ImagePreviewerViewController.swift in Sources */,
 				B8C35FB22D8072BE00A11A2C /* SearchTableViewCell.swift in Sources */,
 				B8EAA0D22D62FE7B005CC6B7 /* GlassSizeViewController.swift in Sources */,
+				3877113C3011333200C83312 /* ChooseBestPlanVC.swift in Sources */,
 				B8FD7F612D30F697000E4425 /* CustomRuler.swift in Sources */,
 				B8A277B32D3688B20059FD1A /* SessionStatusViewController.swift in Sources */,
 				38BF8D112F30474B0043FC1B /* AddMembersVC.swift in Sources */,
@@ -2654,13 +2769,17 @@
 				B8A677772DCE278D00007DAB /* UpcomingClassesNearCollectionViewCell.swift in Sources */,
 				B8FFF4202D09CC200097167A /* GymWorkoutViewController.swift in Sources */,
 				B8C18DD12DDB5D2500A9B210 /* ProfileEditViewController.swift in Sources */,
+				388B2E2430164FDC00514255 /* MyTrainersVC.swift in Sources */,
 				B8AC75D12CF5C3C000520A2E /* CalendarView.swift in Sources */,
+				388128542FF1088F00E115BF /* NewBookingModel.swift in Sources */,
+				AA0000012FF200A100E115BF /* BookingDateState.swift in Sources */,
 				B8C791832CDA432400F4E6BD /* RangePickerView.swift in Sources */,
 				B84F78832CEB0FB600FF7D52 /* CustomTabViewController.swift in Sources */,
 				B8EE25FF2D1447EA006A732E /* CancellationPolicyViewController.swift in Sources */,
 				B8ED0EEB2CCB7502006279B8 /* PersoniledViewController.swift in Sources */,
 				B8FDEEE72CC8D1780061639F /* ValidationFiles.swift in Sources */,
 				B8F030382D54BB1100BE59C2 /* RulerRangeLayer.swift in Sources */,
+				3878C4EF30094458000E50C2 /* ChoosePlanTVCell.swift in Sources */,
 				EE4613172F2BD1F6008FCEA3 /* BestPlanModel.swift in Sources */,
 				B8EB40E52D1AE1DE002EC226 /* ChooseExerciseViewController.swift in Sources */,
 				B8D3E85A2D4B5918008981F7 /* PersonalizedModel.swift in Sources */,
@@ -2685,6 +2804,7 @@
 				B8DB109B2CDDF8D400B414B9 /* DashboardGuestViewController.swift in Sources */,
 				B8BABE742D0AB41E00CA8E27 /* GymWorkoutTableViewCell.swift in Sources */,
 				B83747F92DD491CA00713C00 /* UpcomingClassModel.swift in Sources */,
+				3878C4EC30093F73000E50C2 /* PackageExpireVC.swift in Sources */,
 				B8F556BC2DDF64410075614A /* FollowersViewController.swift in Sources */,
 				D7B210242F4487FB00721F84 /* StoryBars.swift in Sources */,
 				B8136EF82D041CAE00545F7F /* BillingView.swift in Sources */,
@@ -2785,6 +2905,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = LW7P5S9K9P;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -2808,6 +2929,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -2848,6 +2970,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = LW7P5S9K9P;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -2864,6 +2987,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -2877,7 +3001,7 @@
 				CODE_SIGN_ENTITLEMENTS = MyPT/MyPT.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = LW7P5S9K9P;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -2924,7 +3048,7 @@
 				CODE_SIGN_ENTITLEMENTS = MyPT/MyPT.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = LW7P5S9K9P;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -2987,6 +3111,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		3826D2AB2FA906D2001C5C64 /* XCRemoteSwiftPackageReference "mixpanel-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mixpanel/mixpanel-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.3.0;
+			};
+		};
 		38CBBFF32F29474A004D7A5C /* XCRemoteSwiftPackageReference "FSCalendar" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/WenchaoD/FSCalendar.git";
@@ -3110,6 +3242,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		3826D2AC2FA906D2001C5C64 /* Mixpanel */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3826D2AB2FA906D2001C5C64 /* XCRemoteSwiftPackageReference "mixpanel-swift" */;
+			productName = Mixpanel;
+		};
 		38CBBFF42F29474A004D7A5C /* FSCalendar */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 38CBBFF32F29474A004D7A5C /* XCRemoteSwiftPackageReference "FSCalendar" */;

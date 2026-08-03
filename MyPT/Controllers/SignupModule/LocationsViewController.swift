@@ -8,6 +8,7 @@
 import UIKit
 import GoogleMaps
 import GooglePlaces
+import Mixpanel
 
 enum LocationFlow {
     case addAddress
@@ -158,6 +159,10 @@ class LocationsViewController: CommonViewController {
         case .addAddress, .editAddress, .homePage, .updateProfile, .confirmAddAddress:
             print("address....")
         case .defaultLoc:
+            Mixpanel.mainInstance().track(
+                event: "Profile_Setup_Skipped",
+                properties: [:]
+            )
             skipProfileApi(completion: { data in
                 appUserDefaults.setRegistrationSkip(value: true)
                 appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())
@@ -401,78 +406,63 @@ class LocationsViewController: CommonViewController {
     
     @IBAction func continueBtnActn(_ sender: Any) {
         print("Continue btn actn...")
-        
         switch flowLocation {
         case .addAddress:
             if let getAddressData = getAddressData {
                 print(getAddressData)
-//                if isFreeAssessmentSelected ?? false {
-//                    if inputType == "home" { // For Home
-//                        let vc: TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
-//                        vc.flowSlot = .bookTrainerHomeWorkout
-//                        vc.isFromHome = true
-//                        vc.inputType = "home"
-//                        vc.inputLat = Double(self.getAddressData?.lat?.value ?? "0.0")
-//                        vc.inputLong = Double(self.getAddressData?.long?.value ?? "0.0")
-//                        vc.inputParam = DetailsParam(
-//                            type: "home",
-//                            long: self.getAddressData?.long?.value,
-//                            lat: self.getAddressData?.lat?.value,
-//                            addressId: self.getAddressData?.id?.value,
-//                            addressData: self.getAddressData,
-//                            isFreeAssessmentSelected: isFreeAssessmentSelected
-//                        )
-//                        navigationController?.pushViewController(vc, animated: true)
-//                    } else { // For Gym
-//                        let vc: GymWorkoutViewController =
-//                        GymWorkoutViewController.instantiate(appStoryboard: .booking)
-//                        vc.flowGymwork = .bookTrainerGymWorkout
-//                        vc.inputParam = DetailsParam(
-//                            type: "gym",
-//                            long: self.getAddressData?.long?.value ?? "0.0",
-//                            lat: self.getAddressData?.lat?.value ?? "0.0",
-//                            addressId: self.getAddressData?.id?.value,
-//                            addressData: self.getAddressData,
-//                            isFreeAssessmentSelected: isFreeAssessmentSelected
-//                        )
-//                        vc.inputType = "gym"
-//                        vc.inputLat = Double(self.getAddressData?.lat?.value ?? "") ?? 0.0
-//                        vc.inputLong = Double(self.getAddressData?.long?.value ?? "") ?? 0.0
-//                        self.navigationController?.pushViewController(vc, animated: true)
-//                    }
-//                } else {
-                    if inputType == "gym" {
-                        if isFreeAssessmentSelected ?? false {
-                            let vc: GymWorkoutViewController =
-                            GymWorkoutViewController.instantiate(appStoryboard: .booking)
-                            vc.flowGymwork = .bookTrainerGymWorkout
-                            vc.inputParam = DetailsParam(
-                                type: "gym",
-                                long: self.getAddressData?.long?.value ?? "0.0",
-                                lat: self.getAddressData?.lat?.value ?? "0.0",
-                                addressId: self.getAddressData?.id?.value,
-                                addressData: self.getAddressData,
-                                isFreeAssessmentSelected: isFreeAssessmentSelected
-                            )
-                            vc.inputType = "gym"
-                            vc.inputLat = Double(self.getAddressData?.lat?.value ?? "") ?? 0.0
-                            vc.inputLong = Double(self.getAddressData?.long?.value ?? "") ?? 0.0
-                            self.navigationController?.pushViewController(vc, animated: true)
-                        } else {
-                            let vc:GreatNewsVC = GreatNewsVC.instantiate(appStoryboard: .booking)
-                            vc.getAddressData = self.getAddressData
-                            navigationController?.pushViewController(vc, animated: true)
-                        }
+                if isFreeAssessmentSelected ?? false {
+                    Mixpanel.mainInstance().track(
+                        event: "FA_Location_Selected",
+                        properties: [
+                            "service_type": self.inputType,
+                            "location": self.getAddressData?.city_name ?? "",
+                        ]
+                    )
+                }
+                if inputType == "gym" {
+                    if isFreeAssessmentSelected ?? false {
+                        let vc: GymWorkoutViewController =
+                        GymWorkoutViewController.instantiate(appStoryboard: .booking)
+                        vc.flowGymwork = .bookTrainerGymWorkout
+                        vc.inputParam = DetailsParam(
+                            type: "gym",
+                            long: self.getAddressData?.long?.value ?? "0.0",
+                            lat: self.getAddressData?.lat?.value ?? "0.0",
+                            addressId: self.getAddressData?.id?.value,
+                            addressData: self.getAddressData,
+                            isFreeAssessmentSelected: isFreeAssessmentSelected
+                        )
+                        vc.inputType = "gym"
+                        vc.inputLat = Double(self.getAddressData?.lat?.value ?? "") ?? 0.0
+                        vc.inputLong = Double(self.getAddressData?.long?.value ?? "") ?? 0.0
+                        self.navigationController?.pushViewController(vc, animated: true)
                     } else {
-                        let vc:BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
-                        vc.modalPresentationStyle = .automatic
-                        vc.bookingAddressFlow = .addAddress
-                        vc.isFreeAssessmentSelected = isFreeAssessmentSelected
-                        vc.addressData = self.getAddressData
-                        vc.navCtrnl = self.navigationController
-                        self.present(vc, animated: true)
+                        Mixpanel.mainInstance().track(
+                            event: "GymPT_Gym_Selected ",
+                            properties: [
+                                "location": self.getAddressData?.street?.value ?? "",
+                            ]
+                        )
+                        let vc: GreatNewsVC = GreatNewsVC.instantiate(appStoryboard: .booking)
+                        vc.getAddressData = self.getAddressData
+                        navigationController?.pushViewController(vc, animated: true)
                     }
-//                }
+                } else {
+                    Mixpanel.mainInstance().track(
+                        event: "HomePT_Address_Entered",
+                        properties: [
+                            "area": self.getAddressData?.street?.value ?? "",
+                        ]
+                    )
+                    let vc: BookingAddressViewController = BookingAddressViewController.instantiate(appStoryboard: .booking)
+                    vc.modalPresentationStyle = .automatic
+                    vc.bookingAddressFlow = .addAddress
+                    vc.isFreeAssessmentSelected = isFreeAssessmentSelected
+                    vc.addressData = self.getAddressData
+                    vc.navCtrnl = self.navigationController
+                    self.present(vc, animated: true)
+                }
+                //                }
             } else {
                 AlertHelper.shared.alertMesssage(view: self, title: "", message: AppAlertStrings.enter_Location)
             }
@@ -506,8 +496,11 @@ class LocationsViewController: CommonViewController {
                 vc.addressData = getAddressData
                 self.navigationController?.pushViewController(vc, animated: true)
             }
-
         case .defaultLoc:
+            Mixpanel.mainInstance().track(
+                event: "Profile_Setup_Completed",
+                properties: [:]
+            )
             if let mainAddrLbl = self.mainAddrLbl.text , !mainAddrLbl.isEmpty, let subAddrLbl = self.subAddrLbl.text, !subAddrLbl.isEmpty, let lat = showmapCamera?.latitude as? Double, let long = showmapCamera?.longitude as? Double {
                 print(mainAddrLbl, subAddrLbl, lat, long)
                 let fullAddr = mainAddrLbl + " " + subAddrLbl

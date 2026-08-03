@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Mixpanel
 
 class PurchaseReviewPackageVC: CommonViewController {
     
@@ -569,6 +570,24 @@ class PurchaseReviewPackageVC: CommonViewController {
                 
                 verifyPaymentStatus(inputParams: baseParams, completion: { result in
                     if result.data?.isSuccess ?? false {
+                        if self.inputParam?.package_type == "4" {
+                            Mixpanel.mainInstance().track(
+                                event: self.inputParam?.type ?? "" == "home" ? "HomePT_Purchase_Confirmed" : "GymPT_Purchase_Confirmed ",
+                                properties: [
+//                                    "plan_type": self.inputParam?.package_type == "1" ? "Solo" : self.inputParam?.package_type == "2" ? "Buddy" : "Group",
+                                    "amount": self.inputParam?.priceForGymMembership
+                                ]
+                            )
+                        } else {
+                            Mixpanel.mainInstance().track(
+                                event: self.inputParam?.type ?? "" == "home" ? "HomePT_Purchase_Confirmed" : "GymPT_Purchase_Confirmed ",
+                                properties: [
+                                    "training_type": self.inputParam?.package_type == "1" ? "Solo" : self.inputParam?.package_type == "2" ? "Buddy" : "Group",
+                                    "sessions": String(self.checkoutData?.packageDetails?.sessions ?? 0),
+                                    "amount": String(self.checkoutData?.packageDetails?.price ?? 0.0)
+                                ]
+                            )
+                        }
                         let vc:PurchaseSucessfulPaymentVC = PurchaseSucessfulPaymentVC.instantiate(appStoryboard: .purchase)
                         vc.successData = result.data
                         vc.flowGymwork = self.flowGymwork

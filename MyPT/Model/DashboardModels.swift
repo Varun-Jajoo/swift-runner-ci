@@ -22,8 +22,8 @@ struct PlanDetailsModel: Codable {
     var type: FlexibleValue?
     var sessions: FlexibleValue?
     var amount: FlexibleValue?
-    var isUpgrade: Bool?
-    var isShow, is_expired, is_date_expired: Bool?
+    var isUpgrade, is_sessions_out, show_expired_card: Bool?
+    var isShow, is_expired, is_date_expired, is_membership: Bool?
     var renew_new: Bool?
     var msg: FlexibleValue?
     var end_date: FlexibleValue?

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Mixpanel
 
 class GoalsViewController: CommonViewController {
     
@@ -154,6 +155,10 @@ class GoalsViewController: CommonViewController {
         }
     
     override func rightBtnActn(sender: UIButton) {
+        Mixpanel.mainInstance().track(
+            event: "Profile_Setup_Skipped",
+            properties: [:]
+        )
         skipProfileApi(completion: { data in
             appUserDefaults.setRegistrationSkip(value: true)
             appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())

@@ -56,5 +56,4 @@ class GreatNewsVC: CommonViewController {
         self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
         self.setProgress(0.3)
     }
-    
 }

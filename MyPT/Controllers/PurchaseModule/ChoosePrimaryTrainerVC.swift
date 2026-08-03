@@ -162,6 +162,7 @@ class ChoosePrimaryTrainerVC: CommonViewController {
             vc.inputLat = inputLat
             vc.inputLong = inputLong
             vc.inputParam = inputParam
+            vc.package_type = self.packageType
             navigationController?.pushViewController(vc, animated: true)
         }
     }

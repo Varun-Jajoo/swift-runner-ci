@@ -32,6 +32,11 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     }
     var userPlans: [PlanDetailsModel] = [] {
         didSet {
+            if userPlans.contains(where: { $0.is_expired == true }) {
+                heightOfCollectionPlan?.constant = 283
+            } else {
+                heightOfCollectionPlan?.constant = 213
+            }
             collectionPlan.reloadData()
         }
     }
@@ -64,6 +69,7 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     @IBOutlet weak var lblTrainingTeamHeading: UILabel!
     @IBOutlet weak var btnNameInitial: UIButton!
     @IBOutlet weak var pageController: UIPageControl!
+    @IBOutlet weak var heightOfCollectionPlan: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -127,6 +133,11 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         collectionBanner.dataSource = self
         collectionPlan.delegate = self
         collectionPlan.dataSource = self
+        if let layout = collectionPlan.collectionViewLayout as? UICollectionViewFlowLayout {
+            layout.estimatedItemSize = .zero
+            layout.minimumLineSpacing = 15
+            layout.minimumInteritemSpacing = 15
+        }
         collectionSessionType.register(
             UINib(nibName: "TypesOfSessionCVCell", bundle: nil),
             forCellWithReuseIdentifier: "TypesOfSessionCVCell"
@@ -301,23 +312,52 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             self.navigationController?.pushViewController(vc, animated: true)
         }
     }
-    
+
     @objc func useSessionBtnActn(sender: UIButton) {
         TapticEngine.selection.feedback()
-        let vc: CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
-        vc.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(vc, animated: false)
+
+        // Resolve the index of the tapped plan card
+        var view: UIView? = sender
+        while view != nil, !(view is UICollectionViewCell) {
+            view = view?.superview
+        }
+        let planIndex: Int
+        if let cell = view as? UICollectionViewCell,
+           let indexPath = collectionPlan.indexPath(for: cell) {
+            planIndex = indexPath.row
+        } else {
+            planIndex = 0
+        }
+
+        guard userPlans.indices.contains(planIndex) else { return }
+        let plan = userPlans[planIndex]
+
+        if plan.is_expired == true {
+            let bookingReviewPurchaseVC: BookingReviewPurchaseVC = BookingReviewPurchaseVC.instantiate(appStoryboard: .newBookingModule)
+            bookingReviewPurchaseVC.inputParam = DetailsParam(
+                type: plan.type?.value
+            )
+            bookingReviewPurchaseVC.sessions = plan.sessions?.value
+            bookingReviewPurchaseVC.hidesBottomBarWhenPushed = true
+            bookingReviewPurchaseVC.previousSubscriptionID = plan.id?.value
+            bookingReviewPurchaseVC.isGymMembership = plan.is_membership ?? false
+            self.navigationController?.pushViewController(bookingReviewPurchaseVC, animated: false)
+//            let vc: PackageExpireVC = PackageExpireVC.instantiate(appStoryboard: .newBookingModule)
+//            vc.hidesBottomBarWhenPushed = true
+//            vc.userPlans = self.userPlans
+//            self.navigationController?.pushViewController(vc, animated: false)
+        } else {
+            let vc: NewBookingModuleVC = NewBookingModuleVC.instantiate(appStoryboard: .newBookingModule)
+            vc.hidesBottomBarWhenPushed = true
+            self.navigationController?.pushViewController(vc, animated: false)
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == collectionSessionType {
             return 4
         } else if collectionView == collectionMyBooking {
-            
-            //            let count = upcomingSessionData?.count ?? 0
-            
             let count = upcomingSessionData?.count ?? 0
-            
             if count == 0 {
                 collectionView.showEmptyView(
                     title: "You have no upcoming bookings",
@@ -327,9 +367,7 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             } else {
                 collectionView.restoreEmptyView()
             }
-            
             return count
-            
         } else if collectionView == collectionDate {
             return dates.count
         } else if collectionView == collectionBookingSuggestion {
@@ -343,9 +381,7 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             } else {
                 collectionView.restoreEmptyView()
             }
-            
             return trainers.count
-            
         } else if collectionView == collectionMyPTAction {
             //            return homeStoriesData?.count ?? 0
             let count = homeStoriesData?.count ?? 0
@@ -381,7 +417,6 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
         if collectionView == collectionSessionType {
             let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: "TypesOfSessionCVCell",
@@ -441,20 +476,20 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             let trainer = trainers[indexPath.row]
             cell.viewInfo.isHidden = self.slotData?.is_remaining_session ?? false
             cell.btnStackView.isHidden = !(self.slotData?.is_remaining_session ?? false)
+            cell.btnQuickBook.isHidden = !(self.slotData?.is_remaining_session ?? false)
+            cell.btnFullReschedule.isHidden = true
             cell.configure(with: trainer)
+            cell.lblInfo.text = self.slotData?.message
             cell.btnQuickBook.accessibilityHint = trainer.id?.value ?? ""
             cell.btnFullReschedule.accessibilityHint = trainer.id?.value ?? ""
             cell.btnFullReschedule.addTarget(self, action: #selector(fullScheduleBtnActn(sender: )), for: .touchUpInside)
             cell.btnQuickBook.addTarget(self, action: #selector(quickBookBtnActn(sender: )), for: .touchUpInside)
-            cell.btnFullReschedule.isHidden = true
             return cell
         }  else if collectionView == collectionMyPTAction {
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SeePtActionCVCell", for: indexPath) as? SeePtActionCVCell else { return UICollectionViewCell() }
-            
             if let singleStoryData = homeStoriesData?[indexPath.row] {
                 cell.configure(with: singleStoryData)
             }
-            
             return cell
         }  else if collectionView == collectionBanner {
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "BannerHomepageCVCell", for: indexPath) as? BannerHomepageCVCell else { return UICollectionViewCell() }
@@ -465,33 +500,27 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             return cell
         } else if collectionView == collectionPlan {
             let plan = userPlans[indexPath.row]
-            
-            //            if plan.is_expired ?? false {
-            //
-            //                guard let expiredCell = collectionView.dequeueReusableCell(
-            //                    withReuseIdentifier: "ExpiredPlanCVCell",
-            //                    for: indexPath
-            //                ) as? ExpiredPlanCVCell else {
-            //                    return UICollectionViewCell()
-            //                }
-            //
-            //                expiredCell.configure(with: plan)
-            //                expiredCell.btnRenewNow.addTarget(self, action: #selector(useSessionBtnActn(sender: )), for: .touchUpInside)
-            //
-            //                return expiredCell
-            //            } else {
-            
-            guard let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: "PlanCVCell",
-                for: indexPath
-            ) as? PlanCVCell else {
-                return UICollectionViewCell()
+            if plan.is_expired == true {
+                guard let expiredCell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: "ExpiredPlanCVCell",
+                    for: indexPath
+                ) as? ExpiredPlanCVCell else {
+                    return UICollectionViewCell()
+                }
+                expiredCell.configure(with: plan)
+                expiredCell.btnRenewNow.addTarget(self, action: #selector(useSessionBtnActn(sender: )), for: .touchUpInside)
+                return expiredCell
+            } else {
+                guard let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: "PlanCVCell",
+                    for: indexPath
+                ) as? PlanCVCell else {
+                    return UICollectionViewCell()
+                }
+                cell.configure(with: plan)
+                cell.btnUseSession.addTarget(self, action: #selector(useSessionBtnActn(sender: )), for: .touchUpInside)
+                return cell
             }
-            cell.configure(with: plan)
-            cell.btnUseSession.addTarget(self, action: #selector(useSessionBtnActn(sender: )), for: .touchUpInside)
-            
-            return cell
-            //            }
         }
         return UICollectionViewCell()
     }
@@ -508,8 +537,9 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         } else if collectionView == collectionBookingSuggestion {
             return CGSize(width: 343, height: 211)
         } else if collectionView == collectionPlan {
-            //            return CGSize(width: 384, height: 213)
-            return CGSize(width: collectionView.frame.width - 20 , height: 213)
+            let isExpired = userPlans.indices.contains(indexPath.row) ? (userPlans[indexPath.row].is_expired ?? false) : false
+            let cellHeight: CGFloat = isExpired ? 283 : 213
+            return CGSize(width: collectionView.frame.width - 20, height: cellHeight)
         }
         return CGSize(width: collectionView.frame.size.width, height: collectionView.frame.size.height)
     }
@@ -542,19 +572,44 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             callSlotsApi(date: selectedDate)
         } else if collectionView == collectionSessionType {
             let vc : TopPlanVC = TopPlanVC.instantiate(appStoryboard: .homepage)
-            let vc1: CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
-            
+            let vc1: NewBookingModuleVC = NewBookingModuleVC.instantiate(appStoryboard: .newBookingModule)
+            let packageExpireVC: PackageExpireVC = PackageExpireVC.instantiate(appStoryboard: .newBookingModule)
+            let myTrainersVC: MyTrainersVC = MyTrainersVC.instantiate(appStoryboard: .newBookingModule)
+            let bookingReviewPurchaseVC: BookingReviewPurchaseVC = BookingReviewPurchaseVC.instantiate(appStoryboard: .newBookingModule)
             switch indexPath.row {
-            case 0:
+            case 0: // Book Session
                 vc1.hidesBottomBarWhenPushed = true
-                self.navigationController?.pushViewController(vc1, animated: false)
+                packageExpireVC.hidesBottomBarWhenPushed = true
+                guard let selectedPlan = self.userPlans.first(where: { $0.is_expired == true }) ?? self.userPlans.first else {
+                    return
+                }
+                packageExpireVC.userPlans = selectedPlan
+                self.navigationController?.pushViewController(selectedPlan.is_expired == true ? packageExpireVC : vc1, animated: false)
                 return
-            case 1:
-                vc.selectedPlanType = .topup
-            case 2:
-                vc.selectedPlanType = .renew
-            case 3:
-                vc.selectedPlanType = .upgrade
+            case 1: // Renew Plan
+//                vc.selectedPlanType = .topup
+//                vc.selectedPlanType = .renew
+                guard let selectedPlan = self.userPlans.first(where: { $0.is_expired == true }) ?? self.userPlans.first else {
+                    return
+                }
+                bookingReviewPurchaseVC.inputParam = DetailsParam(
+                    type: selectedPlan.type?.value
+                )
+                bookingReviewPurchaseVC.sessions = selectedPlan.sessions?.value
+                bookingReviewPurchaseVC.hidesBottomBarWhenPushed = true
+                bookingReviewPurchaseVC.previousSubscriptionID = selectedPlan.id?.value
+                bookingReviewPurchaseVC.isGymMembership = selectedPlan.is_membership ?? false
+                self.navigationController?.pushViewController(bookingReviewPurchaseVC, animated: false)
+                return
+            case 2: // My Trainers
+//                vc.selectedPlanType = .renew
+//                vc.selectedPlanType = .myTrainers
+                myTrainersVC.hidesBottomBarWhenPushed = true
+                self.navigationController?.pushViewController(myTrainersVC, animated: false)
+                return
+            case 3: // Group Classes
+//                vc.selectedPlanType = .upgrade
+                vc.selectedPlanType = .groupClasses
             default:
                 return
             }
@@ -563,16 +618,16 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         }
     }
     
-    //    func collectionView(_ collectionView: UICollectionView,
-    //                        layout collectionViewLayout: UICollectionViewLayout,
-    //                        minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-    //
-    //        if collectionView == collectionPlan {
-    //            return 14
-    //        }
-    //
-    //        return 0
-    //    }
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+
+        if collectionView == collectionPlan {
+            return 15
+        }
+
+        return 0
+    }
     
     func convertTo12Hour(_ time: String?) -> String {
         
@@ -757,7 +812,7 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     }
     
     @objc func checkInBtnActn(sender:UIButton) {
-        let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
+        let vc: BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
         if let getIndx = self.upcomingSessionData?.firstIndex(where: {
             $0.id?.value == sender.accessibilityHint ?? "0"
         }) {
@@ -826,7 +881,6 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     private func getPlansApi() {
         DashboardVM.getHomePagePlansApi(type: "2") { [weak self] result in
             guard let self = self else { return }
-            
             if result?.status == true {
                 self.userPlans = result?.data ?? []
             }
@@ -834,11 +888,8 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     }
     
     func callSlotsApi(date: String) {
-        
         DashboardVM.getSubscriptionSlotsApi(date: date) { [weak self] result in
-            
             guard let self = self else { return }
-            
             if let data = result?.data {
                 DispatchQueue.main.async {
                     
@@ -846,8 +897,10 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
                     self.trainers = data.trainers ?? []
                     
                     if data.isGroup == true {
-                        self.viewYourTrainingTeamHeading.isHidden = true
-                        self.viewTeam.isHidden = false
+//                        self.viewYourTrainingTeamHeading.isHidden = true
+                        self.viewYourTrainingTeamHeading.isHidden = false
+//                        self.viewTeam.isHidden = false
+                        self.viewTeam.isHidden = true
                         self.lblteamName.text = data.group?.name
                         self.lblDetail.text = data.group?.msg
                         

@@ -66,7 +66,7 @@ class TrainerDescriptionViewController: CommonViewController {
     var hasHomePackage: Bool?
     var hasGymPackage: Bool?
     var package_type: String?
-    
+    var fromMyTrainer: Bool?
     
     //MARK: --------------IBOUTLET
     @IBOutlet weak var trainerImgView: UIImageView!
@@ -118,6 +118,8 @@ class TrainerDescriptionViewController: CommonViewController {
 //    @IBOutlet weak var trainerTagHeightConstrnt: NSLayoutConstraint!
     @IBOutlet weak var btnBookTrainer: UIButton!
     @IBOutlet weak var lblCertificateNoResultFound: UILabel!
+    @IBOutlet weak var viewBottom: UIView!
+    @IBOutlet weak var scrollViewBottomHeight: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -299,7 +301,8 @@ class TrainerDescriptionViewController: CommonViewController {
     
         //---------------------**************UI
         DispatchQueue.main.async {
-            
+            self.viewBottom.isHidden = self.fromMyTrainer ?? false
+            self.scrollViewBottomHeight.constant = self.fromMyTrainer ?? false ? 0 : 100
             self.trainerImgView.addGradientLayer(colors: [UIColor(red: 0, green: 0, blue: 0, alpha: 0), UIColor(red: 0, green: 5/255.0, blue: 2.0/255.0, alpha: 1.0)], locations: [0.92,1], startPoint: CGPoint(x: 0, y: 0), endPoint: CGPoint(x: 0, y: 1), cornerRadius: 0)
             
             [

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Mixpanel
 
 enum TrainerType {
     case soloTraining
@@ -15,6 +16,8 @@ enum TrainerType {
     case gymWorkout
     case withTrainer
     case withoutTrainer
+    case withMyTeams
+    case withAnotherTeam
 }
 
 struct TrainerOption {
@@ -327,6 +330,12 @@ extension CreateTrainerViewController:UITableViewDataSource, UITableViewDelegate
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         selectedIndex = indexPath
+        Mixpanel.mainInstance().track(
+            event: "FA_Service_Type_Selected",
+            properties: [
+                "service_type": selectedIndex?.row == 0 ? "Home" : "Gym",
+            ]
+        )
 //        enableContinueBtn(isSelected: true)
         updateContinueButton(isEnabled: true)
         TapticEngine.selection.feedback()

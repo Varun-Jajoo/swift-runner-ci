@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -1842,7 +1842,7 @@
                                 <rect key="frame" x="0.0" y="240.33333333333331" width="393" height="543.66666666666674"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YL9-cT-txr">
-                                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="851.66666666666663"/>
                                         <subviews>
                                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="al8-Rc-dwB">
                                                 <rect key="frame" x="1" y="1" width="391" height="55"/>
@@ -1869,7 +1869,7 @@
                                                 </connections>
                                             </collectionView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="sAb-LO-yJI">
-                                                <rect key="frame" x="0.0" y="57" width="393" height="793"/>
+                                                <rect key="frame" x="0.0" y="56.999999999999943" width="393" height="792.66666666666652"/>
                                                 <subviews>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="OIM-Xd-ZNf">
                                                         <rect key="frame" x="0.0" y="0.0" width="393" height="396.33333333333331"/>
@@ -1877,6 +1877,9 @@
                                                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="aDb-ME-Nk0">
                                                                 <rect key="frame" x="0.0" y="1" width="393" height="394.33333333333331"/>
                                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                                <constraints>
+                                                                    <constraint firstAttribute="height" constant="394.32999999999998" id="Udz-vV-Bs9"/>
+                                                                </constraints>
                                                                 <connections>
                                                                     <outlet property="dataSource" destination="pt1-WF-54J" id="p3l-CL-76j"/>
                                                                     <outlet property="delegate" destination="pt1-WF-54J" id="hJs-A3-adu"/>
@@ -1892,10 +1895,10 @@
                                                         </constraints>
                                                     </view>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="S1e-Re-Gh7">
-                                                        <rect key="frame" x="0.0" y="396.33333333333326" width="393" height="396.66666666666674"/>
+                                                        <rect key="frame" x="0.0" y="396.33333333333337" width="393" height="396.33333333333337"/>
                                                         <subviews>
                                                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="4py-oh-dp2">
-                                                                <rect key="frame" x="0.0" y="1" width="393" height="393.66666666666669"/>
+                                                                <rect key="frame" x="0.0" y="1" width="393" height="393.33333333333331"/>
                                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="KaH-FF-gcG">
                                                                     <size key="itemSize" width="128" height="128"/>
@@ -1979,6 +1982,7 @@
                         <outlet property="followersMStckBV" destination="MNZ-jf-gAj" id="JZC-l5-9EB"/>
                         <outlet property="followingBtn" destination="0Uc-vR-kjf" id="ICd-nT-1oy"/>
                         <outlet property="gridMBV" destination="S1e-Re-Gh7" id="evc-ah-eol"/>
+                        <outlet property="heightOfTableView" destination="Udz-vV-Bs9" id="jpJ-X8-aRC"/>
                         <outlet property="listMBV" destination="OIM-Xd-ZNf" id="iv0-nm-uwH"/>
                         <outlet property="myTrainersBtn" destination="GXR-h2-bGF" id="vOz-Lg-BhE"/>
                         <outlet property="tagsCollView" destination="al8-Rc-dwB" id="RaC-gz-i7u"/>

@@ -22,6 +22,7 @@ class SearchViewController: UIViewController {
     private var suggestedWorkoutTags: [String]? = ["WEIGHT LOSS", "YOGA", "PILATES", "HEAVY-LIFTING", "CROSS-FIT", "WEIGHT GAIN", "ZUMBA"]
     var isFromHome: Bool? = true
     var inputParam: DetailsParam?
+    var package_type: String?
     
     // MARK: ----------------IBOUTLET
     @IBOutlet weak var topSearchMBV: UIView!
@@ -171,6 +172,7 @@ class SearchViewController: UIViewController {
                 inputData?.trainer_id = "\(data[getIndx ?? 0].id ?? 0)"
             }
             vc.inputParam = inputData
+            vc.package_type = self.package_type
             //                vc.isSlotsAvail = self.trainerData?[indexPath.row].isfull
             
             //            if let isFull = self.trainerData?[indexPath.row].isfull, let slotAvail = self.trainerData?[indexPath.row].slot?.value, isFull && slotAvail.lowercased() == "no".lowercased() {
@@ -189,6 +191,7 @@ class SearchViewController: UIViewController {
             var inputData = inputParam
             inputData?.trainer_id = "\(self.seacrhGymTrainerData?[getIndx ?? 0].id ?? 0)"
             vc.inputParam = inputData
+            vc.package_type = self.package_type
 //            vc.inputParam = DetailsParam(
 //                //                trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)",
 //                //                studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "")",
@@ -251,6 +254,7 @@ extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
                 inputData?.trainer_id = "\(searchStudiosData?[indexPath.row].id ?? 0)"
             }
             vc.inputParam = inputData
+            vc.package_type = self.package_type
             //                vc.isSlotsAvail = self.trainerData?[indexPath.row].isfull
             
             //            if let isFull = self.trainerData?[indexPath.row].isfull, let slotAvail = self.trainerData?[indexPath.row].slot?.value, isFull && slotAvail.lowercased() == "no".lowercased() {
@@ -269,6 +273,7 @@ extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
             var inputData = inputParam
             inputData?.trainer_id = "\(self.seacrhGymTrainerData?[indexPath.row].id ?? 0)"
             vc.inputParam = inputData
+            vc.package_type = self.package_type
 //            vc.inputParam = DetailsParam(
 //                //                trainer_id: "\(self.gymTrainerData?[indexPath.row].id ?? 0)",
 //                //                studio_id: "\(self.gymTrainerData?[indexPath.row].studioID ?? "")",

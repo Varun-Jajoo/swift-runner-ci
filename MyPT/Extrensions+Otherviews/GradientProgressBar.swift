@@ -60,7 +60,7 @@ final class GradientProgressBar: UIView {
         backgroundView.frame = bounds
         backgroundView.layer.cornerRadius = bounds.height / 2
         
-        let width = (currentProgress / total) * bounds.width
+        let width = total > 0 ? (currentProgress / total) * bounds.width : 0
         progressView.frame = CGRect(x: 0, y: 0, width: width, height: bounds.height)
         
         progressView.layer.cornerRadius = bounds.height / 2

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="collection view cell content view" minToolsVersion="11.0"/>
@@ -1015,21 +1015,21 @@
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="FSF-fB-IWI">
                                                                 <rect key="frame" x="0.0" y="970.66666666666674" width="440" height="20"/>
                                                                 <subviews>
-                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Your Training Team" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ERd-PD-dtf">
-                                                                        <rect key="frame" x="147.66666666666666" y="1" width="144.99999999999997" height="20.333333333333332"/>
+                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="My Plans" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ERd-PD-dtf">
+                                                                        <rect key="frame" x="185.66666666666666" y="1" width="69" height="20.333333333333332"/>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                         <color key="textColor" red="1" green="1" blue="1" alpha="0.75151466840000003" colorSpace="custom" customColorSpace="calibratedRGB"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DZ5-d0-B9L">
-                                                                        <rect key="frame" x="312.66666666666669" y="10.666666666666515" width="107.33333333333331" height="1"/>
+                                                                        <rect key="frame" x="274.66666666666669" y="10.666666666666515" width="145.33333333333331" height="1"/>
                                                                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.10000000000000001" colorSpace="custom" customColorSpace="calibratedRGB"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="height" constant="1" id="axp-D1-t7L"/>
                                                                         </constraints>
                                                                     </view>
                                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7qr-My-Sok">
-                                                                        <rect key="frame" x="20.000000000000007" y="10.666666666666515" width="107.66666666666669" height="1"/>
+                                                                        <rect key="frame" x="20" y="10.666666666666515" width="145.66666666666666" height="1"/>
                                                                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.10000000000000001" colorSpace="custom" customColorSpace="calibratedRGB"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="height" constant="1" id="EF3-R5-EmP"/>
@@ -1370,6 +1370,7 @@
                         <outlet property="collectionMyPTAction" destination="efz-kK-ku3" id="SsW-xL-kL0"/>
                         <outlet property="collectionPlan" destination="LPk-Y2-hMR" id="37B-W1-qOg"/>
                         <outlet property="collectionSessionType" destination="2hc-ep-wru" id="fzw-gQ-cPD"/>
+                        <outlet property="heightOfCollectionPlan" destination="mbf-u4-Mak" id="olD-dr-xpk"/>
                         <outlet property="imgBackground" destination="yd0-vU-vY2" id="RWi-2r-hVx"/>
                         <outlet property="imgHeader" destination="FCW-Rn-AIJ" id="ciF-d8-tAb"/>
                         <outlet property="imgOffer" destination="TiQ-vK-cWc" id="Xld-17-3uj"/>

@@ -8,6 +8,7 @@
 
 import UIKit
 import AVFoundation
+import Mixpanel
 
 //add name - step 0,
 //add gender - step 1,
@@ -153,6 +154,10 @@ class OtpViewController: CommonViewController, UITextFieldDelegate {
             ]
             
             mapping.forEach { field, container in
+                Mixpanel.mainInstance().track(
+                    event: "OTP_Verified",
+                    properties: [:]
+                )
                 if isWrongOtp {
                     container.applyOtpStyle(.wrongOtp)
                 } else {
