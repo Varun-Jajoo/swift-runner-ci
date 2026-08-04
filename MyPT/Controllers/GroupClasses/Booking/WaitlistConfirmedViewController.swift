@@ -48,12 +48,9 @@ final class WaitlistConfirmedViewController: CommonViewController {
         static let iconTileSide: CGFloat = 38
         static let notifyIconTileSide: CGFloat = 38
         static let ctaHeight: CGFloat = 48
-        static let backgroundWashRadius: CGFloat = 400
     }
 
     private enum Palette {
-        static let washStart = UIColor(hex: "#1A3D22").withAlphaComponent(0.2)
-        static let washEnd = UIColor(hex: "#000A04").withAlphaComponent(0.0)
         static let headerTitle = UIColor(hex: "#FAFAFA")
         static let headerSubtext = UIColor(hex: "#FAFAFA").withAlphaComponent(0.55) // #8CFAFAFA
         static let divider = UIColor.white.withAlphaComponent(0.10)                 // #1AFFFFFF
@@ -91,7 +88,10 @@ final class WaitlistConfirmedViewController: CommonViewController {
 
     // MARK: - Views
 
-    private let backgroundWash = GradientFadeView()
+    /// `android:background="@drawable/bg_confirm_slot_success"` — the same
+    /// raster photo Slot Confirmed uses (light rays, sparkle particles, a
+    /// blue-teal glow), not the flat radial wash this used to approximate it with.
+    private let backgroundImageView = UIImageView()
     private let scrollView = UIScrollView()
     private let contentStack = UIStackView()
 
@@ -120,24 +120,6 @@ final class WaitlistConfirmedViewController: CommonViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.isNavigationBarHidden = true
-    }
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        updateBackgroundWashGeometry()
-    }
-
-    private func updateBackgroundWashGeometry() {
-        let size = view.bounds.size
-        guard size.width > 0, size.height > 0 else { return }
-        let center = CGPoint(x: 0.1, y: -0.1)
-        let edge = CGPoint(x: center.x + Metric.backgroundWashRadius / size.width,
-                           y: center.y + Metric.backgroundWashRadius / size.height)
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        backgroundWash.gradientLayer.startPoint = center
-        backgroundWash.gradientLayer.endPoint = edge
-        CATransaction.commit()
     }
 
     // MARK: - Populate
@@ -183,16 +165,17 @@ private extension WaitlistConfirmedViewController {
     }
 
     func buildBackgroundWash() {
-        backgroundWash.translatesAutoresizingMaskIntoConstraints = false
-        backgroundWash.gradientLayer.type = .radial
-        backgroundWash.setColors([Palette.washStart, Palette.washEnd])
-        view.addSubview(backgroundWash)
+        backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
+        backgroundImageView.image = UIImage(named: "confirm-success-bg")
+        backgroundImageView.contentMode = .scaleAspectFill
+        backgroundImageView.clipsToBounds = true
+        view.addSubview(backgroundImageView)
 
         NSLayoutConstraint.activate([
-            backgroundWash.topAnchor.constraint(equalTo: view.topAnchor),
-            backgroundWash.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            backgroundWash.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            backgroundWash.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            backgroundImageView.topAnchor.constraint(equalTo: view.topAnchor),
+            backgroundImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            backgroundImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            backgroundImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
 
@@ -284,7 +267,7 @@ private extension WaitlistConfirmedViewController {
         container.translatesAutoresizingMaskIntoConstraints = false
 
         backButton.translatesAutoresizingMaskIntoConstraints = false
-        backButton.configure(icon: WaitlistConfirmedViewController.icon(["ic_back_chevron_20", "ic_back_arrow", "ic_arrow_left"]),
+        backButton.configure(icon: WaitlistConfirmedViewController.icon(["ic_back_chevron_20"], systemFallback: "chevron.left"),
                              diameter: Metric.backButtonDiameter)
         backButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
         container.addSubview(backButton)
@@ -393,7 +376,7 @@ private extension WaitlistConfirmedViewController {
         locationDistanceLabel.lineBreakMode = .byTruncatingTail
         locationDistanceLabel.text = Copy.distancePlaceholder
 
-        let locationRow = makeDetailRow(icon: WaitlistConfirmedViewController.icon(["ic_location_pin_small", "ic_Location", "greenLocation"]),
+        let locationRow = makeDetailRow(icon: WaitlistConfirmedViewController.icon(["ic_location_pin_small"], systemFallback: "mappin.and.ellipse"),
                                         iconSide: 14,
                                         titleLabel: locationTitleLabel,
                                         subtitleLabel: locationDistanceLabel)
@@ -413,7 +396,7 @@ private extension WaitlistConfirmedViewController {
         trainerSubtitleLabel.lineBreakMode = .byTruncatingTail
         trainerSubtitleLabel.text = Copy.trainerSubtitle
 
-        let trainerRow = makeDetailRow(icon: WaitlistConfirmedViewController.icon(["ic_trainer_running_18", "ic_trainer", "ic_running_ jogging"]),
+        let trainerRow = makeDetailRow(icon: WaitlistConfirmedViewController.icon(["ic_trainer_running_18"], systemFallback: "figure.run"),
                                        iconSide: 18,
                                        titleLabel: trainerTitleLabel,
                                        subtitleLabel: trainerSubtitleLabel)
@@ -560,6 +543,10 @@ private extension WaitlistConfirmedViewController {
         card.fillAlpha = 1.0
         card.strokeColor = Palette.notifyCardStroke
         card.strokeAlpha = 1.0
+        // `waitlist_notify_card_bg`'s middle layer: `angle=270` linear,
+        // `#190865FE -> #000865FE` — a faint top-to-bottom blue tint.
+        card.washColors = [GroupClassColor.blue.color.withAlphaComponent(0.098),
+                           GroupClassColor.blue.color.withAlphaComponent(0.0)]
         card.sheenOrigin = .topCenter
         card.sheenAlpha = 0.08
 
@@ -653,9 +640,12 @@ private extension WaitlistConfirmedViewController {
         return style
     }
 
-    static func icon(_ names: [String]) -> UIImage? {
+    static func icon(_ names: [String], systemFallback: String? = nil) -> UIImage? {
         for name in names {
             if let image = UIImage(named: name) { return image }
+        }
+        if let systemFallback = systemFallback {
+            return UIImage(systemName: systemFallback)
         }
         return nil
     }

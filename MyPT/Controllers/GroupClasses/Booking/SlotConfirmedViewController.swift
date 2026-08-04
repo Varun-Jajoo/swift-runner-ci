@@ -241,15 +241,11 @@ final class SlotConfirmedViewController: CommonViewController {
         /// peeks out below it.
         static let policyBarPeek: CGFloat = 50
         static let ctaHeight: CGFloat = 48
-        /// `android:gradientRadius="400dp"` on the page background wash.
-        static let backgroundWashRadius: CGFloat = 400
     }
 
     /// Hex values taken straight from `activity_slot_confirmed.xml`; only the
     /// module-wide slots (page background, gold) come from `GroupClassColor`.
     private enum Palette {
-        static let washStart = UIColor(hex: "#1A3D22").withAlphaComponent(0.2)   // #331A3D22
-        static let washEnd = UIColor(hex: "#000A04").withAlphaComponent(0.0)     // #00000A04
         static let headerTitle = UIColor(hex: "#FAFAFA")
         static let headerSubtext = UIColor(hex: "#959595")
         static let divider = UIColor.white.withAlphaComponent(0.10)              // #1AFFFFFF
@@ -296,7 +292,11 @@ final class SlotConfirmedViewController: CommonViewController {
 
     // MARK: - Views
 
-    private let backgroundWash = GradientFadeView()
+    /// `android:background="@drawable/bg_confirm_slot_success"` — a raster photo
+    /// (light rays, sparkle particles, a blue-teal glow), not the flat radial
+    /// wash `bg_confirm_slot_success_xml.xml` describes; that XML is dead code
+    /// on Android (unreferenced by any layout) and was ported here by mistake.
+    private let backgroundImageView = UIImageView()
     private let scrollView = UIScrollView()
     private let contentStack = UIStackView()
 
@@ -338,36 +338,21 @@ final class SlotConfirmedViewController: CommonViewController {
         navigationController?.isNavigationBarHidden = true
     }
 
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        updateBackgroundWashGeometry()
-    }
-
-    /// `bg_confirm_slot_success_xml`'s radial stop is expressed as a 400dp radius
-    /// around (0.1, -0.1); `CAGradientLayer`'s radial `endPoint` is that radius in
-    /// *unit* coordinates, so it has to be re-derived whenever the bounds change.
-    private func updateBackgroundWashGeometry() {
-        let size = view.bounds.size
-        guard size.width > 0, size.height > 0 else { return }
-
-        let center = CGPoint(x: 0.1, y: -0.1)
-        let edge = CGPoint(x: center.x + Metric.backgroundWashRadius / size.width,
-                           y: center.y + Metric.backgroundWashRadius / size.height)
-
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        backgroundWash.gradientLayer.startPoint = center
-        backgroundWash.gradientLayer.endPoint = edge
-        CATransaction.commit()
-    }
-
     // MARK: - Populate
 
     /// Port of the `findViewById` block in `SlotConfirmedActivity.onCreate`.
     private func populateUI() {
         classTitleLabel.text = classTitle
         classDateTimeLabel.text = classTime
-        locationTitleLabel.text = classLocation
+        // Android: `rawLocation.substringBefore(",").trim()` when the string
+        // contains a comma (e.g. "DSO Club, Dubai" -> "DSO Club"); this is
+        // specific to Slot Confirmed — Waitlist Confirmed does not do this.
+        if let commaRange = classLocation.range(of: ",") {
+            locationTitleLabel.text = String(classLocation[..<commaRange.lowerBound])
+                .trimmingCharacters(in: .whitespaces)
+        } else {
+            locationTitleLabel.text = classLocation
+        }
 
         // Android: only overwrite the placeholder when the extra is non-blank, and
         // append " away" when the caller has not already.
@@ -503,16 +488,17 @@ private extension SlotConfirmedViewController {
     // MARK: Background
 
     func buildBackgroundWash() {
-        backgroundWash.translatesAutoresizingMaskIntoConstraints = false
-        backgroundWash.gradientLayer.type = .radial
-        backgroundWash.setColors([Palette.washStart, Palette.washEnd])
-        view.addSubview(backgroundWash)
+        backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
+        backgroundImageView.image = UIImage(named: "confirm-success-bg")
+        backgroundImageView.contentMode = .scaleAspectFill
+        backgroundImageView.clipsToBounds = true
+        view.addSubview(backgroundImageView)
 
         NSLayoutConstraint.activate([
-            backgroundWash.topAnchor.constraint(equalTo: view.topAnchor),
-            backgroundWash.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            backgroundWash.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            backgroundWash.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            backgroundImageView.topAnchor.constraint(equalTo: view.topAnchor),
+            backgroundImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            backgroundImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            backgroundImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
 
@@ -626,7 +612,7 @@ private extension SlotConfirmedViewController {
         container.translatesAutoresizingMaskIntoConstraints = false
 
         backButton.translatesAutoresizingMaskIntoConstraints = false
-        backButton.configure(icon: SlotConfirmedViewController.icon(["ic_back_chevron_20", "ic_back_arrow", "ic_arrow_left"]),
+        backButton.configure(icon: SlotConfirmedViewController.icon(["ic_back_chevron_20"], systemFallback: "chevron.left"),
                              diameter: Metric.backButtonDiameter)
         backButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
         container.addSubview(backButton)
@@ -755,7 +741,7 @@ private extension SlotConfirmedViewController {
         bar.layer.borderWidth = 1
         bar.layer.borderColor = Palette.policyStroke.cgColor
 
-        let iconView = UIImageView(image: SlotConfirmedViewController.icon(["ic_chat_cancellation_20", "ic_chatMsg", "ic_chats", "chatIcon"])?
+        let iconView = UIImageView(image: SlotConfirmedViewController.icon(["ic_chat_cancellation_20"], systemFallback: "bubble.left.fill")?
             .withRenderingMode(.alwaysTemplate))
         iconView.translatesAutoresizingMaskIntoConstraints = false
         iconView.tintColor = Palette.policyText
@@ -775,7 +761,7 @@ private extension SlotConfirmedViewController {
         row.spacing = 8
         bar.addSubview(row)
 
-        let chevron = UIImageView(image: SlotConfirmedViewController.icon(["ic_chevron_right_16", "chevron-right", "ic_arrow_right"])?
+        let chevron = UIImageView(image: SlotConfirmedViewController.icon(["ic_chevron_right_16", "chevron-right"], systemFallback: "chevron.right")?
             .withRenderingMode(.alwaysTemplate))
         chevron.translatesAutoresizingMaskIntoConstraints = false
         chevron.tintColor = Palette.policyText
@@ -841,7 +827,7 @@ private extension SlotConfirmedViewController {
         locationDistanceLabel.lineBreakMode = .byTruncatingTail
         locationDistanceLabel.text = Copy.distancePlaceholder
 
-        let locationRow = makeDetailRow(icon: SlotConfirmedViewController.icon(["ic_location_pin_small", "ic_Location", "greenLocation"]),
+        let locationRow = makeDetailRow(icon: SlotConfirmedViewController.icon(["ic_location_pin_small"], systemFallback: "mappin.and.ellipse"),
                                         iconSide: 14,
                                         titleLabel: locationTitleLabel,
                                         subtitleLabel: locationDistanceLabel)
@@ -862,7 +848,7 @@ private extension SlotConfirmedViewController {
         trainerSubtitleLabel.lineBreakMode = .byTruncatingTail
         trainerSubtitleLabel.text = Copy.trainerSubtitle
 
-        let trainerRow = makeDetailRow(icon: SlotConfirmedViewController.icon(["ic_trainer_running_18", "ic_trainer", "ic_running_ jogging"]),
+        let trainerRow = makeDetailRow(icon: SlotConfirmedViewController.icon(["ic_trainer_running_18"], systemFallback: "figure.run"),
                                        iconSide: 18,
                                        titleLabel: trainerTitleLabel,
                                        subtitleLabel: trainerSubtitleLabel)
@@ -1062,7 +1048,7 @@ private extension SlotConfirmedViewController {
         box.layer.borderWidth = 1
         box.layer.borderColor = GroupClassColor.gold.color.withAlphaComponent(0.30).cgColor
 
-        let warningIcon = UIImageView(image: SlotConfirmedViewController.icon(["ic_warning_hex_16", "info-hexagon", "ic_information_circle"])?
+        let warningIcon = UIImageView(image: SlotConfirmedViewController.icon(["ic_warning_hex_16", "info-hexagon"], systemFallback: "exclamationmark.triangle.fill")?
             .withRenderingMode(.alwaysTemplate))
         warningIcon.translatesAutoresizingMaskIntoConstraints = false
         warningIcon.tintColor = GroupClassColor.gold.color
@@ -1168,16 +1154,15 @@ private extension SlotConfirmedViewController {
     /// real glyphs later under those exact names upgrades the screen with no code
     /// change; the tail entries are the closest already-bundled iOS assets.
     ///
-    /// TODO: `ic_back_chevron_20`, `ic_chat_cancellation_20`, `ic_chevron_right_16`,
-    /// `ic_location_pin_small`, `ic_trainer_running_18`, `ic_dirham_icon` and
-    /// `ic_warning_hex_16` have no iOS equivalent yet and currently fall through to a
-    /// stand-in. The `GroupClasses/` asset siblings (`chevron-right`,
-    /// `dirham-currency`, `info-hexagon`) are registered but still have no image
-    /// files, so they resolve to `nil` today — every icon slot is fixed-size, so a
-    /// `nil` image degrades to blank space rather than breaking the layout.
-    static func icon(_ names: [String]) -> UIImage? {
+    /// `chevron-right`, `dirham-currency` and `info-hexagon` are real rendered
+    /// Group-Classes assets (not placeholders) and are tried first. Everything
+    /// else falls to a system symbol rather than an unrelated bundled icon.
+    static func icon(_ names: [String], systemFallback: String? = nil) -> UIImage? {
         for name in names {
             if let image = UIImage(named: name) { return image }
+        }
+        if let systemFallback = systemFallback {
+            return UIImage(systemName: systemFallback)
         }
         return nil
     }

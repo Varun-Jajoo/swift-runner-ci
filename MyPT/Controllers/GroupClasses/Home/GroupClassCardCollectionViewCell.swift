@@ -94,14 +94,16 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
         contentView.backgroundColor = .clear
         backgroundColor = .clear
 
-        // Card shell — solid fill (not glass) with the module's gold hairline.
+        // Card shell — solid fill (not glass). The gold hairline is paid-only
+        // (Android toggles `MaterialCardView.strokeColor`/`strokeWidth` per row
+        // in `onBindViewHolder`); `applyBadgeStyle(isPaid:)` sets the alpha.
         cardView.translatesAutoresizingMaskIntoConstraints = false
         cardView.showsSheen = false
         cardView.fillColor = GroupClassCardCollectionViewCell.cardFillColor
         cardView.fillAlpha = 1.0
         cardView.strokeColor = GroupClassColor.cardStroke.color
-        cardView.strokeAlpha = 1.0
-        cardView.strokeWidth = 0.6
+        cardView.strokeAlpha = 0.0
+        cardView.strokeWidth = 0.8
         contentView.addSubview(cardView)
 
         coverImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -119,7 +121,7 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
 
         badgeView.translatesAutoresizingMaskIntoConstraints = false
         badgeView.cornerRadius = 8
-        badgeView.contentInsets = UIEdgeInsets(top: 3, left: 8, bottom: 3, right: 8)
+        badgeView.contentInsets = UIEdgeInsets(top: 2, left: 8, bottom: 2, right: 8)
         cardView.addSubview(badgeView)
 
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -255,12 +257,16 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
         spotLabel.text = availability.text
         apply(availability: availability)
 
-        // The app has no bundled class-cover placeholder (every other class cell
-        // also passes nil); the card's solid fill is the empty state.
+        // Android's Glide call uses `img.png` as both `.placeholder()` and
+        // `.error()` — every failure path (blank URL, load failure) converges on
+        // the same fallback photo. `loadImage(urlString:placeholder:)` already
+        // applies its `placeholder` argument on both the initial call and the
+        // catch branch, so passing the bundled fallback here is a straight port.
+        let fallback = UIImage(named: "class-card-placeholder")
         if let imageURL = GroupClassCardFormatter.absoluteImageURL(item.image) {
-            coverImageView.loadImage(urlString: imageURL, placeholder: nil)
+            coverImageView.loadImage(urlString: imageURL, placeholder: fallback)
         } else {
-            coverImageView.image = nil
+            coverImageView.image = fallback
         }
     }
 
@@ -275,7 +281,12 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
     }
 
     private func applyBadgeStyle(isPaid: Bool) {
+        // Gold hairline is paid-only (`MaterialCardView.strokeColor`/`strokeWidth`
+        // toggled per row on Android, transparent for a free/studio card).
+        cardView.strokeAlpha = isPaid ? 1.0 : 0.0
+
         if isPaid {
+            badgeView.isHorizontalGradient = false
             badgeView.startColor = GroupClassColor.premiumStart.color
             badgeView.endColor = GroupClassColor.premiumEnd.color
             badgeView.strokeColor = GroupClassColor.premiumStroke.color
@@ -283,7 +294,9 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
                                 font: AppFont.bold.size(12.0, familyName: familyFunnelSans),
                                 textColor: UIColor(hex: "#141514"))
         } else {
-            // Android's `studio_badge_bg`: translucent black wash, hairline white stroke.
+            // Android's `studio_badge_bg`: left-to-right translucent black wash,
+            // hairline white stroke.
+            badgeView.isHorizontalGradient = true
             badgeView.startColor = UIColor.black.withAlphaComponent(0.6)
             badgeView.endColor = UIColor.black.withAlphaComponent(0.0)
             badgeView.strokeColor = UIColor(hex: "#FAFAFA").withAlphaComponent(0.2)

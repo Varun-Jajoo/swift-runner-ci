@@ -58,6 +58,13 @@ final class GroupTrainingDetailViewController: CommonViewController {
     private var isAlreadyWaitlisted: Bool = false
     private var isWaitlistMode: Bool = false
     private var isFreeForUser: Bool = false
+    /// Set from `class-detail`'s response — the backend can report a user as
+    /// blacklisted before any booking attempt is made, and the CTA has to catch
+    /// that up front rather than only reacting to a failed `book-class` POST.
+    private var isUserBlacklisted: Bool = false
+    private var blacklistReason: String = "2 consecutive no-shows for group classes"
+    private var blacklistResumesOn: String = ""
+    private var blacklistDaysRemaining: String = ""
     /// Distance without the trailing " away" — the value Android forwards to the
     /// downstream booking screens.
     private var currentDistance: String = ""
@@ -159,6 +166,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
     private let bottomBar = UIView()
     private let priceLabel = UILabel()
     private let ctaButton = GradientCTAButton()
+    private let ctaChevronView = UIImageView()
 
     // MARK: - Lifecycle
 
@@ -335,10 +343,18 @@ final class GroupTrainingDetailViewController: CommonViewController {
         }
     }
 
+    /// Re-measures the button's `wrap_content`+`minWidth` width on every title
+    /// change. Without an explicit relayout pass here the button only ever grows
+    /// (e.g. "BOOK SLOT" -> "PROCEED TO PAYMENT" after the detail refresh lands)
+    /// and never visibly shrinks back down for a shorter title, since nothing
+    /// else on screen forces `bottomBar` to re-run layout in between.
     private func setCTATitle(_ title: String) {
         ctaButton.configure(title: title,
                             font: AppFont.medium.size(14.0, familyName: familyFunnelSans),
                             titleColor: Palette.ctaInk)
+        UIView.animate(withDuration: 0.2) {
+            self.bottomBar.layoutIfNeeded()
+        }
     }
 
     // MARK: - Distance
@@ -445,7 +461,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
                   let detail = result?.data else { return }
 
             DispatchQueue.main.async {
-                self.apply(detail: detail)
+                self.apply(detail: detail, topLevelCode: result?.code, topLevelMsg: result?.msg, topLevelIsBlacklisted: result?.isBlacklisted)
             }
         }
     }
@@ -454,7 +470,24 @@ final class GroupTrainingDetailViewController: CommonViewController {
     /// Ordering matters: capacity is folded in first, then the booked/waitlisted
     /// overrides, then price/access — and only then is the capacity-driven label
     /// recomputed with the freshly-resolved `isFreeForUser`.
-    private func apply(detail: ClassDetailsModel) {
+    private func apply(detail: ClassDetailsModel, topLevelCode: String?, topLevelMsg: String?, topLevelIsBlacklisted: Bool?) {
+
+        // Port of the 5-way OR Android checks in `fetchClassDetail()`'s success
+        // branch: `detail.is_blacklisted` (nested) OR the same key at the
+        // response's top level OR `code == "BLACKLISTED"` OR "blacklisted"/"paused"
+        // appearing in the top-level `msg`.
+        let topLevelMessage = (topLevelMsg ?? "").lowercased()
+        let isBlacklisted = (detail.isBlacklisted == true)
+            || (topLevelIsBlacklisted == true)
+            || (topLevelCode == "BLACKLISTED")
+            || topLevelMessage.contains("blacklisted")
+            || topLevelMessage.contains("paused")
+        if isBlacklisted {
+            isUserBlacklisted = true
+            blacklistReason = detail.reason ?? "2 consecutive no-shows for group classes"
+            blacklistResumesOn = detail.resumesOn ?? ""
+            blacklistDaysRemaining = detail.daysRemaining?.value ?? ""
+        }
 
         let name = (detail.className ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         if !name.isEmpty {
@@ -556,7 +589,11 @@ final class GroupTrainingDetailViewController: CommonViewController {
 
         isFreeForUser = resolveIsFreeForUser(access: resolvedAccess, isMember: isMember)
 
-        if isFreeForUser || isMember {
+        // `isMember` alone used to also trigger "Free for members" here, which
+        // is wrong for a class whose `access` is explicitly "paid" — that case
+        // already resolves `isFreeForUser` to `false` (and the CTA correctly
+        // reads "PROCEED TO PAYMENT"), so the price row should not contradict it.
+        if isFreeForUser {
             priceLabel.text = "Free for members"
         } else if resolvedAccess.lowercased() == "free" {
             priceLabel.text = "FREE"
@@ -641,9 +678,16 @@ final class GroupTrainingDetailViewController: CommonViewController {
         }
     }
 
-    /// The 4-state CTA. Branch order is Android's, verbatim.
+    /// The 4-state CTA. Branch order is Android's, verbatim — the blacklist
+    /// check now runs first, ahead of every other branch (`btnBookSlot`'s
+    /// listener checks `isUserBlacklisted` before `isAlreadyBooked`).
     @objc private func ctaTapped() {
         TapticEngine.selection.feedback()
+
+        if isUserBlacklisted {
+            pushBookingPaused()
+            return
+        }
 
         if isAlreadyBooked {
             pushSlotConfirmedReadOnly()
@@ -669,6 +713,16 @@ final class GroupTrainingDetailViewController: CommonViewController {
         presentConfirmSlotSheet()
     }
 
+    /// Port of the `isUserBlacklisted` branch of `btnBookSlot.setOnClickListener`.
+    private func pushBookingPaused() {
+        let controller = BookingPausedViewController()
+        controller.reason = blacklistReason
+        controller.resumesOn = blacklistResumesOn.isEmpty ? "12 August 2026" : blacklistResumesOn
+        controller.daysRemaining = blacklistDaysRemaining.isEmpty ? "6" : blacklistDaysRemaining
+        controller.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(controller, animated: true)
+    }
+
     /// Port of the `isFreeForUser == false` branch of `btnBookSlot.setOnClickListener`:
     /// Android pushes `ClassPaymentScreenActivity` directly for a paid class,
     /// bypassing the Confirm Slot sheet entirely.
@@ -681,6 +735,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
         controller.trainerName = trainerName
         controller.classPrice = classPrice
         controller.distance = locationDistanceLabel.text ?? currentDistance
+        controller.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(controller, animated: true)
     }
 
@@ -714,6 +769,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
             controller.classLocation = classLocation
             controller.trainerName = trainerName
             controller.distance = currentDistance
+            controller.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(controller, animated: true)
             return
         }
@@ -723,6 +779,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
             controller.reason = result.blacklistDetail?.reason ?? "2 consecutive no-shows for group classes"
             controller.resumesOn = result.blacklistDetail?.resumesOn ?? "12 August 2026"
             controller.daysRemaining = result.blacklistDetail?.daysRemaining?.value ?? "6"
+            controller.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(controller, animated: true)
             return
         }
@@ -761,6 +818,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
         controller.distance = locationDistanceLabel.text ?? currentDistance
         controller.classPrice = classPrice
         controller.isReadOnly = true
+        controller.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(controller, animated: true)
     }
 
@@ -878,17 +936,17 @@ private extension GroupTrainingDetailViewController {
         heroContainer.addSubview(heroFadeView)
 
         backButton.translatesAutoresizingMaskIntoConstraints = false
-        backButton.configure(icon: GroupTrainingDetailViewController.icon(["ic_back_chevron_20", "ic_back_arrow", "ic_arrow_left"]),
+        backButton.configure(icon: GroupTrainingDetailViewController.icon(["ic_back_chevron_20"], systemFallback: "chevron.left"),
                              diameter: Metric.navButtonDiameter)
         backButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
 
         favouriteButton.translatesAutoresizingMaskIntoConstraints = false
-        favouriteButton.configure(icon: GroupTrainingDetailViewController.icon(["ic_heart_20", "ic_heart"]),
+        favouriteButton.configure(icon: GroupTrainingDetailViewController.icon(["ic_heart_20"], systemFallback: "heart"),
                                   diameter: Metric.navButtonDiameter)
         favouriteButton.addTarget(self, action: #selector(favouriteTapped), for: .touchUpInside)
 
         shareButton.translatesAutoresizingMaskIntoConstraints = false
-        shareButton.configure(icon: GroupTrainingDetailViewController.icon(["ic_share_20", "ic_share"]),
+        shareButton.configure(icon: GroupTrainingDetailViewController.icon(["ic_share_20"], systemFallback: "square.and.arrow.up"),
                               diameter: Metric.navButtonDiameter)
         shareButton.addTarget(self, action: #selector(shareTapped), for: .touchUpInside)
 
@@ -972,9 +1030,13 @@ private extension GroupTrainingDetailViewController {
         column.addArrangedSubview(locationDivider)
         column.setCustomSpacing(16, after: locationDivider)
 
-        // 5 — doors-open row
+        // 5 — doors-open row. Both the row above and below it carry a 12pt
+        // internal top/bottom pad; matching the 16pt gap on both sides of that
+        // (rather than only above, which is what made the row look
+        // top-heavy) keeps the whitespace even at 28pt total on each side.
         let doorsRow = makeDoorsOpenRow()
         column.addArrangedSubview(doorsRow)
+        column.setCustomSpacing(16, after: doorsRow)
         column.addArrangedSubview(makeHairline(color: Palette.hairline))
 
         // 6 — why this class stands out
@@ -1041,12 +1103,12 @@ private extension GroupTrainingDetailViewController {
         column.addArrangedSubview(moreTitle)
         column.setCustomSpacing(12, after: moreTitle)
 
-        let cancellationRow = makePolicyRow(icon: GroupTrainingDetailViewController.icon(["ic_person_age_18", "ic_profile"]),
+        let cancellationRow = makePolicyRow(icon: GroupTrainingDetailViewController.icon(["ic_person_age_18"], systemFallback: "person.fill"),
                                             title: "Cancellation policy")
         column.addArrangedSubview(cancellationRow)
         column.setCustomSpacing(8, after: cancellationRow)
 
-        let termsRow = makePolicyRow(icon: GroupTrainingDetailViewController.icon(["ic_clock_18", "ic_clock"]),
+        let termsRow = makePolicyRow(icon: GroupTrainingDetailViewController.icon(["ic_clock_18"], systemFallback: "clock.fill"),
                                      title: "Terms and conditions")
         column.addArrangedSubview(termsRow)
 
@@ -1131,7 +1193,7 @@ private extension GroupTrainingDetailViewController {
     func makeLocationRow() -> UIView {
         locationRow.translatesAutoresizingMaskIntoConstraints = false
 
-        let iconTile = makeIconTile(image: GroupTrainingDetailViewController.icon(["ic_location_pin_small", "ic_Location", "greenLocation"]),
+        let iconTile = makeIconTile(image: GroupTrainingDetailViewController.icon(["ic_location_pin_small"], systemFallback: "mappin.and.ellipse"),
                                     iconSide: 14)
 
         locationTitleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -1184,7 +1246,7 @@ private extension GroupTrainingDetailViewController {
         let container = UIView()
         container.translatesAutoresizingMaskIntoConstraints = false
 
-        let iconTile = makeIconTile(image: GroupTrainingDetailViewController.icon(["ic_clock_18", "ic_clock"]),
+        let iconTile = makeIconTile(image: GroupTrainingDetailViewController.icon(["ic_clock_18"], systemFallback: "clock.fill"),
                                     iconSide: 18)
 
         doorsOpenLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -1215,10 +1277,10 @@ private extension GroupTrainingDetailViewController {
         whyScrollView.backgroundColor = .clear
         whyScrollView.delegate = self
 
-        let card1 = makeWhyCard(icon: GroupTrainingDetailViewController.icon(["ic_expert_instructor_28", "ic_trainer"]),
+        let card1 = makeWhyCard(icon: GroupTrainingDetailViewController.icon(["ic_expert_instructor_28"], systemFallback: "person.crop.circle.badge.checkmark"),
                                 title: "Expert Instructor",
                                 body: "Certified trainer with hundreds of delivered classes")
-        let card2 = makeWhyCard(icon: GroupTrainingDetailViewController.icon(["ic_small_group_28", "ic_withGroup"]),
+        let card2 = makeWhyCard(icon: GroupTrainingDetailViewController.icon(["ic_small_group_28"], systemFallback: "person.2.fill"),
                                 title: "Small Group",
                                 body: "Capped sessions — never a crowd")
 
@@ -1255,8 +1317,9 @@ private extension GroupTrainingDetailViewController {
         card.sheenOrigin = .topCenter
         card.sheenAlpha = 0.10
 
-        let iconView = UIImageView(image: icon)
+        let iconView = UIImageView(image: icon?.withRenderingMode(.alwaysTemplate))
         iconView.translatesAutoresizingMaskIntoConstraints = false
+        iconView.tintColor = .white
         iconView.contentMode = .scaleAspectFit
 
         // The stack is `.fill` (so both labels get the card width and wrap), which
@@ -1357,6 +1420,14 @@ private extension GroupTrainingDetailViewController {
             aboutLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             aboutLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor),
             aboutLabel.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+            // Android has no such guard (its own short-text case is just as
+            // broken), but without one the container clips to the label's
+            // intrinsic height whenever the copy is short, which crops the fade's
+            // top (transparent) stops off and leaves only its near-solid tail
+            // showing — a solid smear sitting directly over the visible text.
+            // Reserving enough room for the fade's full 93pt transition keeps the
+            // top of the copy legible regardless of length.
+            container.heightAnchor.constraint(greaterThanOrEqualToConstant: 110),
 
             fade.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             fade.trailingAnchor.constraint(equalTo: container.trailingAnchor),
@@ -1381,9 +1452,10 @@ private extension GroupTrainingDetailViewController {
         return button
     }
 
-    func appendInfoRows(_ rows: [(icons: [String], text: String)], to column: UIStackView) {
+    func appendInfoRows(_ rows: [(icons: [String], system: String, text: String)], to column: UIStackView) {
         for (index, row) in rows.enumerated() {
-            let view = makeInfoRow(icon: GroupTrainingDetailViewController.icon(row.icons), text: row.text)
+            let icon = GroupTrainingDetailViewController.icon(row.icons, systemFallback: row.system)
+            let view = makeInfoRow(icon: icon, text: row.text)
             column.addArrangedSubview(view)
             // Android: first row 12dp under the heading, subsequent rows 10dp apart.
             if index < rows.count - 1 {
@@ -1505,7 +1577,9 @@ private extension GroupTrainingDetailViewController {
         trainerAvatarView.clipsToBounds = true
         trainerAvatarView.layer.cornerRadius = 16
         trainerAvatarView.backgroundColor = GroupClassColor.bg3.color
-        trainerAvatarView.image = GroupTrainingDetailViewController.icon(["dummy_trainer", "ic_trainer", "ic_profile_placeholder"])
+        trainerAvatarView.tintColor = .white.withAlphaComponent(0.4)
+        trainerAvatarView.image = GroupTrainingDetailViewController.icon(["dummy_trainer"], systemFallback: "person.crop.circle.fill")?
+            .withRenderingMode(.alwaysTemplate)
         card.addSubview(trainerAvatarView)
 
         trainerNameLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -1601,7 +1675,7 @@ private extension GroupTrainingDetailViewController {
         // (Android's `layout_marginBottom="-16dp"`).
         view.insertSubview(waitlistBanner, belowSubview: bottomBar)
 
-        let bellView = UIImageView(image: GroupTrainingDetailViewController.icon(["ic_bell_brown", "bell"])?
+        let bellView = UIImageView(image: GroupTrainingDetailViewController.icon(["ic_bell_brown", "bell"], systemFallback: "bell.fill")?
             .withRenderingMode(.alwaysTemplate))
         bellView.translatesAutoresizingMaskIntoConstraints = false
         bellView.tintColor = Palette.waitlistBannerInk
@@ -1685,18 +1759,27 @@ private extension GroupTrainingDetailViewController {
         ctaButton.translatesAutoresizingMaskIntoConstraints = false
         ctaButton.bandThickness = 2
         setCTATitle("BOOK SLOT")
-        ctaButton.setImage(GroupTrainingDetailViewController.icon(["ic_chevron_right_16_dark", "chevron-right"])?
-            .withRenderingMode(.alwaysTemplate), for: .normal)
-        ctaButton.tintColor = Palette.ctaInk
-        ctaButton.semanticContentAttribute = .forceRightToLeft
-        ctaButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
-        ctaButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 8)
-        // Set after `bandThickness` so the component's own inset pass cannot undo it.
-        ctaButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 2, right: 12)
+        // A trailing chevron drawn as its own view rather than the button's image
+        // slot: UIButton's image+title layout (imageEdgeInsets/titleEdgeInsets +
+        // `semanticContentAttribute = .forceRightToLeft`) is exactly the kind of
+        // insets arithmetic that silently renders nothing when one of the offsets
+        // is off, which is what was reported. A sibling view positioned with plain
+        // Auto Layout can't have that failure mode.
+        // Set after `bandThickness` so the component's own inset pass cannot undo it;
+        // the extra right padding reserves room for the chevron.
+        ctaButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 2, right: 32)
         ctaButton.addTarget(self, action: #selector(ctaTapped), for: .touchUpInside)
         ctaButton.setContentHuggingPriority(.required, for: .horizontal)
         ctaButton.setContentCompressionResistancePriority(.required, for: .horizontal)
         bottomBar.addSubview(ctaButton)
+
+        ctaChevronView.translatesAutoresizingMaskIntoConstraints = false
+        ctaChevronView.image = GroupTrainingDetailViewController.icon(["ic_chevron_right_16_dark", "chevron-right"], systemFallback: "chevron.right")?
+            .withRenderingMode(.alwaysTemplate)
+        ctaChevronView.tintColor = Palette.ctaInk
+        ctaChevronView.contentMode = .scaleAspectFit
+        ctaChevronView.isUserInteractionEnabled = false
+        bottomBar.addSubview(ctaChevronView)
 
         NSLayoutConstraint.activate([
             bottomBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -1716,7 +1799,12 @@ private extension GroupTrainingDetailViewController {
             ctaButton.topAnchor.constraint(equalTo: bottomBar.topAnchor, constant: 14),
             ctaButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
             ctaButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight),
-            ctaButton.widthAnchor.constraint(greaterThanOrEqualToConstant: Metric.ctaMinWidth)
+            ctaButton.widthAnchor.constraint(greaterThanOrEqualToConstant: Metric.ctaMinWidth),
+
+            ctaChevronView.trailingAnchor.constraint(equalTo: ctaButton.trailingAnchor, constant: -12),
+            ctaChevronView.centerYAnchor.constraint(equalTo: ctaButton.centerYAnchor, constant: -1),
+            ctaChevronView.widthAnchor.constraint(equalToConstant: 16),
+            ctaChevronView.heightAnchor.constraint(equalToConstant: 16)
         ])
     }
 
@@ -1741,10 +1829,12 @@ private extension GroupTrainingDetailViewController {
     }
 
     func makeChevron() -> UIImageView {
-        let chevron = UIImageView(image: GroupTrainingDetailViewController.icon(["ic_chevron_right_16", "chevron-right", "ic_arrow_right"])?
+        let chevron = UIImageView(image: GroupTrainingDetailViewController.icon(["ic_chevron_right_16", "chevron-right"], systemFallback: "chevron.right")?
             .withRenderingMode(.alwaysTemplate))
         chevron.translatesAutoresizingMaskIntoConstraints = false
-        chevron.tintColor = .white
+        // Current `ic_chevron_right_16`: `strokeColor="#66FFFFFF"` (40% white),
+        // not opaque — this tint is already defined on the screen as `Palette.distance`.
+        chevron.tintColor = Palette.distance
         chevron.contentMode = .scaleAspectFit
         chevron.setContentHuggingPriority(.required, for: .horizontal)
         chevron.setContentCompressionResistancePriority(.required, for: .horizontal)
@@ -1791,43 +1881,42 @@ private extension GroupTrainingDetailViewController {
 
 private extension GroupTrainingDetailViewController {
 
-    /// First bundled asset wins.
+    /// First bundled asset wins; a system symbol is the last resort.
     ///
     /// Every candidate list leads with the *Android* drawable name, so importing
     /// the real glyphs later under those exact names upgrades the screen with no
-    /// code change; the tail entries are the closest already-bundled iOS assets.
-    ///
-    /// TODO: the following Android glyphs have no iOS equivalent yet and currently
-    /// fall through to a stand-in — `ic_back_chevron_20`, `ic_heart_20`,
-    /// `ic_share_20`, `ic_location_pin_small`, `ic_clock_18`, `ic_towel_18`,
-    /// `ic_skipping_18`, `ic_shoes_18`, `ic_clothes_18`, `ic_person_age_18`,
-    /// `ic_booking_18`, `ic_glove_18`, `ic_expert_instructor_28`,
-    /// `ic_small_group_28`, `ic_chevron_right_16`, `ic_chevron_right_16_dark`,
-    /// `ic_bell_brown`, `dummy_trainer`.
-    static func icon(_ names: [String]) -> UIImage? {
+    /// code change. Deliberately does **not** fall through to unrelated
+    /// already-bundled iOS assets (e.g. workout-library or booking icons designed
+    /// for other screens) — that was rendering the wrong glyph rather than a
+    /// missing one, which is what was actually reported. An SF Symbol is a closer
+    /// visual match than a mismatched bitmap and needs no new asset.
+    static func icon(_ names: [String], systemFallback: String? = nil) -> UIImage? {
         for name in names {
             if let image = UIImage(named: name) { return image }
+        }
+        if let systemFallback = systemFallback {
+            return UIImage(systemName: systemFallback)
         }
         return nil
     }
 
     /// Static "What to bring" list — hard-coded in the Android layout.
-    static var whatToBringRows: [(icons: [String], text: String)] {
+    static var whatToBringRows: [(icons: [String], system: String, text: String)] {
         return [
-            (["ic_towel_18", "ic_person_workout"], "Bring a towel — sweating is guaranteed"),
-            (["ic_skipping_18", "ic_running_ jogging"], "Bring your skipping rope"),
-            (["ic_shoes_18", "ic_Solid_barbell_diagonal"], "Training shoes with lateral support"),
-            (["ic_clothes_18", "ic_transWorkout"], "Comfortable workout clothing")
+            (["ic_towel_18"], "drop.fill", "Bring a towel — sweating is guaranteed"),
+            (["ic_skipping_18"], "figure.walk", "Bring your skipping rope"),
+            (["ic_shoes_18"], "shoeprints.fill", "Training shoes with lateral support"),
+            (["ic_clothes_18"], "tshirt.fill", "Comfortable workout clothing")
         ]
     }
 
     /// Static "Things to know" list — hard-coded in the Android layout.
-    static var thingsToKnowRows: [(icons: [String], text: String)] {
+    static var thingsToKnowRows: [(icons: [String], system: String, text: String)] {
         return [
-            (["ic_person_age_18", "ic_profile"], "Ages 16 and above"),
-            (["ic_clock_18", "ic_clock"], "Arrive 10 minutes early"),
-            (["ic_booking_18", "ic_bookings"], "Bookings non-refundable within 24 hours"),
-            (["ic_glove_18", "ic_strength"], "Gloves provided for boxing classes")
+            (["ic_person_age_18"], "person.fill", "Ages 16 and above"),
+            (["ic_clock_18"], "clock.fill", "Arrive 10 minutes early"),
+            (["ic_booking_18"], "calendar", "Bookings non-refundable within 24 hours"),
+            (["ic_glove_18"], "hand.raised.fill", "Gloves provided for boxing classes")
         ]
     }
 }

@@ -168,6 +168,7 @@ final class CCAvenueClassPaymentViewController: CommonViewController, WKNavigati
             controller.reason = result.blacklistDetail?.reason ?? "2 consecutive no-shows for group classes"
             controller.resumesOn = result.blacklistDetail?.resumesOn ?? "12 August 2026"
             controller.daysRemaining = result.blacklistDetail?.daysRemaining?.value ?? "6"
+            controller.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(controller, animated: true)
             return
         }
@@ -194,6 +195,7 @@ final class CCAvenueClassPaymentViewController: CommonViewController, WKNavigati
         controller.classPrice = price
         // scheduleId intentionally left blank — this screen already POSTed
         // book-class above; see Phase 6's SlotConfirmedViewController.sendBookingData.
+        controller.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(controller, animated: true)
     }
 
@@ -215,7 +217,7 @@ private extension CCAvenueClassPaymentViewController {
         view.addSubview(header)
 
         backButton.translatesAutoresizingMaskIntoConstraints = false
-        backButton.configure(icon: CCAvenueClassPaymentViewController.icon(["ic_chevron_left_24", "ic_back_arrow", "ic_arrow_left"]),
+        backButton.configure(icon: CCAvenueClassPaymentViewController.icon(["ic_chevron_left_24"], systemFallback: "chevron.left"),
                              diameter: 40)
         backButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
         header.addSubview(backButton)
@@ -255,9 +257,12 @@ private extension CCAvenueClassPaymentViewController {
 
 private extension CCAvenueClassPaymentViewController {
 
-    static func icon(_ names: [String]) -> UIImage? {
+    static func icon(_ names: [String], systemFallback: String? = nil) -> UIImage? {
         for name in names {
             if let image = UIImage(named: name) { return image }
+        }
+        if let systemFallback = systemFallback {
+            return UIImage(systemName: systemFallback)
         }
         return nil
     }

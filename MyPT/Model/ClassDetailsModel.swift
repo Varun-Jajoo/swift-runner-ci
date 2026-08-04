@@ -12,6 +12,15 @@ struct ClassDetailsBaseModel: Codable {
     var status: Bool?
     var data: ClassDetailsModel?
     var msg: String?
+    var code: String?
+    /// `is_blacklisted` at the top level of the response — Android's blacklist
+    /// check ORs this together with the same key nested inside `data`.
+    var isBlacklisted: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case status, data, msg, code
+        case isBlacklisted = "is_blacklisted"
+    }
 }
 
 // MARK: - ClassDetailsModel
@@ -43,6 +52,17 @@ struct ClassDetailsModel: Codable {
     var access: String?
     var studioLat, studioLng: FlexibleValue?
     var classType: String?
+    /// `is_blacklisted` nested inside `data` — Android's blacklist check ORs
+    /// this together with the same key at the response's top level.
+    var isBlacklisted: Bool?
+    /// These three only appear when `data` is actually describing a blacklist
+    /// (the backend overloads the same `data` key for both shapes), so they sit
+    /// alongside the normal class-detail fields rather than a separate type.
+    var reason: String?
+    var resumesOn: String?
+    /// FlexibleValue because Android reads this with `optString` (which coerces
+    /// a raw JSON number to a string); read it with `.value` / `.intValue`.
+    var daysRemaining: FlexibleValue?
 
     enum CodingKeys: String, CodingKey {
         case schduleID = "schdule_id"
@@ -64,5 +84,9 @@ struct ClassDetailsModel: Codable {
         case studioLat = "studio_lat"
         case studioLng = "studio_lng"
         case classType = "class_type"
+        case isBlacklisted = "is_blacklisted"
+        case reason
+        case resumesOn = "resumes_on"
+        case daysRemaining = "days_remaining"
     }
 }

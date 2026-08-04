@@ -100,8 +100,14 @@ final class ClassPaymentViewController: CommonViewController {
         static let paymentTitle = UIColor.white
         static let paymentSubtitle = UIColor(hex: "#FAFAFA").withAlphaComponent(0.55)
         static let termsText = UIColor.white
-        static let ctaInk = UIColor(hex: "#131416")
+        // This screen's `tvPaymentPrice` is `#000000`, not the `#131416` every
+        // other CTA in the module uses.
+        static let ctaInk = UIColor(hex: "#000000")
         static let headerTitle = UIColor.white
+        static let paymentRowFill = UIColor(hex: "#212122")
+        static let paymentRowStroke = UIColor.white.withAlphaComponent(0.10)
+        static let applyButtonFill = UIColor(hex: "#1D1E1D")
+        static let discountTileFill = GroupClassColor.lime.color.withAlphaComponent(0.10)
     }
 
     private enum Copy {
@@ -129,10 +135,15 @@ final class ClassPaymentViewController: CommonViewController {
 
     // MARK: - Views
 
+    /// Android's root has a full-bleed `ImageView` (`@drawable/bg_image`, a
+    /// soft dark-green top-centre glow) layered over `#000A04` — this screen
+    /// previously had only the flat colour, no image.
+    private let backgroundImageView = UIImageView()
     private let scrollView = UIScrollView()
     private let contentStack = UIStackView()
     private let footerView = UIView()
     private let ctaButton = GradientCTAButton()
+    private let ctaChevronView = UIImageView()
 
     private let classTitleLabel = UILabel()
     private let classDateTimeLabel = UILabel()
@@ -276,6 +287,7 @@ final class ClassPaymentViewController: CommonViewController {
         controller.trainerName = trainerName
         controller.distance = distance
         controller.price = cleanedPrice()
+        controller.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(controller, animated: true)
     }
 
@@ -310,6 +322,7 @@ final class ClassPaymentViewController: CommonViewController {
             controller.reason = result.blacklistDetail?.reason ?? "2 consecutive no-shows for group classes"
             controller.resumesOn = result.blacklistDetail?.resumesOn ?? "12 August 2026"
             controller.daysRemaining = result.blacklistDetail?.daysRemaining?.value ?? "6"
+            controller.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(controller, animated: true)
             return
         }
@@ -337,6 +350,7 @@ final class ClassPaymentViewController: CommonViewController {
         // scheduleId intentionally left blank: this screen has already POSTed
         // book-class by the time Slot Confirmed appears, matching the Confirm
         // Slot sheet's free-booking path (Phase 5) and avoiding a duplicate POST.
+        controller.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(controller, animated: true)
     }
 }
@@ -463,9 +477,25 @@ private extension ClassPaymentViewController {
 private extension ClassPaymentViewController {
 
     func buildLayout() {
+        buildBackgroundImage()
         buildHeader()
         buildFooter()
         buildScrollView()
+    }
+
+    func buildBackgroundImage() {
+        backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
+        backgroundImageView.image = UIImage(named: "class-payment-bg")
+        backgroundImageView.contentMode = .scaleAspectFill
+        backgroundImageView.clipsToBounds = true
+        view.insertSubview(backgroundImageView, at: 0)
+
+        NSLayoutConstraint.activate([
+            backgroundImageView.topAnchor.constraint(equalTo: view.topAnchor),
+            backgroundImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            backgroundImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            backgroundImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
 
     // MARK: Header (fixed, above the scroll view — matches Android's separate headerLayout)
@@ -478,7 +508,7 @@ private extension ClassPaymentViewController {
 
         let backButton = GlassCircularIconButton()
         backButton.translatesAutoresizingMaskIntoConstraints = false
-        backButton.configure(icon: ClassPaymentViewController.icon(["ic_chevron_left_24", "ic_back_arrow", "ic_arrow_left"]),
+        backButton.configure(icon: ClassPaymentViewController.icon(["ic_chevron_left_24"], systemFallback: "chevron.left"),
                              diameter: Metric.backButtonDiameter)
         backButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
         header.addSubview(backButton)
@@ -522,12 +552,23 @@ private extension ClassPaymentViewController {
         ctaButton.configure(title: Copy.ctaTitle,
                             font: AppFont.medium.size(14.0, familyName: familyFunnelSans),
                             titleColor: Palette.ctaInk)
-        ctaButton.setImage(ClassPaymentViewController.icon(["ic_chevron_right_16_dark", "chevron-right", "ic_arrow_right_black"])?
-            .withRenderingMode(.alwaysOriginal), for: .normal)
-        ctaButton.semanticContentAttribute = .forceRightToLeft
-        ctaButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: ctaButton.bandThickness, right: -8)
+        // Reserves room for the chevron drawn as its own sibling view below —
+        // see the identical note on the Detail screen's CTA chevron. This one
+        // additionally used `.alwaysOriginal` with no explicit tint, so whatever
+        // colour happened to be baked into the source asset rendered as-is —
+        // invisible if that colour turned out to be white-on-white against this
+        // button's white gradient body.
+        ctaButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: ctaButton.bandThickness, right: 32)
         ctaButton.addTarget(self, action: #selector(confirmAndPayTapped), for: .touchUpInside)
         footerView.addSubview(ctaButton)
+
+        ctaChevronView.translatesAutoresizingMaskIntoConstraints = false
+        ctaChevronView.image = ClassPaymentViewController.icon(["ic_chevron_right_16_dark", "chevron-right"], systemFallback: "chevron.right")?
+            .withRenderingMode(.alwaysTemplate)
+        ctaChevronView.tintColor = Palette.ctaInk
+        ctaChevronView.contentMode = .scaleAspectFit
+        ctaChevronView.isUserInteractionEnabled = false
+        footerView.addSubview(ctaChevronView)
 
         NSLayoutConstraint.activate([
             footerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -538,7 +579,12 @@ private extension ClassPaymentViewController {
             ctaButton.leadingAnchor.constraint(equalTo: footerView.leadingAnchor, constant: Metric.horizontalInset),
             ctaButton.trailingAnchor.constraint(equalTo: footerView.trailingAnchor, constant: -Metric.horizontalInset),
             ctaButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
-            ctaButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight)
+            ctaButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight),
+
+            ctaChevronView.trailingAnchor.constraint(equalTo: ctaButton.trailingAnchor, constant: -12),
+            ctaChevronView.centerYAnchor.constraint(equalTo: ctaButton.centerYAnchor, constant: -1),
+            ctaChevronView.widthAnchor.constraint(equalToConstant: 16),
+            ctaChevronView.heightAnchor.constraint(equalToConstant: 16)
         ])
     }
 
@@ -628,11 +674,15 @@ private extension ClassPaymentViewController {
         card.fillAlpha = 1.0
         card.strokeColor = Palette.cardStroke
         card.strokeAlpha = 1.0
-        card.showsSheen = false
+        // `card_details_bg`: flat fill/stroke plus a top-centre radial sheen —
+        // every one of this screen's three cards has it, not just Confirmed's.
+        card.sheenOrigin = .topCenter
+        card.sheenAlpha = 0.08
 
-        let iconTile = makeIconTile(image: ClassPaymentViewController.icon(["ic_discount_percent_18", "discount-percent"]),
-                                    iconSide: Metric.couponIconSide,
-                                    tint: nil) // discount-percent ships its own lime colour, not tinted
+        // `discount_icon_bg`: lime-tinted 8dp tile, distinct from the generic
+        // dark `location_icon_bg` recipe every other row on this screen uses.
+        let iconTile = makeDiscountIconTile(image: ClassPaymentViewController.icon(["ic_discount_percent_18", "discount-percent"]),
+                                            iconSide: Metric.couponIconSide)
 
         couponTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         couponTitleLabel.font = AppFont.regular.size(14.0, familyName: familyFunnelSans)
@@ -682,9 +732,13 @@ private extension ClassPaymentViewController {
         applyButton.spacing = 4
         applyButton.isLayoutMarginsRelativeArrangement = true
         applyButton.layoutMargins = UIEdgeInsets(top: 4, left: 12, bottom: 4, right: 12)
-        applyButton.backgroundColor = UIColor.white.withAlphaComponent(0.08)
-        applyButton.layer.cornerRadius = 18
+        // `btn_apply_bg`: 8dp radius, solid `#1D1E1D` fill, 1dp `#1AFFFFFF`
+        // stroke — not a translucent capsule.
+        applyButton.backgroundColor = Palette.applyButtonFill
+        applyButton.layer.cornerRadius = 8
         applyButton.layer.masksToBounds = true
+        applyButton.layer.borderWidth = 1
+        applyButton.layer.borderColor = Palette.divider.cgColor
         // Android's `btnApplyCoupon` is drawn but has no `OnClickListener` — left
         // non-interactive here too, rather than inventing a coupon flow.
 
@@ -722,7 +776,8 @@ private extension ClassPaymentViewController {
         card.fillAlpha = 1.0
         card.strokeColor = Palette.cardStroke
         card.strokeAlpha = 1.0
-        card.showsSheen = false
+        card.sheenOrigin = .topCenter
+        card.sheenAlpha = 0.08
 
         classTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         classTitleLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
@@ -739,10 +794,13 @@ private extension ClassPaymentViewController {
         durationChip.configure(text: Copy.durationChip,
                                font: AppFont.medium.size(12.0, familyName: familyFunnelSans),
                                textColor: Palette.chipText)
+        // `chip_60_mins_bg`: `#33FFFFFF -> #00FFFFFF` fill, `#33FAFAFA`
+        // (~20% alpha) stroke, `paddingHorizontal=12dp paddingVertical=4dp`.
         durationChip.fillColor = UIColor.white.withAlphaComponent(0.08)
-        durationChip.strokeColor = UIColor.white.withAlphaComponent(0.14)
+        durationChip.strokeColor = UIColor.white.withAlphaComponent(0.2)
+        durationChip.contentInsets = UIEdgeInsets(top: 4, left: 12, bottom: 4, right: 12)
 
-        let classRow = makeDetailRow(icon: ClassPaymentViewController.icon(["ic_yoga_18", "ic_yoga", "ic_person_workout"]),
+        let classRow = makeDetailRow(icon: ClassPaymentViewController.icon(["ic_yoga_18"], systemFallback: "figure.yoga"),
                                      titleLabel: classTitleLabel,
                                      subtitleLabel: classDateTimeLabel,
                                      accessory: durationChip)
@@ -758,7 +816,7 @@ private extension ClassPaymentViewController {
         distanceLabel.numberOfLines = 1
         distanceLabel.text = "2.1 km away"
 
-        let locationRow = makeDetailRow(icon: ClassPaymentViewController.icon(["ic_location_pin_small", "ic_Location", "greenLocation"]),
+        let locationRow = makeDetailRow(icon: ClassPaymentViewController.icon(["ic_location_pin_small"], systemFallback: "mappin.and.ellipse"),
                                         titleLabel: locationLabel,
                                         subtitleLabel: distanceLabel)
 
@@ -774,7 +832,7 @@ private extension ClassPaymentViewController {
         trainerSubtitleLabel.numberOfLines = 1
         trainerSubtitleLabel.text = Copy.trainerSubtitle
 
-        let trainerRow = makeDetailRow(icon: ClassPaymentViewController.icon(["ic_trainer_running_18", "ic_trainer", "ic_running_ jogging"]),
+        let trainerRow = makeDetailRow(icon: ClassPaymentViewController.icon(["ic_trainer_running_18"], systemFallback: "figure.run"),
                                        titleLabel: trainerLabel,
                                        subtitleLabel: trainerSubtitleLabel)
 
@@ -835,6 +893,34 @@ private extension ClassPaymentViewController {
         let iconView = UIImageView(image: tint == nil ? image : image?.withRenderingMode(.alwaysTemplate))
         iconView.translatesAutoresizingMaskIntoConstraints = false
         if let tint = tint { iconView.tintColor = tint }
+        iconView.contentMode = .scaleAspectFit
+        tile.addSubview(iconView)
+
+        NSLayoutConstraint.activate([
+            iconView.centerXAnchor.constraint(equalTo: tile.centerXAnchor),
+            iconView.centerYAnchor.constraint(equalTo: tile.centerYAnchor),
+            iconView.widthAnchor.constraint(equalToConstant: iconSide),
+            iconView.heightAnchor.constraint(equalToConstant: iconSide)
+        ])
+        return tile
+    }
+
+    /// `discount_icon_bg`: 8dp radius, lime-tinted `#1AE0FE08` fill, `#1AFFFFFF`
+    /// stroke, plus a top-centre radial white highlight — distinct from every
+    /// other icon tile on this screen, which uses the dark `location_icon_bg`
+    /// recipe via `makeIconTile`.
+    func makeDiscountIconTile(image: UIImage?, iconSide: CGFloat) -> UIView {
+        let tile = GlassCardView(cornerRadius: 8)
+        tile.translatesAutoresizingMaskIntoConstraints = false
+        tile.fillColor = Palette.discountTileFill
+        tile.fillAlpha = 1.0
+        tile.strokeColor = Palette.divider
+        tile.strokeAlpha = 1.0
+        tile.sheenOrigin = .topCenter
+        tile.sheenAlpha = 0.08
+
+        let iconView = UIImageView(image: image)
+        iconView.translatesAutoresizingMaskIntoConstraints = false
         iconView.contentMode = .scaleAspectFit
         tile.addSubview(iconView)
 
@@ -912,7 +998,8 @@ private extension ClassPaymentViewController {
         card.fillAlpha = 1.0
         card.strokeColor = Palette.cardStroke
         card.strokeAlpha = 1.0
-        card.showsSheen = false
+        card.sheenOrigin = .topCenter
+        card.sheenAlpha = 0.08
 
         let tabby = makePaymentOptionRow(logo: ClassPaymentViewController.icon(["tabby", "ic_tabby_icon"]),
                                          title: Copy.tabbyTitle,
@@ -958,9 +1045,13 @@ private extension ClassPaymentViewController {
                               tapAction: Selector) -> UIView {
         let row = UIView()
         row.translatesAutoresizingMaskIntoConstraints = false
-        row.backgroundColor = UIColor.white.withAlphaComponent(0.04)
-        row.layer.cornerRadius = 12
+        // `payment_option_card_bg`: 16dp radius, solid `#212122` fill, 1dp
+        // `#1AFFFFFF` stroke — not a translucent 12dp glass tint.
+        row.backgroundColor = Palette.paymentRowFill
+        row.layer.cornerRadius = 16
         row.layer.masksToBounds = true
+        row.layer.borderWidth = 1
+        row.layer.borderColor = Palette.paymentRowStroke.cgColor
         row.isLayoutMarginsRelativeArrangement = false
 
         let tap = UITapGestureRecognizer(target: self, action: tapAction)
@@ -982,8 +1073,10 @@ private extension ClassPaymentViewController {
         badge.configure(text: badgeText,
                        font: AppFont.medium.size(9.5, familyName: familyFunnelSans),
                        textColor: Palette.chipText)
+        // Android's small badges: `paddingHorizontal=8dp paddingVertical=3dp`.
         badge.fillColor = UIColor.white.withAlphaComponent(0.08)
-        badge.strokeColor = UIColor.white.withAlphaComponent(0.14)
+        badge.strokeColor = UIColor.white.withAlphaComponent(0.2)
+        badge.contentInsets = UIEdgeInsets(top: 3, left: 8, bottom: 3, right: 8)
 
         let titleRow = UIStackView(arrangedSubviews: [titleLabel, badge])
         titleRow.translatesAutoresizingMaskIntoConstraints = false
@@ -1032,12 +1125,15 @@ private extension ClassPaymentViewController {
     // MARK: Terms & Conditions row
 
     func makeTermsRow() -> UIView {
-        let row = GlassCardView(cornerRadius: 12)
+        // Android reuses `payment_option_card_bg` here too — same solid
+        // `#212122`/16dp/1dp-`#1AFFFFFF` recipe as the Tabby/Card rows above,
+        // not a separate translucent-glass treatment.
+        let row = GlassCardView(cornerRadius: 16)
         row.translatesAutoresizingMaskIntoConstraints = false
-        row.fillColor = .white
-        row.fillAlpha = 0.04
-        row.strokeColor = .white
-        row.strokeAlpha = 0.08
+        row.fillColor = Palette.paymentRowFill
+        row.fillAlpha = 1.0
+        row.strokeColor = Palette.paymentRowStroke
+        row.strokeAlpha = 1.0
         row.showsSheen = false
 
         termsCheckbox.translatesAutoresizingMaskIntoConstraints = false
@@ -1079,10 +1175,14 @@ private extension ClassPaymentViewController {
 private extension ClassPaymentViewController {
 
     /// First bundled asset wins — leads with the Android drawable name so real
-    /// artwork can be dropped in later with no code change.
-    static func icon(_ names: [String]) -> UIImage? {
+    /// artwork can be dropped in later with no code change. Falls to a system
+    /// symbol rather than an unrelated bundled icon designed for another screen.
+    static func icon(_ names: [String], systemFallback: String? = nil) -> UIImage? {
         for name in names {
             if let image = UIImage(named: name) { return image }
+        }
+        if let systemFallback = systemFallback {
+            return UIImage(systemName: systemFallback)
         }
         return nil
     }

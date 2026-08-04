@@ -46,6 +46,10 @@ final class GroupClassCarouselDotsView: UIView {
         isUserInteractionEnabled = false
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .horizontal
+        // Cross-axis centring: the 5pt dots and the 5pt-tall host view already
+        // match, but `.fill` (the default) fights a dot's own required height
+        // constraint whenever it doesn't, which is what made the pill render
+        // taller than Android's 5dp indicator.
         stackView.alignment = .center
         stackView.spacing = GroupClassCarouselDotsView.spacing
         addSubview(stackView)
@@ -117,9 +121,17 @@ final class GroupClassesCarouselView: UIView {
     private static let cardSpacing: CGFloat = 10
     private static let carouselHeight: CGFloat = 250
     private static let sectionHorizontalInset: CGFloat = 16
+    // Android's `groupClassesSection` FrameLayout: a fixed-height full-bleed
+    // banner (`group_classes_bg`) with the carousel/dots/button bottom-aligned
+    // inside a 20dp-bottom-padded column, leaving the top of the banner exposed.
+    private static let sectionHeight: CGFloat = 620
+    private static let sectionBottomInset: CGFloat = 20
 
     /// Fired when a card is tapped, with the fully-derived tap-through payload.
     var onSelectClass: ((GroupClassTapThroughData) -> Void)?
+    /// Fired when "SEE ALL GROUP TRAININGS" is tapped. The carousel has no
+    /// navigation controller of its own, so the owning screen supplies this.
+    var onSeeAllTapped: (() -> Void)?
 
     private(set) var classes: [UpcomingClassModel] = []
 
@@ -127,11 +139,13 @@ final class GroupClassesCarouselView: UIView {
     private var userLat: Double = GroupClassCardFormatter.fallbackLatitude
     private var userLng: Double = GroupClassCardFormatter.fallbackLongitude
 
+    private let backgroundView = UIImageView()
     private let contentStack = UIStackView()
     private let collectionView: UICollectionView
     private let dotsView = GroupClassCarouselDotsView()
     private let dotsPill = UIView()
     private let seeAllButton = GradientCTAButton()
+    private let seeAllChevron = UIImageView()
 
     // MARK: Init
 
@@ -161,6 +175,13 @@ final class GroupClassesCarouselView: UIView {
 
     private func setupViews() {
         backgroundColor = .clear
+        clipsToBounds = true
+
+        backgroundView.translatesAutoresizingMaskIntoConstraints = false
+        backgroundView.image = UIImage(named: "group-classes-bg")
+        backgroundView.contentMode = .scaleAspectFill
+        backgroundView.clipsToBounds = true
+        addSubview(backgroundView)
 
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .clear
@@ -187,16 +208,36 @@ final class GroupClassesCarouselView: UIView {
         dotsRow.backgroundColor = .clear
         dotsRow.addSubview(dotsPill)
 
-        // "SEE ALL GROUP TRAININGS" — Android's own destination for this button is
-        // still a placeholder (it opens BookingPausedActivity with dummy extras),
-        // so it stays hidden here until a real destination is confirmed.
-        // TODO: unhide + wire once the destination is specified.
+        // "SEE ALL GROUP TRAININGS" -> `SeeAllGroupClassesViewController`, the
+        // ported equivalent of Android's `SeeAllGroupClassesActivity`.
         seeAllButton.translatesAutoresizingMaskIntoConstraints = false
+        seeAllButton.bandThickness = 2
         seeAllButton.configure(title: "SEE ALL GROUP TRAININGS",
                                font: AppFont.semibold.size(14.0, familyName: familyFunnelSans),
                                titleColor: UIColor(hex: "#141514"))
-        seeAllButton.isHidden = true
-        seeAllButton.isUserInteractionEnabled = false
+        seeAllButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 2, right: 32)
+        seeAllButton.addTarget(self, action: #selector(seeAllTapped), for: .touchUpInside)
+
+        seeAllChevron.translatesAutoresizingMaskIntoConstraints = false
+        seeAllChevron.image = UIImage(named: "chevron-right")?.withRenderingMode(.alwaysTemplate)
+            ?? UIImage(systemName: "chevron.right")
+        seeAllChevron.tintColor = UIColor(hex: "#141514")
+        seeAllChevron.contentMode = .scaleAspectFit
+        seeAllChevron.isUserInteractionEnabled = false
+        seeAllButton.addSubview(seeAllChevron)
+
+        // Android's `btnSeeAllGroupTrainings` carries `layout_marginHorizontal="20dp"`
+        // inside the full-width column — a wrapper reproduces that inset without
+        // fighting the `.fill` alignment the rest of `contentStack` relies on.
+        let seeAllWrapper = UIView()
+        seeAllWrapper.translatesAutoresizingMaskIntoConstraints = false
+        seeAllWrapper.addSubview(seeAllButton)
+        NSLayoutConstraint.activate([
+            seeAllButton.topAnchor.constraint(equalTo: seeAllWrapper.topAnchor),
+            seeAllButton.bottomAnchor.constraint(equalTo: seeAllWrapper.bottomAnchor),
+            seeAllButton.leadingAnchor.constraint(equalTo: seeAllWrapper.leadingAnchor, constant: 20),
+            seeAllButton.trailingAnchor.constraint(equalTo: seeAllWrapper.trailingAnchor, constant: -20)
+        ])
 
         contentStack.translatesAutoresizingMaskIntoConstraints = false
         contentStack.axis = .vertical
@@ -204,15 +245,24 @@ final class GroupClassesCarouselView: UIView {
         contentStack.spacing = 12
         contentStack.addArrangedSubview(collectionView)
         contentStack.addArrangedSubview(dotsRow)
-        contentStack.addArrangedSubview(seeAllButton)
+        contentStack.addArrangedSubview(seeAllWrapper)
         contentStack.setCustomSpacing(16, after: dotsRow)
         addSubview(contentStack)
 
         NSLayoutConstraint.activate([
-            contentStack.topAnchor.constraint(equalTo: topAnchor),
+            heightAnchor.constraint(equalToConstant: GroupClassesCarouselView.sectionHeight),
+
+            backgroundView.topAnchor.constraint(equalTo: topAnchor),
+            backgroundView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            backgroundView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            backgroundView.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+            // Bottom-aligned only (no top pin): the banner image fills the fixed
+            // 620pt section and the content floats near its bottom edge.
             contentStack.leadingAnchor.constraint(equalTo: leadingAnchor),
             contentStack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            contentStack.bottomAnchor.constraint(equalTo: bottomAnchor),
+            contentStack.bottomAnchor.constraint(equalTo: bottomAnchor,
+                                                 constant: -GroupClassesCarouselView.sectionBottomInset),
 
             collectionView.heightAnchor.constraint(equalToConstant: GroupClassesCarouselView.carouselHeight),
 
@@ -224,10 +274,18 @@ final class GroupClassesCarouselView: UIView {
             dotsView.bottomAnchor.constraint(equalTo: dotsPill.bottomAnchor, constant: -4),
             dotsView.leadingAnchor.constraint(equalTo: dotsPill.leadingAnchor, constant: 12),
             dotsView.trailingAnchor.constraint(equalTo: dotsPill.trailingAnchor, constant: -12),
-            dotsView.heightAnchor.constraint(equalToConstant: 10),
+            dotsView.heightAnchor.constraint(equalToConstant: 5),
 
-            seeAllButton.heightAnchor.constraint(equalToConstant: 42)
+            seeAllButton.heightAnchor.constraint(equalToConstant: 42),
+            seeAllChevron.trailingAnchor.constraint(equalTo: seeAllButton.trailingAnchor, constant: -12),
+            seeAllChevron.centerYAnchor.constraint(equalTo: seeAllButton.centerYAnchor, constant: -1),
+            seeAllChevron.widthAnchor.constraint(equalToConstant: 20),
+            seeAllChevron.heightAnchor.constraint(equalToConstant: 20)
         ])
+    }
+
+    @objc private func seeAllTapped() {
+        onSeeAllTapped?()
     }
 
     override func layoutSubviews() {

@@ -76,6 +76,11 @@ public class GlassCardView: UIView {
     /// from a single hotspot; a linear ramp reads as a banded stripe at card size.
     private var sheenLayer: CAGradientLayer?
 
+    /// Optional middle layer, between the flat fill and the sheen — some cards
+    /// (`waitlist_notify_card_bg`) add a second, linear tinted wash there that a
+    /// flat fill + radial sheen alone can't reproduce.
+    private var washLayer: CAGradientLayer?
+
     public var cornerRadius: CGFloat = 16 { didSet { applyStyle() } }
     public var fillColor: UIColor = UIColor.white { didSet { applyStyle() } }
     public var fillAlpha: CGFloat = 0.06 { didSet { applyStyle() } }
@@ -90,6 +95,10 @@ public class GlassCardView: UIView {
     public var sheenColor: UIColor = UIColor.white { didSet { rebuildSheen() } }
     public var sheenAlpha: CGFloat = 0.10 { didSet { rebuildSheen() } }
     public var showsSheen: Bool = true { didSet { rebuildSheen() } }
+
+    /// Top-to-bottom linear wash sandwiched between the fill and the sheen.
+    /// `nil` (the default) omits the layer entirely.
+    public var washColors: [UIColor]? { didSet { rebuildWash() } }
 
     /// When non-nil the flat `strokeColor` hairline is replaced by a gradient
     /// stroke drawn with the shared `setGradientCellBorder(...)` helper.
@@ -142,8 +151,29 @@ public class GlassCardView: UIView {
                                              sheenColor.withAlphaComponent(0.0).cgColor],
                                     type: .radial)
         sheen.frame = bounds
-        layer.insertSublayer(sheen, at: 0)
+        // Stays above the wash (if any) — fill(back) -> wash(middle) -> sheen(front).
+        if let washLayer = washLayer {
+            layer.insertSublayer(sheen, above: washLayer)
+        } else {
+            layer.insertSublayer(sheen, at: 0)
+        }
         sheenLayer = sheen
+    }
+
+    private func rebuildWash() {
+        washLayer?.removeFromSuperlayer()
+        washLayer = nil
+        guard let colors = washColors, !colors.isEmpty else { return }
+
+        let wash = CAGradientLayer()
+        wash.startPoint = CGPoint(x: 0.5, y: 0.0)
+        wash.endPoint = CGPoint(x: 0.5, y: 1.0)
+        wash.colors = colors.map { $0.cgColor }
+        wash.frame = bounds
+        layer.insertSublayer(wash, at: 0)
+        washLayer = wash
+        // Re-insert the sheen above the freshly-created wash layer.
+        rebuildSheen()
     }
 
     private func applyStyle() {
@@ -165,6 +195,7 @@ public class GlassCardView: UIView {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         sheenLayer?.frame = bounds
+        washLayer?.frame = bounds
         CATransaction.commit()
 
         if let colors = gradientStrokeColors, !colors.isEmpty {
@@ -215,8 +246,10 @@ public class GradientCTAButton: UIButton {
     private func commonInit() {
         layer.insertSublayer(bandLayer, at: 0)
         layer.insertSublayer(bodyLayer, at: 1)
-        bodyLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
-        bodyLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
+        // `btn_cta_gradient_shadow`/`button_prim_bg`: `angle="90"/"95"` in Android's
+        // convention puts the *start* colour at the bottom, not the top.
+        bodyLayer.startPoint = CGPoint(x: 0.5, y: 1.0)
+        bodyLayer.endPoint = CGPoint(x: 0.5, y: 0.0)
         bodyLayer.locations = [0, 1]
 
         setTitleColor(UIColor.black, for: .normal)
@@ -366,15 +399,19 @@ public class SpotProgressBarView: UIView {
         setFillColors(state.fillColors)
     }
 
+    /// Android's `spot_progress_bar*` drawables all specify `android:radius="1dp"`
+    /// — a barely-rounded bar, not a capsule. `bounds.height / 2` (a 2-4pt bar's
+    /// own half-height) was rendering it fully pill-shaped instead.
+    private static let cornerRadius: CGFloat = 1
+
     private func layoutFillLayer(animated: Bool) {
-        let radius = bounds.height / 2
         let target = CGRect(x: 0, y: 0, width: bounds.width * progress, height: bounds.height)
 
         CATransaction.begin()
         CATransaction.setDisableActions(!animated)
         if animated { CATransaction.setAnimationDuration(0.25) }
         fillLayer.frame = target
-        fillLayer.cornerRadius = radius
+        fillLayer.cornerRadius = SpotProgressBarView.cornerRadius
         CATransaction.commit()
     }
 
@@ -383,7 +420,7 @@ public class SpotProgressBarView: UIView {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         trackLayer.frame = bounds
-        trackLayer.cornerRadius = bounds.height / 2
+        trackLayer.cornerRadius = SpotProgressBarView.cornerRadius
         CATransaction.commit()
         layoutFillLayer(animated: false)
     }
@@ -395,10 +432,20 @@ public class SpotProgressBarView: UIView {
 
 // MARK: - PillChipView
 
-/// Small glass pill used for metadata tags (level, duration, location, …).
+/// Small glass chip used for metadata tags (level, duration, location, …).
+///
+/// Android's `glass_pill_bg` is a layered fake-glass recipe — a translucent
+/// stroke+fill rect *plus* a top-left-biased radial sheen on top — at a fixed
+/// 8dp corner radius, not a full capsule. A flat stroke+fill with no sheen and
+/// a height/2 radius reads as "just a pill," which is the reported bug.
 public class PillChipView: UIView {
 
     public let titleLabel = UILabel()
+
+    /// Fixed radius family shared with `location_icon_bg`/`chip_60_mins_bg` —
+    /// deliberately *not* `bounds.height / 2`, which would collapse back to a
+    /// plain capsule.
+    public var cornerRadius: CGFloat = 8 { didSet { setNeedsLayout() } }
 
     public var contentInsets = UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10) {
         didSet { applyInsets() }
@@ -412,12 +459,16 @@ public class PillChipView: UIView {
         didSet { layer.borderColor = strokeColor.cgColor }
     }
 
+    public var sheenColor: UIColor = UIColor.white { didSet { rebuildSheen() } }
+    public var sheenAlpha: CGFloat = 0.2 { didSet { rebuildSheen() } }
+
     public var text: String? {
         get { return titleLabel.text }
         set { titleLabel.text = newValue; invalidateIntrinsicContentSize() }
     }
 
     private var insetConstraints: [NSLayoutConstraint] = []
+    private var sheenLayer: CAGradientLayer?
 
     public convenience init(text: String?) {
         self.init(frame: .zero)
@@ -439,6 +490,7 @@ public class PillChipView: UIView {
         layer.borderWidth = 1
         layer.borderColor = strokeColor.cgColor
         layer.masksToBounds = true
+        rebuildSheen()
 
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
@@ -473,21 +525,44 @@ public class PillChipView: UIView {
         setNeedsLayout()
     }
 
+    private func rebuildSheen() {
+        sheenLayer?.removeFromSuperlayer()
+        // Android centres the radial sheen at (0.3, 0.0) — top edge, slightly
+        // left of centre — fading to fully transparent.
+        let sheen = CAGradientLayer(start: .topLeft,
+                                    end: .bottomRight,
+                                    colors: [sheenColor.withAlphaComponent(sheenAlpha).cgColor,
+                                             sheenColor.withAlphaComponent(0.0).cgColor],
+                                    type: .radial)
+        sheen.frame = bounds
+        layer.insertSublayer(sheen, at: 0)
+        sheenLayer = sheen
+    }
+
     public override func layoutSubviews() {
         super.layoutSubviews()
-        layer.cornerRadius = bounds.height / 2
+        layer.cornerRadius = cornerRadius
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        sheenLayer?.frame = bounds
+        CATransaction.commit()
     }
 }
 
 // MARK: - GlassCircularIconButton
 
 /// Circular translucent icon button — the floating back / favourite / share
-/// controls that sit on top of a hero image.
+/// controls that sit on top of a hero image, also reused as the back button on
+/// the Slot Confirmed / Waitlist Confirmed screens.
+///
+/// Android's `circle_action_btn_bg` is a single 3-stop **linear** gradient fill
+/// (no separate stroke, no radial sheen):
+///   `angle="270"` (top -> bottom): `#4D4275A9` -> `#331C1F21` -> `#661C1F21`.
+/// A flat low-alpha fill plus a border plus a radial dome sheen was a
+/// different-looking recipe entirely, not just a stylistic approximation.
 public class GlassCircularIconButton: UIButton {
 
-    /// Radial rather than linear so the button reads as a dome from any angle;
-    /// hero images sit behind it at arbitrary rotations across the module.
-    private var sheenLayer: CAGradientLayer?
+    private let gradientLayer = CAGradientLayer()
 
     public var diameter: CGFloat = 40 {
         didSet {
@@ -497,17 +572,6 @@ public class GlassCircularIconButton: UIButton {
     }
 
     public var iconInset: CGFloat = 11 { didSet { applyIconInset() } }
-
-    public var fillColor: UIColor = UIColor.white.withAlphaComponent(0.10) {
-        didSet { backgroundColor = fillColor }
-    }
-
-    public var strokeColor: UIColor = UIColor.white.withAlphaComponent(0.16) {
-        didSet { layer.borderColor = strokeColor.cgColor }
-    }
-
-    public var sheenColor: UIColor = UIColor.white { didSet { rebuildSheen() } }
-    public var sheenAlpha: CGFloat = 0.18 { didSet { rebuildSheen() } }
 
     public convenience init(icon: UIImage?, diameter: CGFloat = 40) {
         self.init(frame: .zero)
@@ -526,13 +590,19 @@ public class GlassCircularIconButton: UIButton {
     }
 
     private func commonInit() {
-        backgroundColor = fillColor
-        layer.borderWidth = 1
-        layer.borderColor = strokeColor.cgColor
         layer.masksToBounds = true
         imageView?.contentMode = .scaleAspectFit
         applyIconInset()
-        rebuildSheen()
+
+        gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
+        gradientLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
+        gradientLayer.locations = [0, 0.5, 1]
+        gradientLayer.colors = [
+            UIColor(red: 0x42 / 255.0, green: 0x75 / 255.0, blue: 0xA9 / 255.0, alpha: 0x4D / 255.0).cgColor,
+            UIColor(red: 0x1C / 255.0, green: 0x1F / 255.0, blue: 0x21 / 255.0, alpha: 0x33 / 255.0).cgColor,
+            UIColor(red: 0x1C / 255.0, green: 0x1F / 255.0, blue: 0x21 / 255.0, alpha: 0x66 / 255.0).cgColor
+        ]
+        layer.insertSublayer(gradientLayer, at: 0)
     }
 
     public func configure(icon: UIImage?,
@@ -550,23 +620,11 @@ public class GlassCircularIconButton: UIButton {
                                        right: iconInset)
     }
 
-    private func rebuildSheen() {
-        sheenLayer?.removeFromSuperlayer()
-        let sheen = CAGradientLayer(start: .topLeft,
-                                    end: .bottomRight,
-                                    colors: [sheenColor.withAlphaComponent(sheenAlpha).cgColor,
-                                             sheenColor.withAlphaComponent(0.0).cgColor],
-                                    type: .radial)
-        sheen.frame = bounds
-        layer.insertSublayer(sheen, at: 0)
-        sheenLayer = sheen
-    }
-
     public override func layoutSubviews() {
         super.layoutSubviews()
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        sheenLayer?.frame = bounds
+        gradientLayer.frame = bounds
         CATransaction.commit()
         layer.cornerRadius = bounds.height / 2
     }
@@ -584,9 +642,6 @@ public class PremiumBadgeView: UIView {
     public let titleLabel = UILabel()
     public let iconView = UIImageView()
 
-    /// Diagonal top-left → bottom-right: the white stop has to land on the corner
-    /// nearest the light source so the badge reads as a bevelled metal tag rather
-    /// than a flat two-tone rectangle.
     private let gradientLayer = CAGradientLayer()
 
     public var cornerRadius: CGFloat = 6 { didSet { setNeedsLayout() } }
@@ -597,6 +652,11 @@ public class PremiumBadgeView: UIView {
     public var startColor: UIColor = GroupClassColor.premiumStart.color { didSet { applyStyle() } }
     public var endColor: UIColor = GroupClassColor.premiumEnd.color { didSet { applyStyle() } }
     public var strokeColor: UIColor = GroupClassColor.premiumStroke.color { didSet { applyStyle() } }
+
+    /// `premium_badge_bg` is `angle="270"` (top -> bottom); `studio_badge_bg`
+    /// (the FREE variant) is `angle="0"` (left -> right) — the two drawables
+    /// don't share an axis, only a corner radius.
+    public var isHorizontalGradient: Bool = false { didSet { applyAxis() } }
 
     public var text: String? {
         get { return titleLabel.text }
@@ -627,9 +687,8 @@ public class PremiumBadgeView: UIView {
         layer.masksToBounds = true
         layer.borderWidth = 1
 
-        gradientLayer.startPoint = CGPoint(x: 0.0, y: 0.0)
-        gradientLayer.endPoint = CGPoint(x: 1.0, y: 1.0)
         gradientLayer.locations = [0, 1]
+        applyAxis()
         layer.insertSublayer(gradientLayer, at: 0)
 
         iconView.translatesAutoresizingMaskIntoConstraints = false
@@ -690,6 +749,16 @@ public class PremiumBadgeView: UIView {
     private func applyStyle() {
         gradientLayer.colors = [startColor.cgColor, endColor.cgColor]
         layer.borderColor = strokeColor.cgColor
+    }
+
+    private func applyAxis() {
+        if isHorizontalGradient {
+            gradientLayer.startPoint = CGPoint(x: 0.0, y: 0.5)
+            gradientLayer.endPoint = CGPoint(x: 1.0, y: 0.5)
+        } else {
+            gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
+            gradientLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
+        }
     }
 
     public override func layoutSubviews() {

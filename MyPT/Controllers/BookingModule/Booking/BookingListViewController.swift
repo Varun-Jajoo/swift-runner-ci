@@ -291,6 +291,12 @@ extension BookingListViewController: UITableViewDataSource, UITableViewDelegate{
             controller.classLocation = row.location?.value ?? ""
             controller.trainerName = row.trainer?.value ?? ""
             controller.isReadOnly = true
+            // This is a receipt-style full-screen push straight from the
+            // Bookings tab's own stack, which is never hidden upstream (unlike
+            // the Group-Classes booking flow, which hides it once on the Detail
+            // screen and inherits that for everything pushed after it) — without
+            // this the tab bar stayed visible over what should be a full page.
+            controller.hidesBottomBarWhenPushed = true
             self.navigationController?.pushViewController(controller, animated: true)
             return
         }

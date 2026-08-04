@@ -68,7 +68,13 @@ final class ConfirmSlotSheetViewController: CommonViewController {
     private enum Metric {
         static let horizontalInset: CGFloat = 20
         static let topInset: CGFloat = 12
-        static let bottomInset: CGFloat = 24
+        // Android's 24dp is the *only* bottom clearance it reserves — its system
+        // gesture bar doesn't stack on top of app padding the way iOS's home
+        // indicator does here (`scrollView` is pinned to the safe-area guide, which
+        // already reserves ~34pt on its own). Keeping a full 24pt on top of that
+        // doubled the visible gap below the CTA; a small breathing-room value on
+        // top of the safe area lands close to Android's actual on-screen spacing.
+        static let bottomInset: CGFloat = 8
         static let handleSize = CGSize(width: 64, height: 5)
         static let closeButtonSide: CGFloat = 24
         static let cardPadding: CGFloat = 20
@@ -137,6 +143,7 @@ final class ConfirmSlotSheetViewController: CommonViewController {
     private let trainerNameLabel = UILabel()
 
     private let ctaButton = GradientCTAButton()
+    private let ctaChevronView = UIImageView()
 
     /// Content height fed to the sheet's custom detent, recomputed after layout.
     private var resolvedSheetHeight: CGFloat = 0
@@ -420,6 +427,7 @@ final class ConfirmSlotSheetViewController: CommonViewController {
                 controller.reason = reason
                 controller.resumesOn = resumesOn
                 controller.daysRemaining = daysRemaining
+                controller.hidesBottomBarWhenPushed = true
                 navigationController?.pushViewController(controller, animated: true)
             }
             return
@@ -486,6 +494,7 @@ final class ConfirmSlotSheetViewController: CommonViewController {
             controller.trainerName = trainer
             controller.distance = distance
             controller.classPrice = ""
+            controller.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(controller, animated: true)
         }
     }
@@ -647,10 +656,17 @@ private extension ConfirmSlotSheetViewController {
         container.addSubview(textStack)
 
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.setImage(ConfirmSlotSheetViewController.icon(["ic_close_x_34", "ic_cross", "crossImg", "ic_dismiss"])?
+        closeButton.setImage(ConfirmSlotSheetViewController.icon(["ic_close_x_34"], systemFallback: "xmark")?
             .withRenderingMode(.alwaysTemplate), for: .normal)
         closeButton.tintColor = Palette.title
         closeButton.imageView?.contentMode = .scaleAspectFit
+        // A `UIButton` normally sizes its image view to the image's own intrinsic
+        // size, not the button's bounds — with a small source glyph that renders
+        // well under the intended 24×24 tap target, which is the reported bug.
+        // `.fill` stretches the image to the full content rect instead.
+        closeButton.contentHorizontalAlignment = .fill
+        closeButton.contentVerticalAlignment = .fill
+        closeButton.imageEdgeInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         container.addSubview(closeButton)
 
@@ -695,7 +711,7 @@ private extension ConfirmSlotSheetViewController {
         classDateTimeLabel.numberOfLines = 1
         classDateTimeLabel.lineBreakMode = .byTruncatingTail
 
-        let classRow = makeCardRow(icon: ConfirmSlotSheetViewController.icon(["ic_yoga_18", "ic_yoga", "ic_person_workout"]),
+        let classRow = makeCardRow(icon: ConfirmSlotSheetViewController.icon(["ic_yoga_18"], systemFallback: "figure.yoga"),
                                    titleLabel: classTitleLabel,
                                    subtitleLabel: classDateTimeLabel,
                                    accessory: makeDurationChip())
@@ -716,7 +732,7 @@ private extension ConfirmSlotSheetViewController {
         // screen's distance label is non-blank.
         locationDistanceLabel.text = "2.1 km away"
 
-        let locationRow = makeCardRow(icon: ConfirmSlotSheetViewController.icon(["ic_location_pin_small", "ic_Location", "greenLocation"]),
+        let locationRow = makeCardRow(icon: ConfirmSlotSheetViewController.icon(["ic_location_pin_small"], systemFallback: "mappin.and.ellipse"),
                                       titleLabel: locationTitleLabel,
                                       subtitleLabel: locationDistanceLabel,
                                       accessory: nil)
@@ -736,7 +752,7 @@ private extension ConfirmSlotSheetViewController {
         trainerSubtitleLabel.lineBreakMode = .byTruncatingTail
         trainerSubtitleLabel.text = Copy.trainerSubtitle
 
-        let trainerRow = makeCardRow(icon: ConfirmSlotSheetViewController.icon(["ic_trainer_running_18", "ic_trainer", "ic_running_ jogging"]),
+        let trainerRow = makeCardRow(icon: ConfirmSlotSheetViewController.icon(["ic_trainer_running_18"], systemFallback: "figure.run"),
                                      titleLabel: trainerNameLabel,
                                      subtitleLabel: trainerSubtitleLabel,
                                      accessory: nil)
@@ -879,7 +895,7 @@ private extension ConfirmSlotSheetViewController {
         box.layer.borderWidth = 1
         box.layer.borderColor = GroupClassColor.gold.color.withAlphaComponent(0.30).cgColor
 
-        let warningIcon = UIImageView(image: ConfirmSlotSheetViewController.icon(["ic_warning_hex_16", "info-hexagon", "ic_information_circle"])?
+        let warningIcon = UIImageView(image: ConfirmSlotSheetViewController.icon(["ic_warning_hex_16", "info-hexagon"], systemFallback: "exclamationmark.triangle.fill")?
             .withRenderingMode(.alwaysTemplate))
         warningIcon.translatesAutoresizingMaskIntoConstraints = false
         warningIcon.tintColor = GroupClassColor.gold.color
@@ -950,16 +966,29 @@ private extension ConfirmSlotSheetViewController {
         // `btn_cta_gradient_shadow` offsets the body by 2dp over the grey band.
         ctaButton.bandThickness = 2
         setCTATitle(Copy.confirmCTA)
-        ctaButton.setImage(ConfirmSlotSheetViewController.icon(["ic_chevron_right_16_dark", "chevron-right", "ic_arrow_right_black"])?
-            .withRenderingMode(.alwaysTemplate), for: .normal)
-        ctaButton.tintColor = Palette.ctaInk
-        ctaButton.semanticContentAttribute = .forceRightToLeft
-        ctaButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
-        ctaButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 8)
-        // Set after `bandThickness` so the component's own inset pass cannot undo it.
-        ctaButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 2, right: 16)
+        // Set after `bandThickness` so the component's own inset pass cannot undo
+        // it; the extra right padding reserves room for the chevron drawn below.
+        ctaButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 2, right: 36)
         ctaButton.addTarget(self, action: #selector(confirmTapped), for: .touchUpInside)
         ctaButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight).isActive = true
+
+        // A sibling view rather than the button's image slot — see the identical
+        // note on `GroupTrainingDetailViewController`'s CTA chevron; UIButton's
+        // image+title inset arithmetic was silently rendering nothing.
+        ctaChevronView.translatesAutoresizingMaskIntoConstraints = false
+        ctaChevronView.image = ConfirmSlotSheetViewController.icon(["ic_chevron_right_16_dark", "chevron-right"], systemFallback: "chevron.right")?
+            .withRenderingMode(.alwaysTemplate)
+        ctaChevronView.tintColor = Palette.ctaInk
+        ctaChevronView.contentMode = .scaleAspectFit
+        ctaChevronView.isUserInteractionEnabled = false
+        ctaButton.addSubview(ctaChevronView)
+
+        NSLayoutConstraint.activate([
+            ctaChevronView.trailingAnchor.constraint(equalTo: ctaButton.trailingAnchor, constant: -16),
+            ctaChevronView.centerYAnchor.constraint(equalTo: ctaButton.centerYAnchor, constant: -1),
+            ctaChevronView.widthAnchor.constraint(equalToConstant: 16),
+            ctaChevronView.heightAnchor.constraint(equalToConstant: 16)
+        ])
         return ctaButton
     }
 }
@@ -1015,22 +1044,20 @@ private extension ConfirmSlotSheetViewController {
         return result
     }
 
-    /// First bundled asset wins.
+    /// First bundled asset wins; a system symbol is the last resort.
     ///
     /// Every candidate list leads with the *Android* drawable name, so importing the
     /// real glyphs later under those exact names upgrades the sheet with no code
-    /// change; the tail entries are the closest already-bundled iOS assets.
-    ///
-    /// TODO: `ic_close_x_34`, `ic_yoga_18`, `ic_location_pin_small`,
-    /// `ic_trainer_running_18`, `ic_warning_hex_16` and `ic_chevron_right_16_dark`
-    /// have no iOS equivalent yet and currently fall through to a stand-in. The
-    /// `GroupClasses/` colour-set siblings (`info-hexagon`, `chevron-right`) are
-    /// registered but still have no image files, so they resolve to `nil` today —
-    /// every icon slot is fixed-size, so a `nil` image degrades to blank space
-    /// rather than breaking the layout.
-    static func icon(_ names: [String]) -> UIImage? {
+    /// change. Does **not** fall through to unrelated already-bundled iOS assets —
+    /// those render a wrong-looking glyph rather than a missing one. `info-hexagon`
+    /// and `chevron-right` are real rendered Group-Classes assets (not placeholders)
+    /// and are tried first.
+    static func icon(_ names: [String], systemFallback: String? = nil) -> UIImage? {
         for name in names {
             if let image = UIImage(named: name) { return image }
+        }
+        if let systemFallback = systemFallback {
+            return UIImage(systemName: systemFallback)
         }
         return nil
     }

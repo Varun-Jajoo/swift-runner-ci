@@ -96,6 +96,14 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
             guard let self = self else { return }
             GroupClassNavigator.pushDetail(from: self, data: tapThroughData)
         }
+        groupClassesCarousel?.onSeeAllTapped = { [weak self] in
+            guard let self = self else { return }
+            let controller = SeeAllGroupClassesViewController()
+            controller.initialLat = self.getLat ?? GroupClassCardFormatter.fallbackLatitude
+            controller.initialLng = self.getLong ?? GroupClassCardFormatter.fallbackLongitude
+            controller.hidesBottomBarWhenPushed = true
+            self.navigationController?.pushViewController(controller, animated: true)
+        }
 
         if groupClassesCarousel == nil {
             print("GroupClasses: banner anchor not found — carousel not inserted")

@@ -78,6 +78,11 @@ final class BookingPausedViewController: CommonViewController {
 
     // MARK: - Views
 
+    /// `android:background="@drawable/bg_booking_paused_screen"` — a raster
+    /// photo (new in this push), visually near-identical to Slot/Waitlist
+    /// Confirmed's background. Previously this screen had no background
+    /// treatment at all.
+    private let backgroundImageView = UIImageView()
     private let scrollView = UIScrollView()
     private let contentStack = UIStackView()
     private let footerView = UIView()
@@ -130,13 +135,32 @@ final class BookingPausedViewController: CommonViewController {
 private extension BookingPausedViewController {
 
     func buildLayout() {
+        buildBackgroundImage()
         buildFooter()
         buildScrollView()
     }
 
+    func buildBackgroundImage() {
+        backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
+        backgroundImageView.image = UIImage(named: "booking-paused-bg")
+        backgroundImageView.contentMode = .scaleAspectFill
+        backgroundImageView.clipsToBounds = true
+        view.addSubview(backgroundImageView)
+
+        NSLayoutConstraint.activate([
+            backgroundImageView.topAnchor.constraint(equalTo: view.topAnchor),
+            backgroundImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            backgroundImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            backgroundImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+
     func buildFooter() {
         footerView.translatesAutoresizingMaskIntoConstraints = false
-        footerView.backgroundColor = GroupClassColor.blueCardBg.color
+        // `llBottomButtons` on Android *does* carry a solid `#000814` background
+        // — unlike Slot/Waitlist Confirmed's transparent footers, this one is
+        // genuinely opaque per `activity_booking_paused.xml`.
+        footerView.backgroundColor = UIColor(hex: "#000814")
         view.addSubview(footerView)
 
         ctaButton.translatesAutoresizingMaskIntoConstraints = false
@@ -216,7 +240,7 @@ private extension BookingPausedViewController {
 
         let backButton = GlassCircularIconButton()
         backButton.translatesAutoresizingMaskIntoConstraints = false
-        backButton.configure(icon: BookingPausedViewController.icon(["ic_back_chevron_20", "ic_back_arrow", "ic_arrow_left"]),
+        backButton.configure(icon: BookingPausedViewController.icon(["ic_back_chevron_20"], systemFallback: "chevron.left"),
                              diameter: Metric.backButtonDiameter)
         backButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
         container.addSubview(backButton)
@@ -408,6 +432,10 @@ private extension BookingPausedViewController {
         card.fillAlpha = 1.0
         card.strokeColor = Palette.notifyCardStroke
         card.strokeAlpha = 1.0
+        // `waitlist_notify_card_bg`'s middle layer: `angle=270` linear,
+        // `#190865FE -> #000865FE` — a faint top-to-bottom blue tint.
+        card.washColors = [GroupClassColor.blue.color.withAlphaComponent(0.098),
+                           GroupClassColor.blue.color.withAlphaComponent(0.0)]
         card.sheenOrigin = .topCenter
         card.sheenAlpha = 0.08
 
@@ -451,7 +479,7 @@ private extension BookingPausedViewController {
         textStack.alignment = .fill
         textStack.spacing = 4
 
-        let chevron = UIImageView(image: BookingPausedViewController.icon(["ic_arrow_right_chevron", "chevron-right", "ic_arrow_right"])?
+        let chevron = UIImageView(image: BookingPausedViewController.icon(["ic_arrow_right_chevron", "chevron-right"], systemFallback: "chevron.right")?
             .withRenderingMode(.alwaysTemplate))
         chevron.translatesAutoresizingMaskIntoConstraints = false
         chevron.tintColor = .white
@@ -461,7 +489,10 @@ private extension BookingPausedViewController {
         row.translatesAutoresizingMaskIntoConstraints = false
         row.axis = .horizontal
         row.alignment = .center
+        // Asymmetric on Android: `marginEnd=12dp` bell-tile-to-text,
+        // `marginStart=8dp` text-to-chevron — not one uniform gap.
         row.spacing = 12
+        row.setCustomSpacing(8, after: textStack)
 
         card.addSubview(row)
         NSLayoutConstraint.activate([
@@ -494,9 +525,12 @@ private extension BookingPausedViewController {
         return style
     }
 
-    static func icon(_ names: [String]) -> UIImage? {
+    static func icon(_ names: [String], systemFallback: String? = nil) -> UIImage? {
         for name in names {
             if let image = UIImage(named: name) { return image }
+        }
+        if let systemFallback = systemFallback {
+            return UIImage(systemName: systemFallback)
         }
         return nil
     }
