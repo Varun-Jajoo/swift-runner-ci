@@ -2405,10 +2405,10 @@ preferred times</string>
                                         <rect key="frame" x="0.0" y="0.0" width="393" height="568"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2ZA-yf-6YL">
-                                                <rect key="frame" x="0.0" y="0.0" width="393" height="2231.6666666666665"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="393" height="2321.6666666666665"/>
                                                 <subviews>
                                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="30" translatesAutoresizingMaskIntoConstraints="NO" id="WyZ-fR-FNV">
-                                                        <rect key="frame" x="20" y="0.0" width="353" height="2201.6666666666665"/>
+                                                        <rect key="frame" x="20" y="0.0" width="353" height="2291.6666666666665"/>
                                                         <subviews>
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="t1G-SE-jge">
                                                                 <rect key="frame" x="0.0" y="0.0" width="353" height="120"/>
@@ -3549,6 +3549,45 @@ preferred times</string>
                                                                     <constraint firstItem="AlD-Dv-E8k" firstAttribute="top" secondItem="pXy-aX-jMB" secondAttribute="top" id="rmf-Ly-8Qd"/>
                                                                 </constraints>
                                                             </view>
+                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PPa-Jb-rhu">
+                                                                <rect key="frame" x="0.0" y="2231.6666666666665" width="353" height="60"/>
+                                                                <subviews>
+                                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="TrainingLocation" translatesAutoresizingMaskIntoConstraints="NO" id="aSE-f3-Ekd">
+                                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="60"/>
+                                                                    </imageView>
+                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OJ1-6r-2w3">
+                                                                        <rect key="frame" x="12" y="12" width="24" height="24"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="24" id="0As-BS-zBL"/>
+                                                                            <constraint firstAttribute="height" constant="24" id="ecL-bc-VSw"/>
+                                                                        </constraints>
+                                                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                                        <state key="normal" image="unselectedRadioBtn"/>
+                                                                        <connections>
+                                                                            <action selector="onTapCheck:" destination="y4o-w8-WOw" eventType="touchUpInside" id="cyM-JB-4Zy"/>
+                                                                        </connections>
+                                                                    </button>
+                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fWv-kd-srU">
+                                                                        <rect key="frame" x="48" y="13.999999999999998" width="41.333333333333343" height="20.333333333333329"/>
+                                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                                        <nil key="textColor"/>
+                                                                        <nil key="highlightedColor"/>
+                                                                    </label>
+                                                                </subviews>
+                                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                                <constraints>
+                                                                    <constraint firstItem="aSE-f3-Ekd" firstAttribute="top" secondItem="PPa-Jb-rhu" secondAttribute="top" id="1a5-Kp-JZK"/>
+                                                                    <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="fWv-kd-srU" secondAttribute="trailing" constant="44" id="34k-2x-Sob"/>
+                                                                    <constraint firstAttribute="height" constant="60" id="Bd0-gP-mxb"/>
+                                                                    <constraint firstItem="OJ1-6r-2w3" firstAttribute="leading" secondItem="PPa-Jb-rhu" secondAttribute="leading" constant="12" id="GlN-Ss-CrQ"/>
+                                                                    <constraint firstItem="fWv-kd-srU" firstAttribute="leading" secondItem="OJ1-6r-2w3" secondAttribute="trailing" constant="12" id="LIK-5X-6eU"/>
+                                                                    <constraint firstItem="aSE-f3-Ekd" firstAttribute="leading" secondItem="PPa-Jb-rhu" secondAttribute="leading" id="LaZ-d2-Bz5"/>
+                                                                    <constraint firstAttribute="trailing" secondItem="aSE-f3-Ekd" secondAttribute="trailing" id="NeV-hI-7gH"/>
+                                                                    <constraint firstAttribute="bottom" secondItem="aSE-f3-Ekd" secondAttribute="bottom" id="PBS-1z-x8N"/>
+                                                                    <constraint firstItem="OJ1-6r-2w3" firstAttribute="top" secondItem="PPa-Jb-rhu" secondAttribute="top" constant="12" id="jmH-c0-DxH"/>
+                                                                    <constraint firstItem="fWv-kd-srU" firstAttribute="centerY" secondItem="OJ1-6r-2w3" secondAttribute="centerY" id="mLa-q1-cAp"/>
+                                                                </constraints>
+                                                            </view>
                                                         </subviews>
                                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                     </stackView>
@@ -3603,6 +3642,7 @@ preferred times</string>
                         <outlet property="btnAddress" destination="37O-97-m0Y" id="0xR-if-YW5"/>
                         <outlet property="btnApply" destination="fdV-oC-ZZW" id="ty1-D9-haS"/>
                         <outlet property="btnCard" destination="UBc-74-jI1" id="bqx-CL-TDG"/>
+                        <outlet property="btnCheck" destination="OJ1-6r-2w3" id="SVj-ZX-MGc"/>
                         <outlet property="btnTabby" destination="L95-ky-d6X" id="Fsy-Sj-j3w"/>
                         <outlet property="btnTamara" destination="lDo-kt-h31" id="YCo-6D-nj0"/>
                         <outlet property="btnUpgradePlan" destination="J0N-Vi-pvx" id="m1o-UC-CE2"/>
@@ -3635,6 +3675,7 @@ preferred times</string>
                         <outlet property="lblGymMembershipSelectedPlan" destination="bsI-eZ-3UL" id="XPM-gh-dqZ"/>
                         <outlet property="lblGymMembershipSelectedPlanType" destination="ZAa-vR-RKP" id="zHo-Zk-oSh"/>
                         <outlet property="lblGymName" destination="I1K-42-SIA" id="Rsm-ta-uz5"/>
+                        <outlet property="lblGymRefundable" destination="7t1-vc-Rzr" id="ACV-h0-5eT"/>
                         <outlet property="lblLocationTYpe" destination="O0U-QA-wu2" id="9is-Ra-luw"/>
                         <outlet property="lblMOnth" destination="oo6-OZ-N4v" id="qMm-Jd-NzS"/>
                         <outlet property="lblMode" destination="JX9-cB-9xT" id="Owf-kz-zuI"/>
@@ -3652,7 +3693,7 @@ preferred times</string>
                         <outlet property="lblNumSession" destination="adZ-x1-rcb" id="TU4-Gr-h1Q"/>
                         <outlet property="lblPackageDetail" destination="9a8-k0-ov3" id="9e1-rw-2Ab"/>
                         <outlet property="lblPlanExpired" destination="LX6-c8-KMH" id="N9x-Ez-6AM"/>
-                        <outlet property="lblRefundable" destination="7t1-vc-Rzr" id="HAH-H2-G72"/>
+                        <outlet property="lblRefundable" destination="OJM-nJ-wxN" id="F58-Hi-wZ2"/>
                         <outlet property="lblRemainingSession" destination="5X4-IX-zcp" id="wBB-16-cFa"/>
                         <outlet property="lblSavedAED" destination="oyi-Yh-CEK" id="R9d-CH-AeC"/>
                         <outlet property="lblSavedSession" destination="TQ9-G0-ycf" id="iqV-dx-Glg"/>
@@ -3666,6 +3707,7 @@ preferred times</string>
                         <outlet property="lblTabbyDetail" destination="pGi-3E-tQD" id="FDz-Ff-v8c"/>
                         <outlet property="lblTamara" destination="XYw-d4-Ws6" id="Uv6-N9-oue"/>
                         <outlet property="lblTamarayDetail" destination="43D-bJ-MhS" id="Bbo-1b-BCF"/>
+                        <outlet property="lblTermCondition" destination="fWv-kd-srU" id="BkO-9t-Npo"/>
                         <outlet property="lblTotalSession" destination="WJk-B8-n7p" id="4Aw-WS-s0M"/>
                         <outlet property="lblTrainerName" destination="Pyx-tQ-vgD" id="QY2-aZ-UA1"/>
                         <outlet property="lblTrainingLoc" destination="58R-xP-PvR" id="uoo-JF-gee"/>
@@ -3688,6 +3730,7 @@ preferred times</string>
                         <outlet property="viewSpecialMsg" destination="CEd-6F-JQc" id="dXV-qp-Agy"/>
                         <outlet property="viewTabby" destination="oqP-FC-KZP" id="LX6-23-Sih"/>
                         <outlet property="viewTamara" destination="de5-NE-Dq4" id="FzH-tZ-3wg"/>
+                        <outlet property="viewTermAndCond" destination="PPa-Jb-rhu" id="BZB-c4-yPI"/>
                         <outlet property="viewTrainerLocation" destination="yLJ-mn-QNV" id="T4I-5o-wrd"/>
                         <outlet property="viewUpgrade" destination="t1G-SE-jge" id="SyV-JP-NBp"/>
                     </connections>
@@ -3729,7 +3772,7 @@ preferred times</string>
         <image name="choosePlan" width="389" height="48"/>
         <image name="circle" width="16" height="16"/>
         <image name="clockGrey" width="16" height="16"/>
-        <image name="couponImg" width="30.333333969116211" height="30.333333969116211"/>
+        <image name="couponImg" width="30" height="30"/>
         <image name="dividingImg" width="390" height="1"/>
         <image name="ic_bckShadow" width="630.33331298828125" height="1134.3333740234375"/>
         <image name="ic_clock" width="16" height="16.333333969116211"/>

@@ -22,10 +22,19 @@ class TrainerSuggestionCVCell: UICollectionViewCell, UICollectionViewDelegate, U
     @IBOutlet weak var btnStackView: UIStackView!
     @IBOutlet weak var viewInfo: UIView!
     @IBOutlet weak var lblInfo: UILabel!
+    @IBOutlet weak var heightOfQuickBtn: NSLayoutConstraint!
     
     override func awakeFromNib() {
         super.awakeFromNib()
         uiSetup()
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        heightOfQuickBtn.constant = viewInfo.isHidden ? 42 : 0
+        // Re-apply corners every layout pass so the mask always matches the button's current bounds.
+        // Must be here (not in awakeFromNib async) to handle both fresh and reused cells correctly.
+        btnQuickBook.cornersWithBorder(radius: 8, corners: .allCorners)
     }
     
     private func uiSetup() {
@@ -41,6 +50,7 @@ class TrainerSuggestionCVCell: UICollectionViewCell, UICollectionViewDelegate, U
         self.lblTrainerAvailability.font = AppFont.regular.size(13.0, familyName: familyFunnelSans)
         self.lblTrainerName.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
         self.lblInfo.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
+        self.btnStackView.alignment = .center
         
         DispatchQueue.main.async {
             self.btnQuickBook.setTitle("QUICK BOOK  ", for: .normal)
@@ -50,7 +60,7 @@ class TrainerSuggestionCVCell: UICollectionViewCell, UICollectionViewDelegate, U
             self.btnQuickBook.tintColor = .mainBg   // arrow color
             self.btnQuickBook.backgroundColor = .appWhite
             self.btnQuickBook.setTitleColor(.mainBg, for: .normal)
-            self.btnQuickBook.cornersWithBorder(radius: 8, corners: .allCorners)
+            // cornersWithBorder for btnQuickBook is handled in layoutSubviews
             self.viewInfo.cornersWithBorder(
                 radius: 12,
                 corners: .allCorners,

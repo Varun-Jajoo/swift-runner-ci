@@ -21,12 +21,11 @@ class PlanCVCell: UICollectionViewCell {
     @IBOutlet weak var viewProgress: UIView!
     @IBOutlet weak var btnUseSession: UIButton!
     @IBOutlet weak var btnBuyMore: UIButton!
+    @IBOutlet weak var lblGymExpiry: UILabel!
     
     override func awakeFromNib() {
         super.awakeFromNib()
-    
             uiSetup()
-            
             progressBar.translatesAutoresizingMaskIntoConstraints = false
             viewProgress.addSubview(progressBar)
 
@@ -45,7 +44,12 @@ class PlanCVCell: UICollectionViewCell {
         self.lblRemainingSession.font = AppFont.medium.size(20, familyName: familyClashDisplay)
         self.lblSessionUtilization.font = AppFont.regular.size(12, familyName: familyFunnelSans)
         self.lblTotalSesion.font = AppFont.regular.size(12, familyName: familyFunnelSans)
+        self.lblGymExpiry.font = AppFont.regular.size(12, familyName: familyFunnelSans)
         self.imgPlan.setCornerRadius(cornerRadious: 16)
+        self.btnUseSession.backgroundColor = .white
+        self.btnUseSession.setTitleColor(.black, for: .normal)
+        self.btnUseSession.setCornerRadius(cornerRadious: 8)
+        self.btnUseSession.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
     }
     
     func configure(with model: PlanDetailsModel) {
@@ -60,15 +64,17 @@ class PlanCVCell: UICollectionViewCell {
         
         // Labels
         lblPlanImg.text = model.name?.value
+        lblGymExpiry.text = model.end_date?.value
+        lblGymExpiry.isHidden = !(model.is_membership ?? false)
 //        lblRemainingSession.text = "\(Int(remaining)) sessions remaining"
 //        lblTotalSesion.text = "Total \(Int(total)) sessions"
         
-        lblRemainingSession.text = model.is_membership ?? false ? "\(Int(usedDays)) days remaining" : "\(Int(remainingSession)) sessions remaining"
-        lblTotalSesion.text = model.is_membership ?? false ? "Total \(Int(totalDays)) days" : "Total \(Int(totalSession)) sessions"
-        lblSessionUtilization.text = model.is_membership ?? false ? "Days Utilization" : "Session Utilization"
+        lblRemainingSession.text = model.is_membership ?? false ? "\(Int(remainingDays)) days remaining" : "\(Int(remainingSession)) sessions remaining"
+        lblTotalSesion.text = model.is_membership ?? false ? "\(Int(usedDays)) of \(Int(totalDays)) total" : "Total \(Int(totalSession)) sessions"
+        lblSessionUtilization.text = model.is_membership ?? false ? "Day Used" : "Session Utilization"
         
-        if let remainingDays = model.remaining_days?.intValue {
-            lblValidDate.text = "Valid for \(remainingDays) days"
+        if let remainingDays = model.remaining_days?.intValue, let gymName = model.studio_name {
+            lblValidDate.text = (model.is_membership ?? false) ? gymName : "Valid for \(remainingDays) days"
         }
         
         if let imageUrl = model.image {
@@ -77,6 +83,8 @@ class PlanCVCell: UICollectionViewCell {
         // Progress
         progressBar.total = model.is_membership ?? false ? totalDays : totalSession
         progressBar.setProgress(model.is_membership ?? false ? usedDays : usedSession)
+        btnBuyMore.isHidden = true
+        btnUseSession.setTitle((model.is_membership ?? false ? "RENEW MEMBERSHIP" : "USE SESSION"), for: .normal)
     }
 
     @IBAction func onTapUseSession(_ sender: UIButton) {

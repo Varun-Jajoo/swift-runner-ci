@@ -347,9 +347,21 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
 //            vc.userPlans = self.userPlans
 //            self.navigationController?.pushViewController(vc, animated: false)
         } else {
-            let vc: NewBookingModuleVC = NewBookingModuleVC.instantiate(appStoryboard: .newBookingModule)
-            vc.hidesBottomBarWhenPushed = true
-            self.navigationController?.pushViewController(vc, animated: false)
+            if plan.is_membership ?? false {
+                let bookingReviewPurchaseVC: BookingReviewPurchaseVC = BookingReviewPurchaseVC.instantiate(appStoryboard: .newBookingModule)
+                bookingReviewPurchaseVC.inputParam = DetailsParam(
+                    type: plan.type?.value
+                )
+                bookingReviewPurchaseVC.sessions = plan.sessions?.value
+                bookingReviewPurchaseVC.hidesBottomBarWhenPushed = true
+                bookingReviewPurchaseVC.previousSubscriptionID = plan.id?.value
+                bookingReviewPurchaseVC.isGymMembership = plan.is_membership ?? false
+                self.navigationController?.pushViewController(bookingReviewPurchaseVC, animated: false)
+            } else {
+                let vc: NewBookingModuleVC = NewBookingModuleVC.instantiate(appStoryboard: .newBookingModule)
+                vc.hidesBottomBarWhenPushed = true
+                self.navigationController?.pushViewController(vc, animated: false)
+            }
         }
     }
     

@@ -38,7 +38,7 @@
                                 </constraints>
                             </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Separator" translatesAutoresizingMaskIntoConstraints="NO" id="pzx-qC-CZB">
-                                <rect key="frame" x="117.33333333333331" y="27.666666666666668" width="5" height="5.0000000000000036"/>
+                                <rect key="frame" x="117.33333333333333" y="27.666666666666668" width="5" height="5.0000000000000036"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="5" id="Zs8-GD-KQ5"/>
                                     <constraint firstAttribute="height" constant="5" id="hGo-To-sVH"/>
@@ -59,7 +59,7 @@
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Session Utilization" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AHH-sN-sAK">
                                 <rect key="frame" x="20" y="92.666666666666671" width="139.33333333333334" height="20.333333333333329"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" red="1" green="0.94901960780000005" blue="0.75294117650000003" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="textColor" red="0.77254901960784317" green="0.76470588235294112" blue="0.76078431372549016" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Total 100 sessions" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HLQ-aw-ARK">

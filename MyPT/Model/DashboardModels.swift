@@ -27,7 +27,7 @@ struct PlanDetailsModel: Codable {
     var renew_new: Bool?
     var msg: FlexibleValue?
     var end_date: FlexibleValue?
-    var image: String?
+    var image, studio_name: String?
 }
 
 

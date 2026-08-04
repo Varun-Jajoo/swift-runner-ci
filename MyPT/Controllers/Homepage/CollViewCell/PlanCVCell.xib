@@ -48,6 +48,12 @@
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kv3-wj-84M">
+                                <rect key="frame" x="20" y="73" width="31" height="14.333333333333329"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                <color key="textColor" red="0.74901960784313726" green="0.74901960784313726" blue="0.73725490196078436" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Session Utilization" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PQ3-tk-auj">
                                 <rect key="frame" x="20" y="92.666666666666671" width="139.33333333333334" height="20.333333333333329"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -76,7 +82,6 @@
                                             <constraint firstAttribute="height" constant="42" id="IGi-dj-zsj"/>
                                         </constraints>
                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                        <state key="normal" image="useSession"/>
                                         <connections>
                                             <action selector="onTapUseSession:" destination="gTV-IL-0wX" eventType="touchUpInside" id="FHm-Zt-arb"/>
                                         </connections>
@@ -117,8 +122,10 @@
                             <constraint firstItem="HBx-KW-UoI" firstAttribute="leading" secondItem="PQ3-tk-auj" secondAttribute="leading" id="cN8-ku-ofc"/>
                             <constraint firstItem="U4p-IK-WvW" firstAttribute="centerY" secondItem="U3Q-E5-Kwy" secondAttribute="centerY" id="fRP-E8-xqe"/>
                             <constraint firstItem="Pq0-PX-DAr" firstAttribute="top" secondItem="HBx-KW-UoI" secondAttribute="bottom" constant="10" id="fdx-hb-1Fc"/>
+                            <constraint firstItem="kv3-wj-84M" firstAttribute="leading" secondItem="w27-LV-rJJ" secondAttribute="leading" id="h67-us-ihb"/>
                             <constraint firstItem="HBx-KW-UoI" firstAttribute="top" secondItem="PQ3-tk-auj" secondAttribute="bottom" constant="20" id="hDm-uO-nnf"/>
                             <constraint firstAttribute="bottom" secondItem="BH8-KJ-Zs7" secondAttribute="bottom" id="i7h-kg-wtu"/>
+                            <constraint firstItem="kv3-wj-84M" firstAttribute="top" secondItem="w27-LV-rJJ" secondAttribute="bottom" constant="0.3333333333333286" id="iwf-dT-Mcn"/>
                             <constraint firstAttribute="height" constant="213" id="p4G-OU-bR3"/>
                             <constraint firstItem="w27-LV-rJJ" firstAttribute="top" secondItem="U3Q-E5-Kwy" secondAttribute="bottom" constant="12" id="rS4-Qh-pfh"/>
                             <constraint firstItem="PQ3-tk-auj" firstAttribute="leading" secondItem="w27-LV-rJJ" secondAttribute="leading" id="vKU-vh-4ui"/>
@@ -137,6 +144,7 @@
                 <outlet property="btnBuyMore" destination="jor-aD-gbY" id="3ch-uA-dUF"/>
                 <outlet property="btnUseSession" destination="85G-bG-dzh" id="752-je-klA"/>
                 <outlet property="imgPlan" destination="BH8-KJ-Zs7" id="25M-1h-ISb"/>
+                <outlet property="lblGymExpiry" destination="kv3-wj-84M" id="XTn-Aq-mot"/>
                 <outlet property="lblPlanImg" destination="U3Q-E5-Kwy" id="B1S-gt-wmy"/>
                 <outlet property="lblRemainingSession" destination="w27-LV-rJJ" id="sHz-MM-8W9"/>
                 <outlet property="lblSessionUtilization" destination="PQ3-tk-auj" id="4wl-hI-lxV"/>
@@ -151,6 +159,5 @@
     <resources>
         <image name="Separator" width="4.3333334922790527" height="4.3333334922790527"/>
         <image name="buyMore" width="168" height="42"/>
-        <image name="useSession" width="168" height="42"/>
     </resources>
 </document>

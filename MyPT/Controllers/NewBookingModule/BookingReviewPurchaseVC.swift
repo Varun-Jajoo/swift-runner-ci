@@ -108,9 +108,7 @@ class BookingReviewPurchaseVC: CommonViewController {
     @IBOutlet weak var lblEndDateData: UILabel!
     @IBOutlet weak var lblGymMembershipPrice: UILabel!
     @IBOutlet weak var viewTrainerLocation: UIView!
-//    @IBOutlet weak var lblTermCondition: UILabel!
     @IBOutlet weak var lblRefundable: UILabel!
-//    @IBOutlet weak var btnCheck: UIButton!
     @IBOutlet weak var viewOtherPlans: UIView!
     @IBOutlet weak var lblBrowseOtherPlan: UILabel!
     @IBOutlet weak var lblChangeSessionCount: UILabel!
@@ -132,6 +130,10 @@ class BookingReviewPurchaseVC: CommonViewController {
     @IBOutlet weak var imgNewGymEarlyClock: UIImageView!
     @IBOutlet weak var viewNewGymMSg: UIView!
     @IBOutlet weak var heightOfNewGymMembership: NSLayoutConstraint!
+    @IBOutlet weak var viewTermAndCond: UIView!
+    @IBOutlet weak var btnCheck: UIButton!
+    @IBOutlet weak var lblTermCondition: UILabel!
+    @IBOutlet weak var lblGymRefundable: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -167,9 +169,10 @@ class BookingReviewPurchaseVC: CommonViewController {
     
     private func uiSetup() {
         DispatchQueue.main.async {
-//            self.btnCheck.setImage(UIImage(named: "unselectedRadioBtn"), for: .normal)
-//            self.lblTermCondition.isUserInteractionEnabled = true
+            self.btnCheck.setImage(UIImage(named: "unselectedRadioBtn"), for: .normal)
+            self.lblTermCondition.isUserInteractionEnabled = true
             self.lblRefundable.isUserInteractionEnabled = true
+            self.lblGymRefundable.isUserInteractionEnabled = true
             self.viewPaymenytDownword.roundBottomCorners(radius: 16)
             
             //        .roundSideCorners(radius: 16, cornerSide: .bottomLeft)
@@ -231,7 +234,7 @@ class BookingReviewPurchaseVC: CommonViewController {
             [self.lblMode, self.lblTypeWorkout, self.lblTotalSession, self.lblValidity, self.lblAllTrainer, self.lblSelectedGym, self.lblYouwillBookSession, self.lblCancel6h, self.lblGymMembershipSelectedGym, self.lblGymMembershipSelectedPlan, self.lblStartDate, self.lblEndDate, self.lblNewGymPlanType, self.lblNewGymValidity, self.lblNewSelectedGym].forEach {
                 $0?.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
             }
-//            self.lblTermCondition.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
+            self.lblTermCondition.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
             self.lblSavedSession.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
             self.lblNewGymMsg.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
             self.lblNumOfAED.font = AppFont.bold.size(30.0, familyName: familyFunnelSans)
@@ -280,9 +283,9 @@ class BookingReviewPurchaseVC: CommonViewController {
                 //                .underlineStyle: NSUnderlineStyle.single.rawValue
             ], range: range)
             
-//            self.lblTermCondition.attributedText = attributedString
+            self.lblTermCondition.attributedText = attributedString
             let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.handleTap))
-//            self.lblTermCondition.addGestureRecognizer(tapGesture)
+            self.lblTermCondition.addGestureRecognizer(tapGesture)
             
             
             let refundFullText = "This package is non-refundable. Know More"
@@ -307,51 +310,31 @@ class BookingReviewPurchaseVC: CommonViewController {
             ], range: refundFrange)
             
             self.lblRefundable.attributedText = refundFattributedString
+            self.lblGymRefundable.attributedText = refundFattributedString
             
             let refundFtapGesture = UITapGestureRecognizer(target: self, action: #selector(self.refundhandleTap))
+            let refundGymFtapGesture = UITapGestureRecognizer(target: self, action: #selector(self.refundhandleTap))
             self.lblRefundable.addGestureRecognizer(refundFtapGesture)
+            self.lblGymRefundable.addGestureRecognizer(refundGymFtapGesture)
         }
     }
     
     @objc func handleTap(_ gesture: UITapGestureRecognizer) {
-//        guard let text = lblTermCondition.attributedText?.string else { return }
-//        
-//        let clickableText = "MyPT Personal Training Terms & Conditions"
-//        let range = (text as NSString).range(of: clickableText)
-//        
-//        if gesture.didTapAttributedText(in: lblTermCondition, inRange: range) {
-//            
-//            let vc: TermsConditionVC = TermsConditionVC.instantiate(appStoryboard: .purchase)
-//            vc.onAgreeTap = { [weak self] in
-//                guard let self = self else { return }
-//                
-//                self.isChecked = true
-//                self.btnCheck.setImage(UIImage(named: "ic_checkMark"), for: .normal)
-//            }
-//            vc.type = flowGymwork == .withoutTrainerMembership ? "memebership" : "pt"
-//            vc.modalPresentationStyle = .pageSheet
-//            
-//            //                   if #available(iOS 15.0, *) {
-//            //                       if let sheet = vc.sheetPresentationController {
-//            //                           sheet.detents = [.medium(), .large()]   // half + full
-//            //                           sheet.prefersGrabberVisible = true      // top drag indicator
-//            //                           sheet.preferredCornerRadius = 20        // rounded top
-//            //                       }
-//            //                   }
-//            
-//            self.present(vc, animated: true)
-//        }
-    }
-    
-    @objc func refundhandleTap(_ gesture: UITapGestureRecognizer) {
-        guard let text = lblRefundable.attributedText?.string else { return }
+        guard let text = lblTermCondition.attributedText?.string else { return }
         
-        let refundClickableText = "Know More"
-        let refundrange = (text as NSString).range(of: refundClickableText)
+        let clickableText = "MyPT Personal Training Terms & Conditions"
+        let range = (text as NSString).range(of: clickableText)
         
-        if gesture.didTapAttributedText(in: lblRefundable, inRange: refundrange) {
+        if gesture.didTapAttributedText(in: lblTermCondition, inRange: range) {
             
-            let vc: RefundVC = RefundVC.instantiate(appStoryboard: .purchase)
+            let vc: TermsConditionVC = TermsConditionVC.instantiate(appStoryboard: .purchase)
+            vc.onAgreeTap = { [weak self] in
+                guard let self = self else { return }
+                
+                self.isChecked = true
+                self.btnCheck.setImage(UIImage(named: "ic_checkMark"), for: .normal)
+            }
+            vc.type = flowGymwork == .withoutTrainerMembership ? "memebership" : "pt"
             vc.modalPresentationStyle = .pageSheet
             
             //                   if #available(iOS 15.0, *) {
@@ -364,6 +347,12 @@ class BookingReviewPurchaseVC: CommonViewController {
             
             self.present(vc, animated: true)
         }
+    }
+    
+    @objc func refundhandleTap(_ gesture: UITapGestureRecognizer) {
+        let vc: RefundVC = RefundVC.instantiate(appStoryboard: .purchase)
+        vc.modalPresentationStyle = .pageSheet
+        self.present(vc, animated: true)
     }
     
     private func fetchCheckoutData() {
@@ -503,6 +492,7 @@ class BookingReviewPurchaseVC: CommonViewController {
             lblRemainingSession.text = "AED \(pkg.pricePerSession?.value ?? "") / session"
             lblSavedSession.text = pkg.textMsg
             lblNewGymMsg.text = pkg.textMsg
+            lblNewGymValidityData.text = "\(pkg.validityDays ?? 0) days"
         }
         
         if isUpgradeSelected != false {
@@ -559,12 +549,10 @@ class BookingReviewPurchaseVC: CommonViewController {
     
     private func updateApplyCouponUI() {
         let isApplied = selectedOfferId != nil
-        
         btnApply.setImage(
             UIImage(named: isApplied ? "appliedImg" : "btnApply"),
             for: .normal
         )
-        
         btnApply.isUserInteractionEnabled = !isApplied
     }
     
@@ -677,14 +665,12 @@ class BookingReviewPurchaseVC: CommonViewController {
     
     @IBAction func onTapCheck(_ sender: UIButton) {
         isChecked.toggle()
-        
-//        if isChecked {
-//            btnCheck.setImage(UIImage(named: "ic_checkMark"), for: .normal)
-//        } else {
-//            btnCheck.setImage(UIImage(named: "unselectedRadioBtn"), for: .normal)
-//        }
+        if isChecked {
+            btnCheck.setImage(UIImage(named: "ic_checkMark"), for: .normal)
+        } else {
+            btnCheck.setImage(UIImage(named: "unselectedRadioBtn"), for: .normal)
+        }
     }
-    
     
     @IBAction func onTapConformPay(_ sender: UIButton) {
         paymentPopUp()
@@ -715,7 +701,13 @@ class BookingReviewPurchaseVC: CommonViewController {
         TrainerVM.getAddressApi(viewController: self, inputParms: [:], completion: { [weak self] getResultData in
             guard let self = self, let getResultData = getResultData else { return  }
             print("getResultData", getResultData.data as Any)
-            vc.addressData?.append(contentsOf: getResultData.data ?? [])
+            let addresses = getResultData.data ?? []
+            vc.addressData?.append(contentsOf: addresses)
+            // Pre-select the address that was previously chosen (match by id)
+            if let selectedId = self.inputParam?.addressData?.id?.value,
+               let matchedIndex = addresses.firstIndex(where: { $0.id?.value == selectedId }) {
+                vc.currentSelectedAddress = matchedIndex
+            }
             present(vc, animated: true)
         })
     }
@@ -724,9 +716,7 @@ class BookingReviewPurchaseVC: CommonViewController {
         guard let upgradePlanId = checkoutData?.upgradePlan?.id else {
             return
         }
-        
         selectedBestPlanId = upgradePlanId
-        
         btnUpgradePlan.isUserInteractionEnabled = false
         fetchCheckoutData()
     }
@@ -764,8 +754,6 @@ class BookingReviewPurchaseVC: CommonViewController {
                 )
             }
         }
-        
-        
         // Receive selected coupon back
         vc.sentBackCoupon = { [weak self] coupon, navVC in
             guard let self = self else { return }
@@ -785,10 +773,8 @@ class BookingReviewPurchaseVC: CommonViewController {
             
             applyCouponPopUp()
         }
-        
         self.navigationController?.pushViewController(vc, animated: false)
     }
-    
     
     @IBAction func onTapTabby(_ sender: UIButton) {
         
@@ -862,7 +848,6 @@ class BookingReviewPurchaseVC: CommonViewController {
     }
     
     private func verifyPaymentStatus(inputParams: [String: Any], completion: @escaping (PaymentResponse) -> Void) {
-        
         NetworkManager.shared.genericAPICall(serviceEndPoint: .paymentStatus, method: .post, queries: nil, parameters: inputParams, isShowLoading: false, isShowLoadingWithoutMsg: true, completion: { (getResponce, error) in
             do {
                 print(getResponce as Any)

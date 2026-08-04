@@ -200,7 +200,12 @@ class ReviewBookingViewController: CommonViewController, UITableViewDelegate, UI
             TrainerVM.getAddressApi(viewController: self, inputParms: [:], completion: { [weak self] getResultData in
                 guard let self = self, let getResultData = getResultData else { return  }
                 print("getResultData", getResultData.data as Any)
-                vc.addressData?.append(contentsOf: getResultData.data ?? [])
+                let addresses = getResultData.data ?? []
+                vc.addressData?.append(contentsOf: addresses)
+                // Pre-select the address that was previously chosen (match by id)
+                if let matchedIndex = addresses.firstIndex(where: { $0.id?.value == self.addressID }) {
+                    vc.currentSelectedAddress = matchedIndex
+                }
                 present(vc, animated: true)
             })
         }

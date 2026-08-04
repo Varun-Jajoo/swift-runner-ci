@@ -64,16 +64,16 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="D8P-e8-c3f">
-                                <rect key="frame" x="20" y="149" width="303" height="98"/>
+                                <rect key="frame" x="20" y="146" width="303" height="97"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="9DE-fJ-MaY">
-                                        <rect key="frame" x="0.0" y="0.0" width="303" height="35"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="303" height="34"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SZN-PI-Nb3">
-                                                <rect key="frame" x="0.0" y="0.0" width="30" height="35"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="30" height="34"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="height" constant="35" id="SDX-Ra-2rZ"/>
+                                                    <constraint firstAttribute="height" constant="34" id="Q5X-AQ-sA8"/>
                                                 </constraints>
                                                 <color key="tintColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
@@ -82,7 +82,7 @@
                                                 </connections>
                                             </button>
                                             <button opaque="NO" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="D1U-6n-DPe">
-                                                <rect key="frame" x="148" y="0.0" width="155" height="35"/>
+                                                <rect key="frame" x="148" y="0.0" width="155" height="34"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
@@ -94,7 +94,7 @@
                                         </subviews>
                                     </stackView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="EpV-sm-9cQ">
-                                        <rect key="frame" x="0.0" y="35" width="303" height="63"/>
+                                        <rect key="frame" x="0.0" y="34" width="303" height="63"/>
                                         <subviews>
                                             <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Bj2-2f-ilM">
                                                 <rect key="frame" x="0.0" y="0.0" width="303" height="63"/>
@@ -153,8 +153,8 @@
                             <constraint firstItem="ib1-be-67T" firstAttribute="top" secondItem="b41-JH-s2r" secondAttribute="top" id="gDQ-tt-wdJ"/>
                             <constraint firstItem="D8P-e8-c3f" firstAttribute="leading" secondItem="4mr-Hd-aNM" secondAttribute="leading" id="gT6-23-J8J"/>
                             <constraint firstItem="fA7-TU-j5w" firstAttribute="top" secondItem="hTL-3a-Ko0" secondAttribute="bottom" constant="16" id="kQz-7n-YTR"/>
-                            <constraint firstAttribute="bottom" secondItem="D8P-e8-c3f" secondAttribute="bottom" constant="6" id="qBB-QC-oX6"/>
-                            <constraint firstItem="D8P-e8-c3f" firstAttribute="top" secondItem="4mr-Hd-aNM" secondAttribute="bottom" constant="16" id="tXM-3G-CZb"/>
+                            <constraint firstAttribute="bottom" secondItem="D8P-e8-c3f" secondAttribute="bottom" constant="10" id="qBB-QC-oX6"/>
+                            <constraint firstItem="D8P-e8-c3f" firstAttribute="top" secondItem="4mr-Hd-aNM" secondAttribute="bottom" constant="13" id="tXM-3G-CZb"/>
                             <constraint firstItem="fA7-TU-j5w" firstAttribute="leading" secondItem="4mr-Hd-aNM" secondAttribute="leading" id="yDz-xf-6pR"/>
                         </constraints>
                     </view>
@@ -173,6 +173,7 @@
                 <outlet property="btnQuickBook" destination="SZN-PI-Nb3" id="paP-Np-8Td"/>
                 <outlet property="btnStackView" destination="9DE-fJ-MaY" id="2Yz-Qr-CUw"/>
                 <outlet property="collectionTime" destination="fA7-TU-j5w" id="5Sn-IJ-XYn"/>
+                <outlet property="heightOfQuickBtn" destination="Q5X-AQ-sA8" id="Igb-cA-YoB"/>
                 <outlet property="imgBackground" destination="ib1-be-67T" id="Q8R-tB-jc0"/>
                 <outlet property="imgTrainer" destination="hTL-3a-Ko0" id="4lf-hx-IZH"/>
                 <outlet property="lblInfo" destination="Hkr-Fp-F5s" id="cTj-r5-it1"/>
