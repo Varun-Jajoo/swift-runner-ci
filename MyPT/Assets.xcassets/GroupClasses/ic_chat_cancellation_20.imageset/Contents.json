@@ -1,0 +1,15 @@
+{
+  "images" : [
+    {
+      "filename" : "ic_chat_cancellation_20.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "properties" : {
+    "preserves-vector-representation" : true
+  }
+}

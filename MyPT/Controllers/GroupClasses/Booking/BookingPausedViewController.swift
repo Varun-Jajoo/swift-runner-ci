@@ -411,14 +411,14 @@ private extension BookingPausedViewController {
         card.sheenOrigin = .topCenter
         card.sheenAlpha = 0.08
 
-        let tile = GradientFadeView()
+        let tile = GlassCardView(cornerRadius: 12)
         tile.translatesAutoresizingMaskIntoConstraints = false
-        tile.setColors([UIColor.white.withAlphaComponent(0.1), Palette.notifyTileFill, Palette.notifyTileFill],
-                       locations: [0.0, 0.5, 1.0])
-        tile.layer.cornerRadius = 12
-        tile.layer.masksToBounds = true
-        tile.layer.borderWidth = 1
-        tile.layer.borderColor = Palette.notifyTileFill.cgColor
+        tile.fillColor = Palette.notifyTileFill
+        tile.fillAlpha = 1.0
+        tile.strokeColor = UIColor(hex: "#101113")
+        tile.strokeAlpha = 1.0
+        tile.sheenOrigin = .topCenter
+        tile.sheenAlpha = 0.08
 
         let bellIcon = UIImageView(image: BookingPausedViewController.icon(["ic_bell_18", "bell"])?.withRenderingMode(.alwaysTemplate))
         bellIcon.translatesAutoresizingMaskIntoConstraints = false

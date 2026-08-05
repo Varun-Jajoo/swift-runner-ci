@@ -175,9 +175,9 @@ final class GroupClassesCarouselView: UIView {
         collectionView.register(GroupClassCardCollectionViewCell.self,
                                 forCellWithReuseIdentifier: GroupClassCardCollectionViewCell.reuseIdentifier)
 
-        // Dots sit inside a dark pill, centred under the carousel.
+        // Dots sit inside a dark pill container (#131416 with pill radius)
         dotsPill.translatesAutoresizingMaskIntoConstraints = false
-        dotsPill.backgroundColor = GroupClassColor.bg3.color
+        dotsPill.backgroundColor = UIColor(hex: "#131416")
         dotsPill.layer.masksToBounds = true
         dotsView.translatesAutoresizingMaskIntoConstraints = false
         dotsPill.addSubview(dotsView)

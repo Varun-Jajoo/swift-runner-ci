@@ -538,9 +538,9 @@ private extension ConfirmSlotSheetViewController {
         contentStack.alignment = .fill
         contentStack.spacing = 0
         contentStack.isLayoutMarginsRelativeArrangement = true
-        contentStack.layoutMargins = UIEdgeInsets(top: Metric.topInset,
+        contentStack.layoutMargins = UIEdgeInsets(top: 8,
                                                   left: Metric.horizontalInset,
-                                                  bottom: Metric.bottomInset,
+                                                  bottom: 12,
                                                   right: Metric.horizontalInset)
         scrollView.addSubview(contentStack)
 
@@ -560,27 +560,27 @@ private extension ConfirmSlotSheetViewController {
         // 1 — drag handle
         let handleRow = makeHandleRow()
         contentStack.addArrangedSubview(handleRow)
-        contentStack.setCustomSpacing(20, after: handleRow)
+        contentStack.setCustomSpacing(12, after: handleRow)
 
         // 2 — title / subtitle + close X
         let headerRow = makeHeaderRow()
         contentStack.addArrangedSubview(headerRow)
-        contentStack.setCustomSpacing(20, after: headerRow)
+        contentStack.setCustomSpacing(12, after: headerRow)
 
         // 3 — class / location / trainer details card
         let detailsCard = makeDetailsCard()
         contentStack.addArrangedSubview(detailsCard)
-        contentStack.setCustomSpacing(16, after: detailsCard)
+        contentStack.setCustomSpacing(12, after: detailsCard)
 
         // 4 — amber IMPORTANT NOTE box
         let noteBox = makeImportantNoteBox()
         contentStack.addArrangedSubview(noteBox)
-        contentStack.setCustomSpacing(20, after: noteBox)
+        contentStack.setCustomSpacing(12, after: noteBox)
 
         // 5 — cancellation-policy line
         let policyLabel = makePolicyLabel()
         contentStack.addArrangedSubview(policyLabel)
-        contentStack.setCustomSpacing(16, after: policyLabel)
+        contentStack.setCustomSpacing(12, after: policyLabel)
 
         // 6 — CTA
         contentStack.addArrangedSubview(makeCTA())
@@ -800,20 +800,17 @@ private extension ConfirmSlotSheetViewController {
     /// Android's `location_icon_bg`: 38dp rounded square, top-down
     /// `#1AFFFFFF -> #101113` wash with a `#101113` hairline.
     func makeIconTile(image: UIImage?) -> UIView {
-        let tile = GradientFadeView()
+        let tile = GlassCardView(cornerRadius: 12)
         tile.translatesAutoresizingMaskIntoConstraints = false
-        tile.setColors([UIColor.white.withAlphaComponent(0.1),
-                        Palette.tileFill,
-                        Palette.tileFill],
-                       locations: [0.0, 0.5, 1.0])
-        tile.layer.cornerRadius = 12
-        tile.layer.masksToBounds = true
-        tile.layer.borderWidth = 1
-        tile.layer.borderColor = Palette.tileFill.cgColor
+        tile.fillColor = Palette.tileFill
+        tile.fillAlpha = 1.0
+        tile.strokeColor = UIColor(hex: "#101113")
+        tile.strokeAlpha = 1.0
+        tile.sheenOrigin = .topCenter
+        tile.sheenAlpha = 0.08
 
-        let iconView = UIImageView(image: image?.withRenderingMode(.alwaysTemplate))
+        let iconView = UIImageView(image: image)
         iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.tintColor = .white
         iconView.contentMode = .scaleAspectFit
         tile.addSubview(iconView)
 
