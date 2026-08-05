@@ -1749,6 +1749,7 @@ private extension GroupTrainingDetailViewController {
         label.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
         label.textColor = Palette.waitlistBannerInk
         label.numberOfLines = 0
+        label.textAlignment = .center
         label.text = Copy.waitlistBanner
 
         let row = UIStackView(arrangedSubviews: [bellView, label])
@@ -1766,11 +1767,11 @@ private extension GroupTrainingDetailViewController {
 
             bellView.widthAnchor.constraint(equalToConstant: 16),
             bellView.heightAnchor.constraint(equalToConstant: 16),
-            bannerBg.bottomAnchor.constraint(equalTo: waitlistBanner.bottomAnchor),
 
             row.topAnchor.constraint(equalTo: waitlistBanner.topAnchor, constant: 8),
-            row.leadingAnchor.constraint(equalTo: waitlistBanner.leadingAnchor, constant: 16),
-            row.trailingAnchor.constraint(equalTo: waitlistBanner.trailingAnchor, constant: -16),
+            row.centerXAnchor.constraint(equalTo: waitlistBanner.centerXAnchor),
+            row.leadingAnchor.constraint(greaterThanOrEqualTo: waitlistBanner.leadingAnchor, constant: 16),
+            row.trailingAnchor.constraint(lessThanOrEqualTo: waitlistBanner.trailingAnchor, constant: -16),
             row.bottomAnchor.constraint(equalTo: waitlistBanner.bottomAnchor, constant: -24),
 
             waitlistBanner.leadingAnchor.constraint(equalTo: view.leadingAnchor),

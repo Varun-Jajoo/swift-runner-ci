@@ -1104,14 +1104,11 @@ private extension ClassPaymentViewController {
     // MARK: Terms & Conditions row
 
     func makeTermsRow() -> UIView {
-        // Android reuses `payment_option_card_bg` here too — same solid
-        // `#212122`/16dp/1dp-`#1AFFFFFF` recipe as the Tabby/Card rows above,
-        // not a separate translucent-glass treatment.
-        let row = GlassCardView(cornerRadius: 16)
+        let row = GlassCardView(cornerRadius: 8)
         row.translatesAutoresizingMaskIntoConstraints = false
-        row.fillColor = Palette.paymentRowFill
+        row.fillColor = UIColor(hex: "#101113")
         row.fillAlpha = 1.0
-        row.strokeColor = Palette.paymentRowStroke
+        row.strokeColor = UIColor(hex: "#27282A")
         row.strokeAlpha = 1.0
         row.showsSheen = false
 
