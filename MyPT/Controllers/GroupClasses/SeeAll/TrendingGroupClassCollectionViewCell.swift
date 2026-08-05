@@ -20,17 +20,6 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
     static let reuseIdentifier = "TrendingGroupClassCollectionViewCell"
     static let cardWidth: CGFloat = 160
     static let cardHeight: CGFloat = 190
-    /// `cardHeight` (190) + the 9pt gap to the text block + the text block
-    /// itself (title/time/location+spots, ~57pt at these font sizes).
-    ///
-    /// Android's `rvTrendingClasses` is `wrap_content` — it never hard-codes a
-    /// row height at all. This *has* to be one (`UICollectionViewFlowLayout`
-    /// needs an explicit item size), so it's sized with real headroom rather
-    /// than the exact sum, which left ~0pt of margin: any real-world font
-    /// metric a few points off the estimate overflowed the cell's bounds, and
-    /// since nothing clips `contentView`, that overflow painted straight into
-    /// the dots indicator below instead of being hidden.
-    static let totalCellHeight: CGFloat = 272
     /// Giant rank number's fixed render height (`layout_height="104dp"` on
     /// Android; width is `wrap_content` + `adjustViewBounds`, i.e. scaled to
     /// this height at the asset's own aspect ratio).
@@ -86,10 +75,6 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
     private func setupViews() {
         contentView.backgroundColor = .clear
         backgroundColor = .clear
-        // Safety net: if a future device's font metrics ever push the content
-        // block past `totalCellHeight` again, this clips it instead of letting
-        // it bleed into whatever sits below the trending row.
-        contentView.clipsToBounds = true
 
         rankImageView.translatesAutoresizingMaskIntoConstraints = false
         rankImageView.contentMode = .scaleAspectFit
