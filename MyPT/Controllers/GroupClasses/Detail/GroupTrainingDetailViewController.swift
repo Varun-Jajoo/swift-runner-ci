@@ -898,6 +898,12 @@ final class GroupTrainingDetailViewController: CommonViewController {
         readMoreButton.isHidden = !overflows
         aboutFadeView.isHidden = !overflows || isAboutExpanded
 
+        // Adjust spacing after aboutBlock so that when readMoreButton is hidden,
+        // the gap to the next section ("What to bring") is 24pt instead of collapsing to 8pt.
+        if let column = aboutBlock.superview as? UIStackView {
+            column.setCustomSpacing(overflows ? 8 : 24, after: aboutBlock)
+        }
+
         // A paragraph that no longer overflows (shorter copy arrived from the API
         // while expanded) must not stay stuck in the expanded state.
         if !overflows && isAboutExpanded {
@@ -1465,6 +1471,7 @@ private extension GroupTrainingDetailViewController {
         aboutLabel.translatesAutoresizingMaskIntoConstraints = false
         aboutLabel.font = AppFont.regular.size(14.0, familyName: familyFunnelSans)
         aboutLabel.textColor = Palette.aboutText
+        aboutLabel.textAlignment = .left
         aboutLabel.numberOfLines = GroupTrainingDetailViewController.aboutCollapsedLineLimit
         aboutLabel.lineBreakMode = .byTruncatingTail
         aboutLabel.text = Copy.aboutPlaceholder
