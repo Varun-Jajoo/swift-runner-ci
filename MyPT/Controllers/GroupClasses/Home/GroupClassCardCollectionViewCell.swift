@@ -216,6 +216,7 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
             locationIconView.heightAnchor.constraint(equalToConstant: 14),
 
             progressBar.widthAnchor.constraint(equalToConstant: 59),
+            progressBar.heightAnchor.constraint(equalToConstant: 4),
 
             contentStack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 10),
             contentStack.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -10),

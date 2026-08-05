@@ -575,7 +575,7 @@ private extension ClassPaymentViewController {
             footerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             footerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
-            ctaButton.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 16),
+            ctaButton.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 12),
             ctaButton.leadingAnchor.constraint(equalTo: footerView.leadingAnchor, constant: Metric.horizontalInset),
             ctaButton.trailingAnchor.constraint(equalTo: footerView.trailingAnchor, constant: -Metric.horizontalInset),
             ctaButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
@@ -617,18 +617,12 @@ private extension ClassPaymentViewController {
             contentStack.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
         ])
 
-        let savingsLabel = makeSectionLabel(Copy.savingsSectionTitle, topMargin: 20)
-        let couponCard = makeCouponCard()
-        let classDetailsLabel = makeSectionLabel(Copy.classDetailsSectionTitle)
+        // Savings corner section commented out per design update
+        let classDetailsLabel = makeSectionLabel(Copy.classDetailsSectionTitle, topMargin: 20)
         let classDetailsCard = makeClassDetailsCard()
         let paymentLabel = makeSectionLabel(Copy.paymentSectionTitle)
         let paymentCard = makePaymentOptionsCard()
         let termsRow = makeTermsRow()
-
-        contentStack.addArrangedSubview(savingsLabel)
-        contentStack.setCustomSpacing(12, after: savingsLabel)
-        contentStack.addArrangedSubview(couponCard)
-        contentStack.setCustomSpacing(35, after: couponCard)
 
         contentStack.addArrangedSubview(classDetailsLabel)
         contentStack.setCustomSpacing(12, after: classDetailsLabel)
@@ -881,14 +875,14 @@ private extension ClassPaymentViewController {
     }
 
     func makeIconTile(image: UIImage?, iconSide: CGFloat, tint: UIColor? = .white) -> UIView {
-        let tile = GradientFadeView()
+        let tile = GlassCardView(cornerRadius: 12)
         tile.translatesAutoresizingMaskIntoConstraints = false
-        tile.setColors([UIColor.white.withAlphaComponent(0.1), Palette.tileFill, Palette.tileFill],
-                       locations: [0.0, 0.5, 1.0])
-        tile.layer.cornerRadius = 12
-        tile.layer.masksToBounds = true
-        tile.layer.borderWidth = 1
-        tile.layer.borderColor = Palette.tileFill.cgColor
+        tile.fillColor = Palette.tileFill
+        tile.fillAlpha = 1.0
+        tile.strokeColor = UIColor(hex: "#101113")
+        tile.strokeAlpha = 1.0
+        tile.sheenOrigin = .topCenter
+        tile.sheenAlpha = 0.08
 
         let iconView = UIImageView(image: tint == nil ? image : image?.withRenderingMode(.alwaysTemplate))
         iconView.translatesAutoresizingMaskIntoConstraints = false
@@ -1154,17 +1148,17 @@ private extension ClassPaymentViewController {
         row.isUserInteractionEnabled = true
 
         NSLayoutConstraint.activate([
-            termsCheckbox.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 16),
+            termsCheckbox.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 12),
             termsCheckbox.centerYAnchor.constraint(equalTo: row.centerYAnchor),
             termsCheckbox.widthAnchor.constraint(equalToConstant: Metric.checkboxSide),
             termsCheckbox.heightAnchor.constraint(equalToConstant: Metric.checkboxSide),
-            termsCheckbox.topAnchor.constraint(greaterThanOrEqualTo: row.topAnchor, constant: 16),
-            termsCheckbox.bottomAnchor.constraint(lessThanOrEqualTo: row.bottomAnchor, constant: -16),
+            termsCheckbox.topAnchor.constraint(greaterThanOrEqualTo: row.topAnchor, constant: 12),
+            termsCheckbox.bottomAnchor.constraint(lessThanOrEqualTo: row.bottomAnchor, constant: -12),
 
             label.leadingAnchor.constraint(equalTo: termsCheckbox.trailingAnchor, constant: 12),
-            label.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -16),
-            label.topAnchor.constraint(equalTo: row.topAnchor, constant: 16),
-            label.bottomAnchor.constraint(equalTo: row.bottomAnchor, constant: -16)
+            label.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -12),
+            label.topAnchor.constraint(equalTo: row.topAnchor, constant: 12),
+            label.bottomAnchor.constraint(equalTo: row.bottomAnchor, constant: -12)
         ])
         return row
     }

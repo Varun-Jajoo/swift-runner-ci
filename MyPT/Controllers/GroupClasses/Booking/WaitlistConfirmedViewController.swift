@@ -501,13 +501,14 @@ private extension WaitlistConfirmedViewController {
     }
 
     func makeIconTile(image: UIImage?, iconSide: CGFloat, fill: UIColor) -> UIView {
-        let tile = GradientFadeView()
+        let tile = GlassCardView(cornerRadius: 12)
         tile.translatesAutoresizingMaskIntoConstraints = false
-        tile.setColors([UIColor.white.withAlphaComponent(0.1), fill, fill], locations: [0.0, 0.5, 1.0])
-        tile.layer.cornerRadius = 12
-        tile.layer.masksToBounds = true
-        tile.layer.borderWidth = 1
-        tile.layer.borderColor = fill.cgColor
+        tile.fillColor = fill
+        tile.fillAlpha = 1.0
+        tile.strokeColor = UIColor(hex: "#101113")
+        tile.strokeAlpha = 1.0
+        tile.sheenOrigin = .topCenter
+        tile.sheenAlpha = 0.08
 
         let iconView = UIImageView(image: image?.withRenderingMode(.alwaysTemplate))
         iconView.translatesAutoresizingMaskIntoConstraints = false

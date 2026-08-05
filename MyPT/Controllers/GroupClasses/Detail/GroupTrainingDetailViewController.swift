@@ -335,10 +335,12 @@ final class GroupTrainingDetailViewController: CommonViewController {
         if percentage >= 100 || remaining <= 0 {
             isWaitlistMode = true
             waitlistBanner.isHidden = false
+            scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 56, right: 0)
             setCTATitle("JOIN WAITLIST")
         } else {
             isWaitlistMode = false
             waitlistBanner.isHidden = true
+            scrollView.contentInset = .zero
             setCTATitle(defaultBookingText)
         }
     }
@@ -589,10 +591,6 @@ final class GroupTrainingDetailViewController: CommonViewController {
 
         isFreeForUser = resolveIsFreeForUser(access: resolvedAccess, isMember: isMember)
 
-        // `isMember` alone used to also trigger "Free for members" here, which
-        // is wrong for a class whose `access` is explicitly "paid" — that case
-        // already resolves `isFreeForUser` to `false` (and the CTA correctly
-        // reads "PROCEED TO PAYMENT"), so the price row should not contradict it.
         if isFreeForUser {
             priceLabel.text = "Free for members"
         } else if resolvedAccess.lowercased() == "free" {
@@ -816,7 +814,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
         controller.classLocation = classLocation
         controller.trainerName = trainerName
         controller.distance = locationDistanceLabel.text ?? currentDistance
-        controller.classPrice = classPrice
+        controller.classPrice = isFreeForUser ? "" : classPrice
         controller.isReadOnly = true
         controller.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(controller, animated: true)
@@ -1020,7 +1018,7 @@ private extension GroupTrainingDetailViewController {
         // 3 — date/time + spots progress
         let dateSpotsRow = makeDateAndSpotsRow()
         column.addArrangedSubview(dateSpotsRow)
-        column.setCustomSpacing(16, after: dateSpotsRow)
+        column.setCustomSpacing(0, after: dateSpotsRow)
 
         // 4 — location row (tap -> Maps)
         let locationRowView = makeLocationRow()
@@ -1028,7 +1026,7 @@ private extension GroupTrainingDetailViewController {
 
         let locationDivider = makeHairline(color: Palette.hairline)
         column.addArrangedSubview(locationDivider)
-        column.setCustomSpacing(16, after: locationDivider)
+        column.setCustomSpacing(0, after: locationDivider)
 
         // 5 — doors-open row. Both the row above and below it carry a 12pt
         // internal top/bottom pad; matching the 16pt gap on both sides of that
@@ -1036,14 +1034,15 @@ private extension GroupTrainingDetailViewController {
         // top-heavy) keeps the whitespace even at 28pt total on each side.
         let doorsRow = makeDoorsOpenRow()
         column.addArrangedSubview(doorsRow)
-        column.setCustomSpacing(16, after: doorsRow)
-        column.addArrangedSubview(makeHairline(color: Palette.hairline))
+        let doorsDivider = makeHairline(color: Palette.hairline)
+        column.addArrangedSubview(doorsDivider)
+        column.setCustomSpacing(24, after: doorsDivider)
 
         // 6 — why this class stands out
         let whyTitle = makeSectionTitle("Why this class stands out")
         column.setCustomSpacing(24, after: column.arrangedSubviews[column.arrangedSubviews.count - 1])
         column.addArrangedSubview(whyTitle)
-        column.setCustomSpacing(12, after: whyTitle)
+        column.setCustomSpacing(8, after: whyTitle)
 
         let whyCarousel = makeWhyCarousel()
         column.addArrangedSubview(whyCarousel)
@@ -1069,21 +1068,21 @@ private extension GroupTrainingDetailViewController {
         // 8 — what to bring
         let bringTitle = makeSectionTitle("What to bring")
         column.addArrangedSubview(bringTitle)
-        column.setCustomSpacing(12, after: bringTitle)
+        column.setCustomSpacing(8, after: bringTitle)
         appendInfoRows(GroupTrainingDetailViewController.whatToBringRows, to: column)
 
         // 9 — things to know
         let knowTitle = makeSectionTitle("Things to know")
         column.setCustomSpacing(24, after: column.arrangedSubviews[column.arrangedSubviews.count - 1])
         column.addArrangedSubview(knowTitle)
-        column.setCustomSpacing(12, after: knowTitle)
+        column.setCustomSpacing(8, after: knowTitle)
         appendInfoRows(GroupTrainingDetailViewController.thingsToKnowRows, to: column)
 
         // 10 — media gallery (static placeholders, matching Android)
         let galleryHeader = makeGalleryHeader()
         column.setCustomSpacing(24, after: column.arrangedSubviews[column.arrangedSubviews.count - 1])
         column.addArrangedSubview(galleryHeader)
-        column.setCustomSpacing(12, after: galleryHeader)
+        column.setCustomSpacing(8, after: galleryHeader)
 
         let gallery = makeMediaGallery()
         column.addArrangedSubview(gallery)
@@ -1092,7 +1091,7 @@ private extension GroupTrainingDetailViewController {
         // 11 — trainer card
         let trainerTitle = makeSectionTitle("Your trainer")
         column.addArrangedSubview(trainerTitle)
-        column.setCustomSpacing(12, after: trainerTitle)
+        column.setCustomSpacing(8, after: trainerTitle)
 
         let trainerCard = makeTrainerCard()
         column.addArrangedSubview(trainerCard)
@@ -1101,7 +1100,7 @@ private extension GroupTrainingDetailViewController {
         // 12 — policy rows
         let moreTitle = makeSectionTitle("More")
         column.addArrangedSubview(moreTitle)
-        column.setCustomSpacing(12, after: moreTitle)
+        column.setCustomSpacing(8, after: moreTitle)
 
         let cancellationRow = makePolicyRow(icon: GroupTrainingDetailViewController.icon(["ic_person_age_18"], systemFallback: "person.fill"),
                                             title: "Cancellation policy")
@@ -1193,8 +1192,8 @@ private extension GroupTrainingDetailViewController {
     func makeLocationRow() -> UIView {
         locationRow.translatesAutoresizingMaskIntoConstraints = false
 
-        let iconTile = makeIconTile(image: GroupTrainingDetailViewController.icon(["ic_location_pin_small"], systemFallback: "mappin.and.ellipse"),
-                                    iconSide: 14)
+        let iconTile = makeIconTile(image: GroupTrainingDetailViewController.icon(["ic_location_pin_small", "ic_Location", "greenLocation"]),
+                                    iconSide: 18)
 
         locationTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         locationTitleLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
@@ -1208,8 +1207,6 @@ private extension GroupTrainingDetailViewController {
         locationDistanceLabel.numberOfLines = 1
         locationDistanceLabel.lineBreakMode = .byTruncatingTail
 
-        // `.fill` so a long studio name truncates inside the available width
-        // instead of overflowing past the chevron.
         let textStack = UIStackView(arrangedSubviews: [locationTitleLabel, locationDistanceLabel])
         textStack.translatesAutoresizingMaskIntoConstraints = false
         textStack.axis = .vertical
@@ -1228,15 +1225,13 @@ private extension GroupTrainingDetailViewController {
         locationRow.addSubview(row)
 
         NSLayoutConstraint.activate([
-            locationRow.heightAnchor.constraint(greaterThanOrEqualToConstant: 54),
+            locationRow.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
             row.leadingAnchor.constraint(equalTo: locationRow.leadingAnchor),
             row.trailingAnchor.constraint(equalTo: locationRow.trailingAnchor),
-            row.topAnchor.constraint(equalTo: locationRow.topAnchor, constant: 12),
-            row.bottomAnchor.constraint(equalTo: locationRow.bottomAnchor, constant: -12)
+            row.topAnchor.constraint(equalTo: locationRow.topAnchor, constant: 0),
+            row.bottomAnchor.constraint(equalTo: locationRow.bottomAnchor, constant: -8)
         ])
 
-        // Android attaches the same handler to the container, the gym name and the
-        // distance label — a single container tap covers all three on iOS.
         locationRow.isUserInteractionEnabled = true
         locationRow.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(locationTapped)))
         return locationRow
@@ -1262,11 +1257,11 @@ private extension GroupTrainingDetailViewController {
         container.addSubview(row)
 
         NSLayoutConstraint.activate([
-            container.heightAnchor.constraint(greaterThanOrEqualToConstant: 54),
+            container.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
             row.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             row.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            row.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
-            row.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -12)
+            row.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
+            row.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8)
         ])
         return container
     }
@@ -1405,8 +1400,6 @@ private extension GroupTrainingDetailViewController {
         aboutLabel.text = Copy.aboutPlaceholder
         container.addSubview(aboutLabel)
 
-        // Android overlays a 93dp bottom fade over the copy; the "READ MORE" button
-        // below is the affordance for the hidden tail.
         let fade = GradientFadeView()
         fade.translatesAutoresizingMaskIntoConstraints = false
         fade.setColors([Palette.aboutFade.withAlphaComponent(0.0),
@@ -1432,7 +1425,9 @@ private extension GroupTrainingDetailViewController {
             fade.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             fade.trailingAnchor.constraint(equalTo: container.trailingAnchor),
             fade.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-            fade.heightAnchor.constraint(equalToConstant: 93)
+            fade.heightAnchor.constraint(equalToConstant: 93),
+
+            container.heightAnchor.constraint(equalToConstant: 93)
         ])
         return container
     }
@@ -1653,7 +1648,6 @@ private extension GroupTrainingDetailViewController {
         row.axis = .horizontal
         row.alignment = .center
         row.spacing = 10
-        // Android's `paddingBottom="8dp"` above the hairline.
         row.isLayoutMarginsRelativeArrangement = true
         row.layoutMargins = UIEdgeInsets(top: 0, left: 0, bottom: 8, right: 0)
 
@@ -1666,16 +1660,20 @@ private extension GroupTrainingDetailViewController {
 
     func buildWaitlistBanner() {
         waitlistBanner.translatesAutoresizingMaskIntoConstraints = false
-        waitlistBanner.backgroundColor = Palette.waitlistBannerFill
-        waitlistBanner.layer.cornerRadius = 16
-        waitlistBanner.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        waitlistBanner.layer.masksToBounds = true
         waitlistBanner.isHidden = true
-        // Inserted below the bottom bar so the bar covers the 16pt tuck-under
-        // (Android's `layout_marginBottom="-16dp"`).
         view.insertSubview(waitlistBanner, belowSubview: bottomBar)
 
-        let bellView = UIImageView(image: GroupTrainingDetailViewController.icon(["ic_bell_brown", "bell"], systemFallback: "bell.fill")?
+        let bannerBg = GradientFadeView()
+        bannerBg.translatesAutoresizingMaskIntoConstraints = false
+        bannerBg.setColors([UIColor.white, UIColor(hex: "#EBD463")], locations: [0.0, 1.0])
+        bannerBg.layer.cornerRadius = 16
+        bannerBg.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        bannerBg.layer.masksToBounds = true
+        bannerBg.layer.borderWidth = 1
+        bannerBg.layer.borderColor = UIColor(hex: "#FFEDA5").cgColor
+        waitlistBanner.addSubview(bannerBg)
+
+        let bellView = UIImageView(image: GroupTrainingDetailViewController.icon(["ic_bell_brown", "bell"])?
             .withRenderingMode(.alwaysTemplate))
         bellView.translatesAutoresizingMaskIntoConstraints = false
         bellView.tintColor = Palette.waitlistBannerInk
@@ -1696,12 +1694,18 @@ private extension GroupTrainingDetailViewController {
         waitlistBanner.addSubview(row)
 
         NSLayoutConstraint.activate([
+            bannerBg.topAnchor.constraint(equalTo: waitlistBanner.topAnchor),
+            bannerBg.leadingAnchor.constraint(equalTo: waitlistBanner.leadingAnchor),
+            bannerBg.trailingAnchor.constraint(equalTo: waitlistBanner.trailingAnchor),
+            bannerBg.bottomAnchor.constraint(equalTo: waitlistBanner.bottomAnchor),
+
             bellView.widthAnchor.constraint(equalToConstant: 16),
             bellView.heightAnchor.constraint(equalToConstant: 16),
+            bannerBg.bottomAnchor.constraint(equalTo: waitlistBanner.bottomAnchor),
 
-            row.topAnchor.constraint(equalTo: waitlistBanner.topAnchor, constant: 10),
-            row.leadingAnchor.constraint(equalTo: waitlistBanner.leadingAnchor, constant: 20),
-            row.trailingAnchor.constraint(equalTo: waitlistBanner.trailingAnchor, constant: -20),
+            row.topAnchor.constraint(equalTo: waitlistBanner.topAnchor, constant: 8),
+            row.leadingAnchor.constraint(equalTo: waitlistBanner.leadingAnchor, constant: 16),
+            row.trailingAnchor.constraint(equalTo: waitlistBanner.trailingAnchor, constant: -16),
             row.bottomAnchor.constraint(equalTo: waitlistBanner.bottomAnchor, constant: -24),
 
             waitlistBanner.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -1712,23 +1716,19 @@ private extension GroupTrainingDetailViewController {
 
     func buildBottomBar() {
         bottomBar.translatesAutoresizingMaskIntoConstraints = false
-        // Top 2pt blue border, then the #131416 surface with a top-down white wash.
         bottomBar.backgroundColor = Palette.bottomBarTopBorder
         bottomBar.layer.cornerRadius = 16
         bottomBar.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         bottomBar.layer.masksToBounds = true
         view.addSubview(bottomBar)
 
-        let surface = GradientFadeView()
+        let surface = GlassCardView(cornerRadius: 16)
         surface.translatesAutoresizingMaskIntoConstraints = false
-        surface.setColors([UIColor.white.withAlphaComponent(0.1),
-                           Palette.cardSurface,
-                           Palette.cardSurface],
-                          locations: [0.0, 0.5, 1.0])
-        surface.backgroundColor = Palette.cardSurface
-        surface.layer.cornerRadius = 14
-        surface.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        surface.layer.masksToBounds = true
+        surface.fillColor = Palette.cardSurface
+        surface.fillAlpha = 1.0
+        surface.strokeColor = .clear
+        surface.sheenOrigin = .topCenter
+        surface.sheenAlpha = 0.08
         bottomBar.addSubview(surface)
 
         let perSessionLabel = UILabel()
@@ -1845,23 +1845,21 @@ private extension GroupTrainingDetailViewController {
         return chevron
     }
 
-    /// Android's `location_icon_bg`: 38dp rounded square, top-down
-    /// `#1AFFFFFF -> #101113` wash with a `#101113` hairline.
+    /// Android's `location_icon_bg`: 38dp rounded square (12pt radius),
+    /// 1px solid #101113 border, radial-gradient sheen + #131416 surface.
     func makeIconTile(image: UIImage?, iconSide: CGFloat) -> UIView {
-        let tile = GradientFadeView()
+        let tile = GlassCardView(cornerRadius: 12)
         tile.translatesAutoresizingMaskIntoConstraints = false
-        tile.setColors([UIColor.white.withAlphaComponent(0.1),
-                        Palette.cardStroke,
-                        Palette.cardStroke],
-                       locations: [0.0, 0.5, 1.0])
-        tile.layer.cornerRadius = 12
-        tile.layer.masksToBounds = true
-        tile.layer.borderWidth = 1
-        tile.layer.borderColor = Palette.cardStroke.cgColor
+        tile.fillColor = Palette.cardSurface
+        tile.fillAlpha = 1.0
+        tile.strokeColor = Palette.cardStroke
+        tile.strokeAlpha = 1.0
+        tile.sheenOrigin = .topCenter
+        tile.sheenAlpha = 0.08
 
         let iconView = UIImageView(image: image?.withRenderingMode(.alwaysTemplate))
         iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.tintColor = .white
+        iconView.tintColor = UIColor(hex: "#FAFAFA").withAlphaComponent(0.75)
         iconView.contentMode = .scaleAspectFit
         tile.addSubview(iconView)
 

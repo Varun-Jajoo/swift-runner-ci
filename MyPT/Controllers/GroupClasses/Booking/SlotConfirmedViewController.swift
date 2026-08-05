@@ -369,28 +369,28 @@ final class SlotConfirmedViewController: CommonViewController {
         applyPrice()
     }
 
-    /// Port of the `rawPrice.isNotBlank()` branch.
-    ///
-    /// NOTE: the emptiness test is Android's, verbatim — a literal `"0"` is *not*
-    /// treated as blank here, so a class priced `"0"` renders "0 AED" rather than
-    /// hiding the row. (The detail screen's own price ladder does filter `"0"` /
-    /// `"0.00"`, but `SlotConfirmedActivity` does not, and its callers forward the
-    /// raw value.) Deviating would silently desync the two platforms.
     private func applyPrice() {
         let rawPrice = classPrice.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !rawPrice.isEmpty else {
-            priceDivider.isHidden = true
-            priceRow.isHidden = true
-            return
-        }
-
         let cleanValue = rawPrice
-            .replacingOccurrences(of: "AED", with: "")
+            .replacingOccurrences(of: "AED", with: "", options: .caseInsensitive)
             .replacingOccurrences(of: " ", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        priceTitleLabel.text = "\(cleanValue) AED"
-        priceDivider.isHidden = false
-        priceRow.isHidden = false
+
+        let isFreeOrZero = rawPrice.isEmpty ||
+            cleanValue.caseInsensitiveCompare("free") == .orderedSame ||
+            cleanValue == "0" ||
+            cleanValue == "0.00" ||
+            cleanValue == "0.0" ||
+            (Double(cleanValue) ?? 0.0) <= 0.0
+
+        if !isFreeOrZero {
+            priceTitleLabel.text = "\(cleanValue) AED"
+            priceDivider.isHidden = false
+            priceRow.isHidden = false
+        } else {
+            priceDivider.isHidden = true
+            priceRow.isHidden = true
+        }
     }
 
     // MARK: - Network — POST api/book-class
@@ -1008,20 +1008,17 @@ private extension SlotConfirmedViewController {
     /// Android's `location_icon_bg`: 38dp rounded square, top-down
     /// `#1AFFFFFF -> #101113` wash with a `#101113` hairline.
     func makeIconTile(image: UIImage?, iconSide: CGFloat) -> UIView {
-        let tile = GradientFadeView()
+        let tile = GlassCardView(cornerRadius: 12)
         tile.translatesAutoresizingMaskIntoConstraints = false
-        tile.setColors([UIColor.white.withAlphaComponent(0.1),
-                        Palette.tileFill,
-                        Palette.tileFill],
-                       locations: [0.0, 0.5, 1.0])
-        tile.layer.cornerRadius = 12
-        tile.layer.masksToBounds = true
-        tile.layer.borderWidth = 1
-        tile.layer.borderColor = Palette.tileFill.cgColor
+        tile.fillColor = Palette.tileFill
+        tile.fillAlpha = 1.0
+        tile.strokeColor = UIColor(hex: "#101113")
+        tile.strokeAlpha = 1.0
+        tile.sheenOrigin = .topCenter
+        tile.sheenAlpha = 0.08
 
-        let iconView = UIImageView(image: image?.withRenderingMode(.alwaysTemplate))
+        let iconView = UIImageView(image: image)
         iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.tintColor = .white
         iconView.contentMode = .scaleAspectFit
         tile.addSubview(iconView)
 
