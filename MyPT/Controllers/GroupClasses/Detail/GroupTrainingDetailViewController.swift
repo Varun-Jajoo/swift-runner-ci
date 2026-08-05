@@ -1107,11 +1107,11 @@ private extension GroupTrainingDetailViewController {
         // 7 — about the class
         let aboutTitle = makeSectionTitle("About the class")
         column.addArrangedSubview(aboutTitle)
-        column.setCustomSpacing(0, after: aboutTitle)
+        column.setCustomSpacing(12, after: aboutTitle)
 
         let aboutBlock = makeAboutBlock()
         column.addArrangedSubview(aboutBlock)
-        column.setCustomSpacing(12, after: aboutBlock)
+        column.setCustomSpacing(8, after: aboutBlock)
 
         let readMoreButton = makeReadMoreButton()
         column.addArrangedSubview(readMoreButton)
@@ -1120,7 +1120,7 @@ private extension GroupTrainingDetailViewController {
         // 8 — what to bring
         let bringTitle = makeSectionTitle("What to bring")
         column.addArrangedSubview(bringTitle)
-        column.setCustomSpacing(8, after: bringTitle)
+        column.setCustomSpacing(12, after: bringTitle)
         appendInfoRows(GroupTrainingDetailViewController.whatToBringRows, to: column)
 
         // 9 — things to know
