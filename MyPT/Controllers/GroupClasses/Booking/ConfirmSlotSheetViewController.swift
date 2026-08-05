@@ -67,14 +67,13 @@ final class ConfirmSlotSheetViewController: CommonViewController {
 
     private enum Metric {
         static let horizontalInset: CGFloat = 20
-        static let topInset: CGFloat = 12
         // Android's 24dp is the *only* bottom clearance it reserves — its system
         // gesture bar doesn't stack on top of app padding the way iOS's home
         // indicator does here (`scrollView` is pinned to the safe-area guide, which
-        // already reserves ~34pt on its own). Keeping a full 24pt on top of that
-        // doubled the visible gap below the CTA; a small breathing-room value on
-        // top of the safe area lands close to Android's actual on-screen spacing.
-        static let bottomInset: CGFloat = 8
+        // already reserves ~34pt on its own). Any additional margin here stacks on
+        // top of that reserved safe-area strip, which is what made the gap below
+        // the CTA read as oversized — the safe area alone is enough breathing room.
+        static let bottomInset: CGFloat = 0
         static let handleSize = CGSize(width: 64, height: 5)
         static let closeButtonSide: CGFloat = 24
         static let cardPadding: CGFloat = 20
@@ -549,7 +548,7 @@ private extension ConfirmSlotSheetViewController {
         contentStack.isLayoutMarginsRelativeArrangement = true
         contentStack.layoutMargins = UIEdgeInsets(top: 8,
                                                   left: Metric.horizontalInset,
-                                                  bottom: 12,
+                                                  bottom: Metric.bottomInset,
                                                   right: Metric.horizontalInset)
         scrollView.addSubview(contentStack)
 
@@ -589,7 +588,8 @@ private extension ConfirmSlotSheetViewController {
         // 5 — cancellation-policy line
         let policyLabel = makePolicyLabel()
         contentStack.addArrangedSubview(policyLabel)
-        contentStack.setCustomSpacing(12, after: policyLabel)
+        // Android's `layout_marginTop="16dp"` on the CTA itself.
+        contentStack.setCustomSpacing(16, after: policyLabel)
 
         // 6 — CTA
         contentStack.addArrangedSubview(makeCTA())
@@ -861,13 +861,20 @@ private extension ConfirmSlotSheetViewController {
         durationChipLabel.numberOfLines = 1
         durationChipLabel.textAlignment = .center
         durationChipLabel.text = Copy.defaultDuration
+        // Belt-and-suspenders against the chip stretching to fill the row's
+        // leftover horizontal space: the label itself (not just the chip as the
+        // row's accessory) refuses to grow or compress past its own text size.
+        durationChipLabel.setContentHuggingPriority(.required, for: .horizontal)
+        durationChipLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
         chip.addSubview(durationChipLabel)
 
         NSLayoutConstraint.activate([
+            chip.heightAnchor.constraint(greaterThanOrEqualToConstant: 24),
+            chip.widthAnchor.constraint(equalTo: durationChipLabel.widthAnchor, constant: 24),
             durationChipLabel.topAnchor.constraint(equalTo: chip.topAnchor, constant: 4),
             durationChipLabel.bottomAnchor.constraint(equalTo: chip.bottomAnchor, constant: -4),
-            durationChipLabel.leadingAnchor.constraint(equalTo: chip.leadingAnchor, constant: 12),
-            durationChipLabel.trailingAnchor.constraint(equalTo: chip.trailingAnchor, constant: -12)
+            durationChipLabel.centerXAnchor.constraint(equalTo: chip.centerXAnchor),
+            durationChipLabel.centerYAnchor.constraint(equalTo: chip.centerYAnchor)
         ])
         return chip
     }

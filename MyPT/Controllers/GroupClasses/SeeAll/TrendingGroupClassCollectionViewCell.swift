@@ -6,76 +6,12 @@
 //  rank number peeking out from behind its left edge.
 //
 //  Android reference: `res/layout/item_trending_group_class.xml` +
-//  `adapter/TrendingGroupClassesAdapter.kt`. The rank glyphs there are
-//  hand-drawn gradient vector paths (`ic_rank_number_1/2/3.xml`); reproduced
-//  here as gradient-masked text since importing three bespoke vector assets
-//  for a decorative background element isn't warranted.
+//  `adapter/TrendingGroupClassesAdapter.kt`. The rank glyphs are real
+//  gradient vector drawables (`ic_rank_number_1` through `_5`), now bundled
+//  as SVG imagesets — loaded here directly rather than approximated.
 //
 
 import UIKit
-
-// MARK: - GradientRankNumberView
-
-/// Giant number rendered with the same silver top-to-bottom gradient Android's
-/// rank vectors use (`#EEEEEE` -> `#52999999` -> `#80FFFFFF`), via a
-/// `CATextLayer` mask rather than a bitmap/vector asset.
-final class GradientRankNumberView: UIView {
-
-    private let gradientLayer = CAGradientLayer()
-    private let textMaskLayer = CATextLayer()
-
-    var number: Int = 1 {
-        didSet { textMaskLayer.string = "\(number)" }
-    }
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        commonInit()
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        commonInit()
-    }
-
-    private func commonInit() {
-        backgroundColor = .clear
-        isUserInteractionEnabled = false
-
-        gradientLayer.colors = [
-            UIColor(white: 0.93, alpha: 1.0).cgColor,
-            UIColor(white: 0.6, alpha: 0.32).cgColor,
-            UIColor.white.withAlphaComponent(0.5).cgColor
-        ]
-        gradientLayer.locations = [0, 0.5, 1]
-        gradientLayer.startPoint = CGPoint(x: 0.2, y: 0.0)
-        gradientLayer.endPoint = CGPoint(x: 0.65, y: 1.0)
-
-        textMaskLayer.contentsScale = UIScreen.main.scale
-        textMaskLayer.alignmentMode = .left
-        textMaskLayer.isWrapped = false
-        textMaskLayer.string = "\(number)"
-        if let font = UIFont(name: "\(familyClashDisplay)-Bold", size: 100),
-           let cgFont = CGFont(font.fontName as CFString) {
-            textMaskLayer.font = cgFont
-            textMaskLayer.fontSize = 100
-        } else {
-            textMaskLayer.fontSize = 100
-        }
-
-        gradientLayer.mask = textMaskLayer
-        layer.addSublayer(gradientLayer)
-    }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        gradientLayer.frame = bounds
-        textMaskLayer.frame = bounds
-        CATransaction.commit()
-    }
-}
 
 // MARK: - TrendingGroupClassCollectionViewCell
 
@@ -84,22 +20,30 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
     static let reuseIdentifier = "TrendingGroupClassCollectionViewCell"
     static let cardWidth: CGFloat = 160
     static let cardHeight: CGFloat = 190
-    /// Rank #1's number vector is narrower, so a smaller leading margin still
-    /// keeps the card flush against it; #2 and #3 are visually wider and need
-    /// the larger margin to peek out cleanly (`TrendingGroupClassesAdapter`'s
-    /// `marginStartDp` rule, ported verbatim).
-    static let firstRankLeadingInset: CGFloat = 35
-    static let otherRankLeadingInset: CGFloat = 48
+    /// Giant rank number's fixed render height (`layout_height="104dp"` on
+    /// Android; width is `wrap_content` + `adjustViewBounds`, i.e. scaled to
+    /// this height at the asset's own aspect ratio).
+    static let rankImageHeight: CGFloat = 104
+
+    /// `TrendingGroupClassesAdapter.marginStartDp`, ported verbatim — each
+    /// rank's numeral vector has a different width/shape, so each needed its
+    /// own hand-calibrated peeking offset (ranks 4/5 are visibly wider than
+    /// 1-3 and need to sit further left to still read as "peeking").
+    private static let leadingInsets: [CGFloat] = [35, 48, 48, 60, 58]
+    private static let defaultLeadingInset: CGFloat = 48
+
+    static func leadingInset(forRankIndex index: Int) -> CGFloat {
+        return leadingInsets.indices.contains(index) ? leadingInsets[index] : defaultLeadingInset
+    }
 
     /// Total cell width including the peeking number, for `sizeForItemAt`.
     static func totalWidth(forRankIndex index: Int) -> CGFloat {
-        let inset = index == 0 ? firstRankLeadingInset : otherRankLeadingInset
-        return inset + cardWidth
+        return leadingInset(forRankIndex: index) + cardWidth
     }
 
     private static let cardFillColor = UIColor(hex: "#101113")
 
-    private let rankNumberView = GradientRankNumberView()
+    private let rankImageView = UIImageView()
     private let cardView = GlassCardView(cornerRadius: 12)
     private let coverImageView = UIImageView()
     private let coverFadeView = GradientFadeView()
@@ -113,6 +57,10 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
     private let progressBar = SpotProgressBarView(barHeight: 2)
 
     private var cardLeadingConstraint: NSLayoutConstraint!
+    /// Recreated per-configure since each rank glyph has its own aspect ratio
+    /// (`adjustViewBounds` on Android — `wrap_content` width scaled to the
+    /// fixed 104dp height).
+    private var rankImageWidthConstraint: NSLayoutConstraint?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -128,8 +76,10 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
         contentView.backgroundColor = .clear
         backgroundColor = .clear
 
-        rankNumberView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(rankNumberView)
+        rankImageView.translatesAutoresizingMaskIntoConstraints = false
+        rankImageView.contentMode = .scaleAspectFit
+        rankImageView.isUserInteractionEnabled = false
+        contentView.addSubview(rankImageView)
 
         cardView.translatesAutoresizingMaskIntoConstraints = false
         // Android's `bg_card_gradient_black_without_border`: solid #101113 fill
@@ -226,16 +176,12 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
 
         cardLeadingConstraint = cardView.leadingAnchor.constraint(
             equalTo: contentView.leadingAnchor,
-            constant: TrendingGroupClassCollectionViewCell.otherRankLeadingInset)
+            constant: TrendingGroupClassCollectionViewCell.defaultLeadingInset)
 
         NSLayoutConstraint.activate([
-            rankNumberView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            rankNumberView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 50),
-            // Wider than the leading inset that reveals it (35/48pt) so the
-            // glyph never gets clipped by its own bounds before the card's
-            // edge does the actual "peeking" reveal.
-            rankNumberView.widthAnchor.constraint(equalToConstant: 70),
-            rankNumberView.heightAnchor.constraint(equalToConstant: 104),
+            rankImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            rankImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 50),
+            rankImageView.heightAnchor.constraint(equalToConstant: TrendingGroupClassCollectionViewCell.rankImageHeight),
 
             cardLeadingConstraint,
             cardView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -269,6 +215,7 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         coverImageView.image = nil
+        rankImageView.image = nil
         titleLabel.text = nil
         timeLabel.text = nil
         locationLabel.text = nil
@@ -277,12 +224,8 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
     }
 
     func configure(with item: UpcomingClassModel, rankIndex: Int) {
-        // Ranks 4+ reuse the "3" glyph — Android's own `TrendingGroupClassesAdapter`
-        // does the same (`else -> R.drawable.ic_rank_number_3`), not an oversight.
-        rankNumberView.number = min(rankIndex + 1, 3)
-        cardLeadingConstraint.constant = rankIndex == 0
-            ? TrendingGroupClassCollectionViewCell.firstRankLeadingInset
-            : TrendingGroupClassCollectionViewCell.otherRankLeadingInset
+        applyRankImage(forRankIndex: rankIndex)
+        cardLeadingConstraint.constant = TrendingGroupClassCollectionViewCell.leadingInset(forRankIndex: rankIndex)
 
         titleLabel.text = GroupClassCardFormatter.title(for: item)
 
@@ -330,5 +273,26 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
         } else {
             coverImageView.image = fallback
         }
+    }
+
+    /// Loads the real rank glyph (`ic_rank_number_1` … `_5`; ranks beyond 5
+    /// reuse `_5`, matching `TrendingGroupClassesAdapter`'s own `else` branch)
+    /// and re-derives the width constraint from the asset's own aspect ratio —
+    /// each numeral is a different shape/width at the fixed 104pt height.
+    private func applyRankImage(forRankIndex rankIndex: Int) {
+        let assetNumber = min(rankIndex + 1, 5)
+        let image = UIImage(named: "ic_rank_number_\(assetNumber)")
+        rankImageView.image = image
+
+        rankImageWidthConstraint?.isActive = false
+        guard let image = image, image.size.height > 0 else {
+            rankImageWidthConstraint = nil
+            return
+        }
+        let aspectRatio = image.size.width / image.size.height
+        let widthConstraint = rankImageView.widthAnchor.constraint(
+            equalTo: rankImageView.heightAnchor, multiplier: aspectRatio)
+        widthConstraint.isActive = true
+        rankImageWidthConstraint = widthConstraint
     }
 }

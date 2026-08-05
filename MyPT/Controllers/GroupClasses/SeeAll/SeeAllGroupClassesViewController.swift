@@ -314,15 +314,16 @@ final class SeeAllGroupClassesViewController: CommonViewController {
         tabsStack.alignment = .center
         tabsScrollView.addSubview(tabsStack)
 
-        filterButtons = FilterTab.allCases.map { tab in
+        filterButtons = FilterTab.allCases.enumerated().map { index, tab in
             let button = UIButton(type: .system)
+            button.tag = index
             button.translatesAutoresizingMaskIntoConstraints = false
             button.setTitle(tab.title, for: .normal)
             button.titleLabel?.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
             button.layer.cornerRadius = 16
             button.layer.masksToBounds = true
             button.heightAnchor.constraint(equalToConstant: 32).isActive = true
-            button.addAction(UIAction { [weak self] _ in self?.selectTab(tab) }, for: .touchUpInside)
+            button.addTarget(self, action: #selector(filterTabTapped(_:)), for: .touchUpInside)
             tabsStack.addArrangedSubview(button)
             return (tab, button)
         }
@@ -332,7 +333,7 @@ final class SeeAllGroupClassesViewController: CommonViewController {
         wrapper.addSubview(tabsScrollView)
 
         NSLayoutConstraint.activate([
-            filterButtonBg.topAnchor.constraint(equalTo: wrapper.topAnchor, constant: 12),
+            filterButtonBg.topAnchor.constraint(equalTo: wrapper.topAnchor, constant: 16),
             filterButtonBg.bottomAnchor.constraint(equalTo: wrapper.bottomAnchor),
             filterButtonBg.leadingAnchor.constraint(equalTo: wrapper.leadingAnchor, constant: 20),
             filterButtonBg.heightAnchor.constraint(equalToConstant: 32),
@@ -348,7 +349,7 @@ final class SeeAllGroupClassesViewController: CommonViewController {
             divider.widthAnchor.constraint(equalToConstant: 1),
             divider.heightAnchor.constraint(equalToConstant: 19),
 
-            tabsScrollView.leadingAnchor.constraint(equalTo: divider.trailingAnchor, constant: 8),
+            tabsScrollView.leadingAnchor.constraint(equalTo: divider.trailingAnchor, constant: 10),
             tabsScrollView.trailingAnchor.constraint(equalTo: wrapper.trailingAnchor, constant: -20),
             tabsScrollView.centerYAnchor.constraint(equalTo: filterButtonBg.centerYAnchor),
             tabsScrollView.heightAnchor.constraint(equalToConstant: 32),
@@ -394,6 +395,11 @@ final class SeeAllGroupClassesViewController: CommonViewController {
 
     @objc private func backTapped() {
         navigationController?.popViewController(animated: true)
+    }
+
+    @objc private func filterTabTapped(_ sender: UIButton) {
+        guard FilterTab.allCases.indices.contains(sender.tag) else { return }
+        selectTab(FilterTab.allCases[sender.tag])
     }
 
     private func selectTab(_ tab: FilterTab) {

@@ -1046,7 +1046,6 @@ private extension ClassPaymentViewController {
         row.layer.masksToBounds = true
         row.layer.borderWidth = 1
         row.layer.borderColor = Palette.paymentRowStroke.cgColor
-        row.isLayoutMarginsRelativeArrangement = false
 
         let tap = UITapGestureRecognizer(target: self, action: tapAction)
         row.addGestureRecognizer(tap)

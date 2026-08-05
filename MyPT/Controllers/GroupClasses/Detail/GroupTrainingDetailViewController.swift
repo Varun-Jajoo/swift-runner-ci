@@ -1361,10 +1361,15 @@ private extension GroupTrainingDetailViewController {
         return card
     }
 
+    /// Same recipe as the Home carousel's dots pill (`GroupClassesCarouselView`):
+    /// 5pt-tall `GroupClassCarouselDotsView` in a `bg3` pill, 4pt top/bottom and
+    /// 12pt leading/trailing insets, corner radius = half the resulting pill
+    /// height. This one previously forced the dots view to 10pt tall with a fixed
+    /// 9pt radius, which is why it looked visibly chunkier than Home's.
     func makeWhyDotsRow() -> UIView {
         whyDotsPill.translatesAutoresizingMaskIntoConstraints = false
         whyDotsPill.backgroundColor = GroupClassColor.bg3.color
-        whyDotsPill.layer.cornerRadius = 9
+        whyDotsPill.layer.cornerRadius = 6.5
         whyDotsPill.layer.masksToBounds = true
 
         whyDotsView.translatesAutoresizingMaskIntoConstraints = false
@@ -1379,7 +1384,7 @@ private extension GroupTrainingDetailViewController {
             whyDotsView.bottomAnchor.constraint(equalTo: whyDotsPill.bottomAnchor, constant: -4),
             whyDotsView.leadingAnchor.constraint(equalTo: whyDotsPill.leadingAnchor, constant: 12),
             whyDotsView.trailingAnchor.constraint(equalTo: whyDotsPill.trailingAnchor, constant: -12),
-            whyDotsView.heightAnchor.constraint(equalToConstant: 10),
+            whyDotsView.heightAnchor.constraint(equalToConstant: 5),
 
             whyDotsPill.topAnchor.constraint(equalTo: container.topAnchor),
             whyDotsPill.bottomAnchor.constraint(equalTo: container.bottomAnchor),
