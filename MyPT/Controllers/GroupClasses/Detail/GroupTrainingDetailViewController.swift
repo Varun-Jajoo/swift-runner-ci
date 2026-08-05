@@ -1081,7 +1081,7 @@ private extension GroupTrainingDetailViewController {
 
         let locationDivider = makeHairline(color: Palette.hairline)
         column.addArrangedSubview(locationDivider)
-        column.setCustomSpacing(0, after: locationDivider)
+        column.setCustomSpacing(4, after: locationDivider)
 
         // 5 — doors-open row
         let doorsRow = makeDoorsOpenRow()
@@ -1285,7 +1285,7 @@ private extension GroupTrainingDetailViewController {
             row.leadingAnchor.constraint(equalTo: locationRow.leadingAnchor),
             row.trailingAnchor.constraint(equalTo: locationRow.trailingAnchor),
             row.topAnchor.constraint(equalTo: locationRow.topAnchor, constant: 8),
-            row.bottomAnchor.constraint(equalTo: locationRow.bottomAnchor, constant: -8)
+            row.bottomAnchor.constraint(equalTo: locationRow.bottomAnchor, constant: -12)
         ])
 
         locationRow.isUserInteractionEnabled = true
@@ -1319,7 +1319,7 @@ private extension GroupTrainingDetailViewController {
             row.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             row.trailingAnchor.constraint(equalTo: container.trailingAnchor),
             row.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
-            row.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8)
+            row.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -12)
         ])
         return container
     }
