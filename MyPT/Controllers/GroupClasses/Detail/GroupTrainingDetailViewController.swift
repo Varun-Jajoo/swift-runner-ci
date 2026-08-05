@@ -1073,8 +1073,6 @@ private extension GroupTrainingDetailViewController {
         // 3 — date/time + spots progress
         let dateSpotsRow = makeDateAndSpotsRow()
         column.addArrangedSubview(dateSpotsRow)
-        // Android's `locationRowContainer` carries `layout_marginTop="16dp"`; a 0
-        // gap here is what left the studio name visually welded to the date line.
         column.setCustomSpacing(16, after: dateSpotsRow)
 
         // 4 — location row (tap -> Maps)
@@ -1112,7 +1110,7 @@ private extension GroupTrainingDetailViewController {
         // 7 — about the class
         let aboutTitle = makeSectionTitle("About the class")
         column.addArrangedSubview(aboutTitle)
-        column.setCustomSpacing(8, after: aboutTitle)
+        column.setCustomSpacing(0, after: aboutTitle)
 
         let aboutBlock = makeAboutBlock()
         column.addArrangedSubview(aboutBlock)
