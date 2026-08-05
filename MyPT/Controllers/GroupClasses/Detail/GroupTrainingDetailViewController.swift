@@ -1110,7 +1110,7 @@ private extension GroupTrainingDetailViewController {
         // 7 — about the class
         let aboutTitle = makeSectionTitle("About the class")
         column.addArrangedSubview(aboutTitle)
-        column.setCustomSpacing(8, after: aboutTitle)
+        column.setCustomSpacing(0, after: aboutTitle)
 
         let aboutBlock = makeAboutBlock()
         column.addArrangedSubview(aboutBlock)
