@@ -257,7 +257,7 @@ final class SeeAllGroupClassesViewController: CommonViewController {
             trendingCollectionView.leadingAnchor.constraint(equalTo: wrapper.leadingAnchor),
             trendingCollectionView.trailingAnchor.constraint(equalTo: wrapper.trailingAnchor),
             trendingCollectionView.bottomAnchor.constraint(equalTo: wrapper.bottomAnchor),
-            trendingCollectionView.heightAnchor.constraint(equalToConstant: 250)
+            trendingCollectionView.heightAnchor.constraint(equalToConstant: TrendingGroupClassCollectionViewCell.totalCellHeight)
         ])
         return wrapper
     }
@@ -571,7 +571,7 @@ extension SeeAllGroupClassesViewController: UICollectionViewDataSource, UICollec
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
         if collectionView === trendingCollectionView {
             return CGSize(width: TrendingGroupClassCollectionViewCell.totalWidth(forRankIndex: indexPath.item),
-                          height: 250)
+                          height: TrendingGroupClassCollectionViewCell.totalCellHeight)
         }
 
         let columns = numberOfColumns()
