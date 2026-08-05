@@ -120,6 +120,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
         static let aboutFallback = "What to Expect (this will be displayed as about this class in the app if not use current default)"
         static let aboutPlaceholder = "Start your day with intention. This 60-minute vinyasa flow builds core strength, improves flexibility, and clears the mind before the day begins. Suitable for all levels — modifications provided."
         static let readMore = "READ MORE ABOUT THE CLASS"
+        static let showLess = "SHOW LESS ABOUT THE CLASS"
         static let trainerSubtitle = "Certified Trainer · MyPT"
         static let waitlistBanner = "We'll notify you as soon as a spot becomes available"
         static let perSession = "PER SESSION"
@@ -158,6 +159,13 @@ final class GroupTrainingDetailViewController: CommonViewController {
     private let whyDotsPill = UIView()
 
     private let aboutLabel = UILabel()
+    /// Bottom scrim over the collapsed About copy. Hidden while expanded, and
+    /// hidden entirely when the copy is short enough not to need truncating.
+    private let aboutFadeView = GradientFadeView()
+    private let readMoreButton = UIButton(type: .system)
+    private var isAboutExpanded = false
+    /// Lines shown while collapsed. Anything longer gets the scrim + READ MORE.
+    private static let aboutCollapsedLineLimit = 5
 
     private let trainerAvatarView = UIImageView()
     private let trainerNameLabel = UILabel()
@@ -166,7 +174,6 @@ final class GroupTrainingDetailViewController: CommonViewController {
     private let bottomBar = UIView()
     private let priceLabel = UILabel()
     private let ctaButton = GradientCTAButton()
-    private let ctaChevronView = UIImageView()
 
     // MARK: - Lifecycle
 
@@ -198,6 +205,12 @@ final class GroupTrainingDetailViewController: CommonViewController {
         // Android's `layout_marginTop="40dp"` inside the hero FrameLayout), which
         // means it cannot use the safe-area guide directly.
         heroNavTopConstraint?.constant = view.safeAreaInsets.top + 12
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Needs the label's resolved width, so it can only run after layout.
+        updateAboutOverflowState()
     }
 
     // MARK: - Tap-through ingestion
@@ -846,10 +859,52 @@ final class GroupTrainingDetailViewController: CommonViewController {
         }
     }
 
+    /// Expands / collapses the About copy. Expanding drops the line cap and takes
+    /// the scrim away; collapsing puts both back. Android leaves its own
+    /// `btnReadMore` inert — this is the iOS-side behaviour that was asked for.
     @objc private func readMoreTapped() {
-        // Android's `btnReadMore` has no click listener (confirmed open question in
-        // the migration plan: keep static unless specified).
-        debugPrint("[GroupTrainingDetail] READ MORE tapped — static on Android, intentionally unwired.")
+        TapticEngine.selection.feedback()
+        isAboutExpanded.toggle()
+        readMoreButton.setTitle(isAboutExpanded ? Copy.showLess : Copy.readMore, for: .normal)
+        aboutLabel.numberOfLines = isAboutExpanded ? 0 : GroupTrainingDetailViewController.aboutCollapsedLineLimit
+        aboutFadeView.isHidden = isAboutExpanded
+
+        UIView.animate(withDuration: 0.25) {
+            self.view.layoutIfNeeded()
+        }
+    }
+
+    /// Hides the scrim *and* the READ MORE button when the copy already fits
+    /// inside `aboutCollapsedLineLimit` lines — there is nothing to reveal, so
+    /// neither affordance should be on screen. Re-evaluated on every layout pass
+    /// because the answer depends on the label's resolved width.
+    private func updateAboutOverflowState() {
+        let availableWidth = aboutLabel.bounds.width
+        guard availableWidth > 0, let font = aboutLabel.font else { return }
+
+        let text = aboutLabel.text ?? ""
+        let fullHeight = (text as NSString).boundingRect(
+            with: CGSize(width: availableWidth, height: .greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            attributes: [.font: font],
+            context: nil
+        ).height
+
+        let collapsedLimit = font.lineHeight * CGFloat(GroupTrainingDetailViewController.aboutCollapsedLineLimit)
+        // 1pt of slack absorbs the rounding difference between the measured
+        // bounding box and the label's own line-fragment layout.
+        let overflows = fullHeight > collapsedLimit + 1
+
+        readMoreButton.isHidden = !overflows
+        aboutFadeView.isHidden = !overflows || isAboutExpanded
+
+        // A paragraph that no longer overflows (shorter copy arrived from the API
+        // while expanded) must not stay stuck in the expanded state.
+        if !overflows && isAboutExpanded {
+            isAboutExpanded = false
+            readMoreButton.setTitle(Copy.readMore, for: .normal)
+            aboutLabel.numberOfLines = GroupTrainingDetailViewController.aboutCollapsedLineLimit
+        }
     }
 
     // MARK: - Why-this-class-stands-out carousel indicator
@@ -1018,7 +1073,9 @@ private extension GroupTrainingDetailViewController {
         // 3 — date/time + spots progress
         let dateSpotsRow = makeDateAndSpotsRow()
         column.addArrangedSubview(dateSpotsRow)
-        column.setCustomSpacing(0, after: dateSpotsRow)
+        // Android's `locationRowContainer` carries `layout_marginTop="16dp"`; a 0
+        // gap here is what left the studio name visually welded to the date line.
+        column.setCustomSpacing(16, after: dateSpotsRow)
 
         // 4 — location row (tap -> Maps)
         let locationRowView = makeLocationRow()
@@ -1026,12 +1083,12 @@ private extension GroupTrainingDetailViewController {
 
         let locationDivider = makeHairline(color: Palette.hairline)
         column.addArrangedSubview(locationDivider)
-        column.setCustomSpacing(0, after: locationDivider)
+        // `doorsOpenRowContainer`'s own `layout_marginTop="16dp"` — this is the
+        // "space between the divider and the text below it".
+        column.setCustomSpacing(16, after: locationDivider)
 
-        // 5 — doors-open row. Both the row above and below it carry a 12pt
-        // internal top/bottom pad; matching the 16pt gap on both sides of that
-        // (rather than only above, which is what made the row look
-        // top-heavy) keeps the whitespace even at 28pt total on each side.
+        // 5 — doors-open row (`minHeight="54dp"`, `paddingVertical="12dp"`, and a
+        // 16dp top margin, all mirrored inside `makeDoorsOpenRow`).
         let doorsRow = makeDoorsOpenRow()
         column.addArrangedSubview(doorsRow)
         let doorsDivider = makeHairline(color: Palette.hairline)
@@ -1192,8 +1249,10 @@ private extension GroupTrainingDetailViewController {
     func makeLocationRow() -> UIView {
         locationRow.translatesAutoresizingMaskIntoConstraints = false
 
+        // Android renders this pin at 14dp inside the 38dp tile (the clock row's
+        // is 18dp — they are deliberately different sizes).
         let iconTile = makeIconTile(image: GroupTrainingDetailViewController.icon(["ic_location_pin_small", "ic_Location", "greenLocation"]),
-                                    iconSide: 18)
+                                    iconSide: 14)
 
         locationTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         locationTitleLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
@@ -1224,12 +1283,13 @@ private extension GroupTrainingDetailViewController {
         row.spacing = 12
         locationRow.addSubview(row)
 
+        // `minHeight="54dp"` + `paddingVertical="12dp"` on `locationRowContainer`.
         NSLayoutConstraint.activate([
-            locationRow.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
+            locationRow.heightAnchor.constraint(greaterThanOrEqualToConstant: 54),
             row.leadingAnchor.constraint(equalTo: locationRow.leadingAnchor),
             row.trailingAnchor.constraint(equalTo: locationRow.trailingAnchor),
-            row.topAnchor.constraint(equalTo: locationRow.topAnchor, constant: 0),
-            row.bottomAnchor.constraint(equalTo: locationRow.bottomAnchor, constant: -8)
+            row.topAnchor.constraint(equalTo: locationRow.topAnchor, constant: 12),
+            row.bottomAnchor.constraint(equalTo: locationRow.bottomAnchor, constant: -12)
         ])
 
         locationRow.isUserInteractionEnabled = true
@@ -1256,12 +1316,14 @@ private extension GroupTrainingDetailViewController {
         row.spacing = 12
         container.addSubview(row)
 
+        // `doorsOpenRowContainer`: `minHeight="54dp"`, `paddingVertical="12dp"` —
+        // the same box metrics as the location row above it.
         NSLayoutConstraint.activate([
-            container.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
+            container.heightAnchor.constraint(greaterThanOrEqualToConstant: 54),
             row.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             row.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            row.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
-            row.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8)
+            row.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
+            row.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -12)
         ])
         return container
     }
@@ -1393,6 +1455,12 @@ private extension GroupTrainingDetailViewController {
         return container
     }
 
+    /// The About copy sits directly under its heading and is driven purely by
+    /// `aboutLabel.numberOfLines` — collapsed to `aboutCollapsedLineLimit`, or 0
+    /// (unbounded) once expanded. The container takes its height from the label
+    /// rather than a hard-coded constant; the previous version pinned it to both
+    /// `>= 110` *and* `== 93`, which is an unsatisfiable pair, and clipped the
+    /// copy to a fixed box regardless of how long it actually was.
     func makeAboutBlock() -> UIView {
         let container = UIView()
         container.translatesAutoresizingMaskIntoConstraints = false
@@ -1401,55 +1469,51 @@ private extension GroupTrainingDetailViewController {
         aboutLabel.translatesAutoresizingMaskIntoConstraints = false
         aboutLabel.font = AppFont.regular.size(14.0, familyName: familyFunnelSans)
         aboutLabel.textColor = Palette.aboutText
-        aboutLabel.numberOfLines = 0
+        aboutLabel.numberOfLines = GroupTrainingDetailViewController.aboutCollapsedLineLimit
+        aboutLabel.lineBreakMode = .byTruncatingTail
         aboutLabel.text = Copy.aboutPlaceholder
         container.addSubview(aboutLabel)
 
-        let fade = GradientFadeView()
-        fade.translatesAutoresizingMaskIntoConstraints = false
-        fade.setColors([Palette.aboutFade.withAlphaComponent(0.0),
-                        Palette.aboutFade.withAlphaComponent(0.85),
-                        Palette.aboutFade],
-                       locations: [0.0, 0.5, 1.0])
-        container.addSubview(fade)
+        aboutFadeView.translatesAutoresizingMaskIntoConstraints = false
+        aboutFadeView.setColors([Palette.aboutFade.withAlphaComponent(0.0),
+                                 Palette.aboutFade.withAlphaComponent(0.85),
+                                 Palette.aboutFade],
+                                locations: [0.0, 0.5, 1.0])
+        container.addSubview(aboutFadeView)
+
+        // Android's fade is a flat 93dp. Kept at that height when there's room,
+        // but never taller than the copy it covers — otherwise a short paragraph
+        // ends up buried under the scrim's near-solid tail.
+        let fadeHeight = aboutFadeView.heightAnchor.constraint(equalToConstant: 93)
+        fadeHeight.priority = .defaultHigh
 
         NSLayoutConstraint.activate([
             aboutLabel.topAnchor.constraint(equalTo: container.topAnchor),
             aboutLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             aboutLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor),
             aboutLabel.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-            // Android has no such guard (its own short-text case is just as
-            // broken), but without one the container clips to the label's
-            // intrinsic height whenever the copy is short, which crops the fade's
-            // top (transparent) stops off and leaves only its near-solid tail
-            // showing — a solid smear sitting directly over the visible text.
-            // Reserving enough room for the fade's full 93pt transition keeps the
-            // top of the copy legible regardless of length.
-            container.heightAnchor.constraint(greaterThanOrEqualToConstant: 110),
 
-            fade.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            fade.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            fade.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-            fade.heightAnchor.constraint(equalToConstant: 93),
-
-            container.heightAnchor.constraint(equalToConstant: 93)
+            aboutFadeView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            aboutFadeView.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            aboutFadeView.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+            aboutFadeView.heightAnchor.constraint(lessThanOrEqualTo: container.heightAnchor),
+            fadeHeight
         ])
         return container
     }
 
     func makeReadMoreButton() -> UIView {
-        let button = UIButton(type: .system)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle(Copy.readMore, for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
-        button.backgroundColor = Palette.readMoreFill
-        button.layer.cornerRadius = 8
-        button.layer.borderWidth = 1
-        button.layer.borderColor = Palette.moreHairline.cgColor
-        button.addTarget(self, action: #selector(readMoreTapped), for: .touchUpInside)
-        button.heightAnchor.constraint(equalToConstant: 42).isActive = true
-        return button
+        readMoreButton.translatesAutoresizingMaskIntoConstraints = false
+        readMoreButton.setTitle(Copy.readMore, for: .normal)
+        readMoreButton.setTitleColor(.white, for: .normal)
+        readMoreButton.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
+        readMoreButton.backgroundColor = Palette.readMoreFill
+        readMoreButton.layer.cornerRadius = 8
+        readMoreButton.layer.borderWidth = 1
+        readMoreButton.layer.borderColor = Palette.moreHairline.cgColor
+        readMoreButton.addTarget(self, action: #selector(readMoreTapped), for: .touchUpInside)
+        readMoreButton.heightAnchor.constraint(equalToConstant: 42).isActive = true
+        return readMoreButton
     }
 
     func appendInfoRows(_ rows: [(icons: [String], system: String, text: String)], to column: UIStackView) {
@@ -1764,27 +1828,19 @@ private extension GroupTrainingDetailViewController {
         ctaButton.translatesAutoresizingMaskIntoConstraints = false
         ctaButton.bandThickness = 2
         setCTATitle("BOOK SLOT")
-        // A trailing chevron drawn as its own view rather than the button's image
-        // slot: UIButton's image+title layout (imageEdgeInsets/titleEdgeInsets +
-        // `semanticContentAttribute = .forceRightToLeft`) is exactly the kind of
-        // insets arithmetic that silently renders nothing when one of the offsets
-        // is off, which is what was reported. A sibling view positioned with plain
-        // Auto Layout can't have that failure mode.
-        // Set after `bandThickness` so the component's own inset pass cannot undo it;
-        // the extra right padding reserves room for the chevron.
-        ctaButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 2, right: 32)
+        // Android's `btnBookSlot`: `paddingHorizontal="12dp"` with the text and a
+        // 16dp chevron centred together, 8dp apart. `GradientCTAButton` owns that
+        // layout now (see `setTrailingIcon`), so no per-screen chevron view or
+        // manual `contentEdgeInsets` arithmetic is needed here.
+        ctaButton.horizontalContentInset = 12
+        ctaButton.setTrailingIcon(
+            GroupTrainingDetailViewController.icon(["ic_chevron_right_16_dark", "chevron-right"],
+                                                   systemFallback: "chevron.right"),
+            tint: Palette.ctaInk)
         ctaButton.addTarget(self, action: #selector(ctaTapped), for: .touchUpInside)
         ctaButton.setContentHuggingPriority(.required, for: .horizontal)
         ctaButton.setContentCompressionResistancePriority(.required, for: .horizontal)
         bottomBar.addSubview(ctaButton)
-
-        ctaChevronView.translatesAutoresizingMaskIntoConstraints = false
-        ctaChevronView.image = GroupTrainingDetailViewController.icon(["ic_chevron_right_16_dark", "chevron-right"], systemFallback: "chevron.right")?
-            .withRenderingMode(.alwaysTemplate)
-        ctaChevronView.tintColor = Palette.ctaInk
-        ctaChevronView.contentMode = .scaleAspectFit
-        ctaChevronView.isUserInteractionEnabled = false
-        bottomBar.addSubview(ctaChevronView)
 
         NSLayoutConstraint.activate([
             bottomBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -1804,12 +1860,7 @@ private extension GroupTrainingDetailViewController {
             ctaButton.topAnchor.constraint(equalTo: bottomBar.topAnchor, constant: 14),
             ctaButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
             ctaButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight),
-            ctaButton.widthAnchor.constraint(greaterThanOrEqualToConstant: Metric.ctaMinWidth),
-
-            ctaChevronView.trailingAnchor.constraint(equalTo: ctaButton.trailingAnchor, constant: -12),
-            ctaChevronView.centerYAnchor.constraint(equalTo: ctaButton.centerYAnchor, constant: -1),
-            ctaChevronView.widthAnchor.constraint(equalToConstant: 16),
-            ctaChevronView.heightAnchor.constraint(equalToConstant: 16)
+            ctaButton.widthAnchor.constraint(greaterThanOrEqualToConstant: Metric.ctaMinWidth)
         ])
     }
 

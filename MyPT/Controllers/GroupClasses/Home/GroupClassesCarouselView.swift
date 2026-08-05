@@ -121,11 +121,21 @@ final class GroupClassesCarouselView: UIView {
     private static let cardSpacing: CGFloat = 10
     private static let carouselHeight: CGFloat = 250
     private static let sectionHorizontalInset: CGFloat = 16
-    // Android's `groupClassesSection` FrameLayout: a fixed-height full-bleed
-    // banner (`group_classes_bg`) with the carousel/dots/button bottom-aligned
-    // inside a 20dp-bottom-padded column, leaving the top of the banner exposed.
-    private static let sectionHeight: CGFloat = 620
+    // Android's `groupClassesSection` FrameLayout: a full-bleed banner
+    // (`group_classes_bg`) with the carousel/dots/button bottom-aligned inside a
+    // 20dp-bottom-padded column, leaving the top of the banner exposed.
+    //
+    // Android hard-codes 620dp here, but the artwork is 430x745 — so on any
+    // device that isn't 430pt wide, `scaleAspectFill` has to crop a different
+    // amount off the top and bottom, and the banner's framing drifts with the
+    // screen size. Deriving the height from the source image's own aspect ratio
+    // instead keeps the whole banner visible and identically framed at every
+    // resolution. 620/430 is Android's ratio of section height to artwork width,
+    // preserved so the section still reads at its intended proportion.
+    private static let bannerAspectRatio: CGFloat = 620.0 / 430.0
     private static let sectionBottomInset: CGFloat = 20
+    /// Floor for very narrow devices, so the bottom-aligned column always fits.
+    private static let minimumSectionHeight: CGFloat = 560
 
     /// Fired when a card is tapped, with the fully-derived tap-through payload.
     var onSelectClass: ((GroupClassTapThroughData) -> Void)?
@@ -134,6 +144,10 @@ final class GroupClassesCarouselView: UIView {
     var onSeeAllTapped: (() -> Void)?
 
     private(set) var classes: [UpcomingClassModel] = []
+
+    /// Fingerprint of the currently-rendered payload, so a repeat fetch that
+    /// returns the same data doesn't trigger a visible rebuild.
+    private var renderedSignature: String?
 
     /// Device location used for the fetch and for per-card distance maths.
     private var userLat: Double = GroupClassCardFormatter.fallbackLatitude
@@ -145,7 +159,6 @@ final class GroupClassesCarouselView: UIView {
     private let dotsView = GroupClassCarouselDotsView()
     private let dotsPill = UIView()
     private let seeAllButton = GradientCTAButton()
-    private let seeAllChevron = UIImageView()
 
     // MARK: Init
 
@@ -196,9 +209,11 @@ final class GroupClassesCarouselView: UIView {
         collectionView.register(GroupClassCardCollectionViewCell.self,
                                 forCellWithReuseIdentifier: GroupClassCardCollectionViewCell.reuseIdentifier)
 
-        // Dots sit inside a dark pill container (#131416 with pill radius)
+        // Android's `dots_container_bg`: solid #101113, `radius="999dp"` — i.e. a
+        // true capsule, fully rounded on both ends (the radius itself is applied
+        // in `layoutSubviews`, once the pill's height is known).
         dotsPill.translatesAutoresizingMaskIntoConstraints = false
-        dotsPill.backgroundColor = UIColor(hex: "#131416")
+        dotsPill.backgroundColor = UIColor(hex: "#101113")
         dotsPill.layer.masksToBounds = true
         dotsView.translatesAutoresizingMaskIntoConstraints = false
         dotsPill.addSubview(dotsView)
@@ -215,16 +230,13 @@ final class GroupClassesCarouselView: UIView {
         seeAllButton.configure(title: "SEE ALL GROUP TRAININGS",
                                font: AppFont.semibold.size(14.0, familyName: familyFunnelSans),
                                titleColor: UIColor(hex: "#141514"))
-        seeAllButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 2, right: 32)
+        // Android's `btnSeeAllGroupTrainings`: `paddingHorizontal="12dp"`, with the
+        // label and a 20dp chevron centred together 8dp apart.
+        seeAllButton.horizontalContentInset = 12
+        seeAllButton.trailingIconSize = 20
+        seeAllButton.setTrailingIcon(UIImage(named: "chevron-right") ?? UIImage(systemName: "chevron.right"),
+                                     tint: UIColor(hex: "#141514"))
         seeAllButton.addTarget(self, action: #selector(seeAllTapped), for: .touchUpInside)
-
-        seeAllChevron.translatesAutoresizingMaskIntoConstraints = false
-        seeAllChevron.image = UIImage(named: "chevron-right")?.withRenderingMode(.alwaysTemplate)
-            ?? UIImage(systemName: "chevron.right")
-        seeAllChevron.tintColor = UIColor(hex: "#141514")
-        seeAllChevron.contentMode = .scaleAspectFit
-        seeAllChevron.isUserInteractionEnabled = false
-        seeAllButton.addSubview(seeAllChevron)
 
         // Android's `btnSeeAllGroupTrainings` carries `layout_marginHorizontal="20dp"`
         // inside the full-width column — a wrapper reproduces that inset without
@@ -249,8 +261,16 @@ final class GroupClassesCarouselView: UIView {
         contentStack.setCustomSpacing(16, after: dotsRow)
         addSubview(contentStack)
 
+        // Height tracks the section's own width at the banner's aspect ratio, so
+        // the artwork is framed the same way on every screen size (see the note
+        // on `bannerAspectRatio`).
+        let aspectHeight = heightAnchor.constraint(equalTo: widthAnchor,
+                                                  multiplier: GroupClassesCarouselView.bannerAspectRatio)
+        aspectHeight.priority = .defaultHigh
+
         NSLayoutConstraint.activate([
-            heightAnchor.constraint(equalToConstant: GroupClassesCarouselView.sectionHeight),
+            aspectHeight,
+            heightAnchor.constraint(greaterThanOrEqualToConstant: GroupClassesCarouselView.minimumSectionHeight),
 
             backgroundView.topAnchor.constraint(equalTo: topAnchor),
             backgroundView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -276,11 +296,7 @@ final class GroupClassesCarouselView: UIView {
             dotsView.trailingAnchor.constraint(equalTo: dotsPill.trailingAnchor, constant: -12),
             dotsView.heightAnchor.constraint(equalToConstant: 5),
 
-            seeAllButton.heightAnchor.constraint(equalToConstant: 42),
-            seeAllChevron.trailingAnchor.constraint(equalTo: seeAllButton.trailingAnchor, constant: -12),
-            seeAllChevron.centerYAnchor.constraint(equalTo: seeAllButton.centerYAnchor, constant: -1),
-            seeAllChevron.widthAnchor.constraint(equalToConstant: 20),
-            seeAllChevron.heightAnchor.constraint(equalToConstant: 20)
+            seeAllButton.heightAnchor.constraint(equalToConstant: 42)
         ])
     }
 
@@ -333,10 +349,40 @@ final class GroupClassesCarouselView: UIView {
         self.classes = classes
         // Android hides the section entirely when nothing survives the filter.
         isHidden = classes.isEmpty
+
+        // The home screen re-runs its whole fetch stack in `viewWillAppear`, so
+        // this lands again every time the user navigates *back* here. Rebuilding
+        // the carousel then would rewind the user's scroll position and flash
+        // every cell; when the payload is identical there is nothing to redraw,
+        // so the refresh stays silent.
+        let signature = GroupClassesCarouselView.signature(for: classes)
+        guard signature != renderedSignature else { return }
+        renderedSignature = signature
+
         collectionView.reloadData()
         collectionView.setContentOffset(CGPoint(x: -collectionView.contentInset.left, y: 0), animated: false)
         dotsView.setPageCount(classes.count)
         dotsView.setSelectedPage(0)
+    }
+
+    /// Everything the cards actually render, so an unchanged fetch is detected as
+    /// unchanged even though the decoded models are fresh instances.
+    private static func signature(for classes: [UpcomingClassModel]) -> String {
+        return classes.map { item in
+            [
+                item.scheduleID.map(String.init) ?? "",
+                GroupClassCardFormatter.title(for: item),
+                GroupClassCardFormatter.locationText(for: item),
+                item.time ?? "",
+                item.start_end ?? "",
+                item.image ?? "",
+                GroupClassCardFormatter.resolvedAccess(item.access),
+                (item.isMember ?? false) ? "1" : "0",
+                String(GroupClassCardFormatter.intValue(item.bookedCount, defaultValue: 0)),
+                String(GroupClassCardFormatter.intValue(item.totalCapacity, defaultValue: 20)),
+                String(GroupClassCardFormatter.intValue(item.remainingSeats, defaultValue: 20))
+            ].joined(separator: "|")
+        }.joined(separator: ";")
     }
 }
 

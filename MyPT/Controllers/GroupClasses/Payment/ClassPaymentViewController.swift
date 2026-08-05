@@ -143,7 +143,6 @@ final class ClassPaymentViewController: CommonViewController {
     private let contentStack = UIStackView()
     private let footerView = UIView()
     private let ctaButton = GradientCTAButton()
-    private let ctaChevronView = UIImageView()
 
     private let classTitleLabel = UILabel()
     private let classDateTimeLabel = UILabel()
@@ -552,23 +551,15 @@ private extension ClassPaymentViewController {
         ctaButton.configure(title: Copy.ctaTitle,
                             font: AppFont.medium.size(14.0, familyName: familyFunnelSans),
                             titleColor: Palette.ctaInk)
-        // Reserves room for the chevron drawn as its own sibling view below —
-        // see the identical note on the Detail screen's CTA chevron. This one
-        // additionally used `.alwaysOriginal` with no explicit tint, so whatever
-        // colour happened to be baked into the source asset rendered as-is —
-        // invisible if that colour turned out to be white-on-white against this
-        // button's white gradient body.
-        ctaButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: ctaButton.bandThickness, right: 32)
+        // Text + 8pt + 16pt chevron, centred together — the shared component owns
+        // that layout (`setTrailingIcon`), matching Android's centred CTA row.
+        ctaButton.horizontalContentInset = 12
+        ctaButton.setTrailingIcon(
+            ClassPaymentViewController.icon(["ic_chevron_right_16_dark", "chevron-right"],
+                                            systemFallback: "chevron.right"),
+            tint: Palette.ctaInk)
         ctaButton.addTarget(self, action: #selector(confirmAndPayTapped), for: .touchUpInside)
         footerView.addSubview(ctaButton)
-
-        ctaChevronView.translatesAutoresizingMaskIntoConstraints = false
-        ctaChevronView.image = ClassPaymentViewController.icon(["ic_chevron_right_16_dark", "chevron-right"], systemFallback: "chevron.right")?
-            .withRenderingMode(.alwaysTemplate)
-        ctaChevronView.tintColor = Palette.ctaInk
-        ctaChevronView.contentMode = .scaleAspectFit
-        ctaChevronView.isUserInteractionEnabled = false
-        footerView.addSubview(ctaChevronView)
 
         NSLayoutConstraint.activate([
             footerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -578,13 +569,8 @@ private extension ClassPaymentViewController {
             ctaButton.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 12),
             ctaButton.leadingAnchor.constraint(equalTo: footerView.leadingAnchor, constant: Metric.horizontalInset),
             ctaButton.trailingAnchor.constraint(equalTo: footerView.trailingAnchor, constant: -Metric.horizontalInset),
-            ctaButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
-            ctaButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight),
-
-            ctaChevronView.trailingAnchor.constraint(equalTo: ctaButton.trailingAnchor, constant: -12),
-            ctaChevronView.centerYAnchor.constraint(equalTo: ctaButton.centerYAnchor, constant: -1),
-            ctaChevronView.widthAnchor.constraint(equalToConstant: 16),
-            ctaChevronView.heightAnchor.constraint(equalToConstant: 16)
+            ctaButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
+            ctaButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight)
         ])
     }
 

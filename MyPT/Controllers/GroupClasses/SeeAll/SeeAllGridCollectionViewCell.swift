@@ -167,7 +167,12 @@ final class SeeAllGridCollectionViewCell: UICollectionViewCell {
             locationIconView.widthAnchor.constraint(equalToConstant: 12),
             locationIconView.heightAnchor.constraint(equalToConstant: 12),
 
+            // Explicit height: the intrinsic height alone left the bar collapsed
+            // inside the trailing-aligned vertical stack, which is why it was
+            // missing from these cards. 2pt matches
+            // `item_see_all_grid_class_card.xml`.
             progressBar.widthAnchor.constraint(equalToConstant: 48),
+            progressBar.heightAnchor.constraint(equalToConstant: 2),
 
             contentStack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 10),
             contentStack.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -10),
@@ -177,7 +182,9 @@ final class SeeAllGridCollectionViewCell: UICollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        coverImageView.image = nil
+        // Deliberately does *not* clear `coverImageView`: `configure` always
+        // assigns either the cached/loaded photo or the fallback, and blanking it
+        // here just guarantees a visible empty frame on every reuse.
         titleLabel.text = nil
         timeLabel.text = nil
         locationLabel.text = nil

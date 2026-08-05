@@ -142,7 +142,6 @@ final class ConfirmSlotSheetViewController: CommonViewController {
     private let trainerNameLabel = UILabel()
 
     private let ctaButton = GradientCTAButton()
-    private let ctaChevronView = UIImageView()
 
     /// Content height fed to the sheet's custom detent, recomputed after layout.
     private var resolvedSheetHeight: CGFloat = 0
@@ -970,29 +969,15 @@ private extension ConfirmSlotSheetViewController {
         // `btn_cta_gradient_shadow` offsets the body by 2dp over the grey band.
         ctaButton.bandThickness = 2
         setCTATitle(Copy.confirmCTA)
-        // Set after `bandThickness` so the component's own inset pass cannot undo
-        // it; the extra right padding reserves room for the chevron drawn below.
-        ctaButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 2, right: 36)
+        // Android's CTA centres `[text][8dp][16dp chevron]` inside a
+        // `paddingHorizontal="16dp"` button — handled by the shared component.
+        ctaButton.horizontalContentInset = 16
+        ctaButton.setTrailingIcon(
+            ConfirmSlotSheetViewController.icon(["ic_chevron_right_16_dark", "chevron-right"],
+                                                systemFallback: "chevron.right"),
+            tint: Palette.ctaInk)
         ctaButton.addTarget(self, action: #selector(confirmTapped), for: .touchUpInside)
         ctaButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight).isActive = true
-
-        // A sibling view rather than the button's image slot — see the identical
-        // note on `GroupTrainingDetailViewController`'s CTA chevron; UIButton's
-        // image+title inset arithmetic was silently rendering nothing.
-        ctaChevronView.translatesAutoresizingMaskIntoConstraints = false
-        ctaChevronView.image = ConfirmSlotSheetViewController.icon(["ic_chevron_right_16_dark", "chevron-right"], systemFallback: "chevron.right")?
-            .withRenderingMode(.alwaysTemplate)
-        ctaChevronView.tintColor = Palette.ctaInk
-        ctaChevronView.contentMode = .scaleAspectFit
-        ctaChevronView.isUserInteractionEnabled = false
-        ctaButton.addSubview(ctaChevronView)
-
-        NSLayoutConstraint.activate([
-            ctaChevronView.trailingAnchor.constraint(equalTo: ctaButton.trailingAnchor, constant: -16),
-            ctaChevronView.centerYAnchor.constraint(equalTo: ctaButton.centerYAnchor, constant: -1),
-            ctaChevronView.widthAnchor.constraint(equalToConstant: 16),
-            ctaChevronView.heightAnchor.constraint(equalToConstant: 16)
-        ])
         return ctaButton
     }
 }

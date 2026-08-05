@@ -204,7 +204,12 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
             locationIconView.widthAnchor.constraint(equalToConstant: 12),
             locationIconView.heightAnchor.constraint(equalToConstant: 12),
 
+            // Explicit height: `SpotProgressBarView`'s intrinsic height alone left
+            // the bar collapsed inside the trailing-aligned vertical stack, which
+            // is why it was missing from these cards entirely. 2pt matches
+            // `item_trending_group_class.xml`.
             progressBar.widthAnchor.constraint(equalToConstant: 48),
+            progressBar.heightAnchor.constraint(equalToConstant: 2),
 
             contentStack.topAnchor.constraint(equalTo: cardView.bottomAnchor, constant: 9),
             contentStack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
@@ -214,8 +219,8 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        coverImageView.image = nil
-        rankImageView.image = nil
+        // Cover and rank images are both reassigned unconditionally in
+        // `configure`, so clearing them here only adds a blank frame on reuse.
         titleLabel.text = nil
         timeLabel.text = nil
         locationLabel.text = nil

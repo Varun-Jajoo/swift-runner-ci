@@ -489,7 +489,13 @@ final class SeeAllGroupClassesViewController: CommonViewController {
         }
 
         filteredGridList = filtered
-        gridCollectionView.reloadData()
+        // `reloadData()` tears down and rebuilds every visible cell, which reads
+        // as a flash when only the *set* of rows changed. Reloading the single
+        // section instead keeps cell reuse (and therefore the already-decoded
+        // cover images) intact, and `.none` suppresses the cross-dissolve.
+        UIView.performWithoutAnimation {
+            gridCollectionView.reloadSections(IndexSet(integer: 0))
+        }
         updateGridHeight()
     }
 

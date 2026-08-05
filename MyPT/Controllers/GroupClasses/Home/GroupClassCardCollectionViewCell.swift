@@ -216,7 +216,9 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
             locationIconView.heightAnchor.constraint(equalToConstant: 14),
 
             progressBar.widthAnchor.constraint(equalToConstant: 59),
-            progressBar.heightAnchor.constraint(equalToConstant: 4),
+            // Android's `item_group_class_card.xml` settled back on a 2dp bar
+            // (it briefly went to 4dp with min/maxHeight, then reverted).
+            progressBar.heightAnchor.constraint(equalToConstant: 2),
 
             contentStack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 10),
             contentStack.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -10),
@@ -226,7 +228,8 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        coverImageView.image = nil
+        // `configure` always assigns a cover image (loaded, cached or fallback),
+        // so clearing it here only produced a blank flash on every reuse.
         titleLabel.text = nil
         timeLabel.text = nil
         locationLabel.text = nil

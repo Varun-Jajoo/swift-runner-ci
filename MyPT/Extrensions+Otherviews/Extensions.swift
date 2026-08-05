@@ -15,6 +15,27 @@ private var backViewTag: Int { return 1013 }
 private var centerImgTag: Int { return 1014 }
 private var lockImgTag: Int { return 1015 }
 
+/// Process-lifetime in-memory cache behind `UIImageView.loadImage(urlString:...)`.
+///
+/// `NSCache` (rather than a plain dictionary) so the system can evict entries
+/// under memory pressure on its own.
+enum RemoteImageCache {
+
+    static let shared: NSCache<NSString, UIImage> = {
+        let cache = NSCache<NSString, UIImage>()
+        // Generous but bounded — list thumbnails and hero art, not originals.
+        cache.countLimit = 240
+        return cache
+    }()
+
+    /// Resized variants are cached separately from the full-size image, since
+    /// `loadImage` can be asked for either at the same URL.
+    static func key(for urlString: String, resize: CGSize?) -> NSString {
+        guard let resize = resize else { return urlString as NSString }
+        return "\(urlString)@\(Int(resize.width))x\(Int(resize.height))" as NSString
+    }
+}
+
 
 func createGrayBlurImage(from image: UIImage, blurRadius:Float = 5.0) -> UIImage? {
     guard let ciImage = CIImage(image: image) else { return nil }
@@ -1766,36 +1787,49 @@ extension UIImageView {
     
     
     //MARK: ---------------IMAGE GETTING FROM URL
+    /// Loads a remote image, serving already-fetched ones straight from an
+    /// in-memory cache.
+    ///
+    /// This used to assign `placeholder` unconditionally and then re-download on
+    /// every call, so any `reloadData()` (or simply navigating back to a screen
+    /// and having its list rebuilt) blanked every visible image for the length of
+    /// a network round trip — the visible "flicker". A cache hit now assigns
+    /// synchronously, so a re-display is seamless; the placeholder is only shown
+    /// when there is genuinely nothing to show yet.
     func loadImage(urlString: String?, placeholder: UIImage?, resize: CGSize? = nil) {
+        guard let urlString = urlString, let url = URL(string: urlString) else {
+            self.image = placeholder
+            return
+        }
+
+        let cacheKey = RemoteImageCache.key(for: urlString, resize: resize)
+        if let cached = RemoteImageCache.shared.object(forKey: cacheKey) {
+            self.image = cached
+            return
+        }
+
         self.image = placeholder
-        guard let urlString = urlString, let url = URL(string: urlString) else { return }
 
         Task { [weak self] in
             do {
                 let (data, _) = try await URLSession.shared.data(from: url)
                 if let image = UIImage(data: data) {
-                    if let resize = resize {
-                        self?.image = image.resized(to: resize)
-                    }else{
-                        self?.image = image
-                    }
-                } else {
-                    if let resize = resize {
-                        self?.image = placeholder?.resized(to: resize) 
-                    }else{
+                    let finalImage = resize.map { image.resized(to: $0) } ?? image
+                    if let finalImage = finalImage {
+                        RemoteImageCache.shared.setObject(finalImage, forKey: cacheKey)
+                        self?.image = finalImage
+                    } else {
                         self?.image = placeholder
                     }
+                } else {
+                    self?.image = resize.flatMap { placeholder?.resized(to: $0) } ?? placeholder
                 }
             } catch {
-                if let resize = resize {
-                    self?.image = placeholder?.resized(to: resize)
-                }else{
-                    self?.image = placeholder
-                }
+                self?.image = resize.flatMap { placeholder?.resized(to: $0) } ?? placeholder
             }
         }
     }
-    
+
     //MARK: ---------------IMAGE GETTING FROM URL
     func loadImageWithRatio(urlString: String?, placeholder: UIImage?, resizeRatio: CGFloat? = nil) {
         self.image = placeholder

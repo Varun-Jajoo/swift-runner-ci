@@ -228,6 +228,57 @@ public class GradientCTAButton: UIButton {
     public var bodyStartColor: UIColor = UIColor(hex: "#FFFFFF") { didSet { applyStyle() } }
     public var bodyEndColor: UIColor = UIColor(hex: "#F0F0F0") { didSet { applyStyle() } }
 
+    /// Extra left/right padding inside the body (Android's `paddingHorizontal`).
+    public var horizontalContentInset: CGFloat = 12 { didSet { applyContentInsets() } }
+
+    // MARK: Trailing icon
+    //
+    // Android lays the CTA out as a centred `LinearLayout` of
+    // `[text][marginStart=8dp][16dp chevron]` (`btnBookSlot` in
+    // `activity_group_training_detail.xml`, and the same recipe in the sheet /
+    // payment / see-all buttons). Pinning the chevron to the button's *trailing
+    // edge* instead — which every call site used to do locally — pushed it far
+    // away from the label on a wide button. Reserving `iconSize + gap` on the
+    // right shifts the centred title left by exactly half that, so laying the
+    // icon `gap` after the title's trailing edge leaves the whole
+    // text-plus-icon group optically centred, matching Android.
+
+    private var trailingIconView: UIImageView?
+    public var trailingIconSize: CGFloat = 16 { didSet { applyContentInsets(); setNeedsLayout() } }
+    public var trailingIconGap: CGFloat = 8 { didSet { applyContentInsets(); setNeedsLayout() } }
+
+    /// Frame-laid-out (not constraint-driven) on purpose: `titleLabel` is
+    /// positioned by `UIButton` itself, so a constraint against it would fight
+    /// that layout pass. Pass `nil` to remove the icon.
+    public func setTrailingIcon(_ image: UIImage?, tint: UIColor? = nil) {
+        guard let image = image else {
+            trailingIconView?.removeFromSuperview()
+            trailingIconView = nil
+            applyContentInsets()
+            setNeedsLayout()
+            return
+        }
+
+        let iconView = trailingIconView ?? {
+            let view = UIImageView()
+            view.contentMode = .scaleAspectFit
+            view.isUserInteractionEnabled = false
+            addSubview(view)
+            trailingIconView = view
+            return view
+        }()
+
+        if let tint = tint {
+            iconView.image = image.withRenderingMode(.alwaysTemplate)
+            iconView.tintColor = tint
+        } else {
+            iconView.image = image
+        }
+
+        applyContentInsets()
+        setNeedsLayout()
+    }
+
     public convenience init(title: String?) {
         self.init(frame: .zero)
         configure(title: title)
@@ -271,9 +322,15 @@ public class GradientCTAButton: UIButton {
     }
 
     private func applyContentInsets() {
-        // Keeps the title optically centred inside the body rather than inside
-        // the full control bounds (which include the band).
-        contentEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: bandThickness, right: 0)
+        // `bottom: bandThickness` keeps the title optically centred inside the
+        // body rather than inside the full control bounds (which include the
+        // band). The extra right inset reserves the trailing icon's slot — see
+        // the note above `trailingIconView` for why that centres the group.
+        let reserved = (trailingIconView == nil) ? 0 : (trailingIconSize + trailingIconGap)
+        contentEdgeInsets = UIEdgeInsets(top: 0,
+                                         left: horizontalContentInset,
+                                         bottom: bandThickness,
+                                         right: horizontalContentInset + reserved)
     }
 
     private func applyStyle() {
@@ -294,6 +351,15 @@ public class GradientCTAButton: UIButton {
         bodyLayer.cornerRadius = cornerRadius
 
         CATransaction.commit()
+
+        // Sits `trailingIconGap` after the title's trailing edge, vertically
+        // centred in the body (not the full bounds, which include the band).
+        if let iconView = trailingIconView, let titleFrame = titleLabel?.frame {
+            iconView.frame = CGRect(x: titleFrame.maxX + trailingIconGap,
+                                    y: (bodyHeight - trailingIconSize) / 2,
+                                    width: trailingIconSize,
+                                    height: trailingIconSize)
+        }
     }
 
     public override var isHighlighted: Bool {
