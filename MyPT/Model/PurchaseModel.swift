@@ -261,6 +261,7 @@ struct PackageDetails: Codable {
     let textMsg, early_renewal_text: String?
     let is_early_renew: Bool?
     let original_price, early_renewal_discount: Double?
+    let start_date, end_date: String?
 
     enum CodingKeys: String, CodingKey {
         case type, sessions
@@ -283,6 +284,7 @@ struct PackageDetails: Codable {
         case appliedOfferID = "applied_offer_id"
         case textMsg = "text_msg"
         case early_renewal_text, is_early_renew, original_price, early_renewal_discount
+        case start_date, end_date
     }
 }
 

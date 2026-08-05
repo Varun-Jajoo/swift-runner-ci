@@ -133,7 +133,7 @@ class BookingReviewPurchaseVC: CommonViewController {
     @IBOutlet weak var viewTermAndCond: UIView!
     @IBOutlet weak var btnCheck: UIButton!
     @IBOutlet weak var lblTermCondition: UILabel!
-    @IBOutlet weak var lblGymRefundable: UILabel!
+//    @IBOutlet weak var lblGymRefundable: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -172,7 +172,7 @@ class BookingReviewPurchaseVC: CommonViewController {
             self.btnCheck.setImage(UIImage(named: "unselectedRadioBtn"), for: .normal)
             self.lblTermCondition.isUserInteractionEnabled = true
             self.lblRefundable.isUserInteractionEnabled = true
-            self.lblGymRefundable.isUserInteractionEnabled = true
+//            self.lblGymRefundable.isUserInteractionEnabled = true
             self.viewPaymenytDownword.roundBottomCorners(radius: 16)
             
             //        .roundSideCorners(radius: 16, cornerSide: .bottomLeft)
@@ -225,7 +225,7 @@ class BookingReviewPurchaseVC: CommonViewController {
             self.lblPlanExpired.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
             self.lblAED.font = AppFont.regular.size(14.0, familyName: familyFunnelSans)
             self.lblSession.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
-            [self.lblSavingCorner, self.lblPackageDetail, self.lblNewGymPackageDetail, self.lblGymMembershipPackageDetails, self.lblTrainingLoc, self.lblChoosePayment, self.lblRemainingSession, self.lblTrainerName, self.lblGymName, self.lblNewSelectedGymData].forEach {
+            [self.lblSavingCorner, self.lblPackageDetail, self.lblNewGymPackageDetail, self.lblGymMembershipPackageDetails, self.lblTrainingLoc, self.lblChoosePayment, self.lblRemainingSession, self.lblTrainerName, self.lblGymName].forEach {
                 $0?.font = AppFont.semibold.size(16.0, familyName: familyFunnelSans)
             }
             [self.lblSavedAED, self.lblLocationTYpe, self.lblTabby, self.lblTamara, self.lblCard, self.lblBrowseOtherPlan] .forEach {
@@ -234,6 +234,7 @@ class BookingReviewPurchaseVC: CommonViewController {
             [self.lblMode, self.lblTypeWorkout, self.lblTotalSession, self.lblValidity, self.lblAllTrainer, self.lblSelectedGym, self.lblYouwillBookSession, self.lblCancel6h, self.lblGymMembershipSelectedGym, self.lblGymMembershipSelectedPlan, self.lblStartDate, self.lblEndDate, self.lblNewGymPlanType, self.lblNewGymValidity, self.lblNewSelectedGym].forEach {
                 $0?.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
             }
+            self.lblNewSelectedGymData.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
             self.lblTermCondition.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
             self.lblSavedSession.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
             self.lblNewGymMsg.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
@@ -310,12 +311,12 @@ class BookingReviewPurchaseVC: CommonViewController {
             ], range: refundFrange)
             
             self.lblRefundable.attributedText = refundFattributedString
-            self.lblGymRefundable.attributedText = refundFattributedString
+//            self.lblGymRefundable.attributedText = refundFattributedString
             
             let refundFtapGesture = UITapGestureRecognizer(target: self, action: #selector(self.refundhandleTap))
             let refundGymFtapGesture = UITapGestureRecognizer(target: self, action: #selector(self.refundhandleTap))
             self.lblRefundable.addGestureRecognizer(refundFtapGesture)
-            self.lblGymRefundable.addGestureRecognizer(refundGymFtapGesture)
+//            self.lblGymRefundable.addGestureRecognizer(refundGymFtapGesture)
         }
     }
     
@@ -476,12 +477,15 @@ class BookingReviewPurchaseVC: CommonViewController {
         
         // Package Details
         if let pkg = data.packageDetails {
+            self.heightOfNewGymMembership.constant = (pkg.is_early_renew ?? false) ? 310 : 220
             imgEarlyClock.isHidden = !(pkg.is_early_renew ?? false)
             lblEarlyMsg.isHidden = !(pkg.is_early_renew ?? false)
             imgNewGymEarlyClock.isHidden = !(pkg.is_early_renew ?? false)
             lblNewGymEarlyMsg.isHidden = !(pkg.is_early_renew ?? false)
-            lblNewGymEarlyMsg.text = pkg.early_renewal_text
-            lblEarlyMsg.text = pkg.early_renewal_text
+            viewNewGymMSg.isHidden = !(pkg.is_early_renew ?? false)
+            let lastEndDate = formatDate(pkg.start_date ?? "")
+            lblNewGymEarlyMsg.text = "Starts after your current plan ends - \(lastEndDate)"
+            lblEarlyMsg.text = "Starts after your current plan ends - \(lastEndDate)"
             lblTrainingPlace.text = "\(pkg.type ?? "") Training"
             //            lblSolo.text = "wertyui"
             lblNumSession.text = "\(pkg.totalSessions ?? 0)"
@@ -490,8 +494,8 @@ class BookingReviewPurchaseVC: CommonViewController {
             lblNewGymPrice.text = "AED \(pkg.price ?? 0)"
             //            lblRemainingSession.text = "AED \(pkg.pricePerSession?.value) / session"
             lblRemainingSession.text = "AED \(pkg.pricePerSession?.value ?? "") / session"
-            lblSavedSession.text = pkg.textMsg
-            lblNewGymMsg.text = pkg.textMsg
+            lblSavedSession.text = pkg.early_renewal_text
+            lblNewGymMsg.text = pkg.early_renewal_text
             lblNewGymValidityData.text = "\(pkg.validityDays ?? 0) days"
         }
         
@@ -538,6 +542,21 @@ class BookingReviewPurchaseVC: CommonViewController {
         if isGymMembership {
             lblAdress.text = data.studio?.address
         }
+    }
+    
+    func formatDate(_ dateString: String) -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd"
+        inputFormatter.locale = Locale(identifier: "en_US_POSIX")
+
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "MMM dd, yyyy"
+
+        guard let date = inputFormatter.date(from: dateString) else {
+            return dateString // Return original string if parsing fails
+        }
+
+        return outputFormatter.string(from: date)
     }
     
     func resetSelection() {
