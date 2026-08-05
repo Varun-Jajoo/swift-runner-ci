@@ -192,7 +192,7 @@ final class GroupClassesCarouselView: UIView {
 
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
         backgroundView.image = UIImage(named: "group-classes-bg")
-        backgroundView.contentMode = .scaleAspectFill
+        backgroundView.contentMode = .scaleToFill
         backgroundView.clipsToBounds = true
         addSubview(backgroundView)
 
