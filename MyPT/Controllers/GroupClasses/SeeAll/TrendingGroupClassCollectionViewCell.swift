@@ -142,7 +142,14 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
         spotLabel.textColor = UIColor(hex: "#F0F0F0")
         spotLabel.numberOfLines = 1
         spotLabel.textAlignment = .right
-        spotLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        // `.required` here used to sit at the same priority tier as this row's
+        // own fixed-width pin to the 160pt card — a real conflict whenever the
+        // combined text ("Join Waitlist" + a studio name) didn't quite fit,
+        // which UIKit can resolve by collapsing the view instead of truncating
+        // it. `.defaultHigh` still wins over the location label below (which
+        // stays `.defaultLow`, so it's always the one that yields first) without
+        // being able to deadlock against the row's own required width.
+        spotLabel.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
 
         progressBar.translatesAutoresizingMaskIntoConstraints = false
 
@@ -152,13 +159,20 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
         spotStack.alignment = .trailing
         spotStack.spacing = 2
         spotStack.setContentHuggingPriority(.required, for: .horizontal)
-        spotStack.setContentCompressionResistancePriority(.required, for: .horizontal)
+        spotStack.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
 
         let locationStack = UIStackView(arrangedSubviews: [locationIconView, locationLabel])
         locationStack.translatesAutoresizingMaskIntoConstraints = false
         locationStack.axis = .horizontal
         locationStack.alignment = .center
         locationStack.spacing = 2
+        // The stack's own compression resistance (a `UIView` property, distinct
+        // from the label's) otherwise defaults to `.defaultHigh` regardless of
+        // what priority the label inside it has — matching it to the label
+        // keeps this whole block the first to give, exactly like Android's
+        // `tvClassLocation` (`layout_width="0dp" layout_weight="1"`) always
+        // absorbing whatever space the fixed-width spot column doesn't need.
+        locationStack.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
         let bottomRow = UIStackView(arrangedSubviews: [locationStack, spotStack])
         bottomRow.translatesAutoresizingMaskIntoConstraints = false
