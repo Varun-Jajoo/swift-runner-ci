@@ -1073,8 +1073,7 @@ private extension GroupTrainingDetailViewController {
         // 3 — date/time + spots progress
         let dateSpotsRow = makeDateAndSpotsRow()
         column.addArrangedSubview(dateSpotsRow)
-        // Spacing set to 4pt so combined with locationRow's 12pt internal top inset, net gap is 16pt.
-        column.setCustomSpacing(4, after: dateSpotsRow)
+        column.setCustomSpacing(16, after: dateSpotsRow)
 
         // 4 — location row (tap -> Maps)
         let locationRowView = makeLocationRow()
@@ -1082,11 +1081,9 @@ private extension GroupTrainingDetailViewController {
 
         let locationDivider = makeHairline(color: Palette.hairline)
         column.addArrangedSubview(locationDivider)
-        // Spacing set to 4pt so combined with doorsRow's 12pt internal top inset, net gap is 16pt.
-        column.setCustomSpacing(4, after: locationDivider)
+        column.setCustomSpacing(0, after: locationDivider)
 
-        // 5 — doors-open row (`minHeight="54dp"`, `paddingVertical="12dp"`, and a
-        // 16dp top margin, all mirrored inside `makeDoorsOpenRow`).
+        // 5 — doors-open row
         let doorsRow = makeDoorsOpenRow()
         column.addArrangedSubview(doorsRow)
         let doorsDivider = makeHairline(color: Palette.hairline)
@@ -1287,8 +1284,8 @@ private extension GroupTrainingDetailViewController {
             locationRow.heightAnchor.constraint(greaterThanOrEqualToConstant: 54),
             row.leadingAnchor.constraint(equalTo: locationRow.leadingAnchor),
             row.trailingAnchor.constraint(equalTo: locationRow.trailingAnchor),
-            row.topAnchor.constraint(equalTo: locationRow.topAnchor, constant: 12),
-            row.bottomAnchor.constraint(equalTo: locationRow.bottomAnchor, constant: -12)
+            row.topAnchor.constraint(equalTo: locationRow.topAnchor, constant: 8),
+            row.bottomAnchor.constraint(equalTo: locationRow.bottomAnchor, constant: -8)
         ])
 
         locationRow.isUserInteractionEnabled = true
@@ -1321,8 +1318,8 @@ private extension GroupTrainingDetailViewController {
             container.heightAnchor.constraint(greaterThanOrEqualToConstant: 54),
             row.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             row.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            row.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
-            row.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -12)
+            row.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
+            row.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8)
         ])
         return container
     }
