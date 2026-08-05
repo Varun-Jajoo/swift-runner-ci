@@ -159,6 +159,8 @@ final class GroupTrainingDetailViewController: CommonViewController {
     private let whyDotsPill = UIView()
 
     private let aboutLabel = UILabel()
+    private let aboutContainerView = UIView()
+    private var contentStackView: UIStackView?
     /// Bottom scrim over the collapsed About copy. Hidden while expanded, and
     /// hidden entirely when the copy is short enough not to need truncating.
     private let aboutFadeView = GradientFadeView()
@@ -898,11 +900,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
         readMoreButton.isHidden = !overflows
         aboutFadeView.isHidden = !overflows || isAboutExpanded
 
-        // Adjust spacing after aboutBlock so that when readMoreButton is hidden,
-        // the gap to the next section ("What to bring") is 24pt instead of collapsing to 8pt.
-        if let column = aboutBlock.superview as? UIStackView {
-            column.setCustomSpacing(overflows ? 8 : 24, after: aboutBlock)
-        }
+        contentStackView?.setCustomSpacing(overflows ? 8 : 0, after: aboutContainerView)
 
         // A paragraph that no longer overflows (shorter copy arrived from the API
         // while expanded) must not stay stuck in the expanded state.
@@ -1054,6 +1052,7 @@ private extension GroupTrainingDetailViewController {
 
     func makeContentColumn() -> UIView {
         let column = UIStackView()
+        contentStackView = column
         column.translatesAutoresizingMaskIntoConstraints = false
         column.axis = .vertical
         column.alignment = .fill
@@ -1464,45 +1463,38 @@ private extension GroupTrainingDetailViewController {
     /// `>= 110` *and* `== 93`, which is an unsatisfiable pair, and clipped the
     /// copy to a fixed box regardless of how long it actually was.
     func makeAboutBlock() -> UIView {
-        let container = UIView()
-        container.translatesAutoresizingMaskIntoConstraints = false
-        container.clipsToBounds = true
+        aboutContainerView.translatesAutoresizingMaskIntoConstraints = false
+        aboutContainerView.clipsToBounds = true
 
         aboutLabel.translatesAutoresizingMaskIntoConstraints = false
         aboutLabel.font = AppFont.regular.size(14.0, familyName: familyFunnelSans)
         aboutLabel.textColor = Palette.aboutText
-        aboutLabel.textAlignment = .left
         aboutLabel.numberOfLines = GroupTrainingDetailViewController.aboutCollapsedLineLimit
         aboutLabel.lineBreakMode = .byTruncatingTail
         aboutLabel.text = Copy.aboutPlaceholder
-        container.addSubview(aboutLabel)
+        aboutLabel.setContentHuggingPriority(.required, for: .vertical)
+        aboutLabel.setContentCompressionResistancePriority(.required, for: .vertical)
+        aboutContainerView.addSubview(aboutLabel)
 
         aboutFadeView.translatesAutoresizingMaskIntoConstraints = false
         aboutFadeView.setColors([Palette.aboutFade.withAlphaComponent(0.0),
                                  Palette.aboutFade.withAlphaComponent(0.85),
                                  Palette.aboutFade],
                                 locations: [0.0, 0.5, 1.0])
-        container.addSubview(aboutFadeView)
-
-        // Android's fade is a flat 93dp. Kept at that height when there's room,
-        // but never taller than the copy it covers — otherwise a short paragraph
-        // ends up buried under the scrim's near-solid tail.
-        let fadeHeight = aboutFadeView.heightAnchor.constraint(equalToConstant: 93)
-        fadeHeight.priority = .defaultHigh
+        aboutContainerView.addSubview(aboutFadeView)
 
         NSLayoutConstraint.activate([
-            aboutLabel.topAnchor.constraint(equalTo: container.topAnchor),
-            aboutLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            aboutLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            aboutLabel.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+            aboutLabel.topAnchor.constraint(equalTo: aboutContainerView.topAnchor),
+            aboutLabel.leadingAnchor.constraint(equalTo: aboutContainerView.leadingAnchor),
+            aboutLabel.trailingAnchor.constraint(equalTo: aboutContainerView.trailingAnchor),
+            aboutLabel.bottomAnchor.constraint(equalTo: aboutContainerView.bottomAnchor),
 
-            aboutFadeView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            aboutFadeView.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            aboutFadeView.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-            aboutFadeView.heightAnchor.constraint(lessThanOrEqualTo: container.heightAnchor),
-            fadeHeight
+            aboutFadeView.leadingAnchor.constraint(equalTo: aboutContainerView.leadingAnchor),
+            aboutFadeView.trailingAnchor.constraint(equalTo: aboutContainerView.trailingAnchor),
+            aboutFadeView.bottomAnchor.constraint(equalTo: aboutContainerView.bottomAnchor),
+            aboutFadeView.heightAnchor.constraint(equalToConstant: 40)
         ])
-        return container
+        return aboutContainerView
     }
 
     func makeReadMoreButton() -> UIView {
