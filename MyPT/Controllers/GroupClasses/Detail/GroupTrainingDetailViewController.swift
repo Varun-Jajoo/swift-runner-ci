@@ -1073,9 +1073,8 @@ private extension GroupTrainingDetailViewController {
         // 3 — date/time + spots progress
         let dateSpotsRow = makeDateAndSpotsRow()
         column.addArrangedSubview(dateSpotsRow)
-        // Android's `locationRowContainer` carries `layout_marginTop="16dp"`; a 0
-        // gap here is what left the studio name visually welded to the date line.
-        column.setCustomSpacing(16, after: dateSpotsRow)
+        // Spacing set to 4pt so combined with locationRow's 12pt internal top inset, net gap is 16pt.
+        column.setCustomSpacing(4, after: dateSpotsRow)
 
         // 4 — location row (tap -> Maps)
         let locationRowView = makeLocationRow()
@@ -1083,9 +1082,8 @@ private extension GroupTrainingDetailViewController {
 
         let locationDivider = makeHairline(color: Palette.hairline)
         column.addArrangedSubview(locationDivider)
-        // `doorsOpenRowContainer`'s own `layout_marginTop="16dp"` — this is the
-        // "space between the divider and the text below it".
-        column.setCustomSpacing(16, after: locationDivider)
+        // Spacing set to 4pt so combined with doorsRow's 12pt internal top inset, net gap is 16pt.
+        column.setCustomSpacing(4, after: locationDivider)
 
         // 5 — doors-open row (`minHeight="54dp"`, `paddingVertical="12dp"`, and a
         // 16dp top margin, all mirrored inside `makeDoorsOpenRow`).
@@ -1243,6 +1241,7 @@ private extension GroupTrainingDetailViewController {
         row.spacing = 12
 
         progressBar.widthAnchor.constraint(equalToConstant: Metric.progressBarWidth).isActive = true
+        progressBar.heightAnchor.constraint(equalToConstant: 2).isActive = true
         return row
     }
 
