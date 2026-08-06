@@ -263,6 +263,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
         if !classLocation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             locationPill.text = GroupClassCardFormatter.cleanStudioName(classLocation).uppercased()
         }
+        adjustGlassPillsOverflow()
 
         doorsOpenLabel.attributedText = doorsOpenText(for: rawTime)
 
@@ -559,6 +560,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
         if !apiClassType.isEmpty {
             typePill.text = apiClassType.uppercased()
         }
+        adjustGlassPillsOverflow()
 
         let apiStudioLat = GroupClassCardFormatter.doubleValue(detail.studioLat, defaultValue: studioLat)
         let apiStudioLng = GroupClassCardFormatter.doubleValue(detail.studioLng, defaultValue: studioLng)
@@ -1210,6 +1212,27 @@ private extension GroupTrainingDetailViewController {
             pillStack.trailingAnchor.constraint(lessThanOrEqualTo: wrapper.trailingAnchor)
         ])
         return wrapper
+    }
+
+    /// The 3 glass pills (category, gym, "GROUP CLASS") already truncate
+    /// individually, but a long category name can still leave the gym pill
+    /// squeezed to near-nothing or push the row past the 16pt-inset column.
+    /// Drop the gym pill entirely once the row would overflow - measured
+    /// against each pill's actual rendered text width, not a hardcoded
+    /// character count, so it adapts to any category/gym name length.
+    private func adjustGlassPillsOverflow() {
+        let availableWidth = view.safeAreaLayoutGuide.layoutFrame.width - 32 // 16pt leading + trailing
+        guard availableWidth > 0 else { return }
+
+        let spacing: CGFloat = 6
+
+        func pillWidth(_ pill: PillChipView) -> CGFloat {
+            let insets = pill.contentInsets
+            return pill.titleLabel.intrinsicContentSize.width + insets.left + insets.right
+        }
+
+        let totalWidth = pillWidth(categoryPill) + spacing + pillWidth(locationPill) + spacing + pillWidth(typePill)
+        locationPill.isHidden = totalWidth > availableWidth
     }
 
     func makeDateAndSpotsRow() -> UIView {

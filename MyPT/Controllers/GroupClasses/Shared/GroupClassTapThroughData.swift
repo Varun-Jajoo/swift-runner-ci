@@ -189,6 +189,72 @@ enum GroupClassCardFormatter {
         return "\(dayText) • \(start12)-\(end12) \(amPm)"
     }
 
+    // MARK: Sorting
+
+    /// The API has no raw sortable date field - each item only carries a
+    /// pre-formatted display string like "Fri, 28 Aug • 7-8 AM" (year
+    /// omitted), and the response array is grouped by category/class rather
+    /// than sorted chronologically across all of them. This parses that
+    /// string back into a comparable date so the home carousel can show the
+    /// actual N closest-date upcoming classes, matching Android.
+    ///
+    /// Items whose time string fails to parse sort last rather than being
+    /// dropped, so a formatting surprise never hides a class.
+    static func closestUpcoming(_ classes: [UpcomingClassModel], limit: Int = 10) -> [UpcomingClassModel] {
+        return classes
+            .sorted { scheduleDate(for: $0) < scheduleDate(for: $1) }
+            .prefix(limit)
+            .map { $0 }
+    }
+
+    private static func scheduleDate(for item: UpcomingClassModel) -> Date {
+        let raw = (item.time?.isEmpty == false) ? item.time : item.start_end
+        return parseFormattedSchedule(raw ?? "")
+    }
+
+    /// Expects "EEE, d MMM • h-h a" (e.g. "Fri, 28 Aug • 7-8 AM").
+    private static func parseFormattedSchedule(_ raw: String) -> Date {
+        guard !raw.isEmpty else { return .distantFuture }
+
+        let parts = raw.components(separatedBy: "•")
+        guard parts.count == 2 else { return .distantFuture }
+
+        let datePart = parts[0].trimmingCharacters(in: .whitespaces)
+        let timePart = parts[1].trimmingCharacters(in: .whitespaces)
+
+        guard let commaRange = datePart.range(of: ",") else { return .distantFuture }
+        let dayMonth = String(datePart[commaRange.upperBound...]).trimmingCharacters(in: .whitespaces)
+
+        let thisYear = Calendar.current.component(.year, from: Date())
+        let inputFormatter = DateFormatter()
+        inputFormatter.locale = Locale(identifier: "en_US_POSIX")
+        inputFormatter.dateFormat = "d MMM yyyy"
+        guard let parsedDate = inputFormatter.date(from: "\(dayMonth) \(thisYear)") else { return .distantFuture }
+
+        // The API omits AM/PM on the start hour ("7-8 AM" means 7-8, both AM) -
+        // borrow the trailing AM/PM for the start hour too.
+        let isPM = timePart.uppercased().contains("PM")
+        let startHourToken = timePart.components(separatedBy: "-").first?.trimmingCharacters(in: .whitespaces) ?? "0"
+        let startHour12 = Int(startHourToken) ?? 0
+        let startHour24 = isPM ? (startHour12 % 12) + 12 : startHour12 % 12
+
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone.current
+        var components = calendar.dateComponents([.year, .month, .day], from: parsedDate)
+        components.hour = startHour24
+        components.minute = 0
+        components.second = 0
+        guard var finalDate = calendar.date(from: components) else { return .distantFuture }
+
+        // The API only ever returns classes from today onward, so a parse
+        // that lands in the past means the omitted year wrapped (e.g. today
+        // is 28 Dec, class is "5 Jan" - that's next year, not this one).
+        if finalDate < calendar.startOfDay(for: Date()) {
+            finalDate = calendar.date(byAdding: .year, value: 1, to: finalDate) ?? finalDate
+        }
+        return finalDate
+    }
+
     // MARK: Distance
 
     /// Great-circle distance from the device to the studio, falling back to the

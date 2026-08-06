@@ -336,11 +336,14 @@ final class GroupClassesCarouselView: UIView {
                 GroupClassCardFormatter.isVisibleOnHome(access: $0.access,
                                                         isMember: $0.isMember ?? false)
             }
+            // Home shows only the top 10 closest-date upcoming classes, not the
+            // full catalog - see all lives on its own screen.
+            let topTenClasses = GroupClassCardFormatter.closestUpcoming(visibleClasses, limit: 10)
 
             DispatchQueue.main.async {
                 self.userLat = requestLat
                 self.userLng = requestLng
-                self.apply(classes: visibleClasses)
+                self.apply(classes: topTenClasses)
             }
         }
     }

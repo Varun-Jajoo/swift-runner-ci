@@ -307,7 +307,7 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
                     "type": "2",
                     "name": (userProfile?["fullName"] as? String) ?? "",
                     "device_type": "ios",
-                    "device_token": "48r748fjdfbdjdcn"
+                    "device_token": appUserDefaults.getReFCMToken() ?? ""
                 ]
                 
                 RegistrationVM.socialLoginApi(inputParams: params, completion: {[weak self] getResult in
@@ -363,7 +363,7 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
                     "type": "2",
                     "name": dataGet.fullName ?? "",
                     "device_type": "ios",
-                    "device_token": "48r748fjdfbdjdcn"
+                    "device_token": appUserDefaults.getReFCMToken() ?? ""
                 ]
                 
                 RegistrationVM.socialLoginApi(inputParams: params, completion: {[weak self] getResult in
@@ -595,7 +595,7 @@ class MainViewController: CommonViewController,UITextFieldDelegate {
                     "type": "2",
                     "name": name ?? "",
                     "device_type": "ios",
-                    "device_token": "48r748fjdfbdjdcn"
+                    "device_token": appUserDefaults.getReFCMToken() ?? ""
                 ]
                 
                 RegistrationVM.socialLoginApi(inputParams: params, completion: {[weak self] getResult in
