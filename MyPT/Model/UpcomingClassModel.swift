@@ -43,6 +43,8 @@ struct UpcomingClassModel: Codable {
     var trainerImage: String?
     var access: String?
     var isMember: Bool?
+    var isBooked: Bool?
+    var isWaitlisted: Bool?
     // FlexibleValue: backend types are inconsistent (Android reads these with the coercing
     // optInt/optDouble accessors). Read via `.intValue` / `.doubleValue` / `.value`.
     var bookedCount, totalCapacity, remainingSeats: FlexibleValue?
@@ -62,6 +64,8 @@ struct UpcomingClassModel: Codable {
         case trainerImage = "trainer_image"
         case access, distance
         case isMember = "is_member"
+        case isBooked = "is_booked"
+        case isWaitlisted = "is_waitlisted"
         case bookedCount = "booked_count"
         case totalCapacity = "total_capacity"
         case remainingSeats = "remaining_seats"

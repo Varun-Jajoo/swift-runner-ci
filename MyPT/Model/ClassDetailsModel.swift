@@ -48,6 +48,8 @@ struct ClassDetailsModel: Codable {
     // FlexibleValue: backend types are inconsistent (Android reads these with the coercing
     // optInt/optDouble accessors). Read via `.intValue` / `.doubleValue` / `.value`.
     var bookedCount: FlexibleValue?
+    var remainingSeats: FlexibleValue?
+    var waitlistCount: FlexibleValue?
     var isBooked, isWaitlisted: Bool?
     var access: String?
     var studioLat, studioLng: FlexibleValue?
@@ -78,6 +80,8 @@ struct ClassDetailsModel: Codable {
         case quote, sessions, clientCoached, averageRating, noOfRating, tags, isFollow, certificates
         case mediaGallery = "media_gallery"
         case bookedCount = "booked_count"
+        case remainingSeats = "remaining_seats"
+        case waitlistCount = "waitlist_count"
         case isBooked = "is_booked"
         case isWaitlisted = "is_waitlisted"
         case access

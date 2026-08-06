@@ -211,20 +211,68 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
                                     withCompletionHandler completionHandler: @escaping () -> Void) {
        let userInfo = response.notification.request.content.userInfo
 
-       // ...
-
-       // With swizzling disabled you must let Messaging know about the message, for Analytics
-       // Messaging.messaging().appDidReceiveMessage(userInfo)
-
        // Print full message.
        print(userInfo)
-         
-//         let userInfo = response.notification.request.content.userInfo
 
          Messaging.messaging().appDidReceiveMessage(userInfo)
 
+         AppDelegate.routeNotificationTap(userInfo: userInfo)
+
          completionHandler()
      }
+
+    /// Every waitlisted member gets the same "a spot opened up" push at once
+    /// (`WaitlistNotifier::notifyAll`), so tapping it needs to open the claim
+    /// screen directly rather than just landing on the home tab. Android's
+    /// equivalent: `MyFirebaseMessagingService.sendNotification`'s
+    /// `waitlist_spot_available` branch.
+    private static func routeNotificationTap(userInfo: [AnyHashable: Any]) {
+        guard let type = userInfo["type"] as? String,
+              type.caseInsensitiveCompare("waitlist_spot_available") == .orderedSame,
+              let scheduleId = userInfo["schedule_id"] as? String,
+              !scheduleId.isEmpty else {
+            return
+        }
+
+        guard let navigationController = AppDelegate.topNavigationController() else { return }
+
+        let controller = SlotOpenViewController()
+        controller.scheduleId = scheduleId
+        controller.onClaimed = { [weak navigationController] classTitle, time, location, trainer in
+            let confirmed = SlotConfirmedViewController()
+            confirmed.classTitle = classTitle
+            confirmed.classTime = time
+            confirmed.classLocation = location
+            confirmed.trainerName = trainer
+            confirmed.hidesBottomBarWhenPushed = true
+            navigationController?.pushViewController(confirmed, animated: true)
+        }
+        controller.hidesBottomBarWhenPushed = true
+        navigationController.pushViewController(controller, animated: true)
+    }
+
+    /// Finds the active scene's navigation controller, unwrapping a tab bar
+    /// root if present, so the push lands on whatever tab the user is
+    /// currently on rather than assuming a fixed root type.
+    private static func topNavigationController() -> UINavigationController? {
+        let keyWindow = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }
+
+        var root = keyWindow?.rootViewController
+        if let nav = root as? UINavigationController {
+            if let tab = nav.viewControllers.first as? UITabBarController,
+               let selectedNav = tab.selectedViewController as? UINavigationController {
+                return selectedNav
+            }
+            return nav
+        }
+        if let tab = root as? UITabBarController {
+            root = tab.selectedViewController
+        }
+        return root as? UINavigationController
+    }
    
     
     /*

@@ -253,6 +253,38 @@ class UpcomingClassVM {
     }
 
 
+    //MARK: ----------------------- api/claim-open-spot
+    /// Called by both a waitlisted member (tapped the "spot opened up" push)
+    /// and a brand-new user browsing a class with an open spot - everyone
+    /// gets an equal shot, the backend serializes the race with a row lock
+    /// (`GroupClassService::claimOpenSpot`). Same response envelope as
+    /// join-waitlist/book-class: `status:false, code:"SPOT_TAKEN"` means
+    /// someone else won and this user is now on the waitlist instead.
+    class func claimOpenSpotApi(scheduleId: String?,
+                                isShowLoader: Bool = true,
+                                completion: @escaping(_ resultData: BookClassBaseModel?) -> Void){
+
+        let params: [String: Any] = [
+            "schedule_id": scheduleId ?? ""
+        ]
+
+        print("inputParams = ", params as Any)
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .claim_open_spot, method: .post, parameters: params, isShowLoading: isShowLoader, completion: { (getResponce, error) in
+            do {
+                print(getResponce as Any)
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
+                }
+                let getResult = try JSONDecoder().decode(BookClassBaseModel.self, from: responceData)
+                completion(getResult)
+            } catch {
+                print(error)
+                completion(nil)
+            }
+        })
+    }
+
     //MARK: ----------------------- api/user-meals
     class func getuserMealsApi(inputDate:String? , isShowLoader:Bool = true, completion: @escaping(_ resultData:UserMealsBaseModel?) -> Void){
         /*

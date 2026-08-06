@@ -719,8 +719,8 @@ private extension ConfirmSlotSheetViewController {
         locationTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         locationTitleLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
         locationTitleLabel.textColor = Palette.rowTitle
-        locationTitleLabel.numberOfLines = 1
-        locationTitleLabel.lineBreakMode = .byTruncatingTail
+        locationTitleLabel.numberOfLines = 2
+        locationTitleLabel.lineBreakMode = .byWordWrapping
 
         locationDistanceLabel.translatesAutoresizingMaskIntoConstraints = false
         locationDistanceLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)

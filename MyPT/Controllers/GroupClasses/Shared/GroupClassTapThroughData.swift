@@ -40,6 +40,11 @@ struct GroupClassTapThroughData {
     /// unknown access to paid rather than to a free/mixed CTA.
     var access: String = GroupClassCardFormatter.defaultAccess
     var isMember: Bool = false
+    /// Seeded from the launching card so the detail screen doesn't flash
+    /// "Book Slot" before flipping to "BOOKED" / "ON WAITLIST" once
+    /// `fetchClassDetail()` confirms it a moment later.
+    var isBooked: Bool = false
+    var isWaitlisted: Bool = false
     var bookedCount: Int = 0
     var totalCapacity: Int = 20
     var remainingSeats: Int = 20
@@ -357,6 +362,8 @@ enum GroupClassCardFormatter {
         data.price = item.price?.value ?? ""
         data.access = resolvedAccess(item.access)
         data.isMember = item.isMember ?? false
+        data.isBooked = item.isBooked ?? false
+        data.isWaitlisted = item.isWaitlisted ?? false
         data.bookedCount = intValue(item.bookedCount, defaultValue: 0)
         data.totalCapacity = intValue(item.totalCapacity, defaultValue: 20)
         data.remainingSeats = intValue(item.remainingSeats, defaultValue: 20)

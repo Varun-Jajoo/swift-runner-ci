@@ -95,6 +95,7 @@ enum ApiEndPoint: String {
     case class_category                 =  "api/class-category"
     case book_class                     =  "api/book-class"
     case join_waitlist                  =  "api/join-waitlist"
+    case claim_open_spot                =  "api/claim-open-spot"
 //    case ccaavenue_payment              =  "api/pay"
     case ccaavenue_payment              =  "api/payment/session"
     /// Raw-HTML CCAvenue gateway page for group-class card payments — Android's

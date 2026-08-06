@@ -65,6 +65,16 @@ final class GroupTrainingDetailViewController: CommonViewController {
     private var blacklistReason: String = "2 consecutive no-shows for group classes"
     private var blacklistResumesOn: String = ""
     private var blacklistDaysRemaining: String = ""
+    /// A spot open with people still waiting auto-redirects to Slot Open at
+    /// most once per visit to this screen, so tapping "Not Now" there doesn't
+    /// loop straight back here. Mirrors Android's `checkedSlotOpenRedirect`.
+    private var checkedSlotOpenRedirect: Bool = false
+    /// Live values from the class-detail API, kept at class scope (not just
+    /// local to `updateProgressAndWaitlistState`/the fetch handler) so
+    /// `ctaTapped()` can also route to Slot Open instead of the booking sheet
+    /// when a spot is open but people are already waiting on it.
+    private var remainingSeats: Int = 0
+    private var waitlistCount: Int = 0
     /// Distance without the trailing " away" — the value Android forwards to the
     /// downstream booking screens.
     private var currentDistance: String = ""
@@ -234,6 +244,11 @@ final class GroupTrainingDetailViewController: CommonViewController {
 
         bookedCount = tapThrough.bookedCount
         totalCapacity = tapThrough.totalCapacity
+        // Seeded from whatever the launching card already knew, so the CTA
+        // doesn't flash "Book Slot" before flipping to "BOOKED" / "ON
+        // WAITLIST" once fetchClassDetail() confirms it a moment later.
+        isAlreadyBooked = tapThrough.isBooked
+        isAlreadyWaitlisted = tapThrough.isWaitlisted
         startEnd = tapThrough.startEnd
         lat = tapThrough.userLat == 0 ? GroupClassCardFormatter.fallbackLatitude : tapThrough.userLat
         lng = tapThrough.userLng == 0 ? GroupClassCardFormatter.fallbackLongitude : tapThrough.userLng
@@ -281,6 +296,16 @@ final class GroupTrainingDetailViewController: CommonViewController {
         applyInitialPriceLabel()
 
         updateProgressAndWaitlistState(booked: bookedCount, totalCapacity: totalCapacity)
+
+        // Seeded booked/waitlisted state takes priority over the generic
+        // capacity-based CTA above - same override the live fetch applies
+        // once it confirms this from the server.
+        if isAlreadyBooked {
+            setCTATitle("BOOKED")
+            waitlistBanner.isHidden = true
+        } else if isAlreadyWaitlisted {
+            setCTATitle("ON WAITLIST")
+        }
     }
 
     /// Android's initial (intent-driven) price branch — note it is *not* the same
@@ -334,6 +359,10 @@ final class GroupTrainingDetailViewController: CommonViewController {
     /// green — already live in `GroupClassCardFormatter.availability`.
     private func updateProgressAndWaitlistState(booked: Int, totalCapacity: Int) {
         let remaining = totalCapacity - booked
+        // Was previously only a local, so ctaTapped() and the slot-open
+        // redirect check both read a stale/default value instead of what
+        // this API call just fetched.
+        remainingSeats = remaining
         let percentage = totalCapacity > 0 ? (Double(booked) / Double(totalCapacity)) * 100.0 : 0.0
 
         let availability = GroupClassCardFormatter.availability(bookedCount: booked,
@@ -584,6 +613,19 @@ final class GroupTrainingDetailViewController: CommonViewController {
 
         isAlreadyBooked = detail.isBooked ?? false
         isAlreadyWaitlisted = detail.isWaitlisted ?? false
+
+        // A spot is open with people still waiting - show the priority claim
+        // screen instead of the normal detail page, both for a waitlisted
+        // member whose turn it is and for a brand-new user walking in on an
+        // open spot. Only auto-redirect once per visit.
+        waitlistCount = GroupClassCardFormatter.intValue(detail.waitlistCount, defaultValue: 0)
+        if !checkedSlotOpenRedirect {
+            checkedSlotOpenRedirect = true
+            if !isAlreadyBooked && remainingSeats > 0 && waitlistCount > 0 {
+                pushSlotOpen(time: effectiveTime)
+            }
+        }
+
         if isAlreadyBooked {
             setCTATitle("BOOKED")
             // A booked user never sees the amber waitlist banner.
@@ -709,6 +751,15 @@ final class GroupTrainingDetailViewController: CommonViewController {
             return
         }
 
+        if remainingSeats > 0 && waitlistCount > 0 {
+            // A spot is open but people are already waiting on it - this is the
+            // contested-spot race, not a plain booking. Show the equal-chance
+            // claim screen instead of the payment/booking sheet, for both a
+            // new user and one already on the waitlist.
+            pushSlotOpen(time: dateTimeLabel.text ?? classTime)
+            return
+        }
+
         if isWaitlistMode {
             // Android performs the token check inside `joinWaitlistDirectly` before
             // anything else, so the gate stays on this path.
@@ -726,6 +777,34 @@ final class GroupTrainingDetailViewController: CommonViewController {
         // Android does *not* gate this branch here: the login check lives inside the
         // Confirm Slot bottom sheet's confirm button (`ConfirmSlotSheetViewController`).
         presentConfirmSlotSheet()
+    }
+
+    /// Shared by the auto-redirect (page load) and `ctaTapped()` (Book Slot
+    /// tap) - both routes to this screen need the identical construction and
+    /// the identical onClaimed -> Slot Confirmed hookup.
+    private func pushSlotOpen(time: String) {
+        let controller = SlotOpenViewController()
+        controller.scheduleId = scheduleId
+        controller.classTitle = classTitle
+        controller.classTime = time
+        controller.classLocation = classLocation
+        controller.trainerName = trainerName
+        controller.seedRemainingSeats = remainingSeats
+        controller.seedWaitlistCount = waitlistCount
+        controller.latitude = lat
+        controller.longitude = lng
+        controller.onClaimed = { [weak self] claimedTitle, claimedTime, location, trainer in
+            guard let self = self else { return }
+            let confirmed = SlotConfirmedViewController()
+            confirmed.classTitle = claimedTitle
+            confirmed.classTime = claimedTime
+            confirmed.classLocation = location
+            confirmed.trainerName = trainer
+            confirmed.hidesBottomBarWhenPushed = true
+            self.navigationController?.pushViewController(confirmed, animated: true)
+        }
+        controller.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(controller, animated: true)
     }
 
     /// Port of the `isUserBlacklisted` branch of `btnBookSlot.setOnClickListener`.
@@ -1281,8 +1360,8 @@ private extension GroupTrainingDetailViewController {
         locationTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         locationTitleLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
         locationTitleLabel.textColor = .white
-        locationTitleLabel.numberOfLines = 1
-        locationTitleLabel.lineBreakMode = .byTruncatingTail
+        locationTitleLabel.numberOfLines = 2
+        locationTitleLabel.lineBreakMode = .byWordWrapping
 
         locationDistanceLabel.translatesAutoresizingMaskIntoConstraints = false
         locationDistanceLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
