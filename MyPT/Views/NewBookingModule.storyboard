@@ -3012,6 +3012,7 @@ preferred times</string>
                                                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="trailing" secondItem="CEd-6F-JQc" secondAttribute="trailing" constant="20" id="0Lc-GM-ufw"/>
+                                                                            <constraint firstItem="uWz-fY-r5A" firstAttribute="top" secondItem="oMa-1n-1qE" secondAttribute="bottom" constant="19.999999999999943" id="0QL-Oy-drA"/>
                                                                             <constraint firstItem="Pyx-tQ-vgD" firstAttribute="trailing" secondItem="DUJ-qD-S47" secondAttribute="trailing" id="20s-Ft-m6n"/>
                                                                             <constraint firstItem="JJs-eO-9D0" firstAttribute="leading" secondItem="JX9-cB-9xT" secondAttribute="trailing" constant="84" id="28j-5d-aJ4"/>
                                                                             <constraint firstItem="CEd-6F-JQc" firstAttribute="leading" secondItem="5X4-IX-zcp" secondAttribute="leading" id="6Tx-sk-MfY"/>
@@ -3020,10 +3021,10 @@ preferred times</string>
                                                                             <constraint firstItem="adZ-x1-rcb" firstAttribute="top" secondItem="WJk-B8-n7p" secondAttribute="bottom" constant="10" id="BbL-EY-FpY"/>
                                                                             <constraint firstItem="Irn-dZ-hRD" firstAttribute="leading" secondItem="5X4-IX-zcp" secondAttribute="leading" id="CR1-OK-B7M"/>
                                                                             <constraint firstItem="adZ-x1-rcb" firstAttribute="leading" secondItem="WJk-B8-n7p" secondAttribute="leading" id="CTs-KD-KVH"/>
-                                                                            <constraint firstItem="CEd-6F-JQc" firstAttribute="top" secondItem="5X4-IX-zcp" secondAttribute="bottom" constant="30" id="D4y-Lp-LHP"/>
                                                                             <constraint firstItem="DUJ-qD-S47" firstAttribute="top" secondItem="CEd-6F-JQc" secondAttribute="bottom" constant="20" id="DFh-il-JNN"/>
                                                                             <constraint firstItem="MHs-Cy-qdC" firstAttribute="top" secondItem="JX9-cB-9xT" secondAttribute="bottom" constant="8" id="DHs-Xl-jsm"/>
                                                                             <constraint firstItem="iz2-ch-hKJ" firstAttribute="leading" secondItem="E5W-wb-kMJ" secondAttribute="leading" id="GQE-UJ-OwQ"/>
+                                                                            <constraint firstItem="CEd-6F-JQc" firstAttribute="top" secondItem="5X4-IX-zcp" secondAttribute="bottom" constant="29.999999999999915" id="GrH-HO-LXP"/>
                                                                             <constraint firstItem="te5-gm-eZZ" firstAttribute="leading" secondItem="9qG-pO-ORa" secondAttribute="leading" constant="20" id="IC3-mn-ebD"/>
                                                                             <constraint firstItem="oMa-1n-1qE" firstAttribute="top" secondItem="DUJ-qD-S47" secondAttribute="bottom" constant="20" id="L8i-Zn-y8F"/>
                                                                             <constraint firstItem="7U6-Of-WVr" firstAttribute="centerY" secondItem="Irn-dZ-hRD" secondAttribute="centerY" id="LkR-AO-HCl"/>
@@ -3032,6 +3033,7 @@ preferred times</string>
                                                                             <constraint firstAttribute="trailing" secondItem="te5-gm-eZZ" secondAttribute="trailing" constant="20" id="QRU-sO-IBM"/>
                                                                             <constraint firstItem="gED-T3-oB9" firstAttribute="leading" secondItem="9qG-pO-ORa" secondAttribute="leading" constant="20" id="Qw6-C5-a7A"/>
                                                                             <constraint firstItem="JJs-eO-9D0" firstAttribute="centerY" secondItem="JX9-cB-9xT" secondAttribute="centerY" id="RJp-9h-Qmf"/>
+                                                                            <constraint firstAttribute="bottom" secondItem="uWz-fY-r5A" secondAttribute="bottom" constant="23" id="TOP-js-0AP"/>
                                                                             <constraint firstItem="E5W-wb-kMJ" firstAttribute="leading" secondItem="JJs-eO-9D0" secondAttribute="leading" id="Ttg-M1-7rG"/>
                                                                             <constraint firstItem="JX9-cB-9xT" firstAttribute="top" secondItem="9qG-pO-ORa" secondAttribute="top" constant="12" id="VBn-Yw-CVL"/>
                                                                             <constraint firstItem="DUJ-qD-S47" firstAttribute="leading" secondItem="CEd-6F-JQc" secondAttribute="leading" id="Vg0-nu-T6i"/>
@@ -3051,7 +3053,6 @@ preferred times</string>
                                                                             <constraint firstItem="E5W-wb-kMJ" firstAttribute="top" secondItem="JJs-eO-9D0" secondAttribute="bottom" constant="8" id="oAp-pi-fYw"/>
                                                                             <constraint firstItem="gED-T3-oB9" firstAttribute="top" secondItem="te5-gm-eZZ" secondAttribute="bottom" constant="15" id="oSI-cI-jJ9"/>
                                                                             <constraint firstAttribute="trailing" secondItem="7U6-Of-WVr" secondAttribute="trailing" constant="20" id="p1a-oM-OHr"/>
-                                                                            <constraint firstItem="uWz-fY-r5A" firstAttribute="top" secondItem="oMa-1n-1qE" secondAttribute="bottom" constant="20" id="rpl-bc-Pl5"/>
                                                                             <constraint firstItem="5X4-IX-zcp" firstAttribute="leading" secondItem="gED-T3-oB9" secondAttribute="leading" id="uq2-fB-w4h"/>
                                                                             <constraint firstItem="JX9-cB-9xT" firstAttribute="leading" secondItem="9qG-pO-ORa" secondAttribute="leading" constant="20" id="vJi-On-sht"/>
                                                                             <constraint firstItem="MHs-Cy-qdC" firstAttribute="leading" secondItem="JX9-cB-9xT" secondAttribute="leading" id="vs9-cl-GWY"/>
@@ -3631,6 +3632,7 @@ preferred times</string>
                         <outlet property="btnUpgradePlan" destination="J0N-Vi-pvx" id="m1o-UC-CE2"/>
                         <outlet property="btnViewAllCoupon" destination="K4L-Hz-lmy" id="0sf-vT-AuO"/>
                         <outlet property="heightOfNewGymMembership" destination="Zvb-8B-XvF" id="k2J-5O-TVL"/>
+                        <outlet property="heightOfPackageDetail" destination="vHh-ar-pxk" id="GwV-cP-4DH"/>
                         <outlet property="imgAddressArrow" destination="ArQ-LU-wHa" id="KGm-j7-jdU"/>
                         <outlet property="imgChoosepayment" destination="56U-hU-uWw" id="31e-UB-4eB"/>
                         <outlet property="imgEarlyClock" destination="Irn-dZ-hRD" id="UTJ-7a-RBx"/>

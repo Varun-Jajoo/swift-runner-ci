@@ -133,6 +133,7 @@ class BookingReviewPurchaseVC: CommonViewController {
     @IBOutlet weak var viewTermAndCond: UIView!
     @IBOutlet weak var btnCheck: UIButton!
     @IBOutlet weak var lblTermCondition: UILabel!
+    @IBOutlet weak var heightOfPackageDetail: NSLayoutConstraint!
 //    @IBOutlet weak var lblGymRefundable: UILabel!
     
     override func viewDidLoad() {
@@ -478,6 +479,7 @@ class BookingReviewPurchaseVC: CommonViewController {
         // Package Details
         if let pkg = data.packageDetails {
             self.heightOfNewGymMembership.constant = (pkg.is_early_renew ?? false) ? 310 : 220
+            viewPlanExpired.isHidden = (pkg.is_early_renew ?? false)
             imgEarlyClock.isHidden = !(pkg.is_early_renew ?? false)
             lblEarlyMsg.isHidden = !(pkg.is_early_renew ?? false)
             imgNewGymEarlyClock.isHidden = !(pkg.is_early_renew ?? false)
@@ -496,6 +498,7 @@ class BookingReviewPurchaseVC: CommonViewController {
             lblRemainingSession.text = "AED \(pkg.pricePerSession?.value ?? "") / session"
             lblSavedSession.text = pkg.early_renewal_text
             lblNewGymMsg.text = pkg.early_renewal_text
+            viewSpecialMsg.isHidden = pkg.early_renewal_text == nil || pkg.early_renewal_text == ""
             lblNewGymValidityData.text = "\(pkg.validityDays ?? 0) days"
         }
         
@@ -510,12 +513,13 @@ class BookingReviewPurchaseVC: CommonViewController {
                 lblNewGymMsg.text = upgradePlan.badgeText
             }
         }
-        
+
         // Trainer
         if let trainer = data.trainerDetail?.primaryTrainer {
             lblTrainerName.text = trainer.name
             lblSelectedGym.text = inputParam?.type == "home" ? "" : "SELECTED GYM"
             lblGymName.text = inputParam?.type == "home" ? "" : data.studio?.name
+//            heightOfPackageDetail.constant = inputParam?.type == "home" ? 400 : (data.packageDetails?.early_renewal_text == nil) || (data.packageDetails?.early_renewal_text == "") ? 400 : 459
         }
         
         // Address
