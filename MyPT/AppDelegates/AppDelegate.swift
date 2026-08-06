@@ -169,16 +169,48 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
     // FCM token received
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         print("✅ FCM Token: \(fcmToken ?? "None")")
-        
+
         Messaging.messaging().token { token, error in
             if let error = error {
                 print("❌ Error fetching FCM token: \(error)")
             } else if let token = token {
                 print("✅ FCM Token: \(token)")
                 appUserDefaults.setFCMToken(refreshToken: token)
+                DispatchQueue.main.async {
+                    AppDelegate.showDebugFCMToken(token)
+                }
             }
         }
         // Optionally send to your server
+    }
+
+    // TEMP DEBUG - remove once the FCM token's been copied out.
+    private static func showDebugFCMToken(_ token: String) {
+        guard let keyWindow = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .flatMap({ $0.windows })
+            .first(where: { $0.isKeyWindow }) else { return }
+
+        keyWindow.viewWithTag(999_888).map { $0.removeFromSuperview() }
+
+        let textView = UITextView()
+        textView.tag = 999_888
+        textView.text = token
+        textView.textColor = .blue
+        textView.backgroundColor = .white
+        textView.font = .systemFont(ofSize: 11)
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        keyWindow.addSubview(textView)
+        keyWindow.bringSubviewToFront(textView)
+
+        NSLayoutConstraint.activate([
+            textView.leadingAnchor.constraint(equalTo: keyWindow.safeAreaLayoutGuide.leadingAnchor, constant: 8),
+            textView.trailingAnchor.constraint(equalTo: keyWindow.safeAreaLayoutGuide.trailingAnchor, constant: -8),
+            textView.topAnchor.constraint(equalTo: keyWindow.safeAreaLayoutGuide.topAnchor, constant: 4),
+            textView.heightAnchor.constraint(equalToConstant: 80)
+        ])
     }
 
    

@@ -981,7 +981,12 @@ final class GroupTrainingDetailViewController: CommonViewController {
         readMoreButton.isHidden = !overflows
         aboutFadeView.isHidden = !overflows || isAboutExpanded
 
-        contentStackView?.setCustomSpacing(overflows ? 8 : 0, after: aboutContainerView)
+        // When Read More is hidden, its own `setCustomSpacing(24, after:)` never
+        // renders - UIKit drops spacing tied to a hidden arranged subview - so
+        // the standard 24pt gap into "What to bring" has to be carried by
+        // `aboutContainerView` itself instead, or the next section jams
+        // straight up against the (now-invisible) button with no gap at all.
+        contentStackView?.setCustomSpacing(overflows ? 8 : 24, after: aboutContainerView)
 
         // A paragraph that no longer overflows (shorter copy arrived from the API
         // while expanded) must not stay stuck in the expanded state.

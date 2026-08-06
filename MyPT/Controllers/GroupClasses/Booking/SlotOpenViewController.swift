@@ -564,6 +564,15 @@ private extension SlotOpenViewController {
         heroImageView.image = UIImage(named: "waitlist-spot-open-hero")
         heroImageView.contentMode = .scaleAspectFill
         heroImageView.clipsToBounds = true
+        heroImageView.backgroundColor = .clear
+        // `isOpaque` defaults to true on an image-backed layer, which lets Core
+        // Animation skip blending against whatever is already drawn beneath it -
+        // the exact case `compositingFilter` needs to do its work. Android's
+        // equivalent (`applyLightenBlend`) has the same requirement: it forces
+        // `LAYER_TYPE_HARDWARE` before applying the `PorterDuff.Mode.LIGHTEN`
+        // paint, for the same reason - the blend can't happen against a layer
+        // that's being drawn as a flat opaque bitmap.
+        heroImageView.layer.isOpaque = false
         heroImageView.layer.compositingFilter = "lightenBlendMode"
         container.addSubview(heroImageView)
 
