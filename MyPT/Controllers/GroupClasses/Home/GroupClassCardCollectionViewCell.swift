@@ -51,7 +51,7 @@ final class GradientFadeView: UIView {
 final class GroupClassCardCollectionViewCell: UICollectionViewCell {
 
     static let reuseIdentifier = "GroupClassCardCollectionViewCell"
-    static let cardSize = CGSize(width: 180, height: 240)
+    static let cardSize = CGSize(width: 230, height: 318)
 
     /// Android's `#0D1918` card fill. Not promoted to a colorset because it is
     /// local to this card — every other surface in the module uses `groupClassBg*`.
@@ -77,6 +77,7 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
     private let locationLabel = UILabel()
     private let spotLabel = UILabel()
     private let progressBar = SpotProgressBarView(barHeight: 2)
+    private var progressBarWidthConstraint: NSLayoutConstraint?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -109,7 +110,7 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
         coverImageView.translatesAutoresizingMaskIntoConstraints = false
         coverImageView.contentMode = .scaleAspectFill
         coverImageView.clipsToBounds = true
-        coverImageView.backgroundColor = GroupClassCardCollectionViewCell.cardFillColor
+        coverImageView.backgroundColor = UIColor(hex: "#32615C")
         cardView.addSubview(coverImageView)
 
         coverFadeView.translatesAutoresizingMaskIntoConstraints = false
@@ -160,12 +161,6 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
         spotLabel.textColor = UIColor(hex: "#F0F0F0")
         spotLabel.numberOfLines = 1
         spotLabel.textAlignment = .right
-        // `.required` here used to sit at the same priority tier as this row's
-        // own fixed width — a real conflict whenever the combined text didn't
-        // quite fit, which UIKit can resolve by collapsing the view instead of
-        // truncating it. `.defaultHigh` still wins over the location label
-        // (which stays `.defaultLow`, so it's always the one that yields first)
-        // without being able to deadlock against the row's own required width.
         spotLabel.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
 
         progressBar.translatesAutoresizingMaskIntoConstraints = false
@@ -183,11 +178,6 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
         locationStack.axis = .horizontal
         locationStack.alignment = .center
         locationStack.spacing = 3
-        // The stack's own compression resistance (a `UIView` property, distinct
-        // from the label's) otherwise defaults to `.defaultHigh` regardless of
-        // the label's own priority — matching it keeps this whole block first
-        // to give, mirroring Android's `tvClassLocation`
-        // (`layout_width="0dp" layout_weight="1"`).
         locationStack.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
         let bottomRow = UIStackView(arrangedSubviews: [locationStack, spotStack])
@@ -204,6 +194,9 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
         contentStack.setCustomSpacing(6, after: timeLabel)
         cardView.addSubview(contentStack)
 
+        let barWidth = progressBar.widthAnchor.constraint(equalToConstant: 59)
+        progressBarWidthConstraint = barWidth
+
         NSLayoutConstraint.activate([
             cardView.topAnchor.constraint(equalTo: contentView.topAnchor),
             cardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
@@ -213,12 +206,12 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
             coverImageView.topAnchor.constraint(equalTo: cardView.topAnchor),
             coverImageView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
             coverImageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
-            coverImageView.heightAnchor.constraint(equalToConstant: 165),
+            coverImageView.heightAnchor.constraint(equalToConstant: 230),
 
             coverFadeView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
             coverFadeView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
             coverFadeView.bottomAnchor.constraint(equalTo: coverImageView.bottomAnchor),
-            coverFadeView.heightAnchor.constraint(equalToConstant: 90),
+            coverFadeView.heightAnchor.constraint(equalToConstant: 104),
 
             badgeView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 8),
             badgeView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -8),
@@ -227,25 +220,22 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
             locationIconView.widthAnchor.constraint(equalToConstant: 14),
             locationIconView.heightAnchor.constraint(equalToConstant: 14),
 
-            progressBar.widthAnchor.constraint(equalToConstant: 59),
-            // Android's `item_group_class_card.xml` settled back on a 2dp bar
-            // (it briefly went to 4dp with min/maxHeight, then reverted).
+            barWidth,
             progressBar.heightAnchor.constraint(equalToConstant: 2),
 
             contentStack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 10),
             contentStack.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -10),
-            contentStack.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -8)
+            contentStack.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -15)
         ])
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        // `configure` always assigns a cover image (loaded, cached or fallback),
-        // so clearing it here only produced a blank flash on every reuse.
         titleLabel.text = nil
         timeLabel.text = nil
         locationLabel.text = nil
         spotLabel.text = nil
+        progressBar.isHidden = false
         progressBar.setProgress(0, state: .green)
     }
 
@@ -265,13 +255,29 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
                                                     isMember: item.isMember ?? false)
         applyBadgeStyle(isPaid: isPaid)
 
-        let availability = GroupClassCardFormatter.availability(
-            bookedCount: GroupClassCardFormatter.intValue(item.bookedCount, defaultValue: 0),
-            totalCapacity: GroupClassCardFormatter.intValue(item.totalCapacity, defaultValue: 20),
-            remainingSeats: GroupClassCardFormatter.intValue(item.remainingSeats, defaultValue: 20)
-        )
-        spotLabel.text = availability.text
-        apply(availability: availability)
+        if item.isBooked == true {
+            progressBar.isHidden = true
+            spotLabel.text = "BOOKED"
+            spotLabel.font = AppFont.bold.size(12.0, familyName: familyFunnelSans)
+            spotLabel.textColor = UIColor(hex: "#32AE5C")
+        } else if item.isWaitlisted == true {
+            progressBar.isHidden = true
+            spotLabel.text = "ON WAITLIST"
+            spotLabel.font = AppFont.bold.size(12.0, familyName: familyFunnelSans)
+            spotLabel.textColor = UIColor(hex: "#FFCC33")
+        } else {
+            progressBar.isHidden = false
+            spotLabel.font = AppFont.medium.size(9.0, familyName: familyFunnelSans)
+            spotLabel.textColor = UIColor(hex: "#F0F0F0")
+
+            let availability = GroupClassCardFormatter.availability(
+                bookedCount: GroupClassCardFormatter.intValue(item.bookedCount, defaultValue: 0),
+                totalCapacity: GroupClassCardFormatter.intValue(item.totalCapacity, defaultValue: 20),
+                remainingSeats: GroupClassCardFormatter.intValue(item.remainingSeats, defaultValue: 20)
+            )
+            spotLabel.text = availability.text
+            apply(availability: availability)
+        }
 
         // Android's Glide call uses `img.png` as both `.placeholder()` and
         // `.error()` — every failure path (blank URL, load failure) converges on
@@ -294,6 +300,8 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
         if case .gold = availability.state {
             progressBar.setFillColors(GroupClassCardCollectionViewCell.goldProgressFillColors)
         }
+        let textWidth = spotLabel.intrinsicContentSize.width
+        progressBarWidthConstraint?.constant = max(59, ceil(textWidth))
     }
 
     private func applyBadgeStyle(isPaid: Bool) {

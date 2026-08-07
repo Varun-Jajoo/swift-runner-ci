@@ -42,6 +42,12 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
     }
 
     private static let cardFillColor = UIColor(hex: "#101113")
+    /// `imgClassCover`'s new `android:background="#32615C"` — shows while the
+    /// remote cover image is still loading, instead of the plain card fill.
+    private static let coverPlaceholderColor = UIColor(hex: "#32615C")
+    /// Android's `spot_progress_bar_gold` fill (`#FFCC33 → #586400`), same
+    /// constant `GroupClassCardCollectionViewCell` uses for the identical override.
+    private static let goldProgressFillColors = [UIColor(hex: "#FFCC33"), UIColor(hex: "#586400")]
 
     private let rankImageView = UIImageView()
     private let cardView = GlassCardView(cornerRadius: 12)
@@ -61,6 +67,10 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
     /// (`adjustViewBounds` on Android — `wrap_content` width scaled to the
     /// fixed 104dp height).
     private var rankImageWidthConstraint: NSLayoutConstraint?
+    /// Widened past 59pt when the "N/20 spot left" text itself is longer,
+    /// exactly like `GroupClassCardCollectionViewCell` - Android re-measures
+    /// this `.post{}` after every bind.
+    private var progressBarWidthConstraint: NSLayoutConstraint?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -97,7 +107,7 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
         coverImageView.translatesAutoresizingMaskIntoConstraints = false
         coverImageView.contentMode = .scaleAspectFill
         coverImageView.clipsToBounds = true
-        coverImageView.backgroundColor = TrendingGroupClassCollectionViewCell.cardFillColor
+        coverImageView.backgroundColor = TrendingGroupClassCollectionViewCell.coverPlaceholderColor
         cardView.addSubview(coverImageView)
 
         coverFadeView.translatesAutoresizingMaskIntoConstraints = false
@@ -192,6 +202,9 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
             equalTo: contentView.leadingAnchor,
             constant: TrendingGroupClassCollectionViewCell.defaultLeadingInset)
 
+        let progressBarWidth = progressBar.widthAnchor.constraint(equalToConstant: 59)
+        progressBarWidthConstraint = progressBarWidth
+
         NSLayoutConstraint.activate([
             rankImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             rankImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 50),
@@ -210,7 +223,7 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
             coverFadeView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
             coverFadeView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
             coverFadeView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor),
-            coverFadeView.heightAnchor.constraint(equalToConstant: 80),
+            coverFadeView.heightAnchor.constraint(equalToConstant: 86),
 
             badgeView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 8),
             badgeView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -8),
@@ -222,7 +235,7 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
             // the bar collapsed inside the trailing-aligned vertical stack, which
             // is why it was missing from these cards entirely. 2pt matches
             // `item_trending_group_class.xml`.
-            progressBar.widthAnchor.constraint(equalToConstant: 48),
+            progressBarWidth,
             progressBar.heightAnchor.constraint(equalToConstant: 2),
 
             contentStack.topAnchor.constraint(equalTo: cardView.bottomAnchor, constant: 9),
@@ -239,6 +252,7 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
         timeLabel.text = nil
         locationLabel.text = nil
         spotLabel.text = nil
+        progressBar.isHidden = false
         progressBar.setProgress(0, state: .green)
     }
 
@@ -275,16 +289,36 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
             cardView.strokeAlpha = 0.0
         }
 
-        let availability = GroupClassCardFormatter.availability(
-            bookedCount: GroupClassCardFormatter.intValue(item.bookedCount, defaultValue: 0),
-            totalCapacity: GroupClassCardFormatter.intValue(item.totalCapacity, defaultValue: 20),
-            remainingSeats: GroupClassCardFormatter.intValue(item.remainingSeats, defaultValue: 20)
-        )
-        spotLabel.text = availability.text
-        progressBar.setProgress(availability.progress, state: availability.state)
-        if case .gold = availability.state {
-            progressBar.setFillColors([UIColor(hex: "#FFCC33"), UIColor(hex: "#586400")])
+        // EXACT SAME LOGIC & TEXT COLORS AS HOME CARDS (GroupClassCardCollectionViewCell).
+        if item.isBooked == true {
+            progressBar.isHidden = true
+            spotLabel.text = "BOOKED"
+            spotLabel.font = AppFont.bold.size(12.0, familyName: familyFunnelSans)
+            spotLabel.textColor = UIColor(hex: "#32AE5C")
+        } else if item.isWaitlisted == true {
+            progressBar.isHidden = true
+            spotLabel.text = "ON WAITLIST"
+            spotLabel.font = AppFont.bold.size(12.0, familyName: familyFunnelSans)
+            spotLabel.textColor = UIColor(hex: "#FFCC33")
+        } else {
+            progressBar.isHidden = false
+            spotLabel.font = AppFont.medium.size(9.0, familyName: familyFunnelSans)
+            spotLabel.textColor = UIColor(hex: "#F0F0F0")
+
+            let availability = GroupClassCardFormatter.availability(
+                bookedCount: GroupClassCardFormatter.intValue(item.bookedCount, defaultValue: 0),
+                totalCapacity: GroupClassCardFormatter.intValue(item.totalCapacity, defaultValue: 20),
+                remainingSeats: GroupClassCardFormatter.intValue(item.remainingSeats, defaultValue: 20)
+            )
+            spotLabel.text = availability.text
+            progressBar.setProgress(availability.progress, state: availability.state)
+            if case .gold = availability.state {
+                progressBar.setFillColors(TrendingGroupClassCollectionViewCell.goldProgressFillColors)
+            }
         }
+
+        let textWidth = spotLabel.intrinsicContentSize.width
+        progressBarWidthConstraint?.constant = max(59, ceil(textWidth))
 
         let fallback = UIImage(named: "class-card-placeholder")
         if let imageURL = GroupClassCardFormatter.absoluteImageURL(item.image) {

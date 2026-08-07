@@ -116,23 +116,28 @@ final class GroupClassCarouselDotsView: UIView {
 
 final class GroupClassesCarouselView: UIView {
 
-    // Card 180×240 with a 10pt gutter, inside a 250pt-tall strip — Android's
-    // `item_group_class_card.xml` dimensions and the 250dp RecyclerView.
+    // Card 230×318 with a 10pt gutter, inside a 328pt-tall strip — Android's
+    // `item_group_class_card.xml` dimensions and the 328dp RecyclerView height
+    // (bumped from 250dp when the card itself grew from 180×240 to fit the new
+    // BOOKED/ON WAITLIST states; the old 250pt height here was never updated to
+    // match, clipping the bottom of every card).
     private static let cardSpacing: CGFloat = 10
-    private static let carouselHeight: CGFloat = 250
+    private static let carouselHeight: CGFloat = 328
     private static let sectionHorizontalInset: CGFloat = 16
     // Android's `groupClassesSection` FrameLayout: a full-bleed banner
     // (`group_classes_bg`) with the carousel/dots/button bottom-aligned inside a
     // 20dp-bottom-padded column, leaving the top of the banner exposed.
     //
-    // Android hard-codes 620dp here, but the artwork is 430x745 — so on any
-    // device that isn't 430pt wide, `scaleAspectFill` has to crop a different
-    // amount off the top and bottom, and the banner's framing drifts with the
-    // screen size. Deriving the height from the source image's own aspect ratio
-    // instead keeps the whole banner visible and identically framed at every
-    // resolution. 620/430 is Android's ratio of section height to artwork width,
-    // preserved so the section still reads at its intended proportion.
-    private static let bannerAspectRatio: CGFloat = 620.0 / 430.0
+    // Android hard-codes a fixed section height (780dp, up from 620dp) and anchors
+    // the banner image at its own natural size to the top rather than stretching it
+    // to fill - so on any device that isn't exactly as wide as the artwork, a solid
+    // fill color shows below the image instead of a distorted stretch. Deriving the
+    // height from the source image's own aspect ratio instead keeps the whole
+    // banner visible, unstretched and identically framed at every resolution, with
+    // no separate fill color needed. This ratio must track the artwork's actual
+    // pixel dimensions - it was re-exported at 1290×2235 (was 430×745), so this
+    // constant must be updated again if the asset is ever swapped again.
+    private static let bannerAspectRatio: CGFloat = 2235.0 / 1290.0
     private static let sectionBottomInset: CGFloat = 20
     /// Floor for very narrow devices, so the bottom-aligned column always fits.
     private static let minimumSectionHeight: CGFloat = 560

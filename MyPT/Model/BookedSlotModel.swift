@@ -43,7 +43,11 @@ struct SlotDateModel: Codable {
   status / msg / code / is_blacklisted / data).
 
  The "data" key is SHAPE-SHIFTING:
- - on success  -> booking/waitlist details  -> decoded into `data` (BookingClassDataModel)
+ - on plain success  -> booking/waitlist details  -> decoded into `data` (BookingClassDataModel)
+ - on free-booking spam-guard success/re-tap -> {waitlist_type, is_already_waitlisted, position, ...}
+   -> decoded into `specialWaitlist` (SpecialWaitlistDetailModel). Detected by the presence of the
+   `waitlist_type` key, which a plain booking/waitlist-success payload never includes (confirmed live
+   against UAT) - only its VALUE ("special" vs "normal") tells you whether the guard actually triggered.
  - on blacklist failure -> {reason, resumes_on, days_remaining} -> decoded into `blacklistDetail`
 
  Blacklist detection logic to replicate at every call site (mirrors Android
@@ -66,6 +70,9 @@ struct BookClassBaseModel: Codable {
     var isBlacklisted: Bool?
     /// Populated only when the "data" key carries the blacklist payload instead of booking details.
     var blacklistDetail: BlacklistDetailModel?
+    /// Populated only when the "data" key carries the free-booking spam-guard payload
+    /// (fresh special-waitlist join, or a re-tap on one that already exists).
+    var specialWaitlist: SpecialWaitlistDetailModel?
 
     enum CodingKeys: String, CodingKey {
         case status, data, msg, errors, code
@@ -81,14 +88,26 @@ struct BookClassBaseModel: Codable {
         code = try? container.decodeIfPresent(String.self, forKey: .code)
         isBlacklisted = try? container.decodeIfPresent(Bool.self, forKey: .isBlacklisted)
 
-        // "data" means two different things depending on status, so try both shapes.
+        // "data" means three different things depending on shape, so try all three.
         let decodedBooking = try? container.decodeIfPresent(BookingClassDataModel.self, forKey: .data)
+        let decodedSpecialWaitlist = try? container.decodeIfPresent(SpecialWaitlistDetailModel.self, forKey: .data)
         let decodedBlacklist = try? container.decodeIfPresent(BlacklistDetailModel.self, forKey: .data)
+
+        // waitlist_type is present on EVERY spam-guard payload (fresh join carries "special"
+        // or "normal"; a re-tap on an existing entry carries whatever it already was) and
+        // absent from every plain booking/waitlist-success payload - the one reliable signal.
+        if let waitlistPayload = decodedSpecialWaitlist, waitlistPayload.waitlistType != nil {
+            data = nil
+            blacklistDetail = nil
+            specialWaitlist = waitlistPayload
+            return
+        }
 
         // NOTE: every property of BookingClassDataModel is optional, so it also decodes
         // *successfully* (but completely empty) from a blacklist payload. Success is therefore
         // not a sufficient test - we additionally require it to actually carry booking details,
         // or the response to be a success response (keeps the legacy success path byte-identical).
+        specialWaitlist = nil
         if let booking = decodedBooking, booking.hasBookingDetails || (status == true) {
             data = booking
             blacklistDetail = nil
@@ -107,6 +126,8 @@ struct BookClassBaseModel: Codable {
         try container.encodeIfPresent(isBlacklisted, forKey: .isBlacklisted)
         if let data = data {
             try container.encode(data, forKey: .data)
+        } else if let specialWaitlist = specialWaitlist {
+            try container.encode(specialWaitlist, forKey: .data)
         } else if let blacklistDetail = blacklistDetail {
             try container.encode(blacklistDetail, forKey: .data)
         }
@@ -141,6 +162,41 @@ struct BlacklistDetailModel: Codable {
         case resumesOn = "resumes_on"
         case daysRemaining = "days_remaining"
     }
+}
+
+// MARK: - SpecialWaitlistDetailModel
+/// Free-booking spam-guard payload carried under the "data" key of a book-class /
+/// join-waitlist response, whenever this member already has another active booking.
+/// Mirrors Android's raw JSONObject reads in GroupTrainingDetailActivity.kt - `waitlisted`
+/// is set on a fresh join, `isAlreadyWaitlisted` on a re-tap of an existing entry; only
+/// `waitlistType == "special"` means the guard actually triggered ("normal" just means
+/// this member is on the plain waitlist, not double-booked).
+struct SpecialWaitlistDetailModel: Codable {
+    var waitlisted: Bool?
+    var isAlreadyWaitlisted: Bool?
+    var waitlistType: String?
+    var bottomTab: String?
+    /// FlexibleValue for the same reason as ClassDetailsModel.waitlistCount - backend
+    /// types are inconsistent.
+    var position: FlexibleValue?
+    var notificationWindowHours: FlexibleValue?
+    var deferredUntil: String?
+    var blockedByBookingId: FlexibleValue?
+    var canNotifyNow: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case waitlisted
+        case isAlreadyWaitlisted = "is_already_waitlisted"
+        case waitlistType = "waitlist_type"
+        case bottomTab = "bottom_tab"
+        case position
+        case notificationWindowHours = "notification_window_hours"
+        case deferredUntil = "deferred_until"
+        case blockedByBookingId = "blocked_by_booking_id"
+        case canNotifyNow = "can_notify_now"
+    }
+
+    var isSpecial: Bool { waitlistType == "special" }
 }
 
 //MARK: ----------- BookedTrainerModel

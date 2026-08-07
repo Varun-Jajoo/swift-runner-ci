@@ -65,6 +65,13 @@ struct ClassDetailsModel: Codable {
     /// FlexibleValue because Android reads this with `optString` (which coerces
     /// a raw JSON number to a string); read it with `.value` / `.intValue`.
     var daysRemaining: FlexibleValue?
+    /// Free-booking spam guard: tells the client BEFORE the user taps
+    /// Book Slot / Join Waitlist whether that tap will land them on the
+    /// special double-booking waitlist, so the confirm sheet can be
+    /// skipped entirely in favor of the double-booking sheet.
+    var willSpecialWaitlist: Bool?
+    /// FlexibleValue for the same reason as waitlistCount/daysRemaining above.
+    var specialWaitlistNotifyHours: FlexibleValue?
 
     enum CodingKeys: String, CodingKey {
         case schduleID = "schdule_id"
@@ -92,5 +99,7 @@ struct ClassDetailsModel: Codable {
         case reason
         case resumesOn = "resumes_on"
         case daysRemaining = "days_remaining"
+        case willSpecialWaitlist = "will_special_waitlist"
+        case specialWaitlistNotifyHours = "special_waitlist_notify_hours"
     }
 }

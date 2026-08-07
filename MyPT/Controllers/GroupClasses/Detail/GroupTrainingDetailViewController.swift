@@ -75,6 +75,13 @@ final class GroupTrainingDetailViewController: CommonViewController {
     /// when a spot is open but people are already waiting on it.
     private var remainingSeats: Int = 0
     private var waitlistCount: Int = 0
+    /// From class-detail's `will_special_waitlist` - true means tapping Book
+    /// Slot / Join Waitlist will trigger the free-booking spam guard, so the
+    /// double-booking sheet must show BEFORE any booking-confirm UI, not after.
+    private var willSpecialWaitlist: Bool = false
+    /// From class-detail's `special_waitlist_notify_hours` - used to pre-show
+    /// the double-booking sheet before the real book/join API call.
+    private var specialWaitlistNotifyHours: Int = 3
     /// Distance without the trailing " away" — the value Android forwards to the
     /// downstream booking screens.
     private var currentDistance: String = ""
@@ -83,11 +90,11 @@ final class GroupTrainingDetailViewController: CommonViewController {
 
     private enum Metric {
         static let heroHeight: CGFloat = 364
-        static let heroFadeHeight: CGFloat = 140
+        static let heroFadeHeight: CGFloat = 218
         static let horizontalInset: CGFloat = 16
         static let navButtonDiameter: CGFloat = 40
         static let iconTileSide: CGFloat = 38
-        static let progressBarWidth: CGFloat = 71
+        static let progressBarWidth: CGFloat = 59
         static let whyCardWidth: CGFloat = 190
         static let galleryCardSize = CGSize(width: 180, height: 250)
         static let ctaHeight: CGFloat = 48
@@ -158,6 +165,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
     private let dateTimeLabel = UILabel()
     private let spotsLabel = UILabel()
     private let progressBar = SpotProgressBarView(barHeight: 2)
+    private var detailProgressBarWidthConstraint: NSLayoutConstraint?
 
     private let locationRow = UIView()
     private let locationTitleLabel = UILabel()
@@ -184,6 +192,10 @@ final class GroupTrainingDetailViewController: CommonViewController {
 
     private let waitlistBanner = UIView()
     private let bottomBar = UIView()
+    /// Android's `tvPriceLabel` — normally the static "PER SESSION" caption above
+    /// `priceLabel`, repurposed by `applyPostBookingCta()` to show dynamic
+    /// "See you on..." / "We'll notify you..." copy once booked/waitlisted.
+    private let perSessionLabel = UILabel()
     private let priceLabel = UILabel()
     private let ctaButton = GradientCTAButton()
 
@@ -301,10 +313,9 @@ final class GroupTrainingDetailViewController: CommonViewController {
         // capacity-based CTA above - same override the live fetch applies
         // once it confirms this from the server.
         if isAlreadyBooked {
-            setCTATitle("BOOKED")
-            waitlistBanner.isHidden = true
+            applyPostBookingCta(booked: true)
         } else if isAlreadyWaitlisted {
-            setCTATitle("ON WAITLIST")
+            applyPostBookingCta(booked: false)
         }
     }
 
@@ -373,6 +384,8 @@ final class GroupTrainingDetailViewController: CommonViewController {
         if case .gold = availability.state {
             progressBar.setFillColors(Palette.goldProgressFill)
         }
+        let textWidth = spotsLabel.intrinsicContentSize.width
+        detailProgressBarWidthConstraint?.constant = max(Metric.progressBarWidth, ceil(textWidth))
 
         // Android's default label flips purely on `isFreeForUser`.
         let defaultBookingText = isFreeForUser ? "BOOK SLOT" : "PROCEED TO PAYMENT"
@@ -396,12 +409,97 @@ final class GroupTrainingDetailViewController: CommonViewController {
     /// and never visibly shrinks back down for a shorter title, since nothing
     /// else on screen forces `bottomBar` to re-run layout in between.
     private func setCTATitle(_ title: String) {
+        resetCTAStyle()
         ctaButton.configure(title: title,
                             font: AppFont.medium.size(14.0, familyName: familyFunnelSans),
                             titleColor: Palette.ctaInk)
         UIView.animate(withDuration: 0.2) {
             self.bottomBar.layoutIfNeeded()
         }
+    }
+
+    /// `tvPriceLabel` keeps the same font/color/kerning whether it's showing the
+    /// static "PER SESSION" caption or `applyPostBookingCta()`'s dynamic copy -
+    /// Android applies `letterSpacing="0.06"` in the XML itself, so it's not lost
+    /// when the Kotlin code swaps `.text` at runtime, and neither should this be.
+    private func setPerSessionLabelText(_ text: String) {
+        perSessionLabel.attributedText = NSAttributedString(
+            string: text,
+            attributes: [
+                .font: AppFont.regular.size(10.0, familyName: familyFunnelSans),
+                .foregroundColor: Palette.perSession,
+                .kern: 0.6
+            ]
+        )
+    }
+
+    /// Undoes `applyPostBookingCta()`'s dark "VIEW" re-skin. Called at the top of
+    /// `setCTATitle()` so every OTHER path (paid/waitlist/default booking) always
+    /// starts from the normal white-gradient look, regardless of what state the
+    /// button was left in before.
+    private func resetCTAStyle() {
+        ctaButton.bandThickness = 2
+        ctaButton.bodyStartColor = UIColor(hex: "#FFFFFF")
+        ctaButton.bodyEndColor = UIColor(hex: "#F0F0F0")
+        ctaButton.layer.borderWidth = 0
+        ctaButton.setTrailingIcon(
+            GroupTrainingDetailViewController.icon(["ic_chevron_right_16_dark", "chevron-right"], systemFallback: "chevron.right"),
+            tint: Palette.ctaInk)
+    }
+
+    /// Port of `applyPostBookingCta(booked)`: swaps the bottom bar's price
+    /// section + CTA from the bookable state to the post-action "VIEW" state -
+    /// same button whether fully booked or just on the waitlist, only the two
+    /// text lines above it differ.
+    ///
+    /// NOTE (matches Android's actual current behaviour, not a bug introduced
+    /// here): `fetchClassDetail()`'s generic price refresh runs AFTER this and
+    /// unconditionally overwrites `priceLabel` (Android's `tvPriceMember`) back
+    /// to the plain price/"Free for members" text - only `perSessionLabel`
+    /// (Android's `tvPriceLabel`) durably keeps the "See you on..."/"We'll
+    /// notify you..." copy. Ported as-is for parity.
+    private func applyPostBookingCta(booked: Bool) {
+        setPerSessionLabelText(booked ? buildSeeYouOnText() : "We'll notify you if a slot opens")
+        priceLabel.text = booked ? "Your class is booked" : "You're on the waitlist"
+
+        if booked {
+            waitlistBanner.isHidden = true
+        }
+
+        ctaButton.bandThickness = 0
+        // `bg_btn_not_now`'s fill (#1D1E1D) - same flat dark already used for
+        // the About section's "SHOW LESS" pill (`Palette.readMoreFill`).
+        ctaButton.bodyStartColor = Palette.readMoreFill
+        ctaButton.bodyEndColor = Palette.readMoreFill
+        ctaButton.layer.cornerRadius = ctaButton.cornerRadius
+        ctaButton.layer.borderWidth = 1
+        ctaButton.layer.borderColor = UIColor.white.withAlphaComponent(0.10).cgColor
+        ctaButton.configure(title: "VIEW",
+                            font: AppFont.medium.size(14.0, familyName: familyFunnelSans),
+                            titleColor: .white)
+        ctaButton.setTrailingIcon(
+            GroupTrainingDetailViewController.icon(["ic_chevron_right_16", "chevron-right"], systemFallback: "chevron.right"),
+            tint: UIColor.white.withAlphaComponent(0.4))
+        UIView.animate(withDuration: 0.2) {
+            self.bottomBar.layoutIfNeeded()
+        }
+    }
+
+    /// "Thu, 27 Aug • 7-8 AM" -> "See you on 27 Aug at 7:00 AM!"
+    private func buildSeeYouOnText() -> String {
+        let formatted = dateTimeLabel.text ?? ""
+        guard !formatted.isEmpty else { return "See you soon!" }
+
+        let parts = formatted.components(separatedBy: "•").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+        guard parts.count == 2 else { return "See you soon!" }
+
+        let datePart = parts[0].components(separatedBy: ",").dropFirst().joined(separator: ",").trimmingCharacters(in: .whitespacesAndNewlines)
+        let timePart = parts[1]
+        let startHour = timePart.components(separatedBy: "-").first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let amPm = String(timePart.trimmingCharacters(in: .whitespacesAndNewlines).suffix(2))
+
+        guard !datePart.isEmpty, !startHour.isEmpty else { return "See you soon!" }
+        return "See you on \(datePart) at \(startHour):00 \(amPm)!"
     }
 
     // MARK: - Distance
@@ -619,6 +717,8 @@ final class GroupTrainingDetailViewController: CommonViewController {
         // member whose turn it is and for a brand-new user walking in on an
         // open spot. Only auto-redirect once per visit.
         waitlistCount = GroupClassCardFormatter.intValue(detail.waitlistCount, defaultValue: 0)
+        willSpecialWaitlist = detail.willSpecialWaitlist ?? false
+        specialWaitlistNotifyHours = GroupClassCardFormatter.intValue(detail.specialWaitlistNotifyHours, defaultValue: 3)
         if !checkedSlotOpenRedirect {
             checkedSlotOpenRedirect = true
             if !isAlreadyBooked && remainingSeats > 0 && waitlistCount > 0 {
@@ -627,11 +727,9 @@ final class GroupTrainingDetailViewController: CommonViewController {
         }
 
         if isAlreadyBooked {
-            setCTATitle("BOOKED")
-            // A booked user never sees the amber waitlist banner.
-            waitlistBanner.isHidden = true
+            applyPostBookingCta(booked: true)
         } else if isAlreadyWaitlisted {
-            setCTATitle("ON WAITLIST")
+            applyPostBookingCta(booked: false)
         } else {
             // A booking may have been removed server-side; recompute from capacity.
             updateProgressAndWaitlistState(booked: bookedCount, totalCapacity: totalCapacity)
@@ -760,10 +858,33 @@ final class GroupTrainingDetailViewController: CommonViewController {
             return
         }
 
+        if isAlreadyWaitlisted {
+            // Already on the waitlist and no open spot to claim right now -
+            // just show their existing waitlist status, don't re-join.
+            let controller = WaitlistConfirmedViewController()
+            controller.classTitle = classTitle
+            controller.classTime = dateTimeLabel.text ?? ""
+            controller.classLocation = classLocation
+            controller.trainerName = trainerName
+            controller.distance = locationDistanceLabel.text ?? currentDistance
+            controller.hidesBottomBarWhenPushed = true
+            navigationController?.pushViewController(controller, animated: true)
+            return
+        }
+
         if isWaitlistMode {
             // Android performs the token check inside `joinWaitlistDirectly` before
             // anything else, so the gate stays on this path.
             guard requireLogin() else { return }
+
+            if willSpecialWaitlist {
+                // class-detail already told us this tap will trigger the spam
+                // guard - show the double-booking sheet FIRST and only actually
+                // join if the member explicitly confirms inside it, instead of
+                // creating the special-waitlist row eagerly on this outer tap.
+                presentDoubleBookingSheet(preCheck: true)
+                return
+            }
             joinWaitlist()
             return
         }
@@ -771,6 +892,15 @@ final class GroupTrainingDetailViewController: CommonViewController {
         if !isFreeForUser {
             guard requireLogin() else { return }
             pushClassPayment()
+            return
+        }
+
+        if willSpecialWaitlist {
+            // Free path keeps Android's eager-create behaviour: no pre-check
+            // sheet here, just book immediately and show the double-booking
+            // sheet AFTER if the response confirms the spam guard triggered.
+            guard requireLogin() else { return }
+            performFreeBooking()
             return
         }
 
@@ -836,18 +966,24 @@ final class GroupTrainingDetailViewController: CommonViewController {
     /// Port of `joinWaitlistDirectly`: `POST join-waitlist` with schedule_id /
     /// transaction_id="" / price, then either refresh + push Waitlist Confirmed
     /// (success), stub to Phase 10 (blacklisted), or surface the server message.
-    private func joinWaitlist() {
+    ///
+    /// `skipSpecialSheetCheck` is `true` only when the double-booking sheet was
+    /// already shown BEFORE this call (the pre-check path) - the member already
+    /// confirmed, so the response's `waitlist_type` is ignored and this always
+    /// finishes as a plain success, exactly like Android's
+    /// `joinWaitlistDirectly(..., skipSpecialSheetCheck = true)`.
+    private func joinWaitlist(skipSpecialSheetCheck: Bool = false) {
         UpcomingClassVM.joinWaitlistApi(scheduleId: scheduleId,
                                         transactionId: "",
                                         price: classPrice) { [weak self] result in
             guard let self = self else { return }
             DispatchQueue.main.async {
-                self.handleWaitlistResponse(result)
+                self.handleWaitlistResponse(result, skipSpecialSheetCheck: skipSpecialSheetCheck)
             }
         }
     }
 
-    private func handleWaitlistResponse(_ result: BookClassBaseModel?) {
+    private func handleWaitlistResponse(_ result: BookClassBaseModel?, skipSpecialSheetCheck: Bool = false) {
         guard let result = result else {
             AlertHelper.shared.showCustomeAlert(title: "", message: "Could not join waitlist. Please try again.", actions: ["OK"], completion: nil)
             return
@@ -857,6 +993,17 @@ final class GroupTrainingDetailViewController: CommonViewController {
             // Android calls fetchClassDetail() before navigating so this screen
             // reflects the new waitlist state when the user comes back.
             fetchClassDetail()
+
+            // Post-hoc fallback: class-detail's `will_special_waitlist` said this
+            // wouldn't trigger the guard (or this is the un-gated plain path), but
+            // the server disagrees - show the sheet now instead of silently
+            // treating a special-waitlist join as a plain one.
+            if !skipSpecialSheetCheck, result.specialWaitlist?.isSpecial == true {
+                presentDoubleBookingSheet(preCheck: false,
+                                          notifyHours: result.specialWaitlist?.notificationWindowHours?.intValue)
+                return
+            }
+
             let controller = WaitlistConfirmedViewController()
             controller.classTitle = classTitle
             controller.classTime = dateTimeLabel.text ?? ""
@@ -888,6 +1035,100 @@ final class GroupTrainingDetailViewController: CommonViewController {
         if model.code == "BLACKLISTED" { return true }
         let lowered = (model.msg ?? "").lowercased()
         return lowered.contains("blacklisted") || lowered.contains("paused")
+    }
+
+    /// Port of Android's extracted `performFreeBooking()`: the free-for-member
+    /// `POST book-class` call, shared by the willSpecialWaitlist bypass here and
+    /// (separately) `ConfirmSlotSheetViewController`'s own confirm button. Unlike
+    /// the waitlist path, the free path keeps Android's EAGER-create behaviour -
+    /// no pre-check sheet, book immediately and show the double-booking sheet
+    /// AFTER only if the response confirms the spam guard triggered.
+    private func performFreeBooking() {
+        guard !scheduleId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            pushSlotConfirmedFresh()
+            return
+        }
+
+        UpcomingClassVM.bookGroupClassApi(scheduleId: scheduleId,
+                                          transactionId: "",
+                                          paymentType: "free") { [weak self] result in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.handleFreeBookingResponse(result)
+            }
+        }
+    }
+
+    private func handleFreeBookingResponse(_ result: BookClassBaseModel?) {
+        guard let result = result else {
+            AlertHelper.shared.showCustomeAlert(title: "", message: "Booking failed. Please try again.", actions: ["OK"], completion: nil)
+            return
+        }
+
+        if result.status == true {
+            fetchClassDetail()
+
+            if result.specialWaitlist?.isSpecial == true {
+                presentDoubleBookingSheet(preCheck: false,
+                                          notifyHours: result.specialWaitlist?.notificationWindowHours?.intValue)
+                return
+            }
+
+            pushSlotConfirmedFresh()
+            return
+        }
+
+        if isWaitlistBlacklisted(result) {
+            let controller = BookingPausedViewController()
+            controller.reason = result.blacklistDetail?.reason ?? "2 consecutive no-shows for group classes"
+            controller.resumesOn = result.blacklistDetail?.resumesOn ?? "12 August 2026"
+            controller.daysRemaining = result.blacklistDetail?.daysRemaining?.value ?? "6"
+            controller.hidesBottomBarWhenPushed = true
+            navigationController?.pushViewController(controller, animated: true)
+            return
+        }
+
+        let trimmedMessage = (result.msg ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let message = trimmedMessage.isEmpty ? "Booking failed. Please try again." : trimmedMessage
+        AlertHelper.shared.showCustomeAlert(title: "", message: message, actions: ["OK"], completion: nil)
+    }
+
+    /// Mirrors `ConfirmSlotSheetViewController.navigateToSlotConfirmed()`'s fresh
+    /// (non-read-only) success screen: no `schedule_id` forwarded (the booking
+    /// already exists) and no price (this is the free-for-member path).
+    private func pushSlotConfirmedFresh() {
+        let controller = SlotConfirmedViewController()
+        controller.classTitle = classTitle
+        controller.classTime = dateTimeLabel.text ?? ""
+        controller.classLocation = classLocation
+        controller.trainerName = trainerName
+        controller.distance = locationDistanceLabel.text ?? currentDistance
+        controller.classPrice = ""
+        controller.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(controller, animated: true)
+    }
+
+    /// Port of `showDoubleBookingBottomSheet(notifyHours, onJoinConfirmed)`.
+    /// `preCheck == true` -> pre-check mode: no entry exists yet, the sheet's own
+    /// Join button fires `joinWaitlist(skipSpecialSheetCheck: true)`.
+    /// `preCheck == false` -> post-hoc mode: entry already exists server-side,
+    /// the sheet's Join button just confirms and pushes Waitlist Confirmed.
+    private func presentDoubleBookingSheet(preCheck: Bool, notifyHours: Int? = nil) {
+        var input = DoubleBookingSheetInput()
+        input.classTitle = classTitle
+        input.classTime = dateTimeLabel.text ?? classTime
+        input.classLocation = classLocation
+        input.trainerName = trainerName
+        input.distance = locationDistanceLabel.text ?? currentDistance
+        input.notifyHours = notifyHours ?? specialWaitlistNotifyHours
+
+        if preCheck {
+            DoubleBookingSheetViewController.present(from: self, input: input) { [weak self] in
+                self?.joinWaitlist(skipSpecialSheetCheck: true)
+            }
+        } else {
+            DoubleBookingSheetViewController.present(from: self, input: input)
+        }
     }
 
     /// Port of the `isAlreadyBooked` branch of `btnBookSlot.setOnClickListener`.
@@ -1070,7 +1311,7 @@ private extension GroupTrainingDetailViewController {
         heroImageView.translatesAutoresizingMaskIntoConstraints = false
         heroImageView.contentMode = .scaleAspectFill
         heroImageView.clipsToBounds = true
-        heroImageView.backgroundColor = GroupClassColor.bg2.color
+        heroImageView.backgroundColor = UIColor(hex: "#32615C")
         heroContainer.addSubview(heroImageView)
 
         heroFadeView.translatesAutoresizingMaskIntoConstraints = false
@@ -1152,7 +1393,7 @@ private extension GroupTrainingDetailViewController {
         // 1 — three glass pills
         let pillsRow = makePillsRow()
         column.addArrangedSubview(pillsRow)
-        column.setCustomSpacing(16, after: pillsRow)
+        column.setCustomSpacing(8, after: pillsRow)
 
         // 2 — class title
         titleLabel.font = AppFont.medium.size(24.0, familyName: familyClashDisplay)
@@ -1349,7 +1590,9 @@ private extension GroupTrainingDetailViewController {
         row.alignment = .center
         row.spacing = 12
 
-        progressBar.widthAnchor.constraint(equalToConstant: Metric.progressBarWidth).isActive = true
+        let barWidth = progressBar.widthAnchor.constraint(equalToConstant: Metric.progressBarWidth)
+        detailProgressBarWidthConstraint = barWidth
+        barWidth.isActive = true
         progressBar.heightAnchor.constraint(equalToConstant: 2).isActive = true
         return row
     }
@@ -1903,17 +2146,8 @@ private extension GroupTrainingDetailViewController {
         surface.sheenAlpha = 0.08
         bottomBar.addSubview(surface)
 
-        let perSessionLabel = UILabel()
         perSessionLabel.translatesAutoresizingMaskIntoConstraints = false
-        perSessionLabel.attributedText = NSAttributedString(
-            string: Copy.perSession,
-            attributes: [
-                .font: AppFont.regular.size(10.0, familyName: familyFunnelSans),
-                .foregroundColor: Palette.perSession,
-                // Android `letterSpacing="0.06"` is in em: 0.06 * 10sp.
-                .kern: 0.6
-            ]
-        )
+        setPerSessionLabelText(Copy.perSession)
 
         priceLabel.translatesAutoresizingMaskIntoConstraints = false
         priceLabel.font = AppFont.semibold.size(18.0, familyName: familyClashDisplay)
