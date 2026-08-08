@@ -62,7 +62,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Register with APNs
          application.registerForRemoteNotifications()
-        
+
+        // Safety net alongside the refresh-callback upload in
+        // `messaging(_:didReceiveRegistrationToken:)`: catches a token that
+        // rotated while the app wasn't running to receive that callback, or
+        // simply hasn't been re-confirmed to the server in a while. No-ops
+        // if the cached token is already in sync and recent (see
+        // `FcmTokenSync.needsUpload`), or if nobody's logged in yet.
+        FcmTokenSync.sync(token: appUserDefaults.getReFCMToken())
+
         return true
     }
     
@@ -176,12 +184,20 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
             } else if let token = token {
                 print("✅ FCM Token: \(token)")
                 appUserDefaults.setFCMToken(refreshToken: token)
+                // This was the actual bug: the refreshed token was saved
+                // locally and never told to the backend, so the server kept
+                // pushing to the old, dead token once Firebase rotated it -
+                // notifications worked right after login, then silently
+                // stopped until the next one. `upload` unconditionally (not
+                // `sync`'s staleness check) since a genuinely NEW token from
+                // FCM should always be pushed regardless of when the last
+                // sync happened.
+                FcmTokenSync.upload(token)
                 DispatchQueue.main.async {
                     AppDelegate.showDebugFCMToken(token)
                 }
             }
         }
-        // Optionally send to your server
     }
 
     // TEMP DEBUG - remove once the FCM token's been copied out.

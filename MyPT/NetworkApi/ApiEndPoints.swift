@@ -103,6 +103,7 @@ enum ApiEndPoint: String {
     case get_gx_cancellation_policy_paid = "api/get-legal-document/gx_cancellation_policy_paid"
     case get_gx_terms_free              =  "api/get-legal-document/gx_terms_free"
     case get_gx_terms_paid              =  "api/get-legal-document/gx_terms_paid"
+    case sync_device_token              =  "api/sync-device-token"
 //    case ccaavenue_payment              =  "api/pay"
     case ccaavenue_payment              =  "api/payment/session"
     /// Raw-HTML CCAvenue gateway page for group-class card payments — Android's

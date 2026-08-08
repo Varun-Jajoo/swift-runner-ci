@@ -468,6 +468,7 @@
 		B8FD7D1B2D65A8F0004C4AFF /* DummyRulerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FD7D1A2D65A8F0004C4AFF /* DummyRulerViewController.swift */; };
 		B8FD7F612D30F697000E4425 /* CustomRuler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FD7F602D30F697000E4425 /* CustomRuler.swift */; };
 		B8FDEEC32CC8CAD00061639F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FDEEC22CC8CAD00061639F /* AppDelegate.swift */; };
+		F8DC6528E04B93D32710F050 /* FcmTokenSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = D85818D1C923C43924FC13FE /* FcmTokenSync.swift */; };
 		B8FDEEC52CC8CAD00061639F /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FDEEC42CC8CAD00061639F /* SceneDelegate.swift */; };
 		B8FDEEC72CC8CAD00061639F /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FDEEC62CC8CAD00061639F /* MainViewController.swift */; };
 		B8FDEECA2CC8CAD00061639F /* Base in Resources */ = {isa = PBXBuildFile; fileRef = B8FDEEC92CC8CAD00061639F /* Base */; };
@@ -960,6 +961,7 @@
 		B8FD7F602D30F697000E4425 /* CustomRuler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomRuler.swift; sourceTree = "<group>"; };
 		B8FDEEBF2CC8CAD00061639F /* MyPT Connect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MyPT Connect.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B8FDEEC22CC8CAD00061639F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		D85818D1C923C43924FC13FE /* FcmTokenSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FcmTokenSync.swift; sourceTree = "<group>"; };
 		B8FDEEC42CC8CAD00061639F /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		B8FDEEC62CC8CAD00061639F /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		B8FDEEC92CC8CAD00061639F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -1979,6 +1981,7 @@
 			children = (
 				B8FDEEC22CC8CAD00061639F /* AppDelegate.swift */,
 				B8FDEEC42CC8CAD00061639F /* SceneDelegate.swift */,
+				D85818D1C923C43924FC13FE /* FcmTokenSync.swift */,
 			);
 			path = AppDelegates;
 			sourceTree = "<group>";
@@ -2600,6 +2603,7 @@
 				B8DCD1992DFFFE1700E160D5 /* EditPhotoPopupViewController.swift in Sources */,
 				B8F0303E2D54BB6500BE59C2 /* RulerRangeTextView.swift in Sources */,
 				B8FDEEC32CC8CAD00061639F /* AppDelegate.swift in Sources */,
+				F8DC6528E04B93D32710F050 /* FcmTokenSync.swift in Sources */,
 				B8A540D72CF05052007FECB3 /* TrainerDescriptionViewController.swift in Sources */,
 				B8C553F32DF702140056E310 /* GymSearchViewController.swift in Sources */,
 				B8F0303A2D54BB3000BE59C2 /* RulerRangePointerView.swift in Sources */,

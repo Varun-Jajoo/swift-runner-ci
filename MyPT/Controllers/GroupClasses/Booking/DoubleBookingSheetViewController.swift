@@ -452,6 +452,11 @@ private extension DoubleBookingSheetViewController {
 
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.setImage(UIImage(named: "ic-double-booking-close") ?? UIImage(systemName: "xmark"), for: .normal)
+        // Only affects the `xmark` fallback (the real asset is a bundled PNG
+        // rendered as-is, not a template image, so tintColor is a no-op on
+        // it) - without this, a fallback SF Symbol with no explicit tint
+        // renders in UIKit's default blue instead of matching the sheet.
+        closeButton.tintColor = Palette.title
         closeButton.accessibilityLabel = "Close"
         closeButton.imageView?.contentMode = .scaleAspectFit
         closeButton.contentHorizontalAlignment = .fill
@@ -633,8 +638,16 @@ private extension DoubleBookingSheetViewController {
         card.addSubview(graphicColumn)
 
         NSLayoutConstraint.activate([
-            textStack.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
-            textStack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -12),
+            // Android centers this block vertically (`gravity="center_vertical"`
+            // on the card) when the card is taller than the text needs (i.e. it
+            // hit the 115dp minHeight) - equal slack above and below. Pinning
+            // top AND bottom to exact equality instead forced textStack to
+            // stretch to fill that slack, which spread out unevenly across
+            // title/row1/row2 (whichever had the lowest hugging priority)
+            // instead, showing up as an oversized gap between items 1 and 2.
+            textStack.topAnchor.constraint(greaterThanOrEqualTo: card.topAnchor, constant: 12),
+            textStack.bottomAnchor.constraint(lessThanOrEqualTo: card.bottomAnchor, constant: -12),
+            textStack.centerYAnchor.constraint(equalTo: card.centerYAnchor),
             textStack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 12),
             textStack.trailingAnchor.constraint(equalTo: graphicColumn.leadingAnchor, constant: -4),
 
