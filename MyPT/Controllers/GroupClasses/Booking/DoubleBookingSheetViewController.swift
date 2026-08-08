@@ -656,7 +656,23 @@ private extension DoubleBookingSheetViewController {
 
         let dotsView = UIImageView(image: UIImage(named: "bg-double-booking-dots"))
         dotsView.translatesAutoresizingMaskIntoConstraints = false
-        dotsView.contentMode = .scaleToFill
+        // Android's `fitXY` non-uniformly stretches too, but that source is a
+        // tileable vector drawable that hides it; this is a single rasterized
+        // PNG at one fixed aspect ratio, so the same stretch reads as visibly
+        // distorted (oval, not round) dots. `.scaleAspectFill` + the column's
+        // existing `clipsToBounds` keeps the dots round and crops overflow
+        // instead of warping them.
+        dotsView.contentMode = .scaleAspectFill
+        dotsView.clipsToBounds = true
+        // All 4 edges are pinned below (required priority), fully determining
+        // this view's frame - dropping these to the minimum guarantees the
+        // image's own intrinsic size can never compete with those pins, even
+        // transiently, which would otherwise read as the column (and the
+        // card around it) growing taller than the text content calls for.
+        dotsView.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        dotsView.setContentHuggingPriority(.defaultLow, for: .vertical)
+        dotsView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        dotsView.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
         column.addSubview(dotsView)
 
         let mockView = UIImageView(image: UIImage(named: mockImageName))
