@@ -5,7 +5,7 @@
 //  "You already have an active booking" bottom sheet — shown by the free-booking
 //  spam guard whenever a member already has another active free-class booking.
 //
-//  Android reference (ground truth for copy and logic):
+//  Android reference (ground truth for copy, colors and layout):
 //    app/src/main/res/layout/dialog_double_booking_bottom_sheet.xml
 //    app/src/main/java/co/com/mypt/UpComingClasses/GroupTrainingDetailActivity.kt
 //        · showDoubleBookingBottomSheet(notifyHours, onJoinConfirmed)
@@ -19,12 +19,13 @@
 //      fires the real book/join API call; nothing is created server-side until this
 //      sheet's own CTA is tapped.
 //
-//  Drawables ported programmatically, same convention as `ConfirmSlotSheetViewController`:
-//  Android's dot-pattern card backgrounds, phone-mockup illustrations and the
-//  gradient-blended hero/connector graphics are bespoke raster assets with no iOS
-//  equivalent asset pipeline in this repo — the layout below reproduces the same
-//  information architecture and copy with the module's existing glass-card / icon-tile
-//  primitives instead of 1:1 pixel parity.
+//  Assets ported 1:1 from the Android drawables (not approximated): the hero photo,
+//  the two phone-mockup illustrations and the dot-pattern card background are the
+//  same PNGs Android bundles (`img_double_booking_hero`, `img_manage_booking_mock`,
+//  `img_waitlist_mock`, copied byte-for-byte); the OR connector, the two number
+//  badges and the close glyph were vector drawables (`ic_double_booking_or_connector`,
+//  `ic_number_1_badge`, `ic_number_2_badge`, `ic_close_24`) with SVG-identical path
+//  syntax, converted to real SVG and rasterized at high scale to PNG.
 //
 
 import UIKit
@@ -58,16 +59,21 @@ final class DoubleBookingSheetViewController: CommonViewController {
     var onJoinConfirmed: (() -> Void)?
 
     // MARK: Layout constants
+    //
+    // Every value here is Android's own dp figure from
+    // `dialog_double_booking_bottom_sheet.xml`, ported 1:1 as points.
 
     private enum Metric {
-        static let horizontalInset: CGFloat = 20
+        static let horizontalInset: CGFloat = 12
         static let handleSize = CGSize(width: 64, height: 5)
         static let closeButtonSide: CGFloat = 24
-        static let cardPadding: CGFloat = 16
-        static let cardCornerRadius: CGFloat = 12
-        static let iconTileSide: CGFloat = 38
-        static let rowIconSide: CGFloat = 18
-        static let numberBadgeSide: CGFloat = 16
+        static let heroSize = CGSize(width: 254, height: 162)
+        static let connectorSize = CGSize(width: 22, height: 150)
+        static let cardMinHeight: CGFloat = 115
+        static let cardCornerRadius: CGFloat = 8
+        static let graphicColumnWidth: CGFloat = 112
+        static let mockSize = CGSize(width: 78, height: 61)
+        static let numberBadgeSide: CGFloat = 13
         static let ctaHeight: CGFloat = 48
         static let sheetCornerRadius: CGFloat = 20
         static let bookingsTabIndex = 2
@@ -81,6 +87,7 @@ final class DoubleBookingSheetViewController: CommonViewController {
         static let title = UIColor(hex: "#F0F0F0")
         static let dividerLabel = UIColor(hex: "#FAFAFA").withAlphaComponent(0.55) // #8CFAFAFA
         static let dividerLine = UIColor.white.withAlphaComponent(0.10)           // #1AFFFFFF
+        static let heroTileFill = UIColor(hex: "#0A0A0A")
         static let cardFill = UIColor(hex: "#131416")
         // GlassCardView applies `strokeAlpha` via `.withAlphaComponent`, which
         // REPLACES a color's alpha rather than multiplying it - this must stay a
@@ -90,9 +97,6 @@ final class DoubleBookingSheetViewController: CommonViewController {
         static let cardStrokeAlpha: CGFloat = 0.30
         static let cardTitle = UIColor.white
         static let itemText = UIColor(hex: "#B3B3B3")
-        static let tileFill = UIColor(hex: "#101113")
-        static let numberBadgeFill = GroupClassColor.lime.color.withAlphaComponent(0.16)
-        static let numberBadgeText = GroupClassColor.lime.color
         static let manageButtonFill = UIColor(hex: "#1D1E1D")
         static let manageButtonStroke = UIColor.white.withAlphaComponent(0.10)
         static let manageButtonText = UIColor(hex: "#FAFAFA")
@@ -124,6 +128,7 @@ final class DoubleBookingSheetViewController: CommonViewController {
     private let scrollView = UIScrollView()
     private let contentStack = UIStackView()
     private let closeButton = UIButton(type: .system)
+    private let heroImageView = UIImageView()
     private let waitlistNotifyLabel = UILabel()
     private let manageButton = UIButton(type: .system)
     private let joinButton = GradientCTAButton()
@@ -354,7 +359,7 @@ private extension DoubleBookingSheetViewController {
         contentStack.alignment = .fill
         contentStack.spacing = 0
         contentStack.isLayoutMarginsRelativeArrangement = true
-        contentStack.layoutMargins = UIEdgeInsets(top: 8,
+        contentStack.layoutMargins = UIEdgeInsets(top: 12,
                                                   left: Metric.horizontalInset,
                                                   bottom: 20,
                                                   right: Metric.horizontalInset)
@@ -373,43 +378,47 @@ private extension DoubleBookingSheetViewController {
             contentStack.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
         ])
 
-        // 1 — drag handle + close X
+        // 1 — drag handle
         let handleRow = makeHandleRow()
         contentStack.addArrangedSubview(handleRow)
-        contentStack.setCustomSpacing(4, after: handleRow)
 
+        // 2 — close X (own row, marginTop 4dp)
         let closeRow = makeCloseRow()
         contentStack.addArrangedSubview(closeRow)
+        contentStack.setCustomSpacing(4, after: handleRow)
 
-        // 2 — headline
+        // 3 — hero (marginTop 4dp)
+        let hero = makeHeroTile()
+        contentStack.addArrangedSubview(hero)
+        contentStack.setCustomSpacing(4, after: closeRow)
+
+        // 4 — headline (marginTop 11dp)
         let headline = makeHeadlineLabel()
         contentStack.addArrangedSubview(headline)
-        contentStack.setCustomSpacing(18, after: headline)
+        contentStack.setCustomSpacing(11, after: hero)
 
-        // 3 — "To Reserve This Slot" gradient divider
+        // 5 — "To Reserve This Slot" gradient divider (marginTop 18dp)
         let dividerRow = makeSectionDividerRow()
         contentStack.addArrangedSubview(dividerRow)
-        contentStack.setCustomSpacing(16, after: dividerRow)
+        contentStack.setCustomSpacing(18, after: headline)
 
-        // 4 — the two cards
-        let manageCard = makeManageBookingCard()
-        contentStack.addArrangedSubview(manageCard)
-        contentStack.setCustomSpacing(12, after: manageCard)
+        // 6 — connector + cards row (marginTop 18dp)
+        let connectorRow = makeConnectorAndCardsRow()
+        contentStack.addArrangedSubview(connectorRow)
+        contentStack.setCustomSpacing(18, after: dividerRow)
 
-        let waitlistCard = makeWaitlistCard()
-        contentStack.addArrangedSubview(waitlistCard)
-        contentStack.setCustomSpacing(26, after: waitlistCard)
-
-        // 5 — thin divider
+        // 7 — thin divider (marginTop 26dp)
         let divider = UIView()
         divider.translatesAutoresizingMaskIntoConstraints = false
         divider.backgroundColor = Palette.dividerLine
         divider.heightAnchor.constraint(equalToConstant: 1).isActive = true
         contentStack.addArrangedSubview(divider)
-        contentStack.setCustomSpacing(26, after: divider)
+        contentStack.setCustomSpacing(26, after: connectorRow)
 
-        // 6 — buttons row
-        contentStack.addArrangedSubview(makeButtonsRow())
+        // 8 — buttons row (marginTop 26dp)
+        let buttonsRow = makeButtonsRow()
+        contentStack.addArrangedSubview(buttonsRow)
+        contentStack.setCustomSpacing(26, after: divider)
     }
 
     func makeHandleRow() -> UIView {
@@ -433,19 +442,18 @@ private extension DoubleBookingSheetViewController {
         return container
     }
 
+    /// `ic_close_24` - a real two-tone (#F0F0F0/#FFFFFF) rasterized asset, used
+    /// as-is (not tinted) so both stroke colors survive.
     func makeCloseRow() -> UIView {
         let container = UIView()
         container.translatesAutoresizingMaskIntoConstraints = false
 
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.setImage(DoubleBookingSheetViewController.icon(["ic_close_24", "ic_close_x_34"], systemFallback: "xmark")?
-            .withRenderingMode(.alwaysTemplate), for: .normal)
-        closeButton.tintColor = Palette.title
+        closeButton.setImage(UIImage(named: "ic-double-booking-close") ?? UIImage(systemName: "xmark"), for: .normal)
         closeButton.accessibilityLabel = "Close"
         closeButton.imageView?.contentMode = .scaleAspectFit
         closeButton.contentHorizontalAlignment = .fill
         closeButton.contentVerticalAlignment = .fill
-        closeButton.imageEdgeInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         container.addSubview(closeButton)
 
@@ -457,6 +465,46 @@ private extension DoubleBookingSheetViewController {
             closeButton.heightAnchor.constraint(equalToConstant: Metric.closeButtonSide)
         ])
         return container
+    }
+
+    /// Android wraps the hero in a near-black (#0A0A0A) tile so the lighten-blend
+    /// composite has something dark enough to disappear into instead of showing a
+    /// rectangle edge against the sheet's lighter #131416 background - same trick
+    /// `SlotOpenViewController.makeHeroBlock()` uses for its own hero photo.
+    func makeHeroTile() -> UIView {
+        let tile = UIView()
+        tile.translatesAutoresizingMaskIntoConstraints = false
+        tile.backgroundColor = Palette.heroTileFill
+        tile.clipsToBounds = true
+
+        heroImageView.translatesAutoresizingMaskIntoConstraints = false
+        heroImageView.image = UIImage(named: "img-double-booking-hero")
+        heroImageView.contentMode = .scaleAspectFit
+        heroImageView.backgroundColor = .clear
+        heroImageView.layer.isOpaque = false
+        heroImageView.layer.compositingFilter = "lightenBlendMode"
+        tile.addSubview(heroImageView)
+
+        NSLayoutConstraint.activate([
+            tile.widthAnchor.constraint(equalToConstant: Metric.heroSize.width),
+            tile.heightAnchor.constraint(equalToConstant: Metric.heroSize.height),
+            heroImageView.topAnchor.constraint(equalTo: tile.topAnchor),
+            heroImageView.leadingAnchor.constraint(equalTo: tile.leadingAnchor),
+            heroImageView.trailingAnchor.constraint(equalTo: tile.trailingAnchor),
+            heroImageView.bottomAnchor.constraint(equalTo: tile.bottomAnchor)
+        ])
+
+        // Centered horizontally within the full-width row (Android's
+        // `layout_gravity="center_horizontal"` on a `wrap_content` FrameLayout).
+        let row = UIView()
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.addSubview(tile)
+        NSLayoutConstraint.activate([
+            tile.topAnchor.constraint(equalTo: row.topAnchor),
+            tile.bottomAnchor.constraint(equalTo: row.bottomAnchor),
+            tile.centerXAnchor.constraint(equalTo: row.centerXAnchor)
+        ])
+        return row
     }
 
     func makeHeadlineLabel() -> UILabel {
@@ -497,10 +545,38 @@ private extension DoubleBookingSheetViewController {
         return row
     }
 
-    // MARK: Cards
+    // MARK: Connector + cards
+
+    /// Android's horizontal row: the OR connector (22×150) pinned to the leading
+    /// edge, `gravity="center_vertical"` against the two-card column beside it.
+    func makeConnectorAndCardsRow() -> UIView {
+        let connector = UIImageView(image: UIImage(named: "ic-double-booking-or-connector"))
+        connector.translatesAutoresizingMaskIntoConstraints = false
+        connector.contentMode = .scaleAspectFit
+        connector.setContentHuggingPriority(.required, for: .horizontal)
+        connector.setContentCompressionResistancePriority(.required, for: .horizontal)
+
+        let cardsColumn = UIStackView(arrangedSubviews: [makeManageBookingCard(), makeWaitlistCard()])
+        cardsColumn.translatesAutoresizingMaskIntoConstraints = false
+        cardsColumn.axis = .vertical
+        cardsColumn.alignment = .fill
+        cardsColumn.spacing = 12
+
+        let row = UIStackView(arrangedSubviews: [connector, cardsColumn])
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.axis = .horizontal
+        row.alignment = .center
+        row.spacing = 6
+
+        NSLayoutConstraint.activate([
+            connector.widthAnchor.constraint(equalToConstant: Metric.connectorSize.width),
+            connector.heightAnchor.constraint(equalToConstant: Metric.connectorSize.height)
+        ])
+        return row
+    }
 
     func makeManageBookingCard() -> UIView {
-        return makeCard(icon: DoubleBookingSheetViewController.icon(["ic_calendar_18"], systemFallback: "calendar.badge.clock"),
+        return makeCard(mockImageName: "img-manage-booking-mock",
                         title: Copy.manageCardTitle,
                         row1: makeChecklistRow(number: 1, text: Copy.manageItem1),
                         row2: makeChecklistRow(number: 2, text: Copy.manageItem2))
@@ -509,15 +585,18 @@ private extension DoubleBookingSheetViewController {
     /// Android's XML keeps the dynamic `tvWaitlistNotifyHours` copy as item 1 and
     /// the static "first-come, first-served" line as item 2 - order preserved here.
     func makeWaitlistCard() -> UIView {
-        return makeCard(icon: DoubleBookingSheetViewController.icon(["ic_bell_18"], systemFallback: "bell.badge"),
+        return makeCard(mockImageName: "img-waitlist-mock",
                         title: Copy.waitlistCardTitle,
                         row1: makeChecklistRow(number: 1, label: waitlistNotifyLabel),
                         row2: makeChecklistRow(number: 2, text: Copy.waitlistItem2))
     }
 
-    /// One `bg_double_booking_card`-equivalent: icon tile + title, then the two
-    /// already-built numbered checklist rows, in the order given.
-    func makeCard(icon: UIImage?, title: String, row1: UIView, row2: UIView) -> UIView {
+    /// One `bg_double_booking_card`: text column (title + two numbered checklist
+    /// rows) on the left, a 112pt-wide dot-pattern + phone-mockup graphic column
+    /// on the right - matches Android's exact two-column card, no leading icon
+    /// tile (the card has no icon before its title, unlike the Confirm Slot sheet's
+    /// rows - an earlier iOS pass invented one that Android's XML doesn't have).
+    func makeCard(mockImageName: String, title: String, row1: UIView, row2: UIView) -> UIView {
         let card = GlassCardView(cornerRadius: Metric.cardCornerRadius)
         card.translatesAutoresizingMaskIntoConstraints = false
         card.fillColor = Palette.cardFill
@@ -525,8 +604,7 @@ private extension DoubleBookingSheetViewController {
         card.strokeColor = Palette.cardStroke
         card.strokeAlpha = Palette.cardStrokeAlpha
         card.showsSheen = false
-
-        let iconTile = makeIconTile(image: icon)
+        card.heightAnchor.constraint(greaterThanOrEqualToConstant: Metric.cardMinHeight).isActive = true
 
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -535,59 +613,64 @@ private extension DoubleBookingSheetViewController {
         titleLabel.numberOfLines = 1
         titleLabel.text = title
 
-        let headerRow = UIStackView(arrangedSubviews: [iconTile, titleLabel])
-        headerRow.translatesAutoresizingMaskIntoConstraints = false
-        headerRow.axis = .horizontal
-        headerRow.alignment = .center
-        headerRow.spacing = 10
+        let textStack = UIStackView(arrangedSubviews: [titleLabel, row1, row2])
+        textStack.translatesAutoresizingMaskIntoConstraints = false
+        textStack.axis = .vertical
+        textStack.alignment = .fill
+        textStack.spacing = 6
+        card.addSubview(textStack)
 
-        let stack = UIStackView(arrangedSubviews: [headerRow, row1, row2])
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.axis = .vertical
-        stack.alignment = .fill
-        stack.spacing = 8
-        card.addSubview(stack)
+        let graphicColumn = makeGraphicColumn(mockImageName: mockImageName)
+        card.addSubview(graphicColumn)
 
         NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: card.topAnchor, constant: Metric.cardPadding),
-            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: Metric.cardPadding),
-            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -Metric.cardPadding),
-            stack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -Metric.cardPadding)
+            textStack.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
+            textStack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -12),
+            textStack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 12),
+            textStack.trailingAnchor.constraint(equalTo: graphicColumn.leadingAnchor, constant: -4),
+
+            graphicColumn.topAnchor.constraint(equalTo: card.topAnchor),
+            graphicColumn.bottomAnchor.constraint(equalTo: card.bottomAnchor),
+            graphicColumn.trailingAnchor.constraint(equalTo: card.trailingAnchor),
+            graphicColumn.widthAnchor.constraint(equalToConstant: Metric.graphicColumnWidth)
         ])
         return card
     }
 
-    /// `location_icon_bg`-equivalent 38pt tile, reused from the Confirm Slot sheet's
-    /// visual language for the card's leading icon.
-    func makeIconTile(image: UIImage?) -> UIView {
-        let tile = GlassCardView(cornerRadius: 10)
-        tile.translatesAutoresizingMaskIntoConstraints = false
-        tile.fillColor = Palette.tileFill
-        tile.fillAlpha = 1.0
-        tile.strokeColor = UIColor(hex: "#101113")
-        tile.strokeAlpha = 1.0
-        tile.sheenOrigin = .topCenter
-        tile.sheenAlpha = 0.08
+    /// The card's right-hand 112pt column: the dot-pattern background filling the
+    /// full card height, with the phone-mockup illustration bottom-left aligned
+    /// over it (`layout_gravity="bottom|start"`, `marginStart="10dp"`).
+    func makeGraphicColumn(mockImageName: String) -> UIView {
+        let column = UIView()
+        column.translatesAutoresizingMaskIntoConstraints = false
+        column.clipsToBounds = true
 
-        let iconView = UIImageView(image: image?.withRenderingMode(.alwaysTemplate))
-        iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.tintColor = Palette.numberBadgeText
-        iconView.contentMode = .scaleAspectFit
-        tile.addSubview(iconView)
+        let dotsView = UIImageView(image: UIImage(named: "bg-double-booking-dots"))
+        dotsView.translatesAutoresizingMaskIntoConstraints = false
+        dotsView.contentMode = .scaleToFill
+        column.addSubview(dotsView)
+
+        let mockView = UIImageView(image: UIImage(named: mockImageName))
+        mockView.translatesAutoresizingMaskIntoConstraints = false
+        mockView.contentMode = .scaleAspectFit
+        column.addSubview(mockView)
 
         NSLayoutConstraint.activate([
-            tile.widthAnchor.constraint(equalToConstant: Metric.iconTileSide),
-            tile.heightAnchor.constraint(equalToConstant: Metric.iconTileSide),
-            iconView.centerXAnchor.constraint(equalTo: tile.centerXAnchor),
-            iconView.centerYAnchor.constraint(equalTo: tile.centerYAnchor),
-            iconView.widthAnchor.constraint(equalToConstant: Metric.rowIconSide),
-            iconView.heightAnchor.constraint(equalToConstant: Metric.rowIconSide)
+            dotsView.topAnchor.constraint(equalTo: column.topAnchor),
+            dotsView.leadingAnchor.constraint(equalTo: column.leadingAnchor),
+            dotsView.trailingAnchor.constraint(equalTo: column.trailingAnchor),
+            dotsView.bottomAnchor.constraint(equalTo: column.bottomAnchor),
+
+            mockView.widthAnchor.constraint(equalToConstant: Metric.mockSize.width),
+            mockView.heightAnchor.constraint(equalToConstant: Metric.mockSize.height),
+            mockView.bottomAnchor.constraint(equalTo: column.bottomAnchor),
+            mockView.leadingAnchor.constraint(equalTo: column.leadingAnchor, constant: 10)
         ])
-        return tile
+        return column
     }
 
-    /// `ic_number_1_badge`/`ic_number_2_badge` + body text, built from a plain
-    /// numbered circle (no bespoke badge assets available on iOS).
+    /// `ic_number_1_badge`/`ic_number_2_badge` (real rasterized assets, #F2EBC0
+    /// circle + #141514 numeral) + body text.
     func makeChecklistRow(number: Int, text: String) -> UIView {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -603,7 +686,13 @@ private extension DoubleBookingSheetViewController {
         label.textColor = Palette.itemText
         label.numberOfLines = 0
 
-        let badge = makeNumberBadge(number)
+        let badge = UIImageView(image: UIImage(named: "ic-double-booking-number-\(number)"))
+        badge.translatesAutoresizingMaskIntoConstraints = false
+        badge.contentMode = .scaleAspectFit
+        NSLayoutConstraint.activate([
+            badge.widthAnchor.constraint(equalToConstant: Metric.numberBadgeSide),
+            badge.heightAnchor.constraint(equalToConstant: Metric.numberBadgeSide)
+        ])
 
         let row = UIStackView(arrangedSubviews: [badge, label])
         row.translatesAutoresizingMaskIntoConstraints = false
@@ -611,30 +700,6 @@ private extension DoubleBookingSheetViewController {
         row.alignment = .top
         row.spacing = 6
         return row
-    }
-
-    func makeNumberBadge(_ number: Int) -> UIView {
-        let badge = UIView()
-        badge.translatesAutoresizingMaskIntoConstraints = false
-        badge.backgroundColor = Palette.numberBadgeFill
-        badge.layer.cornerRadius = Metric.numberBadgeSide / 2
-        badge.layer.masksToBounds = true
-
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = AppFont.semibold.size(9.0, familyName: familyFunnelSans)
-        label.textColor = Palette.numberBadgeText
-        label.textAlignment = .center
-        label.text = "\(number)"
-        badge.addSubview(label)
-
-        NSLayoutConstraint.activate([
-            badge.widthAnchor.constraint(equalToConstant: Metric.numberBadgeSide),
-            badge.heightAnchor.constraint(equalToConstant: Metric.numberBadgeSide),
-            label.centerXAnchor.constraint(equalTo: badge.centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: badge.centerYAnchor)
-        ])
-        return badge
     }
 
     // MARK: Buttons row
@@ -679,7 +744,9 @@ private extension DoubleBookingSheetViewController {
 private extension DoubleBookingSheetViewController {
 
     /// Same resolution order as `ConfirmSlotSheetViewController.icon(_:systemFallback:)`:
-    /// first bundled asset wins, a system symbol is the last resort.
+    /// first bundled asset wins, a system symbol is the last resort. Only the join
+    /// button's chevron still needs this - every other glyph in this sheet is now a
+    /// real bundled asset referenced directly by name.
     static func icon(_ names: [String], systemFallback: String? = nil) -> UIImage? {
         for name in names {
             if let image = UIImage(named: name) { return image }

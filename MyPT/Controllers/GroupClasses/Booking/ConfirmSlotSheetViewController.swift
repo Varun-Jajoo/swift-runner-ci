@@ -63,6 +63,17 @@ final class ConfirmSlotSheetViewController: CommonViewController {
     /// (it refreshes the detail screen behind the sheet before navigating away).
     var onBookingSucceeded: (() -> Void)?
 
+    /// Fires instead of navigating to Slot Confirmed when the book-class response
+    /// turns out to be a special-waitlist payload (`waitlist_type == "special"`) -
+    /// this sheet is only ever shown when class-detail's `will_special_waitlist`
+    /// pre-check read false, but that flag can go stale between the fetch and the
+    /// tap (e.g. the member booked something else elsewhere in the meantime), so
+    /// the response itself is still the source of truth. Mirrors the identical
+    /// post-hoc check `GroupTrainingDetailViewController.handleFreeBookingResponse()`
+    /// already does for the eager (pre-check-true) tap path - this sheet is the
+    /// other place a free booking gets POSTed from and needs the same fallback.
+    var onSpecialWaitlistTriggered: ((_ notifyHours: Int?) -> Void)?
+
     // MARK: Layout constants
 
     private enum Metric {
@@ -408,6 +419,15 @@ final class ConfirmSlotSheetViewController: CommonViewController {
             // Android calls `fetchClassDetail()` before navigating so the detail
             // screen behind the sheet comes back showing "BOOKED".
             onBookingSucceeded?()
+
+            if result.specialWaitlist?.isSpecial == true {
+                let notifyHours = result.specialWaitlist?.notificationWindowHours?.intValue
+                dismiss(animated: true) { [weak self] in
+                    self?.onSpecialWaitlistTriggered?(notifyHours)
+                }
+                return
+            }
+
             navigateToSlotConfirmed()
             return
         }
@@ -516,9 +536,11 @@ extension ConfirmSlotSheetViewController {
     @discardableResult
     static func present(from presenter: UIViewController,
                         input: ConfirmSlotSheetInput,
-                        onBookingSucceeded: (() -> Void)? = nil) -> ConfirmSlotSheetViewController {
+                        onBookingSucceeded: (() -> Void)? = nil,
+                        onSpecialWaitlistTriggered: ((_ notifyHours: Int?) -> Void)? = nil) -> ConfirmSlotSheetViewController {
         let controller = ConfirmSlotSheetViewController(input: input)
         controller.onBookingSucceeded = onBookingSucceeded
+        controller.onSpecialWaitlistTriggered = onSpecialWaitlistTriggered
         // Captured up front: for a sheet presentation UIKit reports the *container*
         // (nav/tab controller) as `presentingViewController`, and it goes `nil` the
         // instant dismissal starts — so the push target is resolved here, where the

@@ -752,17 +752,25 @@ final class GroupTrainingDetailViewController: CommonViewController {
 
         isFreeForUser = resolveIsFreeForUser(access: resolvedAccess, isMember: isMember)
 
-        if isFreeForUser {
-            priceLabel.text = "Free for members"
-        } else if resolvedAccess.lowercased() == "free" {
-            priceLabel.text = "FREE"
-        } else if !cleanPrice.isEmpty, cleanPrice != "0", cleanPrice != "0.00" {
-            priceLabel.text = "AED \(cleanPrice)"
-        } else {
-            priceLabel.text = ""
-        }
-
+        // Guarded: this used to run unconditionally AFTER applyPostBookingCta()
+        // above, silently overwriting "Your class is booked"/"You're on the
+        // waitlist" back to "Free for members"/price on every single class-detail
+        // refresh (matches an identical bug just fixed in Android's
+        // GroupTrainingDetailActivity.kt - populateUI()'s seeded path never had
+        // it, since there the price text is set BEFORE applyPostBookingCta()
+        // runs, so only whichever booking hadn't finished its live refresh yet
+        // ever showed the correct CTA).
         if !isAlreadyBooked && !isAlreadyWaitlisted {
+            if isFreeForUser {
+                priceLabel.text = "Free for members"
+            } else if resolvedAccess.lowercased() == "free" {
+                priceLabel.text = "FREE"
+            } else if !cleanPrice.isEmpty, cleanPrice != "0", cleanPrice != "0.00" {
+                priceLabel.text = "AED \(cleanPrice)"
+            } else {
+                priceLabel.text = ""
+            }
+
             updateProgressAndWaitlistState(booked: bookedCount, totalCapacity: totalCapacity)
         }
     }
@@ -1183,11 +1191,17 @@ final class GroupTrainingDetailViewController: CommonViewController {
         input.price = classPrice
         input.isFreeForUser = isFreeForUser
 
-        ConfirmSlotSheetViewController.present(from: self, input: input) { [weak self] in
+        ConfirmSlotSheetViewController.present(from: self, input: input, onBookingSucceeded: { [weak self] in
             // Android calls `fetchClassDetail()` right before it leaves for Slot
             // Confirmed, so this screen shows "BOOKED" when the user comes back.
             self?.fetchClassDetail()
-        }
+        }, onSpecialWaitlistTriggered: { [weak self] notifyHours in
+            // will_special_waitlist read false when this sheet was shown, but the
+            // booking response disagreed - show the double-booking sheet now
+            // instead of silently letting the normal confirm sheet's own success
+            // path treat this as an ordinary booking.
+            self?.presentDoubleBookingSheet(preCheck: false, notifyHours: notifyHours)
+        })
     }
 
     /// Expands / collapses the About copy. Expanding drops the line cap and takes
