@@ -654,25 +654,19 @@ private extension DoubleBookingSheetViewController {
         column.translatesAutoresizingMaskIntoConstraints = false
         column.clipsToBounds = true
 
-        let dotsView = UIImageView(image: UIImage(named: "bg-double-booking-dots"))
+        // A plain UIView painted via CALayer.contents, NOT a UIImageView.
+        // UIImageView carries the image's own intrinsic content size, and even
+        // with all 4 edges pinned (as this was), that size could still leak
+        // into resolving `card`'s otherwise-ambiguous height (only bounded by
+        // `>= cardMinHeight`, no upper bound) - which is what actually caused
+        // the cards to balloon to the dots image's native size instead of the
+        // text content's. A plain UIView has no intrinsic size at all, so
+        // there's nothing left that could do that.
+        let dotsView = UIView()
         dotsView.translatesAutoresizingMaskIntoConstraints = false
-        // Android's `fitXY` non-uniformly stretches too, but that source is a
-        // tileable vector drawable that hides it; this is a single rasterized
-        // PNG at one fixed aspect ratio, so the same stretch reads as visibly
-        // distorted (oval, not round) dots. `.scaleAspectFill` + the column's
-        // existing `clipsToBounds` keeps the dots round and crops overflow
-        // instead of warping them.
-        dotsView.contentMode = .scaleAspectFill
         dotsView.clipsToBounds = true
-        // All 4 edges are pinned below (required priority), fully determining
-        // this view's frame - dropping these to the minimum guarantees the
-        // image's own intrinsic size can never compete with those pins, even
-        // transiently, which would otherwise read as the column (and the
-        // card around it) growing taller than the text content calls for.
-        dotsView.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        dotsView.setContentHuggingPriority(.defaultLow, for: .vertical)
-        dotsView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        dotsView.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
+        dotsView.layer.contentsGravity = .resizeAspectFill
+        dotsView.layer.contents = UIImage(named: "bg-double-booking-dots")?.cgImage
         column.addSubview(dotsView)
 
         let mockView = UIImageView(image: UIImage(named: mockImageName))
