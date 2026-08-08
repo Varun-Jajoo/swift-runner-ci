@@ -23,6 +23,7 @@
 //
 
 import UIKit
+import CoreLocation
 
 final class GroupTrainingDetailViewController: CommonViewController {
 
@@ -1343,6 +1344,32 @@ final class GroupTrainingDetailViewController: CommonViewController {
             readMoreButton.setTitle(Copy.readMore, for: .normal)
             aboutLabel.numberOfLines = GroupTrainingDetailViewController.aboutCollapsedLineLimit
         }
+    }
+
+    // MARK: - Distance helper
+
+    private func updateDetailDistance(studioLat: Double, studioLng: Double, fallback: String) {
+        let trimmed = fallback.trimmingCharacters(in: .whitespacesAndNewlines)
+        let formattedFallback = trimmed.contains("away") ? trimmed : "\(trimmed) away"
+
+        let distStr: String
+        if studioLat != 0.0 && studioLng != 0.0 && lat != 0.0 && lng != 0.0 {
+            let userLoc = CLLocation(latitude: lat, longitude: lng)
+            let studioLoc = CLLocation(latitude: studioLat, longitude: studioLng)
+            let meters = userLoc.distance(from: studioLoc)
+            if meters < 1000 {
+                distStr = "\(Int(meters)) m away"
+            } else {
+                distStr = String(format: "%.1f km away", meters / 1000.0)
+            }
+        } else if !trimmed.isEmpty && !trimmed.hasPrefix("0.0") && trimmed.lowercased() != "away" {
+            distStr = formattedFallback
+        } else {
+            distStr = formattedFallback
+        }
+
+        locationDistanceLabel.text = distStr
+        currentDistance = distStr.replacingOccurrences(of: " away", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     // MARK: - Why-this-class-stands-out carousel indicator
