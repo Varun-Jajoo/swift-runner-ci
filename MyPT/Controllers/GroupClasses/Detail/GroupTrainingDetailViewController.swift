@@ -719,13 +719,20 @@ final class GroupTrainingDetailViewController: CommonViewController {
         waitlistCount = GroupClassCardFormatter.intValue(detail.waitlistCount, defaultValue: 0)
         willSpecialWaitlist = detail.willSpecialWaitlist ?? false
         specialWaitlistNotifyHours = GroupClassCardFormatter.intValue(detail.specialWaitlistNotifyHours, defaultValue: 3)
+        // Computed fresh here (not from `isFreeForUser`, which isn't recomputed
+        // from this response until further below) - the claim-open-spot screen
+        // only ever succeeds for a member this class is actually free for.
+        // Routing a paid/mixed-non-member user there anyway meant every tap on
+        // its Confirm button came back PAYMENT_REQUIRED - always a popup +
+        // redirect to payment, never a successful claim.
+        let freshIsFreeForUser = resolveIsFreeForUser(access: (detail.access ?? classAccess), isMember: detail.isMember ?? false)
         if !checkedSlotOpenRedirect {
             checkedSlotOpenRedirect = true
             // Excludes a member the free-booking spam guard would block: they
             // must never auto-land on the priority-claim race screen for this
             // class - only the double-booking sheet, via the willSpecialWaitlist
             // branch in ctaTapped().
-            if !isAlreadyBooked && remainingSeats > 0 && waitlistCount > 0 && !willSpecialWaitlist {
+            if !isAlreadyBooked && remainingSeats > 0 && waitlistCount > 0 && !willSpecialWaitlist && freshIsFreeForUser {
                 pushSlotOpen(time: effectiveTime)
             }
         }
@@ -817,8 +824,22 @@ final class GroupTrainingDetailViewController: CommonViewController {
     }
 
     @objc private func shareTapped() {
-        // Android's `btnShare` likewise has no click listener.
-        debugPrint("[GroupTrainingDetail] Share tapped — no destination defined on Android either.")
+        let rawTime = startEnd.isEmpty ? classTime : startEnd
+        let formattedTime = GroupClassCardFormatter.formatTimeForUI(rawTime)
+        var shareText = "Check out \(classTitle) on MyPT!\n"
+        if !formattedTime.isEmpty {
+            shareText += "Time: \(formattedTime)\n"
+        }
+        if !classLocation.isEmpty {
+            shareText += "Location: \(classLocation)"
+        }
+
+        let activityVC = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = shareButton
+            popover.sourceRect = shareButton.bounds
+        }
+        present(activityVC, animated: true)
     }
 
     @objc private func locationTapped() {
@@ -861,14 +882,19 @@ final class GroupTrainingDetailViewController: CommonViewController {
             return
         }
 
-        if remainingSeats > 0 && waitlistCount > 0 && !willSpecialWaitlist {
+        if remainingSeats > 0 && waitlistCount > 0 && !willSpecialWaitlist && isFreeForUser {
             // A spot is open but people are already waiting on it - this is the
             // contested-spot race, not a plain booking. Show the equal-chance
             // claim screen instead of the payment/booking sheet, for both a
             // new user and one already on the waitlist. Excludes a member the
             // free-booking spam guard would block - falls through to the
             // willSpecialWaitlist branch below instead, which shows the
-            // double-booking sheet.
+            // double-booking sheet. Also excludes anyone this class isn't
+            // actually free for (paid, or mixed and not an active member) -
+            // claim-open-spot only ever succeeds when free for this member, so
+            // routing them here otherwise meant Confirm always came back
+            // PAYMENT_REQUIRED (always a popup + redirect to payment) - falls
+            // through to the `!isFreeForUser` branch below instead.
             pushSlotOpen(time: dateTimeLabel.text ?? classTime)
             return
         }
@@ -911,11 +937,18 @@ final class GroupTrainingDetailViewController: CommonViewController {
         }
 
         if willSpecialWaitlist {
-            // Free path keeps Android's eager-create behaviour: no pre-check
-            // sheet here, just book immediately and show the double-booking
-            // sheet AFTER if the response confirms the spam guard triggered.
+            // class-detail already told us this tap will trigger the spam
+            // guard - show the double-booking sheet FIRST, same as the
+            // isWaitlistMode branch above, and only actually book if the
+            // member explicitly confirms inside it. (Previously booked
+            // eagerly on this outer tap - matching Android's own prior bug -
+            // so the sheet showed afterward as a no-op confirmation with
+            // nothing left to confirm, i.e. opening the sheet was what
+            // booked them, not tapping its confirm button.)
             guard requireLogin() else { return }
-            performFreeBooking()
+            presentDoubleBookingSheet(preCheck: true) { [weak self] in
+                self?.performFreeBooking()
+            }
             return
         }
 
@@ -1128,7 +1161,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
     /// Join button fires `joinWaitlist(skipSpecialSheetCheck: true)`.
     /// `preCheck == false` -> post-hoc mode: entry already exists server-side,
     /// the sheet's Join button just confirms and pushes Waitlist Confirmed.
-    private func presentDoubleBookingSheet(preCheck: Bool, notifyHours: Int? = nil) {
+    private func presentDoubleBookingSheet(preCheck: Bool, notifyHours: Int? = nil, onConfirm: (() -> Void)? = nil) {
         var input = DoubleBookingSheetInput()
         input.classTitle = classTitle
         input.classTime = dateTimeLabel.text ?? classTime
@@ -1139,7 +1172,11 @@ final class GroupTrainingDetailViewController: CommonViewController {
 
         if preCheck {
             DoubleBookingSheetViewController.present(from: self, input: input) { [weak self] in
-                self?.joinWaitlist(skipSpecialSheetCheck: true)
+                if let onConfirm = onConfirm {
+                    onConfirm()
+                } else {
+                    self?.joinWaitlist(skipSpecialSheetCheck: true)
+                }
             }
         } else {
             DoubleBookingSheetViewController.present(from: self, input: input)
@@ -1508,12 +1545,14 @@ private extension GroupTrainingDetailViewController {
         column.setCustomSpacing(8, after: moreTitle)
 
         let cancellationRow = makePolicyRow(icon: GroupTrainingDetailViewController.icon(["ic_person_age_18"], systemFallback: "person.fill"),
-                                            title: "Cancellation policy")
+                                            title: "Cancellation policy",
+                                            action: #selector(cancellationPolicyRowTapped))
         column.addArrangedSubview(cancellationRow)
         column.setCustomSpacing(8, after: cancellationRow)
 
         let termsRow = makePolicyRow(icon: GroupTrainingDetailViewController.icon(["ic_clock_18"], systemFallback: "clock.fill"),
-                                     title: "Terms and conditions")
+                                     title: "Terms and conditions",
+                                     action: #selector(termsAndConditionsRowTapped))
         column.addArrangedSubview(termsRow)
 
         return column
@@ -2057,13 +2096,16 @@ private extension GroupTrainingDetailViewController {
     }
 
     /// "Cancellation policy" / "Terms and conditions": icon tile + title + chevron,
-    /// with a hairline underneath. Neither row has a destination on Android.
-    func makePolicyRow(icon: UIImage?, title: String) -> UIView {
+    /// with a hairline underneath. Previously had no destination on either
+    /// platform - `action` now opens the matching bottom sheet.
+    func makePolicyRow(icon: UIImage?, title: String, action: Selector) -> UIView {
         let container = UIStackView()
         container.translatesAutoresizingMaskIntoConstraints = false
         container.axis = .vertical
         container.alignment = .fill
         container.spacing = 0
+        container.isUserInteractionEnabled = true
+        container.addGestureRecognizer(UITapGestureRecognizer(target: self, action: action))
 
         let iconTile = makeIconTile(image: icon, iconSide: 18)
 
@@ -2089,6 +2131,17 @@ private extension GroupTrainingDetailViewController {
         container.addArrangedSubview(row)
         container.addArrangedSubview(makeHairline(color: Palette.moreHairline))
         return container
+    }
+
+    /// `isFreeForUser` is the same free/paid resolution already driving this
+    /// screen's button label and CTA routing - reused here to pick which doc
+    /// variant to fetch (see `CancellationPolicySheetViewController.isFree`).
+    @objc private func cancellationPolicyRowTapped() {
+        CancellationPolicySheetViewController.present(from: self, isFree: isFreeForUser)
+    }
+
+    @objc private func termsAndConditionsRowTapped() {
+        TermsAndConditionsSheetViewController.present(from: self, isFree: isFreeForUser)
     }
 
     // MARK: Waitlist banner + sticky bottom bar

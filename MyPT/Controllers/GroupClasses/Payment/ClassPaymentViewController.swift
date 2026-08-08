@@ -258,6 +258,14 @@ final class ClassPaymentViewController: CommonViewController {
         isTermsChecked.toggle()
     }
 
+    /// This screen is unreachable for a free booking (paid classes route here
+    /// directly; free ones go through `ConfirmSlotSheetViewController` instead),
+    /// so the paid variant is deterministically the only correct one - same
+    /// reasoning as Android's identical call site.
+    @objc private func showTermsSheetTapped() {
+        TermsAndConditionsSheetViewController.present(from: self, isFree: false)
+    }
+
     @objc private func backTapped() {
         navigationController?.popViewController(animated: true)
     }
@@ -1128,6 +1136,16 @@ private extension ClassPaymentViewController {
         let tap = UITapGestureRecognizer(target: self, action: #selector(termsTapped))
         row.addGestureRecognizer(tap)
         row.isUserInteractionEnabled = true
+
+        // The row's own tap only ever toggled the checkbox - the "Terms &
+        // Conditions" text itself had no way to actually show the terms.
+        // Giving the label its own gesture and making the row's require it to
+        // fail first means tapping the text opens the sheet, tapping anywhere
+        // else on the row (or the checkbox) still just toggles agreement.
+        label.isUserInteractionEnabled = true
+        let showTermsTap = UITapGestureRecognizer(target: self, action: #selector(showTermsSheetTapped))
+        label.addGestureRecognizer(showTermsTap)
+        tap.require(toFail: showTermsTap)
 
         NSLayoutConstraint.activate([
             termsCheckbox.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 12),

@@ -290,6 +290,35 @@ final class SlotOpenViewController: CommonViewController {
         UpcomingClassVM.classDetailsApi(inputParams: params, isShowLoader: false) { [weak self] result in
             guard let self = self, let detail = result?.data else { return }
             DispatchQueue.main.async {
+                // This screen is reachable directly from the "spot available" push
+                // notification (`AppDelegate.routeNotificationTap`) - a cold tap
+                // that never goes through GroupTrainingDetailViewController's own
+                // willSpecialWaitlist gate at all. A member the free-booking spam
+                // guard would block must NEVER see the priority-claim race screen,
+                // full stop - redirect to the normal detail screen instead (in
+                // place, so there's no back-button path to this screen either),
+                // where tapping the CTA correctly shows the double-booking sheet.
+                if detail.willSpecialWaitlist == true {
+                    self.redirectToDetailScreen(detail: detail)
+                    return
+                }
+
+                // Same reachable-directly-from-push problem as above:
+                // claim-open-spot only ever succeeds when this spot is actually
+                // free for the current member (strictly 'free', or 'mixed' +
+                // active membership). Without this check, a non-member (or a
+                // 'paid' class) landing here via push saw a claim screen that
+                // ALWAYS came back PAYMENT_REQUIRED on Confirm - a popup +
+                // redirect to payment every single time. Redirect to the detail
+                // screen instead, which routes straight to payment itself.
+                let access = (detail.access ?? "").lowercased()
+                let isMember = detail.isMember ?? false
+                let isFreeForUser = access == "free" ? true : (access == "paid" ? false : isMember)
+                if !isFreeForUser {
+                    self.redirectToDetailScreen(detail: detail)
+                    return
+                }
+
                 if let name = detail.className, !name.isEmpty { self.classTitleLabel.text = name }
                 if let time = detail.time, !time.isEmpty { self.classDateTimeLabel.text = time }
                 if let location = detail.location, !location.isEmpty { self.locationTitleLabel.text = location }
@@ -305,6 +334,32 @@ final class SlotOpenViewController: CommonViewController {
                 if let price = detail.price, !price.isEmpty { self.classPrice = price }
             }
         }
+    }
+
+    /// Replaces this screen in place in the navigation stack (not just a push on
+    /// top) so there's no back-button path that returns to Slot Open either.
+    private func redirectToDetailScreen(detail: ClassDetailsModel) {
+        guard let navigationController = self.navigationController else { return }
+
+        var tapThrough = GroupClassTapThroughData()
+        tapThrough.scheduleId = scheduleId
+        tapThrough.title = detail.className?.isEmpty == false ? (detail.className ?? classTitle) : classTitle
+        tapThrough.time = detail.time?.isEmpty == false ? (detail.time ?? classTime) : classTime
+        tapThrough.location = detail.location?.isEmpty == false ? (detail.location ?? classLocation) : classLocation
+        tapThrough.userLat = latitude
+        tapThrough.userLng = longitude
+
+        let detailVC = GroupTrainingDetailViewController()
+        detailVC.tapThrough = tapThrough
+        detailVC.hidesBottomBarWhenPushed = true
+
+        var stack = navigationController.viewControllers
+        if let index = stack.firstIndex(of: self) {
+            stack[index] = detailVC
+        } else {
+            stack.append(detailVC)
+        }
+        navigationController.setViewControllers(stack, animated: true)
     }
 
     private func applySlotCounts(remainingSeats: Int, waitlistCount: Int) {

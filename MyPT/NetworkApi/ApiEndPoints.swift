@@ -96,6 +96,13 @@ enum ApiEndPoint: String {
     case book_class                     =  "api/book-class"
     case join_waitlist                  =  "api/join-waitlist"
     case claim_open_spot                =  "api/claim-open-spot"
+    // Free and paid classes show DIFFERENT cancellation/terms text - same
+    // free/paid split every other GX booking rule already uses, just applied
+    // to which doc `type` gets requested.
+    case get_gx_cancellation_policy_free = "api/get-legal-document/gx_cancellation_policy_free"
+    case get_gx_cancellation_policy_paid = "api/get-legal-document/gx_cancellation_policy_paid"
+    case get_gx_terms_free              =  "api/get-legal-document/gx_terms_free"
+    case get_gx_terms_paid              =  "api/get-legal-document/gx_terms_paid"
 //    case ccaavenue_payment              =  "api/pay"
     case ccaavenue_payment              =  "api/payment/session"
     /// Raw-HTML CCAvenue gateway page for group-class card payments — Android's

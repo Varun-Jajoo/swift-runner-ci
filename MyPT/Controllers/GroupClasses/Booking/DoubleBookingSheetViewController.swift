@@ -88,7 +88,9 @@ final class DoubleBookingSheetViewController: CommonViewController {
         static let dividerLabel = UIColor(hex: "#FAFAFA").withAlphaComponent(0.55) // #8CFAFAFA
         static let dividerLine = UIColor.white.withAlphaComponent(0.10)           // #1AFFFFFF
         static let heroTileFill = UIColor(hex: "#0A0A0A")
-        static let cardFill = UIColor(hex: "#131416")
+        // `bg_double_booking_card.xml`'s own solid color - NOT the same as the
+        // sheet's own #131416 background (easy to mix up, one hex digit apart).
+        static let cardFill = UIColor(hex: "#131615")
         // GlassCardView applies `strokeAlpha` via `.withAlphaComponent`, which
         // REPLACES a color's alpha rather than multiplying it - this must stay a
         // fully opaque base color, with the 0.30 (Android's #4D999999) applied via
@@ -454,6 +456,11 @@ private extension DoubleBookingSheetViewController {
         closeButton.imageView?.contentMode = .scaleAspectFit
         closeButton.contentHorizontalAlignment = .fill
         closeButton.contentVerticalAlignment = .fill
+        // Android's ImageView carries `android:padding="2dp"` on top of its 24dp
+        // box, so the glyph itself renders at ~20dp - without this the glyph
+        // fills the full 24pt box edge-to-edge and reads visibly larger/more
+        // cramped than Android's.
+        closeButton.imageEdgeInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         container.addSubview(closeButton)
 
@@ -518,15 +525,17 @@ private extension DoubleBookingSheetViewController {
         return label
     }
 
+    /// Android fades these in from each outer edge toward the label
+    /// (`bg_gradient_divider_line` / `_reversed`: `#05FFFFFF` -> `#4DFFFFFF` and
+    /// reversed) rather than using a flat line - a plain solid color here was a
+    /// visible miss against the 1:1 port.
     func makeSectionDividerRow() -> UIView {
-        let leftLine = UIView()
+        let leftLine = GradientLineView(startAlpha: 0.02, endAlpha: 0.30)
         leftLine.translatesAutoresizingMaskIntoConstraints = false
-        leftLine.backgroundColor = Palette.dividerLine
         leftLine.heightAnchor.constraint(equalToConstant: 1).isActive = true
 
-        let rightLine = UIView()
+        let rightLine = GradientLineView(startAlpha: 0.30, endAlpha: 0.02)
         rightLine.translatesAutoresizingMaskIntoConstraints = false
-        rightLine.backgroundColor = Palette.dividerLine
         rightLine.heightAnchor.constraint(equalToConstant: 1).isActive = true
 
         let label = UILabel()
@@ -736,6 +745,32 @@ private extension DoubleBookingSheetViewController {
         row.distribution = .fillEqually
         row.spacing = 10
         return row
+    }
+}
+
+// MARK: - Gradient divider line
+
+/// Horizontal left-to-right fade, ported from the two `bg_gradient_divider_line`
+/// shape drawables (both white, differing only in which end is more opaque).
+private final class GradientLineView: UIView {
+    private let gradientLayer = CAGradientLayer()
+
+    init(startAlpha: CGFloat, endAlpha: CGFloat) {
+        super.init(frame: .zero)
+        gradientLayer.colors = [
+            UIColor.white.withAlphaComponent(startAlpha).cgColor,
+            UIColor.white.withAlphaComponent(endAlpha).cgColor
+        ]
+        gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
+        gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
+        layer.addSublayer(gradientLayer)
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        gradientLayer.frame = bounds
     }
 }
 

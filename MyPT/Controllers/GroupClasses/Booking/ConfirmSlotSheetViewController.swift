@@ -982,7 +982,20 @@ private extension ConfirmSlotSheetViewController {
         label.numberOfLines = 0
         label.textAlignment = .center
         label.attributedText = ConfirmSlotSheetViewController.policyText()
+        // Was purely decorative colored text with no tap action. The label is
+        // one short centered line, so making the whole thing tappable (rather
+        // than a precise tap-range limited to just the "Cancellation Policy"
+        // span) is indistinguishable to the user.
+        label.isUserInteractionEnabled = true
+        label.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(policyLabelTapped)))
         return label
+    }
+
+    @objc private func policyLabelTapped() {
+        // This sheet only ever shows for a free booking (paid classes route
+        // straight to `ClassPaymentViewController` instead) - deterministically
+        // the free variant, same reasoning as Android's identical call site.
+        CancellationPolicySheetViewController.present(from: self, isFree: true)
     }
 
     // MARK: CTA
