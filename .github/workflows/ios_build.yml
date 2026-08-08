@@ -23,15 +23,22 @@ jobs:
 
       - name: Resolve Swift Package Dependencies
         run: |
-          xcodebuild -resolvePackageDependencies -project MyPT.xcodeproj
+          xcodebuild -resolvePackageDependencies \
+            -project MyPT.xcodeproj \
+            -skipPackagePluginValidation \
+            -skipMacroValidation
 
       - name: Build iOS App Binary
         run: |
           xcodebuild -project MyPT.xcodeproj \
             -scheme MyPT \
-            -destination 'generic/platform=iOS Simulator' \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
             -configuration Debug \
             -derivedDataPath ./build \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             clean build
 
@@ -39,4 +46,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: MyPT-iOS-App
-          path: ./build/Build/Products/Debug-iphonesimulator/MyPT.app
+          path: ./build/Build/Products/Debug-iphonesimulator/*.app
+          if-no-files-found: warn
