@@ -30,6 +30,7 @@ jobs:
 
       - name: Build iOS App Binary
         run: |
+          set -o pipefail
           xcodebuild -project MyPT.xcodeproj \
             -scheme MyPT \
             -destination 'platform=iOS Simulator,name=iPhone 16' \
@@ -40,7 +41,13 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
-            clean build
+            build 2>&1 | tee xcodebuild.log
+
+      - name: Dump Compiler Errors on Failure
+        if: failure()
+        run: |
+          echo "=== XCODEBUILD COMPILER ERRORS ==="
+          grep -E "(error:|fatal error:|\*\* BUILD FAILED \*\*)" xcodebuild.log || cat xcodebuild.log | tail -n 150
 
       - name: Upload Built App Artifact
         uses: actions/upload-artifact@v4
