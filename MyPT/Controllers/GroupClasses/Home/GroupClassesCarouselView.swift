@@ -124,23 +124,19 @@ final class GroupClassesCarouselView: UIView {
     private static let cardSpacing: CGFloat = 10
     private static let carouselHeight: CGFloat = 328
     private static let sectionHorizontalInset: CGFloat = 16
-    // Android's `groupClassesSection` FrameLayout: a full-bleed banner
-    // (`group_classes_bg`) with the carousel/dots/button bottom-aligned inside a
-    // 20dp-bottom-padded column, leaving the top of the banner exposed.
-    //
-    // Android hard-codes a fixed section height (780dp, up from 620dp) and anchors
-    // the banner image at its own natural size to the top rather than stretching it
-    // to fill - so on any device that isn't exactly as wide as the artwork, a solid
-    // fill color shows below the image instead of a distorted stretch. Deriving the
-    // height from the source image's own aspect ratio instead keeps the whole
-    // banner visible, unstretched and identically framed at every resolution, with
-    // no separate fill color needed. This ratio must track the artwork's actual
-    // pixel dimensions - it was re-exported at 1290×2235 (was 430×745), so this
-    // constant must be updated again if the asset is ever swapped again.
+    // Android's `groupClassesSection` FrameLayout: fixed 780dp height (ported 1:1
+    // as points, matching this file's existing dp->pt convention), `#32615C`
+    // background fill, and the banner image (`match_parent` width / `wrap_content`
+    // height / `fitStart` / `gravity="top"`, i.e. scaled to the full section width,
+    // preserving its own aspect ratio, anchored to the top) - the carousel/dots/
+    // button column sits bottom-aligned inside a 20dp-bottom-padded area on top of
+    // whichever is taller, the image or that column.
+    private static let sectionHeight: CGFloat = 780
+    // Must track the artwork's actual pixel dimensions - it was re-exported at
+    // 1290×2235 (was 430×745), so this needs updating again if the asset changes.
     private static let bannerAspectRatio: CGFloat = 2235.0 / 1290.0
     private static let sectionBottomInset: CGFloat = 20
-    /// Floor for very narrow devices, so the bottom-aligned column always fits.
-    private static let minimumSectionHeight: CGFloat = 560
+    private static let sectionFill = UIColor(hex: "#32615C")
 
     /// Fired when a card is tapped, with the fully-derived tap-through payload.
     var onSelectClass: ((GroupClassTapThroughData) -> Void)?
@@ -192,12 +188,12 @@ final class GroupClassesCarouselView: UIView {
     // MARK: Setup
 
     private func setupViews() {
-        backgroundColor = .clear
+        backgroundColor = GroupClassesCarouselView.sectionFill
         clipsToBounds = true
 
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
         backgroundView.image = UIImage(named: "group-classes-bg")
-        backgroundView.contentMode = .scaleToFill
+        backgroundView.contentMode = .scaleAspectFit
         backgroundView.clipsToBounds = true
         addSubview(backgroundView)
 
@@ -266,24 +262,22 @@ final class GroupClassesCarouselView: UIView {
         contentStack.setCustomSpacing(16, after: dotsRow)
         addSubview(contentStack)
 
-        // Height tracks the section's own width at the banner's aspect ratio, so
-        // the artwork is framed the same way on every screen size (see the note
-        // on `bannerAspectRatio`).
-        let aspectHeight = heightAnchor.constraint(equalTo: widthAnchor,
-                                                  multiplier: GroupClassesCarouselView.bannerAspectRatio)
-        aspectHeight.priority = .defaultHigh
-
         NSLayoutConstraint.activate([
-            aspectHeight,
-            heightAnchor.constraint(greaterThanOrEqualToConstant: GroupClassesCarouselView.minimumSectionHeight),
+            heightAnchor.constraint(equalToConstant: GroupClassesCarouselView.sectionHeight),
 
+            // Top-anchored, full width, height derived from the artwork's own
+            // aspect ratio (no bottom pin) - matches Android's `wrap_content`
+            // height / `fitStart` / `gravity="top"` image scaled to the section's
+            // full width. Whatever the fixed 780pt section doesn't cover shows
+            // the `#32615C` fill instead of a distorted stretch.
             backgroundView.topAnchor.constraint(equalTo: topAnchor),
             backgroundView.leadingAnchor.constraint(equalTo: leadingAnchor),
             backgroundView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            backgroundView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            backgroundView.heightAnchor.constraint(equalTo: backgroundView.widthAnchor,
+                                                   multiplier: GroupClassesCarouselView.bannerAspectRatio),
 
-            // Bottom-aligned only (no top pin): the banner image fills the fixed
-            // 620pt section and the content floats near its bottom edge.
+            // Bottom-aligned only (no top pin): the content floats near the
+            // fixed section's bottom edge, on top of the banner/fill behind it.
             contentStack.leadingAnchor.constraint(equalTo: leadingAnchor),
             contentStack.trailingAnchor.constraint(equalTo: trailingAnchor),
             contentStack.bottomAnchor.constraint(equalTo: bottomAnchor,

@@ -658,6 +658,7 @@ private extension ConfirmSlotSheetViewController {
         closeButton.setImage(ConfirmSlotSheetViewController.icon(["ic_close_x_34"], systemFallback: "xmark")?
             .withRenderingMode(.alwaysTemplate), for: .normal)
         closeButton.tintColor = Palette.title
+        closeButton.accessibilityLabel = "Close"
         closeButton.imageView?.contentMode = .scaleAspectFit
         // A `UIButton` normally sizes its image view to the image's own intrinsic
         // size, not the button's bounds — with a small source glyph that renders

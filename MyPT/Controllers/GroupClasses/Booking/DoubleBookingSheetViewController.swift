@@ -441,6 +441,7 @@ private extension DoubleBookingSheetViewController {
         closeButton.setImage(DoubleBookingSheetViewController.icon(["ic_close_24", "ic_close_x_34"], systemFallback: "xmark")?
             .withRenderingMode(.alwaysTemplate), for: .normal)
         closeButton.tintColor = Palette.title
+        closeButton.accessibilityLabel = "Close"
         closeButton.imageView?.contentMode = .scaleAspectFit
         closeButton.contentHorizontalAlignment = .fill
         closeButton.contentVerticalAlignment = .fill

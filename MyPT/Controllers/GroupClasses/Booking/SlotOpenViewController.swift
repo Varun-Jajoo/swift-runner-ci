@@ -109,6 +109,9 @@ final class SlotOpenViewController: CommonViewController {
     var seedWaitlistCount: Int?
     var latitude: Double = GroupClassCardFormatter.fallbackLatitude
     var longitude: Double = GroupClassCardFormatter.fallbackLongitude
+    /// From class-detail's `price` - only needed for the PAYMENT_REQUIRED
+    /// redirect (a paid/mixed class's open spot can't be claimed for free).
+    private var classPrice: String = ""
 
     /// Fires when the claim succeeds - the caller pushes Slot Confirmed.
     var onClaimed: ((_ classTitle: String, _ time: String, _ location: String, _ trainerName: String) -> Void)?
@@ -298,6 +301,8 @@ final class SlotOpenViewController: CommonViewController {
                 let remainingSeats = max(1, capacity - booked)
                 let waitlistCount = GroupClassCardFormatter.intValue(detail.waitlistCount, defaultValue: 5)
                 self.applySlotCounts(remainingSeats: remainingSeats, waitlistCount: waitlistCount)
+
+                if let price = detail.price, !price.isEmpty { self.classPrice = price }
             }
         }
     }
@@ -372,6 +377,25 @@ final class SlotOpenViewController: CommonViewController {
             controller.daysRemaining = result.blacklistDetail?.daysRemaining?.value ?? "6"
             controller.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(controller, animated: true)
+            return
+        }
+
+        if result.code == "PAYMENT_REQUIRED" {
+            // This open spot is on a paid/mixed class this member isn't covered
+            // for free - route to payment instead of leaving them stuck on a
+            // claim screen that can never succeed for them.
+            AlertHelper.shared.showCustomeAlert(title: "", message: result.msg ?? "This class requires payment.", actions: ["OK"]) { [weak self] _ in
+                guard let self = self else { return }
+                let controller = ClassPaymentViewController()
+                controller.scheduleId = self.scheduleId
+                controller.classTitle = self.classTitleLabel.text ?? self.classTitle
+                controller.classTime = self.classDateTimeLabel.text ?? self.classTime
+                controller.classLocation = self.locationTitleLabel.text ?? self.classLocation
+                controller.trainerName = self.trainerName
+                controller.classPrice = (!self.classPrice.isEmpty && self.classPrice != "0") ? self.classPrice : "50.00"
+                controller.hidesBottomBarWhenPushed = true
+                self.navigationController?.pushViewController(controller, animated: true)
+            }
             return
         }
 

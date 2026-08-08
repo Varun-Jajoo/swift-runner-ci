@@ -721,7 +721,11 @@ final class GroupTrainingDetailViewController: CommonViewController {
         specialWaitlistNotifyHours = GroupClassCardFormatter.intValue(detail.specialWaitlistNotifyHours, defaultValue: 3)
         if !checkedSlotOpenRedirect {
             checkedSlotOpenRedirect = true
-            if !isAlreadyBooked && remainingSeats > 0 && waitlistCount > 0 {
+            // Excludes a member the free-booking spam guard would block: they
+            // must never auto-land on the priority-claim race screen for this
+            // class - only the double-booking sheet, via the willSpecialWaitlist
+            // branch in ctaTapped().
+            if !isAlreadyBooked && remainingSeats > 0 && waitlistCount > 0 && !willSpecialWaitlist {
                 pushSlotOpen(time: effectiveTime)
             }
         }
@@ -849,11 +853,14 @@ final class GroupTrainingDetailViewController: CommonViewController {
             return
         }
 
-        if remainingSeats > 0 && waitlistCount > 0 {
+        if remainingSeats > 0 && waitlistCount > 0 && !willSpecialWaitlist {
             // A spot is open but people are already waiting on it - this is the
             // contested-spot race, not a plain booking. Show the equal-chance
             // claim screen instead of the payment/booking sheet, for both a
-            // new user and one already on the waitlist.
+            // new user and one already on the waitlist. Excludes a member the
+            // free-booking spam guard would block - falls through to the
+            // willSpecialWaitlist branch below instead, which shows the
+            // double-booking sheet.
             pushSlotOpen(time: dateTimeLabel.text ?? classTime)
             return
         }
