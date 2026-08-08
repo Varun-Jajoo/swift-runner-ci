@@ -3,18 +3,7 @@
 //  MyPT
 //
 //  "Terms & Condition" bottom sheet for group (GX) classes — numbered
-//  sections (bold title + gray paragraph), no icon, unlike the Cancellation
-//  Policy checklist sheet. Backed by the same `legal_documents` /
-//  `content_json_en` mechanism (see `CancellationPolicySheetViewController`
-//  for the shared rationale), under `type: gx_terms_free` / `gx_terms_paid`.
-//
-//  Layout spacing here is a direct port of the Figma redline given for this
-//  screen (handle -> 31pt -> title -> 19.44pt -> divider -> 26.44pt -> section 1
-//  -> 5pt -> body -> 26.45pt -> section 2 -> ...), not approximated like
-//  Cancellation Policy's card colors were.
-//
-//  Android reference: `GroupTrainingDetailActivity.showTermsAndConditionsBottomSheet()`
-//  / `dialog_terms_conditions_bottom_sheet.xml` / `item_terms_conditions_row.xml`.
+//  sections (bold title + gray paragraph) with "OKAY, GOT IT" action button.
 //
 
 import UIKit
@@ -53,12 +42,13 @@ final class TermsAndConditionsSheetViewController: CommonViewController {
         static let horizontalInset: CGFloat = 20
         static let handleSize = CGSize(width: 64, height: 5)
         static let closeButtonSide: CGFloat = 24
-        static let handleToTitle: CGFloat = 31
-        static let titleToDivider: CGFloat = 19.44
-        static let dividerToItems: CGFloat = 26.44
-        static let itemSpacing: CGFloat = 26.44
-        static let titleToBody: CGFloat = 5
+        static let handleToTitle: CGFloat = 20
+        static let titleToDivider: CGFloat = 16
+        static let dividerToItems: CGFloat = 16
+        static let itemSpacing: CGFloat = 16
+        static let titleToBody: CGFloat = 4
         static let sheetCornerRadius: CGFloat = 20
+        static let buttonHeight: CGFloat = 48
     }
 
     private enum Palette {
@@ -68,14 +58,15 @@ final class TermsAndConditionsSheetViewController: CommonViewController {
         static let divider = UIColor.white.withAlphaComponent(0.10)
         static let itemTitle = UIColor.white
         static let itemDescription = UIColor(hex: "#AAAAAA")
+        static let btnBg = UIColor(hex: "#F2EBC0")
+        static let btnText = UIColor(hex: "#141514")
     }
 
     private enum Copy {
-        static let fallbackTitle = "Terms & Condition"
+        static let fallbackTitle = "Terms & Conditions"
+        static let okayGotIt = "OKAY, GOT IT"
     }
 
-    /// The exact content seeded on the backend for `gx_terms_free`/`_paid` -
-    /// shown immediately on open, before the live fetch resolves.
     private static let defaultItems: [GxTermsItem] = [
         GxTermsItem(title: "1. Booking & Payment", description: "All bookings are confirmed only upon successful payment. Prices are inclusive of VAT where applicable. MyPT reserves the right to update pricing with 7 days notice."),
         GxTermsItem(title: "2. Class Participation", description: "Participants must be 16 years or older unless otherwise stated. Please inform your trainer of any injuries before the session begins.")
@@ -85,10 +76,9 @@ final class TermsAndConditionsSheetViewController: CommonViewController {
     private let contentStack = UIStackView()
     private let titleLabel = UILabel()
     private let itemsStack = UIStackView()
+    private let okayButton = UIButton(type: .system)
 
     private var resolvedSheetHeight: CGFloat = 0
-
-    /// Same free/paid split as `CancellationPolicySheetViewController.isFree`.
     private var isFree: Bool = true
 
     override var preferredStatusBarStyle: UIStatusBarStyle { return .lightContent }
@@ -99,8 +89,6 @@ final class TermsAndConditionsSheetViewController: CommonViewController {
         modalPresentationStyle = .pageSheet
         buildLayout()
         configureSheetPresentation()
-        // Same "show the seeded default immediately, replace with live data
-        // if it arrives" fix as CancellationPolicySheetViewController.
         populate(title: nil, items: TermsAndConditionsSheetViewController.defaultItems)
         fetchTerms()
     }
@@ -131,9 +119,9 @@ final class TermsAndConditionsSheetViewController: CommonViewController {
                     identifier: UISheetPresentationController.Detent.Identifier("termsConditionsContent")
                 ) { [weak self] context in
                     guard let self = self, self.resolvedSheetHeight > 0 else {
-                        return context.maximumDetentValue
+                        return context.maximumDetentValue * 0.75
                     }
-                    return min(self.resolvedSheetHeight, context.maximumDetentValue)
+                    return min(self.resolvedSheetHeight, context.maximumDetentValue * 0.85)
                 }
                 sheet.detents = [detent]
             } else {
@@ -153,7 +141,7 @@ final class TermsAndConditionsSheetViewController: CommonViewController {
             verticalFittingPriority: .fittingSizeLevel
         ).height
 
-        let total = ceil(contentHeight + view.safeAreaInsets.bottom)
+        let total = ceil(contentHeight + 16)
         guard total > 0, abs(total - resolvedSheetHeight) > 0.5 else { return }
 
         resolvedSheetHeight = total
@@ -184,11 +172,12 @@ final class TermsAndConditionsSheetViewController: CommonViewController {
             titleLabel.text = title
         }
 
+        let displayItems = items.isEmpty ? TermsAndConditionsSheetViewController.defaultItems : items
         itemsStack.arrangedSubviews.forEach {
             itemsStack.removeArrangedSubview($0)
             $0.removeFromSuperview()
         }
-        for item in items {
+        for item in displayItems {
             itemsStack.addArrangedSubview(makeItemBlock(item))
         }
 
@@ -220,7 +209,7 @@ private extension TermsAndConditionsSheetViewController {
         contentStack.isLayoutMarginsRelativeArrangement = true
         contentStack.layoutMargins = UIEdgeInsets(top: 12,
                                                   left: Metric.horizontalInset,
-                                                  bottom: 20,
+                                                  bottom: 16,
                                                   right: Metric.horizontalInset)
         scrollView.addSubview(contentStack)
 
@@ -228,7 +217,7 @@ private extension TermsAndConditionsSheetViewController {
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
             contentStack.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
             contentStack.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
@@ -257,6 +246,26 @@ private extension TermsAndConditionsSheetViewController {
         itemsStack.spacing = Metric.itemSpacing
         contentStack.addArrangedSubview(itemsStack)
         contentStack.setCustomSpacing(Metric.dividerToItems, after: divider)
+
+        let bottomDivider = UIView()
+        bottomDivider.translatesAutoresizingMaskIntoConstraints = false
+        bottomDivider.backgroundColor = Palette.divider
+        bottomDivider.heightAnchor.constraint(equalToConstant: 1).isActive = true
+
+        okayButton.translatesAutoresizingMaskIntoConstraints = false
+        okayButton.setTitle(Copy.okayGotIt, for: .normal)
+        okayButton.setTitleColor(Palette.btnText, for: .normal)
+        okayButton.titleLabel?.font = AppFont.bold.size(14.0, familyName: familyFunnelSans)
+        okayButton.backgroundColor = Palette.btnBg
+        okayButton.layer.cornerRadius = 8
+        okayButton.layer.masksToBounds = true
+        okayButton.heightAnchor.constraint(equalToConstant: Metric.buttonHeight).isActive = true
+        okayButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+
+        contentStack.setCustomSpacing(16, after: itemsStack)
+        contentStack.addArrangedSubview(bottomDivider)
+        contentStack.setCustomSpacing(16, after: bottomDivider)
+        contentStack.addArrangedSubview(okayButton)
     }
 
     func makeHandleRow() -> UIView {
@@ -315,9 +324,6 @@ private extension TermsAndConditionsSheetViewController {
         return row
     }
 
-    /// One numbered section: bold white title (14pt/700), 5pt gap, then a
-    /// gray (#AAAAAA) 13pt body at ~165% line height (21.45pt) via
-    /// `NSMutableParagraphStyle.lineSpacing`, exactly as specced.
     func makeItemBlock(_ item: GxTermsItem) -> UIView {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -331,7 +337,7 @@ private extension TermsAndConditionsSheetViewController {
         descriptionLabel.numberOfLines = 0
         let bodyFont = AppFont.regular.size(13.0, familyName: familyFunnelSans)
         let paragraph = NSMutableParagraphStyle()
-        paragraph.lineSpacing = 21.45 - bodyFont.lineHeight
+        paragraph.lineSpacing = 4
         descriptionLabel.attributedText = NSAttributedString(
             string: item.description ?? "",
             attributes: [

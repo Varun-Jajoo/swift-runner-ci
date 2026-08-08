@@ -1,0 +1,40 @@
+name: Build iOS Branch
+
+on:
+  push:
+    branches:
+      - group-classes-ios
+      - '**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build iOS on macOS Cloud Runner
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout Current Branch
+        uses: actions/checkout@v4
+
+      - name: Select Xcode Version
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+
+      - name: Resolve Swift Package Dependencies
+        run: |
+          xcodebuild -resolvePackageDependencies -project MyPT.xcodeproj
+
+      - name: Build iOS App Binary
+        run: |
+          xcodebuild -project MyPT.xcodeproj \
+            -scheme MyPT \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            -derivedDataPath ./build \
+            CODE_SIGNING_ALLOWED=NO \
+            clean build
+
+      - name: Upload Built App Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MyPT-iOS-App
+          path: ./build/Build/Products/Debug-iphonesimulator/MyPT.app

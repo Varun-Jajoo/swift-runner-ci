@@ -166,7 +166,7 @@ enum GroupClassCardFormatter {
     /// Formats the backend time into the card's `EEE, d MMM • h-h a` shape.
     /// Already-formatted values (they contain the bullet) are passed straight
     /// through, matching Android.
-    static func formatTimeForUI(_ rawTimeStr: String?) -> String {
+    static func formatTimeForUI(_ rawTimeStr: String?, dateStr: String? = nil) -> String {
         let raw = (rawTimeStr ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         guard !raw.isEmpty else { return defaultTime }
         if raw.contains("•") { return raw }
@@ -174,24 +174,47 @@ enum GroupClassCardFormatter {
         let clean = raw.replacingOccurrences(of: "GMT", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
-        let inputFormatter = DateFormatter()
-        inputFormatter.locale = Locale(identifier: "en_US_POSIX")
-        inputFormatter.dateFormat = clean.contains("-") ? "yyyy-MM-dd HH:mm:ss" : "dd MMMM, HH:mm"
+        let hasDateInTime = clean.contains("202") || clean.contains("Jan") || clean.contains("Feb") ||
+            clean.contains("Mar") || clean.contains("Apr") || clean.contains("May") ||
+            clean.contains("Jun") || clean.contains("Jul") || clean.contains("Aug") ||
+            clean.contains("Sep") || clean.contains("Oct") || clean.contains("Nov") || clean.contains("Dec")
 
-        guard let date = inputFormatter.date(from: clean) else { return raw }
+        if hasDateInTime {
+            let inputFormatter = DateFormatter()
+            inputFormatter.locale = Locale(identifier: "en_US_POSIX")
+            inputFormatter.dateFormat = (clean.contains("-") && clean.count > 15) ? "yyyy-MM-dd HH:mm:ss" : "dd MMMM, HH:mm"
 
-        let dayFormatter = DateFormatter()
-        dayFormatter.locale = Locale(identifier: "en_US_POSIX")
-        dayFormatter.dateFormat = "EEE, d MMM"
-        let dayText = dayFormatter.string(from: date)
+            if let date = inputFormatter.date(from: clean) {
+                let dayFormatter = DateFormatter()
+                dayFormatter.locale = Locale(identifier: "en_US_POSIX")
+                dayFormatter.dateFormat = "EEE, d MMM"
+                let dayText = dayFormatter.string(from: date)
 
-        let startHour = Calendar.current.component(.hour, from: date)
-        let endHour = (startHour + 1) % 24
-        let start12 = (startHour % 12 == 0) ? 12 : startHour % 12
-        let end12 = (endHour % 12 == 0) ? 12 : endHour % 12
-        let amPm = (endHour >= 12) ? "PM" : "AM"
+                let startHour = Calendar.current.component(.hour, from: date)
+                let endHour = (startHour + 1) % 24
+                let start12 = (startHour % 12 == 0) ? 12 : startHour % 12
+                let end12 = (endHour % 12 == 0) ? 12 : endHour % 12
+                let amPm = (endHour >= 12 && endHour != 24) ? "PM" : "AM"
 
-        return "\(dayText) • \(start12)-\(end12) \(amPm)"
+                return "\(dayText) • \(start12)-\(end12) \(amPm)"
+            }
+        } else if let dateStr = dateStr, !dateStr.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            let cleanDate = dateStr.replacingOccurrences(of: "GMT", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+            let dateFormatter = DateFormatter()
+            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+            dateFormatter.dateFormat = cleanDate.contains("-") ? "yyyy-MM-dd" : "dd MMMM"
+
+            if let date = dateFormatter.date(from: cleanDate) {
+                let dayFormatter = DateFormatter()
+                dayFormatter.locale = Locale(identifier: "en_US_POSIX")
+                dayFormatter.dateFormat = "EEE, d MMM"
+                let dayText = dayFormatter.string(from: date)
+                let timeClean = clean.components(separatedBy: " ").first ?? clean
+                return "\(dayText) • \(timeClean)"
+            }
+        }
+
+        return raw
     }
 
     // MARK: Sorting

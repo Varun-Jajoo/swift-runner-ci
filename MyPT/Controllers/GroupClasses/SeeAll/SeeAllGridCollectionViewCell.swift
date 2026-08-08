@@ -14,8 +14,8 @@ final class SeeAllGridCollectionViewCell: UICollectionViewCell {
 
     static let reuseIdentifier = "SeeAllGridCollectionViewCell"
     /// Fixed regardless of column count — only the width changes with the
-    /// responsive span count (`app:cardCornerRadius="16dp"`, height `220dp`).
-    static let cardHeight: CGFloat = 220
+    /// responsive span count (`app:cardCornerRadius="16dp"`, height `228dp`).
+    static let cardHeight: CGFloat = 228
 
     /// Android's `#0D1918` card fill (`app:cardBackgroundColor`).
     private static let cardFillColor = UIColor(hex: "#0D1918")
@@ -31,6 +31,7 @@ final class SeeAllGridCollectionViewCell: UICollectionViewCell {
     private let locationLabel = UILabel()
     private let spotLabel = UILabel()
     private let progressBar = SpotProgressBarView(barHeight: 2)
+    private var progressBarWidthConstraint: NSLayoutConstraint?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -166,12 +167,12 @@ final class SeeAllGridCollectionViewCell: UICollectionViewCell {
             coverImageView.topAnchor.constraint(equalTo: cardView.topAnchor),
             coverImageView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
             coverImageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
-            coverImageView.heightAnchor.constraint(equalToConstant: 135),
+            coverImageView.heightAnchor.constraint(equalToConstant: 160),
 
             coverFadeView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
             coverFadeView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
             coverFadeView.bottomAnchor.constraint(equalTo: coverImageView.bottomAnchor),
-            coverFadeView.heightAnchor.constraint(equalToConstant: 75),
+            coverFadeView.heightAnchor.constraint(equalToConstant: 35),
 
             badgeView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 8),
             badgeView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -8),
@@ -183,13 +184,16 @@ final class SeeAllGridCollectionViewCell: UICollectionViewCell {
             // inside the trailing-aligned vertical stack, which is why it was
             // missing from these cards. 2pt matches
             // `item_see_all_grid_class_card.xml`.
-            progressBar.widthAnchor.constraint(equalToConstant: 48),
             progressBar.heightAnchor.constraint(equalToConstant: 2),
 
             contentStack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 10),
             contentStack.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -10),
             contentStack.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -8)
         ])
+
+        let barWidth = progressBar.widthAnchor.constraint(equalToConstant: 48)
+        barWidth.isActive = true
+        progressBarWidthConstraint = barWidth
     }
 
     override func prepareForReuse() {
@@ -225,15 +229,34 @@ final class SeeAllGridCollectionViewCell: UICollectionViewCell {
         }
         cardView.strokeAlpha = isPaid ? 1.0 : 0.0
 
-        let availability = GroupClassCardFormatter.availability(
-            bookedCount: GroupClassCardFormatter.intValue(item.bookedCount, defaultValue: 0),
-            totalCapacity: GroupClassCardFormatter.intValue(item.totalCapacity, defaultValue: 20),
-            remainingSeats: GroupClassCardFormatter.intValue(item.remainingSeats, defaultValue: 20)
-        )
-        spotLabel.text = availability.text
-        progressBar.setProgress(availability.progress, state: availability.state)
-        if case .gold = availability.state {
-            progressBar.setFillColors([UIColor(hex: "#FFCC33"), UIColor(hex: "#586400")])
+        if item.isBooked == true {
+            progressBar.isHidden = true
+            spotLabel.text = "BOOKED"
+            spotLabel.font = AppFont.bold.size(8.5, familyName: familyFunnelSans)
+            spotLabel.textColor = UIColor(hex: "#32AE5C")
+        } else if item.isWaitlisted == true {
+            progressBar.isHidden = true
+            spotLabel.text = "ON WAITLIST"
+            spotLabel.font = AppFont.bold.size(8.5, familyName: familyFunnelSans)
+            spotLabel.textColor = UIColor(hex: "#FFCC33")
+        } else {
+            progressBar.isHidden = false
+            spotLabel.font = AppFont.medium.size(9.0, familyName: familyFunnelSans)
+            spotLabel.textColor = UIColor(hex: "#F0F0F0")
+
+            let availability = GroupClassCardFormatter.availability(
+                bookedCount: GroupClassCardFormatter.intValue(item.bookedCount, defaultValue: 0),
+                totalCapacity: GroupClassCardFormatter.intValue(item.totalCapacity, defaultValue: 20),
+                remainingSeats: GroupClassCardFormatter.intValue(item.remainingSeats, defaultValue: 20)
+            )
+            spotLabel.text = availability.text
+            progressBar.setProgress(availability.progress, state: availability.state)
+            if case .gold = availability.state {
+                progressBar.setFillColors([UIColor(hex: "#FFCC33"), UIColor(hex: "#586400")])
+            }
+
+            let textWidth = spotLabel.intrinsicContentSize.width
+            progressBarWidthConstraint?.constant = max(48, ceil(textWidth))
         }
 
         let fallback = UIImage(named: "class-card-placeholder")

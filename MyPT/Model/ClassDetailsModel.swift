@@ -72,6 +72,13 @@ struct ClassDetailsModel: Codable {
     var willSpecialWaitlist: Bool?
     /// FlexibleValue for the same reason as waitlistCount/daysRemaining above.
     var specialWaitlistNotifyHours: FlexibleValue?
+    var normalWaitlistCount: FlexibleValue?
+    var specialWaitlistCount: FlexibleValue?
+    var onlyExtraBooking: Bool?
+    var onlySpecialWaitlist: Bool?
+    var isOnlyExtraBooking: Bool?
+    var isOnlySpecialWaitlist: Bool?
+    var waitlistType: String?
 
     enum CodingKeys: String, CodingKey {
         case schduleID = "schdule_id"
@@ -101,5 +108,12 @@ struct ClassDetailsModel: Codable {
         case daysRemaining = "days_remaining"
         case willSpecialWaitlist = "will_special_waitlist"
         case specialWaitlistNotifyHours = "special_waitlist_notify_hours"
+        case normalWaitlistCount = "normal_waitlist_count"
+        case specialWaitlistCount = "special_waitlist_count"
+        case onlyExtraBooking = "only_extra_booking"
+        case onlySpecialWaitlist = "only_special_waitlist"
+        case isOnlyExtraBooking = "is_only_extra_booking"
+        case isOnlySpecialWaitlist = "is_only_special_waitlist"
+        case waitlistType = "waitlist_type"
     }
 }

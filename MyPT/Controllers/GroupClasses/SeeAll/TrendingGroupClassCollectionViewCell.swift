@@ -223,7 +223,7 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
             coverFadeView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
             coverFadeView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
             coverFadeView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor),
-            coverFadeView.heightAnchor.constraint(equalToConstant: 86),
+            coverFadeView.heightAnchor.constraint(equalToConstant: 45),
 
             badgeView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 8),
             badgeView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -8),
@@ -280,9 +280,9 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
             cardView.strokeAlpha = 1.0
         } else {
             badgeView.isHorizontalGradient = true
-            badgeView.startColor = UIColor.black.withAlphaComponent(0.6)
-            badgeView.endColor = UIColor.black.withAlphaComponent(0.0)
-            badgeView.strokeColor = UIColor(hex: "#FAFAFA").withAlphaComponent(0.2)
+            badgeView.startColor = UIColor(hex: "#1A1D1C")
+            badgeView.endColor = UIColor(hex: "#1A1D1C")
+            badgeView.strokeColor = UIColor(hex: "#FAFAFA").withAlphaComponent(0.3)
             badgeView.configure(text: "FREE",
                                 font: AppFont.bold.size(11.0, familyName: familyFunnelSans),
                                 textColor: UIColor(hex: "#F0F0F0"))
@@ -293,12 +293,12 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
         if item.isBooked == true {
             progressBar.isHidden = true
             spotLabel.text = "BOOKED"
-            spotLabel.font = AppFont.bold.size(12.0, familyName: familyFunnelSans)
+            spotLabel.font = AppFont.bold.size(10.0, familyName: familyFunnelSans)
             spotLabel.textColor = UIColor(hex: "#32AE5C")
         } else if item.isWaitlisted == true {
             progressBar.isHidden = true
             spotLabel.text = "ON WAITLIST"
-            spotLabel.font = AppFont.bold.size(12.0, familyName: familyFunnelSans)
+            spotLabel.font = AppFont.bold.size(10.0, familyName: familyFunnelSans)
             spotLabel.textColor = UIColor(hex: "#FFCC33")
         } else {
             progressBar.isHidden = false

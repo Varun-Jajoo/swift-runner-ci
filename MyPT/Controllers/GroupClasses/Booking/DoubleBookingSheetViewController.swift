@@ -82,12 +82,12 @@ final class DoubleBookingSheetViewController: CommonViewController {
     /// Hex values taken straight from `dialog_double_booking_bottom_sheet.xml` /
     /// `bg_double_booking_card.xml` / `bg_btn_not_now.xml`.
     private enum Palette {
-        static let sheetBg = UIColor(hex: "#131416")
+        static let sheetBg = UIColor(hex: "#040509")
         static let handle = UIColor(hex: "#393C43")
         static let title = UIColor(hex: "#F0F0F0")
         static let dividerLabel = UIColor(hex: "#FAFAFA").withAlphaComponent(0.55) // #8CFAFAFA
         static let dividerLine = UIColor.white.withAlphaComponent(0.10)           // #1AFFFFFF
-        static let heroTileFill = UIColor(hex: "#0A0A0A")
+        static let heroTileFill = UIColor(hex: "#040509")
         // `bg_double_booking_card.xml`'s own solid color - NOT the same as the
         // sheet's own #131416 background (easy to mix up, one hex digit apart).
         static let cardFill = UIColor(hex: "#131615")
@@ -266,7 +266,7 @@ final class DoubleBookingSheetViewController: CommonViewController {
         let distance = input.distance
 
         dismiss(animated: true) {
-            let controller = WaitlistConfirmedViewController()
+            let controller = DoubleBookingWaitlistConfirmedViewController()
             controller.classTitle = title
             controller.classTime = time
             controller.classLocation = location

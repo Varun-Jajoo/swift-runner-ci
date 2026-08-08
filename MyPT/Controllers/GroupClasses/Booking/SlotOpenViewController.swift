@@ -303,6 +303,28 @@ final class SlotOpenViewController: CommonViewController {
                     return
                 }
 
+                let waitlistType = (detail.waitlistType ?? "").lowercased()
+                let isSpecialWaitlistType = waitlistType == "special" || waitlistType == "extra"
+
+                let normalWaitlistCount = GroupClassCardFormatter.intValue(detail.normalWaitlistCount, defaultValue: -1)
+                let specialWaitlistCount = GroupClassCardFormatter.intValue(detail.specialWaitlistCount, defaultValue: 0)
+                let waitlistCountVal = GroupClassCardFormatter.intValue(detail.waitlistCount, defaultValue: 0)
+                let onlyExtraBooking = detail.onlyExtraBooking ?? detail.onlySpecialWaitlist ?? detail.isOnlyExtraBooking ?? detail.isOnlySpecialWaitlist ?? (
+                    (isSpecialWaitlistType && normalWaitlistCount <= 0) ||
+                    (specialWaitlistCount > 0 && specialWaitlistCount >= waitlistCountVal) ||
+                    (normalWaitlistCount == 0 && waitlistCountVal > 0)
+                )
+
+                let hasContestedNormalWaitlist = !onlyExtraBooking && (
+                    normalWaitlistCount >= 0 ? normalWaitlistCount > 0 :
+                    (specialWaitlistCount > 0 ? waitlistCountVal > specialWaitlistCount : waitlistCountVal > 0)
+                )
+
+                if onlyExtraBooking || !hasContestedNormalWaitlist {
+                    self.redirectToDetailScreen(detail: detail)
+                    return
+                }
+
                 // Same reachable-directly-from-push problem as above:
                 // claim-open-spot only ever succeeds when this spot is actually
                 // free for the current member (strictly 'free', or 'mixed' +

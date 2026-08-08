@@ -214,7 +214,8 @@ final class GroupClassesCarouselView: UIView {
         // true capsule, fully rounded on both ends (the radius itself is applied
         // in `layoutSubviews`, once the pill's height is known).
         dotsPill.translatesAutoresizingMaskIntoConstraints = false
-        dotsPill.backgroundColor = UIColor(hex: "#101113")
+        dotsPill.backgroundColor = UIColor(hex: "#101010")
+        dotsPill.layer.cornerRadius = 9
         dotsPill.layer.masksToBounds = true
         dotsView.translatesAutoresizingMaskIntoConstraints = false
         dotsPill.addSubview(dotsView)

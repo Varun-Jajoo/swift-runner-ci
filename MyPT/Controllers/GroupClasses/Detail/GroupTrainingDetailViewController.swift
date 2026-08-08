@@ -283,7 +283,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
     private func populateUI() {
         titleLabel.text = classTitle
 
-        let rawTime = startEnd.isEmpty ? classTime : startEnd
+        let rawTime = (classTime.contains("•") || classTime.contains("-") || classTime.rangeOfCharacter(from: .letters) != nil) ? classTime : (startEnd.isEmpty ? classTime : startEnd)
         dateTimeLabel.text = GroupClassCardFormatter.formatTimeForUI(rawTime)
 
         locationTitleLabel.text = classLocation
@@ -641,9 +641,19 @@ final class GroupTrainingDetailViewController: CommonViewController {
         }
 
         let apiTime = (detail.time ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        let effectiveTime = apiTime.isEmpty ? (startEnd.isEmpty ? classTime : startEnd) : apiTime
-        if !effectiveTime.isEmpty {
-            dateTimeLabel.text = GroupClassCardFormatter.formatTimeForUI(effectiveTime)
+        let apiDate = (detail.date ?? detail.startDate ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedTime: String
+        if classTime.contains("•") && !apiTime.contains("-") {
+            resolvedTime = classTime
+        } else if !apiTime.isEmpty {
+            resolvedTime = GroupClassCardFormatter.formatTimeForUI(apiTime, dateStr: apiDate)
+        } else if !classTime.isEmpty {
+            resolvedTime = GroupClassCardFormatter.formatTimeForUI(classTime, dateStr: apiDate)
+        } else {
+            resolvedTime = GroupClassCardFormatter.formatTimeForUI(startEnd, dateStr: apiDate)
+        }
+        if !resolvedTime.isEmpty {
+            dateTimeLabel.text = resolvedTime
         }
 
         let apiTrainerName = (detail.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
@@ -693,13 +703,20 @@ final class GroupTrainingDetailViewController: CommonViewController {
         let apiStudioLng = GroupClassCardFormatter.doubleValue(detail.studioLng, defaultValue: studioLng)
         studioLat = apiStudioLat
         studioLng = apiStudioLng
-        // Android passes the API's `distance` straight through; keeping the
-        // tap-through value as a second fallback avoids regressing a good distance
-        // to a placeholder when the detail response omits the field.
         let apiDistance = (detail.distance ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let effectiveDistance: String
+        if !currentDistance.isEmpty && !currentDistance.hasPrefix("0.0") && currentDistance.lowercased() != "away" {
+            effectiveDistance = currentDistance
+        } else if !apiDistance.isEmpty && !apiDistance.hasPrefix("0.0") && apiDistance.lowercased() != "away" {
+            effectiveDistance = apiDistance
+        } else if !tapThrough.distance.isEmpty && !tapThrough.distance.hasPrefix("0.0") {
+            effectiveDistance = tapThrough.distance
+        } else {
+            effectiveDistance = currentDistance
+        }
         updateDetailDistance(studioLat: apiStudioLat,
                              studioLng: apiStudioLng,
-                             fallback: apiDistance.isEmpty ? tapThrough.distance : apiDistance)
+                             fallback: effectiveDistance)
 
         let apiCapacity = detail.capacity ?? totalCapacity
         let apiBookedCount = GroupClassCardFormatter.intValue(detail.bookedCount, defaultValue: bookedCount)
@@ -717,6 +734,21 @@ final class GroupTrainingDetailViewController: CommonViewController {
         // member whose turn it is and for a brand-new user walking in on an
         // open spot. Only auto-redirect once per visit.
         waitlistCount = GroupClassCardFormatter.intValue(detail.waitlistCount, defaultValue: 0)
+        let waitlistType = (detail.waitlistType ?? "").lowercased()
+        let isSpecialWaitlistType = waitlistType == "special" || waitlistType == "extra"
+
+        let normalWaitlistCount = GroupClassCardFormatter.intValue(detail.normalWaitlistCount, defaultValue: -1)
+        let specialWaitlistCount = GroupClassCardFormatter.intValue(detail.specialWaitlistCount, defaultValue: 0)
+        let onlyExtraBooking = detail.onlyExtraBooking ?? detail.onlySpecialWaitlist ?? detail.isOnlyExtraBooking ?? detail.isOnlySpecialWaitlist ?? (
+            (isSpecialWaitlistType && normalWaitlistCount <= 0) ||
+            (specialWaitlistCount > 0 && specialWaitlistCount >= waitlistCount) ||
+            (normalWaitlistCount == 0 && waitlistCount > 0)
+        )
+        let hasContestedNormalWaitlist = !onlyExtraBooking && (
+            normalWaitlistCount >= 0 ? normalWaitlistCount > 0 :
+            (specialWaitlistCount > 0 ? waitlistCount > specialWaitlistCount : waitlistCount > 0)
+        )
+
         willSpecialWaitlist = detail.willSpecialWaitlist ?? false
         specialWaitlistNotifyHours = GroupClassCardFormatter.intValue(detail.specialWaitlistNotifyHours, defaultValue: 3)
         // Computed fresh here (not from `isFreeForUser`, which isn't recomputed
@@ -728,11 +760,10 @@ final class GroupTrainingDetailViewController: CommonViewController {
         let freshIsFreeForUser = resolveIsFreeForUser(access: (detail.access ?? classAccess), isMember: detail.isMember ?? false)
         if !checkedSlotOpenRedirect {
             checkedSlotOpenRedirect = true
-            // Excludes a member the free-booking spam guard would block: they
-            // must never auto-land on the priority-claim race screen for this
-            // class - only the double-booking sheet, via the willSpecialWaitlist
-            // branch in ctaTapped().
-            if !isAlreadyBooked && remainingSeats > 0 && waitlistCount > 0 && !willSpecialWaitlist && freshIsFreeForUser {
+            // For a NON double booking user (!willSpecialWaitlist), do NOT
+            // show the open slot screen if the waitlist has ONLY extra booking
+            // members (onlyExtraBooking) - instead, they get the normal booking flow.
+            if !isAlreadyBooked && remainingSeats > 0 && hasContestedNormalWaitlist && !willSpecialWaitlist && freshIsFreeForUser && !onlyExtraBooking {
                 pushSlotOpen(time: effectiveTime)
             }
         }
@@ -882,33 +913,47 @@ final class GroupTrainingDetailViewController: CommonViewController {
             return
         }
 
-        if remainingSeats > 0 && waitlistCount > 0 && !willSpecialWaitlist && isFreeForUser {
-            // A spot is open but people are already waiting on it - this is the
-            // contested-spot race, not a plain booking. Show the equal-chance
-            // claim screen instead of the payment/booking sheet, for both a
-            // new user and one already on the waitlist. Excludes a member the
-            // free-booking spam guard would block - falls through to the
-            // willSpecialWaitlist branch below instead, which shows the
-            // double-booking sheet. Also excludes anyone this class isn't
-            // actually free for (paid, or mixed and not an active member) -
-            // claim-open-spot only ever succeeds when free for this member, so
-            // routing them here otherwise meant Confirm always came back
-            // PAYMENT_REQUIRED (always a popup + redirect to payment) - falls
-            // through to the `!isFreeForUser` branch below instead.
+        let waitlistType = (detail?.waitlistType ?? "").lowercased()
+        let isSpecialWaitlistType = waitlistType == "special" || waitlistType == "extra"
+
+        let normalWaitlistCount = GroupClassCardFormatter.intValue(detail?.normalWaitlistCount, defaultValue: -1)
+        let specialWaitlistCount = GroupClassCardFormatter.intValue(detail?.specialWaitlistCount, defaultValue: 0)
+        let onlyExtraBooking = detail?.onlyExtraBooking ?? detail?.onlySpecialWaitlist ?? detail?.isOnlyExtraBooking ?? detail?.isOnlySpecialWaitlist ?? (
+            (isSpecialWaitlistType && normalWaitlistCount <= 0) ||
+            (specialWaitlistCount > 0 && specialWaitlistCount >= waitlistCount) ||
+            (normalWaitlistCount == 0 && waitlistCount > 0)
+        )
+        let hasContestedNormalWaitlist = !onlyExtraBooking && (
+            normalWaitlistCount >= 0 ? normalWaitlistCount > 0 :
+            (specialWaitlistCount > 0 ? waitlistCount > specialWaitlistCount : waitlistCount > 0)
+        )
+
+        if remainingSeats > 0 && hasContestedNormalWaitlist && !willSpecialWaitlist && isFreeForUser && !onlyExtraBooking {
+            // A spot is open with real normal waitlisted members waiting in line -
+            // show the priority claim race screen. If the waitlist contains ONLY
+            // extra booking members (onlyExtraBooking), non-double-booking users
+            // proceed directly with the standard normal booking flow.
             pushSlotOpen(time: dateTimeLabel.text ?? classTime)
             return
         }
 
         if isAlreadyWaitlisted {
-            // Already on the waitlist and no open spot to claim right now -
-            // just show their existing waitlist status, don't re-join.
-            let controller = WaitlistConfirmedViewController()
-            controller.classTitle = classTitle
-            controller.classTime = dateTimeLabel.text ?? ""
-            controller.classLocation = classLocation
-            controller.trainerName = trainerName
-            controller.distance = locationDistanceLabel.text ?? currentDistance
-            controller.hidesBottomBarWhenPushed = true
+            let controller: UIViewController = willSpecialWaitlist ? DoubleBookingWaitlistConfirmedViewController() : WaitlistConfirmedViewController()
+            if let dbVc = controller as? DoubleBookingWaitlistConfirmedViewController {
+                dbVc.classTitle = classTitle
+                dbVc.classTime = dateTimeLabel.text ?? ""
+                dbVc.classLocation = classLocation
+                dbVc.trainerName = trainerName
+                dbVc.distance = locationDistanceLabel.text ?? currentDistance
+                dbVc.hidesBottomBarWhenPushed = true
+            } else if let wVc = controller as? WaitlistConfirmedViewController {
+                wVc.classTitle = classTitle
+                wVc.classTime = dateTimeLabel.text ?? ""
+                wVc.classLocation = classLocation
+                wVc.trainerName = trainerName
+                wVc.distance = locationDistanceLabel.text ?? currentDistance
+                wVc.hidesBottomBarWhenPushed = true
+            }
             navigationController?.pushViewController(controller, animated: true)
             return
         }
@@ -947,7 +992,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
             // booked them, not tapping its confirm button.)
             guard requireLogin() else { return }
             presentDoubleBookingSheet(preCheck: true) { [weak self] in
-                self?.performFreeBooking()
+                self?.performFreeBooking(skipSpecialSheetCheck: true)
             }
             return
         }
@@ -1087,11 +1132,15 @@ final class GroupTrainingDetailViewController: CommonViewController {
 
     /// Port of Android's extracted `performFreeBooking()`: the free-for-member
     /// `POST book-class` call, shared by the willSpecialWaitlist bypass here and
-    /// (separately) `ConfirmSlotSheetViewController`'s own confirm button. Unlike
-    /// the waitlist path, the free path keeps Android's EAGER-create behaviour -
-    /// no pre-check sheet, book immediately and show the double-booking sheet
-    /// AFTER only if the response confirms the spam guard triggered.
-    private func performFreeBooking() {
+    /// (separately) `ConfirmSlotSheetViewController`'s own confirm button.
+    ///
+    /// `skipSpecialSheetCheck` mirrors `joinWaitlist(skipSpecialSheetCheck:)`:
+    /// pass `true` when this call is itself firing from inside the
+    /// double-booking sheet's own confirm tap (the pre-check path) - the user
+    /// already saw and confirmed that sheet, so a response that (correctly,
+    /// expectedly) reports `specialWaitlist.isSpecial == true` must NOT
+    /// re-trigger it, or the sheet visibly closes and reopens on every tap.
+    private func performFreeBooking(skipSpecialSheetCheck: Bool = false) {
         guard !scheduleId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             pushSlotConfirmedFresh()
             return
@@ -1102,12 +1151,12 @@ final class GroupTrainingDetailViewController: CommonViewController {
                                           paymentType: "free") { [weak self] result in
             guard let self = self else { return }
             DispatchQueue.main.async {
-                self.handleFreeBookingResponse(result)
+                self.handleFreeBookingResponse(result, skipSpecialSheetCheck: skipSpecialSheetCheck)
             }
         }
     }
 
-    private func handleFreeBookingResponse(_ result: BookClassBaseModel?) {
+    private func handleFreeBookingResponse(_ result: BookClassBaseModel?, skipSpecialSheetCheck: Bool = false) {
         guard let result = result else {
             AlertHelper.shared.showCustomeAlert(title: "", message: "Booking failed. Please try again.", actions: ["OK"], completion: nil)
             return
@@ -1116,7 +1165,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
         if result.status == true {
             fetchClassDetail()
 
-            if result.specialWaitlist?.isSpecial == true {
+            if !skipSpecialSheetCheck, result.specialWaitlist?.isSpecial == true {
                 presentDoubleBookingSheet(preCheck: false,
                                           notifyHours: result.specialWaitlist?.notificationWindowHours?.intValue)
                 return
