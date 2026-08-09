@@ -146,15 +146,44 @@ final class WaitlistConfirmedViewController: CommonViewController {
 
     // MARK: - Actions
 
-    /// Android: both `btnGlassBack` and `btnViewBooking` just `finish()` — this
-    /// screen never jumps tabs, unlike Slot Confirmed.
+    private static let bookingsTabIndex = 2
+
     @objc private func backTapped() {
         navigationController?.popViewController(animated: true)
     }
 
+    /// Was just `popViewController` (matching Android's old `finish()`) - closed
+    /// back to Group Training Detail instead of actually taking the member to
+    /// their bookings, unlike Slot Confirmed / Double Booking Waitlist
+    /// Confirmed's own "VIEW BOOKING" buttons. Same tab-jump pattern as those.
     @objc private func viewBookingTapped() {
         TapticEngine.selection.feedback()
-        navigationController?.popViewController(animated: true)
+
+        let hostNavigationController = navigationController
+
+        guard let tabBarController = resolveTabBarController(),
+              let tabs = tabBarController.viewControllers,
+              tabs.indices.contains(WaitlistConfirmedViewController.bookingsTabIndex) else {
+            hostNavigationController?.popToRootViewController(animated: true)
+            return
+        }
+
+        (tabs[WaitlistConfirmedViewController.bookingsTabIndex] as? UINavigationController)?
+            .popToRootViewController(animated: false)
+        tabBarController.selectedIndex = WaitlistConfirmedViewController.bookingsTabIndex
+
+        hostNavigationController?.popToRootViewController(animated: false)
+    }
+
+    private func resolveTabBarController() -> UITabBarController? {
+        if let tabBarController = tabBarController { return tabBarController }
+
+        var candidate = UIApplication.shared.windows.first(where: \.isKeyWindow)?.rootViewController
+        while let current = candidate {
+            if let tabBarController = current as? UITabBarController { return tabBarController }
+            candidate = current.presentedViewController ?? current.children.first
+        }
+        return nil
     }
 }
 

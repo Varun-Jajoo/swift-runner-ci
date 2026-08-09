@@ -126,7 +126,11 @@ class BookingListTableViewCell: UITableViewCell {
         self.dateLbl.text = inputData.timing?.value
 //        self.workoutFocusDescLbl.text = inputData.workoutFocus?.joined(separator: ",")
         self.workoutFocusDescLbl.text = inputData.bookingType
-        self.sessionDescLbl.text = inputData.sessionType?.value
+        // sessionType carries the class title for group-class rows
+        // (BookingListController.php sets it to $class->name), the same
+        // text workoutFocusDescLbl just showed above it - swap in a generic
+        // "Group" tag there instead of repeating it.
+        self.sessionDescLbl.text = inputData.isGroupClass ? "Group" : inputData.sessionType?.value
         self.timeLbl.text = inputData.duration?.value
         self.trainerNameLbl.text = inputData.trainer?.value
 
