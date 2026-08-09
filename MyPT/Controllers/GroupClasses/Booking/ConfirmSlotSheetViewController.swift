@@ -142,6 +142,10 @@ final class ConfirmSlotSheetViewController: CommonViewController {
         static let policyEmphasis = "Cancellation Policy"
         static let confirmCTA = "CONFIRM YOUR SLOT"
         static let paymentCTA = "PROCEED TO PAYMENT"
+        /// Same wording as the detail screen's own waitlist CTA
+        /// (GroupTrainingDetailViewController's `setCTATitle("JOIN WAITLIST")`),
+        /// and the mirror of `leaveWaitlistCTA` on the cancel sheet.
+        static let joinWaitlistCTA = "JOIN WAITLIST"
         static let defaultDuration = "60 MINS"
         static let defaultTrainer = "Sara K."
         static let trainerSubtitle = "Certified MyPT Trainer"

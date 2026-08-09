@@ -13,6 +13,32 @@
 
 import UIKit
 
+// MARK: - CapsuleView
+
+/// A view that keeps itself a perfect capsule.
+///
+/// This exists because the two previous attempts at rounding the dots pill both
+/// failed, for two different reasons:
+///
+///   1. `cornerRadius = bounds.height / 2` set inside `setupViews()` — bounds are
+///      still `.zero` at construction, so the radius resolved to 0.
+///   2. `cornerRadius = 999` — unlike CSS `border-radius`, CALayer does NOT clamp
+///      an oversized radius to a capsule. On a 13pt-tall pill it renders square.
+///
+/// A third attempt (setting it from the *carousel's* `layoutSubviews`) also fails:
+/// the pill is a grandchild — it sits inside `dotsRow` — so its frame has not been
+/// resolved yet when the carousel lays out, and the height read there is still 0.
+///
+/// Doing it in the view's own `layoutSubviews` is the only placement that is
+/// correct regardless of layout timing or of the pill's eventual height. Same
+/// pattern `GroupClassUIComponents.swift` already uses for its circular button.
+final class CapsuleView: UIView {
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        layer.cornerRadius = bounds.height / 2
+    }
+}
+
 // MARK: - GroupClassCarouselDotsView
 
 /// Worm-style page indicator: the selected page is a 25×5 pill, the rest are
@@ -162,7 +188,7 @@ final class GroupClassesCarouselView: UIView {
     private let contentStack = UIStackView()
     private let collectionView: UICollectionView
     private let dotsView = GroupClassCarouselDotsView()
-    private let dotsPill = UIView()
+    private let dotsPill = CapsuleView()
     private let seeAllButton = GradientCTAButton()
 
     // MARK: Init
@@ -214,18 +240,13 @@ final class GroupClassesCarouselView: UIView {
         collectionView.register(GroupClassCardCollectionViewCell.self,
                                 forCellWithReuseIdentifier: GroupClassCardCollectionViewCell.reuseIdentifier)
 
-        // border-radius: var(--Radius-full, 999px) - literally 999, not a
-        // computed bounds.height/2 (which depends on layoutSubviews firing
-        // with the pill's final size and evidently wasn't taking effect on
-        // device - still rendered square-cornered). CALayer clamps an
-        // oversized cornerRadius to a perfect capsule the same way CSS
-        // clamps an oversized border-radius, so this can't be wrong no
-        // matter what the pill's resolved height ends up being.
+        // border-radius: var(--Radius-full, 999px). No cornerRadius is set here —
+        // dotsPill is a CapsuleView, which rounds itself in its own layoutSubviews
+        // (see that type for why every other placement failed).
         // background: var(--Colors-Surface-Low, #131416) - exact match for
         // GroupClassColor.bg2.
         dotsPill.translatesAutoresizingMaskIntoConstraints = false
         dotsPill.backgroundColor = GroupClassColor.bg2.color
-        dotsPill.layer.cornerRadius = 999
         dotsPill.layer.masksToBounds = true
         dotsView.translatesAutoresizingMaskIntoConstraints = false
         dotsPill.addSubview(dotsView)
