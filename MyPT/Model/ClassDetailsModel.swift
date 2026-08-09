@@ -44,7 +44,13 @@ struct ClassDetailsModel: Codable {
     var tags: [String]? //[TrainerTagModel]?
     var isFollow: Bool?
     var certificates: [CertificateModel]?
-    var mediaGallery: [GalleryModel]?
+    /// `ClassEventController::classDetail()` always returns a flat array of
+    /// already-resolved URL strings here (class's own gallery, or the
+    /// trainer's media as fallback) - never `{media_path, is_image, is_video}`
+    /// objects like GalleryModel (that shape belongs to the trainer-profile
+    /// endpoint). Was mistyped as `[GalleryModel]?` and could never actually
+    /// decode for this endpoint.
+    var mediaGallery: [String]?
     // FlexibleValue: backend types are inconsistent (Android reads these with the coercing
     // optInt/optDouble accessors). Read via `.intValue` / `.doubleValue` / `.value`.
     var bookedCount: FlexibleValue?
@@ -87,6 +93,12 @@ struct ClassDetailsModel: Codable {
     /// `detail.date ?? detail.startDate` fallback in `apply(detail:)` compiles.
     var date: String?
     var startDate: String?
+    /// Icon keys are always one of the backend's fixed preset set (see
+    /// ClassEventController::APP_DETAIL_ICON_KEYS) - never raw emoji - so a
+    /// plain key-to-asset lookup is all the UI needs (checklistIcon(for:) in
+    /// GroupTrainingDetailViewController).
+    var whatToBring: [ChecklistItemModel]?
+    var thingsToKnow: [ChecklistItemModel]?
 
     enum CodingKeys: String, CodingKey {
         case schduleID = "schdule_id"
@@ -125,5 +137,12 @@ struct ClassDetailsModel: Codable {
         case waitlistType = "waitlist_type"
         case date
         case startDate = "start_date"
+        case whatToBring = "what_to_bring"
+        case thingsToKnow = "things_to_know"
     }
+}
+
+struct ChecklistItemModel: Codable {
+    var text: String?
+    var icon: String?
 }

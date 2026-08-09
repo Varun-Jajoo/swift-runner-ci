@@ -1572,24 +1572,30 @@ private extension GroupTrainingDetailViewController {
         let bringTitle = makeSectionTitle("What to bring")
         column.addArrangedSubview(bringTitle)
         column.setCustomSpacing(12, after: bringTitle)
-        appendInfoRows(GroupTrainingDetailViewController.whatToBringRows, to: column)
+        appendInfoRows(GroupTrainingDetailViewController.checklistRows(from: detail?.whatToBring, fallback: GroupTrainingDetailViewController.whatToBringRows), to: column)
 
         // 9 — things to know
         let knowTitle = makeSectionTitle("Things to know")
         column.setCustomSpacing(24, after: column.arrangedSubviews[column.arrangedSubviews.count - 1])
         column.addArrangedSubview(knowTitle)
         column.setCustomSpacing(8, after: knowTitle)
-        appendInfoRows(GroupTrainingDetailViewController.thingsToKnowRows, to: column)
+        appendInfoRows(GroupTrainingDetailViewController.checklistRows(from: detail?.thingsToKnow, fallback: GroupTrainingDetailViewController.thingsToKnowRows), to: column)
 
-        // 10 — media gallery (static placeholders, matching Android)
-        let galleryHeader = makeGalleryHeader()
-        column.setCustomSpacing(24, after: column.arrangedSubviews[column.arrangedSubviews.count - 1])
-        column.addArrangedSubview(galleryHeader)
-        column.setCustomSpacing(8, after: galleryHeader)
+        // 10 — media gallery, from the class detail API's media_gallery array
+        // (already-resolved URLs, either the class's own uploaded gallery or
+        // the trainer's media as a fallback) - whole section hidden when
+        // there's genuinely nothing to show rather than 3 unrelated stock photos.
+        let galleryUrls = (detail?.mediaGallery ?? []).filter { !$0.isEmpty }
+        if !galleryUrls.isEmpty {
+            let galleryHeader = makeGalleryHeader()
+            column.setCustomSpacing(24, after: column.arrangedSubviews[column.arrangedSubviews.count - 1])
+            column.addArrangedSubview(galleryHeader)
+            column.setCustomSpacing(8, after: galleryHeader)
 
-        let gallery = makeMediaGallery()
-        column.addArrangedSubview(gallery)
-        column.setCustomSpacing(24, after: gallery)
+            let gallery = makeMediaGallery(urls: galleryUrls)
+            column.addArrangedSubview(gallery)
+            column.setCustomSpacing(24, after: gallery)
+        }
 
         // 11 — trainer card
         let trainerTitle = makeSectionTitle("Your trainer")
@@ -2042,14 +2048,13 @@ private extension GroupTrainingDetailViewController {
 
     /// Static placeholder gallery, exactly as Android ships it (the migration plan
     /// explicitly says NOT to wire this to `media_gallery` unless asked).
-    func makeMediaGallery() -> UIView {
+    func makeMediaGallery(urls: [String]) -> UIView {
         let scroll = UIScrollView()
         scroll.translatesAutoresizingMaskIntoConstraints = false
         scroll.showsHorizontalScrollIndicator = false
         scroll.backgroundColor = .clear
 
-        let placeholders = ["ic_gym_workout", "ic_chestpressdark", "ic_gymWorkout"]
-        let cards = placeholders.map { makeGalleryCard(imageName: $0) }
+        let cards = urls.map { makeGalleryCard(urlString: $0) }
 
         let stack = UIStackView(arrangedSubviews: cards)
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -2068,17 +2073,20 @@ private extension GroupTrainingDetailViewController {
         return scroll
     }
 
-    func makeGalleryCard(imageName: String) -> UIView {
+    func makeGalleryCard(urlString: String) -> UIView {
         let card = UIView()
         card.translatesAutoresizingMaskIntoConstraints = false
         card.backgroundColor = Palette.cardSurface
         card.layer.cornerRadius = 16
         card.layer.masksToBounds = true
 
-        let imageView = UIImageView(image: UIImage(named: imageName))
+        let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
+        if let url = GroupClassCardFormatter.absoluteImageURL(urlString) {
+            imageView.loadImage(urlString: url, placeholder: nil)
+        }
         card.addSubview(imageView)
 
         NSLayoutConstraint.activate([
@@ -2424,6 +2432,43 @@ private extension GroupTrainingDetailViewController {
             return UIImage(systemName: systemFallback)
         }
         return nil
+    }
+
+    /// Maps a backend checklist icon key (see ClassEventController::
+    /// APP_DETAIL_ICON_KEYS - always one of this fixed preset set, never raw
+    /// emoji) to an asset name + SF Symbol fallback, mirroring Android's
+    /// checklistIconFor() in GroupTrainingDetailActivity.kt.
+    static func checklistIconAssets(for key: String?) -> (icons: [String], system: String) {
+        switch key ?? "" {
+        case "towel": return (["ic_towel_18"], "drop.fill")
+        case "water": return (["ic_water_18"], "drop.fill")
+        case "shoes": return (["ic_shoes_18"], "shoeprints.fill")
+        case "clothes": return (["ic_clothes_18"], "tshirt.fill")
+        case "rope": return (["ic_skipping_18"], "figure.walk")
+        case "glove": return (["ic_glove_18"], "hand.raised.fill")
+        case "yoga": return (["ic_yoga_18"], "figure.mind.and.body")
+        case "dumbbell": return (["ic_dumbbell_18"], "dumbbell.fill")
+        case "socks": return (["ic_clothes_18"], "tshirt.fill")
+        case "clock": return (["ic_clock_18"], "clock.fill")
+        case "age": return (["ic_person_age_18"], "person.fill")
+        case "booking": return (["ic_booking_18"], "calendar")
+        case "info": return (["info-hexagon"], "info.circle.fill")
+        case "flame": return (["ic_flame_18"], "flame.fill")
+        case "heart": return (["ic_heart_20"], "heart.fill")
+        default: return (["info-hexagon"], "info.circle.fill")
+        }
+    }
+
+    /// Converts the API's `[{"text", "icon"}]` checklist array into the row
+    /// tuples `appendInfoRows` expects, falling back to the static defaults
+    /// below when the class has none set.
+    static func checklistRows(from items: [ChecklistItemModel]?, fallback: [(icons: [String], system: String, text: String)]) -> [(icons: [String], system: String, text: String)] {
+        guard let items = items, !items.isEmpty else { return fallback }
+        return items.compactMap { item in
+            guard let text = item.text, !text.isEmpty else { return nil }
+            let assets = checklistIconAssets(for: item.icon)
+            return (icons: assets.icons, system: assets.system, text: text)
+        }
     }
 
     /// Static "What to bring" list — hard-coded in the Android layout.
