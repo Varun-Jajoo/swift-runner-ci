@@ -16,6 +16,13 @@ jobs:
       - name: Checkout Current Branch
         uses: actions/checkout@v4
 
+      - name: Print Branch and Commit Info
+        run: |
+          echo "=== GIT INFO ==="
+          git branch --show-current || echo "Detached HEAD"
+          echo "Commit SHA: ${{ github.sha }}"
+          git log -n 3 --oneline
+
       - name: Select Xcode 16.2
         uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -41,7 +48,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            build 2>&1 | tee xcodebuild.log
+            clean build 2>&1 | tee xcodebuild.log
 
       - name: Package App into IPA
         run: |
