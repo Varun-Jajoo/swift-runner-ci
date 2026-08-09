@@ -33,15 +33,24 @@ jobs:
           set -o pipefail
           xcodebuild -project MyPT.xcodeproj \
             -scheme MyPT \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -destination 'generic/platform=iOS' \
             -configuration Debug \
             -derivedDataPath ./build \
             -skipPackagePluginValidation \
             -skipMacroValidation \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
             build 2>&1 | tee xcodebuild.log
+
+      - name: Package App into IPA
+        run: |
+          mkdir -p Payload
+          APP_PATH=$(find ./build/Build/Products -name "*.app" -type d | head -n 1)
+          echo "Packaging APP from: $APP_PATH"
+          cp -r "$APP_PATH" Payload/
+          zip -r MyPT.ipa Payload
+          echo "Created MyPT.ipa successfully"
 
       - name: Dump Compiler Errors on Failure
         if: failure()
@@ -49,9 +58,9 @@ jobs:
           echo "=== XCODEBUILD COMPILER ERRORS ==="
           grep -E "(error:|fatal error:|\*\* BUILD FAILED \*\*)" xcodebuild.log || cat xcodebuild.log | tail -n 150
 
-      - name: Upload Built App Artifact
+      - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MyPT-iOS-App
-          path: ./build/Build/Products/Debug-iphonesimulator/*.app
-          if-no-files-found: warn
+          name: MyPT-iOS-IPA
+          path: MyPT.ipa
+          if-no-files-found: error
