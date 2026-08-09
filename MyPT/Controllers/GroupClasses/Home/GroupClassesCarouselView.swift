@@ -407,6 +407,11 @@ final class GroupClassesCarouselView: UIView {
 
     /// Everything the cards actually render, so an unchanged fetch is detected as
     /// unchanged even though the decoded models are fresh instances.
+    ///
+    /// isBooked/isWaitlisted are in here too - joining a waitlist (normal or
+    /// the special/priority one) doesn't change any capacity number, so
+    /// without them the card kept showing its pre-join state (no "ON
+    /// WAITLIST" badge) until something else about the list happened to change.
     private static func signature(for classes: [UpcomingClassModel]) -> String {
         return classes.map { item in
             [
@@ -420,7 +425,9 @@ final class GroupClassesCarouselView: UIView {
                 (item.isMember ?? false) ? "1" : "0",
                 String(GroupClassCardFormatter.intValue(item.bookedCount, defaultValue: 0)),
                 String(GroupClassCardFormatter.intValue(item.totalCapacity, defaultValue: 20)),
-                String(GroupClassCardFormatter.intValue(item.remainingSeats, defaultValue: 20))
+                String(GroupClassCardFormatter.intValue(item.remainingSeats, defaultValue: 20)),
+                (item.isBooked ?? false) ? "1" : "0",
+                (item.isWaitlisted ?? false) ? "1" : "0"
             ].joined(separator: "|")
         }.joined(separator: ";")
     }

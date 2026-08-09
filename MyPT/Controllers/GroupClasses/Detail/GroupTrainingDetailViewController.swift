@@ -453,12 +453,15 @@ final class GroupTrainingDetailViewController: CommonViewController {
         if isAlreadyBooked {
             progressBar.isHidden = true
             spotsLabel.text = "BOOKED"
-            spotsLabel.font = AppFont.bold.size(10.0, familyName: familyFunnelSans)
+            // Was 10.0 - copy-pasted from the card badge's compact size, but on
+            // this full-size detail screen it read smaller than everything
+            // around it (dateTimeLabel, right next to it, is 14.0).
+            spotsLabel.font = AppFont.bold.size(14.0, familyName: familyFunnelSans)
             spotsLabel.textColor = UIColor(hex: "#32AE5C")
         } else if isAlreadyWaitlisted {
             progressBar.isHidden = true
             spotsLabel.text = "ON WAITLIST"
-            spotsLabel.font = AppFont.bold.size(10.0, familyName: familyFunnelSans)
+            spotsLabel.font = AppFont.bold.size(14.0, familyName: familyFunnelSans)
             spotsLabel.textColor = UIColor(hex: "#FFCC33")
         } else {
             progressBar.isHidden = false

@@ -284,6 +284,36 @@ extension BookingListViewController: UITableViewDataSource, UITableViewDelegate{
         // UpcomingAdapter/UpcomingSessionsAdapter click listeners (both branch on
         // the identical isGroupClass condition, regardless of the selected tab).
         if let row = self.bookingData?[indexPath.row], row.isGroupClass {
+            // Upcoming waitlist rows have a live claim state to show (plain
+            // waitlist position, or the overlapping-waitlist priority window) -
+            // routing them through the "your slot is confirmed" receipt like a
+            // real booking hid that entirely. Cancelled/Completed rows have
+            // nothing live left to show, so they keep using the generic
+            // read-only receipt below regardless of type.
+            if self.selectedTags == 2, row.isWaitlistRow {
+                let controller: UIViewController = row.isSpecialWaitlist
+                    ? DoubleBookingWaitlistConfirmedViewController()
+                    : WaitlistConfirmedViewController()
+                let bookingType = row.bookingType?.trimmingCharacters(in: .whitespacesAndNewlines)
+                let title = (bookingType?.isEmpty == false ? bookingType : row.sessionType?.value) ?? ""
+                if let dbVc = controller as? DoubleBookingWaitlistConfirmedViewController {
+                    dbVc.classTitle = title
+                    dbVc.classTime = row.timing?.value ?? ""
+                    dbVc.classLocation = row.location?.value ?? ""
+                    dbVc.trainerName = row.trainer?.value ?? ""
+                    dbVc.distance = row.distance?.value ?? ""
+                } else if let wVc = controller as? WaitlistConfirmedViewController {
+                    wVc.classTitle = title
+                    wVc.classTime = row.timing?.value ?? ""
+                    wVc.classLocation = row.location?.value ?? ""
+                    wVc.trainerName = row.trainer?.value ?? ""
+                    wVc.distance = row.distance?.value ?? ""
+                }
+                controller.hidesBottomBarWhenPushed = true
+                self.navigationController?.pushViewController(controller, animated: true)
+                return
+            }
+
             let bookingType = row.bookingType?.trimmingCharacters(in: .whitespacesAndNewlines)
             let controller = SlotConfirmedViewController()
             controller.classTitle = (bookingType?.isEmpty == false ? bookingType : row.sessionType?.value) ?? ""

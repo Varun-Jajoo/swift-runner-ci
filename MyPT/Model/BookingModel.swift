@@ -23,6 +23,10 @@ struct BookingDataModel: Codable {
     var sessionType, duration, trainer, location, distance, scheduleMsg, averageRating, price, studioLat, studioLng: FlexibleValue?
     var isReschedule, isTrainer, isSchedule, isCheckinAvailable, isRefund: Bool?
     var msg, bookingType: String?
+    /// 'special' vs 'normal' - only meaningful when `id` carries the "wl-"
+    /// waitlist prefix. Matches `GcWaitlist.waitlist_type` verbatim, same key
+    /// `BookingListController.php`'s waitlist mapping already returns.
+    var waitlistType: String?
 
     enum CodingKeys: String, CodingKey {
         case id, type, timing, trainer_image, selected_slot
@@ -34,9 +38,20 @@ struct BookingDataModel: Codable {
         case isReschedule = "is_reschedule"
         case isRefund = "is_refund"
         case bookingType = "booking_type"
+        case waitlistType = "waitlist_type"
         case isSchedule
         case isTrainer
         case msg, scheduleMsg, averageRating, starts_in
+    }
+
+    /// True only for a waitlist row (`id` carries the "wl-" prefix
+    /// `BookingListController.php` prepends for `GcWaitlist` rows).
+    var isWaitlistRow: Bool {
+        id?.value.hasPrefix("wl-") == true
+    }
+
+    var isSpecialWaitlist: Bool {
+        waitlistType == "special"
     }
 
     /// Port of the `isGroupClass` check in Android's `UpcomingAdapter.kt` /

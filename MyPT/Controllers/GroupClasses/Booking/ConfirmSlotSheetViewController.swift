@@ -707,31 +707,28 @@ private extension ConfirmSlotSheetViewController {
         container.addSubview(textStack)
 
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.setImage(ConfirmSlotSheetViewController.icon(["ic_close_x_34"], systemFallback: "xmark")?
-            .withRenderingMode(.alwaysTemplate), for: .normal)
+        let closeSymbolConfig = UIImage.SymbolConfiguration(pointSize: 18, weight: .bold)
+        let closeImg = UIImage(systemName: "xmark", withConfiguration: closeSymbolConfig) ?? ConfirmSlotSheetViewController.icon(["ic_close_x_34"], systemFallback: "xmark")
+        closeButton.setImage(closeImg?.withRenderingMode(.alwaysTemplate), for: .normal)
         closeButton.tintColor = Palette.title
         closeButton.accessibilityLabel = "Close"
         closeButton.imageView?.contentMode = .scaleAspectFit
-        // A `UIButton` normally sizes its image view to the image's own intrinsic
-        // size, not the button's bounds — with a small source glyph that renders
-        // well under the intended 24×24 tap target, which is the reported bug.
-        // `.fill` stretches the image to the full content rect instead.
-        closeButton.contentHorizontalAlignment = .fill
-        closeButton.contentVerticalAlignment = .fill
-        closeButton.imageEdgeInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
+        closeButton.contentHorizontalAlignment = .center
+        closeButton.contentVerticalAlignment = .center
+        closeButton.imageEdgeInsets = UIEdgeInsets(top: 6, left: 6, bottom: 6, right: 6)
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         container.addSubview(closeButton)
 
         NSLayoutConstraint.activate([
-            closeButton.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            closeButton.topAnchor.constraint(equalTo: container.topAnchor),
-            closeButton.widthAnchor.constraint(equalToConstant: Metric.closeButtonSide),
-            closeButton.heightAnchor.constraint(equalToConstant: Metric.closeButtonSide),
+            closeButton.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: 4),
+            closeButton.topAnchor.constraint(equalTo: container.topAnchor, constant: -4),
+            closeButton.widthAnchor.constraint(equalToConstant: 36),
+            closeButton.heightAnchor.constraint(equalToConstant: 36),
 
             textStack.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             textStack.topAnchor.constraint(equalTo: container.topAnchor),
             textStack.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-            textStack.trailingAnchor.constraint(equalTo: closeButton.leadingAnchor, constant: -12)
+            textStack.trailingAnchor.constraint(equalTo: closeButton.leadingAnchor, constant: -8)
         ])
         return container
     }
@@ -980,6 +977,13 @@ private extension ConfirmSlotSheetViewController {
         bodyLabel.numberOfLines = 0
         bodyLabel.attributedText = ConfirmSlotSheetViewController.importantNoteText()
 
+        let accentLine = UIView()
+        accentLine.translatesAutoresizingMaskIntoConstraints = false
+        accentLine.backgroundColor = GroupClassColor.gold.color
+        accentLine.layer.cornerRadius = 2
+        accentLine.layer.masksToBounds = true
+        box.addSubview(accentLine)
+
         let stack = UIStackView(arrangedSubviews: [headingWrapper, bodyLabel])
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.axis = .vertical
@@ -988,6 +992,11 @@ private extension ConfirmSlotSheetViewController {
         box.addSubview(stack)
 
         NSLayoutConstraint.activate([
+            accentLine.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 12),
+            accentLine.topAnchor.constraint(equalTo: box.topAnchor, constant: 12),
+            accentLine.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -12),
+            accentLine.widthAnchor.constraint(equalToConstant: 4),
+
             warningIcon.widthAnchor.constraint(equalToConstant: Metric.warningIconSide),
             warningIcon.heightAnchor.constraint(equalToConstant: Metric.warningIconSide),
 
@@ -997,7 +1006,7 @@ private extension ConfirmSlotSheetViewController {
             headingRow.trailingAnchor.constraint(lessThanOrEqualTo: headingWrapper.trailingAnchor),
 
             stack.topAnchor.constraint(equalTo: box.topAnchor, constant: 12),
-            stack.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 16),
+            stack.leadingAnchor.constraint(equalTo: accentLine.trailingAnchor, constant: 10),
             stack.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -16),
             stack.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -16)
         ])
