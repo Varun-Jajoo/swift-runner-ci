@@ -161,7 +161,7 @@ private extension BookingCancelledViewController {
         ctaButton.bandThickness = 2
         ctaButton.configure(title: Copy.viewBookingsCTA,
                             font: AppFont.semibold.size(16.0, familyName: familyFunnelSans),
-                            textColor: Palette.ctaInk)
+                            titleColor: Palette.ctaInk)
         ctaButton.addTarget(self, action: #selector(viewMyBookingsTapped), for: .touchUpInside)
         footerView.addSubview(ctaButton)
 
@@ -370,11 +370,18 @@ private extension BookingCancelledViewController {
 
         let fieldLabelView = UILabel()
         fieldLabelView.translatesAutoresizingMaskIntoConstraints = false
-        fieldLabelView.font = AppFont.semibold.size(11.0, familyName: familyFunnelSans)
-        fieldLabelView.textColor = Palette.fieldLabel
-        fieldLabelView.letterSpacing(0.08)
         fieldLabelView.numberOfLines = 1
-        fieldLabelView.text = fieldLabel
+        // No `.letterSpacing` extension exists in the project - kern applied
+        // via attributedText instead, same as setPerSessionLabelText(). 0.88
+        // = 0.08 x 11pt, matching that function's 0.06 x 10pt -> 0.6 ratio.
+        fieldLabelView.attributedText = NSAttributedString(
+            string: fieldLabel,
+            attributes: [
+                .font: AppFont.semibold.size(11.0, familyName: familyFunnelSans),
+                .foregroundColor: Palette.fieldLabel,
+                .kern: 0.88
+            ]
+        )
 
         let textStack = UIStackView(arrangedSubviews: [fieldLabelView, titleLabel, subLabel])
         textStack.translatesAutoresizingMaskIntoConstraints = false
