@@ -214,11 +214,13 @@ final class GroupClassesCarouselView: UIView {
         collectionView.register(GroupClassCardCollectionViewCell.self,
                                 forCellWithReuseIdentifier: GroupClassCardCollectionViewCell.reuseIdentifier)
 
-        // Android's `dots_container_bg`: solid #101113, `radius="999dp"` — i.e. a
-        // true capsule, fully rounded on both ends (the radius itself is applied
-        // in `layoutSubviews`, once the pill's height is known).
+        // border-radius: var(--Radius-full, 999px) - i.e. a true capsule, fully
+        // rounded on both ends (the radius itself is applied in
+        // `layoutSubviews`, once the pill's height is known).
+        // background: var(--Colors-Surface-Low, #131416) - exact match for
+        // GroupClassColor.bg2.
         dotsPill.translatesAutoresizingMaskIntoConstraints = false
-        dotsPill.backgroundColor = UIColor(hex: "#101010")
+        dotsPill.backgroundColor = GroupClassColor.bg2.color
         dotsPill.layer.cornerRadius = 9
         dotsPill.layer.masksToBounds = true
         dotsView.translatesAutoresizingMaskIntoConstraints = false

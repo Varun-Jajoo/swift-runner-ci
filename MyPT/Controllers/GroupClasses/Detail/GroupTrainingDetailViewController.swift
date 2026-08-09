@@ -184,6 +184,27 @@ final class GroupTrainingDetailViewController: CommonViewController {
     private let aboutLabel = UILabel()
     private let aboutContainerView = UIView()
     private var contentStackView: UIStackView?
+    /// Rows for these two + the gallery cards below are built once in
+    /// buildScrollView() (called from viewDidLoad, before fetchClassDetail()
+    /// resolves) using whatever `detail` is at that moment - nil, since the
+    /// network call hasn't returned yet. Unlike titleLabel/heroImageView etc.
+    /// (single persistent views apply(detail:) can just re-set .text/.image
+    /// on), these are collections of rows/cards with no stored reference, so
+    /// without one apply(detail:) has nothing to repopulate and the real API
+    /// data never reaches the screen. Stored here so refreshWhatToBring() /
+    /// refreshThingsToKnow() / refreshMediaGallery() can clear + rebuild them
+    /// once the real data actually arrives.
+    private let whatToBringStack = UIStackView()
+    private let thingsToKnowStack = UIStackView()
+    /// Header + scrollview wrapped in one vertical stack rather than added to
+    /// `column` as two separate arranged subviews toggled via `.isHidden` -
+    /// UIStackView's custom-spacing-after-a-hidden-view behavior is
+    /// unreliable (the surrounding gap can collapse to zero), which is
+    /// exactly what happened here. refreshMediaGallery() inserts/removes
+    /// this single wrapper as one unit instead, which has no such quirk.
+    private let mediaGallerySectionView = UIStackView()
+    private let mediaGalleryScrollView = UIScrollView()
+    private let mediaGalleryCardsStack = UIStackView()
     /// Bottom scrim over the collapsed About copy. Hidden while expanded, and
     /// hidden entirely when the copy is short enough not to need truncating.
     private let aboutFadeView = GradientFadeView()
@@ -509,10 +530,18 @@ final class GroupTrainingDetailViewController: CommonViewController {
 
     // MARK: - Distance
 
-    /// Port of `updateDetailDistance(sLat, sLng, fallback)`.
+    /// Port of `updateDetailDistance(sLat, sLng, fallback)`. Same fix as
+    /// Android: pass nil here instead of `lat`/`lng` so `distanceText`
+    /// always checks the device's real last-known location first - `lat`/
+    /// `lng` are just whatever the caller (e.g. the home banner) forwarded,
+    /// defaulting to a fixed Dubai coordinate when it forwarded none, which
+    /// used to silently win over the real device location for every screen
+    /// that didn't pass real coordinates through. `lat`/`lng` stay as-is for
+    /// the classDetail API request and the onward booking-screen handoff
+    /// below - only this distance display should prefer live location.
     private func updateDetailDistance(studioLat: Double, studioLng: Double, fallback: String) {
-        let text = GroupClassCardFormatter.distanceText(userLat: lat,
-                                                        userLng: lng,
+        let text = GroupClassCardFormatter.distanceText(userLat: nil,
+                                                        userLng: nil,
                                                         studioLat: studioLat,
                                                         studioLng: studioLng,
                                                         fallback: fallback)
@@ -622,6 +651,13 @@ final class GroupTrainingDetailViewController: CommonViewController {
     /// recomputed with the freshly-resolved `isFreeForUser`.
     private func apply(detail: ClassDetailsModel, topLevelCode: String?, topLevelMsg: String?, topLevelIsBlacklisted: Bool?) {
         self.detail = detail
+        // buildScrollView() (viewDidLoad, before this ever fires) built these
+        // three sections against a nil `detail`, so they need an explicit
+        // refresh now that the real data is in - see the note above
+        // whatToBringStack's declaration.
+        refreshWhatToBring()
+        refreshThingsToKnow()
+        refreshMediaGallery()
 
         // Port of the 5-way OR Android checks in `fetchClassDetail()`'s success
         // branch: `detail.is_blacklisted` (nested) OR the same key at the
@@ -1569,32 +1605,55 @@ private extension GroupTrainingDetailViewController {
         column.setCustomSpacing(24, after: readMoreButton)
 
         // 8 — what to bring
+        // Rows go into a dedicated nested stack (not `column` directly) so
+        // refreshWhatToBring() can clear + rebuild just this section once
+        // fetchClassDetail() actually resolves - see the note above
+        // whatToBringStack's declaration for why that matters.
         let bringTitle = makeSectionTitle("What to bring")
         column.addArrangedSubview(bringTitle)
         column.setCustomSpacing(12, after: bringTitle)
-        appendInfoRows(GroupTrainingDetailViewController.checklistRows(from: detail?.whatToBring, fallback: GroupTrainingDetailViewController.whatToBringRows), to: column)
+        whatToBringStack.axis = .vertical
+        whatToBringStack.alignment = .fill
+        whatToBringStack.spacing = 0
+        column.addArrangedSubview(whatToBringStack)
+        appendInfoRows(GroupTrainingDetailViewController.checklistRows(from: detail?.whatToBring, fallback: GroupTrainingDetailViewController.whatToBringRows), to: whatToBringStack)
 
         // 9 — things to know
         let knowTitle = makeSectionTitle("Things to know")
         column.setCustomSpacing(24, after: column.arrangedSubviews[column.arrangedSubviews.count - 1])
         column.addArrangedSubview(knowTitle)
         column.setCustomSpacing(8, after: knowTitle)
-        appendInfoRows(GroupTrainingDetailViewController.checklistRows(from: detail?.thingsToKnow, fallback: GroupTrainingDetailViewController.thingsToKnowRows), to: column)
+        thingsToKnowStack.axis = .vertical
+        thingsToKnowStack.alignment = .fill
+        thingsToKnowStack.spacing = 0
+        column.addArrangedSubview(thingsToKnowStack)
+        appendInfoRows(GroupTrainingDetailViewController.checklistRows(from: detail?.thingsToKnow, fallback: GroupTrainingDetailViewController.thingsToKnowRows), to: thingsToKnowStack)
+        // Standard gap to whatever comes next - set once here so it holds
+        // regardless of whether the media gallery section below ends up
+        // inserted or not (refreshMediaGallery() only inserts/removes the
+        // gallery wrapper itself, it never touches this value).
+        column.setCustomSpacing(24, after: thingsToKnowStack)
 
         // 10 — media gallery, from the class detail API's media_gallery array
         // (already-resolved URLs, either the class's own uploaded gallery or
-        // the trainer's media as a fallback) - whole section hidden when
-        // there's genuinely nothing to show rather than 3 unrelated stock photos.
-        let galleryUrls = (detail?.mediaGallery ?? []).filter { !$0.isEmpty }
-        if !galleryUrls.isEmpty {
-            let galleryHeader = makeGalleryHeader()
-            column.setCustomSpacing(24, after: column.arrangedSubviews[column.arrangedSubviews.count - 1])
-            column.addArrangedSubview(galleryHeader)
-            column.setCustomSpacing(8, after: galleryHeader)
+        // the trainer's media as a fallback). Built but NOT added to `column`
+        // here - refreshMediaGallery() inserts it right after
+        // thingsToKnowStack once fetchClassDetail() resolves with real URLs,
+        // and removes it again if there are none, so there's never a
+        // hidden-but-present arranged subview to confuse the stack's spacing.
+        mediaGallerySectionView.axis = .vertical
+        mediaGallerySectionView.alignment = .fill
+        mediaGallerySectionView.spacing = 8
+        let galleryHeader = makeGalleryHeader()
+        mediaGallerySectionView.addArrangedSubview(galleryHeader)
+        let gallery = makeMediaGallery()
+        mediaGallerySectionView.addArrangedSubview(gallery)
 
-            let gallery = makeMediaGallery(urls: galleryUrls)
-            column.addArrangedSubview(gallery)
-            column.setCustomSpacing(24, after: gallery)
+        let initialGalleryUrls = (detail?.mediaGallery ?? []).filter { !$0.isEmpty }
+        populateMediaGalleryCards(urls: initialGalleryUrls)
+        if !initialGalleryUrls.isEmpty {
+            column.addArrangedSubview(mediaGallerySectionView)
+            column.setCustomSpacing(24, after: mediaGallerySectionView)
         }
 
         // 11 — trainer card
@@ -1988,6 +2047,40 @@ private extension GroupTrainingDetailViewController {
         return readMoreButton
     }
 
+    /// Called from apply(detail:) once the real API response arrives -
+    /// buildScrollView() runs synchronously in viewDidLoad, before
+    /// fetchClassDetail() has resolved, so the rows/cards it builds initially
+    /// are always the fallback/empty state. These clear + rebuild just the
+    /// affected nested stack so the real data actually reaches the screen.
+    func refreshWhatToBring() {
+        whatToBringStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        appendInfoRows(GroupTrainingDetailViewController.checklistRows(from: detail?.whatToBring, fallback: GroupTrainingDetailViewController.whatToBringRows), to: whatToBringStack)
+    }
+
+    func refreshThingsToKnow() {
+        thingsToKnowStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        appendInfoRows(GroupTrainingDetailViewController.checklistRows(from: detail?.thingsToKnow, fallback: GroupTrainingDetailViewController.thingsToKnowRows), to: thingsToKnowStack)
+    }
+
+    func refreshMediaGallery() {
+        let urls = (detail?.mediaGallery ?? []).filter { !$0.isEmpty }
+        populateMediaGalleryCards(urls: urls)
+
+        guard let column = contentStackView else { return }
+        let isInColumn = mediaGallerySectionView.superview === column
+
+        if urls.isEmpty {
+            if isInColumn {
+                column.removeArrangedSubview(mediaGallerySectionView)
+                mediaGallerySectionView.removeFromSuperview()
+            }
+        } else if !isInColumn {
+            guard let thingsToKnowIndex = column.arrangedSubviews.firstIndex(of: thingsToKnowStack) else { return }
+            column.insertArrangedSubview(mediaGallerySectionView, at: thingsToKnowIndex + 1)
+            column.setCustomSpacing(24, after: mediaGallerySectionView)
+        }
+    }
+
     func appendInfoRows(_ rows: [(icons: [String], system: String, text: String)], to column: UIStackView) {
         for (index, row) in rows.enumerated() {
             let icon = GroupTrainingDetailViewController.icon(row.icons, systemFallback: row.system)
@@ -2048,29 +2141,30 @@ private extension GroupTrainingDetailViewController {
 
     /// Static placeholder gallery, exactly as Android ships it (the migration plan
     /// explicitly says NOT to wire this to `media_gallery` unless asked).
-    func makeMediaGallery(urls: [String]) -> UIView {
-        let scroll = UIScrollView()
-        scroll.translatesAutoresizingMaskIntoConstraints = false
-        scroll.showsHorizontalScrollIndicator = false
-        scroll.backgroundColor = .clear
+    func makeMediaGallery() -> UIView {
+        mediaGalleryScrollView.translatesAutoresizingMaskIntoConstraints = false
+        mediaGalleryScrollView.showsHorizontalScrollIndicator = false
+        mediaGalleryScrollView.backgroundColor = .clear
 
-        let cards = urls.map { makeGalleryCard(urlString: $0) }
-
-        let stack = UIStackView(arrangedSubviews: cards)
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.axis = .horizontal
-        stack.alignment = .fill
-        stack.spacing = 12
-        scroll.addSubview(stack)
+        mediaGalleryCardsStack.translatesAutoresizingMaskIntoConstraints = false
+        mediaGalleryCardsStack.axis = .horizontal
+        mediaGalleryCardsStack.alignment = .fill
+        mediaGalleryCardsStack.spacing = 12
+        mediaGalleryScrollView.addSubview(mediaGalleryCardsStack)
 
         NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: scroll.contentLayoutGuide.topAnchor),
-            stack.leadingAnchor.constraint(equalTo: scroll.contentLayoutGuide.leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: scroll.contentLayoutGuide.trailingAnchor),
-            stack.bottomAnchor.constraint(equalTo: scroll.contentLayoutGuide.bottomAnchor),
-            scroll.heightAnchor.constraint(equalToConstant: Metric.galleryCardSize.height)
+            mediaGalleryCardsStack.topAnchor.constraint(equalTo: mediaGalleryScrollView.contentLayoutGuide.topAnchor),
+            mediaGalleryCardsStack.leadingAnchor.constraint(equalTo: mediaGalleryScrollView.contentLayoutGuide.leadingAnchor),
+            mediaGalleryCardsStack.trailingAnchor.constraint(equalTo: mediaGalleryScrollView.contentLayoutGuide.trailingAnchor),
+            mediaGalleryCardsStack.bottomAnchor.constraint(equalTo: mediaGalleryScrollView.contentLayoutGuide.bottomAnchor),
+            mediaGalleryScrollView.heightAnchor.constraint(equalToConstant: Metric.galleryCardSize.height)
         ])
-        return scroll
+        return mediaGalleryScrollView
+    }
+
+    func populateMediaGalleryCards(urls: [String]) {
+        mediaGalleryCardsStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        urls.forEach { mediaGalleryCardsStack.addArrangedSubview(makeGalleryCard(urlString: $0)) }
     }
 
     func makeGalleryCard(urlString: String) -> UIView {
