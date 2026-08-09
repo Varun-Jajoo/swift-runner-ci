@@ -49,8 +49,9 @@ struct BookingDataModel: Codable {
     /// rows into the wrong (PT-session) detail screen, which renders blank
     /// for a "wl-" id it doesn't understand.
     var isGroupClass: Bool {
-        if let type = type?.value, type.range(of: "group_class", options: .caseInsensitive) != nil { return true }
-        if let bookingType = bookingType, bookingType.range(of: "group", options: .caseInsensitive) != nil { return true }
+        if let id = id?.value, id.hasPrefix("wl-") { return true }
+        if let type = type?.value, type.range(of: "group", options: .caseInsensitive) != nil { return true }
+        if let bookingType = bookingType, bookingType.range(of: "group", options: .caseInsensitive) != nil || bookingType.range(of: "waitlist", options: .caseInsensitive) != nil { return true }
         if let sessionType = sessionType?.value, sessionType.range(of: "group", options: .caseInsensitive) != nil { return true }
         return false
     }

@@ -490,9 +490,25 @@ final class SlotConfirmedViewController: CommonViewController {
     /// land on the duplicated/reskinned "Booking Cancelled" screen instead of
     /// just popping back to a stale details view.
     private func navigateToBookingCancelled() {
+        let isWaitlistBooking = bookingId.hasPrefix("wl-")
+        let rawPrice = classPrice.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleanValue = rawPrice
+            .replacingOccurrences(of: "AED", with: "", options: .caseInsensitive)
+            .replacingOccurrences(of: " ", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let isFreeOrZero = rawPrice.isEmpty ||
+            cleanValue.caseInsensitiveCompare("free") == .orderedSame ||
+            cleanValue == "0" ||
+            cleanValue == "0.00" ||
+            cleanValue == "0.0" ||
+            (Double(cleanValue) ?? 0.0) <= 0.0
+
         let controller = BookingCancelledViewController()
         controller.classTitle = classTitle
         controller.classTime = classTime
+        controller.isWaitlist = isWaitlistBooking
+        controller.isRefund = !isFreeOrZero
+        controller.price = !isFreeOrZero ? "\(cleanValue) AED" : ""
         controller.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(controller, animated: true)
     }
@@ -795,27 +811,31 @@ private extension SlotConfirmedViewController {
     /// sits *behind* the details card, which carries a 50dp bottom margin — so the
     /// strip peeks out 50dp below the card and is overlapped for the rest of its
     /// height.
-    /// Plain vertical stack - the previous "peek behind the card" mechanic
-    /// (card overlapping a taller strip pinned to the container's bottom)
-    /// left a large dead-looking gap whenever the card was shorter than the
-    /// reserved reveal (e.g. no price row), rendering as a big empty block
-    /// above the policy row instead of an actual peeking card.
     func makeStackedCards() -> UIView {
-        let stack = UIStackView(arrangedSubviews: [makeDetailsCard(), makeCancellationPolicyBar()])
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.axis = .vertical
-        stack.alignment = .fill
-        stack.spacing = 12
-        return stack
+        let container = UIView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+
+        let policyBar = makeCancellationPolicyBar()
+        let detailsCard = makeDetailsCard()
+
+        container.addSubview(policyBar)
+        container.addSubview(detailsCard)
+
+        NSLayoutConstraint.activate([
+            detailsCard.topAnchor.constraint(equalTo: container.topAnchor),
+            detailsCard.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            detailsCard.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+
+            policyBar.topAnchor.constraint(equalTo: detailsCard.bottomAnchor, constant: -20),
+            policyBar.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            policyBar.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            policyBar.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+        ])
+        return container
     }
 
     /// `confirmed_cancellation_bottom_bg`: flat `#2B2B2C` fill, `#232323` hairline,
-    /// 16dp radius. Its row and chevron are bottom-aligned so they land inside the
-    /// 50dp strip that is not covered by the card above.
-    ///
-    /// The Android view sets `clickable="true"` but never attaches an
-    /// `OnClickListener`, so it is decorative there; left non-interactive here
-    /// rather than inventing a destination.
+    /// 16dp radius. Peeking card attached behind detailsCard.
     func makeCancellationPolicyBar() -> UIView {
         let bar = UIView()
         bar.translatesAutoresizingMaskIntoConstraints = false
@@ -856,12 +876,12 @@ private extension SlotConfirmedViewController {
             iconView.widthAnchor.constraint(equalToConstant: Metric.policyIconSide),
             iconView.heightAnchor.constraint(equalToConstant: Metric.policyIconSide),
 
-            row.leadingAnchor.constraint(equalTo: bar.leadingAnchor, constant: Metric.policyBarInset),
-            row.topAnchor.constraint(equalTo: bar.topAnchor, constant: Metric.policyBarInset),
-            row.bottomAnchor.constraint(equalTo: bar.bottomAnchor, constant: -Metric.policyBarInset),
+            row.leadingAnchor.constraint(equalTo: bar.leadingAnchor, constant: 16),
+            row.topAnchor.constraint(equalTo: bar.topAnchor, constant: 34),
+            row.bottomAnchor.constraint(equalTo: bar.bottomAnchor, constant: -14),
             row.trailingAnchor.constraint(lessThanOrEqualTo: chevron.leadingAnchor, constant: -12),
 
-            chevron.trailingAnchor.constraint(equalTo: bar.trailingAnchor, constant: -Metric.policyBarInset),
+            chevron.trailingAnchor.constraint(equalTo: bar.trailingAnchor, constant: -16),
             chevron.centerYAnchor.constraint(equalTo: row.centerYAnchor),
             chevron.widthAnchor.constraint(equalToConstant: Metric.policyChevronSide),
             chevron.heightAnchor.constraint(equalToConstant: Metric.policyChevronSide)

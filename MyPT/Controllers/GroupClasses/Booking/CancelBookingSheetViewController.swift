@@ -632,9 +632,9 @@ private extension CancelBookingSheetViewController {
         headingRow.alignment = .center
         headingRow.spacing = 8
 
-        let headingWrapper = UIView()
-        headingWrapper.translatesAutoresizingMaskIntoConstraints = false
-        headingWrapper.addSubview(headingRow)
+        let indentSpacer = UIView()
+        indentSpacer.translatesAutoresizingMaskIntoConstraints = false
+        indentSpacer.widthAnchor.constraint(equalToConstant: 24).isActive = true
 
         let bodyLabel = UILabel()
         bodyLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -648,26 +648,25 @@ private extension CancelBookingSheetViewController {
             ]
         )
 
-        let stack = UIStackView(arrangedSubviews: [headingWrapper, bodyLabel])
+        let bodyRow = UIStackView(arrangedSubviews: [indentSpacer, bodyLabel])
+        bodyRow.translatesAutoresizingMaskIntoConstraints = false
+        bodyRow.axis = .horizontal
+        bodyRow.alignment = .fill
+
+        let stack = UIStackView(arrangedSubviews: [headingRow, bodyRow])
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.axis = .vertical
         stack.alignment = .fill
-        stack.spacing = 6
+        stack.spacing = 5
         box.addSubview(stack)
 
         NSLayoutConstraint.activate([
             warningIcon.widthAnchor.constraint(equalToConstant: 16),
             warningIcon.heightAnchor.constraint(equalToConstant: 16),
-            headingRow.topAnchor.constraint(equalTo: headingWrapper.topAnchor),
-            headingRow.bottomAnchor.constraint(equalTo: headingWrapper.bottomAnchor),
-            headingRow.leadingAnchor.constraint(equalTo: headingWrapper.leadingAnchor),
-            headingRow.trailingAnchor.constraint(lessThanOrEqualTo: headingWrapper.trailingAnchor)
-        ])
 
-        NSLayoutConstraint.activate([
             stack.topAnchor.constraint(equalTo: box.topAnchor, constant: 12),
-            stack.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 16),
-            stack.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -16),
+            stack.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 12),
+            stack.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -12),
             stack.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -12)
         ])
         return box

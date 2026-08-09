@@ -24,6 +24,9 @@ final class BookingCancelledViewController: CommonViewController {
 
     var classTitle: String = "Morning Flow Yoga"
     var classTime: String = "Wed, 9 Jul • 7-8 AM"
+    var isWaitlist: Bool = false
+    var isRefund: Bool = false
+    var price: String = ""
 
     // MARK: - Layout constants
 
@@ -40,17 +43,21 @@ final class BookingCancelledViewController: CommonViewController {
     private enum Palette {
         static let headerTitle = UIColor(hex: "#FAFAFA")
         static let headerSubtext = UIColor(hex: "#FAFAFA").withAlphaComponent(0.55) // #8CFAFAFA
+        static let divider = UIColor.white.withAlphaComponent(0.10)                  // #1AFFFFFF
         static let cardFill = UIColor(hex: "#18191C")
         static let cardStroke = UIColor(hex: "#232323")
         static let tileFill = UIColor(hex: "#101113")
+        static let fieldLabel = UIColor(hex: "#959595")
         static let rowTitle = UIColor(hex: "#FAFAFA")
-        static let rowSubtitle = UIColor(hex: "#FAFAFA").withAlphaComponent(0.55) // #8CFAFAFA
+        static let rowSubtitle = UIColor(hex: "#959595")
         static let ctaInk = UIColor(hex: "#131416")
     }
 
     private enum Copy {
         static let headerTitle = "Booking Cancelled"
         static let headerSubtext = "Your spot has been released for other members."
+        static let classFieldLabel = "CANCELLED CLASS"
+        static let statusFieldLabel = "BOOKING STATUS"
         static let viewBookingsCTA = "VIEW MY BOOKINGS"
     }
 
@@ -66,6 +73,8 @@ final class BookingCancelledViewController: CommonViewController {
 
     private let classTitleLabel = UILabel()
     private let classDateTimeLabel = UILabel()
+    private let statusTitleLabel = UILabel()
+    private let statusDescriptionLabel = UILabel()
 
     // MARK: - Lifecycle
 
@@ -88,6 +97,20 @@ final class BookingCancelledViewController: CommonViewController {
     private func populateUI() {
         classTitleLabel.text = classTitle
         classDateTimeLabel.text = classTime
+
+        if isWaitlist {
+            statusTitleLabel.text = "Waitlist Cancelled"
+            statusDescriptionLabel.text = "You have been removed from the waitlist."
+        } else if isRefund && !price.isEmpty {
+            statusTitleLabel.text = "\(price) Refund Eligible"
+            statusDescriptionLabel.text = "Your refund will be processed to your original payment method."
+        } else if isRefund {
+            statusTitleLabel.text = "Refund Eligible"
+            statusDescriptionLabel.text = "Your refund will be processed to your original payment method."
+        } else {
+            statusTitleLabel.text = "Spot Released"
+            statusDescriptionLabel.text = "Your spot has been made available to waitlisted members."
+        }
     }
 
     // MARK: - Actions
@@ -138,35 +161,33 @@ private extension BookingCancelledViewController {
         ctaButton.bandThickness = 2
         ctaButton.configure(title: Copy.viewBookingsCTA,
                             font: AppFont.semibold.size(16.0, familyName: familyFunnelSans),
-                            titleColor: Palette.ctaInk)
+                            textColor: Palette.ctaInk)
         ctaButton.addTarget(self, action: #selector(viewMyBookingsTapped), for: .touchUpInside)
         footerView.addSubview(ctaButton)
 
         NSLayoutConstraint.activate([
             footerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             footerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            footerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            footerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
 
             ctaButton.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 12),
             ctaButton.leadingAnchor.constraint(equalTo: footerView.leadingAnchor, constant: Metric.horizontalInset),
             ctaButton.trailingAnchor.constraint(equalTo: footerView.trailingAnchor, constant: -Metric.horizontalInset),
-            ctaButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
+            ctaButton.bottomAnchor.constraint(equalTo: footerView.bottomAnchor, constant: -12),
             ctaButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight)
         ])
     }
 
     func buildScrollView() {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.backgroundColor = .clear
         scrollView.showsVerticalScrollIndicator = false
+        scrollView.alwaysBounceVertical = true
         view.addSubview(scrollView)
 
         contentStack.translatesAutoresizingMaskIntoConstraints = false
         contentStack.axis = .vertical
         contentStack.alignment = .fill
-        contentStack.spacing = 0
-        contentStack.isLayoutMarginsRelativeArrangement = true
-        contentStack.layoutMargins = UIEdgeInsets(top: 20, left: Metric.horizontalInset, bottom: 24, right: Metric.horizontalInset)
+        contentStack.spacing = 24
         scrollView.addSubview(contentStack)
 
         NSLayoutConstraint.activate([
@@ -175,28 +196,26 @@ private extension BookingCancelledViewController {
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: footerView.topAnchor),
 
-            contentStack.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            contentStack.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            contentStack.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-            contentStack.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            contentStack.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
+            contentStack.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor, constant: 12),
+            contentStack.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor, constant: Metric.horizontalInset),
+            contentStack.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor, constant: -Metric.horizontalInset),
+            contentStack.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor, constant: -24),
+            contentStack.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor, constant: -2 * Metric.horizontalInset)
         ])
 
-        let backRow = makeBackButtonRow()
-        contentStack.addArrangedSubview(backRow)
-        contentStack.setCustomSpacing(28, after: backRow)
+        buildContentStack()
+    }
 
-        let badgeRow = makeBadgeRow()
-        contentStack.addArrangedSubview(badgeRow)
-        contentStack.setCustomSpacing(24, after: badgeRow)
+    func buildContentStack() {
+        contentStack.addArrangedSubview(makeBackButtonRow())
+        contentStack.addArrangedSubview(makeBadgeRow())
 
-        let titleLabel = makeHeaderTitleLabel()
-        contentStack.addArrangedSubview(titleLabel)
-        contentStack.setCustomSpacing(8, after: titleLabel)
-
-        let subtextLabel = makeHeaderSubtextLabel()
-        contentStack.addArrangedSubview(subtextLabel)
-        contentStack.setCustomSpacing(28, after: subtextLabel)
+        let headerStack = UIStackView(arrangedSubviews: [makeHeaderTitleLabel(), makeHeaderSubtextLabel()])
+        headerStack.translatesAutoresizingMaskIntoConstraints = false
+        headerStack.axis = .vertical
+        headerStack.alignment = .fill
+        headerStack.spacing = 8
+        contentStack.addArrangedSubview(headerStack)
 
         contentStack.addArrangedSubview(makeSummaryCard())
     }
@@ -267,7 +286,7 @@ private extension BookingCancelledViewController {
         return label
     }
 
-    // MARK: Cancelled booking summary card
+    // MARK: Cancelled booking summary card (1:1 with Booking Paused / Blocked card)
 
     func makeSummaryCard() -> UIView {
         let card = GlassCardView(cornerRadius: Metric.cardCornerRadius)
@@ -279,6 +298,61 @@ private extension BookingCancelledViewController {
         card.sheenOrigin = .topCenter
         card.sheenAlpha = 0.08
 
+        classTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        classTitleLabel.font = AppFont.semibold.size(16.0, familyName: familyFunnelSans)
+        classTitleLabel.textColor = Palette.rowTitle
+        classTitleLabel.numberOfLines = 1
+
+        classDateTimeLabel.translatesAutoresizingMaskIntoConstraints = false
+        classDateTimeLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
+        classDateTimeLabel.textColor = Palette.rowSubtitle
+        classDateTimeLabel.numberOfLines = 1
+
+        let classRow = makeFieldRow(icon: BookingCancelledViewController.icon(["ic_calendar_cross_18", "calendar-cross"], systemFallback: "calendar.badge.exclamationmark"),
+                                    fieldLabel: Copy.classFieldLabel,
+                                    titleLabel: classTitleLabel,
+                                    subLabel: classDateTimeLabel)
+
+        let divider = UIView()
+        divider.translatesAutoresizingMaskIntoConstraints = false
+        divider.backgroundColor = Palette.divider
+        divider.heightAnchor.constraint(equalToConstant: 1).isActive = true
+
+        statusTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        statusTitleLabel.font = AppFont.bold.size(18.0, familyName: familyFunnelSans)
+        statusTitleLabel.textColor = Palette.rowTitle
+        statusTitleLabel.numberOfLines = 1
+
+        statusDescriptionLabel.translatesAutoresizingMaskIntoConstraints = false
+        statusDescriptionLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
+        statusDescriptionLabel.textColor = Palette.rowSubtitle
+        statusDescriptionLabel.numberOfLines = 0
+
+        let statusRow = makeFieldRow(icon: BookingCancelledViewController.icon(["ic_chat_cancellation_20", "info-hexagon"], systemFallback: "info.circle"),
+                                     fieldLabel: Copy.statusFieldLabel,
+                                     titleLabel: statusTitleLabel,
+                                     subLabel: statusDescriptionLabel)
+
+        let stack = UIStackView(arrangedSubviews: [classRow, divider, statusRow])
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .vertical
+        stack.alignment = .fill
+        stack.spacing = 20
+
+        card.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: card.topAnchor, constant: Metric.cardPadding),
+            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: Metric.cardPadding),
+            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -Metric.cardPadding),
+            stack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -Metric.cardPadding)
+        ])
+        return card
+    }
+
+    func makeFieldRow(icon: UIImage?, fieldLabel: String, titleLabel: UILabel, subLabel: UILabel) -> UIView {
+        let row = UIView()
+        row.translatesAutoresizingMaskIntoConstraints = false
+
         let iconTile = GlassCardView(cornerRadius: 12)
         iconTile.translatesAutoresizingMaskIntoConstraints = false
         iconTile.fillColor = Palette.tileFill
@@ -288,54 +362,46 @@ private extension BookingCancelledViewController {
         iconTile.sheenOrigin = .topCenter
         iconTile.sheenAlpha = 0.08
 
-        let iconView = UIImageView(image: BookingCancelledViewController.icon(["ic_calendar_cross_18", "calendar-cross"], systemFallback: "calendar.badge.exclamationmark")?
-            .withRenderingMode(.alwaysTemplate))
+        let iconView = UIImageView(image: icon?.withRenderingMode(.alwaysTemplate))
         iconView.tintColor = .white
         iconView.translatesAutoresizingMaskIntoConstraints = false
         iconView.contentMode = .scaleAspectFit
         iconTile.addSubview(iconView)
 
-        classTitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        classTitleLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
-        classTitleLabel.textColor = Palette.rowTitle
-        classTitleLabel.numberOfLines = 1
-        classTitleLabel.lineBreakMode = .byTruncatingTail
+        let fieldLabelView = UILabel()
+        fieldLabelView.translatesAutoresizingMaskIntoConstraints = false
+        fieldLabelView.font = AppFont.semibold.size(11.0, familyName: familyFunnelSans)
+        fieldLabelView.textColor = Palette.fieldLabel
+        fieldLabelView.letterSpacing(0.08)
+        fieldLabelView.numberOfLines = 1
+        fieldLabelView.text = fieldLabel
 
-        classDateTimeLabel.translatesAutoresizingMaskIntoConstraints = false
-        classDateTimeLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
-        classDateTimeLabel.textColor = Palette.rowSubtitle
-        classDateTimeLabel.numberOfLines = 1
-        classDateTimeLabel.lineBreakMode = .byTruncatingTail
-
-        let textStack = UIStackView(arrangedSubviews: [classTitleLabel, classDateTimeLabel])
+        let textStack = UIStackView(arrangedSubviews: [fieldLabelView, titleLabel, subLabel])
         textStack.translatesAutoresizingMaskIntoConstraints = false
         textStack.axis = .vertical
         textStack.alignment = .fill
-        textStack.spacing = 2
-        textStack.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        textStack.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        textStack.spacing = 4
 
-        let row = UIStackView(arrangedSubviews: [iconTile, textStack])
-        row.translatesAutoresizingMaskIntoConstraints = false
-        row.axis = .horizontal
-        row.alignment = .center
-        row.spacing = 12
-        card.addSubview(row)
+        row.addSubview(iconTile)
+        row.addSubview(textStack)
 
         NSLayoutConstraint.activate([
+            iconTile.leadingAnchor.constraint(equalTo: row.leadingAnchor),
+            iconTile.topAnchor.constraint(equalTo: row.topAnchor),
             iconTile.widthAnchor.constraint(equalToConstant: Metric.iconTileSide),
             iconTile.heightAnchor.constraint(equalToConstant: Metric.iconTileSide),
+
             iconView.centerXAnchor.constraint(equalTo: iconTile.centerXAnchor),
             iconView.centerYAnchor.constraint(equalTo: iconTile.centerYAnchor),
             iconView.widthAnchor.constraint(equalToConstant: 18),
             iconView.heightAnchor.constraint(equalToConstant: 18),
 
-            row.topAnchor.constraint(equalTo: card.topAnchor, constant: Metric.cardPadding),
-            row.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: Metric.cardPadding),
-            row.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -Metric.cardPadding),
-            row.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -Metric.cardPadding)
+            textStack.leadingAnchor.constraint(equalTo: iconTile.trailingAnchor, constant: 12),
+            textStack.trailingAnchor.constraint(equalTo: row.trailingAnchor),
+            textStack.topAnchor.constraint(equalTo: row.topAnchor),
+            textStack.bottomAnchor.constraint(equalTo: row.bottomAnchor)
         ])
-        return card
+        return row
     }
 }
 
