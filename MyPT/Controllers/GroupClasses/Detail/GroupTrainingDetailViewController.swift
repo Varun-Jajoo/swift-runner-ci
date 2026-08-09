@@ -427,6 +427,29 @@ final class GroupTrainingDetailViewController: CommonViewController {
             scrollView.contentInset = .zero
             setCTATitle(defaultBookingText)
         }
+
+        // GroupClassCardCollectionViewCell replaces the capacity bar with a
+        // "BOOKED"/"ON WAITLIST" badge for classes this user already
+        // booked/waitlisted - this screen never did, leaving the bar showing
+        // a capacity color unrelated to this user's own status. Applied
+        // after the capacity branch above so isWaitlistMode/waitlistBanner/
+        // the CTA title it sets (genuinely about the class's own capacity,
+        // not this user) stay untouched.
+        if isAlreadyBooked {
+            progressBar.isHidden = true
+            spotsLabel.text = "BOOKED"
+            spotsLabel.font = AppFont.bold.size(10.0, familyName: familyFunnelSans)
+            spotsLabel.textColor = UIColor(hex: "#32AE5C")
+        } else if isAlreadyWaitlisted {
+            progressBar.isHidden = true
+            spotsLabel.text = "ON WAITLIST"
+            spotsLabel.font = AppFont.bold.size(10.0, familyName: familyFunnelSans)
+            spotsLabel.textColor = UIColor(hex: "#FFCC33")
+        } else {
+            progressBar.isHidden = false
+            spotsLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
+            spotsLabel.textColor = Palette.spotsText
+        }
     }
 
     /// Re-measures the button's `wrap_content`+`minWidth` width on every title

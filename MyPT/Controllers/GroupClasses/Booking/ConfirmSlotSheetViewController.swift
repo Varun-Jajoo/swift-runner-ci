@@ -49,6 +49,15 @@ struct ConfirmSlotSheetInput {
     var price: String = ""
     /// Drives the CTA label: `true` -> "CONFIRM YOUR SLOT", `false` -> "PROCEED TO PAYMENT".
     var isFreeForUser: Bool = true
+    /// When true, this is a waitlist join, not a booking - confirming calls
+    /// `onWaitlistJoinConfirmed` instead of POSTing book-class. Was previously
+    /// missing entirely: `GroupTrainingDetailViewController` called
+    /// `joinWaitlist()` straight from the outer CTA tap with no confirmation
+    /// sheet at all for the plain (non-special) waitlist case - the member
+    /// was joined on a single tap with no chance to review or back out,
+    /// unlike every other path on this screen (booking, special-waitlist),
+    /// which always confirms first.
+    var isWaitlistJoin: Bool = false
 }
 
 // MARK: - ConfirmSlotSheetViewController
@@ -73,6 +82,10 @@ final class ConfirmSlotSheetViewController: CommonViewController {
     /// already does for the eager (pre-check-true) tap path - this sheet is the
     /// other place a free booking gets POSTed from and needs the same fallback.
     var onSpecialWaitlistTriggered: ((_ notifyHours: Int?) -> Void)?
+
+    /// Fires instead of the book-class POST when `input.isWaitlistJoin` is true -
+    /// the presenter sets this to its own `joinWaitlist()`.
+    var onWaitlistJoinConfirmed: (() -> Void)?
 
     // MARK: Layout constants
 
@@ -272,7 +285,11 @@ final class ConfirmSlotSheetViewController: CommonViewController {
         let trainer = input.trainerName.trimmingCharacters(in: .whitespacesAndNewlines)
         trainerNameLabel.text = "Trainer: " + (trainer.isEmpty ? Copy.defaultTrainer : trainer)
 
-        setCTATitle(input.isFreeForUser ? Copy.confirmCTA : Copy.paymentCTA)
+        if input.isWaitlistJoin {
+            setCTATitle(Copy.joinWaitlistCTA)
+        } else {
+            setCTATitle(input.isFreeForUser ? Copy.confirmCTA : Copy.paymentCTA)
+        }
     }
 
     private func setCTATitle(_ title: String) {

@@ -47,7 +47,7 @@ struct DoubleBookingSheetInput {
 
 // MARK: - DoubleBookingSheetViewController
 
-final class DoubleBookingSheetViewController: CommonViewController {
+final class DoubleBookingSheetViewController: CommonViewController, UIAdaptivePresentationControllerDelegate {
 
     // MARK: Input / output
 
@@ -143,6 +143,16 @@ final class DoubleBookingSheetViewController: CommonViewController {
     /// `presentingViewController` goes `nil` the moment a dismissal begins.
     private weak var hostNavigationController: UINavigationController?
 
+    /// In post-hoc mode (`onJoinConfirmed == nil`) the special-waitlist row is
+    /// ALREADY committed server-side before this sheet ever shows - there's
+    /// nothing left to "confirm" or "cancel" here. Dismissing via the X, a
+    /// swipe-down, or a tap outside must still land the member on the
+    /// overlapping-waitlist confirmation screen, or they end up ambiguously
+    /// "on some waitlist" with no idea which one. Guards against
+    /// double-navigating when a button already routed somewhere specific
+    /// (Join / Manage Booking) before the dismissal completed.
+    private var handledNav = false
+
     // MARK: Init
 
     init(input: DoubleBookingSheetInput) {
@@ -168,6 +178,11 @@ final class DoubleBookingSheetViewController: CommonViewController {
         buildLayout()
         populateUI()
         configureSheetPresentation()
+
+        presentationController?.delegate = self
+        // Post-hoc mode: no safe "swipe away and pretend nothing happened"
+        // state exists - force an explicit button tap (X/Join/Manage).
+        isModalInPresentation = onJoinConfirmed != nil ? false : true
     }
 
     override func viewDidLayoutSubviews() {
@@ -238,12 +253,26 @@ final class DoubleBookingSheetViewController: CommonViewController {
     // MARK: Actions
 
     @objc private func closeTapped() {
-        dismiss(animated: true)
+        guard onJoinConfirmed == nil else {
+            dismiss(animated: true)
+            return
+        }
+
+        // Post-hoc mode: the row already exists server-side - closing must
+        // still land the member on the overlapping-waitlist confirmation
+        // screen, not silently vanish.
+        handledNav = true
+        let navigationController = resolveHostNavigationController()
+        hostNavigationController = navigationController
+        dismiss(animated: true) { [weak self] in
+            self?.pushDoubleBookingConfirmed(on: navigationController)
+        }
     }
 
     /// Port of `btnJoinWaitlistDoubleBooking.setOnClickListener`.
     @objc private func joinWaitlistTapped() {
         TapticEngine.selection.feedback()
+        handledNav = true
 
         if let onJoinConfirmed = onJoinConfirmed {
             // Entry hasn't happened yet - this tap is the explicit confirmation,
@@ -259,21 +288,8 @@ final class DoubleBookingSheetViewController: CommonViewController {
         let navigationController = resolveHostNavigationController()
         hostNavigationController = navigationController
 
-        let title = input.classTitle
-        let time = input.classTime
-        let location = input.classLocation
-        let trainer = input.trainerName
-        let distance = input.distance
-
-        dismiss(animated: true) {
-            let controller = DoubleBookingWaitlistConfirmedViewController()
-            controller.classTitle = title
-            controller.classTime = time
-            controller.classLocation = location
-            controller.trainerName = trainer
-            controller.distance = distance
-            controller.hidesBottomBarWhenPushed = true
-            navigationController?.pushViewController(controller, animated: true)
+        dismiss(animated: true) { [weak self] in
+            self?.pushDoubleBookingConfirmed(on: navigationController)
         }
     }
 
@@ -281,6 +297,7 @@ final class DoubleBookingSheetViewController: CommonViewController {
     /// the Bookings tab exactly like `SlotConfirmedViewController.viewMyBookingsTapped()`.
     @objc private func manageBookingTapped() {
         TapticEngine.selection.feedback()
+        handledNav = true
 
         // Resolved *before* dismiss starts - `presentingViewController` (and the
         // tab-bar walk that depends on it) goes `nil` the instant dismissal begins.
@@ -301,6 +318,31 @@ final class DoubleBookingSheetViewController: CommonViewController {
             tabBarController.selectedIndex = Metric.bookingsTabIndex
             hostNavigationController?.popToRootViewController(animated: false)
         }
+    }
+
+    /// Builds and pushes the overlapping-waitlist confirmation screen. Shared by
+    /// every post-hoc dismissal path (X tap, swipe-down, Join Waitlist tap) since
+    /// the row already exists server-side regardless of how this sheet closes.
+    private func pushDoubleBookingConfirmed(on navigationController: UINavigationController?) {
+        let controller = DoubleBookingWaitlistConfirmedViewController()
+        controller.classTitle = input.classTitle
+        controller.classTime = input.classTime
+        controller.classLocation = input.classLocation
+        controller.trainerName = input.trainerName
+        controller.distance = input.distance
+        controller.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(controller, animated: true)
+    }
+
+    // MARK: UIAdaptivePresentationControllerDelegate
+
+    /// Catches interactive dismissal (swipe-down / tap-outside) that bypasses
+    /// every button above. `isModalInPresentation` blocks this in post-hoc mode
+    /// already, but this is the safety net if that ever gets bypassed.
+    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+        guard !handledNav, onJoinConfirmed == nil else { return }
+        handledNav = true
+        pushDoubleBookingConfirmed(on: resolveHostNavigationController())
     }
 
     private func resolveHostNavigationController() -> UINavigationController? {

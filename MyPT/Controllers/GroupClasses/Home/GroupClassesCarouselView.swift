@@ -214,14 +214,18 @@ final class GroupClassesCarouselView: UIView {
         collectionView.register(GroupClassCardCollectionViewCell.self,
                                 forCellWithReuseIdentifier: GroupClassCardCollectionViewCell.reuseIdentifier)
 
-        // border-radius: var(--Radius-full, 999px) - i.e. a true capsule, fully
-        // rounded on both ends (the radius itself is applied in
-        // `layoutSubviews`, once the pill's height is known).
+        // border-radius: var(--Radius-full, 999px) - literally 999, not a
+        // computed bounds.height/2 (which depends on layoutSubviews firing
+        // with the pill's final size and evidently wasn't taking effect on
+        // device - still rendered square-cornered). CALayer clamps an
+        // oversized cornerRadius to a perfect capsule the same way CSS
+        // clamps an oversized border-radius, so this can't be wrong no
+        // matter what the pill's resolved height ends up being.
         // background: var(--Colors-Surface-Low, #131416) - exact match for
         // GroupClassColor.bg2.
         dotsPill.translatesAutoresizingMaskIntoConstraints = false
         dotsPill.backgroundColor = GroupClassColor.bg2.color
-        dotsPill.layer.cornerRadius = 9
+        dotsPill.layer.cornerRadius = 999
         dotsPill.layer.masksToBounds = true
         dotsView.translatesAutoresizingMaskIntoConstraints = false
         dotsPill.addSubview(dotsView)
@@ -308,11 +312,6 @@ final class GroupClassesCarouselView: UIView {
 
     @objc private func seeAllTapped() {
         onSeeAllTapped?()
-    }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        dotsPill.layer.cornerRadius = dotsPill.bounds.height / 2
     }
 
     // MARK: Data
