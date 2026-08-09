@@ -39,6 +39,9 @@ final class GroupTrainingDetailViewController: CommonViewController {
     // ported logic stays readable next to the Kotlin.
 
     private var scheduleId: String = ""
+    /// Skips the redundant re-fetch on the first viewWillAppear right after
+    /// viewDidLoad already fetched. Set true once that first fetch fires.
+    private var hasFetchedOnce: Bool = false
     private var classTitle: String = ""
     private var classTime: String = ""
     private var classLocation: String = ""
@@ -240,6 +243,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
 
         // Android: `if (scheduleId.isNotBlank()) fetchClassDetail()`.
         if !scheduleId.isEmpty {
+            hasFetchedOnce = true
             fetchClassDetail()
         }
     }
@@ -247,6 +251,17 @@ final class GroupTrainingDetailViewController: CommonViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.isNavigationBarHidden = true
+
+        // willSpecialWaitlist/isAlreadyBooked/isAlreadyWaitlisted are snapshotted
+        // once per fetch and read again at CTA-tap time. Without a re-fetch here,
+        // booking/waitlisting a DIFFERENT class on another screen and coming back
+        // to this still-alive screen leaves those flags stale - the normal confirm
+        // sheet can show when the server would now say "special", since nothing
+        // ever told this screen its own snapshot is out of date. Skips the very
+        // first appearance since viewDidLoad already just fetched.
+        if hasFetchedOnce && !scheduleId.isEmpty {
+            fetchClassDetail()
+        }
     }
 
     override func viewSafeAreaInsetsDidChange() {
@@ -1042,7 +1057,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
                 presentDoubleBookingSheet(preCheck: true)
                 return
             }
-            joinWaitlist()
+            presentConfirmWaitlistJoinSheet()
             return
         }
 
@@ -1168,14 +1183,25 @@ final class GroupTrainingDetailViewController: CommonViewController {
                 return
             }
 
-            let controller = WaitlistConfirmedViewController()
-            controller.classTitle = classTitle
-            controller.classTime = dateTimeLabel.text ?? ""
-            controller.classLocation = classLocation
-            controller.trainerName = trainerName
-            controller.distance = currentDistance
-            controller.hidesBottomBarWhenPushed = true
-            navigationController?.pushViewController(controller, animated: true)
+            // Port of Android's `isSpecialWaitlist = skipSpecialSheetCheck ||
+            // waitlist_type == "special"` in `joinWaitlistDirectly()` - missing
+            // here meant a pre-confirmed double-booking join (skipSpecialSheetCheck
+            // true, sheet already shown) always landed on the PLAIN waitlist
+            // confirmed screen instead of the overlapping-waitlist one, even
+            // though the row that actually got created server-side was special.
+            let isSpecialWaitlist = skipSpecialSheetCheck || result.specialWaitlist?.isSpecial == true
+            if isSpecialWaitlist {
+                pushDoubleBookingWaitlistConfirmed()
+            } else {
+                let controller = WaitlistConfirmedViewController()
+                controller.classTitle = classTitle
+                controller.classTime = dateTimeLabel.text ?? ""
+                controller.classLocation = classLocation
+                controller.trainerName = trainerName
+                controller.distance = currentDistance
+                controller.hidesBottomBarWhenPushed = true
+                navigationController?.pushViewController(controller, animated: true)
+            }
             return
         }
 
@@ -1242,7 +1268,18 @@ final class GroupTrainingDetailViewController: CommonViewController {
                 return
             }
 
-            pushSlotConfirmedFresh()
+            // Port of Android's `isSpecialWaitlist = skipSpecialSheetCheck ||
+            // waitlist_type == "special"` in `performFreeBooking()` - missing
+            // here meant a pre-confirmed double-booking (skipSpecialSheetCheck
+            // true, sheet already shown) always landed on "Your slot is
+            // confirmed" even though the backend diverted this booking into a
+            // special-waitlist row instead of an actual booking.
+            let isSpecialWaitlist = skipSpecialSheetCheck || result.specialWaitlist?.isSpecial == true
+            if isSpecialWaitlist {
+                pushDoubleBookingWaitlistConfirmed()
+            } else {
+                pushSlotConfirmedFresh()
+            }
             return
         }
 
@@ -1272,6 +1309,22 @@ final class GroupTrainingDetailViewController: CommonViewController {
         controller.trainerName = trainerName
         controller.distance = locationDistanceLabel.text ?? currentDistance
         controller.classPrice = ""
+        controller.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(controller, animated: true)
+    }
+
+    /// Shared destination for any post-hoc "this join/booking turned out to
+    /// already be special" outcome - a pre-confirmed double-booking sheet
+    /// (`skipSpecialSheetCheck == true`) means the row is guaranteed special
+    /// server-side regardless of what this specific response's own
+    /// `specialWaitlist.isSpecial` says.
+    private func pushDoubleBookingWaitlistConfirmed() {
+        let controller = DoubleBookingWaitlistConfirmedViewController()
+        controller.classTitle = classTitle
+        controller.classTime = dateTimeLabel.text ?? ""
+        controller.classLocation = classLocation
+        controller.trainerName = trainerName
+        controller.distance = locationDistanceLabel.text ?? currentDistance
         controller.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(controller, animated: true)
     }
@@ -1358,6 +1411,28 @@ final class GroupTrainingDetailViewController: CommonViewController {
             // instead of silently letting the normal confirm sheet's own success
             // path treat this as an ordinary booking.
             self?.presentDoubleBookingSheet(preCheck: false, notifyHours: notifyHours)
+        })
+    }
+
+    /// Was previously missing entirely: the `isWaitlistMode && !willSpecialWaitlist`
+    /// branch above called `joinWaitlist()` straight from the outer CTA tap with no
+    /// confirmation step at all, unlike every other path on this screen (booking,
+    /// special-waitlist), which always confirms first. Mirrors Android's fix -
+    /// `showConfirmSlotBottomSheet(..., isWaitlistJoin = true)`.
+    private func presentConfirmWaitlistJoinSheet() {
+        var input = ConfirmSlotSheetInput()
+        input.scheduleId = scheduleId
+        input.title = classTitle
+        input.time = dateTimeLabel.text ?? ""
+        input.location = classLocation
+        input.distance = locationDistanceLabel.text ?? currentDistance
+        input.trainerName = trainerName
+        input.price = classPrice
+        input.isFreeForUser = isFreeForUser
+        input.isWaitlistJoin = true
+
+        ConfirmSlotSheetViewController.present(from: self, input: input, onWaitlistJoinConfirmed: { [weak self] in
+            self?.joinWaitlist()
         })
     }
 

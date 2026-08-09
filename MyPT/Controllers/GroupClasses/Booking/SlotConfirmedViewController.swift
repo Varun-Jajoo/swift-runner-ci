@@ -356,6 +356,13 @@ final class SlotConfirmedViewController: CommonViewController {
         if !isReadOnly, !scheduleId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             sendBookingData()
         }
+
+        // Only for a just-completed booking, not a read-only review of one
+        // that already existed - arms a "N spots opened up" local
+        // notification for the next time the app backgrounds.
+        if !isReadOnly {
+            WaitlistOpenSlotsNotifier.armOnNextBackground()
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {

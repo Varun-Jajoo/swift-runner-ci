@@ -384,6 +384,13 @@ final class ConfirmSlotSheetViewController: CommonViewController {
             return
         }
 
+        if input.isWaitlistJoin {
+            dismiss(animated: true) { [weak self] in
+                self?.onWaitlistJoinConfirmed?()
+            }
+            return
+        }
+
         if input.scheduleId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             // Android's no-schedule shortcut: skip the API and show Slot Confirmed.
             navigateToSlotConfirmed()
@@ -558,10 +565,12 @@ extension ConfirmSlotSheetViewController {
     static func present(from presenter: UIViewController,
                         input: ConfirmSlotSheetInput,
                         onBookingSucceeded: (() -> Void)? = nil,
-                        onSpecialWaitlistTriggered: ((_ notifyHours: Int?) -> Void)? = nil) -> ConfirmSlotSheetViewController {
+                        onSpecialWaitlistTriggered: ((_ notifyHours: Int?) -> Void)? = nil,
+                        onWaitlistJoinConfirmed: (() -> Void)? = nil) -> ConfirmSlotSheetViewController {
         let controller = ConfirmSlotSheetViewController(input: input)
         controller.onBookingSucceeded = onBookingSucceeded
         controller.onSpecialWaitlistTriggered = onSpecialWaitlistTriggered
+        controller.onWaitlistJoinConfirmed = onWaitlistJoinConfirmed
         // Captured up front: for a sheet presentation UIKit reports the *container*
         // (nav/tab controller) as `presentingViewController`, and it goes `nil` the
         // instant dismissal starts — so the push target is resolved here, where the

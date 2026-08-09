@@ -285,6 +285,25 @@ class UpcomingClassVM {
         })
     }
 
+    //MARK: ----------------------- api/waitlist-open-slots-count
+    /// Count of this member's active waitlist entries whose class currently
+    /// has an open spot - used to decide whether to fire a local "N spots
+    /// opened up" notification the next time the app backgrounds right
+    /// after a booking/waitlist-join. Android: `ApiURL.waitlistOpenSlotsCount`.
+    class func waitlistOpenSlotsCountApi(isShowLoader: Bool = false,
+                                         completion: @escaping(_ emptySlots: Int) -> Void) {
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .waitlist_open_slots_count, method: .get, isShowLoading: isShowLoader, completion: { (getResponce, error) in
+            guard let responceData = getResponce,
+                  let json = try? JSONSerialization.jsonObject(with: responceData) as? [String: Any],
+                  json["status"] as? Bool == true,
+                  let data = json["data"] as? [String: Any] else {
+                completion(0)
+                return
+            }
+            completion(data["empty_slots"] as? Int ?? 0)
+        })
+    }
+
     //MARK: ----------------------- api/user-meals
     class func getuserMealsApi(inputDate:String? , isShowLoader:Bool = true, completion: @escaping(_ resultData:UserMealsBaseModel?) -> Void){
         /*

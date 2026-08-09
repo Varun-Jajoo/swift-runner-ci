@@ -96,6 +96,7 @@ enum ApiEndPoint: String {
     case book_class                     =  "api/book-class"
     case join_waitlist                  =  "api/join-waitlist"
     case claim_open_spot                =  "api/claim-open-spot"
+    case waitlist_open_slots_count      =  "api/waitlist-open-slots-count"
     // Free and paid classes show DIFFERENT cancellation/terms text - same
     // free/paid split every other GX booking rule already uses, just applied
     // to which doc `type` gets requested.

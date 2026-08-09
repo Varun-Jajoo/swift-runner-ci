@@ -275,8 +275,14 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
     /// equivalent: `MyFirebaseMessagingService.sendNotification`'s
     /// `waitlist_spot_available` branch.
     private static func routeNotificationTap(userInfo: [AnyHashable: Any]) {
-        guard let type = userInfo["type"] as? String,
-              type.caseInsensitiveCompare("waitlist_spot_available") == .orderedSame,
+        guard let type = userInfo["type"] as? String else { return }
+
+        if type.caseInsensitiveCompare("waitlist_open_slots") == .orderedSame {
+            AppDelegate.jumpToBookingsTab()
+            return
+        }
+
+        guard type.caseInsensitiveCompare("waitlist_spot_available") == .orderedSame,
               let scheduleId = userInfo["schedule_id"] as? String,
               !scheduleId.isEmpty else {
             return
@@ -320,6 +326,38 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
             root = tab.selectedViewController
         }
         return root as? UINavigationController
+    }
+
+    /// Local "N spots opened up" notification's tap target - the Bookings
+    /// tab itself (index 2, same constant every confirmation screen already
+    /// uses), not any specific class, since the count spans every class
+    /// this member is waitlisted for.
+    private static func jumpToBookingsTab() {
+        let bookingsTabIndex = 2
+
+        let keyWindow = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }
+
+        var candidate = keyWindow?.rootViewController
+        var tabBarController: UITabBarController?
+        while let current = candidate {
+            if let tab = current as? UITabBarController {
+                tabBarController = tab
+                break
+            }
+            candidate = current.presentedViewController ?? current.children.first
+        }
+
+        guard let tabBarController = tabBarController,
+              let tabs = tabBarController.viewControllers,
+              tabs.indices.contains(bookingsTabIndex) else {
+            return
+        }
+
+        (tabs[bookingsTabIndex] as? UINavigationController)?.popToRootViewController(animated: false)
+        tabBarController.selectedIndex = bookingsTabIndex
     }
    
     

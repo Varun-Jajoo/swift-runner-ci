@@ -115,6 +115,10 @@ final class WaitlistConfirmedViewController: CommonViewController {
         view.backgroundColor = GroupClassColor.bg.color
         buildLayout()
         populateUI()
+
+        // Arms a "N spots opened up" local notification for the next time
+        // the app backgrounds after this waitlist join.
+        WaitlistOpenSlotsNotifier.armOnNextBackground()
     }
 
     override func viewWillAppear(_ animated: Bool) {
