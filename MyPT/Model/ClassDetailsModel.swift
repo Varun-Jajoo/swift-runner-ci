@@ -79,6 +79,14 @@ struct ClassDetailsModel: Codable {
     var isOnlyExtraBooking: Bool?
     var isOnlySpecialWaitlist: Bool?
     var waitlistType: String?
+    /// Verified against `ClassEventController::classDetail()`: it never
+    /// actually sends either key - `time`/`start_end` are always pre-formatted
+    /// strings like "Fri, 14 Aug • 7-8 AM" already. Harmless either way since
+    /// `GroupClassCardFormatter.formatTimeForUI` short-circuits on any input
+    /// containing "•" before it would ever consult these; kept only so the
+    /// `detail.date ?? detail.startDate` fallback in `apply(detail:)` compiles.
+    var date: String?
+    var startDate: String?
 
     enum CodingKeys: String, CodingKey {
         case schduleID = "schdule_id"
@@ -115,5 +123,7 @@ struct ClassDetailsModel: Codable {
         case isOnlyExtraBooking = "is_only_extra_booking"
         case isOnlySpecialWaitlist = "is_only_special_waitlist"
         case waitlistType = "waitlist_type"
+        case date
+        case startDate = "start_date"
     }
 }

@@ -220,6 +220,14 @@ final class SlotConfirmedViewController: CommonViewController {
     /// Android has no alternate wording, so none is invented here.
     var isReadOnly: Bool = false
 
+    /// `user_classes.id` for this booking - required to call `cancel-class-booking`.
+    /// Only meaningful (and only ever set by the caller) alongside `isReadOnly`.
+    var bookingId: String = ""
+    /// Shows the "CANCEL BOOKING" link above the main CTA. The Bookings list
+    /// only sets this for its Upcoming tab - a Cancelled or Completed booking
+    /// has nothing left to cancel.
+    var canCancelBooking: Bool = false
+
     // MARK: - Layout constants
 
     private enum Metric {
@@ -263,6 +271,7 @@ final class SlotConfirmedViewController: CommonViewController {
         static let rowSubtitle = UIColor.white.withAlphaComponent(0.4)           // #66FFFFFF
         static let noteBody = UIColor(hex: "#FAFAFA").withAlphaComponent(0.55)   // #8CFAFAFA
         static let ctaInk = UIColor(hex: "#131416")
+        static let cancelText = UIColor(hex: "#FF6B6B")
     }
 
     /// Copy that is hard-coded in the Android layout / Kotlin.
@@ -279,6 +288,9 @@ final class SlotConfirmedViewController: CommonViewController {
         static let distancePlaceholder = "2.1 km away"
         static let priceSubtitle = "Group Class Cost"
         static let viewBookingsCTA = "VIEW MY BOOKINGS"
+        static let cancelBookingCTA = "CANCEL BOOKING"
+        static let cancelConfirmTitle = "Cancel this booking?"
+        static let cancelConfirmMessage = "This will free up your spot for other members."
     }
 
     /// Index of the Bookings tab in `CustomTabViewController`.
@@ -314,6 +326,8 @@ final class SlotConfirmedViewController: CommonViewController {
     private let priceRow = UIStackView()
 
     private let footerView = UIView()
+    private let footerStack = UIStackView()
+    private let cancelButton = UIButton(type: .system)
     private let ctaButton = GradientCTAButton()
 
     // MARK: - Lifecycle
@@ -427,6 +441,42 @@ final class SlotConfirmedViewController: CommonViewController {
         return nil
     }
 
+    /// Mirrors the fix in Android's `UpcomingBookingDetails.sendCancelData()`:
+    /// a group-class booking has to go through `cancel-class-booking`
+    /// (its row lives in `user_classes`), not the personal-training
+    /// `cancel-session` endpoint - that one "succeeds" without ever touching
+    /// this booking's real row, so the class keeps showing as booked
+    /// everywhere except this one screen's own local state.
+    @objc private func cancelBookingTapped() {
+        guard !bookingId.isEmpty else { return }
+
+        AlertHelper.shared.showCustomeAlert(title: Copy.cancelConfirmTitle,
+                                            message: Copy.cancelConfirmMessage,
+                                            actions: ["Ok", "Cancel"],
+                                            withCancel: true) { [weak self] tappedIndex in
+            guard let self = self, tappedIndex == 0 else { return }
+
+            let params: [String: Any] = ["booking_id": self.bookingId]
+            NetworkManager.shared.genericAPICall(serviceEndPoint: .cancel_class_booking,
+                                                 method: .post,
+                                                 parameters: params,
+                                                 isShowLoading: true) { [weak self] responseData, _ in
+                guard let self = self else { return }
+                let succeeded = responseData
+                    .flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
+                    .flatMap { $0["status"] as? Bool } ?? false
+
+                DispatchQueue.main.async {
+                    if succeeded {
+                        self.navigationController?.popViewController(animated: true)
+                    } else {
+                        AlertHelper.shared.showCustomeAlert(title: "", message: "Could not cancel booking. Please try again.", actions: ["OK"], completion: nil)
+                    }
+                }
+            }
+        }
+    }
+
     /// Port of Android's `navigateHome`: `MainActivity` with `FLAG_ACTIVITY_CLEAR_TOP`
     /// and **no** `key_tab` extra, i.e. tear down everything above the tab host and
     /// leave the selected tab alone.
@@ -513,6 +563,17 @@ private extension SlotConfirmedViewController {
         footerView.backgroundColor = .clear
         view.addSubview(footerView)
 
+        // Only shown for a group-class row opened from the Bookings tab's
+        // Upcoming sub-tab (`canCancelBooking`) - a stack so hiding it
+        // collapses the space instead of leaving a gap above the main CTA.
+        cancelButton.translatesAutoresizingMaskIntoConstraints = false
+        cancelButton.setTitle(Copy.cancelBookingCTA, for: .normal)
+        cancelButton.setTitleColor(Palette.cancelText, for: .normal)
+        cancelButton.titleLabel?.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
+        cancelButton.addTarget(self, action: #selector(cancelBookingTapped), for: .touchUpInside)
+        cancelButton.heightAnchor.constraint(equalToConstant: 44).isActive = true
+        cancelButton.isHidden = !(isReadOnly && canCancelBooking && !bookingId.isEmpty)
+
         ctaButton.translatesAutoresizingMaskIntoConstraints = false
         // `btn_cta_gradient_shadow` offsets the body by 2dp over the grey band.
         ctaButton.bandThickness = 2
@@ -520,21 +581,28 @@ private extension SlotConfirmedViewController {
                             font: AppFont.semibold.size(16.0, familyName: familyFunnelSans),
                             titleColor: Palette.ctaInk)
         ctaButton.addTarget(self, action: #selector(viewMyBookingsTapped), for: .touchUpInside)
-        footerView.addSubview(ctaButton)
+        ctaButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight).isActive = true
+
+        footerStack.translatesAutoresizingMaskIntoConstraints = false
+        footerStack.axis = .vertical
+        footerStack.alignment = .fill
+        footerStack.spacing = 4
+        footerStack.addArrangedSubview(cancelButton)
+        footerStack.addArrangedSubview(ctaButton)
+        footerView.addSubview(footerStack)
 
         NSLayoutConstraint.activate([
             footerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             footerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             footerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
-            ctaButton.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 12),
-            ctaButton.leadingAnchor.constraint(equalTo: footerView.leadingAnchor,
-                                               constant: Metric.horizontalInset),
-            ctaButton.trailingAnchor.constraint(equalTo: footerView.trailingAnchor,
-                                                constant: -Metric.horizontalInset),
-            ctaButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor,
-                                              constant: -12),
-            ctaButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight)
+            footerStack.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 12),
+            footerStack.leadingAnchor.constraint(equalTo: footerView.leadingAnchor,
+                                                 constant: Metric.horizontalInset),
+            footerStack.trailingAnchor.constraint(equalTo: footerView.trailingAnchor,
+                                                  constant: -Metric.horizontalInset),
+            footerStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor,
+                                                constant: -12)
         ])
     }
 

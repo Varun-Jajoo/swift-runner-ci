@@ -291,6 +291,9 @@ extension BookingListViewController: UITableViewDataSource, UITableViewDelegate{
             controller.classLocation = row.location?.value ?? ""
             controller.trainerName = row.trainer?.value ?? ""
             controller.isReadOnly = true
+            controller.bookingId = row.id?.value ?? ""
+            // Only the Upcoming sub-tab has anything left to cancel.
+            controller.canCancelBooking = (self.selectedTags == 2)
             // This is a receipt-style full-screen push straight from the
             // Bookings tab's own stack, which is never hidden upstream (unlike
             // the Group-Classes booking flow, which hides it once on the Detail
