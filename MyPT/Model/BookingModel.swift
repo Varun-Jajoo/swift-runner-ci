@@ -40,11 +40,16 @@ struct BookingDataModel: Codable {
     }
 
     /// Port of the `isGroupClass` check in Android's `UpcomingAdapter.kt` /
-    /// `UpcomingSessionsAdapter.kt` (both onBindViewHolder and the click
-    /// listener build the identical condition inline): `type == "group_class"`,
-    /// or `booking_type`/`session_type` containing "group", case-insensitive.
+    /// `UpcomingSessionsAdapter.kt`: `type` CONTAINS "group_class" (not an
+    /// exact match - a waitlist row's type is "group_class_waitlist"), or
+    /// `booking_type`/`session_type` containing "group", case-insensitive.
+    /// An exact-match-only `type` check plus relying on the class NAME
+    /// containing "group" (a coincidence that only ever worked while every
+    /// class showed the generic "Group Class" fallback name) sent waitlist
+    /// rows into the wrong (PT-session) detail screen, which renders blank
+    /// for a "wl-" id it doesn't understand.
     var isGroupClass: Bool {
-        if type?.value?.compare("group_class", options: .caseInsensitive) == .orderedSame { return true }
+        if let type = type?.value, type.range(of: "group_class", options: .caseInsensitive) != nil { return true }
         if let bookingType = bookingType, bookingType.range(of: "group", options: .caseInsensitive) != nil { return true }
         if let sessionType = sessionType?.value, sessionType.range(of: "group", options: .caseInsensitive) != nil { return true }
         return false
