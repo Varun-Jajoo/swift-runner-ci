@@ -576,6 +576,17 @@ private extension DoubleBookingSheetViewController {
     /// (`bg_gradient_divider_line` / `_reversed`: `#05FFFFFF` -> `#4DFFFFFF` and
     /// reversed) rather than using a flat line - a plain solid color here was a
     /// visible miss against the 1:1 port.
+    /// The two gradient lines have no intrinsic size and no width constraint
+    /// of their own - inside a `.fill`-distribution stack that's a known
+    /// Auto Layout ambiguity (two equally-weighted, zero-intrinsic-size
+    /// flexible views don't reliably split 50/50; the solver is free to
+    /// collapse one to zero width since any split still satisfies every
+    /// constraint, which is exactly what made the left line disappear while
+    /// the label rendered off-center instead of in the middle). Tying them
+    /// to an explicit equal-width relationship (design spec: 112.75pt each
+    /// at the sheet's own reference width) forces the only valid solution to
+    /// be a true 50/50 split, without hard-coding an absolute width that
+    /// would fight the row's own full-width stretch on other screen sizes.
     func makeSectionDividerRow() -> UIView {
         let leftLine = GradientLineView(startAlpha: 0.02, endAlpha: 0.30)
         leftLine.translatesAutoresizingMaskIntoConstraints = false
@@ -584,6 +595,7 @@ private extension DoubleBookingSheetViewController {
         let rightLine = GradientLineView(startAlpha: 0.30, endAlpha: 0.02)
         rightLine.translatesAutoresizingMaskIntoConstraints = false
         rightLine.heightAnchor.constraint(equalToConstant: 1).isActive = true
+        rightLine.widthAnchor.constraint(equalTo: leftLine.widthAnchor).isActive = true
 
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false

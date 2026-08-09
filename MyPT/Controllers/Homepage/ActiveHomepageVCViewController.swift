@@ -559,14 +559,32 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if collectionView == collectionMyBooking {
+            guard let session = self.upcomingSessionData?[indexPath.row] else { return }
+            let typeStr = session.sessionType?.value?.lowercased() ?? ""
+            let bookingType = session.bookingType?.value?.lowercased() ?? ""
+            let isGroupClass = typeStr.contains("group") || typeStr == "class" || bookingType.contains("group") || bookingType == "class"
+            if isGroupClass {
+                let confirmed = SlotConfirmedViewController()
+                let title = session.bookingType?.value?.isEmpty == false ? session.bookingType?.value : session.sessionType?.value
+                confirmed.classTitle = title ?? ""
+                confirmed.classTime = session.timing?.value ?? ""
+                confirmed.classLocation = session.location?.value ?? ""
+                confirmed.trainerName = session.trainer?.value ?? ""
+                confirmed.distance = session.distance?.value ?? ""
+                confirmed.classPrice = session.price?.value ?? ""
+                confirmed.studioLat = Double(session.studioLat?.value ?? "") ?? 0
+                confirmed.studioLng = Double(session.studioLng?.value ?? "") ?? 0
+                confirmed.isReadOnly = true
+                confirmed.bookingId = session.id?.value ?? ""
+                confirmed.canCancelBooking = true
+                confirmed.hidesBottomBarWhenPushed = true
+                self.navigationController?.pushViewController(confirmed, animated: true)
+                return
+            }
             let vc: BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
-            //            if let getIndx = self.upcomingSessionData?.firstIndex(where: {
-            //                $0.id?.value == sender.accessibilityHint ?? "0"
-            //            }) {
             vc.detailsFlow = .upcoming
-            vc.bookingIdStr = "\(self.upcomingSessionData?[indexPath.row].id?.value ?? "0")"
-            vc.typeStr = self.upcomingSessionData?[indexPath.row].sessionType?.value
-            //            }
+            vc.bookingIdStr = "\(session.id?.value ?? "0")"
+            vc.typeStr = session.sessionType?.value
             self.navigationController?.pushViewController(vc, animated: true)
         } else if collectionView == collectionMyPTAction {
             let storiesList = homeStoriesData?[indexPath.row].stories
@@ -800,15 +818,36 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     }
     
     @objc func checkInBtnActn(sender:UIButton) {
-        let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
         if let getIndx = self.upcomingSessionData?.firstIndex(where: {
             $0.id?.value == sender.accessibilityHint ?? "0"
-        }) {
+        }), let session = self.upcomingSessionData?[getIndx] {
+            let typeStr = session.sessionType?.value?.lowercased() ?? ""
+            let bookingType = session.bookingType?.value?.lowercased() ?? ""
+            let isGroupClass = typeStr.contains("group") || typeStr == "class" || bookingType.contains("group") || bookingType == "class"
+            if isGroupClass {
+                let confirmed = SlotConfirmedViewController()
+                let title = session.bookingType?.value?.isEmpty == false ? session.bookingType?.value : session.sessionType?.value
+                confirmed.classTitle = title ?? ""
+                confirmed.classTime = session.timing?.value ?? ""
+                confirmed.classLocation = session.location?.value ?? ""
+                confirmed.trainerName = session.trainer?.value ?? ""
+                confirmed.distance = session.distance?.value ?? ""
+                confirmed.classPrice = session.price?.value ?? ""
+                confirmed.studioLat = Double(session.studioLat?.value ?? "") ?? 0
+                confirmed.studioLng = Double(session.studioLng?.value ?? "") ?? 0
+                confirmed.isReadOnly = true
+                confirmed.bookingId = session.id?.value ?? ""
+                confirmed.canCancelBooking = true
+                confirmed.hidesBottomBarWhenPushed = true
+                self.navigationController?.pushViewController(confirmed, animated: true)
+                return
+            }
+            let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
             vc.detailsFlow = .upcoming
-            vc.bookingIdStr = "\(self.upcomingSessionData?[getIndx].id?.value ?? "0")"
-            vc.typeStr = self.upcomingSessionData?[getIndx].sessionType?.value
+            vc.bookingIdStr = "\(session.id?.value ?? "0")"
+            vc.typeStr = session.sessionType?.value
+            self.navigationController?.pushViewController(vc, animated: true)
         }
-        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     private func getTopContentsApi() {
