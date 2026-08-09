@@ -82,7 +82,6 @@ final class CancelBookingSheetViewController: CommonViewController {
         static let dangerStart = UIColor(hex: "#FF4444")
         static let dangerEnd = UIColor(hex: "#FF4444")
         static let dangerBand = UIColor(hex: "#2B1512")
-        static let keepBookingText = UIColor(hex: "#F0F0F0")
         static let supportCardBg = UIColor(hex: "#0954A9")
         static let supportSubtitle = UIColor(hex: "#8CFAFAFA")
     }
@@ -691,10 +690,13 @@ private extension CancelBookingSheetViewController {
     func makeKeepBookingButton() -> UIView {
         keepBookingButton.translatesAutoresizingMaskIntoConstraints = false
         keepBookingButton.setTitle(Copy.keepCTA, for: .normal)
-        keepBookingButton.setTitleColor(Palette.keepBookingText, for: .normal)
+        keepBookingButton.setTitleColor(UIColor(hex: "#131416"), for: .normal)
         keepBookingButton.titleLabel?.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
+        keepBookingButton.backgroundColor = .white
+        keepBookingButton.layer.cornerRadius = 8
+        keepBookingButton.layer.masksToBounds = true
         keepBookingButton.addTarget(self, action: #selector(keepBookingTapped), for: .touchUpInside)
-        keepBookingButton.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        keepBookingButton.heightAnchor.constraint(equalToConstant: 48).isActive = true
         return keepBookingButton
     }
 }

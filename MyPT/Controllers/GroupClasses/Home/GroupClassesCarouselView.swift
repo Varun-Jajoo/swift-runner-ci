@@ -105,9 +105,13 @@ final class GroupClassCarouselDotsView: UIView {
             dot.backgroundColor = isSelected
                 ? GroupClassCarouselDotsView.selectedColor
                 : GroupClassCarouselDotsView.unselectedColor
-            // Selected pill keeps the same 2.5pt radius as the dots on Android
-            // (8dp requested, but clamped by the 5dp height).
+            // Exactly half the dot's own 5pt height, not a fixed larger
+            // value assumed to clamp - Android's equivalent (`CarouselIndicatorView`)
+            // used to request a flat 8dp against a 5dp bar and rendered with
+            // visibly squared corners on some paths; this stays a guaranteed
+            // capsule regardless of the bar's width.
             dot.layer.cornerRadius = GroupClassCarouselDotsView.dotSize / 2
+            dot.layer.masksToBounds = true
         }
     }
 }

@@ -278,7 +278,9 @@ final class SlotConfirmedViewController: CommonViewController {
         static let rowSubtitle = UIColor.white.withAlphaComponent(0.4)           // #66FFFFFF
         static let noteBody = UIColor(hex: "#FAFAFA").withAlphaComponent(0.55)   // #8CFAFAFA
         static let ctaInk = UIColor(hex: "#131416")
-        static let cancelText = UIColor(hex: "#FF6B6B")
+        // Same red as CancelBookingSheetViewController's CANCEL BOOKING CTA
+        // (Palette.dangerStart there) - was a lighter, mismatched red before.
+        static let cancelText = UIColor(hex: "#FF4444")
     }
 
     /// Copy that is hard-coded in the Android layout / Kotlin.
