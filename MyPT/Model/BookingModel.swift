@@ -20,16 +20,19 @@ struct BookingDataModel: Codable {
     var id: FlexibleValue?
     var type, timing, starts_in, trainer_image, selected_slot: FlexibleValue?
     var workoutFocus: [String]?
-    var sessionType, duration, trainer, location, distance, scheduleMsg, averageRating: FlexibleValue?
-    var isReschedule, isTrainer, isSchedule, isCheckinAvailable: Bool?
+    var sessionType, duration, trainer, location, distance, scheduleMsg, averageRating, price, studioLat, studioLng: FlexibleValue?
+    var isReschedule, isTrainer, isSchedule, isCheckinAvailable, isRefund: Bool?
     var msg, bookingType: String?
 
     enum CodingKeys: String, CodingKey {
         case id, type, timing, trainer_image, selected_slot
         case workoutFocus = "workout_focus"
         case sessionType = "session_type"
-        case duration, trainer, location, distance
+        case duration, trainer, location, distance, price
+        case studioLat = "studio_lat"
+        case studioLng = "studio_long"
         case isReschedule = "is_reschedule"
+        case isRefund = "is_refund"
         case bookingType = "booking_type"
         case isSchedule
         case isTrainer

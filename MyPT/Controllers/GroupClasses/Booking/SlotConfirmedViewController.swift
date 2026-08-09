@@ -182,6 +182,13 @@ final class SlotConfirmedViewController: CommonViewController {
     var distance: String = ""
     /// `price` / `total_price` — blank hides the price row *and* its divider.
     var classPrice: String = ""
+    /// Raw studio coordinates - when both are non-zero, `distance` above is
+    /// recomputed from the device's own cached location instead of trusted
+    /// as-is (only ever set on a read-only re-entry from the Bookings list;
+    /// the fresh-booking path already gets a client-computed string from
+    /// `GroupTrainingDetailViewController` upstream).
+    var studioLat: Double = 0
+    var studioLng: Double = 0
 
     // MARK: - Deferred booking POST (Android's `sendBookingData`)
     //
@@ -277,6 +284,7 @@ final class SlotConfirmedViewController: CommonViewController {
     /// Copy that is hard-coded in the Android layout / Kotlin.
     private enum Copy {
         static let headerTitle = "Your slot is confirmed"
+        static let readOnlyHeaderTitle = "Booking Details"
         static let headerSubtext = "Your slot is confirmed. Manage your booking anytime from My Bookings."
         static let categoryPill = "GROUP CLASS"
         static let cancellationPolicy = "Cancellation Policy"
@@ -289,6 +297,7 @@ final class SlotConfirmedViewController: CommonViewController {
         static let priceSubtitle = "Group Class Cost"
         static let viewBookingsCTA = "VIEW MY BOOKINGS"
         static let cancelBookingCTA = "CANCEL BOOKING"
+        static let leaveWaitlistCTA = "LEAVE WAITLIST"
         static let cancelConfirmTitle = "Cancel this booking?"
         static let cancelConfirmMessage = "This will free up your spot for other members."
     }
@@ -327,7 +336,7 @@ final class SlotConfirmedViewController: CommonViewController {
 
     private let footerView = UIView()
     private let footerStack = UIStackView()
-    private let cancelButton = UIButton(type: .system)
+    private let cancelButton = GradientCTAButton()
     private let ctaButton = GradientCTAButton()
 
     // MARK: - Lifecycle
@@ -358,21 +367,29 @@ final class SlotConfirmedViewController: CommonViewController {
     private func populateUI() {
         classTitleLabel.text = classTitle
         classDateTimeLabel.text = classTime
-        // Android: `rawLocation.substringBefore(",").trim()` when the string
-        // contains a comma (e.g. "DSO Club, Dubai" -> "DSO Club"); this is
-        // specific to Slot Confirmed — Waitlist Confirmed does not do this.
-        if let commaRange = classLocation.range(of: ",") {
-            locationTitleLabel.text = String(classLocation[..<commaRange.lowerBound])
-                .trimmingCharacters(in: .whitespaces)
-        } else {
-            locationTitleLabel.text = classLocation
-        }
+        // Real studio names are "Gym Type - Branch" (e.g. "Mixed Gym -
+        // Silicon Oasis"), not comma-separated - a comma-only check left
+        // these showing in full. Reuses the same canonical cleanup the
+        // browse cards use.
+        locationTitleLabel.text = GroupClassCardFormatter.cleanStudioName(classLocation)
 
         // Android: only overwrite the placeholder when the extra is non-blank, and
         // append " away" when the caller has not already.
         let trimmedDistance = distance.trimmingCharacters(in: .whitespacesAndNewlines)
         if !trimmedDistance.isEmpty {
             locationDistanceLabel.text = trimmedDistance.contains("away") ? trimmedDistance : "\(trimmedDistance) away"
+        }
+        // Recompute from the device's own cached location instead of trusting
+        // the server's figure (only as fresh as whatever lat/long the
+        // booking-list request happened to send). `distanceText` already
+        // falls back to `appUserDefaults.getLatLong()` when userLat/Lng are
+        // nil, so this is the same call site the browse cards use.
+        if studioLat != 0, studioLng != 0 {
+            locationDistanceLabel.text = GroupClassCardFormatter.distanceText(
+                userLat: nil, userLng: nil,
+                studioLat: studioLat, studioLng: studioLng,
+                fallback: distance
+            )
         }
 
         let trimmedTrainer = trainerName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -447,34 +464,37 @@ final class SlotConfirmedViewController: CommonViewController {
     /// `cancel-session` endpoint - that one "succeeds" without ever touching
     /// this booking's real row, so the class keeps showing as booked
     /// everywhere except this one screen's own local state.
+    ///
+    /// Presents `CancelBookingSheetViewController` - the app's own confirm-
+    /// booking-style sheet - instead of a plain system alert, matching
+    /// Android's `SlotConfirmedActivity.showCancelBookingBottomSheet`.
     @objc private func cancelBookingTapped() {
         guard !bookingId.isEmpty else { return }
 
-        AlertHelper.shared.showCustomeAlert(title: Copy.cancelConfirmTitle,
-                                            message: Copy.cancelConfirmMessage,
-                                            actions: ["Ok", "Cancel"],
-                                            withCancel: true) { [weak self] tappedIndex in
-            guard let self = self, tappedIndex == 0 else { return }
+        let isWaitlistBooking = bookingId.hasPrefix("wl-")
+        var sheetInput = CancelBookingSheetInput()
+        sheetInput.bookingId = isWaitlistBooking ? String(bookingId.dropFirst(3)) : bookingId
+        sheetInput.isWaitlist = isWaitlistBooking
+        sheetInput.title = classTitle
+        sheetInput.time = classTime
+        sheetInput.location = classLocation
+        sheetInput.distance = distance
+        sheetInput.price = classPrice
 
-            let params: [String: Any] = ["booking_id": self.bookingId]
-            NetworkManager.shared.genericAPICall(serviceEndPoint: .cancel_class_booking,
-                                                 method: .post,
-                                                 parameters: params,
-                                                 isShowLoading: true) { [weak self] responseData, _ in
-                guard let self = self else { return }
-                let succeeded = responseData
-                    .flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
-                    .flatMap { $0["status"] as? Bool } ?? false
-
-                DispatchQueue.main.async {
-                    if succeeded {
-                        self.navigationController?.popViewController(animated: true)
-                    } else {
-                        AlertHelper.shared.showCustomeAlert(title: "", message: "Could not cancel booking. Please try again.", actions: ["OK"], completion: nil)
-                    }
-                }
-            }
+        CancelBookingSheetViewController.present(from: self, input: sheetInput) { [weak self] in
+            self?.navigateToBookingCancelled()
         }
+    }
+
+    /// Port of `SlotConfirmedActivity.sendCancelBookingRequest`'s success path:
+    /// land on the duplicated/reskinned "Booking Cancelled" screen instead of
+    /// just popping back to a stale details view.
+    private func navigateToBookingCancelled() {
+        let controller = BookingCancelledViewController()
+        controller.classTitle = classTitle
+        controller.classTime = classTime
+        controller.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(controller, animated: true)
     }
 
     /// Port of Android's `navigateHome`: `MainActivity` with `FLAG_ACTIVITY_CLEAR_TOP`
@@ -566,12 +586,18 @@ private extension SlotConfirmedViewController {
         // Only shown for a group-class row opened from the Bookings tab's
         // Upcoming sub-tab (`canCancelBooking`) - a stack so hiding it
         // collapses the space instead of leaving a gap above the main CTA.
+        // A real filled red button, not a plain text link - matches Android's
+        // `btn_danger_gradient_shadow`.
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
-        cancelButton.setTitle(Copy.cancelBookingCTA, for: .normal)
-        cancelButton.setTitleColor(Palette.cancelText, for: .normal)
-        cancelButton.titleLabel?.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
+        cancelButton.bandThickness = 2
+        cancelButton.bandColor = UIColor(hex: "#2B1512")
+        cancelButton.bodyStartColor = Palette.cancelText
+        cancelButton.bodyEndColor = Palette.cancelText
+        cancelButton.configure(title: bookingId.hasPrefix("wl-") ? Copy.leaveWaitlistCTA : Copy.cancelBookingCTA,
+                               font: AppFont.semibold.size(15.0, familyName: familyFunnelSans),
+                               titleColor: .white)
         cancelButton.addTarget(self, action: #selector(cancelBookingTapped), for: .touchUpInside)
-        cancelButton.heightAnchor.constraint(equalToConstant: 44).isActive = true
+        cancelButton.heightAnchor.constraint(equalToConstant: 48).isActive = true
         cancelButton.isHidden = !(isReadOnly && canCancelBooking && !bookingId.isEmpty)
 
         ctaButton.translatesAutoresizingMaskIntoConstraints = false
@@ -642,22 +668,28 @@ private extension SlotConfirmedViewController {
         // 1 — glass back button
         let backRow = makeBackButtonRow()
         contentStack.addArrangedSubview(backRow)
-        contentStack.setCustomSpacing(34, after: backRow)
+        contentStack.setCustomSpacing(isReadOnly ? 22 : 34, after: backRow)
 
-        // 2 — 120pt success badge
-        let badgeRow = makeBadgeRow()
-        contentStack.addArrangedSubview(badgeRow)
-        contentStack.setCustomSpacing(22, after: badgeRow)
+        // 2 — 120pt success badge - only for a just-booked confirmation, not
+        // when reviewing a booking that already exists.
+        if !isReadOnly {
+            let badgeRow = makeBadgeRow()
+            contentStack.addArrangedSubview(badgeRow)
+            contentStack.setCustomSpacing(22, after: badgeRow)
+        }
 
-        // 3 — "Your slot is confirmed"
+        // 3 — "Your slot is confirmed" / "Booking Details" in read-only mode
         let titleLabel = makeHeaderTitleLabel()
         contentStack.addArrangedSubview(titleLabel)
         contentStack.setCustomSpacing(8, after: titleLabel)
 
-        // 4 — subtext
-        let subtextRow = makeHeaderSubtextRow()
-        contentStack.addArrangedSubview(subtextRow)
-        contentStack.setCustomSpacing(22, after: subtextRow)
+        // 4 — subtext - success framing only; a details view needs no
+        // explanatory subtext under a neutral "Booking Details" title.
+        if !isReadOnly {
+            let subtextRow = makeHeaderSubtextRow()
+            contentStack.addArrangedSubview(subtextRow)
+            contentStack.setCustomSpacing(22, after: subtextRow)
+        }
 
         // 5 — divider
         let divider = makeDivider()
@@ -669,7 +701,9 @@ private extension SlotConfirmedViewController {
         contentStack.addArrangedSubview(stackedCards)
         contentStack.setCustomSpacing(16, after: stackedCards)
 
-        // 7 — amber IMPORTANT NOTE box
+        // 7 — amber IMPORTANT NOTE box - kept in read-only mode too (a late
+        // cancellation still counts toward the same blacklist strikes), not
+        // just for a fresh booking.
         contentStack.addArrangedSubview(makeImportantNoteBox())
     }
 
@@ -721,7 +755,7 @@ private extension SlotConfirmedViewController {
         label.textColor = Palette.headerTitle
         label.textAlignment = .center
         label.numberOfLines = 0
-        label.text = Copy.headerTitle
+        label.text = isReadOnly ? Copy.readOnlyHeaderTitle : Copy.headerTitle
         return label
     }
 
@@ -761,36 +795,18 @@ private extension SlotConfirmedViewController {
     /// sits *behind* the details card, which carries a 50dp bottom margin — so the
     /// strip peeks out 50dp below the card and is overlapped for the rest of its
     /// height.
+    /// Plain vertical stack - the previous "peek behind the card" mechanic
+    /// (card overlapping a taller strip pinned to the container's bottom)
+    /// left a large dead-looking gap whenever the card was shorter than the
+    /// reserved reveal (e.g. no price row), rendering as a big empty block
+    /// above the policy row instead of an actual peeking card.
     func makeStackedCards() -> UIView {
-        let container = UIView()
-        container.translatesAutoresizingMaskIntoConstraints = false
-
-        // Added first -> lower in the z-order, i.e. behind the card.
-        let policyBar = makeCancellationPolicyBar()
-        container.addSubview(policyBar)
-
-        let detailsCard = makeDetailsCard()
-        container.addSubview(detailsCard)
-
-        // `wrap_content` + `minHeight="103dp"`: at least 103, exactly 103 unless the
-        // strip's own content needs more.
-        let policyBarHeight = policyBar.heightAnchor.constraint(equalToConstant: Metric.policyBarMinHeight)
-        policyBarHeight.priority = .defaultHigh
-
-        NSLayoutConstraint.activate([
-            policyBar.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            policyBar.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            policyBar.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-            policyBar.heightAnchor.constraint(greaterThanOrEqualToConstant: Metric.policyBarMinHeight),
-            policyBarHeight,
-
-            detailsCard.topAnchor.constraint(equalTo: container.topAnchor),
-            detailsCard.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            detailsCard.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            detailsCard.bottomAnchor.constraint(equalTo: container.bottomAnchor,
-                                                constant: -Metric.policyBarPeek)
-        ])
-        return container
+        let stack = UIStackView(arrangedSubviews: [makeDetailsCard(), makeCancellationPolicyBar()])
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .vertical
+        stack.alignment = .fill
+        stack.spacing = 12
+        return stack
     }
 
     /// `confirmed_cancellation_bottom_bg`: flat `#2B2B2C` fill, `#232323` hairline,
@@ -841,12 +857,12 @@ private extension SlotConfirmedViewController {
             iconView.heightAnchor.constraint(equalToConstant: Metric.policyIconSide),
 
             row.leadingAnchor.constraint(equalTo: bar.leadingAnchor, constant: Metric.policyBarInset),
+            row.topAnchor.constraint(equalTo: bar.topAnchor, constant: Metric.policyBarInset),
             row.bottomAnchor.constraint(equalTo: bar.bottomAnchor, constant: -Metric.policyBarInset),
-            row.topAnchor.constraint(greaterThanOrEqualTo: bar.topAnchor, constant: Metric.policyBarInset),
             row.trailingAnchor.constraint(lessThanOrEqualTo: chevron.leadingAnchor, constant: -12),
 
             chevron.trailingAnchor.constraint(equalTo: bar.trailingAnchor, constant: -Metric.policyBarInset),
-            chevron.bottomAnchor.constraint(equalTo: bar.bottomAnchor, constant: -Metric.policyBarInset),
+            chevron.centerYAnchor.constraint(equalTo: row.centerYAnchor),
             chevron.widthAnchor.constraint(equalToConstant: Metric.policyChevronSide),
             chevron.heightAnchor.constraint(equalToConstant: Metric.policyChevronSide)
         ])
@@ -988,13 +1004,13 @@ private extension SlotConfirmedViewController {
     /// origin the shared `CAGradientPoint` enum offers, and `.bottomRight` gives the
     /// falloff a non-zero horizontal radius (a `.bottomCenter` edge would collapse
     /// the radial ellipse to a zero-width sliver).
-    func makeCategoryPillRow() -> UIView {
+    func makePill(text: String, textColor: UIColor, strokeColor: UIColor, fillColor: UIColor, fillAlpha: CGFloat) -> UIView {
         let pill = GlassCardView(cornerRadius: 8)
         pill.translatesAutoresizingMaskIntoConstraints = false
-        pill.fillColor = .white
-        pill.fillAlpha = 0.0
-        pill.strokeColor = Palette.pillStroke
-        pill.strokeAlpha = 0.2
+        pill.fillColor = fillColor
+        pill.fillAlpha = fillAlpha
+        pill.strokeColor = strokeColor
+        pill.strokeAlpha = fillAlpha > 0 ? 0.3 : 0.2
         pill.sheenColor = .white
         pill.sheenAlpha = 0.2
         pill.sheenOrigin = .topCenter
@@ -1003,28 +1019,60 @@ private extension SlotConfirmedViewController {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
-        label.textColor = Palette.pillText
+        label.textColor = textColor
         label.textAlignment = .center
         label.numberOfLines = 1
-        label.text = Copy.categoryPill
+        label.text = text
         pill.addSubview(label)
-
-        // Wrapper keeps the pill hugging the leading edge inside a `.fill` stack.
-        let wrapper = UIView()
-        wrapper.translatesAutoresizingMaskIntoConstraints = false
-        wrapper.addSubview(pill)
 
         NSLayoutConstraint.activate([
             label.topAnchor.constraint(equalTo: pill.topAnchor, constant: 4),
             label.bottomAnchor.constraint(equalTo: pill.bottomAnchor, constant: -4),
             label.leadingAnchor.constraint(equalTo: pill.leadingAnchor, constant: 12),
             label.trailingAnchor.constraint(equalTo: pill.trailingAnchor, constant: -12),
+            pill.heightAnchor.constraint(greaterThanOrEqualToConstant: 24)
+        ])
+        return pill
+    }
 
-            pill.heightAnchor.constraint(greaterThanOrEqualToConstant: 24),
-            pill.topAnchor.constraint(equalTo: wrapper.topAnchor),
-            pill.bottomAnchor.constraint(equalTo: wrapper.bottomAnchor),
-            pill.leadingAnchor.constraint(equalTo: wrapper.leadingAnchor),
-            pill.trailingAnchor.constraint(lessThanOrEqualTo: wrapper.trailingAnchor)
+    /// Booking-status pill - "CONFIRMED" (green) or "WAITLISTED" (amber) -
+    /// only shown in read-only mode, right next to the GROUP CLASS pill.
+    func makeCategoryPillRow() -> UIView {
+        let categoryPill = makePill(text: Copy.categoryPill,
+                                    textColor: Palette.pillText,
+                                    strokeColor: Palette.pillStroke,
+                                    fillColor: .white,
+                                    fillAlpha: 0.0)
+
+        var arranged: [UIView] = [categoryPill]
+        if isReadOnly {
+            let isWaitlistBooking = bookingId.hasPrefix("wl-")
+            let statusPill = makePill(
+                text: isWaitlistBooking ? "WAITLISTED" : "CONFIRMED",
+                textColor: isWaitlistBooking ? GroupClassColor.gold.color : UIColor(hex: "#34C759"),
+                strokeColor: isWaitlistBooking ? GroupClassColor.gold.color : UIColor(hex: "#34C759"),
+                fillColor: isWaitlistBooking ? GroupClassColor.gold.color : UIColor(hex: "#34C759"),
+                fillAlpha: 0.10
+            )
+            arranged.append(statusPill)
+        }
+
+        let row = UIStackView(arrangedSubviews: arranged)
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.axis = .horizontal
+        row.alignment = .center
+        row.spacing = 8
+
+        // Wrapper keeps the row hugging the leading edge inside a `.fill` stack.
+        let wrapper = UIView()
+        wrapper.translatesAutoresizingMaskIntoConstraints = false
+        wrapper.addSubview(row)
+
+        NSLayoutConstraint.activate([
+            row.topAnchor.constraint(equalTo: wrapper.topAnchor),
+            row.bottomAnchor.constraint(equalTo: wrapper.bottomAnchor),
+            row.leadingAnchor.constraint(equalTo: wrapper.leadingAnchor),
+            row.trailingAnchor.constraint(lessThanOrEqualTo: wrapper.trailingAnchor)
         ])
         return wrapper
     }

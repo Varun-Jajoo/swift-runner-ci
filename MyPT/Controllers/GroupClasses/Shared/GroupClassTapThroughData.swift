@@ -144,9 +144,16 @@ enum GroupClassCardFormatter {
 
     /// Studio names arrive as `"MyPT - Silicon Oasis"`; the card only shows the
     /// branch, so keep everything after the first hyphen.
+    /// Studio names in this app follow two conventions: "Venue, City" (take
+    /// the part before the comma - the specific venue) or "Gym Type - Branch"
+    /// (take the part after the hyphen - the specific branch, e.g.
+    /// "Mixed Gym - Silicon Oasis" -> "Silicon Oasis").
     static func cleanStudioName(_ rawName: String?) -> String {
         let raw = (rawName ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         guard !raw.isEmpty else { return defaultStudio }
+        if let comma = raw.range(of: ",") {
+            return String(raw[..<comma.lowerBound]).trimmingCharacters(in: .whitespaces)
+        }
         guard let separator = raw.range(of: "-") else { return raw }
         return String(raw[separator.upperBound...]).trimmingCharacters(in: .whitespaces)
     }

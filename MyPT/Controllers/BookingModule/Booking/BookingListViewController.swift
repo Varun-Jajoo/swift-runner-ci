@@ -290,6 +290,10 @@ extension BookingListViewController: UITableViewDataSource, UITableViewDelegate{
             controller.classTime = row.timing?.value ?? ""
             controller.classLocation = row.location?.value ?? ""
             controller.trainerName = row.trainer?.value ?? ""
+            controller.distance = row.distance?.value ?? ""
+            controller.classPrice = row.price?.value ?? ""
+            controller.studioLat = Double(row.studioLat?.value ?? "") ?? 0
+            controller.studioLng = Double(row.studioLng?.value ?? "") ?? 0
             controller.isReadOnly = true
             controller.bookingId = row.id?.value ?? ""
             // Only the Upcoming sub-tab has anything left to cancel.
