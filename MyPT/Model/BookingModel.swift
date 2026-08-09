@@ -47,7 +47,7 @@ struct BookingDataModel: Codable {
     /// True only for a waitlist row (`id` carries the "wl-" prefix
     /// `BookingListController.php` prepends for `GcWaitlist` rows).
     var isWaitlistRow: Bool {
-        id?.value.hasPrefix("wl-") == true
+        id?.value?.hasPrefix("wl-") == true
     }
 
     var isSpecialWaitlist: Bool {

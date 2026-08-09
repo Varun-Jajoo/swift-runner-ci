@@ -183,7 +183,7 @@ final class CancellationPolicySheetViewController: CommonViewController {
             verticalFittingPriority: .fittingSizeLevel
         ).height
 
-        let total = ceil(contentHeight + view.safeAreaInsets.bottom)
+        let total = ceil(contentHeight + 16)
         guard total > 0, abs(total - resolvedSheetHeight) > 0.5 else { return }
 
         resolvedSheetHeight = total
@@ -263,7 +263,7 @@ private extension CancellationPolicySheetViewController {
         contentStack.isLayoutMarginsRelativeArrangement = true
         contentStack.layoutMargins = UIEdgeInsets(top: 12,
                                                   left: Metric.horizontalInset,
-                                                  bottom: 20,
+                                                  bottom: 16,
                                                   right: Metric.horizontalInset)
         scrollView.addSubview(contentStack)
 
@@ -271,7 +271,7 @@ private extension CancellationPolicySheetViewController {
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
             contentStack.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
             contentStack.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
