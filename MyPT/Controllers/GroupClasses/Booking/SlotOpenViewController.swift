@@ -209,7 +209,9 @@ final class SlotOpenViewController: CommonViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = GroupClassColor.bg.color
+        // Scoped to this screen only, not the shared GroupClassColor.bg token
+        // (#000A04) other screens still use - matches Android's rendered look here.
+        view.backgroundColor = UIColor(hex: "#020402")
         buildLayout()
         populateUI()
         startCountdown()
@@ -291,18 +293,13 @@ final class SlotOpenViewController: CommonViewController {
             guard let self = self, let detail = result?.data else { return }
             DispatchQueue.main.async {
                 // This screen is reachable directly from the "spot available" push
-                // notification (`AppDelegate.routeNotificationTap`) - a cold tap
-                // that never goes through GroupTrainingDetailViewController's own
-                // willSpecialWaitlist gate at all. A member the free-booking spam
-                // guard would block must NEVER see the priority-claim race screen,
-                // full stop - redirect to the normal detail screen instead (in
-                // place, so there's no back-button path to this screen either),
-                // where tapping the CTA correctly shows the double-booking sheet.
-                if detail.willSpecialWaitlist == true {
-                    self.redirectToDetailScreen(detail: detail)
-                    return
-                }
-
+                // notification (`AppDelegate.routeNotificationTap`). Double-booked
+                // members (willSpecialWaitlist) used to redirect away to the detail
+                // screen right here, before the member ever saw this countdown/
+                // urgency screen the notification promised - now handled inline
+                // instead (see claimSpotTapped()'s SPECIAL_WAITLIST_DEFERRED
+                // branch), matching what tapping the push notification should
+                // actually open.
                 let waitlistType = (detail.waitlistType ?? "").lowercased()
                 let isSpecialWaitlistType = waitlistType == "special" || waitlistType == "extra"
 
@@ -429,6 +426,23 @@ final class SlotOpenViewController: CommonViewController {
             let location = result.data?.location ?? locationTitleLabel.text ?? classLocation
             let trainer = result.data?.trainer?.name ?? trainerName
             onClaimed?(classTitleLabel.text ?? classTitle, time, location, trainer)
+            return
+        }
+
+        if result.code == "SPECIAL_WAITLIST_DEFERRED" {
+            // claimOpenSpotApi() already created the special-waitlist entry
+            // server-side (post-hoc, same as the double-booking sheet
+            // elsewhere in the app) - show it right here instead of
+            // redirecting away to the class detail screen, so a notification
+            // tap lands the member on the countdown screen they expect, not
+            // somewhere else entirely.
+            var input = DoubleBookingSheetInput()
+            input.classTitle = classTitleLabel.text ?? classTitle
+            input.classTime = classDateTimeLabel.text ?? classTime
+            input.classLocation = locationTitleLabel.text ?? classLocation
+            input.trainerName = trainerName
+            input.notifyHours = result.specialWaitlist?.notificationWindowHours?.intValue ?? 3
+            DoubleBookingSheetViewController.present(from: self, input: input)
             return
         }
 
