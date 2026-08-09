@@ -402,19 +402,30 @@ final class SlotConfirmedViewController: CommonViewController {
         applyPrice()
     }
 
-    private func applyPrice() {
+    /// Android's `isFreeOrZero`: blank, "free", or <= 0 all mean a free booking.
+    /// Hoisted out of applyPrice() so the cancellation-policy row can pick the
+    /// same free/paid legal-doc variant instead of re-deriving it.
+    var isFreeOrZero: Bool {
         let rawPrice = classPrice.trimmingCharacters(in: .whitespacesAndNewlines)
         let cleanValue = rawPrice
             .replacingOccurrences(of: "AED", with: "", options: .caseInsensitive)
             .replacingOccurrences(of: " ", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
-        let isFreeOrZero = rawPrice.isEmpty ||
+        return rawPrice.isEmpty ||
             cleanValue.caseInsensitiveCompare("free") == .orderedSame ||
             cleanValue == "0" ||
             cleanValue == "0.00" ||
             cleanValue == "0.0" ||
             (Double(cleanValue) ?? 0.0) <= 0.0
+    }
+
+    private func applyPrice() {
+        let rawPrice = classPrice.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleanValue = rawPrice
+            .replacingOccurrences(of: "AED", with: "", options: .caseInsensitive)
+            .replacingOccurrences(of: " ", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
 
         if !isFreeOrZero {
             priceTitleLabel.text = "\(cleanValue) AED"
@@ -519,6 +530,14 @@ final class SlotConfirmedViewController: CommonViewController {
     /// and **no** `key_tab` extra, i.e. tear down everything above the tab host and
     /// leave the selected tab alone.
     ///
+    /// Opens the same cancellation-policy sheet the Group Training Detail screen
+    /// opens from its own policy row. `isFreeOrZero` picks the free vs paid legal
+    /// document, matching how the detail screen passes `isFreeForUser`.
+    @objc private func cancellationPolicyBarTapped() {
+        TapticEngine.selection.feedback()
+        CancellationPolicySheetViewController.present(from: self, isFree: isFreeOrZero)
+    }
+
     /// In read-only mode the screen was reached from a screen the user still wants
     /// (Detail / the Bookings list), so it steps back one level instead.
     @objc private func backTapped() {
@@ -846,6 +865,13 @@ private extension SlotConfirmedViewController {
         bar.layer.masksToBounds = true
         bar.layer.borderWidth = 1
         bar.layer.borderColor = Palette.policyStroke.cgColor
+
+        // The row has always drawn a trailing chevron but had no gesture attached,
+        // so it read as tappable and did nothing. Same destination the detail
+        // screen's own policy row uses.
+        bar.isUserInteractionEnabled = true
+        bar.addGestureRecognizer(UITapGestureRecognizer(target: self,
+                                                        action: #selector(cancellationPolicyBarTapped)))
 
         let iconView = UIImageView(image: SlotConfirmedViewController.icon(["ic_chat_cancellation_20"], systemFallback: "bubble.left.fill")?
             .withRenderingMode(.alwaysTemplate))

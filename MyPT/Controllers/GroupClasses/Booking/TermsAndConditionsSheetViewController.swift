@@ -58,8 +58,12 @@ final class TermsAndConditionsSheetViewController: CommonViewController {
         static let divider = UIColor.white.withAlphaComponent(0.10)
         static let itemTitle = UIColor.white
         static let itemDescription = UIColor(hex: "#AAAAAA")
-        static let btnBg = UIColor(hex: "#F2EBC0")
-        static let btnText = UIColor(hex: "#141514")
+        /// Matches CancellationPolicySheetViewController's ctaFill/ctaInk exactly —
+        /// the two sheets are siblings reached from the same rows, so they use one
+        /// button treatment. Was #F2EBC0 (cream), which read as yellow next to the
+        /// white CTA on the cancellation sheet.
+        static let btnBg = UIColor.white
+        static let btnText = UIColor.black
     }
 
     private enum Copy {
@@ -255,8 +259,14 @@ private extension TermsAndConditionsSheetViewController {
         okayButton.translatesAutoresizingMaskIntoConstraints = false
         okayButton.setTitle(Copy.okayGotIt, for: .normal)
         okayButton.setTitleColor(Palette.btnText, for: .normal)
-        okayButton.titleLabel?.font = AppFont.bold.size(14.0, familyName: familyFunnelSans)
+        // Same treatment as the cancellation sheet's CTA: semibold 13 with a
+        // trailing chevron, so both sheets present an identical button.
+        okayButton.titleLabel?.font = AppFont.semibold.size(13.0, familyName: familyFunnelSans)
         okayButton.backgroundColor = Palette.btnBg
+        okayButton.tintColor = Palette.btnText
+        okayButton.setImage(UIImage(systemName: "chevron.right"), for: .normal)
+        okayButton.semanticContentAttribute = .forceRightToLeft
+        okayButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 6, bottom: 0, right: 0)
         okayButton.layer.cornerRadius = 8
         okayButton.layer.masksToBounds = true
         okayButton.heightAnchor.constraint(equalToConstant: Metric.buttonHeight).isActive = true

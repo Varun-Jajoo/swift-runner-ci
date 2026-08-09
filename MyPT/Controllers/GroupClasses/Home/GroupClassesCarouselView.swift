@@ -119,7 +119,18 @@ final class GroupClassCarouselDotsView: UIView {
         let clamped = min(max(page, 0), pageCount - 1)
         guard clamped != selectedPage else { return }
         selectedPage = clamped
-        applySelection()
+        // The selected dot grows 5pt -> 25pt and swaps colour. Writing that
+        // straight into the width constraint makes it jump; animating the layout
+        // pass lets it glide instead. `.beginFromCurrentState` so a fast scroll
+        // across several pages retargets mid-flight rather than restarting each
+        // time. setPageCount()'s own applySelection() stays unanimated — that's
+        // initial construction, not a transition.
+        UIView.animate(withDuration: 0.25,
+                       delay: 0,
+                       options: [.curveEaseInOut, .beginFromCurrentState]) {
+            self.applySelection()
+            self.layoutIfNeeded()
+        }
     }
 
     private func applySelection() {
@@ -496,6 +507,18 @@ extension GroupClassesCarouselView: UICollectionViewDataSource, UICollectionView
         guard scrollView === collectionView, !classes.isEmpty else { return }
         let pageWidth = GroupClassCardCollectionViewCell.cardSize.width + GroupClassesCarouselView.cardSpacing
         guard pageWidth > 0 else { return }
+        // At maximum scroll the last card comes to rest against the trailing
+        // content inset, so contentOffset.x never reaches (count - 1) * pageWidth
+        // — rawPage rounds down to count - 2 and the second-to-last dot stays lit.
+        // Snap the final page explicitly rather than trusting the offset maths at
+        // the very end. (setSelectedPage already clamps, which is why clamping
+        // alone doesn't fix this: the computed page is legitimately count - 2.)
+        let maxOffsetX = scrollView.contentSize.width - scrollView.bounds.width
+        if maxOffsetX > 0, scrollView.contentOffset.x >= maxOffsetX - 0.5 {
+            dotsView.setSelectedPage(classes.count - 1)
+            return
+        }
+
         let rawPage = (scrollView.contentOffset.x + scrollView.contentInset.left) / pageWidth
         dotsView.setSelectedPage(Int(rawPage.rounded()))
     }
