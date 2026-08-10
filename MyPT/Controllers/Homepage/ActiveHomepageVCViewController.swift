@@ -561,11 +561,11 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         if collectionView == collectionMyBooking {
             guard let session = self.upcomingSessionData?[indexPath.row] else { return }
             let typeStr = session.sessionType?.value?.lowercased() ?? ""
-            let bookingType = session.bookingType?.value?.lowercased() ?? ""
+            let bookingType = session.bookingType?.lowercased() ?? ""
             let isGroupClass = typeStr.contains("group") || typeStr == "class" || bookingType.contains("group") || bookingType == "class"
             if isGroupClass {
                 let confirmed = SlotConfirmedViewController()
-                let title = session.bookingType?.value?.isEmpty == false ? session.bookingType?.value : session.sessionType?.value
+                let title = session.bookingType?.isEmpty == false ? session.bookingType : session.sessionType?.value
                 confirmed.classTitle = title ?? ""
                 confirmed.classTime = session.timing?.value ?? ""
                 confirmed.classLocation = session.location?.value ?? ""
@@ -822,11 +822,11 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             $0.id?.value == sender.accessibilityHint ?? "0"
         }), let session = self.upcomingSessionData?[getIndx] {
             let typeStr = session.sessionType?.value?.lowercased() ?? ""
-            let bookingType = session.bookingType?.value?.lowercased() ?? ""
+            let bookingType = session.bookingType?.lowercased() ?? ""
             let isGroupClass = typeStr.contains("group") || typeStr == "class" || bookingType.contains("group") || bookingType == "class"
             if isGroupClass {
                 let confirmed = SlotConfirmedViewController()
-                let title = session.bookingType?.value?.isEmpty == false ? session.bookingType?.value : session.sessionType?.value
+                let title = session.bookingType?.isEmpty == false ? session.bookingType : session.sessionType?.value
                 confirmed.classTitle = title ?? ""
                 confirmed.classTime = session.timing?.value ?? ""
                 confirmed.classLocation = session.location?.value ?? ""
