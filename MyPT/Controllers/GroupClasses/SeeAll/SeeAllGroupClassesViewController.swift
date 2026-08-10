@@ -51,6 +51,13 @@ final class SeeAllGroupClassesViewController: CommonViewController {
     private var trendingList: [UpcomingClassModel] = []
     private var activeTab: FilterTab = .all
     private var lastLayoutWidth: CGFloat = 0
+    /// Skips the redundant re-fetch on the first appearance right after
+    /// `viewDidLoad` already fetched. Without a re-fetch on later
+    /// appearances, booking/waitlisting a class then returning to this list
+    /// left it showing pre-booking seat counts/status until the user backed
+    /// all the way out and back in - mirrors the same fix already applied to
+    /// `GroupTrainingDetailViewController.viewWillAppear`.
+    private var hasFetchedOnce = false
 
     // MARK: - Views
 
@@ -122,6 +129,15 @@ final class SeeAllGroupClassesViewController: CommonViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.isNavigationBarHidden = true
+
+        // Skips the very first appearance (viewDidLoad already just fetched,
+        // and this runs immediately after it on the same presentation) - only
+        // re-fetches on a LATER appearance, e.g. coming back after booking a
+        // class elsewhere.
+        if hasFetchedOnce {
+            loadClasses()
+        }
+        hasFetchedOnce = true
     }
 
     override func viewSafeAreaInsetsDidChange() {

@@ -90,11 +90,17 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         collectionDate.reloadData()
         collectionBookingSuggestion.reloadData()
         
+        // `getLocation()`'s own completion already calls `loadGroupClasses()`
+        // once real coordinates land - calling it again here unconditionally
+        // fired the same "viewall-classes" request twice on every cold-cache
+        // appearance (once with fallback coordinates, once for real).
+        var hasCachedLocation = false
         if let lat = appUserDefaults.getLatLong()?.components(separatedBy: ",").first,
             let long = appUserDefaults.getLatLong()?.components(separatedBy: ",").last {
             print("Current lat", lat)
             self.getLat = Double(lat)
             self.getLong = Double(long)
+            hasCachedLocation = true
             let currentLoc: String? = appUserDefaults.getCurrentAddr()
             if let currentLoc = currentLoc {
                 self.lblAddress.text = String(currentLoc.prefix(25))
@@ -111,7 +117,9 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         bookingListApi()
         getPlansApi()
         getBannerApi()
-        loadGroupClasses()
+        if hasCachedLocation {
+            loadGroupClasses()
+        }
         if let firstDate = dates.first {
             let todayDate = getFormattedDate(from: firstDate)
             callSlotsApi(date: todayDate)

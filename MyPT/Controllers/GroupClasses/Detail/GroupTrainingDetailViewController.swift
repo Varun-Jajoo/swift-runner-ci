@@ -250,7 +250,6 @@ final class GroupTrainingDetailViewController: CommonViewController {
 
         // Android: `if (scheduleId.isNotBlank()) fetchClassDetail()`.
         if !scheduleId.isEmpty {
-            hasFetchedOnce = true
             fetchClassDetail()
         }
     }
@@ -271,6 +270,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
         if hasFetchedOnce && !scheduleId.isEmpty {
             fetchClassDetail()
         }
+        hasFetchedOnce = true
     }
 
     override func viewSafeAreaInsetsDidChange() {
