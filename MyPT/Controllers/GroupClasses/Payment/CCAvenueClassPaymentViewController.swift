@@ -166,8 +166,8 @@ final class CCAvenueClassPaymentViewController: CommonViewController, WKNavigati
         if isBlacklisted(result) {
             let controller = BookingPausedViewController()
             controller.reason = result.blacklistDetail?.reason ?? "2 consecutive no-shows for group classes"
-            controller.resumesOn = result.blacklistDetail?.resumesOn ?? "12 August 2026"
-            controller.daysRemaining = result.blacklistDetail?.daysRemaining?.value ?? "6"
+            controller.resumesOn = result.blacklistDetail?.resumesOn ?? "12 August 2026, 6:00 PM"
+            controller.hoursRemaining = result.blacklistDetail?.hoursRemaining?.value ?? "24"
             controller.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(controller, animated: true)
             return

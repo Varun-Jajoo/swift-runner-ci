@@ -27,10 +27,10 @@ final class BookingPausedViewController: CommonViewController {
     // carries, with Android's own fallback copy as the default.
 
     var reason: String = "2 consecutive no-shows for group classes"
-    var resumesOn: String = "12 August 2026"
-    /// Raw days-remaining value (e.g. `"6"`) — the "(N days remaining)" wrapper
+    var resumesOn: String = "12 August 2026, 6:00 PM"
+    /// Raw hours-remaining value (e.g. `"24"`) — the "(N hours remaining)" wrapper
     /// is applied in `populateUI()`, matching Android's own formatting exactly.
-    var daysRemaining: String = "6"
+    var hoursRemaining: String = "24"
 
     // MARK: - Layout constants
 
@@ -114,8 +114,8 @@ final class BookingPausedViewController: CommonViewController {
         reasonTitleLabel.text = reason
         resumesDateLabel.text = resumesOn
 
-        let trimmed = daysRemaining.trimmingCharacters(in: .whitespacesAndNewlines)
-        daysRemainingLabel.text = trimmed.hasPrefix("(") ? trimmed : "(\(trimmed) days remaining)"
+        let trimmed = hoursRemaining.trimmingCharacters(in: .whitespacesAndNewlines)
+        daysRemainingLabel.text = trimmed.hasPrefix("(") ? trimmed : "(\(trimmed) hours remaining)"
     }
 
     // MARK: - Actions

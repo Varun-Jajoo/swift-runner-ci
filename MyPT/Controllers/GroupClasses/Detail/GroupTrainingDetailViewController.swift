@@ -67,7 +67,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
     private var isUserBlacklisted: Bool = false
     private var blacklistReason: String = "2 consecutive no-shows for group classes"
     private var blacklistResumesOn: String = ""
-    private var blacklistDaysRemaining: String = ""
+    private var blacklistHoursRemaining: String = ""
     /// A spot open with people still waiting auto-redirects to Slot Open at
     /// most once per visit to this screen, so tapping "Not Now" there doesn't
     /// loop straight back here. Mirrors Android's `checkedSlotOpenRedirect`.
@@ -714,7 +714,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
             isUserBlacklisted = true
             blacklistReason = detail.reason ?? "2 consecutive no-shows for group classes"
             blacklistResumesOn = detail.resumesOn ?? ""
-            blacklistDaysRemaining = detail.daysRemaining?.value ?? ""
+            blacklistHoursRemaining = detail.hoursRemaining?.value ?? ""
         }
 
         let name = (detail.className ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
@@ -1123,8 +1123,8 @@ final class GroupTrainingDetailViewController: CommonViewController {
     private func pushBookingPaused() {
         let controller = BookingPausedViewController()
         controller.reason = blacklistReason
-        controller.resumesOn = blacklistResumesOn.isEmpty ? "12 August 2026" : blacklistResumesOn
-        controller.daysRemaining = blacklistDaysRemaining.isEmpty ? "6" : blacklistDaysRemaining
+        controller.resumesOn = blacklistResumesOn.isEmpty ? "12 August 2026, 6:00 PM" : blacklistResumesOn
+        controller.hoursRemaining = blacklistHoursRemaining.isEmpty ? "24" : blacklistHoursRemaining
         controller.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(controller, animated: true)
     }
@@ -1211,8 +1211,8 @@ final class GroupTrainingDetailViewController: CommonViewController {
         if isWaitlistBlacklisted(result) {
             let controller = BookingPausedViewController()
             controller.reason = result.blacklistDetail?.reason ?? "2 consecutive no-shows for group classes"
-            controller.resumesOn = result.blacklistDetail?.resumesOn ?? "12 August 2026"
-            controller.daysRemaining = result.blacklistDetail?.daysRemaining?.value ?? "6"
+            controller.resumesOn = result.blacklistDetail?.resumesOn ?? "12 August 2026, 6:00 PM"
+            controller.hoursRemaining = result.blacklistDetail?.hoursRemaining?.value ?? "24"
             controller.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(controller, animated: true)
             return
@@ -1289,8 +1289,8 @@ final class GroupTrainingDetailViewController: CommonViewController {
         if isWaitlistBlacklisted(result) {
             let controller = BookingPausedViewController()
             controller.reason = result.blacklistDetail?.reason ?? "2 consecutive no-shows for group classes"
-            controller.resumesOn = result.blacklistDetail?.resumesOn ?? "12 August 2026"
-            controller.daysRemaining = result.blacklistDetail?.daysRemaining?.value ?? "6"
+            controller.resumesOn = result.blacklistDetail?.resumesOn ?? "12 August 2026, 6:00 PM"
+            controller.hoursRemaining = result.blacklistDetail?.hoursRemaining?.value ?? "24"
             controller.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(controller, animated: true)
             return

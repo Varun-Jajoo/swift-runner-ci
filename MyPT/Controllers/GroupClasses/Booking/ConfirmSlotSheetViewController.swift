@@ -461,10 +461,10 @@ final class ConfirmSlotSheetViewController: CommonViewController {
         }
 
         if isBlacklisted(result) {
-            // Android fallbacks, replicated: reason / resumes_on / days_remaining.
+            // Android fallbacks, replicated: reason / resumes_on / hours_remaining.
             let reason = result.blacklistDetail?.reason ?? "2 consecutive no-shows for group classes"
-            let resumesOn = result.blacklistDetail?.resumesOn ?? "12 August 2026"
-            let daysRemaining = result.blacklistDetail?.daysRemaining?.value ?? "6"
+            let resumesOn = result.blacklistDetail?.resumesOn ?? "12 August 2026, 6:00 PM"
+            let hoursRemaining = result.blacklistDetail?.hoursRemaining?.value ?? "24"
 
             let navigationController = resolveHostNavigationController()
             hostNavigationController = navigationController
@@ -472,7 +472,7 @@ final class ConfirmSlotSheetViewController: CommonViewController {
                 let controller = BookingPausedViewController()
                 controller.reason = reason
                 controller.resumesOn = resumesOn
-                controller.daysRemaining = daysRemaining
+                controller.hoursRemaining = hoursRemaining
                 controller.hidesBottomBarWhenPushed = true
                 navigationController?.pushViewController(controller, animated: true)
             }

@@ -46,6 +46,10 @@ class PaymentMethodsViewController: CommonViewController {
     private var paymentId: String?
     private var availableProducts: [TabbyProductType] = []
     private var selectedPaymentMethod: Int?
+    /// Bumped on every `configureTabbySession()` call so a stale completion
+    /// (e.g. from the `.expired` reconfigure path) can't overwrite a newer
+    /// in-flight session's state.
+    private var tabbyConfigToken = 0
     
     //MARK: ------------- IBOUTLET
     @IBOutlet weak var topTitleLbl: UILabel!
@@ -342,24 +346,28 @@ extension PaymentMethodsViewController{
                 payment: customerPayment
             )
 
+        tabbyConfigToken += 1
+        let requestToken = tabbyConfigToken
+
         TabbySDK.shared.setup(withApiKey: AppConstant.tabby_key) //Use with your public API Key
 
             TabbySDK.shared.configure(forPayment: myTestPayment) { [weak self] result in
+                guard let self = self, self.tabbyConfigToken == requestToken else { return }
                 switch result {
                 case .success(let sessionInfo):
                     print("SessionId: \(sessionInfo.sessionId)")
                     print("PaymentId: \(sessionInfo.paymentId)")
                     print("Available products: \(sessionInfo.tabbyProductTypes)")
 
-                    self?.sessionId = sessionInfo.sessionId
-                    self?.paymentId = sessionInfo.paymentId
-                    self?.availableProducts = sessionInfo.tabbyProductTypes
+                    self.sessionId = sessionInfo.sessionId
+                    self.paymentId = sessionInfo.paymentId
+                    self.availableProducts = sessionInfo.tabbyProductTypes
 
-                    self?.isTabbyInstallmentsAvailable = sessionInfo.tabbyProductTypes.contains(.installments)
-                   
+                    self.isTabbyInstallmentsAvailable = sessionInfo.tabbyProductTypes.contains(.installments)
+
                 case .failure(let error):
                     print("Tabby configure failed: \(error.localizedDescription)")
-                    self?.isTabbyInstallmentsAvailable = false
+                    self.isTabbyInstallmentsAvailable = false
                 }
             }
         }

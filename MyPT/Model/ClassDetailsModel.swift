@@ -70,7 +70,7 @@ struct ClassDetailsModel: Codable {
     var resumesOn: String?
     /// FlexibleValue because Android reads this with `optString` (which coerces
     /// a raw JSON number to a string); read it with `.value` / `.intValue`.
-    var daysRemaining: FlexibleValue?
+    var hoursRemaining: FlexibleValue?
     /// Free-booking spam guard: tells the client BEFORE the user taps
     /// Book Slot / Join Waitlist whether that tap will land them on the
     /// special double-booking waitlist, so the confirm sheet can be
@@ -125,7 +125,7 @@ struct ClassDetailsModel: Codable {
         case isBlacklisted = "is_blacklisted"
         case reason
         case resumesOn = "resumes_on"
-        case daysRemaining = "days_remaining"
+        case hoursRemaining = "hours_remaining"
         case willSpecialWaitlist = "will_special_waitlist"
         case specialWaitlistNotifyHours = "special_waitlist_notify_hours"
         case normalWaitlistCount = "normal_waitlist_count"

@@ -67,6 +67,11 @@ final class ClassPaymentViewController: CommonViewController {
     private var tabbySessionId: String?
     private var tabbyPaymentId: String?
     private var isTabbyInstallmentsAvailable = false
+    /// Bumped on every `configureTabbySession()` call; a completion checks
+    /// its captured token against the current one before writing session
+    /// state, so a stale reply (e.g. from the `.expired` reconfigure path)
+    /// can't clobber a newer in-flight session.
+    private var tabbyConfigToken = 0
 
     // MARK: - Layout constants
 
@@ -327,8 +332,8 @@ final class ClassPaymentViewController: CommonViewController {
         if isBlacklisted(result) {
             let controller = BookingPausedViewController()
             controller.reason = result.blacklistDetail?.reason ?? "2 consecutive no-shows for group classes"
-            controller.resumesOn = result.blacklistDetail?.resumesOn ?? "12 August 2026"
-            controller.daysRemaining = result.blacklistDetail?.daysRemaining?.value ?? "6"
+            controller.resumesOn = result.blacklistDetail?.resumesOn ?? "12 August 2026, 6:00 PM"
+            controller.hoursRemaining = result.blacklistDetail?.hoursRemaining?.value ?? "24"
             controller.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(controller, animated: true)
             return
@@ -421,16 +426,20 @@ private extension ClassPaymentViewController {
             payment: customerPayment
         )
 
+        tabbyConfigToken += 1
+        let requestToken = tabbyConfigToken
+
         TabbySDK.shared.setup(withApiKey: AppConstant.tabby_key)
         TabbySDK.shared.configure(forPayment: checkoutPayload) { [weak self] result in
+            guard let self = self, self.tabbyConfigToken == requestToken else { return }
             switch result {
             case .success(let sessionInfo):
-                self?.tabbySessionId = sessionInfo.sessionId
-                self?.tabbyPaymentId = sessionInfo.paymentId
-                self?.isTabbyInstallmentsAvailable = sessionInfo.tabbyProductTypes.contains(.installments)
+                self.tabbySessionId = sessionInfo.sessionId
+                self.tabbyPaymentId = sessionInfo.paymentId
+                self.isTabbyInstallmentsAvailable = sessionInfo.tabbyProductTypes.contains(.installments)
             case .failure(let error):
                 debugPrint("[ClassPayment] Tabby configure failed: \(error.localizedDescription)")
-                self?.isTabbyInstallmentsAvailable = false
+                self.isTabbyInstallmentsAvailable = false
             }
         }
     }

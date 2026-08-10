@@ -18,6 +18,9 @@ class Utility: NSObject {
     private static var loaderView: UIView?
     private static var messageLabel: UILabel?
     private var backgroundGradient: CAGradientLayer?
+    /// Counts overlapping show/hide requests so one API call finishing early
+    /// can't tear down another still-in-flight call's loader overlay.
+    private static var loaderRefCount: Int = 0
 
 //    class func showLoader(
 //        message: String = "We're preparing your personalised training experience",
@@ -75,10 +78,15 @@ class Utility: NSObject {
         subtitle: String = "Just fine-tuning your training setup",
         fullScreen: Bool = true
     ) {
+        loaderRefCount += 1
+
         guard let window = UIApplication.shared
             .windows.first(where: { $0.isKeyWindow }) else { return }
 
-        hideLoader()
+        // A loader is already up for an earlier overlapping call — keep it
+        // and just track that one more caller is depending on it, rather than
+        // tearing it down and racing a fresh one on top.
+        if loaderView != nil { return }
 
         let overlay = UIView(frame: window.bounds)
         overlay.isUserInteractionEnabled = true
@@ -139,6 +147,8 @@ class Utility: NSObject {
 
 
     class func hideLoader() {
+        loaderRefCount = max(0, loaderRefCount - 1)
+        guard loaderRefCount == 0 else { return }
         loaderView?.removeFromSuperview()
         loaderView = nil
         messageLabel = nil

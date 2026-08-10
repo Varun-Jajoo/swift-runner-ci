@@ -48,7 +48,7 @@ struct SlotDateModel: Codable {
    -> decoded into `specialWaitlist` (SpecialWaitlistDetailModel). Detected by the presence of the
    `waitlist_type` key, which a plain booking/waitlist-success payload never includes (confirmed live
    against UAT) - only its VALUE ("special" vs "normal") tells you whether the guard actually triggered.
- - on blacklist failure -> {reason, resumes_on, days_remaining} -> decoded into `blacklistDetail`
+ - on blacklist failure -> {reason, resumes_on, hours_remaining} -> decoded into `blacklistDetail`
 
  Blacklist detection logic to replicate at every call site (mirrors Android
  GroupTrainingDetailActivity.kt lines 572-586 for book-class and 803-817 for join-waitlist):
@@ -59,7 +59,7 @@ struct SlotDateModel: Codable {
         || (model.msg?.lowercased().contains("paused") ?? false)
 
  Android fallbacks when the blacklist payload is missing a field:
- reason -> "2 consecutive no-shows for group classes", resumes_on -> "12 August 2026", days_remaining -> "6".
+ reason -> "2 consecutive no-shows for group classes", resumes_on -> "12 August 2026, 6:00 PM", hours_remaining -> "24".
  */
 struct BookClassBaseModel: Codable {
     var status: Bool?
@@ -154,13 +154,13 @@ struct BlacklistDetailModel: Codable {
     var reason: String?
     var resumesOn: String?
     /// FlexibleValue because Android reads this with optString (which coerces a raw JSON
-    /// number to a string); read it with `daysRemaining?.value` / `.intValue`.
-    var daysRemaining: FlexibleValue?
+    /// number to a string); read it with `hoursRemaining?.value` / `.intValue`.
+    var hoursRemaining: FlexibleValue?
 
     enum CodingKeys: String, CodingKey {
         case reason
         case resumesOn = "resumes_on"
-        case daysRemaining = "days_remaining"
+        case hoursRemaining = "hours_remaining"
     }
 }
 
