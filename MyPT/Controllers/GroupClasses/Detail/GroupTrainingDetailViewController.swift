@@ -960,7 +960,14 @@ final class GroupTrainingDetailViewController: CommonViewController {
             shareText += "Time: \(formattedTime)\n"
         }
         if !classLocation.isEmpty {
-            shareText += "Location: \(classLocation)"
+            shareText += "Location: \(classLocation)\n"
+        }
+        // `/class/{id}` already exists server-side (deeplink.blade.php) and
+        // routes to the Play Store or App Store based on the visitor's
+        // device - the one link that works regardless of which platform
+        // whoever this gets shared with is on.
+        if !scheduleId.isEmpty {
+            shareText += "\nhttps://mobileapp.mypt-me.com/class/\(scheduleId)"
         }
 
         let activityVC = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
