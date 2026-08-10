@@ -131,10 +131,7 @@ final class ConfirmSlotSheetViewController: CommonViewController {
     /// Copy that is hard-coded in the Android layout / Kotlin.
     private enum Copy {
         static let title = "Confirm your slot"
-        /// Verbatim from `dialog_confirm_slot_bottom_sheet.xml`. It reads like an
-        /// address-picker leftover, but the Kotlin never overwrites
-        /// `tvBottomSheetSubtext`, so this is what ships on Android today.
-        static let subtitle = "Select a saved address or add a new one."
+        static let subtitle = "Review your class details before confirming"
         static let importantNoteTitle = "IMPORTANT NOTE"
         static let importantNoteBody = "If you miss two classes consecutively (no-show or late cancellation), you will be blacklisted from group classes for "
         static let importantNoteEmphasis = "48 hours."
@@ -977,13 +974,6 @@ private extension ConfirmSlotSheetViewController {
         bodyLabel.numberOfLines = 0
         bodyLabel.attributedText = ConfirmSlotSheetViewController.importantNoteText()
 
-        let accentLine = UIView()
-        accentLine.translatesAutoresizingMaskIntoConstraints = false
-        accentLine.backgroundColor = GroupClassColor.gold.color
-        accentLine.layer.cornerRadius = 2
-        accentLine.layer.masksToBounds = true
-        box.addSubview(accentLine)
-
         let stack = UIStackView(arrangedSubviews: [headingWrapper, bodyLabel])
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.axis = .vertical
@@ -992,11 +982,6 @@ private extension ConfirmSlotSheetViewController {
         box.addSubview(stack)
 
         NSLayoutConstraint.activate([
-            accentLine.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 12),
-            accentLine.topAnchor.constraint(equalTo: box.topAnchor, constant: 12),
-            accentLine.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -12),
-            accentLine.widthAnchor.constraint(equalToConstant: 4),
-
             warningIcon.widthAnchor.constraint(equalToConstant: Metric.warningIconSide),
             warningIcon.heightAnchor.constraint(equalToConstant: Metric.warningIconSide),
 
@@ -1006,7 +991,7 @@ private extension ConfirmSlotSheetViewController {
             headingRow.trailingAnchor.constraint(lessThanOrEqualTo: headingWrapper.trailingAnchor),
 
             stack.topAnchor.constraint(equalTo: box.topAnchor, constant: 12),
-            stack.leadingAnchor.constraint(equalTo: accentLine.trailingAnchor, constant: 10),
+            stack.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 16),
             stack.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -16),
             stack.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -16)
         ])
