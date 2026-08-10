@@ -729,17 +729,27 @@ class NetworkManager {
                                 print(error.localizedDescription)
                             }
                             completion(data, nil)
+                        } else {
+                            // A 2xx with no body (e.g. a 204, or a flaky
+                            // proxy/CDN stripping it) must still call back -
+                            // otherwise the caller's completion never fires,
+                            // the tap silently does nothing, and the user
+                            // re-taps into a race with the still in-flight
+                            // first request.
+                            completion(nil, nil)
                         }
                     case badRequest:
                         // Bad Request: Handle the specific error case
                         print("Bad Request")
+                        completion(nil, nil)
                     case InvalidAccessTokenCode:
                         // Unauthorized: Handle the specific error case
                         self.handle401StatusCode(serviceEndPoint)
                         print("INVALID AUTHTOKEN") //when AuthToken is expire
+                        completion(nil, nil)
                     default:
                         print("Status Code: \(statusCode)")
-                        break
+                        completion(nil, nil)
                     }
                 }
                 

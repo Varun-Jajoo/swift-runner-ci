@@ -72,6 +72,13 @@ final class GroupTrainingDetailViewController: CommonViewController {
     /// most once per visit to this screen, so tapping "Not Now" there doesn't
     /// loop straight back here. Mirrors Android's `checkedSlotOpenRedirect`.
     private var checkedSlotOpenRedirect: Bool = false
+    /// Guards against a double-tap firing `ctaTapped()` twice before the first
+    /// tap's sheet/screen transition finishes presenting - two `present()`
+    /// calls racing against the same custom sheet-detent controller mid-
+    /// transition is a known UISheetPresentationController crash trigger.
+    /// Mirrors the debounce `SlotOpenViewController.confirmTapped()` already
+    /// uses (disable the CTA, re-enable once the transition settles).
+    private var isProcessingCtaTap: Bool = false
     /// Live values from the class-detail API, kept at class scope (not just
     /// local to `updateProgressAndWaitlistState`/the fetch handler) so
     /// `ctaTapped()` can also route to Slot Open instead of the booking sheet
@@ -251,6 +258,8 @@ final class GroupTrainingDetailViewController: CommonViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.isNavigationBarHidden = true
+        isProcessingCtaTap = false
+        ctaButton.isEnabled = true
 
         // willSpecialWaitlist/isAlreadyBooked/isAlreadyWaitlisted are snapshotted
         // once per fetch and read again at CTA-tap time. Without a re-fetch here,
@@ -990,6 +999,14 @@ final class GroupTrainingDetailViewController: CommonViewController {
     /// check now runs first, ahead of every other branch (`btnBookSlot`'s
     /// listener checks `isUserBlacklisted` before `isAlreadyBooked`).
     @objc private func ctaTapped() {
+        guard !isProcessingCtaTap else { return }
+        isProcessingCtaTap = true
+        ctaButton.isEnabled = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
+            self?.isProcessingCtaTap = false
+            self?.ctaButton.isEnabled = true
+        }
+
         TapticEngine.selection.feedback()
 
         if isUserBlacklisted {
