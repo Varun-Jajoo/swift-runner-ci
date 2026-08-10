@@ -595,7 +595,6 @@ private extension DoubleBookingSheetViewController {
         let rightLine = GradientLineView(startAlpha: 0.30, endAlpha: 0.02)
         rightLine.translatesAutoresizingMaskIntoConstraints = false
         rightLine.heightAnchor.constraint(equalToConstant: 1).isActive = true
-        rightLine.widthAnchor.constraint(equalTo: leftLine.widthAnchor).isActive = true
 
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -610,6 +609,13 @@ private extension DoubleBookingSheetViewController {
         row.axis = .horizontal
         row.alignment = .center
         row.spacing = 10
+
+        // Activated only now that leftLine/rightLine share `row` as a common
+        // ancestor - setting this cross-view constraint active any earlier
+        // (before either view was in a hierarchy) threw "Unable to activate
+        // constraint ... because they have no common ancestor" every single
+        // time this sheet loaded, crashing on the very first presentation.
+        rightLine.widthAnchor.constraint(equalTo: leftLine.widthAnchor).isActive = true
         return row
     }
 
