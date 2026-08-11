@@ -341,6 +341,7 @@ final class SlotOpenViewController: CommonViewController {
                 if let name = detail.className, !name.isEmpty { self.classTitleLabel.text = name }
                 if let time = detail.time, !time.isEmpty { self.classDateTimeLabel.text = time }
                 if let location = detail.location, !location.isEmpty { self.locationTitleLabel.text = location }
+                if let distance = detail.distance, !distance.isEmpty { self.locationDistanceLabel.text = distance }
                 if let trainer = detail.name, !trainer.isEmpty { self.trainerTitleLabel.text = "Trainer: \(trainer)" }
                 if let category = detail.classType, !category.isEmpty { self.categoryPillLabel.text = category.uppercased() }
 
