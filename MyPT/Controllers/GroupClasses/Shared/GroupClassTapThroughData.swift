@@ -78,7 +78,6 @@ enum GroupClassCardFormatter {
     /// is likewise unreachable from the card path because `defaultLocation` is
     /// substituted first.
     static let defaultStudio = "Silicon Oasis"
-    static let defaultDistance = "2.1 km away"
     /// Android reads the field as `json.optString("access", "paid")` and its
     /// `FullNearUpcomingCLassModel.access` property also defaults to `"paid"`, so a
     /// class that omits `access` is treated as PAID (PREMIUM badge), never as free.
@@ -313,8 +312,14 @@ enum GroupClassCardFormatter {
 
     // MARK: Distance
 
-    /// Great-circle distance from the device to the studio, falling back to the
-    /// server-supplied `distance` string when the studio has no coordinates.
+    /// Great-circle distance from the device to the studio. Device location
+    /// first (real GPS/cached UserDefaults reading), server-supplied
+    /// `distance` string only as a last-resort fallback when the studio has
+    /// no coordinates - never synthesizes a distance from `fallbackLatitude`/
+    /// `fallbackLongitude` (Dubai defaults) the way this used to, since that's
+    /// just as meaningless for a member nowhere near Dubai as trusting the
+    /// server's own Dubai-default-based figure was. Android counterpart:
+    /// `computeDeviceDistanceText()` in `GroupClassLocationUtils.kt`.
     static func distanceText(userLat: Double?,
                              userLng: Double?,
                              studioLat: Double?,
@@ -326,11 +331,12 @@ enum GroupClassCardFormatter {
 
         if resolvedLat == 0 || resolvedLng == 0 {
             let stored = appUserDefaults.getLatLong()?.components(separatedBy: ",")
-            resolvedLat = Double(stored?.first ?? "") ?? fallbackLatitude
-            resolvedLng = Double(stored?.last ?? "") ?? fallbackLongitude
+            resolvedLat = Double(stored?.first ?? "") ?? 0
+            resolvedLng = Double(stored?.last ?? "") ?? 0
         }
 
-        if let studioLat = studioLat, let studioLng = studioLng, studioLat != 0, studioLng != 0 {
+        if resolvedLat != 0, resolvedLng != 0,
+           let studioLat = studioLat, let studioLng = studioLng, studioLat != 0, studioLng != 0 {
             let meters = CLLocation(latitude: resolvedLat, longitude: resolvedLng)
                 .distance(from: CLLocation(latitude: studioLat, longitude: studioLng))
             if meters < 1000 {
@@ -340,7 +346,10 @@ enum GroupClassCardFormatter {
         }
 
         let cleanFallback = (fallback ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !cleanFallback.isEmpty else { return defaultDistance }
+        guard !cleanFallback.isEmpty,
+              !cleanFallback.hasPrefix("0.0"),
+              cleanFallback.caseInsensitiveCompare("away") != .orderedSame,
+              !cleanFallback.hasPrefix("2.1 km") else { return "" }
         return cleanFallback.contains("away") ? cleanFallback : "\(cleanFallback) away"
     }
 

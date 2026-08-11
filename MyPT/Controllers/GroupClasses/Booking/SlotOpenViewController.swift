@@ -112,6 +112,8 @@ final class SlotOpenViewController: CommonViewController {
     /// From class-detail's `price` - only needed for the PAYMENT_REQUIRED
     /// redirect (a paid/mixed class's open spot can't be claimed for free).
     private var classPrice: String = ""
+    private var studioLat: Double = 0
+    private var studioLng: Double = 0
 
     /// Fires when the claim succeeds - the caller pushes Slot Confirmed.
     var onClaimed: ((_ classTitle: String, _ time: String, _ location: String, _ trainerName: String) -> Void)?
@@ -341,7 +343,17 @@ final class SlotOpenViewController: CommonViewController {
                 if let name = detail.className, !name.isEmpty { self.classTitleLabel.text = name }
                 if let time = detail.time, !time.isEmpty { self.classDateTimeLabel.text = time }
                 if let location = detail.location, !location.isEmpty { self.locationTitleLabel.text = location }
-                if let distance = detail.distance, !distance.isEmpty { self.locationDistanceLabel.text = distance }
+                self.studioLat = detail.studioLat?.doubleValue ?? 0
+                self.studioLng = detail.studioLng?.doubleValue ?? 0
+                // Device location first, server-passed distance only as a
+                // last-resort fallback - see
+                // GroupClassCardFormatter.distanceText()'s doc comment.
+                let resolvedDistance = GroupClassCardFormatter.distanceText(
+                    userLat: nil, userLng: nil,
+                    studioLat: self.studioLat, studioLng: self.studioLng,
+                    fallback: detail.distance
+                )
+                if !resolvedDistance.isEmpty { self.locationDistanceLabel.text = resolvedDistance }
                 if let trainer = detail.name, !trainer.isEmpty { self.trainerTitleLabel.text = "Trainer: \(trainer)" }
                 if let category = detail.classType, !category.isEmpty { self.categoryPillLabel.text = category.uppercased() }
 
@@ -442,6 +454,9 @@ final class SlotOpenViewController: CommonViewController {
             input.classTime = classDateTimeLabel.text ?? classTime
             input.classLocation = locationTitleLabel.text ?? classLocation
             input.trainerName = trainerName
+            input.distance = locationDistanceLabel.text ?? ""
+            input.studioLat = studioLat
+            input.studioLng = studioLng
             input.notifyHours = result.specialWaitlist?.notificationWindowHours?.intValue ?? 3
             DoubleBookingSheetViewController.present(from: self, input: input)
             return
@@ -456,6 +471,8 @@ final class SlotOpenViewController: CommonViewController {
             controller.classTime = classDateTimeLabel.text ?? classTime
             controller.classLocation = locationTitleLabel.text ?? classLocation
             controller.trainerName = trainerName
+            controller.studioLat = studioLat
+            controller.studioLng = studioLng
             controller.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(controller, animated: true)
             AlertHelper.shared.showCustomeAlert(title: "", message: result.msg ?? "This spot was just claimed by someone else.", actions: ["OK"], completion: nil)

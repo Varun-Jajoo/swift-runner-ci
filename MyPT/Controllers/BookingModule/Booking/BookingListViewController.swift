@@ -329,6 +329,8 @@ extension BookingListViewController: UITableViewDataSource, UITableViewDelegate{
                     dbVc.classLocation = row.location?.value ?? ""
                     dbVc.trainerName = row.trainer?.value ?? ""
                     dbVc.distance = row.distance?.value ?? ""
+                    dbVc.studioLat = row.studioLat?.doubleValue ?? 0
+                    dbVc.studioLng = row.studioLng?.doubleValue ?? 0
                     dbVc.hidesBottomBarWhenPushed = true
                     self.navigationController?.pushViewController(dbVc, animated: true)
                     return
@@ -366,6 +368,8 @@ extension BookingListViewController: UITableViewDataSource, UITableViewDelegate{
                 input.classLocation = row.location?.value ?? ""
                 input.trainerName = row.trainer?.value ?? ""
                 input.distance = row.distance?.value ?? ""
+                input.studioLat = row.studioLat?.doubleValue ?? 0
+                input.studioLng = row.studioLng?.doubleValue ?? 0
                 let controller = ClassCancelledByAdminViewController()
                 controller.input = input
                 controller.hidesBottomBarWhenPushed = true

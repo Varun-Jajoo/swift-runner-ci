@@ -1064,6 +1064,8 @@ final class GroupTrainingDetailViewController: CommonViewController {
                 dbVc.classLocation = classLocation
                 dbVc.trainerName = trainerName
                 dbVc.distance = locationDistanceLabel.text ?? currentDistance
+                dbVc.studioLat = studioLat
+                dbVc.studioLng = studioLng
                 dbVc.hidesBottomBarWhenPushed = true
             } else if let wVc = controller as? WaitlistConfirmedViewController {
                 wVc.classTitle = classTitle
@@ -1071,6 +1073,8 @@ final class GroupTrainingDetailViewController: CommonViewController {
                 wVc.classLocation = classLocation
                 wVc.trainerName = trainerName
                 wVc.distance = locationDistanceLabel.text ?? currentDistance
+                wVc.studioLat = studioLat
+                wVc.studioLng = studioLng
                 wVc.hidesBottomBarWhenPushed = true
             }
             navigationController?.pushViewController(controller, animated: true)
@@ -1232,6 +1236,8 @@ final class GroupTrainingDetailViewController: CommonViewController {
                 controller.classLocation = classLocation
                 controller.trainerName = trainerName
                 controller.distance = currentDistance
+                controller.studioLat = studioLat
+                controller.studioLng = studioLng
                 controller.hidesBottomBarWhenPushed = true
                 navigationController?.pushViewController(controller, animated: true)
             }
@@ -1358,6 +1364,8 @@ final class GroupTrainingDetailViewController: CommonViewController {
         controller.classLocation = classLocation
         controller.trainerName = trainerName
         controller.distance = locationDistanceLabel.text ?? currentDistance
+        controller.studioLat = studioLat
+        controller.studioLng = studioLng
         controller.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(controller, animated: true)
     }
@@ -1374,6 +1382,8 @@ final class GroupTrainingDetailViewController: CommonViewController {
         input.classLocation = classLocation
         input.trainerName = trainerName
         input.distance = locationDistanceLabel.text ?? currentDistance
+        input.studioLat = studioLat
+        input.studioLng = studioLng
         input.notifyHours = notifyHours ?? specialWaitlistNotifyHours
 
         if preCheck {

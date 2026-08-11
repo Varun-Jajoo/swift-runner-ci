@@ -27,6 +27,8 @@ final class DoubleBookingWaitlistConfirmedViewController: CommonViewController {
     var classLocation: String = "Silicon Oasis"
     var trainerName: String = ""
     var distance: String = ""
+    var studioLat: Double = 0
+    var studioLng: Double = 0
 
     private enum Metric {
         static let horizontalInset: CGFloat = 20
@@ -120,9 +122,15 @@ final class DoubleBookingWaitlistConfirmedViewController: CommonViewController {
         dateTimeLabel.text = classTime
         locationTitleLabel.text = GroupClassCardFormatter.cleanStudioName(classLocation)
 
-        let trimmedDistance = distance.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !trimmedDistance.isEmpty {
-            locationDistanceLabel.text = trimmedDistance.contains("away") ? trimmedDistance : "\(trimmedDistance) away"
+        // Device location first, server-passed distance only as a last-resort
+        // fallback - see GroupClassCardFormatter.distanceText()'s doc comment.
+        let resolvedDistance = GroupClassCardFormatter.distanceText(
+            userLat: nil, userLng: nil,
+            studioLat: studioLat, studioLng: studioLng,
+            fallback: distance
+        )
+        if !resolvedDistance.isEmpty {
+            locationDistanceLabel.text = resolvedDistance
         }
 
         let trimmedTrainer = trainerName.trimmingCharacters(in: .whitespacesAndNewlines)

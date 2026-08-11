@@ -40,6 +40,8 @@ struct DoubleBookingSheetInput {
     var trainerName: String = ""
     /// The detail screen's distance label text, forwarded verbatim to Waitlist Confirmed.
     var distance: String = ""
+    var studioLat: Double = 0
+    var studioLng: Double = 0
     /// From class-detail's `special_waitlist_notify_hours` / the book-class response's
     /// `notification_window_hours` — whichever triggered this sheet.
     var notifyHours: Int = 3
@@ -323,6 +325,8 @@ final class DoubleBookingSheetViewController: CommonViewController, UIAdaptivePr
         controller.classLocation = input.classLocation
         controller.trainerName = input.trainerName
         controller.distance = input.distance
+        controller.studioLat = input.studioLat
+        controller.studioLng = input.studioLng
         controller.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(controller, animated: true)
     }

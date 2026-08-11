@@ -29,6 +29,8 @@ struct ClassCancelledByAdminInput {
     var classLocation: String = ""
     var trainerName: String = ""
     var distance: String = ""
+    var studioLat: Double = 0
+    var studioLng: Double = 0
 }
 
 // MARK: - ClassCancelledByAdminViewController
@@ -378,8 +380,13 @@ private extension ClassCancelledByAdminViewController {
         locationDistanceLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
         locationDistanceLabel.textColor = Palette.rowSubtitle
         locationDistanceLabel.numberOfLines = 1
-        let trimmedDistance = input.distance.trimmingCharacters(in: .whitespacesAndNewlines)
-        locationDistanceLabel.text = trimmedDistance.isEmpty ? "" : (trimmedDistance.contains("away") ? trimmedDistance : "\(trimmedDistance) away")
+        // Device location first, server-passed distance only as a last-resort
+        // fallback - see GroupClassCardFormatter.distanceText()'s doc comment.
+        locationDistanceLabel.text = GroupClassCardFormatter.distanceText(
+            userLat: nil, userLng: nil,
+            studioLat: input.studioLat, studioLng: input.studioLng,
+            fallback: input.distance
+        )
 
         let locationRow = makeDetailRow(icon: ClassCancelledByAdminViewController.icon(["ic_location_pin_small"], systemFallback: "mappin.and.ellipse"),
                                         iconSide: 14,
