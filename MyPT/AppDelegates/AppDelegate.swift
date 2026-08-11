@@ -269,25 +269,38 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
          completionHandler()
      }
 
+    private static func routeNotificationTap(userInfo: [AnyHashable: Any]) {
+        guard let type = userInfo["type"] as? String else { return }
+        let scheduleId = userInfo["schedule_id"] as? String
+
+        if type.caseInsensitiveCompare("waitlist_open_slots") == .orderedSame {
+            // The local "N spots opened up" notification only carries a
+            // schedule_id when there was exactly one match - go straight to
+            // its claim screen then, same as the specific server-pushed
+            // "waitlist_spot_available" type. With more than one match there's
+            // no single class to deep link to, so fall back to the Bookings tab.
+            if let scheduleId = scheduleId, !scheduleId.isEmpty {
+                AppDelegate.pushClaimScreen(scheduleId: scheduleId)
+            } else {
+                AppDelegate.jumpToBookingsTab()
+            }
+            return
+        }
+
+        guard type.caseInsensitiveCompare("waitlist_spot_available") == .orderedSame,
+              let scheduleId = scheduleId, !scheduleId.isEmpty else {
+            return
+        }
+
+        AppDelegate.pushClaimScreen(scheduleId: scheduleId)
+    }
+
     /// Every waitlisted member gets the same "a spot opened up" push at once
     /// (`WaitlistNotifier::notifyAll`), so tapping it needs to open the claim
     /// screen directly rather than just landing on the home tab. Android's
     /// equivalent: `MyFirebaseMessagingService.sendNotification`'s
     /// `waitlist_spot_available` branch.
-    private static func routeNotificationTap(userInfo: [AnyHashable: Any]) {
-        guard let type = userInfo["type"] as? String else { return }
-
-        if type.caseInsensitiveCompare("waitlist_open_slots") == .orderedSame {
-            AppDelegate.jumpToBookingsTab()
-            return
-        }
-
-        guard type.caseInsensitiveCompare("waitlist_spot_available") == .orderedSame,
-              let scheduleId = userInfo["schedule_id"] as? String,
-              !scheduleId.isEmpty else {
-            return
-        }
-
+    private static func pushClaimScreen(scheduleId: String) {
         guard let navigationController = AppDelegate.topNavigationController() else { return }
 
         let controller = SlotOpenViewController()
@@ -331,8 +344,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
     /// Local "N spots opened up" notification's tap target - the Bookings
     /// tab itself (index 2, same constant every confirmation screen already
     /// uses), not any specific class, since the count spans every class
-    /// this member is waitlisted for.
-    private static func jumpToBookingsTab() {
+    /// this member is waitlisted for. Not private: also the shared "land on
+    /// Bookings" target for any sheet/screen that doesn't have a reliable
+    /// `navigationController` of its own to fall back on (e.g. a modally
+    /// presented sheet) - see `DoubleBookingSheetViewController.manageBookingTapped()`.
+    static func jumpToBookingsTab() {
         let bookingsTabIndex = 2
 
         let keyWindow = UIApplication.shared.connectedScenes

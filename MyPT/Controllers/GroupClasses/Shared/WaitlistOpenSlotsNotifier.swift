@@ -14,6 +14,11 @@
 import UIKit
 import UserNotifications
 
+struct WaitlistOpenSlot {
+    let scheduleId: String
+    let className: String
+}
+
 enum WaitlistOpenSlotsNotifier {
 
     private static var observer: NSObjectProtocol?
@@ -41,26 +46,35 @@ enum WaitlistOpenSlotsNotifier {
     }
 
     private static func checkAndNotify() {
-        UpcomingClassVM.waitlistOpenSlotsCountApi { emptySlots in
-            guard emptySlots > 0 else { return }
-            scheduleNotification(emptySlots: emptySlots)
+        UpcomingClassVM.waitlistOpenSlotsCountApi { slots in
+            guard !slots.isEmpty else { return }
+            scheduleNotification(slots: slots)
         }
     }
 
-    private static func scheduleNotification(emptySlots: Int) {
+    private static func scheduleNotification(slots: [WaitlistOpenSlot]) {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else { return }
 
             let content = UNMutableNotificationContent()
-            content.title = "Spot available"
-            content.body = emptySlots == 1
-                ? "1 spot opened up in a class you're waitlisted for."
-                : "\(emptySlots) spots opened up in classes you're waitlisted for."
+            content.title = "Spot Available 🔔"
+            var userInfo: [AnyHashable: Any] = ["type": "waitlist_open_slots"]
+
+            if slots.count == 1, let only = slots.first {
+                // Exactly one open spot - name the class and deep link straight
+                // to its claim screen (AppDelegate.routeNotificationTap(userInfo:)),
+                // same idiom the server-pushed "waitlist_spot_available" type
+                // already uses for a specific class.
+                content.body = "A spot opened up in \(only.className) - confirm before another member does."
+                userInfo["schedule_id"] = only.scheduleId
+            } else {
+                // Multiple matches - no single class to name or deep link to,
+                // just a generic nudge toward the Bookings tab instead of
+                // spelling out "N spots opened up".
+                content.body = "A spot opened up in one of your waitlisted classes. Tap to view your bookings."
+            }
             content.sound = .default
-            // Routed by AppDelegate.routeNotificationTap(userInfo:) - jumps
-            // straight to the Bookings tab, same idiom as the server-pushed
-            // "waitlist_spot_available" type already handles for a specific class.
-            content.userInfo = ["type": "waitlist_open_slots"]
+            content.userInfo = userInfo
 
             let request = UNNotificationRequest(
                 identifier: "waitlist_open_slots",

@@ -76,7 +76,6 @@ final class DoubleBookingSheetViewController: CommonViewController, UIAdaptivePr
         static let numberBadgeSide: CGFloat = 13
         static let ctaHeight: CGFloat = 48
         static let sheetCornerRadius: CGFloat = 20
-        static let bookingsTabIndex = 2
     }
 
     /// Hex values taken straight from `dialog_double_booking_bottom_sheet.xml` /
@@ -110,7 +109,7 @@ final class DoubleBookingSheetViewController: CommonViewController, UIAdaptivePr
         static let title = "You already have an active booking"
         static let dividerLabel = "To Reserve This Slot"
         static let manageCardTitle = "Manage Current Booking"
-        static let manageItem1 = "Cancel your upcoming class"
+        static let manageItem1 = "Complete or Cancel your upcoming booking"
         static let manageItem2 = "Your spot will be available to book this session"
         static let waitlistCardTitle = "Join the Waitlist"
         static let waitlistItem2 = "Spots are first-come, first-served"
@@ -294,29 +293,23 @@ final class DoubleBookingSheetViewController: CommonViewController, UIAdaptivePr
     }
 
     /// Port of `btnManageExistingBooking.setOnClickListener`: dismiss, then land on
-    /// the Bookings tab exactly like `SlotConfirmedViewController.viewMyBookingsTapped()`.
+    /// the Bookings tab. Previously replicated `SlotConfirmedViewController.
+    /// viewMyBookingsTapped()`'s own resolve-then-pop-both dance, but that
+    /// screen is always reached by a PUSH (so its `navigationController` IS
+    /// reliably the current tab's stack) - this sheet is PRESENTED, and when
+    /// `resolveTabBarController()` failed to find the tab bar in that context,
+    /// the fallback (`hostNavigationController?.popToRootViewController`) only
+    /// popped whatever stack presented this sheet WITHOUT ever switching tabs -
+    /// landing on Home whenever that happened to be the presenting tab, instead
+    /// of Bookings. Reusing the same tab-switch `AppDelegate` already uses for
+    /// the local "spot opened up" notification sidesteps that guesswork
+    /// entirely - it always lands on Bookings.
     @objc private func manageBookingTapped() {
         TapticEngine.selection.feedback()
         handledNav = true
 
-        // Resolved *before* dismiss starts - `presentingViewController` (and the
-        // tab-bar walk that depends on it) goes `nil` the instant dismissal begins.
-        let tabBarController = resolveTabBarController()
-        let hostNavigationController = resolveHostNavigationController()
-        self.hostNavigationController = hostNavigationController
-
         dismiss(animated: true) {
-            guard let tabBarController = tabBarController,
-                  let tabs = tabBarController.viewControllers,
-                  tabs.indices.contains(Metric.bookingsTabIndex) else {
-                hostNavigationController?.popToRootViewController(animated: true)
-                return
-            }
-
-            (tabs[Metric.bookingsTabIndex] as? UINavigationController)?
-                .popToRootViewController(animated: false)
-            tabBarController.selectedIndex = Metric.bookingsTabIndex
-            hostNavigationController?.popToRootViewController(animated: false)
+            AppDelegate.jumpToBookingsTab()
         }
     }
 
@@ -351,18 +344,6 @@ final class DoubleBookingSheetViewController: CommonViewController, UIAdaptivePr
         if let navigationController = presentingViewController?.navigationController { return navigationController }
         if let tabBarController = presentingViewController as? UITabBarController {
             return tabBarController.selectedViewController as? UINavigationController
-        }
-        return nil
-    }
-
-    private func resolveTabBarController() -> UITabBarController? {
-        if let tabBarController = tabBarController { return tabBarController }
-        if let tabBarController = presentingViewController?.tabBarController { return tabBarController }
-
-        var candidate = UIApplication.shared.windows.first(where: \.isKeyWindow)?.rootViewController
-        while let current = candidate {
-            if let tabBarController = current as? UITabBarController { return tabBarController }
-            candidate = current.presentedViewController ?? current.children.first
         }
         return nil
     }
