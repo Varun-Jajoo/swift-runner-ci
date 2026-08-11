@@ -454,11 +454,19 @@ private extension ClassCancelledByAdminViewController {
         label.text = text
         label.textAlignment = .center
 
-        let container = UIView()
+        // Glass pill, same recipe as every other "GROUP CLASS" badge in the
+        // module (e.g. WaitlistConfirmedViewController's categoryPill) -
+        // this used to be a plain bordered UIView with no glass fill/sheen.
+        let container = GlassCardView()
         container.translatesAutoresizingMaskIntoConstraints = false
-        container.layer.cornerRadius = 100
-        container.layer.borderWidth = 1
-        container.layer.borderColor = Palette.pillStroke.withAlphaComponent(0.20).cgColor
+        container.fillColor = .white
+        container.fillAlpha = 0.0
+        container.strokeColor = Palette.pillStroke
+        container.strokeAlpha = 0.2
+        container.sheenColor = .white
+        container.sheenAlpha = 0.2
+        container.sheenOrigin = .topCenter
+        container.sheenEdge = .bottomRight
         container.addSubview(label)
 
         NSLayoutConstraint.activate([
