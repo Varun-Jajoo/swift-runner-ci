@@ -188,6 +188,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
     private let locationDistanceLabel = UILabel()
     private let doorsOpenLabel = UILabel()
 
+    private let whyTitleLabel = UILabel()
     private let whyScrollView = UIScrollView()
     private let whyCardsStack = UIStackView()
     private let whyDotsView = GroupClassCarouselDotsView()
@@ -248,7 +249,9 @@ final class GroupTrainingDetailViewController: CommonViewController {
         readTapThroughData()
         buildLayout()
         populateUI()
-        setupWhyCarouselIndicator()
+        // Real card count/dots come from refreshWhyStandsOut(), called once
+        // fetchClassDetail() resolves below - buildLayout() only builds the
+        // empty carousel shell.
 
         // Android: `if (scheduleId.isNotBlank()) fetchClassDetail()`.
         if !scheduleId.isEmpty {
@@ -710,6 +713,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
         refreshWhatToBring()
         refreshThingsToKnow()
         refreshMediaGallery()
+        refreshWhyStandsOut()
 
         // Port of the 5-way OR Android checks in `fetchClassDetail()`'s success
         // branch: `detail.is_blacklisted` (nested) OR the same key at the
@@ -1520,13 +1524,6 @@ final class GroupTrainingDetailViewController: CommonViewController {
         }
     }
 
-    // MARK: - Why-this-class-stands-out carousel indicator
-
-    /// Port of `setupCarouselIndicator()`: two pages, switching at the 50% scroll mark.
-    private func setupWhyCarouselIndicator() {
-        whyDotsView.setPageCount(2)
-        whyDotsView.setSelectedPage(0)
-    }
 }
 
 // MARK: - UIScrollViewDelegate
@@ -1535,9 +1532,16 @@ extension GroupTrainingDetailViewController: UIScrollViewDelegate {
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard scrollView === whyScrollView else { return }
+        // Proportional rather than a hardcoded binary 0/1 - the carousel can
+        // now hold anywhere from 1 to 4 cards depending on how many
+        // why_stands_out entries the class actually has (page count is set
+        // in refreshWhyStandsOut(), readable via pageCount's public getter).
+        let pageCount = whyDotsView.pageCount
+        guard pageCount > 1 else { return }
         let maxScroll = max(scrollView.contentSize.width - scrollView.bounds.width, 1)
         let ratio = min(max(scrollView.contentOffset.x / maxScroll, 0), 1)
-        whyDotsView.setSelectedPage(ratio > 0.5 ? 1 : 0)
+        let selectedPage = min(max(Int((ratio * CGFloat(pageCount - 1)).rounded()), 0), pageCount - 1)
+        whyDotsView.setSelectedPage(selectedPage)
     }
 }
 
@@ -1704,11 +1708,16 @@ private extension GroupTrainingDetailViewController {
         column.addArrangedSubview(doorsDivider)
         column.setCustomSpacing(24, after: doorsDivider)
 
-        // 6 — why this class stands out
-        let whyTitle = makeSectionTitle("Why this class stands out")
+        // 6 — why this class stands out (title/carousel/dots visibility all
+        // toggle together in refreshWhyStandsOut() if a class has none configured)
+        whyTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        whyTitleLabel.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
+        whyTitleLabel.textColor = .white
+        whyTitleLabel.numberOfLines = 0
+        whyTitleLabel.text = "Why this class stands out"
         column.setCustomSpacing(24, after: column.arrangedSubviews[column.arrangedSubviews.count - 1])
-        column.addArrangedSubview(whyTitle)
-        column.setCustomSpacing(8, after: whyTitle)
+        column.addArrangedSubview(whyTitleLabel)
+        column.setCustomSpacing(8, after: whyTitleLabel)
 
         let whyCarousel = makeWhyCarousel()
         column.addArrangedSubview(whyCarousel)
@@ -2059,6 +2068,7 @@ private extension GroupTrainingDetailViewController {
             whyCardsStack.addArrangedSubview(card)
         }
 
+        whyTitleLabel.isHidden = items.isEmpty
         whyScrollView.isHidden = items.isEmpty
         whyDotsPill.isHidden = items.count <= 1
         whyDotsView.setPageCount(items.count)
