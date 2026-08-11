@@ -9,6 +9,7 @@
 //
 
 import UIKit
+import SDWebImage
 
 final class SeeAllGridCollectionViewCell: UICollectionViewCell {
 
@@ -259,9 +260,12 @@ final class SeeAllGridCollectionViewCell: UICollectionViewCell {
             progressBarWidthConstraint?.constant = max(48, ceil(textWidth))
         }
 
+        // SDWebImage's own cache + per-imageView load cancellation - see
+        // GroupClassCardCollectionViewCell's identical call for why that
+        // cancellation matters for a reused collection view cell.
         let fallback = UIImage(named: "class-card-placeholder")
-        if let imageURL = GroupClassCardFormatter.absoluteImageURL(item.image) {
-            coverImageView.loadImage(urlString: imageURL, placeholder: fallback)
+        if let imageURL = GroupClassCardFormatter.absoluteImageURL(item.image), let url = URL(string: imageURL) {
+            coverImageView.sd_setImage(with: url, placeholderImage: fallback)
         } else {
             coverImageView.image = fallback
         }

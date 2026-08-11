@@ -158,6 +158,27 @@ enum GroupClassCardFormatter {
         return String(raw[separator.upperBound...]).trimmingCharacters(in: .whitespaces)
     }
 
+    /// The other half of the same "Gym Type - Branch" name - the TYPE prefix
+    /// (e.g. "DSO Ladies - Silicon Oasis" -> "DSO Ladies"), not the branch
+    /// suffix `cleanStudioName` returns. Used for the group-class filter
+    /// chips: was previously two hardcoded "Mixed Gym"/"Ladies Gym" tabs
+    /// matched by fuzzy substring search, showing the same two labels
+    /// regardless of which club a class actually belonged to - this derives
+    /// the real per-studio label from the same raw name the card itself
+    /// already carries. Android counterpart: `groupClassChipLabel()` in
+    /// `GroupClassLocationUtils.kt`.
+    static func chipLabel(_ rawName: String?) -> String {
+        let raw = (rawName ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !raw.isEmpty else { return raw }
+        if let range = raw.range(of: " - ") {
+            return String(raw[..<range.lowerBound]).trimmingCharacters(in: .whitespaces)
+        }
+        if let comma = raw.range(of: ",") {
+            return String(raw[..<comma.lowerBound]).trimmingCharacters(in: .whitespaces)
+        }
+        return raw
+    }
+
     /// `studio_name` -> `location` -> `"DSO Club"`, then cleaned — the exact order
     /// and placeholder Android uses when binding a card.
     static func locationText(for item: UpcomingClassModel) -> String {

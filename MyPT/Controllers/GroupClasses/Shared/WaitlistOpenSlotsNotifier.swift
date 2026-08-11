@@ -45,10 +45,23 @@ enum WaitlistOpenSlotsNotifier {
         }
     }
 
+    private static let notifiedScheduleIdsKey = "waitlist_open_slots_notified_schedule_ids"
+
     private static func checkAndNotify() {
         UpcomingClassVM.waitlistOpenSlotsCountApi { slots in
             guard !slots.isEmpty else { return }
-            scheduleNotification(slots: slots)
+
+            // Every open spot this member's already been locally notified
+            // about (in an earlier background check, or by the real-time
+            // server push this duplicated) gets filtered out here - without
+            // this, a class that's simply been sitting open re-notified every
+            // single time the app backgrounds after any booking action.
+            let alreadyNotified = Set(UserDefaults.standard.stringArray(forKey: notifiedScheduleIdsKey) ?? [])
+            let newSlots = slots.filter { !alreadyNotified.contains($0.scheduleId) }
+            guard !newSlots.isEmpty else { return }
+
+            scheduleNotification(slots: newSlots)
+            UserDefaults.standard.set(Array(alreadyNotified.union(newSlots.map { $0.scheduleId })), forKey: notifiedScheduleIdsKey)
         }
     }
 

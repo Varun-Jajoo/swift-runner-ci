@@ -99,6 +99,11 @@ struct ClassDetailsModel: Codable {
     /// GroupTrainingDetailViewController).
     var whatToBring: [ChecklistItemModel]?
     var thingsToKnow: [ChecklistItemModel]?
+    /// Title/subtitle pairs an admin configures per class (0-4 of them) - no
+    /// icon key, unlike whatToBring/thingsToKnow, so the UI picks an icon by
+    /// card position instead (see GroupTrainingDetailViewController's
+    /// whyStandsOutIcon(forIndex:)).
+    var whyStandsOut: [WhyStandsOutItemModel]?
 
     enum CodingKeys: String, CodingKey {
         case schduleID = "schdule_id"
@@ -139,10 +144,16 @@ struct ClassDetailsModel: Codable {
         case startDate = "start_date"
         case whatToBring = "what_to_bring"
         case thingsToKnow = "things_to_know"
+        case whyStandsOut = "why_stands_out"
     }
 }
 
 struct ChecklistItemModel: Codable {
     var text: String?
     var icon: String?
+}
+
+struct WhyStandsOutItemModel: Codable {
+    var title: String?
+    var subtitle: String?
 }

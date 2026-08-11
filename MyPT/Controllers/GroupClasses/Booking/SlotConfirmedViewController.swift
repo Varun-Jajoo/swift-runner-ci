@@ -235,6 +235,17 @@ final class SlotConfirmedViewController: CommonViewController {
     /// has nothing left to cancel.
     var canCancelBooking: Bool = false
 
+    /// One of "confirmed" / "completed" / "cancelled" / "no_show" - drives the
+    /// status pill, and for "no_show" also the date row and important-note box.
+    /// Straight from `BookingListController::getBooking()`'s `booking_status`.
+    var bookingStatus: String = "confirmed"
+    /// Only meaningful alongside "no_show" - the member's current consecutive
+    /// no-show count (capped at 2, the blacklist threshold).
+    var noShowCount: Int = 0
+    /// Only meaningful alongside "no_show" when `noShowCount >= 2` - already
+    /// formatted server-side ("11 August 2026, 6:00 PM").
+    var noShowBlockedUntil: String = ""
+
     // MARK: - Layout constants
 
     private enum Metric {
@@ -293,6 +304,8 @@ final class SlotConfirmedViewController: CommonViewController {
         static let importantNoteTitle = "IMPORTANT NOTE"
         static let importantNoteBody = "If you miss two classes consecutively (no-show or late cancellation), you will be blacklisted from group classes for "
         static let importantNoteEmphasis = "48 hours."
+        static let noShowNoteFirst = "You have been marked no-show for this class because you didn't attend. This is your 1st of 2 no-shows."
+        static let noShowNoteSecondPrefix = "You have been restricted from booking further due to consecutive no-shows. You will be unblocked on "
         static let trainerPlaceholder = "Trainer: Sara K."
         static let trainerSubtitle = "Certified MyPT Trainer"
         static let distancePlaceholder = "2.1 km away"
@@ -375,7 +388,11 @@ final class SlotConfirmedViewController: CommonViewController {
     /// Port of the `findViewById` block in `SlotConfirmedActivity.onCreate`.
     private func populateUI() {
         classTitleLabel.text = classTitle
-        classDateTimeLabel.text = classTime
+        if bookingStatus == "no_show" {
+            classDateTimeLabel.attributedText = SlotConfirmedViewController.noShowDateText(classTime)
+        } else {
+            classDateTimeLabel.text = classTime
+        }
         // Real studio names are "Gym Type - Branch" (e.g. "Mixed Gym -
         // Silicon Oasis"), not comma-separated - a comma-only check left
         // these showing in full. Reuses the same canonical cleanup the
@@ -1102,11 +1119,23 @@ private extension SlotConfirmedViewController {
         var arranged: [UIView] = [categoryPill]
         if isReadOnly {
             let isWaitlistBooking = bookingId.hasPrefix("wl-")
+            let (text, color): (String, UIColor) = {
+                if isWaitlistBooking { return ("WAITLISTED", GroupClassColor.gold.color) }
+                switch bookingStatus {
+                case "no_show": return ("MISSED - NO SHOW", Palette.cancelText)
+                case "cancelled": return ("CANCELLED", Palette.cancelText)
+                // Gray, not green - matches Android's completed pill
+                // (pill_bg_completed_gray) rather than reusing the "upcoming
+                // and about to happen" green for something already over.
+                case "completed": return ("COMPLETED", UIColor(hex: "#FAFAFA").withAlphaComponent(0.75))
+                default: return ("CONFIRMED", UIColor(hex: "#34C759"))
+                }
+            }()
             let statusPill = makePill(
-                text: isWaitlistBooking ? "WAITLISTED" : "CONFIRMED",
-                textColor: isWaitlistBooking ? GroupClassColor.gold.color : UIColor(hex: "#34C759"),
-                strokeColor: isWaitlistBooking ? GroupClassColor.gold.color : UIColor(hex: "#34C759"),
-                fillColor: isWaitlistBooking ? GroupClassColor.gold.color : UIColor(hex: "#34C759"),
+                text: text,
+                textColor: color,
+                strokeColor: color,
+                fillColor: color,
                 fillAlpha: 0.10
             )
             arranged.append(statusPill)
@@ -1207,25 +1236,32 @@ private extension SlotConfirmedViewController {
     // MARK: Important note
 
     func makeImportantNoteBox() -> UIView {
+        // Same box, same CSS shape (fill/stroke alpha, radius, layout) as the
+        // default gold cancellation-policy note - just recolored red for a
+        // no-show booking, since it's warning about something that already
+        // happened rather than something that might.
+        let isNoShow = bookingStatus == "no_show"
+        let tintColor = isNoShow ? Palette.cancelText : GroupClassColor.gold.color
+
         let box = UIView()
         box.translatesAutoresizingMaskIntoConstraints = false
         // `important_note_bg`: #1ADB812E fill, #4DDB812E stroke, 12dp radius.
-        box.backgroundColor = GroupClassColor.gold.color.withAlphaComponent(0.10)
+        box.backgroundColor = tintColor.withAlphaComponent(0.10)
         box.layer.cornerRadius = 12
         box.layer.masksToBounds = true
         box.layer.borderWidth = 1
-        box.layer.borderColor = GroupClassColor.gold.color.withAlphaComponent(0.30).cgColor
+        box.layer.borderColor = tintColor.withAlphaComponent(0.30).cgColor
 
         let warningIcon = UIImageView(image: SlotConfirmedViewController.icon(["ic_warning_hex_16", "info-hexagon"], systemFallback: "exclamationmark.triangle.fill")?
             .withRenderingMode(.alwaysTemplate))
         warningIcon.translatesAutoresizingMaskIntoConstraints = false
-        warningIcon.tintColor = GroupClassColor.gold.color
+        warningIcon.tintColor = tintColor
         warningIcon.contentMode = .scaleAspectFit
 
         let headingLabel = UILabel()
         headingLabel.translatesAutoresizingMaskIntoConstraints = false
         headingLabel.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
-        headingLabel.textColor = GroupClassColor.gold.color
+        headingLabel.textColor = tintColor
         headingLabel.numberOfLines = 1
         headingLabel.text = Copy.importantNoteTitle
 
@@ -1243,7 +1279,9 @@ private extension SlotConfirmedViewController {
         let bodyLabel = UILabel()
         bodyLabel.translatesAutoresizingMaskIntoConstraints = false
         bodyLabel.numberOfLines = 0
-        bodyLabel.attributedText = SlotConfirmedViewController.importantNoteText()
+        bodyLabel.attributedText = isNoShow
+            ? SlotConfirmedViewController.noShowNoteText(count: noShowCount, blockedUntil: noShowBlockedUntil)
+            : SlotConfirmedViewController.importantNoteText()
 
         let stack = UIStackView(arrangedSubviews: [headingWrapper, bodyLabel])
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -1313,6 +1351,54 @@ private extension SlotConfirmedViewController {
 
         let result = NSMutableAttributedString(string: Copy.importantNoteBody, attributes: base)
         result.append(NSAttributedString(string: Copy.importantNoteEmphasis, attributes: emphasis))
+        return result
+    }
+
+    /// The important-note box's body for a no-show booking - 1st of 2 is a
+    /// plain heads-up, 2nd of 2 explains the active block and when it lifts
+    /// (the unblock date rendered bold, same emphasis treatment as the
+    /// default box's "48 hours.").
+    static func noShowNoteText(count: Int, blockedUntil: String) -> NSAttributedString {
+        let paragraph = paragraphStyle(lineSpacing: 3, alignment: .left)
+        let base: [NSAttributedString.Key: Any] = [
+            .font: AppFont.regular.size(12.0, familyName: familyFunnelSans),
+            .foregroundColor: Palette.noteBody,
+            .paragraphStyle: paragraph
+        ]
+
+        if count < 2 || blockedUntil.isEmpty {
+            return NSAttributedString(string: Copy.noShowNoteFirst, attributes: base)
+        }
+
+        let emphasis: [NSAttributedString.Key: Any] = [
+            .font: AppFont.bold.size(12.0, familyName: familyFunnelSans),
+            .foregroundColor: Palette.cancelText,
+            .paragraphStyle: paragraph
+        ]
+        let result = NSMutableAttributedString(string: Copy.noShowNoteSecondPrefix, attributes: base)
+        result.append(NSAttributedString(string: "\(blockedUntil).", attributes: emphasis))
+        return result
+    }
+
+    /// Replaces the plain date/time row for a no-show booking - red text, a
+    /// crossed-calendar glyph inline before it, "No show on {date/time}"
+    /// instead of just the bare timing string.
+    static func noShowDateText(_ classTime: String) -> NSAttributedString {
+        let result = NSMutableAttributedString()
+
+        if let glyph = icon(["calendar-cross"], systemFallback: "calendar.badge.exclamationmark") {
+            let attachment = NSTextAttachment()
+            attachment.image = glyph.withRenderingMode(.alwaysTemplate).withTintColor(Palette.cancelText)
+            let fontHeight = AppFont.semibold.size(14.0, familyName: familyFunnelSans).pointSize
+            attachment.bounds = CGRect(x: 0, y: (fontHeight - 14) / 2 - 1, width: 14, height: 14)
+            result.append(NSAttributedString(attachment: attachment))
+            result.append(NSAttributedString(string: " "))
+        }
+
+        result.append(NSAttributedString(string: "No show on \(classTime)", attributes: [
+            .font: AppFont.semibold.size(14.0, familyName: familyFunnelSans),
+            .foregroundColor: Palette.cancelText
+        ]))
         return result
     }
 

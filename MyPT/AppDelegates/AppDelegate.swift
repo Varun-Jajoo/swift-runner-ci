@@ -273,6 +273,18 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
         guard let type = userInfo["type"] as? String else { return }
         let scheduleId = userInfo["schedule_id"] as? String
 
+        // The push payload only carries the class name + schedule_id, not
+        // full class detail (location/trainer/time) the rejection screen
+        // needs - land on the Bookings tab and let the Cancelled row's own
+        // tap handler (already wired to detect cancelled_by_admin) build the
+        // full screen from there, rather than a second fetch just for this.
+        if type.caseInsensitiveCompare("class_cancelled_by_admin") == .orderedSame
+            || type.caseInsensitiveCompare("waitlist_not_converted") == .orderedSame
+            || type.caseInsensitiveCompare("waitlist_invitation_expired") == .orderedSame {
+            AppDelegate.jumpToBookingsTab()
+            return
+        }
+
         if type.caseInsensitiveCompare("waitlist_open_slots") == .orderedSame {
             // The local "N spots opened up" notification only carries a
             // schedule_id when there was exactly one match - go straight to

@@ -23,6 +23,7 @@
 //
 
 import UIKit
+import SDWebImage
 
 final class GroupTrainingDetailViewController: CommonViewController {
 
@@ -188,6 +189,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
     private let doorsOpenLabel = UILabel()
 
     private let whyScrollView = UIScrollView()
+    private let whyCardsStack = UIStackView()
     private let whyDotsView = GroupClassCarouselDotsView()
     private let whyDotsPill = UIView()
 
@@ -393,8 +395,8 @@ final class GroupTrainingDetailViewController: CommonViewController {
     private func applyHeroImage(_ path: String) {
         // The app bundles no group-class cover placeholder (the home card cell has
         // the same gap); the hero's solid fill is the empty state.
-        if let url = GroupClassCardFormatter.absoluteImageURL(path) {
-            heroImageView.loadImage(urlString: url, placeholder: nil)
+        if let absoluteURL = GroupClassCardFormatter.absoluteImageURL(path), let url = URL(string: absoluteURL) {
+            heroImageView.sd_setImage(with: url, placeholderImage: nil)
         } else {
             heroImageView.image = nil
         }
@@ -404,8 +406,8 @@ final class GroupTrainingDetailViewController: CommonViewController {
         // Android hands the raw value straight to Glide; `absoluteImageURL` passes
         // absolute URLs through untouched and additionally resolves bare storage
         // paths, so it is a strict superset of that behaviour.
-        if let url = GroupClassCardFormatter.absoluteImageURL(path) {
-            trainerAvatarView.loadImage(urlString: url, placeholder: nil)
+        if let absoluteURL = GroupClassCardFormatter.absoluteImageURL(path), let url = URL(string: absoluteURL) {
+            trainerAvatarView.sd_setImage(with: url, placeholderImage: nil)
         }
     }
 
@@ -1990,39 +1992,77 @@ private extension GroupTrainingDetailViewController {
         return container
     }
 
+    /// Cards are populated in refreshWhyStandsOut() (called from apply(detail:)
+    /// once the real class-detail API response is in) from the why_stands_out
+    /// array - an admin-configured 0-4 title/subtitle pairs per class. This
+    /// used to hardcode exactly two cards ("Expert Instructor"/"Small Group")
+    /// for every class regardless of what was actually configured.
     func makeWhyCarousel() -> UIView {
         whyScrollView.translatesAutoresizingMaskIntoConstraints = false
         whyScrollView.showsHorizontalScrollIndicator = false
         whyScrollView.backgroundColor = .clear
         whyScrollView.delegate = self
 
-        let card1 = makeWhyCard(icon: GroupTrainingDetailViewController.icon(["ic_expert_instructor_28"], systemFallback: "person.crop.circle.badge.checkmark"),
-                                title: "Expert Instructor",
-                                body: "Certified trainer with hundreds of delivered classes")
-        let card2 = makeWhyCard(icon: GroupTrainingDetailViewController.icon(["ic_small_group_28"], systemFallback: "person.2.fill"),
-                                title: "Small Group",
-                                body: "Capped sessions — never a crowd")
-
-        // A horizontal stack with `.fill` alignment gives both cards the height of
+        // A horizontal stack with `.fill` alignment gives every card the height of
         // the tallest — Android's `measureWithLargestChild`.
-        let stack = UIStackView(arrangedSubviews: [card1, card2])
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.axis = .horizontal
-        stack.alignment = .fill
-        stack.spacing = 12
-        whyScrollView.addSubview(stack)
+        whyCardsStack.translatesAutoresizingMaskIntoConstraints = false
+        whyCardsStack.axis = .horizontal
+        whyCardsStack.alignment = .fill
+        whyCardsStack.spacing = 12
+        whyScrollView.addSubview(whyCardsStack)
 
         NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: whyScrollView.contentLayoutGuide.topAnchor),
-            stack.leadingAnchor.constraint(equalTo: whyScrollView.contentLayoutGuide.leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: whyScrollView.contentLayoutGuide.trailingAnchor),
-            stack.bottomAnchor.constraint(equalTo: whyScrollView.contentLayoutGuide.bottomAnchor),
-            whyScrollView.heightAnchor.constraint(equalTo: stack.heightAnchor),
-
-            card1.widthAnchor.constraint(equalToConstant: Metric.whyCardWidth),
-            card2.widthAnchor.constraint(equalToConstant: Metric.whyCardWidth)
+            whyCardsStack.topAnchor.constraint(equalTo: whyScrollView.contentLayoutGuide.topAnchor),
+            whyCardsStack.leadingAnchor.constraint(equalTo: whyScrollView.contentLayoutGuide.leadingAnchor),
+            whyCardsStack.trailingAnchor.constraint(equalTo: whyScrollView.contentLayoutGuide.trailingAnchor),
+            whyCardsStack.bottomAnchor.constraint(equalTo: whyScrollView.contentLayoutGuide.bottomAnchor),
+            whyScrollView.heightAnchor.constraint(equalTo: whyCardsStack.heightAnchor)
         ])
         return whyScrollView
+    }
+
+    /// No icon field comes back per why_stands_out entry - fixed by position
+    /// instead: same two icons the old hardcoded cards used for the first two
+    /// (every class has at least these two configured in practice), yoga/heart
+    /// for a 3rd/4th, generic beyond that. Android counterpart:
+    /// whyStandsOutIconFor() in GroupTrainingDetailActivity.kt - Android uses
+    /// dedicated ic_yoga_28/ic_heart_28 assets there with a thinner stroke to
+    /// match the first two icons' native 28pt weight (ic_yoga_18/ic_heart_20
+    /// were authored for a small 18-20pt display size, where a relatively
+    /// thicker stroke is intentional for legibility). No equivalent asset
+    /// exists in this project's asset catalog and one can't be hand-authored
+    /// without Xcode, so this reuses the same small-size assets other iOS
+    /// screens already reference - the 3rd/4th icon's stroke will likely
+    /// look heavier than the first two here until a proper 28pt asset is
+    /// added to Assets.xcassets.
+    static func whyStandsOutIcon(forIndex index: Int) -> UIImage? {
+        switch index {
+        case 0: return icon(["ic_expert_instructor_28"], systemFallback: "person.crop.circle.badge.checkmark")
+        case 1: return icon(["ic_small_group_28"], systemFallback: "person.2.fill")
+        case 2: return icon(["ic_yoga_18"], systemFallback: "figure.mind.and.body")
+        case 3: return icon(["ic_heart_20"], systemFallback: "heart.fill")
+        default: return icon(["ic_info_hexagon_18"], systemFallback: "info.circle")
+        }
+    }
+
+    /// Called from apply(detail:) - see refreshWhatToBring()'s doc comment for
+    /// why a refresh-after-the-fact pass is needed at all.
+    func refreshWhyStandsOut() {
+        whyCardsStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+
+        let items = (detail?.whyStandsOut ?? []).filter { !($0.title ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        for (index, item) in items.enumerated() {
+            let card = makeWhyCard(icon: GroupTrainingDetailViewController.whyStandsOutIcon(forIndex: index),
+                                    title: item.title ?? "",
+                                    body: item.subtitle ?? "")
+            card.widthAnchor.constraint(equalToConstant: Metric.whyCardWidth).isActive = true
+            whyCardsStack.addArrangedSubview(card)
+        }
+
+        whyScrollView.isHidden = items.isEmpty
+        whyDotsPill.isHidden = items.count <= 1
+        whyDotsView.setPageCount(items.count)
+        whyDotsView.setSelectedPage(0)
     }
 
     func makeWhyCard(icon: UIImage?, title: String, body: String) -> UIView {
@@ -2303,8 +2343,8 @@ private extension GroupTrainingDetailViewController {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
-        if let url = GroupClassCardFormatter.absoluteImageURL(urlString) {
-            imageView.loadImage(urlString: url, placeholder: nil)
+        if let absoluteURL = GroupClassCardFormatter.absoluteImageURL(urlString), let url = URL(string: absoluteURL) {
+            imageView.sd_setImage(with: url, placeholderImage: nil)
         }
         card.addSubview(imageView)
 

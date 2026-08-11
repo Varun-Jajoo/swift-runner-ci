@@ -12,6 +12,7 @@
 //
 
 import UIKit
+import SDWebImage
 
 // MARK: - TrendingGroupClassCollectionViewCell
 
@@ -321,8 +322,8 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
         progressBarWidthConstraint?.constant = max(59, ceil(textWidth))
 
         let fallback = UIImage(named: "class-card-placeholder")
-        if let imageURL = GroupClassCardFormatter.absoluteImageURL(item.image) {
-            coverImageView.loadImage(urlString: imageURL, placeholder: fallback)
+        if let imageURL = GroupClassCardFormatter.absoluteImageURL(item.image), let url = URL(string: imageURL) {
+            coverImageView.sd_setImage(with: url, placeholderImage: fallback)
         } else {
             coverImageView.image = fallback
         }

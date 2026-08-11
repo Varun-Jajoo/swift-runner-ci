@@ -291,32 +291,87 @@ extension BookingListViewController: UITableViewDataSource, UITableViewDelegate{
             // nothing live left to show, so they keep using the generic
             // read-only receipt below regardless of type.
             if self.selectedTags == 2, row.isWaitlistRow {
-                let controller: UIViewController = row.isSpecialWaitlist
-                    ? DoubleBookingWaitlistConfirmedViewController()
-                    : WaitlistConfirmedViewController()
-                let bookingType = row.bookingType?.trimmingCharacters(in: .whitespacesAndNewlines)
-                let title = (bookingType?.isEmpty == false ? bookingType : row.sessionType?.value) ?? ""
-                if let dbVc = controller as? DoubleBookingWaitlistConfirmedViewController {
-                    dbVc.classTitle = title
+                // A normal (non-special) waitlist entry whose spot has
+                // already opened up gets the claim screen directly instead of
+                // the static "you're waitlisted" receipt - no reason to make
+                // the member re-discover that a spot they can already take is
+                // sitting there.
+                if !row.isSpecialWaitlist, row.hasOpenSpot == true, let scheduleId = row.scheduleId?.value, !scheduleId.isEmpty {
+                    let controller = SlotOpenViewController()
+                    controller.scheduleId = scheduleId
+                    controller.hidesBottomBarWhenPushed = true
+                    controller.onClaimed = { [weak self] classTitle, time, location, trainer in
+                        let confirmed = SlotConfirmedViewController()
+                        confirmed.classTitle = classTitle
+                        confirmed.classTime = time
+                        confirmed.classLocation = location
+                        confirmed.trainerName = trainer
+                        confirmed.hidesBottomBarWhenPushed = true
+                        self?.navigationController?.pushViewController(confirmed, animated: true)
+                    }
+                    self.navigationController?.pushViewController(controller, animated: true)
+                    return
+                }
+
+                // A special (overlapping-booking) entry still shows its own
+                // priority-window explainer. A normal entry with no open spot
+                // yet needs an actionable detail screen (LEAVE WAITLIST), not
+                // the static "you're waitlisted" receipt with nothing to do
+                // on it - SlotConfirmedViewController already fully supports
+                // this via its own "wl-" bookingId handling (WAITLISTED pill,
+                // LEAVE WAITLIST CTA wired to leave-waitlist), same as a real
+                // booking's CANCEL BOOKING path just below.
+                if row.isSpecialWaitlist {
+                    let dbVc = DoubleBookingWaitlistConfirmedViewController()
+                    let bookingType = row.bookingType?.trimmingCharacters(in: .whitespacesAndNewlines)
+                    dbVc.classTitle = (bookingType?.isEmpty == false ? bookingType : row.sessionType?.value) ?? ""
                     dbVc.classTime = row.timing?.value ?? ""
                     dbVc.classLocation = row.location?.value ?? ""
                     dbVc.trainerName = row.trainer?.value ?? ""
                     dbVc.distance = row.distance?.value ?? ""
-                } else if let wVc = controller as? WaitlistConfirmedViewController {
-                    wVc.classTitle = title
-                    wVc.classTime = row.timing?.value ?? ""
-                    wVc.classLocation = row.location?.value ?? ""
-                    wVc.trainerName = row.trainer?.value ?? ""
-                    wVc.distance = row.distance?.value ?? ""
+                    dbVc.hidesBottomBarWhenPushed = true
+                    self.navigationController?.pushViewController(dbVc, animated: true)
+                    return
                 }
+
+                let bookingType = row.bookingType?.trimmingCharacters(in: .whitespacesAndNewlines)
+                let controller = SlotConfirmedViewController()
+                controller.classTitle = (bookingType?.isEmpty == false ? bookingType : row.sessionType?.value) ?? ""
+                controller.classTime = row.timing?.value ?? ""
+                controller.classLocation = row.location?.value ?? ""
+                controller.trainerName = row.trainer?.value ?? ""
+                controller.distance = row.distance?.value ?? ""
+                controller.isReadOnly = true
+                controller.bookingId = row.id?.value ?? ""
+                controller.canCancelBooking = true
                 controller.hidesBottomBarWhenPushed = true
                 self.navigationController?.pushViewController(controller, animated: true)
                 return
             }
 
             let bookingType = row.bookingType?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let resolvedTitle = (bookingType?.isEmpty == false ? bookingType : row.sessionType?.value) ?? ""
+
+            // A class the admin cancelled outright (not the member's own
+            // cancel) gets the dedicated rejection screen instead of the
+            // usual receipt with a plain "CANCELLED" pill - see
+            // ClassCancelledByAdminViewController's own doc comment for why.
+            if row.bookingStatus == "cancelled", row.cancelledByAdmin == true {
+                var input = ClassCancelledByAdminInput()
+                input.classTitle = resolvedTitle
+                input.classTime = row.timing?.value ?? ""
+                input.classLocation = row.location?.value ?? ""
+                input.trainerName = row.trainer?.value ?? ""
+                input.distance = row.distance?.value ?? ""
+                let controller = ClassCancelledByAdminViewController()
+                controller.input = input
+                controller.hidesBottomBarWhenPushed = true
+                self.navigationController?.pushViewController(controller, animated: true)
+                return
+            }
+
             let controller = SlotConfirmedViewController()
-            controller.classTitle = (bookingType?.isEmpty == false ? bookingType : row.sessionType?.value) ?? ""
+            controller.classTitle = resolvedTitle
             controller.classTime = row.timing?.value ?? ""
             controller.classLocation = row.location?.value ?? ""
             controller.trainerName = row.trainer?.value ?? ""
@@ -326,6 +381,9 @@ extension BookingListViewController: UITableViewDataSource, UITableViewDelegate{
             controller.studioLng = Double(row.studioLng?.value ?? "") ?? 0
             controller.isReadOnly = true
             controller.bookingId = row.id?.value ?? ""
+            controller.bookingStatus = row.bookingStatus ?? "confirmed"
+            controller.noShowCount = row.noShowCount ?? 0
+            controller.noShowBlockedUntil = row.noShowBlockedUntil ?? ""
             // Only the Upcoming sub-tab has anything left to cancel.
             controller.canCancelBooking = (self.selectedTags == 2)
             // This is a receipt-style full-screen push straight from the

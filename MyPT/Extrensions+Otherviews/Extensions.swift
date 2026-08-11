@@ -8,6 +8,7 @@
 import UIKit
 import ImageIO
 import CoreImage
+import CryptoKit
 
 private var backImageViewTag: Int { return 1011 }
 private var navBtnTag: Int { return 1012 }
@@ -15,10 +16,13 @@ private var backViewTag: Int { return 1013 }
 private var centerImgTag: Int { return 1014 }
 private var lockImgTag: Int { return 1015 }
 
-/// Process-lifetime in-memory cache behind `UIImageView.loadImage(urlString:...)`.
-///
-/// `NSCache` (rather than a plain dictionary) so the system can evict entries
-/// under memory pressure on its own.
+/// Two-tier cache behind `UIImageView.loadImage(urlString:...)` - memory first,
+/// disk second. The memory tier alone (all this used to be) is process-lifetime
+/// only: gone the moment the app relaunches, and the system is free to evict it
+/// under memory pressure at any point in between - which meant class cards
+/// re-downloaded the exact same image from scratch (spinner + placeholder,
+/// every time) far more often than the URL actually changed. The disk tier
+/// survives both, so a card only ever pays the network cost once per image.
 enum RemoteImageCache {
 
     static let shared: NSCache<NSString, UIImage> = {
@@ -33,6 +37,48 @@ enum RemoteImageCache {
     static func key(for urlString: String, resize: CGSize?) -> NSString {
         guard let resize = resize else { return urlString as NSString }
         return "\(urlString)@\(Int(resize.width))x\(Int(resize.height))" as NSString
+    }
+
+    // MARK: Disk tier
+
+    private static let ioQueue = DispatchQueue(label: "com.mypt.remoteimagecache.io", qos: .utility)
+
+    private static let directory: URL = {
+        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let dir = caches.appendingPathComponent("RemoteImageCache", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }()
+
+    /// SHA256 of the cache key (not the raw key) as the filename - the key can
+    /// contain a full URL plus a resize suffix, neither of which is a safe
+    /// filename component (slashes, query strings, etc).
+    private static func diskURL(for key: NSString) -> URL {
+        let digest = SHA256.hash(data: Data((key as String).utf8))
+        let hex = digest.map { String(format: "%02x", $0) }.joined()
+        return directory.appendingPathComponent(hex)
+    }
+
+    /// `UIImageView`/`UIButton` are implicitly `@MainActor`-isolated under this
+    /// project's SDK, so a plain (non-detached) `Task` created from `loadImage`
+    /// inherits the main actor - awaiting this, rather than calling a sync
+    /// function directly, is what actually forces the blocking file read onto
+    /// a background thread instead of stalling the main thread for the
+    /// duration of the disk access.
+    static func loadFromDisk(for key: NSString) async -> UIImage? {
+        await Task.detached(priority: .utility) {
+            guard let data = try? Data(contentsOf: diskURL(for: key)) else { return nil }
+            return UIImage(data: data)
+        }.value
+    }
+
+    /// Fire-and-forget; failures (disk full, sandbox quirk) just mean the next
+    /// load falls back to network again - not worth surfacing.
+    static func saveToDisk(_ image: UIImage, for key: NSString) {
+        ioQueue.async {
+            guard let data = image.jpegData(compressionQuality: 0.9) else { return }
+            try? data.write(to: diskURL(for: key))
+        }
     }
 }
 
@@ -1788,7 +1834,7 @@ extension UIImageView {
     
     //MARK: ---------------IMAGE GETTING FROM URL
     /// Loads a remote image, serving already-fetched ones straight from an
-    /// in-memory cache.
+    /// in-memory cache, or the on-disk cache one tier down.
     ///
     /// This used to assign `placeholder` unconditionally and then re-download on
     /// every call, so any `reloadData()` (or simply navigating back to a screen
@@ -1811,21 +1857,30 @@ extension UIImageView {
         self.image = placeholder
 
         Task { [weak self] in
+            // Disk tier - survives relaunch and memory-pressure eviction, unlike
+            // the NSCache checked above.
+            if let diskImage = await RemoteImageCache.loadFromDisk(for: cacheKey) {
+                RemoteImageCache.shared.setObject(diskImage, forKey: cacheKey)
+                await MainActor.run { self?.image = diskImage }
+                return
+            }
+
             do {
                 let (data, _) = try await URLSession.shared.data(from: url)
                 if let image = UIImage(data: data) {
                     let finalImage = resize.map { image.resized(to: $0) } ?? image
                     if let finalImage = finalImage {
                         RemoteImageCache.shared.setObject(finalImage, forKey: cacheKey)
-                        self?.image = finalImage
+                        RemoteImageCache.saveToDisk(finalImage, for: cacheKey)
+                        await MainActor.run { self?.image = finalImage }
                     } else {
-                        self?.image = placeholder
+                        await MainActor.run { self?.image = placeholder }
                     }
                 } else {
-                    self?.image = resize.flatMap { placeholder?.resized(to: $0) } ?? placeholder
+                    await MainActor.run { self?.image = resize.flatMap { placeholder?.resized(to: $0) } ?? placeholder }
                 }
             } catch {
-                self?.image = resize.flatMap { placeholder?.resized(to: $0) } ?? placeholder
+                await MainActor.run { self?.image = resize.flatMap { placeholder?.resized(to: $0) } ?? placeholder }
             }
         }
     }

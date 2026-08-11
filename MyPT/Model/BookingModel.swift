@@ -27,6 +27,24 @@ struct BookingDataModel: Codable {
     /// waitlist prefix. Matches `GcWaitlist.waitlist_type` verbatim, same key
     /// `BookingListController.php`'s waitlist mapping already returns.
     var waitlistType: String?
+    /// One of "confirmed" / "completed" / "cancelled" / "no_show" - group-class
+    /// rows only. Drives `SlotConfirmedViewController`'s status pill/date-row/
+    /// important-note box.
+    var bookingStatus: String?
+    /// Only meaningful when `bookingStatus == "cancelled"` - true when the
+    /// whole class schedule was cancelled by an admin, false for the member's
+    /// own individual cancel.
+    var cancelledByAdmin: Bool?
+    /// Only meaningful when `bookingStatus == "no_show"` - capped at 2 server-side.
+    var noShowCount: Int?
+    /// Only meaningful when `bookingStatus == "no_show"` and `noShowCount == 2` -
+    /// already formatted server-side.
+    var noShowBlockedUntil: String?
+    /// Only meaningful for a waitlist row ("wl-" prefixed `id`) - the
+    /// schedule this entry is waiting on, needed to push `SlotOpenViewController`
+    /// straight from a Bookings-list tap when `hasOpenSpot` is true.
+    var scheduleId: FlexibleValue?
+    var hasOpenSpot: Bool?
 
     enum CodingKeys: String, CodingKey {
         case id, type, timing, trainer_image, selected_slot
@@ -39,6 +57,12 @@ struct BookingDataModel: Codable {
         case isRefund = "is_refund"
         case bookingType = "booking_type"
         case waitlistType = "waitlist_type"
+        case bookingStatus = "booking_status"
+        case cancelledByAdmin = "cancelled_by_admin"
+        case noShowCount = "no_show_count"
+        case noShowBlockedUntil = "no_show_blocked_until"
+        case scheduleId = "schedule_id"
+        case hasOpenSpot = "has_open_spot"
         case isSchedule
         case isTrainer
         case msg, scheduleMsg, averageRating, starts_in

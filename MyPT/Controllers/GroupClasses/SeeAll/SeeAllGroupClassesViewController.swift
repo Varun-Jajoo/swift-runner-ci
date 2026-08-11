@@ -26,16 +26,21 @@ final class SeeAllGroupClassesViewController: CommonViewController {
 
     // MARK: - State
 
-    private enum FilterTab: CaseIterable {
-        case all, mixed, ladies, week, month
+    /// `.studio(label)` holds one dynamically-derived per-studio chip (e.g.
+    /// "DSO Ladies") - built at runtime from the real studio names present in
+    /// `masterClassList`, replacing the old fixed "MIXED GYM"/"LADIES GYM"
+    /// cases that showed the same two labels regardless of which club a class
+    /// actually belonged to. Android counterpart: `buildStudioChips()` in
+    /// `SeeAllGroupClassesActivity.kt`.
+    private enum FilterTab: Equatable {
+        case all, studio(String), week, month
 
         var title: String {
             switch self {
-            case .all:    return "ALL CLASSES"
-            case .mixed:  return "MIXED GYM"
-            case .ladies: return "LADIES GYM"
-            case .week:   return "THIS WEEK"
-            case .month:  return "THIS MONTH"
+            case .all:           return "ALL CLASSES"
+            case .studio(let s): return s.uppercased()
+            case .week:          return "THIS WEEK"
+            case .month:         return "THIS MONTH"
             }
         }
     }
@@ -75,6 +80,7 @@ final class SeeAllGroupClassesViewController: CommonViewController {
     private let upcomingTitleLabel = UILabel()
     private let filterSettingsIcon = UIImageView()
     private var filterButtons: [(tab: FilterTab, button: UIButton)] = []
+    private let tabsStack = UIStackView()
 
     private let gridCollectionView: UICollectionView
     private var gridHeightConstraint: NSLayoutConstraint?
@@ -323,26 +329,16 @@ final class SeeAllGroupClassesViewController: CommonViewController {
         tabsScrollView.translatesAutoresizingMaskIntoConstraints = false
         tabsScrollView.showsHorizontalScrollIndicator = false
 
-        let tabsStack = UIStackView()
         tabsStack.translatesAutoresizingMaskIntoConstraints = false
         tabsStack.axis = .horizontal
         tabsStack.spacing = 8
         tabsStack.alignment = .center
         tabsScrollView.addSubview(tabsStack)
 
-        filterButtons = FilterTab.allCases.enumerated().map { index, tab in
-            let button = UIButton(type: .system)
-            button.tag = index
-            button.translatesAutoresizingMaskIntoConstraints = false
-            button.setTitle(tab.title, for: .normal)
-            button.titleLabel?.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
-            button.layer.cornerRadius = 16
-            button.layer.masksToBounds = true
-            button.heightAnchor.constraint(equalToConstant: 32).isActive = true
-            button.addTarget(self, action: #selector(filterTabTapped(_:)), for: .touchUpInside)
-            tabsStack.addArrangedSubview(button)
-            return (tab, button)
-        }
+        // Studio chips aren't known yet (masterClassList is still empty at
+        // this point) - just ALL/WEEK/MONTH for now, `rebuildFilterTabs`
+        // inserts the real per-studio chips once `loadClasses()` returns.
+        rebuildFilterTabs(withStudioLabels: [])
 
         wrapper.addSubview(filterButtonBg)
         wrapper.addSubview(divider)
@@ -414,8 +410,8 @@ final class SeeAllGroupClassesViewController: CommonViewController {
     }
 
     @objc private func filterTabTapped(_ sender: UIButton) {
-        guard FilterTab.allCases.indices.contains(sender.tag) else { return }
-        selectTab(FilterTab.allCases[sender.tag])
+        guard filterButtons.indices.contains(sender.tag) else { return }
+        selectTab(filterButtons[sender.tag].tab)
     }
 
     private func selectTab(_ tab: FilterTab) {
@@ -423,6 +419,39 @@ final class SeeAllGroupClassesViewController: CommonViewController {
         activeTab = tab
         applyTabStyles()
         filterGridClasses()
+    }
+
+    /// Rebuilds the tab bar as `[ALL, ...one chip per distinct studio label...,
+    /// WEEK, MONTH]`. Called once with an empty list while the screen is still
+    /// loading, then again with the real labels once `loadClasses()` returns -
+    /// mirrors `SeeAllGroupClassesActivity.buildStudioChips()`.
+    private func rebuildFilterTabs(withStudioLabels labels: [String]) {
+        let previousTab = activeTab
+        tabsStack.arrangedSubviews.forEach {
+            tabsStack.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
+
+        let tabs: [FilterTab] = [.all] + labels.map { .studio($0) } + [.week, .month]
+        filterButtons = tabs.enumerated().map { index, tab in
+            let button = UIButton(type: .system)
+            button.tag = index
+            button.translatesAutoresizingMaskIntoConstraints = false
+            button.setTitle(tab.title, for: .normal)
+            button.titleLabel?.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
+            button.layer.cornerRadius = 16
+            button.layer.masksToBounds = true
+            button.heightAnchor.constraint(equalToConstant: 32).isActive = true
+            button.addTarget(self, action: #selector(filterTabTapped(_:)), for: .touchUpInside)
+            tabsStack.addArrangedSubview(button)
+            return (tab, button)
+        }
+
+        // The previously-active tab might not exist anymore (fresh data,
+        // different studios) - fall back to ALL rather than leaving no tab
+        // visually selected.
+        activeTab = tabs.contains(previousTab) ? previousTab : .all
+        applyTabStyles()
     }
 
     private func applyTabStyles() {
@@ -456,6 +485,29 @@ final class SeeAllGroupClassesViewController: CommonViewController {
             DispatchQueue.main.async {
                 self.masterClassList = allClasses
                 self.filteredGridList = allClasses
+
+                // Distinct per-studio chip labels, in first-seen order - same
+                // dedupe idiom as Android's `LinkedHashSet`.
+                var seenLabels = Set<String>()
+                var orderedLabels: [String] = []
+                for item in allClasses {
+                    let raw = (item.studioName?.isEmpty == false ? item.studioName : item.location) ?? ""
+                    guard !raw.isEmpty else { continue }
+                    let label = GroupClassCardFormatter.chipLabel(raw)
+                    if !label.isEmpty, !seenLabels.contains(label) {
+                        seenLabels.insert(label)
+                        orderedLabels.append(label)
+                    }
+                }
+                self.rebuildFilterTabs(withStudioLabels: orderedLabels)
+                // rebuildFilterTabs may have kept a non-ALL tab active (same
+                // studio still present after refresh) - re-apply that filter
+                // against the freshly-loaded list rather than leaving the
+                // unfiltered `filteredGridList` set just above.
+                if self.activeTab != .all {
+                    self.filterGridClasses()
+                }
+
                 self.gridCollectionView.reloadData()
                 self.updateGridHeight()
 
@@ -484,8 +536,9 @@ final class SeeAllGroupClassesViewController: CommonViewController {
         return Double(booked) / Double(effectiveCapacity)
     }
 
-    /// Port of `filterGridClasses()`. Note LADIES has no empty-result fallback
-    /// while MIXED does — that asymmetry is in the Android source, not a typo.
+    /// Port of `filterGridClasses()`. The studio tabs now match on the exact
+    /// derived chip label rather than a fuzzy "mixed"/"ladies" substring
+    /// search, same as Android's `groupClassChipLabel()` comparison.
     private func filterGridClasses() {
         guard !masterClassList.isEmpty else { return }
 
@@ -493,11 +546,11 @@ final class SeeAllGroupClassesViewController: CommonViewController {
         switch activeTab {
         case .all:
             filtered = masterClassList
-        case .mixed:
-            let matched = masterClassList.filter(containsMixedSignal)
-            filtered = matched.isEmpty ? masterClassList : matched
-        case .ladies:
-            filtered = masterClassList.filter(containsLadiesSignal)
+        case .studio(let label):
+            filtered = masterClassList.filter { item in
+                let raw = (item.studioName?.isEmpty == false ? item.studioName : item.location) ?? ""
+                return !raw.isEmpty && GroupClassCardFormatter.chipLabel(raw) == label
+            }
         case .week:
             filtered = Array(masterClassList.prefix(6))
         case .month:
@@ -513,19 +566,6 @@ final class SeeAllGroupClassesViewController: CommonViewController {
             gridCollectionView.reloadSections(IndexSet(integer: 0))
         }
         updateGridHeight()
-    }
-
-    private func containsMixedSignal(_ item: UpcomingClassModel) -> Bool {
-        (item.studioName ?? "").localizedCaseInsensitiveContains("mixed") ||
-        (item.location ?? "").localizedCaseInsensitiveContains("mixed") ||
-        (item.className ?? "").localizedCaseInsensitiveContains("mixed") ||
-        (item.access ?? "").localizedCaseInsensitiveContains("mixed")
-    }
-
-    private func containsLadiesSignal(_ item: UpcomingClassModel) -> Bool {
-        (item.studioName ?? "").localizedCaseInsensitiveContains("ladies") ||
-        (item.location ?? "").localizedCaseInsensitiveContains("ladies") ||
-        (item.className ?? "").localizedCaseInsensitiveContains("ladies")
     }
 
     private func openDetail(for item: UpcomingClassModel) {

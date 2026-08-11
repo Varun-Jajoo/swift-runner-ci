@@ -8,6 +8,7 @@
 //
 
 import UIKit
+import SDWebImage
 
 // MARK: - GradientFadeView
 
@@ -281,12 +282,16 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
 
         // Android's Glide call uses `img.png` as both `.placeholder()` and
         // `.error()` — every failure path (blank URL, load failure) converges on
-        // the same fallback photo. `loadImage(urlString:placeholder:)` already
-        // applies its `placeholder` argument on both the initial call and the
-        // catch branch, so passing the bundled fallback here is a straight port.
+        // the same fallback photo. `sd_setImage`'s own `placeholderImage` applies
+        // on the initial call and, since no explicit `.error` transformer is
+        // set, its default failure image handling leaves the placeholder in
+        // place on a load failure too - same straight port. SDWebImage also
+        // cancels any in-flight load for this cell automatically on the next
+        // call, so a fast-scrolled-away cell reused for a different class can't
+        // have a stale fetch land the WRONG cover photo on it after the fact.
         let fallback = UIImage(named: "class-card-placeholder")
-        if let imageURL = GroupClassCardFormatter.absoluteImageURL(item.image) {
-            coverImageView.loadImage(urlString: imageURL, placeholder: fallback)
+        if let imageURL = GroupClassCardFormatter.absoluteImageURL(item.image), let url = URL(string: imageURL) {
+            coverImageView.sd_setImage(with: url, placeholderImage: fallback)
         } else {
             coverImageView.image = fallback
         }
