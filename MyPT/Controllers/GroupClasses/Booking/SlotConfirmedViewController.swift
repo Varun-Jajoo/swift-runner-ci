@@ -310,6 +310,7 @@ final class SlotConfirmedViewController: CommonViewController {
         static let importantNoteBody = "If you miss two classes consecutively (no-show or late cancellation), you will be blacklisted from group classes for "
         static let importantNoteEmphasis = "48 hours."
         static let noShowNoteFirst = "You have been marked no-show for this class because you didn't attend. This is your 1st of 2 no-shows."
+        static let noShowNoteCleared = "You were marked no-show for this class. This no longer counts against you — you attended a class since, so your no-show streak has been reset."
         static let noShowNoteSecondPrefix = "You have been restricted from booking further due to consecutive no-shows. You will be unblocked on "
         static let cancelledNoteTitle = "CLASS HAS BEEN CANCELLED"
         static let cancelledNoteBody = "This class has been cancelled as per your request."
@@ -1383,6 +1384,13 @@ private extension SlotConfirmedViewController {
             .foregroundColor: Palette.noteBody,
             .paragraphStyle: paragraph
         ]
+
+        // 0 = the streak was reset by a later attendance, so this no-show no
+        // longer counts toward the 2-strike ban (backend sends the true current
+        // streak; it used to be floored to 1, which hid the reset entirely).
+        if count <= 0 {
+            return NSAttributedString(string: Copy.noShowNoteCleared, attributes: base)
+        }
 
         if count < 2 || blockedUntil.isEmpty {
             return NSAttributedString(string: Copy.noShowNoteFirst, attributes: base)
