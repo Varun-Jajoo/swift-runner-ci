@@ -185,7 +185,9 @@ final class ClassPaymentViewController: CommonViewController {
         buildLayout()
         populateUI()
         applySelectionUI()
-        configureTabbySession()
+        // Tabby commented out for now.
+//        configureTabbySession()
+        refreshLatestPrice()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -213,7 +215,39 @@ final class ClassPaymentViewController: CommonViewController {
         priceLabel.text = "\(cleanedPrice()) AED"
         couponTitleLabel.text = Copy.couponTitleFormat
 
-        applyTabbySubtext()
+        // Tabby commented out for now.
+//        applyTabbySubtext()
+    }
+
+    /// The price shown here was carried forward from whatever screen pushed
+    /// this one (detail/slot-open), which is itself just a snapshot from
+    /// whenever THAT screen last loaded - if the admin edits the class price
+    /// in between, the payment screen (and the amount actually charged, since
+    /// cleanedPrice() reads straight off classPrice) silently kept using the
+    /// old number. Refetches class-detail here so the price - and whatever
+    /// gets charged - reflects what the backend has right now, not a stale
+    /// carried-forward value. "Populate instantly, then refresh" - same
+    /// pattern GroupTrainingDetailViewController already uses.
+    private func refreshLatestPrice() {
+        guard !scheduleId.isEmpty else { return }
+
+        let stored = appUserDefaults.getLatLong()?.components(separatedBy: ",")
+        let lat = Double(stored?.first ?? "") ?? GroupClassCardFormatter.fallbackLatitude
+        let lng = Double(stored?.last ?? "") ?? GroupClassCardFormatter.fallbackLongitude
+        let params: [String: String] = ["lat": "\(lat)", "long": "\(lng)", "schdule_id": scheduleId]
+
+        UpcomingClassVM.classDetailsApi(inputParams: params, isShowLoader: false) { [weak self] result in
+            guard let self = self,
+                  result?.status == true,
+                  let detail = result?.data,
+                  let freshPrice = detail.price?.value,
+                  !freshPrice.isEmpty else { return }
+
+            DispatchQueue.main.async {
+                self.classPrice = freshPrice
+                self.priceLabel.text = "\(self.cleanedPrice()) AED"
+            }
+        }
     }
 
     /// Android: `rawPrice.replace("AED","").replace(" ","").trim()`.
@@ -998,13 +1032,14 @@ private extension ClassPaymentViewController {
         card.sheenOrigin = .topCenter
         card.sheenAlpha = 0.08
 
-        let tabby = makePaymentOptionRow(logo: ClassPaymentViewController.icon(["tabby", "ic_tabby_icon"]),
-                                         title: Copy.tabbyTitle,
-                                         badgeText: Copy.tabbyBadge,
-                                         subtitleLabel: tabbySubtextLabel,
-                                         checkbox: tabbyCheckbox,
-                                         tapAction: #selector(tabbyRowTapped))
-        tabbyRow = tabby
+        // Tabby commented out for now - see tapped()'s matching comment.
+//        let tabby = makePaymentOptionRow(logo: ClassPaymentViewController.icon(["tabby", "ic_tabby_icon"]),
+//                                         title: Copy.tabbyTitle,
+//                                         badgeText: Copy.tabbyBadge,
+//                                         subtitleLabel: tabbySubtextLabel,
+//                                         checkbox: tabbyCheckbox,
+//                                         tapAction: #selector(tabbyRowTapped))
+//        tabbyRow = tabby
 
         let card2 = makePaymentOptionRow(logo: ClassPaymentViewController.icon(["cards_im", "ic_masterCard_icon"]),
                                          title: Copy.cardTitle,
@@ -1018,7 +1053,7 @@ private extension ClassPaymentViewController {
                                          tapAction: #selector(cardRowTapped))
         cardRow = card2
 
-        let stack = UIStackView(arrangedSubviews: [tabby, card2])
+        let stack = UIStackView(arrangedSubviews: [card2])
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.axis = .vertical
         stack.alignment = .fill
