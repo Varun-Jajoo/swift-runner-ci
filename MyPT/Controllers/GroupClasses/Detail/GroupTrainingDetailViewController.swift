@@ -396,12 +396,16 @@ final class GroupTrainingDetailViewController: CommonViewController {
     }
 
     private func applyHeroImage(_ path: String) {
-        // The app bundles no group-class cover placeholder (the home card cell has
-        // the same gap); the hero's solid fill is the empty state.
+        // Android's imgHeroCover always falls back to the same generic
+        // `R.drawable.img` the cards use, both as Glide's `.placeholder()` and
+        // `.error()` (populateUI()/fetchClassDetail() in
+        // GroupTrainingDetailActivity.kt) - reusing the card's own bundled
+        // asset here instead of leaving the hero blank.
+        let fallback = UIImage(named: "class-card-placeholder")
         if let absoluteURL = GroupClassCardFormatter.absoluteImageURL(path), let url = URL(string: absoluteURL) {
-            heroImageView.sd_setImage(with: url, placeholderImage: nil)
+            heroImageView.sd_setImage(with: url, placeholderImage: fallback)
         } else {
-            heroImageView.image = nil
+            heroImageView.image = fallback
         }
     }
 
@@ -776,9 +780,11 @@ final class GroupTrainingDetailViewController: CommonViewController {
         if !apiImage.isEmpty {
             classImage = apiImage
             applyHeroImage(apiImage)
-        } else {
-            heroImageView.image = nil
         }
+        // Android leaves imgHeroCover untouched when class_profile is blank
+        // here too - whatever applyHeroImage(classImage) already showed from
+        // the tap-through seed (real image, or the placeholder) stays as-is
+        // instead of being wiped back to blank.
 
         let description = (detail.classDescription ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         aboutLabel.text = description.isEmpty ? Copy.aboutFallback : description
