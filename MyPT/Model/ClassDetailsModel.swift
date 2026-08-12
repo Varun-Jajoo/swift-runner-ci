@@ -39,7 +39,17 @@ struct ClassDetailsModel: Codable {
     var followers: String?
     var trainWithMe: String?
     var quote, sessions, clientCoached: String?
-    var averageRating: Int?
+    /// FlexibleValue, not Int - `ClassEventController::classDetail()` sends
+    /// `round($trainer->testimonials->avg('rating'), 1)`, a genuine fractional
+    /// value (4.5, 4.7, ...) for any trainer with real testimonials. Decoding
+    /// straight into `Int` throws on the first non-whole rating (JSONDecoder's
+    /// Int decoding rejects a fractional JSON number outright), which fails
+    /// the WHOLE `ClassDetailsModel` decode - and since that decode failure
+    /// used to be silently swallowed (see `classDetailsApi`'s catch block),
+    /// the entire detail screen (capacity, why-stands-out, what-to-bring,
+    /// everything) just never updated for any class whose trainer had a
+    /// non-integer average rating. Read via `.doubleValue`.
+    var averageRating: FlexibleValue?
     var noOfRating: String?
     var tags: [String]? //[TrainerTagModel]?
     var isFollow: Bool?

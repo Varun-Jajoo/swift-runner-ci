@@ -363,11 +363,31 @@ final class ConfirmSlotSheetViewController: CommonViewController {
     }
 
     /// Port of `btnConfirmSlotAction.setOnClickListener`. Branch order is Android's,
-    /// verbatim: login gate -> paid detour -> missing-schedule shortcut -> book-class.
+    /// verbatim: login gate -> waitlist-join detour -> paid detour ->
+    /// missing-schedule shortcut -> book-class.
+    ///
+    /// The waitlist-join check MUST come before the paid detour: a full paid/
+    /// premium class still routes here with `isWaitlistJoin = true` and
+    /// `isFreeForUser = false` (`GroupTrainingDetailViewController.ctaTapped()`'s
+    /// `isWaitlistMode` branch fires regardless of `isFreeForUser`), and
+    /// joining a waitlist is never itself a payment — `joinWaitlistApi` posts
+    /// `price`, not `payment_type`, same as Android's `joinWaitlistDirectly`.
+    /// With the checks the other way round, tapping "JOIN WAITLIST" on a
+    /// premium class fell into the paid-detour stub below and just dismissed
+    /// the sheet — the tap did nothing, and since `joinWaitlist()` never ran,
+    /// `fetchClassDetail()` never refreshed the class's seat/waitlist counts
+    /// either.
     @objc private func confirmTapped() {
         TapticEngine.selection.feedback()
 
         guard requireLogin() else { return }
+
+        if input.isWaitlistJoin {
+            dismiss(animated: true) { [weak self] in
+                self?.onWaitlistJoinConfirmed?()
+            }
+            return
+        }
 
         if !input.isFreeForUser {
             // Android pushes ClassPaymentScreenActivity here with schedule_id and a
@@ -378,13 +398,6 @@ final class ConfirmSlotSheetViewController: CommonViewController {
             // input.scheduleId and (input.price non-blank && != "0" ? input.price : "50.00").
             debugPrint("[ConfirmSlotSheet] CTA 'PROCEED TO PAYMENT' — Class Payment screen lands in Phase 7. Dismissing.")
             dismiss(animated: true)
-            return
-        }
-
-        if input.isWaitlistJoin {
-            dismiss(animated: true) { [weak self] in
-                self?.onWaitlistJoinConfirmed?()
-            }
             return
         }
 

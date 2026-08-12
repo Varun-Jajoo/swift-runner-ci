@@ -71,18 +71,23 @@ class UpcomingClassVM {
         NetworkManager.shared.genericAPICall(serviceEndPoint: .class_detail, method: .get , queries: inputParams, parameters:  nil, isShowLoading: isShowLoader, completion: {  ( getResponce, error) in
             do{
                 print(getResponce as Any)
-                if let responceData = getResponce {
-                    let getResult = try JSONDecoder().decode(ClassDetailsBaseModel.self, from: responceData)
-                    if (getResult.status == true)  {
-                        completion(getResult)
-                    }
-                    else{
-                        completion(getResult)
-//                        AlertHelper.shared.showCustomeAlert(title: "", message: getResult.errors ?? "", completion: nil)
-                    }
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
                 }
+                let getResult = try JSONDecoder().decode(ClassDetailsBaseModel.self, from: responceData)
+                completion(getResult)
             }catch {
+                // Was a silent dead end: neither branch above called `completion`
+                // when the response was missing, and a decode failure here just
+                // printed and fell through - the caller's completion closure never
+                // fired at all, so the whole detail screen (capacity, why-stands-
+                // out, what-to-bring, everything) stayed on its placeholder state
+                // forever with no error surfaced. `joinWaitlistApi`/`bookGroupClassApi`
+                // just below already call `completion(nil)` from their own catch
+                // blocks - this brings class-detail in line with that.
                 print(error)
+                completion(nil)
             }
         })
     }
@@ -101,18 +106,22 @@ class UpcomingClassVM {
         NetworkManager.shared.genericAPICall(serviceEndPoint: .viewall_classes, method: .get , queries: inputParams, parameters:  nil, isShowLoading: isShowLoader, completion: {  ( getResponce, error) in
             do{
                 print(getResponce as Any)
-                if let responceData = getResponce {
-                    let getResult = try JSONDecoder().decode(ViewAllClassBaseModel.self, from: responceData)
-                    if (getResult.status == true)  {
-                        completion(getResult)
-                    }
-                    else{
-                        completion(getResult)
-//                        AlertHelper.shared.showCustomeAlert(title: "", message: getResult.errors ?? "", completion: nil)
-                    }
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
                 }
+                let getResult = try JSONDecoder().decode(ViewAllClassBaseModel.self, from: responceData)
+                completion(getResult)
             }catch {
+                // Same dead end as `classDetailsApi` had: a decode failure here
+                // (e.g. one `UpcomingClassModel` row from a premium/paid class
+                // carrying a value one of its fields can't decode) used to just
+                // print and never call `completion` at all - the Home carousel
+                // and See All grid ("group activity data") silently kept
+                // showing stale/empty data, and See All's loader (isShowLoader:
+                // true there) spun forever since nothing ever dismissed it.
                 print(error)
+                completion(nil)
             }
         })
     }
