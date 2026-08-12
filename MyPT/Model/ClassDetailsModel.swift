@@ -29,7 +29,19 @@ struct ClassDetailsModel: Codable {
     var isMember: Bool?
     var className: String?
     var classProfile: String?
-    var classDescription, classCategory, price: String?
+    var classDescription, classCategory: String?
+    /// FlexibleValue, not String - `classes.price` was migrated to an `INT`
+    /// column (`2025_04_01_153536_change_price_column_type.php`), so
+    /// `ClassEventController::classDetail()`'s `'price' => $class->price`
+    /// serializes as a raw JSON number for any class with a real (paid) price,
+    /// not a string. `String` decoding throws on a JSON number, failing the
+    /// WHOLE struct decode - same failure mode as `averageRating` below, but
+    /// this one trips on price itself rather than the trainer's rating, so it
+    /// hits premium/paid classes specifically (a free class's price is more
+    /// often an empty/zero string that happens to decode fine). The list
+    /// model's own `price` (`UpcomingClassModel`) is already `FlexibleValue`
+    /// for the same reason. Read via `.value`.
+    var price: FlexibleValue?
     var trainerID: Int?
     var distance: String?
     var capacity: Int?
@@ -38,7 +50,10 @@ struct ClassDetailsModel: Codable {
     var isVerified: Bool?
     var followers: String?
     var trainWithMe: String?
-    var quote, sessions, clientCoached: String?
+    var quote, clientCoached: String?
+    /// FlexibleValue for the same reason as `price` above - unused by any UI
+    /// today, but still decoded, so still a live decode-failure risk.
+    var sessions: FlexibleValue?
     /// FlexibleValue, not Int - `ClassEventController::classDetail()` sends
     /// `round($trainer->testimonials->avg('rating'), 1)`, a genuine fractional
     /// value (4.5, 4.7, ...) for any trainer with real testimonials. Decoding

@@ -200,7 +200,7 @@ class ClassDetailsViewController: CommonViewController {
             self.trainerBadgeImgView.isHidden = true
         }
         
-        let sessionCountTxt = self.classDetails?.sessions ?? ""
+        let sessionCountTxt = self.classDetails?.sessions?.value ?? ""
         let sessionParts = sessionCountTxt.components(separatedBy: " ")
         if let sessionFirst = sessionParts.first, let sessionSecondPart = sessionParts.dropFirst().joined(separator: " ") as String? {
             self.sessionsCountLbl.text = sessionFirst
@@ -223,7 +223,7 @@ class ClassDetailsViewController: CommonViewController {
             self.bookingBtn.isUserInteractionEnabled = false
             bookingBtn.setTitle(AppStrings.reserve_Slot, for: .normal)
         }else{
-            let classPrice = "@ AED " + (self.classDetails?.price ?? "")
+            let classPrice = "@ AED " + (self.classDetails?.price?.value ?? "")
             
             bookingBtn.setTitle(AppStrings.reserve_Slot + classPrice, for: .normal)
             self.bookingBtn.isUserInteractionEnabled = true

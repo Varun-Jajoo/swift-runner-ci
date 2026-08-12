@@ -188,6 +188,19 @@ enum GroupClassCardFormatter {
         return cleanStudioName(defaultLocation)
     }
 
+    /// Card variant of `locationText`: same field priority/defaults, but keeps
+    /// the studio-TYPE prefix (e.g. "DSO Ladies", "DSO Mixed") via `chipLabel`
+    /// instead of the branch suffix `cleanStudioName` returns. Home carousel
+    /// and See All cards use this; the detail page and booking-confirmation
+    /// screens intentionally keep `cleanStudioName`'s branch text unchanged.
+    static func cardLocationText(for item: UpcomingClassModel) -> String {
+        let studioName = (item.studioName ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if !studioName.isEmpty { return chipLabel(studioName) }
+        let location = (item.location ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if !location.isEmpty { return chipLabel(location) }
+        return chipLabel(defaultLocation)
+    }
+
     // MARK: Time
 
     /// Formats the backend time into the card's `EEE, d MMM • h-h a` shape.
@@ -395,6 +408,17 @@ enum GroupClassCardFormatter {
     static func absoluteImageURL(_ rawPath: String?) -> String? {
         let raw = (rawPath ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         guard !raw.isEmpty else { return nil }
+        if raw.lowercased().hasPrefix("http://") {
+            // Laravel's `asset()` mirrors the request scheme it was called under,
+            // so a backend `APP_URL` misconfigured as plain http leaks a "http://"
+            // image URL here. Info.plist's ATS exception list only covers the
+            // CCAvenue payment domain, not the API host, so a plain-http image
+            // silently fails to load (blank card fill) instead of erroring loudly
+            // - the same class renders fine on Android, which has no such
+            // restriction. The app's own API traffic to this exact host is
+            // always https (`AppBaseUrl.baseScheme`), so upgrading is safe.
+            return "https://" + String(raw.dropFirst("http://".count))
+        }
         if raw.lowercased().hasPrefix("http") { return raw }
         let host = isTesting ? AppBaseUrl.baseDevUrl.rawValue : AppBaseUrl.baseProductionUrl.rawValue
         return AppBaseUrl.baseScheme.rawValue + "://" + host + "/storage/" + raw

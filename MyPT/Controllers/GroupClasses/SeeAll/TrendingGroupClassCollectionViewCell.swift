@@ -266,7 +266,7 @@ final class TrendingGroupClassCollectionViewCell: UICollectionViewCell {
         let rawTime = (item.time?.isEmpty == false) ? item.time : item.start_end
         timeLabel.text = GroupClassCardFormatter.formatTimeForUI(rawTime)
 
-        locationLabel.text = GroupClassCardFormatter.locationText(for: item)
+        locationLabel.text = GroupClassCardFormatter.cardLocationText(for: item)
 
         let isPaid = GroupClassCardFormatter.isPaid(access: item.access,
                                                     isMember: item.isMember ?? false)

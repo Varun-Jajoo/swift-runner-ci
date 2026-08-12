@@ -249,7 +249,7 @@ final class GroupClassCardCollectionViewCell: UICollectionViewCell {
         let rawTime = (item.time?.isEmpty == false) ? item.time : item.start_end
         timeLabel.text = GroupClassCardFormatter.formatTimeForUI(rawTime)
 
-        locationLabel.text = GroupClassCardFormatter.locationText(for: item)
+        locationLabel.text = GroupClassCardFormatter.cardLocationText(for: item)
 
         // PREMIUM for paid (and mixed-but-not-a-member) classes, FREE otherwise.
         let isPaid = GroupClassCardFormatter.isPaid(access: item.access,

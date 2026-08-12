@@ -216,7 +216,7 @@ final class SeeAllGridCollectionViewCell: UICollectionViewCell {
         let rawTime = (item.time?.isEmpty == false) ? item.time : item.start_end
         timeLabel.text = GroupClassCardFormatter.formatTimeForUI(rawTime)
 
-        locationLabel.text = GroupClassCardFormatter.locationText(for: item)
+        locationLabel.text = GroupClassCardFormatter.cardLocationText(for: item)
 
         // PREMIUM only, never FREE — this screen hides the badge entirely for
         // free/studio classes rather than showing a FREE pill.

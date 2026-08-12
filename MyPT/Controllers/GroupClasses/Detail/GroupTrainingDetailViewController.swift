@@ -888,7 +888,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
         let resolvedAccess = access.isEmpty ? (classAccess.isEmpty ? "mixed" : classAccess) : access
         classAccess = resolvedAccess
 
-        let price = (detail.price ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let price = (detail.price?.value ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         if !price.isEmpty { classPrice = price }
         let cleanPrice = cleanedPrice(classPrice)
 

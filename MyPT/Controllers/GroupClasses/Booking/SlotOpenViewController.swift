@@ -363,7 +363,7 @@ final class SlotOpenViewController: CommonViewController {
                 let waitlistCount = GroupClassCardFormatter.intValue(detail.waitlistCount, defaultValue: 5)
                 self.applySlotCounts(remainingSeats: remainingSeats, waitlistCount: waitlistCount)
 
-                if let price = detail.price, !price.isEmpty { self.classPrice = price }
+                if let price = detail.price?.value, !price.isEmpty { self.classPrice = price }
             }
         }
     }
