@@ -35,6 +35,12 @@ struct BookingDataModel: Codable {
     /// whole class schedule was cancelled by an admin, false for the member's
     /// own individual cancel.
     var cancelledByAdmin: Bool?
+    /// Only meaningful when `bookingStatus == "cancelled"` - third bucket
+    /// alongside `cancelledByAdmin`: "banned" when this booking was
+    /// cascade-cancelled because the member got blacklisted (see
+    /// `GroupClassService::cascadeCancelFutureBookingsOnBan`), nil for a
+    /// normal member-initiated cancel.
+    var cancelledReason: String?
     /// Only meaningful when `bookingStatus == "no_show"` - capped at 2 server-side.
     var noShowCount: Int?
     /// Only meaningful when `bookingStatus == "no_show"` and `noShowCount == 2` -
@@ -59,6 +65,7 @@ struct BookingDataModel: Codable {
         case waitlistType = "waitlist_type"
         case bookingStatus = "booking_status"
         case cancelledByAdmin = "cancelled_by_admin"
+        case cancelledReason = "cancelled_reason"
         case noShowCount = "no_show_count"
         case noShowBlockedUntil = "no_show_blocked_until"
         case scheduleId = "schedule_id"

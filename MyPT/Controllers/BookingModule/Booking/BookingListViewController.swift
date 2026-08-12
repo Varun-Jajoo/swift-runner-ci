@@ -389,6 +389,7 @@ extension BookingListViewController: UITableViewDataSource, UITableViewDelegate{
             controller.isReadOnly = true
             controller.bookingId = row.id?.value ?? ""
             controller.bookingStatus = row.bookingStatus ?? "confirmed"
+            controller.cancelledReason = row.cancelledReason ?? ""
             controller.noShowCount = row.noShowCount ?? 0
             controller.noShowBlockedUntil = row.noShowBlockedUntil ?? ""
             // Only the Upcoming sub-tab has anything left to cancel.
