@@ -483,7 +483,7 @@ final class SeeAllGroupClassesViewController: CommonViewController {
 
     // MARK: - Data
 
-    private func loadClasses() {
+    private func loadClasses(showLoader: Bool = true) {
         let requestLat = lat == 0 ? GroupClassCardFormatter.fallbackLatitude : lat
         let requestLng = lng == 0 ? GroupClassCardFormatter.fallbackLongitude : lng
         let params: [String: String] = [
@@ -493,7 +493,15 @@ final class SeeAllGroupClassesViewController: CommonViewController {
             "category_id": ""
         ]
 
-        UpcomingClassVM.viewAllClassesApi(inputParams: params, isShowLoader: true) { [weak self] result in
+        // A realtime event (handleStoreEvent's classCreated/classStatusChanged/
+        // accessChanged/classUpdated, showLoader: false) must not show this -
+        // a full-screen loader flashing every time someone else's class
+        // changes reads as "the screen keeps refreshing", the same complaint
+        // the reloadData() calls below already have to avoid causing via
+        // scroll position (they don't move contentOffset - only Home's
+        // carousel needed that guard, since it's the one that explicitly
+        // recentered on every apply()).
+        UpcomingClassVM.viewAllClassesApi(inputParams: params, isShowLoader: showLoader) { [weak self] result in
             guard let self = self else { return }
             let allClasses = result?.data?.allClasses ?? []
 
@@ -556,7 +564,7 @@ final class SeeAllGroupClassesViewController: CommonViewController {
     private func handleStoreEvent(_ event: GroupClassStoreEvent) {
         switch event {
         case .classCreated, .classStatusChanged, .accessChanged:
-            loadClasses()
+            loadClasses(showLoader: false)
 
         case .seatsChanged(let classId, let scheduleId):
             patchAllLists(matchingClassId: classId, scheduleId: scheduleId)
@@ -568,6 +576,12 @@ final class SeeAllGroupClassesViewController: CommonViewController {
             // Cards show seat availability, never queue length - nothing to
             // repaint here. (The Detail and Slot Open screens do show it.)
             break
+
+        case .classUpdated:
+            loadClasses(showLoader: false)
+
+        case .selfBookingChanged(let classId, let scheduleId):
+            patchAllLists(matchingClassId: classId, scheduleId: scheduleId)
         }
     }
 
@@ -611,6 +625,12 @@ final class SeeAllGroupClassesViewController: CommonViewController {
             }
             if let price = live.price {
                 list[index].price = FlexibleValue(value: price)
+            }
+            if let isBooked = live.isBooked {
+                list[index].isBooked = isBooked
+            }
+            if let isWaitlisted = live.isWaitlisted {
+                list[index].isWaitlisted = isWaitlisted
             }
             onTouched()
         }

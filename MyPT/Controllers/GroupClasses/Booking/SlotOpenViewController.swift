@@ -275,10 +275,14 @@ final class SlotOpenViewController: CommonViewController {
             // pressuring them, and one that grows should.
             guard eventClassId == classId, eventScheduleId == Int(scheduleId) else { return }
             let live = GroupClassStore.shared.liveState(classId: classId, scheduleId: Int(scheduleId))
-            if let remaining = live.remainingSeats {
-                headlineLabel.text = remaining <= 0
-                    ? "This spot has been claimed"
-                    : "\(remaining) \(remaining == 1 ? "slot" : "slots") \(remaining == 1 ? "is" : "are") open!"
+            // Only ever re-render the count itself. This used to swap the
+            // headline out for a "this spot has been claimed" message once the
+            // count hit zero, which read as the member's OWN action having
+            // failed (or already been confirmed) when all it meant was that the
+            // live number moved. handleClaimResponse()'s SPOT_TAKEN branch is
+            // what actually tells them the race was lost.
+            if let remaining = live.remainingSeats, remaining > 0 {
+                headlineLabel.text = "\(remaining) \(remaining == 1 ? "slot" : "slots") \(remaining == 1 ? "is" : "are") open!"
             }
             if let waitlistCount = live.waitlistCount {
                 let memberWord = waitlistCount == 1 ? "member" : "members"
@@ -399,21 +403,15 @@ final class SlotOpenViewController: CommonViewController {
                     return
                 }
 
-                // Same reachable-directly-from-push problem as above:
-                // claim-open-spot only ever succeeds when this spot is actually
-                // free for the current member (strictly 'free', or 'mixed' +
-                // active membership). Without this check, a non-member (or a
-                // 'paid' class) landing here via push saw a claim screen that
-                // ALWAYS came back PAYMENT_REQUIRED on Confirm - a popup +
-                // redirect to payment every single time. Redirect to the detail
-                // screen instead, which routes straight to payment itself.
-                let access = (detail.access ?? "").lowercased()
-                let isMember = detail.isMember ?? false
-                let isFreeForUser = access == "free" ? true : (access == "paid" ? false : isMember)
-                if !isFreeForUser {
-                    self.redirectToDetailScreen(detail: detail)
-                    return
-                }
+                // A paid (or mixed-and-not-covered) class gets this screen too -
+                // the open spot and the queue racing for it are just as real
+                // whether or not the seat costs money. There used to be a
+                // redirect to the detail screen here on the grounds that
+                // claim-open-spot always answers PAYMENT_REQUIRED for these
+                // members, but handleClaimResponse() already handles exactly
+                // that reply by routing to the payment page - so the redirect
+                // only cost the member the countdown and the queue context, to
+                // end up at the same place one extra tap later.
 
                 if let newClassId = detail.classId, newClassId > 0 {
                     self.classId = newClassId
@@ -495,11 +493,15 @@ final class SlotOpenViewController: CommonViewController {
     }
 
     @objc private func confirmTapped() {
+        confirmSpot(confirmSpecialWaitlist: false)
+    }
+
+    private func confirmSpot(confirmSpecialWaitlist: Bool) {
         guard !scheduleId.isEmpty else { return }
         TapticEngine.selection.feedback()
         confirmButton.isEnabled = false
 
-        UpcomingClassVM.claimOpenSpotApi(scheduleId: scheduleId) { [weak self] result in
+        UpcomingClassVM.claimOpenSpotApi(scheduleId: scheduleId, confirmSpecialWaitlist: confirmSpecialWaitlist) { [weak self] result in
             guard let self = self else { return }
             DispatchQueue.main.async {
                 self.confirmButton.isEnabled = true
@@ -522,13 +524,33 @@ final class SlotOpenViewController: CommonViewController {
             return
         }
 
+        if result.code == "SPECIAL_WAITLIST_CONFIRM_REQUIRED" {
+            // Nothing created yet - the backend only replies this without
+            // confirmSpecialWaitlist set. Show the sheet as a real choice;
+            // only its own "Join Waitlist" tap re-calls
+            // confirmSpot(confirmSpecialWaitlist: true), which is the sole
+            // path that actually creates the row. Any other dismissal
+            // (X/swipe/tap outside) sends nothing at all.
+            var input = DoubleBookingSheetInput()
+            input.classTitle = classTitleLabel.text ?? classTitle
+            input.classTime = classDateTimeLabel.text ?? classTime
+            input.classLocation = locationTitleLabel.text ?? classLocation
+            input.trainerName = trainerName
+            input.distance = locationDistanceLabel.text ?? ""
+            input.studioLat = studioLat
+            input.studioLng = studioLng
+            input.notifyHours = result.specialWaitlist?.notificationWindowHours?.intValue ?? 3
+            DoubleBookingSheetViewController.present(from: self, input: input) { [weak self] in
+                self?.confirmSpot(confirmSpecialWaitlist: true)
+            }
+            return
+        }
+
         if result.code == "SPECIAL_WAITLIST_DEFERRED" {
-            // claimOpenSpotApi() already created the special-waitlist entry
-            // server-side (post-hoc, same as the double-booking sheet
-            // elsewhere in the app) - show it right here instead of
-            // redirecting away to the class detail screen, so a notification
-            // tap lands the member on the countdown screen they expect, not
-            // somewhere else entirely.
+            // Reached only after confirmSpecialWaitlist: true was sent - the
+            // row is genuinely committed now, with real consent already
+            // given via the sheet tap that triggered this call. Post-hoc
+            // display here, matching the already-confirmed path elsewhere.
             var input = DoubleBookingSheetInput()
             input.classTitle = classTitleLabel.text ?? classTitle
             input.classTime = classDateTimeLabel.text ?? classTime

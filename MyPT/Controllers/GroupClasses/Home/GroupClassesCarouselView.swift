@@ -379,7 +379,7 @@ final class GroupClassesCarouselView: UIView {
     private func handleStoreEvent(_ event: GroupClassStoreEvent) {
         switch event {
         case .classCreated, .classStatusChanged, .accessChanged:
-            loadClasses(lat: lastRequestLat, long: lastRequestLng)
+            loadClasses(lat: lastRequestLat, long: lastRequestLng, resetScroll: false)
 
         case .seatsChanged(let classId, let scheduleId):
             patchCards(matchingClassId: classId, scheduleId: scheduleId)
@@ -391,6 +391,12 @@ final class GroupClassesCarouselView: UIView {
             // Cards show seat availability, never queue length - nothing to
             // repaint here. (The Detail and Slot Open screens do show it.)
             break
+
+        case .classUpdated:
+            loadClasses(lat: lastRequestLat, long: lastRequestLng, resetScroll: false)
+
+        case .selfBookingChanged(let classId, let scheduleId):
+            patchCards(matchingClassId: classId, scheduleId: scheduleId)
         }
     }
 
@@ -417,6 +423,12 @@ final class GroupClassesCarouselView: UIView {
             if let price = live.price {
                 classes[index].price = FlexibleValue(value: price)
             }
+            if let isBooked = live.isBooked {
+                classes[index].isBooked = isBooked
+            }
+            if let isWaitlisted = live.isWaitlisted {
+                classes[index].isWaitlisted = isWaitlisted
+            }
             changedIndexPaths.append(IndexPath(item: index, section: 0))
         }
         guard !changedIndexPaths.isEmpty else { return }
@@ -430,7 +442,7 @@ final class GroupClassesCarouselView: UIView {
     ///
     /// Free classes are dropped unless the user is an active member — the same
     /// rule Android applies while parsing the response.
-    func loadClasses(lat: Double?, long: Double?) {
+    func loadClasses(lat: Double?, long: Double?, resetScroll: Bool = true) {
 
         let requestLat = (lat ?? 0) == 0 ? GroupClassCardFormatter.fallbackLatitude : (lat ?? 0)
         let requestLng = (long ?? 0) == 0 ? GroupClassCardFormatter.fallbackLongitude : (long ?? 0)
@@ -460,12 +472,12 @@ final class GroupClassesCarouselView: UIView {
             DispatchQueue.main.async {
                 self.userLat = requestLat
                 self.userLng = requestLng
-                self.apply(classes: topTenClasses)
+                self.apply(classes: topTenClasses, resetScroll: resetScroll)
             }
         }
     }
 
-    private func apply(classes: [UpcomingClassModel]) {
+    private func apply(classes: [UpcomingClassModel], resetScroll: Bool) {
         self.classes = classes
         // Android hides the section entirely when nothing survives the filter.
         isHidden = classes.isEmpty
@@ -480,9 +492,17 @@ final class GroupClassesCarouselView: UIView {
         renderedSignature = signature
 
         collectionView.reloadData()
-        collectionView.setContentOffset(CGPoint(x: -collectionView.contentInset.left, y: 0), animated: false)
+        // Only actually a fresh appearance (viewWillAppear's own call, default
+        // true) wants the carousel snapped back to the start. A realtime event
+        // mid-view (resetScroll: false, from handleStoreEvent) must leave
+        // wherever the member scrolled to alone - jumping them back to card 1
+        // because someone else's booking changed elsewhere is exactly the
+        // "scroll keeps resetting" behavior this parameter exists to stop.
+        if resetScroll {
+            collectionView.setContentOffset(CGPoint(x: -collectionView.contentInset.left, y: 0), animated: false)
+            dotsView.setSelectedPage(0)
+        }
         dotsView.setPageCount(classes.count)
-        dotsView.setSelectedPage(0)
     }
 
     /// Everything the cards actually render, so an unchanged fetch is detected as
@@ -507,7 +527,11 @@ final class GroupClassesCarouselView: UIView {
                 String(GroupClassCardFormatter.intValue(item.totalCapacity, defaultValue: 20)),
                 String(GroupClassCardFormatter.intValue(item.remainingSeats, defaultValue: 20)),
                 (item.isBooked ?? false) ? "1" : "0",
-                (item.isWaitlisted ?? false) ? "1" : "0"
+                (item.isWaitlisted ?? false) ? "1" : "0",
+                // Without this a PRICE_CHANGED refetch hashes identical to
+                // what's already rendered and gets dropped by the caller's
+                // early return, leaving the old price on the card.
+                item.price?.value ?? ""
             ].joined(separator: "|")
         }.joined(separator: ";")
     }

@@ -201,14 +201,21 @@ class UpcomingClassVM {
     class func bookGroupClassApi(scheduleId: String?,
                                  transactionId: String = "",
                                  paymentType: String = "free",
+                                 confirmSpecialWaitlist: Bool = false,
                                  isShowLoader: Bool = true,
                                  completion: @escaping(_ resultData: BookClassBaseModel?) -> Void){
 
-        let params:[String:Any] = [
+        var params:[String:Any] = [
             "schedule_id": scheduleId ?? "",
             "transaction_id": transactionId,
             "payment_type": paymentType
         ]
+        // Only set once genuine consent happened (the double-booking sheet's
+        // own "Join Waitlist" tap) - see Android's identical param on
+        // performFreeBooking()'s HashMap.
+        if confirmSpecialWaitlist {
+            params["confirm_special_waitlist"] = "1"
+        }
 
         print("inputParams = ", params as Any)
         NetworkManager.shared.genericAPICall(serviceEndPoint: .book_class, method: .post , parameters: params, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
@@ -270,12 +277,18 @@ class UpcomingClassVM {
     /// join-waitlist/book-class: `status:false, code:"SPOT_TAKEN"` means
     /// someone else won and this user is now on the waitlist instead.
     class func claimOpenSpotApi(scheduleId: String?,
+                                confirmSpecialWaitlist: Bool = false,
                                 isShowLoader: Bool = true,
                                 completion: @escaping(_ resultData: BookClassBaseModel?) -> Void){
 
-        let params: [String: Any] = [
+        var params: [String: Any] = [
             "schedule_id": scheduleId ?? ""
         ]
+        // See bookGroupClassApi's identical param - only set once genuine
+        // consent happened (the double-booking sheet's own "Join Waitlist" tap).
+        if confirmSpecialWaitlist {
+            params["confirm_special_waitlist"] = "1"
+        }
 
         print("inputParams = ", params as Any)
         NetworkManager.shared.genericAPICall(serviceEndPoint: .claim_open_spot, method: .post, parameters: params, isShowLoading: isShowLoader, completion: { (getResponce, error) in

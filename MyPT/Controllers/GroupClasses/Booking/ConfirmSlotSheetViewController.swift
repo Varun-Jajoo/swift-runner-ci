@@ -458,7 +458,13 @@ final class ConfirmSlotSheetViewController: CommonViewController {
             // screen behind the sheet comes back showing "BOOKED".
             onBookingSucceeded?()
 
-            if result.specialWaitlist?.isSpecial == true {
+            // pendingConfirmation, not isSpecial: without confirmSpecialWaitlist
+            // sent (this call never sends it - see performFreeBooking()'s own
+            // first attempt for the only place that does), the backend never
+            // creates the row for a special diversion, so there's nothing here
+            // to treat as already-succeeded. onSpecialWaitlistTriggered's
+            // caller shows the double-booking sheet as a genuine choice.
+            if result.specialWaitlist?.pendingConfirmation == true {
                 let notifyHours = result.specialWaitlist?.notificationWindowHours?.intValue
                 dismiss(animated: true) { [weak self] in
                     self?.onSpecialWaitlistTriggered?(notifyHours)

@@ -183,6 +183,10 @@ struct SpecialWaitlistDetailModel: Codable {
     var deferredUntil: String?
     var blockedByBookingId: FlexibleValue?
     var canNotifyNow: Bool?
+    /// True only when the backend hasn't created the waitlist row yet - see
+    /// bookClass()'s pending_confirmation branch on the PHP side. Absent
+    /// (nil) on every other response shape, including the confirmed one.
+    var pendingConfirmation: Bool?
 
     enum CodingKeys: String, CodingKey {
         case waitlisted
@@ -194,6 +198,7 @@ struct SpecialWaitlistDetailModel: Codable {
         case deferredUntil = "deferred_until"
         case blockedByBookingId = "blocked_by_booking_id"
         case canNotifyNow = "can_notify_now"
+        case pendingConfirmation = "pending_confirmation"
     }
 
     var isSpecial: Bool { waitlistType == "special" }

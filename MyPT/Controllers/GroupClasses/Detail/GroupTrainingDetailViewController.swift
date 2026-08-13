@@ -377,16 +377,12 @@ final class GroupTrainingDetailViewController: CommonViewController {
 
         applyInitialPriceLabel()
 
-        updateProgressAndWaitlistState(booked: bookedCount, totalCapacity: totalCapacity)
-
         // Seeded booked/waitlisted state takes priority over the generic
-        // capacity-based CTA above - same override the live fetch applies
-        // once it confirms this from the server.
-        if isAlreadyBooked {
-            applyPostBookingCta(booked: true)
-        } else if isAlreadyWaitlisted {
-            applyPostBookingCta(booked: false)
-        }
+        // capacity-based CTA - and, since this now re-invokes
+        // applyPostBookingCta() itself for isAlreadyBooked/isAlreadyWaitlisted,
+        // one call covers both the top badge and the CTA. (Used to be a
+        // separate explicit call here; now redundant with what this already does.)
+        updateProgressAndWaitlistState(booked: bookedCount, totalCapacity: totalCapacity)
     }
 
     /// Android's initial (intent-driven) price branch — note it is *not* the same
@@ -500,6 +496,23 @@ final class GroupTrainingDetailViewController: CommonViewController {
             progressBar.isHidden = false
             spotsLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
             spotsLabel.textColor = Palette.spotsText
+        }
+
+        // setCTATitle() above (via the capacity branch) just repainted the
+        // button for the generic BOOK SLOT / PROCEED TO PAYMENT / JOIN
+        // WAITLIST state via resetCTAStyle() - correct when this member isn't
+        // booked, but every realtime event runs through here regardless of
+        // whose booking changed, so an already-booked/waitlisted member's CTA
+        // was getting stomped back to that generic look on ANY unrelated
+        // event (someone else's seat change, a price edit). applyPostBookingCta()
+        // is the only thing that sets priceLabel/perSessionLabel at all, and
+        // it was never re-invoked from a live update - re-running it here is
+        // what actually keeps the CTA (button AND the price row beside it) in
+        // sync with isAlreadyBooked/isAlreadyWaitlisted on every event.
+        if isAlreadyBooked {
+            applyPostBookingCta(booked: true)
+        } else if isAlreadyWaitlisted {
+            applyPostBookingCta(booked: false)
         }
     }
 
@@ -862,6 +875,10 @@ final class GroupTrainingDetailViewController: CommonViewController {
 
         isAlreadyBooked = detail.isBooked ?? false
         isAlreadyWaitlisted = detail.isWaitlisted ?? false
+        if let scheduleIdInt = Int(scheduleId) {
+            GroupClassStore.shared.setSelfBookingState(classId: classId, scheduleId: scheduleIdInt,
+                                                        isBooked: isAlreadyBooked, isWaitlisted: isAlreadyWaitlisted)
+        }
 
         // A spot is open with people still waiting - show the priority claim
         // screen instead of the normal detail page, both for a waitlisted
@@ -885,31 +902,31 @@ final class GroupTrainingDetailViewController: CommonViewController {
 
         willSpecialWaitlist = detail.willSpecialWaitlist ?? false
         specialWaitlistNotifyHours = GroupClassCardFormatter.intValue(detail.specialWaitlistNotifyHours, defaultValue: 3)
-        // Computed fresh here (not from `isFreeForUser`, which isn't recomputed
-        // from this response until further below) - the claim-open-spot screen
-        // only ever succeeds for a member this class is actually free for.
-        // Routing a paid/mixed-non-member user there anyway meant every tap on
-        // its Confirm button came back PAYMENT_REQUIRED - always a popup +
-        // redirect to payment, never a successful claim.
-        let freshIsFreeForUser = resolveIsFreeForUser(access: (detail.access ?? classAccess), isMember: detail.isMember ?? false)
+        // (The fresh access/is-member resolution that used to live here only
+        // existed to gate this redirect on free-for-this-member. That gate is
+        // gone - paid classes get the claim screen too - and the isFreeForUser
+        // property the CTA reads is recomputed from this same response below.)
         if !checkedSlotOpenRedirect {
             checkedSlotOpenRedirect = true
             // For a NON double booking user (!willSpecialWaitlist), do NOT
             // show the open slot screen if the waitlist has ONLY extra booking
             // members (onlyExtraBooking) - instead, they get the normal booking flow.
-            if !isAlreadyBooked && remainingSeats > 0 && hasContestedNormalWaitlist && !willSpecialWaitlist && freshIsFreeForUser && !onlyExtraBooking {
+            // Same as the CTA-tap branch: no isFreeForUser gate.
+            if !isAlreadyBooked && remainingSeats > 0 && hasContestedNormalWaitlist && !willSpecialWaitlist && !onlyExtraBooking {
                 pushSlotOpen(time: effectiveTime)
             }
         }
 
-        if isAlreadyBooked {
-            applyPostBookingCta(booked: true)
-        } else if isAlreadyWaitlisted {
-            applyPostBookingCta(booked: false)
-        } else {
-            // A booking may have been removed server-side; recompute from capacity.
-            updateProgressAndWaitlistState(booked: bookedCount, totalCapacity: totalCapacity)
-        }
+        // updateProgressAndWaitlistState() owns spotsLabel/progressBar (the top
+        // badge) AND, since it now re-invokes applyPostBookingCta() at its own
+        // tail for isAlreadyBooked/isAlreadyWaitlisted, the CTA too - one call
+        // covers all three states. This used to treat applyPostBookingCta()
+        // and updateProgressAndWaitlistState() as mutually exclusive
+        // alternatives, but applyPostBookingCta() alone never touches the top
+        // badge at all, so a transition INTO booked/waitlisted here (the
+        // exact case this branch exists for) fixed the CTA while leaving the
+        // top badge stuck on its previous capacity text.
+        updateProgressAndWaitlistState(booked: bookedCount, totalCapacity: totalCapacity)
 
         doorsOpenLabel.attributedText = doorsOpenText(for: effectiveTime)
 
@@ -990,21 +1007,38 @@ final class GroupTrainingDetailViewController: CommonViewController {
             // same group-class.{classId} channel - only this screen's own
             // occurrence should move its numbers.
             guard eventClassId == classId, eventScheduleId == Int(scheduleId) else { return }
-            applyLiveState()
+            // A real refetch, not applyLiveState()'s cheap numeric patch:
+            // this event fires for ANY seat/waitlist change on this
+            // occurrence, including an admin adding/removing THIS viewer
+            // specifically - and PARTICIPANT_JOINED/LEFT/WAITLIST_CHANGED's
+            // payload can't carry that (fan-out broadcast, not
+            // per-recipient), so there's no way to tell from the event alone
+            // whether isAlreadyBooked itself needs to flip. Only a real fetch
+            // can answer that - same reasoning as classStatusChanged/
+            // accessChanged below.
+            fetchClassDetail()
 
         case .capacityChanged(let eventClassId), .priceChanged(let eventClassId):
             guard eventClassId == classId else { return }
             applyLiveState()
 
-        case .classStatusChanged(let eventClassId), .accessChanged(let eventClassId):
-            // Status (Completed/Cancelled) and access (free/paid/mixed) both
-            // change more than one field and, for access, depend on this
-            // member's own subscription - re-run the existing, already-tested
+        case .classStatusChanged(let eventClassId), .accessChanged(let eventClassId), .classUpdated(let eventClassId):
+            // Status (Completed/Cancelled), access (free/paid/mixed), and
+            // name/date/venue/trainer edits (classUpdated) all change more
+            // than one field and, for access, depend on this member's own
+            // subscription - re-run the existing, already-tested
             // REST refresh rather than a bespoke patch.
             guard eventClassId == classId else { return }
             fetchClassDetail()
 
         case .classCreated:
+            break
+
+        case .selfBookingChanged:
+            // Fired by this same screen's own fetchClassDetail() apply step
+            // (see setSelfBookingState call site) - already reflected in
+            // isAlreadyBooked/isAlreadyWaitlisted by the time this arrives,
+            // nothing further to do here.
             break
         }
     }
@@ -1156,11 +1190,16 @@ final class GroupTrainingDetailViewController: CommonViewController {
             (specialWaitlistCount > 0 ? waitlistCount > specialWaitlistCount : waitlistCount > 0)
         )
 
-        if remainingSeats > 0 && hasContestedNormalWaitlist && !willSpecialWaitlist && isFreeForUser && !onlyExtraBooking {
+        if remainingSeats > 0 && hasContestedNormalWaitlist && !willSpecialWaitlist && !onlyExtraBooking {
             // A spot is open with real normal waitlisted members waiting in line -
             // show the priority claim race screen. If the waitlist contains ONLY
             // extra booking members (onlyExtraBooking), non-double-booking users
             // proceed directly with the standard normal booking flow.
+            //
+            // Deliberately NOT gated on isFreeForUser: a paid class's open spot
+            // is contested exactly the same way, and the claim screen's Confirm
+            // routes to payment for those members (SlotOpenViewController ->
+            // handleClaimResponse()'s PAYMENT_REQUIRED branch).
             pushSlotOpen(time: dateTimeLabel.text ?? classTime)
             return
         }
@@ -1393,7 +1432,8 @@ final class GroupTrainingDetailViewController: CommonViewController {
 
         UpcomingClassVM.bookGroupClassApi(scheduleId: scheduleId,
                                           transactionId: "",
-                                          paymentType: "free") { [weak self] result in
+                                          paymentType: "free",
+                                          confirmSpecialWaitlist: skipSpecialSheetCheck) { [weak self] result in
             guard let self = self else { return }
             DispatchQueue.main.async {
                 self.handleFreeBookingResponse(result, skipSpecialSheetCheck: skipSpecialSheetCheck)
@@ -1410,9 +1450,18 @@ final class GroupTrainingDetailViewController: CommonViewController {
         if result.status == true {
             fetchClassDetail()
 
-            if !skipSpecialSheetCheck, result.specialWaitlist?.isSpecial == true {
-                presentDoubleBookingSheet(preCheck: false,
-                                          notifyHours: result.specialWaitlist?.notificationWindowHours?.intValue)
+            // With confirmSpecialWaitlist not sent (skipSpecialSheetCheck
+            // false), the backend never creates the row for a special
+            // diversion - it only replies pendingConfirmation so this can
+            // show the sheet as a genuine choice. onConfirm is the ONLY path
+            // that re-calls performFreeBooking(skipSpecialSheetCheck: true)
+            // (-> confirmSpecialWaitlist: true), so dismissing the sheet any
+            // other way sends nothing at all - no row, no push, nothing.
+            if !skipSpecialSheetCheck, result.specialWaitlist?.pendingConfirmation == true {
+                presentDoubleBookingSheet(preCheck: true,
+                                          notifyHours: result.specialWaitlist?.notificationWindowHours?.intValue) { [weak self] in
+                    self?.performFreeBooking(skipSpecialSheetCheck: true)
+                }
                 return
             }
 
@@ -1561,8 +1610,14 @@ final class GroupTrainingDetailViewController: CommonViewController {
             // will_special_waitlist read false when this sheet was shown, but the
             // booking response disagreed - show the double-booking sheet now
             // instead of silently letting the normal confirm sheet's own success
-            // path treat this as an ordinary booking.
-            self?.presentDoubleBookingSheet(preCheck: false, notifyHours: notifyHours)
+            // path treat this as an ordinary booking. preCheck: true - nothing
+            // has been created server-side yet (see ConfirmSlotSheetViewController's
+            // pendingConfirmation check), so this must be a genuine choice, not
+            // a post-hoc notice: onConfirm is the only path that actually
+            // creates the row.
+            self?.presentDoubleBookingSheet(preCheck: true, notifyHours: notifyHours) { [weak self] in
+                self?.performFreeBooking(skipSpecialSheetCheck: true)
+            }
         })
     }
 

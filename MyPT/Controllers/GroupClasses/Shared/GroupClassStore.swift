@@ -44,6 +44,14 @@ struct GroupClassLiveState {
     /// Queue length for this occurrence. Moves independently of the seat
     /// counts above - joining/leaving a waitlist never changes a booked seat.
     var waitlistCount: Int?
+    /// This device's own booking status for this occurrence. NOT set from
+    /// any broadcast (booking status is per-recipient, so the wire never
+    /// carries it - see WaitlistChanged.php/PriceChanged.php's own per-user
+    /// notes). Set locally the instant a book/cancel/waitlist action on
+    /// THIS device succeeds, so every other currently-open screen/card for
+    /// the same class reflects it immediately without a network round trip.
+    var isBooked: Bool?
+    var isWaitlisted: Bool?
 }
 
 // MARK: - Typed events
@@ -72,6 +80,17 @@ enum GroupClassStoreEvent {
     /// (one broadcast, many recipients - see ClassCreated.php), so screens
     /// re-fetch rather than inserting the payload directly.
     case classCreated
+    /// Name, schedule date/time, studio, or trainer changed - catch-all for
+    /// everything PriceChanged/CapacityChanged/AccessChanged/
+    /// ClassStatusChanged don't already cover. Screens re-fetch, same as
+    /// accessChanged/classStatusChanged.
+    case classUpdated(classId: Int)
+    /// This device's own booking/waitlist status for an occurrence changed,
+    /// set locally right after a book/cancel/waitlist action on THIS device
+    /// succeeds (see GroupClassLiveState.isBooked/isWaitlisted) - lets every
+    /// other currently-open card/screen for the same class pick it up
+    /// without a network round trip.
+    case selfBookingChanged(classId: Int, scheduleId: Int)
 }
 
 // MARK: - Store
@@ -109,6 +128,8 @@ final class GroupClassStore {
             merged.bookedCount = scheduleLevel.bookedCount
             merged.remainingSeats = scheduleLevel.remainingSeats
             merged.waitlistCount = scheduleLevel.waitlistCount
+            merged.isBooked = scheduleLevel.isBooked
+            merged.isWaitlisted = scheduleLevel.isWaitlisted
         }
         // A capacity edit invalidates whatever seat count was last broadcast
         // for this occupancy: CAPACITY_CHANGED intentionally carries no
@@ -119,6 +140,24 @@ final class GroupClassStore {
             merged.remainingSeats = max(0, capacity - booked)
         }
         return merged
+    }
+
+    // MARK: Self-booking state (local-only, never comes over the wire)
+
+    /// Called right after a book/cancel/join-waitlist/leave-waitlist action
+    /// on THIS device succeeds. Not derived from any broadcast: booking
+    /// status is per-recipient, so the wire deliberately never carries it
+    /// (same reasoning as AccessChanged - see broadcastWith() on the PHP
+    /// side). This is what makes the "BOOKED"/"ON WAITLIST" badge (in place
+    /// of the capacity progress bar) flip live on every other currently-open
+    /// card/screen for the same class, not just the one the action happened on.
+    func setSelfBookingState(classId: Int, scheduleId: Int, isBooked: Bool?, isWaitlisted: Bool?) {
+        guard scheduleId > 0 else { return }
+        var state = scheduleState[scheduleId] ?? GroupClassLiveState()
+        state.isBooked = isBooked
+        state.isWaitlisted = isWaitlisted
+        scheduleState[scheduleId] = state
+        broadcast(.selfBookingChanged(classId: classId, scheduleId: scheduleId))
     }
 
     // MARK: Observation
@@ -231,6 +270,10 @@ final class GroupClassStore {
 
         case "CLASS_CREATED":
             broadcast(.classCreated)
+
+        case "CLASS_UPDATED":
+            guard let classId = data["classId"] as? Int else { return }
+            broadcast(.classUpdated(classId: classId))
 
         default:
             break
