@@ -98,6 +98,14 @@ final class GroupTrainingDetailViewController: CommonViewController {
     /// counts, only-extra-booking flags) that aren't already mirrored into
     /// their own dedicated stored properties above.
     private var detail: ClassDetailsModel?
+    /// Populated from `class-detail`'s `class_id` - unknown until the first
+    /// fetch lands (only `scheduleId` is available from the tap-through
+    /// payload), so realtime subscription only starts once this is set.
+    /// See `apply(detail:)` and `subscribeToRealtime()`.
+    private var classId: Int = 0
+    /// Handle for this screen's GroupClassStore subscription, released in
+    /// viewWillDisappear.
+    private var storeObserverToken: UUID?
     /// Distance without the trailing " away" — the value Android forwards to the
     /// downstream booking screens.
     private var currentDistance: String = ""
@@ -276,6 +284,13 @@ final class GroupTrainingDetailViewController: CommonViewController {
             fetchClassDetail()
         }
         hasFetchedOnce = true
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        // Screen-scoped subscription lifetime (§11c): only listens for this
+        // class's realtime events while actually on screen.
+        unsubscribeFromRealtime()
     }
 
     override func viewSafeAreaInsetsDidChange() {
@@ -710,6 +725,15 @@ final class GroupTrainingDetailViewController: CommonViewController {
     /// recomputed with the freshly-resolved `isFreeForUser`.
     private func apply(detail: ClassDetailsModel, topLevelCode: String?, topLevelMsg: String?, topLevelIsBlacklisted: Bool?) {
         self.detail = detail
+
+        // classId is only known once class-detail responds (the tap-through
+        // payload only ever carried scheduleId) - subscribe as soon as it's
+        // available. subscribe() is safe to call again on a later refresh
+        // with the same id (§11c).
+        if let newClassId = detail.classId, newClassId > 0 {
+            classId = newClassId
+            subscribeToRealtime()
+        }
         // buildScrollView() (viewDidLoad, before this ever fires) built these
         // three sections against a nil `detail`, so they need an explicit
         // refresh now that the real data is in - see the note above
@@ -931,6 +955,85 @@ final class GroupTrainingDetailViewController: CommonViewController {
     private var isAuthenticated: Bool {
         let token = (appUserDefaults.getAccessToken() ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         return !token.isEmpty && token != "-1"
+    }
+
+    // MARK: - Realtime (via GroupClassStore)
+
+    private func subscribeToRealtime() {
+        guard classId > 0 else { return }
+        GroupClassStore.shared.startWatching(classId: classId)
+        guard storeObserverToken == nil else { return }
+        storeObserverToken = GroupClassStore.shared.observe { [weak self] event in
+            self?.handleStoreEvent(event)
+        }
+    }
+
+    private func unsubscribeFromRealtime() {
+        GroupClassStore.shared.removeObserver(storeObserverToken)
+        storeObserverToken = nil
+        guard classId > 0 else { return }
+        GroupClassStore.shared.stopWatching(classId: classId)
+    }
+
+    /// Applies the store's canonical live state to this screen, reusing the
+    /// same fields/methods `apply(detail:)` already populates. Payload
+    /// parsing and price type-coercion happen once inside the store - this
+    /// only decides what to re-render. `PARTICIPANT_STATUS_CHANGED` has no
+    /// on-screen field to patch on this member-facing screen (it reflects
+    /// OTHER members' attendance marks, not this user's own booked/
+    /// waitlisted state), so the store doesn't surface it at all.
+    private func handleStoreEvent(_ event: GroupClassStoreEvent) {
+        switch event {
+        case .seatsChanged(let eventClassId, let eventScheduleId),
+             .waitlistChanged(let eventClassId, let eventScheduleId):
+            // A class can have multiple schedules, all broadcasting on the
+            // same group-class.{classId} channel - only this screen's own
+            // occurrence should move its numbers.
+            guard eventClassId == classId, eventScheduleId == Int(scheduleId) else { return }
+            applyLiveState()
+
+        case .capacityChanged(let eventClassId), .priceChanged(let eventClassId):
+            guard eventClassId == classId else { return }
+            applyLiveState()
+
+        case .classStatusChanged(let eventClassId), .accessChanged(let eventClassId):
+            // Status (Completed/Cancelled) and access (free/paid/mixed) both
+            // change more than one field and, for access, depend on this
+            // member's own subscription - re-run the existing, already-tested
+            // REST refresh rather than a bespoke patch.
+            guard eventClassId == classId else { return }
+            fetchClassDetail()
+
+        case .classCreated:
+            break
+        }
+    }
+
+    /// Pulls whatever the store currently holds for this class/occurrence
+    /// and re-renders. Reading merged state (rather than reacting to one
+    /// event's payload) means a screen that was backgrounded through several
+    /// events still lands on the correct final values.
+    private func applyLiveState() {
+        let live = GroupClassStore.shared.liveState(classId: classId, scheduleId: Int(scheduleId))
+        if let capacity = live.capacity { totalCapacity = capacity }
+        if let booked = live.bookedCount { bookedCount = booked }
+        // Not rendered directly here, but `ctaTapped()` reads it to decide
+        // between the normal booking sheet and the contested Slot Open screen -
+        // a stale queue length routes the member to the wrong one.
+        if let waitlist = live.waitlistCount { waitlistCount = waitlist }
+        if let price = live.price {
+            classPrice = price
+            // Only repaint the price line when it is actually showing a price.
+            // Once this member has booked/waitlisted, `applyPostBookingCta()`
+            // owns that label ("Your class is booked" / "You're on the
+            // waitlist") - an unrelated admin price edit must not silently
+            // replace their booking confirmation with a price tag. Same guard
+            // Android's GroupTrainingDetailActivity already applies.
+            if !isAlreadyBooked && !isAlreadyWaitlisted {
+                applyInitialPriceLabel()
+            }
+        }
+        updateProgressAndWaitlistState(booked: bookedCount, totalCapacity: totalCapacity)
     }
 
     /// Routes a guest to the app's existing login entry point (`MainViewController`,

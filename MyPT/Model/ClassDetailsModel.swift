@@ -26,6 +26,10 @@ struct ClassDetailsBaseModel: Codable {
 // MARK: - ClassDetailsModel
 struct ClassDetailsModel: Codable {
     var schduleID: Int?
+    /// Needed to subscribe to the `group-class.{classId}` realtime channel -
+    /// distinct from `schduleID` (a specific occurrence), this is the parent
+    /// class the realtime backend keys its channel/events on.
+    var classId: Int?
     var isMember: Bool?
     var className: String?
     var classProfile: String?
@@ -132,6 +136,7 @@ struct ClassDetailsModel: Codable {
 
     enum CodingKeys: String, CodingKey {
         case schduleID = "schdule_id"
+        case classId = "class_id"
         case isMember = "is_member"
         case className = "class_name"
         case classProfile = "class_profile"

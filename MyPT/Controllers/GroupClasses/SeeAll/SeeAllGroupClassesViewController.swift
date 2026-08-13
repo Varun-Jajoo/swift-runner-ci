@@ -63,6 +63,8 @@ final class SeeAllGroupClassesViewController: CommonViewController {
     /// all the way out and back in - mirrors the same fix already applied to
     /// `GroupTrainingDetailViewController.viewWillAppear`.
     private var hasFetchedOnce = false
+    /// Handle for this screen's GroupClassStore subscription.
+    private var storeObserverToken: UUID?
 
     // MARK: - Views
 
@@ -144,6 +146,19 @@ final class SeeAllGroupClassesViewController: CommonViewController {
             loadClasses()
         }
         hasFetchedOnce = true
+        GroupClassStore.shared.startWatchingListing()
+        if storeObserverToken == nil {
+            storeObserverToken = GroupClassStore.shared.observe { [weak self] event in
+                self?.handleStoreEvent(event)
+            }
+        }
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        GroupClassStore.shared.removeObserver(storeObserverToken)
+        storeObserverToken = nil
+        GroupClassStore.shared.stopWatchingListing()
     }
 
     override func viewSafeAreaInsetsDidChange() {
@@ -527,6 +542,83 @@ final class SeeAllGroupClassesViewController: CommonViewController {
                 self.dotsView.setSelectedPage(0)
             }
         }
+    }
+
+    // MARK: - Realtime (via GroupClassStore)
+
+    /// Same reasoning as GroupClassesCarouselView: CLASS_CREATED/
+    /// CLASS_STATUS_CHANGED re-fetch (their payloads can't carry this user's
+    /// is_member/is_booked/is_waitlisted state) rather than being applied
+    /// client-side; the other events patch already-fetched (already correctly
+    /// personalized) entries in place, across both masterClassList/
+    /// filteredGridList and trendingList since a class can appear in either
+    /// or both simultaneously.
+    private func handleStoreEvent(_ event: GroupClassStoreEvent) {
+        switch event {
+        case .classCreated, .classStatusChanged, .accessChanged:
+            loadClasses()
+
+        case .seatsChanged(let classId, let scheduleId):
+            patchAllLists(matchingClassId: classId, scheduleId: scheduleId)
+
+        case .capacityChanged(let classId), .priceChanged(let classId):
+            patchAllLists(matchingClassId: classId, scheduleId: nil)
+
+        case .waitlistChanged:
+            // Cards show seat availability, never queue length - nothing to
+            // repaint here. (The Detail and Slot Open screens do show it.)
+            break
+        }
+    }
+
+    private func patchAllLists(matchingClassId classId: Int, scheduleId: Int?) {
+        var touchedGrid = false
+        var touchedTrending = false
+
+        applyLiveState(to: &masterClassList, classId, scheduleId) { touchedGrid = true }
+        applyLiveState(to: &filteredGridList, classId, scheduleId) { }
+        applyLiveState(to: &trendingList, classId, scheduleId) { touchedTrending = true }
+
+        if touchedGrid {
+            UIView.performWithoutAnimation {
+                gridCollectionView.reloadSections(IndexSet(integer: 0))
+            }
+            updateGridHeight()
+        }
+        if touchedTrending {
+            trendingCollectionView.reloadData()
+        }
+    }
+
+    /// Overlays the store's canonical live values onto every matching entry
+    /// of one list. `onTouched` fires when at least one row actually matched,
+    /// so the caller only reloads collection views that really changed.
+    private func applyLiveState(to list: inout [UpcomingClassModel],
+                                _ classId: Int,
+                                _ scheduleId: Int?,
+                                _ onTouched: () -> Void) {
+        for index in list.indices where matches(list[index], classId, scheduleId) {
+            let live = GroupClassStore.shared.liveState(classId: classId,
+                                                        scheduleId: list[index].scheduleID)
+            if let booked = live.bookedCount {
+                list[index].bookedCount = FlexibleValue(value: String(booked))
+            }
+            if let remaining = live.remainingSeats {
+                list[index].remainingSeats = FlexibleValue(value: String(remaining))
+            }
+            if let capacity = live.capacity {
+                list[index].totalCapacity = FlexibleValue(value: String(capacity))
+            }
+            if let price = live.price {
+                list[index].price = FlexibleValue(value: price)
+            }
+            onTouched()
+        }
+    }
+
+    private func matches(_ item: UpcomingClassModel, _ classId: Int, _ scheduleId: Int?) -> Bool {
+        guard item.classID == classId else { return false }
+        return scheduleId == nil || item.scheduleID == scheduleId
     }
 
     private func fullnessRatio(_ item: UpcomingClassModel) -> Double {

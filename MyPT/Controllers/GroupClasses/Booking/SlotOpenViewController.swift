@@ -114,6 +114,12 @@ final class SlotOpenViewController: CommonViewController {
     private var classPrice: String = ""
     private var studioLat: Double = 0
     private var studioLng: Double = 0
+    /// Populated from class-detail's `class_id` once the fetch lands - this
+    /// screen only ever starts with a scheduleId (from the push payload or
+    /// the launching Detail screen). Realtime subscription starts once set.
+    private var classId: Int = 0
+    /// Handle for this screen's GroupClassStore subscription.
+    private var storeObserverToken: UUID?
 
     /// Fires when the claim succeeds - the caller pushes Slot Confirmed.
     var onClaimed: ((_ classTitle: String, _ time: String, _ location: String, _ trainerName: String) -> Void)?
@@ -225,8 +231,77 @@ final class SlotOpenViewController: CommonViewController {
         navigationController?.isNavigationBarHidden = true
     }
 
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        unsubscribeFromRealtime()
+    }
+
     deinit {
         countdownTimer?.invalidate()
+    }
+
+    // MARK: Realtime (via GroupClassStore)
+
+    private func subscribeToRealtime() {
+        guard classId > 0 else { return }
+        GroupClassStore.shared.startWatching(classId: classId)
+        guard storeObserverToken == nil else { return }
+        storeObserverToken = GroupClassStore.shared.observe { [weak self] event in
+            self?.handleStoreEvent(event)
+        }
+    }
+
+    private func unsubscribeFromRealtime() {
+        GroupClassStore.shared.removeObserver(storeObserverToken)
+        storeObserverToken = nil
+        guard classId > 0 else { return }
+        GroupClassStore.shared.stopWatching(classId: classId)
+    }
+
+    /// The open spot(s) this screen is racing the user to claim can be taken
+    /// by someone else while they're deciding - live count keeps the number
+    /// honest instead of letting them tap Confirm on a stale "1 slot open"
+    /// that's actually already gone (handleClaimResponse()'s SPOT_TAKEN
+    /// branch already covers that outcome gracefully, but showing the real
+    /// number is better than relying on it).
+    private func handleStoreEvent(_ event: GroupClassStoreEvent) {
+        switch event {
+        case .seatsChanged(let eventClassId, let eventScheduleId),
+             .waitlistChanged(let eventClassId, let eventScheduleId):
+            // Both numbers on this screen are live: the open-slot count is the
+            // spot being raced for, and the queue length is the urgency
+            // ("N people are waiting in queue. Book before they do.") - a
+            // queue that empties out while the member hesitates should stop
+            // pressuring them, and one that grows should.
+            guard eventClassId == classId, eventScheduleId == Int(scheduleId) else { return }
+            let live = GroupClassStore.shared.liveState(classId: classId, scheduleId: Int(scheduleId))
+            if let remaining = live.remainingSeats {
+                headlineLabel.text = remaining <= 0
+                    ? "This spot has been claimed"
+                    : "\(remaining) \(remaining == 1 ? "slot" : "slots") \(remaining == 1 ? "is" : "are") open!"
+            }
+            if let waitlistCount = live.waitlistCount {
+                let memberWord = waitlistCount == 1 ? "member" : "members"
+                subtitleLabel.text = "This spot is available to the next \(waitlistCount) \(memberWord) on the waitlist"
+                urgencySubtitleLabel.text = "\(waitlistCount) people are waiting in queue. Book before they do."
+            }
+
+        case .accessChanged(let eventClassId), .classStatusChanged(let eventClassId):
+            // This screen is only valid while the spot is still claimable by
+            // THIS member for free: `fetchClassDetail()` holds that gate and
+            // redirects to the detail screen when it isn't (a paid/mixed
+            // class a non-member can't claim would otherwise leave them
+            // tapping "Confirm This Spot" for a guaranteed PAYMENT_REQUIRED).
+            // An admin flipping access - or cancelling/completing the class -
+            // mid-countdown has to re-run that gate, and since free-for-this-
+            // member resolves against the member's own subscription, only a
+            // real fetch can answer it.
+            guard eventClassId == classId else { return }
+            fetchClassDetail()
+
+        default:
+            break
+        }
     }
 
     // MARK: Populate
@@ -338,6 +413,11 @@ final class SlotOpenViewController: CommonViewController {
                 if !isFreeForUser {
                     self.redirectToDetailScreen(detail: detail)
                     return
+                }
+
+                if let newClassId = detail.classId, newClassId > 0 {
+                    self.classId = newClassId
+                    self.subscribeToRealtime()
                 }
 
                 if let name = detail.className, !name.isEmpty { self.classTitleLabel.text = name }

@@ -216,6 +216,12 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         checkAssessmentStatusApi()
         loadGroupClasses()
         updateTrainerSelection(isHomeTrainerSelected: true)
+        groupClassesCarousel?.startRealtime()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        groupClassesCarousel?.stopRealtime()
     }
 
     override func viewDidAppear(_ animated: Bool) {

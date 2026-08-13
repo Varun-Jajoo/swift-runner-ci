@@ -82,7 +82,8 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.isNavigationBarHidden = true
-        
+        groupClassesCarousel?.startRealtime()
+
         // Reset date selection and suggestions when returning from another tab.
         generateDates()
         selectedIndex = 0
@@ -125,7 +126,12 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             callSlotsApi(date: todayDate)
         }
     }
-    
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        groupClassesCarousel?.stopRealtime()
+    }
+
     private func uiSetup() {
         collectionSessionType.delegate = self
         collectionSessionType.dataSource = self

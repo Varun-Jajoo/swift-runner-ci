@@ -346,6 +346,84 @@ final class GroupClassesCarouselView: UIView {
         onSeeAllTapped?()
     }
 
+    // MARK: - Realtime (via GroupClassStore)
+
+    /// Last lat/long passed to loadClasses(), re-used to re-fetch on
+    /// CLASS_CREATED without the owning screen having to resupply it.
+    private var lastRequestLat: Double?
+    private var lastRequestLng: Double?
+    private var storeObserverToken: UUID?
+
+    func startRealtime() {
+        GroupClassStore.shared.startWatchingListing()
+        guard storeObserverToken == nil else { return }
+        storeObserverToken = GroupClassStore.shared.observe { [weak self] event in
+            self?.handleStoreEvent(event)
+        }
+    }
+
+    func stopRealtime() {
+        GroupClassStore.shared.removeObserver(storeObserverToken)
+        storeObserverToken = nil
+        GroupClassStore.shared.stopWatchingListing()
+    }
+
+    /// CLASS_CREATED/CLASS_STATUS_CHANGED trigger a full re-fetch rather
+    /// than a client-side patch: their payloads can't carry any one
+    /// recipient's is_member/is_booked/is_waitlisted state (one broadcast,
+    /// many recipients), and acting on them directly would risk showing a
+    /// free class to a non-member. Re-running the existing REST fetch reuses
+    /// the already-correct personalization instead. Seat/capacity/price
+    /// changes only touch already-fetched (already correctly personalized)
+    /// cards, so those patch in place.
+    private func handleStoreEvent(_ event: GroupClassStoreEvent) {
+        switch event {
+        case .classCreated, .classStatusChanged, .accessChanged:
+            loadClasses(lat: lastRequestLat, long: lastRequestLng)
+
+        case .seatsChanged(let classId, let scheduleId):
+            patchCards(matchingClassId: classId, scheduleId: scheduleId)
+
+        case .capacityChanged(let classId), .priceChanged(let classId):
+            patchCards(matchingClassId: classId, scheduleId: nil)
+
+        case .waitlistChanged:
+            // Cards show seat availability, never queue length - nothing to
+            // repaint here. (The Detail and Slot Open screens do show it.)
+            break
+        }
+    }
+
+    /// Re-applies the store's canonical live state to every currently-fetched
+    /// card matching classId (and scheduleId, when given - seat changes are
+    /// per-occurrence, capacity/price are class-wide), then reloads only the
+    /// affected cells rather than rebuilding the whole carousel.
+    private func patchCards(matchingClassId classId: Int, scheduleId: Int?) {
+        var changedIndexPaths: [IndexPath] = []
+        for index in classes.indices {
+            guard classes[index].classID == classId,
+                  scheduleId == nil || classes[index].scheduleID == scheduleId else { continue }
+            let live = GroupClassStore.shared.liveState(classId: classId,
+                                                        scheduleId: classes[index].scheduleID)
+            if let booked = live.bookedCount {
+                classes[index].bookedCount = FlexibleValue(value: String(booked))
+            }
+            if let remaining = live.remainingSeats {
+                classes[index].remainingSeats = FlexibleValue(value: String(remaining))
+            }
+            if let capacity = live.capacity {
+                classes[index].totalCapacity = FlexibleValue(value: String(capacity))
+            }
+            if let price = live.price {
+                classes[index].price = FlexibleValue(value: price)
+            }
+            changedIndexPaths.append(IndexPath(item: index, section: 0))
+        }
+        guard !changedIndexPaths.isEmpty else { return }
+        renderedSignature = GroupClassesCarouselView.signature(for: classes)
+        collectionView.reloadItems(at: changedIndexPaths)
+    }
+
     // MARK: Data
 
     /// Fetches `GET viewall-classes` and renders the carousel.
@@ -356,6 +434,8 @@ final class GroupClassesCarouselView: UIView {
 
         let requestLat = (lat ?? 0) == 0 ? GroupClassCardFormatter.fallbackLatitude : (lat ?? 0)
         let requestLng = (long ?? 0) == 0 ? GroupClassCardFormatter.fallbackLongitude : (long ?? 0)
+        lastRequestLat = requestLat
+        lastRequestLng = requestLng
 
         let params: [String: String] = [
             "lat": "\(requestLat)",
