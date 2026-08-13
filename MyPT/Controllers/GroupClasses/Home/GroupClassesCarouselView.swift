@@ -512,27 +512,37 @@ final class GroupClassesCarouselView: UIView {
     /// the special/priority one) doesn't change any capacity number, so
     /// without them the card kept showing its pre-join state (no "ON
     /// WAITLIST" badge) until something else about the list happened to change.
+    /// Broken into individually-typed `let`s rather than one big array
+    /// literal - adding the trailing price field pushed the old single-
+    /// expression version past Swift's type-checker complexity limit
+    /// ("unable to type-check this expression in reasonable time"). Each
+    /// line here is now its own small expression, so the checker never has
+    /// to solve the whole thing at once.
     private static func signature(for classes: [UpcomingClassModel]) -> String {
-        return classes.map { item in
-            [
-                item.scheduleID.map(String.init) ?? "",
-                GroupClassCardFormatter.title(for: item),
-                GroupClassCardFormatter.locationText(for: item),
-                item.time ?? "",
-                item.start_end ?? "",
-                item.image ?? "",
-                GroupClassCardFormatter.resolvedAccess(item.access),
-                (item.isMember ?? false) ? "1" : "0",
-                String(GroupClassCardFormatter.intValue(item.bookedCount, defaultValue: 0)),
-                String(GroupClassCardFormatter.intValue(item.totalCapacity, defaultValue: 20)),
-                String(GroupClassCardFormatter.intValue(item.remainingSeats, defaultValue: 20)),
-                (item.isBooked ?? false) ? "1" : "0",
-                (item.isWaitlisted ?? false) ? "1" : "0",
-                // Without this a PRICE_CHANGED refetch hashes identical to
-                // what's already rendered and gets dropped by the caller's
-                // early return, leaving the old price on the card.
-                item.price?.value ?? ""
-            ].joined(separator: "|")
+        return classes.map { item -> String in
+            let scheduleID: String = item.scheduleID.map(String.init) ?? ""
+            let title: String = GroupClassCardFormatter.title(for: item)
+            let location: String = GroupClassCardFormatter.locationText(for: item)
+            let time: String = item.time ?? ""
+            let startEnd: String = item.start_end ?? ""
+            let image: String = item.image ?? ""
+            let access: String = GroupClassCardFormatter.resolvedAccess(item.access)
+            let isMember: String = (item.isMember ?? false) ? "1" : "0"
+            let booked: String = String(GroupClassCardFormatter.intValue(item.bookedCount, defaultValue: 0))
+            let capacity: String = String(GroupClassCardFormatter.intValue(item.totalCapacity, defaultValue: 20))
+            let remaining: String = String(GroupClassCardFormatter.intValue(item.remainingSeats, defaultValue: 20))
+            let isBooked: String = (item.isBooked ?? false) ? "1" : "0"
+            let isWaitlisted: String = (item.isWaitlisted ?? false) ? "1" : "0"
+            // Without this a PRICE_CHANGED refetch hashes identical to
+            // what's already rendered and gets dropped by the caller's
+            // early return, leaving the old price on the card.
+            let price: String = item.price?.value ?? ""
+
+            let fields: [String] = [
+                scheduleID, title, location, time, startEnd, image, access,
+                isMember, booked, capacity, remaining, isBooked, isWaitlisted, price
+            ]
+            return fields.joined(separator: "|")
         }.joined(separator: ";")
     }
 }
