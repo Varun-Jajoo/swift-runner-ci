@@ -134,7 +134,8 @@ class BookingReviewPurchaseVC: CommonViewController {
     @IBOutlet weak var btnCheck: UIButton!
     @IBOutlet weak var lblTermCondition: UILabel!
     @IBOutlet weak var heightOfPackageDetail: NSLayoutConstraint!
-//    @IBOutlet weak var lblGymRefundable: UILabel!
+    @IBOutlet weak var lblPlanExpiredTitle: UILabel!
+    //    @IBOutlet weak var lblGymRefundable: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -222,8 +223,9 @@ class BookingReviewPurchaseVC: CommonViewController {
             self.imgTrainingLoc.cornersWithBorder(radius: 12, corners: .allCorners, borderColor: .clear, borderWidth: 0)
             self.imgChoosepayment.cornersWithBorder(radius: 12, corners: .allCorners, borderColor: .clear, borderWidth: 0)
             
+            self.lblPlanExpiredTitle.font = AppFont.regular.size(16.0, familyName: familyClashDisplay)
             self.lblUpgradeToVIP.font = AppFont.medium.size(20.0, familyName: familyClashDisplay)
-            self.lblPlanExpired.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
+            self.lblPlanExpired.font = AppFont.regular.size(14.0, familyName: familyFunnelSans)
             self.lblAED.font = AppFont.regular.size(14.0, familyName: familyFunnelSans)
             self.lblSession.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
             [self.lblSavingCorner, self.lblPackageDetail, self.lblNewGymPackageDetail, self.lblGymMembershipPackageDetails, self.lblTrainingLoc, self.lblChoosePayment, self.lblRemainingSession, self.lblTrainerName, self.lblGymName].forEach {
@@ -443,6 +445,7 @@ class BookingReviewPurchaseVC: CommonViewController {
         // Upgrade View visibility
         viewUpgrade.isHidden = (data.upgradePlan == nil)
         lblPlanExpired.text = data.renewal_info?.message
+        lblPlanExpiredTitle.text = data.packageDetails?.is_early_renew ?? false ? "When does my renewed plan start?" : "When does my plan start?"
         // Re-apply border after text changes viewPlanExpired's height via Auto Layout
         viewPlanExpired.layoutIfNeeded()
         viewPlanExpired.cornersWithBorder(

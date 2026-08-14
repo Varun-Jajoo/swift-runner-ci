@@ -32,11 +32,11 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     }
     var userPlans: [PlanDetailsModel] = [] {
         didSet {
-            if userPlans.contains(where: { $0.is_expired == true }) {
-                heightOfCollectionPlan?.constant = 283
-            } else {
-                heightOfCollectionPlan?.constant = 213
-            }
+//            if userPlans.contains(where: { $0.is_expired == true }) {
+//                heightOfCollectionPlan?.constant = 213
+//            } else {
+//                heightOfCollectionPlan?.constant = 230
+//            }
             collectionPlan.reloadData()
         }
     }
@@ -167,8 +167,8 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             forCellWithReuseIdentifier: "PlanCVCell"
         )
         collectionPlan.register(
-            UINib(nibName: "ExpiredPlanCVCell", bundle: nil),
-            forCellWithReuseIdentifier: "ExpiredPlanCVCell"
+            UINib(nibName: "NewExpiredPlanCVCell", bundle: nil),
+            forCellWithReuseIdentifier: "NewExpiredPlanCVCell"
         )
         DispatchQueue.main.async {
             self.pageController.currentPageIndicatorTintColor = .white
@@ -513,10 +513,16 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         } else if collectionView == collectionPlan {
             let plan = userPlans[indexPath.row]
             if plan.is_expired == true {
+//                guard let expiredCell = collectionView.dequeueReusableCell(
+//                    withReuseIdentifier: "ExpiredPlanCVCell",
+//                    for: indexPath
+//                ) as? ExpiredPlanCVCell else {
+//                    return UICollectionViewCell()
+//                }
                 guard let expiredCell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: "ExpiredPlanCVCell",
+                    withReuseIdentifier: "NewExpiredPlanCVCell",
                     for: indexPath
-                ) as? ExpiredPlanCVCell else {
+                ) as? NewExpiredPlanCVCell else {
                     return UICollectionViewCell()
                 }
                 expiredCell.configure(with: plan)
@@ -550,7 +556,8 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             return CGSize(width: 343, height: 211)
         } else if collectionView == collectionPlan {
             let isExpired = userPlans.indices.contains(indexPath.row) ? (userPlans[indexPath.row].is_expired ?? false) : false
-            let cellHeight: CGFloat = isExpired ? 283 : 213
+//            let cellHeight: CGFloat = isExpired ? 283 : 213
+            let cellHeight: CGFloat = 213
             return CGSize(width: collectionView.frame.width - 20, height: cellHeight)
         }
         return CGSize(width: collectionView.frame.size.width, height: collectionView.frame.size.height)
@@ -588,6 +595,7 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             let packageExpireVC: PackageExpireVC = PackageExpireVC.instantiate(appStoryboard: .newBookingModule)
             let myTrainersVC: MyTrainersVC = MyTrainersVC.instantiate(appStoryboard: .newBookingModule)
             let bookingReviewPurchaseVC: BookingReviewPurchaseVC = BookingReviewPurchaseVC.instantiate(appStoryboard: .newBookingModule)
+            let renewPlanVC: RenewPlanVC = RenewPlanVC.instantiate(appStoryboard: .newBookingModule)
             switch indexPath.row {
             case 0: // Book Session
                 vc1.hidesBottomBarWhenPushed = true
@@ -599,19 +607,30 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
                 self.navigationController?.pushViewController(selectedPlan.is_expired == true ? packageExpireVC : vc1, animated: false)
                 return
             case 1: // Renew Plan
-//                vc.selectedPlanType = .topup
-//                vc.selectedPlanType = .renew
-                guard let selectedPlan = self.userPlans.first(where: { $0.is_expired == true }) ?? self.userPlans.first else {
-                    return
+                if self.userPlans.count > 1 {
+                    renewPlanVC.userPlans = self.userPlans
+                    renewPlanVC.modalPresentationStyle = .automatic
+//                    renewPlanVC.isModalInPresentation = true
+//                    renewPlanVC.modalPresentationStyle = .pageSheet
+//                    if #available(iOS 15.0, *) {
+//                        if let sheet = renewPlanVC.sheetPresentationController {
+//                            sheet.detents = [.medium(), .large()]
+//                            sheet.selectedDetentIdentifier = .medium
+//                            sheet.prefersGrabberVisible = true
+//                            sheet.preferredCornerRadius = 20
+//                        }
+//                    }
+                    self.present(renewPlanVC, animated: true)
+                } else if let selectedPlan = self.userPlans.first {
+                    bookingReviewPurchaseVC.inputParam = DetailsParam(
+                        type: selectedPlan.type?.value
+                    )
+                    bookingReviewPurchaseVC.sessions = selectedPlan.sessions?.value
+                    bookingReviewPurchaseVC.hidesBottomBarWhenPushed = true
+                    bookingReviewPurchaseVC.previousSubscriptionID = selectedPlan.id?.value
+                    bookingReviewPurchaseVC.isGymMembership = selectedPlan.is_membership ?? false
+                    self.navigationController?.pushViewController(bookingReviewPurchaseVC, animated: false)
                 }
-                bookingReviewPurchaseVC.inputParam = DetailsParam(
-                    type: selectedPlan.type?.value
-                )
-                bookingReviewPurchaseVC.sessions = selectedPlan.sessions?.value
-                bookingReviewPurchaseVC.hidesBottomBarWhenPushed = true
-                bookingReviewPurchaseVC.previousSubscriptionID = selectedPlan.id?.value
-                bookingReviewPurchaseVC.isGymMembership = selectedPlan.is_membership ?? false
-                self.navigationController?.pushViewController(bookingReviewPurchaseVC, animated: false)
                 return
             case 2: // My Trainers
 //                vc.selectedPlanType = .renew

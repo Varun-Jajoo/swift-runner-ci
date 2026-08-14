@@ -44,7 +44,7 @@ class TrainerSuggestionCVCell: UICollectionViewCell, UICollectionViewDelegate, U
             UINib(nibName: "TimeSlotCVCell", bundle: nil),
             forCellWithReuseIdentifier: "TimeSlotCVCell"
         )
-        viewBackground.cornersWithBorder(radius: 16, corners: .allCorners)
+//        viewBackground.cornersWithBorder(radius: 16, corners: .allCorners)
         imgBackground.cornersWithBorder(radius: 16, corners: .allCorners)
         imgTrainer.cornersWithBorder(radius: 18, corners: .allCorners)
         self.lblTrainerAvailability.font = AppFont.regular.size(13.0, familyName: familyFunnelSans)
@@ -65,6 +65,12 @@ class TrainerSuggestionCVCell: UICollectionViewCell, UICollectionViewDelegate, U
                 radius: 12,
                 corners: .allCorners,
                 borderColor: UIColor(red: 238/255, green: 77/255, blue: 55/255, alpha: 0.13),
+                borderWidth: 3
+            )
+            self.viewBackground.cornersWithBorder(
+                radius: 12,
+                corners: .allCorners,
+                borderColor: UIColor(red: 39/255, green: 40/255, blue: 42/255, alpha: 1),
                 borderWidth: 3
             )
         }

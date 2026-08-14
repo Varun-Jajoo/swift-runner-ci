@@ -8,7 +8,7 @@
 import UIKit
 
 
-class PackageExpireVC: UIViewController {
+class PackageExpireVC: CommonViewController {
     
     var userPlans: PlanDetailsModel?
 
@@ -65,6 +65,18 @@ class PackageExpireVC: UIViewController {
         }
         viewRound.makeCircular()
         lblGymRound.makeCircular()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.setNavigationColor(setColor: .clear)
+        self.statusBarColor(setColor: .clear)
+        setNavUI()
+    }
+    
+    func setNavUI() {
+        self.setLeftMenu(leftImgs: [AppImages.backArrowWithBg], setTitle: [], setTintColor: UIColor.appWhite, setTitleColor: UIColor.appWhite)
+        self.setRighMenu(setTitle: [], setTintColor: .black, setTitleColor:.clear)
     }
  
     private func setData() {

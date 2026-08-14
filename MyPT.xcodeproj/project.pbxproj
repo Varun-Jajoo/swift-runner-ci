@@ -36,6 +36,9 @@
 		38CB47732F42C5FC004F1748 /* Trainer Animation.gif in Resources */ = {isa = PBXBuildFile; fileRef = 38CB47722F42C5FC004F1748 /* Trainer Animation.gif */; };
 		38CBBFF52F29474A004D7A5C /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = 38CBBFF42F29474A004D7A5C /* FSCalendar */; };
 		38D55B692FE7E61500BAE1A9 /* AvailableTrainerPresentVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D55B682FE7E61500BAE1A9 /* AvailableTrainerPresentVC.swift */; };
+		38D951A4302F27CE00A6A85C /* RenewPlanVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D951A3302F27CE00A6A85C /* RenewPlanVC.swift */; };
+		38D951A7302F292100A6A85C /* RenewPlanTVCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 38D951A6302F292100A6A85C /* RenewPlanTVCell.xib */; };
+		38D951A8302F292100A6A85C /* RenewPlanTVCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D951A5302F292100A6A85C /* RenewPlanTVCell.swift */; };
 		38F98A3C2F5B341700144C33 /* NewCalenderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38F98A3B2F5B341700144C33 /* NewCalenderViewController.swift */; };
 		38FE27C32EFEC1860017DBAF /* FunnelSans-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 38FE27BA2EFEC1860017DBAF /* FunnelSans-ExtraBoldItalic.ttf */; };
 		38FE27C42EFEC1860017DBAF /* FunnelSans-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 38FE27BD2EFEC1860017DBAF /* FunnelSans-LightItalic.ttf */; };
@@ -565,6 +568,9 @@
 		38BF8D102F30474B0043FC1B /* AddMembersVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMembersVC.swift; sourceTree = "<group>"; };
 		38CB47722F42C5FC004F1748 /* Trainer Animation.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "Trainer Animation.gif"; sourceTree = "<group>"; };
 		38D55B682FE7E61500BAE1A9 /* AvailableTrainerPresentVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailableTrainerPresentVC.swift; sourceTree = "<group>"; };
+		38D951A3302F27CE00A6A85C /* RenewPlanVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenewPlanVC.swift; sourceTree = "<group>"; };
+		38D951A5302F292100A6A85C /* RenewPlanTVCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenewPlanTVCell.swift; sourceTree = "<group>"; };
+		38D951A6302F292100A6A85C /* RenewPlanTVCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RenewPlanTVCell.xib; sourceTree = "<group>"; };
 		38F98A3B2F5B341700144C33 /* NewCalenderViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCalenderViewController.swift; sourceTree = "<group>"; };
 		38FE27B72EFEC1860017DBAF /* FunnelSans-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "FunnelSans-Bold.ttf"; sourceTree = "<group>"; };
 		38FE27B82EFEC1860017DBAF /* FunnelSans-BoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "FunnelSans-BoldItalic.ttf"; sourceTree = "<group>"; };
@@ -1103,6 +1109,7 @@
 				3877113B3011333200C83312 /* ChooseBestPlanVC.swift */,
 				388B2E213014B86500514255 /* BookingReviewPurchaseVC.swift */,
 				388B2E2330164FDC00514255 /* MyTrainersVC.swift */,
+				38D951A3302F27CE00A6A85C /* RenewPlanVC.swift */,
 			);
 			path = NewBookingModule;
 			sourceTree = "<group>";
@@ -1125,6 +1132,8 @@
 				386E8A0A2FFA6F8C00D1E13E /* ReviewBookingTVCell.xib */,
 				3878C4ED30094458000E50C2 /* ChoosePlanTVCell.swift */,
 				3878C4EE30094458000E50C2 /* ChoosePlanTVCell.xib */,
+				38D951A5302F292100A6A85C /* RenewPlanTVCell.swift */,
+				38D951A6302F292100A6A85C /* RenewPlanTVCell.xib */,
 			);
 			path = TableviewCell;
 			sourceTree = "<group>";
@@ -2456,6 +2465,7 @@
 				B8BABE7F2D0B143F00CA8E27 /* RatingsCollectionViewCell.xib in Resources */,
 				B8DFFC832D1BE97E00EFF09C /* FilterCategoryCollectionViewCell.xib in Resources */,
 				B8A677822DCE426A00007DAB /* ClassCategoryCollectionViewCell.xib in Resources */,
+				38D951A7302F292100A6A85C /* RenewPlanTVCell.xib in Resources */,
 				B84F78982CEB195200FF7D52 /* More.storyboard in Resources */,
 				D7B0B6C42F37AE3E00A0579E /* Homepage.storyboard in Resources */,
 				B8B9A3D62E41D58E00E0FA16 /* BookingNotificationTableViewCell.xib in Resources */,
@@ -2617,6 +2627,8 @@
 				B80571442D79C62300B7BF93 /* ProductCancelPopupViewController.swift in Sources */,
 				B819589E2D40B172000FBA16 /* ArrivingViewController.swift in Sources */,
 				38BF8D0F2F2FD42E0043FC1B /* AddMemberDetailVC.swift in Sources */,
+				38D951A4302F27CE00A6A85C /* RenewPlanVC.swift in Sources */,
+				38D951A8302F292100A6A85C /* RenewPlanTVCell.swift in Sources */,
 				388B2E223014B86500514255 /* BookingReviewPurchaseVC.swift in Sources */,
 				B8FE31842CF702AA00B25860 /* BillShape.swift in Sources */,
 				D72BD87B2F2DD9F700EC57E3 /* SessionsRulerView.swift in Sources */,
@@ -3001,7 +3013,7 @@
 				CODE_SIGN_ENTITLEMENTS = MyPT/MyPT.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = LW7P5S9K9P;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -3020,12 +3032,12 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.7;
+				MARKETING_VERSION = 1.0.10;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.MyPT.fintess;
 				PRODUCT_NAME = "MyPT Connect";
@@ -3048,7 +3060,7 @@
 				CODE_SIGN_ENTITLEMENTS = MyPT/MyPT.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = LW7P5S9K9P;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -3067,12 +3079,12 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.7;
+				MARKETING_VERSION = 1.0.10;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.MyPT.fintess;
 				PRODUCT_NAME = "MyPT Connect";
