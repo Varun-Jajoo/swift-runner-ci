@@ -575,6 +575,7 @@ final class SlotOpenViewController: CommonViewController {
             controller.trainerName = trainerName
             controller.studioLat = studioLat
             controller.studioLng = studioLng
+            controller.waitlistType = "normal"
             controller.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(controller, animated: true)
             AlertHelper.shared.showCustomeAlert(title: "", message: result.msg ?? "This spot was just claimed by someone else.", actions: ["OK"], completion: nil)

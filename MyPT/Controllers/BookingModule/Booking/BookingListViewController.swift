@@ -313,26 +313,32 @@ extension BookingListViewController: UITableViewDataSource, UITableViewDelegate{
                     return
                 }
 
-                // A special (overlapping-booking) entry still shows its own
-                // priority-window explainer. A normal entry with no open spot
-                // yet needs an actionable detail screen (LEAVE WAITLIST), not
-                // the static "you're waitlisted" receipt with nothing to do
-                // on it - SlotConfirmedViewController already fully supports
-                // this via its own "wl-" bookingId handling (WAITLISTED pill,
-                // LEAVE WAITLIST CTA wired to leave-waitlist), same as a real
-                // booking's CANCEL BOOKING path just below.
+                // Routes here to WaitlistConfirmedViewController, NOT
+                // DoubleBookingWaitlistConfirmedViewController - this list is
+                // the one place that screen is deliberately never a target
+                // from. WaitlistConfirmedViewController's own top chip (see
+                // its populateUI()) is what now carries the special/normal
+                // distinction, and it has the same LEAVE WAITLIST action
+                // DoubleBookingWaitlistConfirmedViewController never had.
+                // (GroupTrainingDetailViewController's own routing is
+                // untouched - it still uses
+                // DoubleBookingWaitlistConfirmedViewController for a FRESH
+                // special-waitlist join, where the pre-confirm sheet flow
+                // genuinely needs that screen's own copy/behavior.)
                 if row.isSpecialWaitlist {
-                    let dbVc = DoubleBookingWaitlistConfirmedViewController()
+                    let wVc = WaitlistConfirmedViewController()
                     let bookingType = row.bookingType?.trimmingCharacters(in: .whitespacesAndNewlines)
-                    dbVc.classTitle = (bookingType?.isEmpty == false ? bookingType : row.sessionType?.value) ?? ""
-                    dbVc.classTime = row.timing?.value ?? ""
-                    dbVc.classLocation = row.location?.value ?? ""
-                    dbVc.trainerName = row.trainer?.value ?? ""
-                    dbVc.distance = row.distance?.value ?? ""
-                    dbVc.studioLat = row.studioLat?.doubleValue ?? 0
-                    dbVc.studioLng = row.studioLng?.doubleValue ?? 0
-                    dbVc.hidesBottomBarWhenPushed = true
-                    self.navigationController?.pushViewController(dbVc, animated: true)
+                    wVc.classTitle = (bookingType?.isEmpty == false ? bookingType : row.sessionType?.value) ?? ""
+                    wVc.classTime = row.timing?.value ?? ""
+                    wVc.classLocation = row.location?.value ?? ""
+                    wVc.trainerName = row.trainer?.value ?? ""
+                    wVc.distance = row.distance?.value ?? ""
+                    wVc.studioLat = row.studioLat?.doubleValue ?? 0
+                    wVc.studioLng = row.studioLng?.doubleValue ?? 0
+                    wVc.waitlistType = "special"
+                    wVc.bookingId = row.id?.value ?? ""
+                    wVc.hidesBottomBarWhenPushed = true
+                    self.navigationController?.pushViewController(wVc, animated: true)
                     return
                 }
 

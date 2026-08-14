@@ -1223,6 +1223,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
                 wVc.distance = locationDistanceLabel.text ?? currentDistance
                 wVc.studioLat = studioLat
                 wVc.studioLng = studioLng
+                wVc.waitlistType = willSpecialWaitlist ? "special" : "normal"
                 wVc.hidesBottomBarWhenPushed = true
             }
             navigationController?.pushViewController(controller, animated: true)
@@ -1386,6 +1387,7 @@ final class GroupTrainingDetailViewController: CommonViewController {
                 controller.distance = currentDistance
                 controller.studioLat = studioLat
                 controller.studioLng = studioLng
+                controller.waitlistType = "normal"
                 controller.hidesBottomBarWhenPushed = true
                 navigationController?.pushViewController(controller, animated: true)
             }

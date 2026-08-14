@@ -38,6 +38,17 @@ final class WaitlistConfirmedViewController: CommonViewController {
     var distance: String = ""
     var studioLat: Double = 0
     var studioLng: Double = 0
+    /// "special" or "normal" - the ONLY thing that carries the distinction now
+    /// that BookingListViewController routes every waitlist row here
+    /// regardless of type (DoubleBookingWaitlistConfirmedViewController is no
+    /// longer a routing target from that list). Drives categoryPillLabel in
+    /// populateUI() - same value the routing decision itself was just based on.
+    var waitlistType: String = "normal"
+    /// "wl-104" style id from the Bookings list tap - empty when this screen
+    /// is reached straight from a fresh normal-waitlist join instead (that
+    /// call site doesn't have the new entry's id yet). Mirrors
+    /// SlotConfirmedViewController's own bookingId.
+    var bookingId: String = ""
 
     // MARK: - Layout constants
 
@@ -73,6 +84,7 @@ final class WaitlistConfirmedViewController: CommonViewController {
         static let notifySubtitle = UIColor(hex: "#959595")
         static let notifyInfoText = UIColor(hex: "#FAFAFA").withAlphaComponent(0.55)
         static let ctaInk = UIColor(hex: "#131416")
+        static let leaveWaitlistText = UIColor(hex: "#FF4444")
     }
 
     private enum Copy {
@@ -86,6 +98,7 @@ final class WaitlistConfirmedViewController: CommonViewController {
         static let notifySubtitle = "Enable notifications to get instant alerts when a spot opens."
         static let notifyInfoText = "Spots are booked on a first-confirmed basis"
         static let viewBookingCTA = "VIEW BOOKING"
+        static let leaveWaitlistCTA = "LEAVE WAITLIST"
     }
 
     // MARK: - Views
@@ -98,6 +111,7 @@ final class WaitlistConfirmedViewController: CommonViewController {
     private let contentStack = UIStackView()
 
     private let backButton = GlassCircularIconButton()
+    private let categoryPillLabel = UILabel()
 
     private let classTitleLabel = UILabel()
     private let classDateTimeLabel = UILabel()
@@ -107,6 +121,9 @@ final class WaitlistConfirmedViewController: CommonViewController {
 
     private let footerView = UIView()
     private let ctaButton = GradientCTAButton()
+    private let leaveWaitlistButton = GradientCTAButton()
+    private var ctaBottomToSafeArea: NSLayoutConstraint!
+    private var leaveButtonBottomToSafeArea: NSLayoutConstraint!
 
     // MARK: - Lifecycle
 
@@ -135,6 +152,16 @@ final class WaitlistConfirmedViewController: CommonViewController {
         classDateTimeLabel.text = classTime
         locationTitleLabel.text = classLocation
 
+        // Was static ("GROUP CLASS"). See waitlistType's own doc comment -
+        // this chip is now the only thing distinguishing special from normal.
+        if waitlistType == "special" {
+            categoryPillLabel.text = "OVERLAPPING WAITLIST"
+            categoryPillLabel.textColor = UIColor(hex: "#FFCC33")
+        } else {
+            categoryPillLabel.text = "WAITLISTED"
+            categoryPillLabel.textColor = Palette.pillText
+        }
+
         // Device location first, server-passed distance only as a last-resort
         // fallback - see GroupClassCardFormatter.distanceText()'s doc comment.
         let resolvedDistance = GroupClassCardFormatter.distanceText(
@@ -150,6 +177,19 @@ final class WaitlistConfirmedViewController: CommonViewController {
         if !trimmedTrainer.isEmpty {
             trainerTitleLabel.text = trimmedTrainer.hasPrefix("Trainer:") ? trimmedTrainer : "Trainer: \(trimmedTrainer)"
         }
+
+        updateLeaveButtonVisibility()
+    }
+
+    /// bookingId is only ever set by the Bookings-list tap (UpcomingAdapter's
+    /// iOS counterpart, BookingListViewController) - a fresh normal-waitlist
+    /// join has no id to pass yet, same reasoning as
+    /// DoubleBookingWaitlistConfirmedViewController's own bookingId gate.
+    private func updateLeaveButtonVisibility() {
+        let hasBookingId = !bookingId.isEmpty
+        leaveWaitlistButton.isHidden = !hasBookingId
+        ctaBottomToSafeArea.isActive = !hasBookingId
+        leaveButtonBottomToSafeArea.isActive = hasBookingId
     }
 
     // MARK: - Actions
@@ -158,6 +198,37 @@ final class WaitlistConfirmedViewController: CommonViewController {
 
     @objc private func backTapped() {
         navigationController?.popViewController(animated: true)
+    }
+
+    @objc private func leaveWaitlistTapped() {
+        guard !bookingId.isEmpty else { return }
+
+        var sheetInput = CancelBookingSheetInput()
+        sheetInput.bookingId = bookingId.hasPrefix("wl-") ? String(bookingId.dropFirst(3)) : bookingId
+        sheetInput.isWaitlist = true
+        sheetInput.title = classTitle
+        sheetInput.time = classTime
+        sheetInput.location = classLocation
+        sheetInput.distance = distance
+        sheetInput.price = ""
+
+        CancelBookingSheetViewController.present(from: self, input: sheetInput) { [weak self] in
+            self?.navigateToBookingCancelled()
+        }
+    }
+
+    /// Waitlist joins are never a payment, so this is always the free/no-refund
+    /// shape - simpler than SlotConfirmedViewController's own version, which
+    /// has to branch on whether the underlying booking was paid.
+    private func navigateToBookingCancelled() {
+        let controller = BookingCancelledViewController()
+        controller.classTitle = classTitle
+        controller.classTime = classTime
+        controller.isWaitlist = true
+        controller.isRefund = false
+        controller.price = ""
+        controller.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(controller, animated: true)
     }
 
     /// Was just `popViewController` (matching Android's old `finish()`) - closed
@@ -233,6 +304,29 @@ private extension WaitlistConfirmedViewController {
         ctaButton.addTarget(self, action: #selector(viewBookingTapped), for: .touchUpInside)
         footerView.addSubview(ctaButton)
 
+        // This screen is now also the target for special-waitlist rows
+        // tapped from the Bookings list (see waitlistType's own doc comment) -
+        // needs the same leave action DoubleBookingWaitlistConfirmedViewController
+        // never had either (that screen's own gap, not ported here since
+        // it's no longer reachable from the list). Only shown when bookingId
+        // is non-empty, same condition Android's XML-GONE achieves - toggled
+        // in updateLeaveButtonVisibility(), called from populateUI().
+        leaveWaitlistButton.translatesAutoresizingMaskIntoConstraints = false
+        leaveWaitlistButton.bandThickness = 2
+        leaveWaitlistButton.bandColor = UIColor(hex: "#2B1512")
+        leaveWaitlistButton.bodyStartColor = Palette.leaveWaitlistText
+        leaveWaitlistButton.bodyEndColor = Palette.leaveWaitlistText
+        leaveWaitlistButton.configure(title: Copy.leaveWaitlistCTA,
+                                      font: AppFont.semibold.size(15.0, familyName: familyFunnelSans),
+                                      titleColor: .white)
+        leaveWaitlistButton.addTarget(self, action: #selector(leaveWaitlistTapped), for: .touchUpInside)
+        leaveWaitlistButton.isHidden = true
+        footerView.addSubview(leaveWaitlistButton)
+
+        ctaBottomToSafeArea = ctaButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
+        leaveButtonBottomToSafeArea = leaveWaitlistButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
+        ctaBottomToSafeArea.isActive = true
+
         NSLayoutConstraint.activate([
             footerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             footerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -241,8 +335,12 @@ private extension WaitlistConfirmedViewController {
             ctaButton.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 12),
             ctaButton.leadingAnchor.constraint(equalTo: footerView.leadingAnchor, constant: Metric.horizontalInset),
             ctaButton.trailingAnchor.constraint(equalTo: footerView.trailingAnchor, constant: -Metric.horizontalInset),
-            ctaButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
-            ctaButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight)
+            ctaButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight),
+
+            leaveWaitlistButton.topAnchor.constraint(equalTo: ctaButton.bottomAnchor, constant: 10),
+            leaveWaitlistButton.leadingAnchor.constraint(equalTo: footerView.leadingAnchor, constant: Metric.horizontalInset),
+            leaveWaitlistButton.trailingAnchor.constraint(equalTo: footerView.trailingAnchor, constant: -Metric.horizontalInset),
+            leaveWaitlistButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight)
         ])
     }
 
@@ -487,24 +585,23 @@ private extension WaitlistConfirmedViewController {
         pill.sheenOrigin = .topCenter
         pill.sheenEdge = .bottomRight
 
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
-        label.textColor = Palette.pillText
-        label.textAlignment = .center
-        label.numberOfLines = 1
-        label.text = Copy.categoryPill
-        pill.addSubview(label)
+        categoryPillLabel.translatesAutoresizingMaskIntoConstraints = false
+        categoryPillLabel.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
+        categoryPillLabel.textColor = Palette.pillText
+        categoryPillLabel.textAlignment = .center
+        categoryPillLabel.numberOfLines = 1
+        categoryPillLabel.text = Copy.categoryPill
+        pill.addSubview(categoryPillLabel)
 
         let wrapper = UIView()
         wrapper.translatesAutoresizingMaskIntoConstraints = false
         wrapper.addSubview(pill)
 
         NSLayoutConstraint.activate([
-            label.topAnchor.constraint(equalTo: pill.topAnchor, constant: 4),
-            label.bottomAnchor.constraint(equalTo: pill.bottomAnchor, constant: -4),
-            label.leadingAnchor.constraint(equalTo: pill.leadingAnchor, constant: 12),
-            label.trailingAnchor.constraint(equalTo: pill.trailingAnchor, constant: -12),
+            categoryPillLabel.topAnchor.constraint(equalTo: pill.topAnchor, constant: 4),
+            categoryPillLabel.bottomAnchor.constraint(equalTo: pill.bottomAnchor, constant: -4),
+            categoryPillLabel.leadingAnchor.constraint(equalTo: pill.leadingAnchor, constant: 12),
+            categoryPillLabel.trailingAnchor.constraint(equalTo: pill.trailingAnchor, constant: -12),
 
             pill.heightAnchor.constraint(greaterThanOrEqualToConstant: 24),
             pill.topAnchor.constraint(equalTo: wrapper.topAnchor),
