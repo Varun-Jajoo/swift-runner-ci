@@ -381,16 +381,23 @@ final class GroupClassesCarouselView: UIView {
         case .classCreated, .classStatusChanged, .accessChanged:
             loadClasses(lat: lastRequestLat, long: lastRequestLng, resetScroll: false)
 
-        case .seatsChanged(let classId, let scheduleId):
-            patchCards(matchingClassId: classId, scheduleId: scheduleId)
+        case .seatsChanged, .waitlistChanged:
+            // Same reasoning as GroupTrainingDetailViewController's identical
+            // fix: this event fires for ANY seat/waitlist change on this
+            // occurrence, including an admin adding/removing THIS viewer
+            // specifically - and the broadcast payload can't carry that
+            // (fan-out, not per-recipient), so there's no way to tell from
+            // the event alone whether THIS card's isBooked/isWaitlisted
+            // needs to flip. patchCards() only had the store's local
+            // selfBookingChanged override to fall back on, which is only
+            // ever set by Detail's own fetchClassDetail() - a booking made
+            // via Slot Open or the plain Confirm sheet without ever
+            // revisiting Detail left the card frozen on stale REST data.
+            // Only a real refetch can answer it.
+            loadClasses(lat: lastRequestLat, long: lastRequestLng, resetScroll: false)
 
         case .capacityChanged(let classId), .priceChanged(let classId):
             patchCards(matchingClassId: classId, scheduleId: nil)
-
-        case .waitlistChanged:
-            // Cards show seat availability, never queue length - nothing to
-            // repaint here. (The Detail and Slot Open screens do show it.)
-            break
 
         case .classUpdated:
             loadClasses(lat: lastRequestLat, long: lastRequestLng, resetScroll: false)

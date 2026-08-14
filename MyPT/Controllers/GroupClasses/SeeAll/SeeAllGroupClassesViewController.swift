@@ -555,27 +555,34 @@ final class SeeAllGroupClassesViewController: CommonViewController {
     // MARK: - Realtime (via GroupClassStore)
 
     /// Same reasoning as GroupClassesCarouselView: CLASS_CREATED/
-    /// CLASS_STATUS_CHANGED re-fetch (their payloads can't carry this user's
-    /// is_member/is_booked/is_waitlisted state) rather than being applied
-    /// client-side; the other events patch already-fetched (already correctly
-    /// personalized) entries in place, across both masterClassList/
-    /// filteredGridList and trendingList since a class can appear in either
-    /// or both simultaneously.
+    /// CLASS_STATUS_CHANGED/SEATS_CHANGED/WAITLIST_CHANGED all re-fetch
+    /// (their payloads can't carry this user's is_member/is_booked/
+    /// is_waitlisted state) rather than being applied client-side; only
+    /// CAPACITY_CHANGED/PRICE_CHANGED patch already-fetched (already
+    /// correctly personalized) entries in place, across both
+    /// masterClassList/filteredGridList and trendingList since a class can
+    /// appear in either or both simultaneously.
     private func handleStoreEvent(_ event: GroupClassStoreEvent) {
         switch event {
         case .classCreated, .classStatusChanged, .accessChanged:
             loadClasses(showLoader: false)
 
-        case .seatsChanged(let classId, let scheduleId):
-            patchAllLists(matchingClassId: classId, scheduleId: scheduleId)
+        case .seatsChanged, .waitlistChanged:
+            // Same reasoning as GroupTrainingDetailViewController's identical
+            // fix: this event fires for ANY seat/waitlist change on this
+            // occurrence, including an admin adding/removing THIS viewer
+            // specifically - and the broadcast payload can't carry that
+            // (fan-out, not per-recipient), so patchAllLists() had no way to
+            // know whether THIS card's isBooked/isWaitlisted needs to flip.
+            // It only had the store's local selfBookingChanged override to
+            // fall back on, which is only ever set by Detail's own
+            // fetchClassDetail() - a booking made via Slot Open or the plain
+            // Confirm sheet without ever revisiting Detail left the card
+            // frozen on stale REST data. Only a real refetch can answer it.
+            loadClasses(showLoader: false)
 
         case .capacityChanged(let classId), .priceChanged(let classId):
             patchAllLists(matchingClassId: classId, scheduleId: nil)
-
-        case .waitlistChanged:
-            // Cards show seat availability, never queue length - nothing to
-            // repaint here. (The Detail and Slot Open screens do show it.)
-            break
 
         case .classUpdated:
             loadClasses(showLoader: false)
