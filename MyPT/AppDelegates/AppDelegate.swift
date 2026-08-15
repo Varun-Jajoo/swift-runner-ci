@@ -265,11 +265,18 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
          Messaging.messaging().appDidReceiveMessage(userInfo)
 
          AppDelegate.routeNotificationTap(userInfo: userInfo)
+         if let type = userInfo["type"] as? String {
+             NotificationReadTracker.markReadByContext(pushType: type, scheduleId: userInfo["schedule_id"] as? String)
+         }
 
          completionHandler()
      }
 
-    private static func routeNotificationTap(userInfo: [AnyHashable: Any]) {
+    /// Not private: also called directly by NotificationsViewController's row
+    /// tap (NotificationRouting.route(notificationType:data:)) so the list
+    /// screen and an actual push tap can never navigate differently for the
+    /// same type.
+    static func routeNotificationTap(userInfo: [AnyHashable: Any]) {
         guard let type = userInfo["type"] as? String else { return }
         let scheduleId = userInfo["schedule_id"] as? String
 

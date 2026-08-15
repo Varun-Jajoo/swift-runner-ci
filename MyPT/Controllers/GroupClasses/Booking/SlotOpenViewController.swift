@@ -566,19 +566,18 @@ final class SlotOpenViewController: CommonViewController {
 
         if result.code == "SPOT_TAKEN" {
             // The backend guarantees this user is on the waitlist now (it adds
-            // them if they weren't already) - send them to the normal
-            // waitlisted confirmation, not an error dead-end.
-            let controller = WaitlistConfirmedViewController()
+            // them if they weren't already) - a real status screen instead of
+            // an alert + straight push to WaitlistConfirmedViewController.
+            let controller = SpotTakenViewController()
             controller.classTitle = classTitleLabel.text ?? classTitle
             controller.classTime = classDateTimeLabel.text ?? classTime
             controller.classLocation = locationTitleLabel.text ?? classLocation
             controller.trainerName = trainerName
+            controller.distance = locationDistanceLabel.text ?? ""
             controller.studioLat = studioLat
             controller.studioLng = studioLng
-            controller.waitlistType = "normal"
             controller.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(controller, animated: true)
-            AlertHelper.shared.showCustomeAlert(title: "", message: result.msg ?? "This spot was just claimed by someone else.", actions: ["OK"], completion: nil)
             return
         }
 
@@ -865,41 +864,61 @@ private extension SlotOpenViewController {
         urgencyTitleLabel.textColor = Palette.urgencyTitle
         urgencyTitleLabel.numberOfLines = 0
         urgencyTitleLabel.text = Copy.urgencyTitle
+        urgencyTitleLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
 
         urgencySubtitleLabel.translatesAutoresizingMaskIntoConstraints = false
         urgencySubtitleLabel.font = AppFont.regular.size(12.5, familyName: familyFunnelSans)
         urgencySubtitleLabel.textColor = Palette.urgencySubtitle
         urgencySubtitleLabel.numberOfLines = 0
+        urgencySubtitleLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        urgencySubtitleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
-        // width=0 equivalent (weight=1 on Android): low hugging/compression so
-        // this column - not the timer pill - is what shrinks/wraps under
-        // pressure, which is what fixed the congested layout on Android.
-        let textStack = UIStackView(arrangedSubviews: [urgencyTitleLabel, urgencySubtitleLabel])
-        textStack.translatesAutoresizingMaskIntoConstraints = false
-        textStack.axis = .vertical
-        textStack.alignment = .fill
-        textStack.spacing = 2
-        textStack.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        textStack.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        // Title gets its own full-width row (icon + title, nothing else
+        // competing for space); the timer pill drops to the row below and
+        // shares that row with the subtitle only - matches Android's
+        // two-row urgency card.
+        let titleRow = UIStackView(arrangedSubviews: [clockIcon, urgencyTitleLabel])
+        titleRow.translatesAutoresizingMaskIntoConstraints = false
+        titleRow.axis = .horizontal
+        titleRow.alignment = .center
+        titleRow.spacing = 12
 
         let timerPillView = makeTimerPill()
 
-        let row = UIStackView(arrangedSubviews: [clockIcon, textStack, timerPillView])
-        row.translatesAutoresizingMaskIntoConstraints = false
-        row.axis = .horizontal
-        row.alignment = .center
-        row.spacing = 12
+        let subtitleRow = UIStackView(arrangedSubviews: [urgencySubtitleLabel, timerPillView])
+        subtitleRow.translatesAutoresizingMaskIntoConstraints = false
+        subtitleRow.axis = .horizontal
+        subtitleRow.alignment = .center
+        subtitleRow.spacing = 12
 
-        card.addSubview(row)
+        // Indented to align under the title text, not the icon - same 28pt
+        // (16pt icon + 12pt spacing) Android's own marginStart uses.
+        let subtitleContainer = UIView()
+        subtitleContainer.translatesAutoresizingMaskIntoConstraints = false
+        subtitleContainer.addSubview(subtitleRow)
+        NSLayoutConstraint.activate([
+            subtitleRow.topAnchor.constraint(equalTo: subtitleContainer.topAnchor),
+            subtitleRow.bottomAnchor.constraint(equalTo: subtitleContainer.bottomAnchor),
+            subtitleRow.leadingAnchor.constraint(equalTo: subtitleContainer.leadingAnchor, constant: 28),
+            subtitleRow.trailingAnchor.constraint(equalTo: subtitleContainer.trailingAnchor)
+        ])
+
+        let column = UIStackView(arrangedSubviews: [titleRow, subtitleContainer])
+        column.translatesAutoresizingMaskIntoConstraints = false
+        column.axis = .vertical
+        column.alignment = .fill
+        column.spacing = 6
+
+        card.addSubview(column)
         NSLayoutConstraint.activate([
             clockIcon.widthAnchor.constraint(equalToConstant: 16),
             clockIcon.heightAnchor.constraint(equalToConstant: 16),
 
             card.heightAnchor.constraint(greaterThanOrEqualToConstant: 88),
-            row.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
-            row.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 16),
-            row.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
-            row.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -12)
+            column.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
+            column.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 16),
+            column.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
+            column.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -12)
         ])
         return card
     }

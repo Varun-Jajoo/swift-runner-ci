@@ -69,12 +69,15 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
     /// at runtime (see `setupGroupClassesSection()`).
     private var groupClassesCarousel: GroupClassesCarouselView?
 
+    private weak var notificationUnreadDot: UIView?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         uiSetup()
         setupGroupClassesSection()
         lblAddress.isUserInteractionEnabled = true
         view.isUserInteractionEnabled = true
+        notificationUnreadDot = NotificationBellInstaller.install(leftOf: btnNameInitial, in: self)
 
     }
 
@@ -188,6 +191,7 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         btnHomeTrainers.layer.masksToBounds = true
         btnGymTrainers.layer.masksToBounds = true
         self.navigationController?.isNavigationBarHidden = true
+        NotificationBellInstaller.refreshUnreadBadge(notificationUnreadDot)
         if let lat = appUserDefaults.getLatLong()?.components(separatedBy: ",").first,
             let long = appUserDefaults.getLatLong()?.components(separatedBy: ",").last {
             print("Current lat", lat)

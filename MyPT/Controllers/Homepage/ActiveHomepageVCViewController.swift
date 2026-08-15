@@ -69,9 +69,12 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     /// at runtime (see `setupGroupClassesSection()`).
     private var groupClassesCarousel: GroupClassesCarouselView?
 
+    private weak var notificationUnreadDot: UIView?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         uiSetup()
+        notificationUnreadDot = NotificationBellInstaller.install(leftOf: btnNameInitial, in: self)
         setupGroupClassesSection()
         generateDates()
         collectionDate.reloadData()
@@ -83,6 +86,7 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         super.viewWillAppear(animated)
         self.navigationController?.isNavigationBarHidden = true
         groupClassesCarousel?.startRealtime()
+        NotificationBellInstaller.refreshUnreadBadge(notificationUnreadDot)
 
         // Reset date selection and suggestions when returning from another tab.
         generateDates()
