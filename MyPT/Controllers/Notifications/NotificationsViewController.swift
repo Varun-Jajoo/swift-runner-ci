@@ -35,7 +35,7 @@ final class NotificationsViewController: CommonViewController {
         static let title = UIColor.white
         static let sectionLabel = UIColor(hex: "#959595")
         static let divider = UIColor.white.withAlphaComponent(0.10)
-        static let cardUnreadFill = UIColor(hex: "#131416")
+        static let cardUnreadFill = UIColor(hex: "#0A0A0B")
         static let cardUnreadStroke = UIColor(hex: "#E0FE08").withAlphaComponent(0.05)
         static let cardReadFill = UIColor(hex: "#1E1E1F")
         static let cardReadStroke = UIColor(hex: "#232323")
@@ -223,7 +223,6 @@ private extension NotificationsViewController {
         titleLabel.text = "Notifications"
         titleLabel.font = AppFont.medium.size(18.0, familyName: familyFunnelSans)
         titleLabel.textColor = Palette.title
-        titleLabel.textAlignment = .center
         view.addSubview(titleLabel)
 
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -256,8 +255,12 @@ private extension NotificationsViewController {
             closeButton.widthAnchor.constraint(equalToConstant: 40),
             closeButton.heightAnchor.constraint(equalToConstant: 40),
 
+            // Left-aligned right after the close button + a gap - not
+            // centered on the screen (reads as unrelated to the icon) and
+            // not centered in the remaining space either (still visually
+            // drifts away from the icon).
             titleLabel.centerYAnchor.constraint(equalTo: closeButton.centerYAnchor),
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            titleLabel.leadingAnchor.constraint(equalTo: closeButton.trailingAnchor, constant: 16),
 
             tableView.topAnchor.constraint(equalTo: closeButton.bottomAnchor, constant: 16),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),

@@ -73,9 +73,14 @@ struct BookClassBaseModel: Codable {
     /// Populated only when the "data" key carries the free-booking spam-guard payload
     /// (fresh special-waitlist join, or a re-tap on one that already exists).
     var specialWaitlist: SpecialWaitlistDetailModel?
+    /// Top-level `price` on a PAYMENT_REQUIRED response only
+    /// (`'price' => $class->price ?? 0` in ClassEventController::bookClass()) -
+    /// FlexibleValue since it can be a bare number or, for a DECIMAL-column
+    /// price, a numeric string.
+    var price: FlexibleValue?
 
     enum CodingKeys: String, CodingKey {
-        case status, data, msg, errors, code
+        case status, data, msg, errors, code, price
         case isBlacklisted = "is_blacklisted"
     }
 
@@ -87,6 +92,7 @@ struct BookClassBaseModel: Codable {
         errors = try? container.decodeIfPresent([String: [String]].self, forKey: .errors)
         code = try? container.decodeIfPresent(String.self, forKey: .code)
         isBlacklisted = try? container.decodeIfPresent(Bool.self, forKey: .isBlacklisted)
+        price = try? container.decodeIfPresent(FlexibleValue.self, forKey: .price)
 
         // "data" means three different things depending on shape, so try all three.
         let decodedBooking = try? container.decodeIfPresent(BookingClassDataModel.self, forKey: .data)

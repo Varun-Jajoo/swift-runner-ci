@@ -391,13 +391,25 @@ final class ConfirmSlotSheetViewController: CommonViewController {
 
         if !input.isFreeForUser {
             // Android pushes ClassPaymentScreenActivity here with schedule_id and a
-            // "50.00" fallback price. On iOS the detail screen already routes paid
-            // classes straight to payment without opening this sheet, so this branch
-            // is only reachable if a future caller presents it for a paid class.
-            // TODO(Phase 7): dismiss, then push ClassPaymentViewController with
-            // input.scheduleId and (input.price non-blank && != "0" ? input.price : "50.00").
-            debugPrint("[ConfirmSlotSheet] CTA 'PROCEED TO PAYMENT' — Class Payment screen lands in Phase 7. Dismissing.")
-            dismiss(animated: true)
+            // "50.00" fallback price. Now reachable in practice, not just in
+            // theory - a `mixed` class only reads as free client-side for an
+            // any-gym member; the backend requires the SAME gym (or a
+            // same-location partner studio), so a member of a different gym
+            // legitimately lands here with isFreeForUser already known false.
+            let navigationController = resolveHostNavigationController()
+            hostNavigationController = navigationController
+            dismiss(animated: true) { [weak self] in
+                guard let self = self else { return }
+                let controller = ClassPaymentViewController()
+                controller.scheduleId = self.input.scheduleId
+                controller.classTitle = self.input.title
+                controller.classTime = self.input.time
+                controller.classLocation = self.input.location
+                controller.trainerName = self.input.trainerName
+                controller.classPrice = (!self.input.price.isEmpty && self.input.price != "0") ? self.input.price : "50.00"
+                controller.hidesBottomBarWhenPushed = true
+                navigationController?.pushViewController(controller, animated: true)
+            }
             return
         }
 
@@ -489,6 +501,31 @@ final class ConfirmSlotSheetViewController: CommonViewController {
                 controller.reason = reason
                 controller.resumesOn = resumesOn
                 controller.hoursRemaining = hoursRemaining
+                controller.hidesBottomBarWhenPushed = true
+                navigationController?.pushViewController(controller, animated: true)
+            }
+            return
+        }
+
+        if result.code == "PAYMENT_REQUIRED" {
+            // The sheet opened believing this booking was free
+            // (input.isFreeForUser was true when presented) but book-class's
+            // own, authoritative check disagreed - same location-scoped
+            // membership gap as the isFreeForUser==false branch above, just
+            // caught here instead of before the tap. Route to payment
+            // instead of dead-ending on an alert with nowhere to go.
+            let navigationController = resolveHostNavigationController()
+            hostNavigationController = navigationController
+            let price = result.price?.value
+            dismiss(animated: true) { [weak self] in
+                guard let self = self else { return }
+                let controller = ClassPaymentViewController()
+                controller.scheduleId = self.input.scheduleId
+                controller.classTitle = self.input.title
+                controller.classTime = self.input.time
+                controller.classLocation = self.input.location
+                controller.trainerName = self.input.trainerName
+                controller.classPrice = (price != nil && price != "0") ? price! : ((!self.input.price.isEmpty && self.input.price != "0") ? self.input.price : "50.00")
                 controller.hidesBottomBarWhenPushed = true
                 navigationController?.pushViewController(controller, animated: true)
             }

@@ -117,14 +117,20 @@ private extension NotificationRowCell {
         contentView.backgroundColor = .clear
         selectionStyle = .none
 
+        // radial-gradient(41.31% 50% at 50% -10.17%, rgba(255,255,255,0.08) 0%,
+        // transparent 100%) from the design spec - same technique
+        // card_details_bg.xml already uses on Android, just expressed via
+        // GlassCardView's own sheen layer here instead of a second drawable.
         card.translatesAutoresizingMaskIntoConstraints = false
-        card.showsSheen = false
+        card.sheenOrigin = .topCenter
+        card.sheenAlpha = 0.08
         card.isUserInteractionEnabled = true
         card.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleTap)))
         contentView.addSubview(card)
 
         iconTile.translatesAutoresizingMaskIntoConstraints = false
-        iconTile.showsSheen = false
+        iconTile.sheenOrigin = .topCenter
+        iconTile.sheenAlpha = 0.08
         card.addSubview(iconTile)
 
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -157,8 +163,11 @@ private extension NotificationRowCell {
             card.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
             card.heightAnchor.constraint(greaterThanOrEqualToConstant: 84),
 
+            // Top-aligned with the title (and, by extension, the dot - both
+            // sit on the same card.top+12 line) rather than centered in the
+            // card's full height, which grows with a 2-line subtext.
             iconTile.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 12),
-            iconTile.centerYAnchor.constraint(equalTo: card.centerYAnchor),
+            iconTile.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
             iconTile.widthAnchor.constraint(equalToConstant: 38),
             iconTile.heightAnchor.constraint(equalToConstant: 38),
 
@@ -172,7 +181,7 @@ private extension NotificationRowCell {
             timeLabel.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
 
             chevron.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -11),
-            chevron.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -21),
+            chevron.centerYAnchor.constraint(equalTo: subtextLabel.centerYAnchor),
             chevron.widthAnchor.constraint(equalToConstant: 18),
             chevron.heightAnchor.constraint(equalToConstant: 18),
 
@@ -182,7 +191,10 @@ private extension NotificationRowCell {
 
             subtextLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 2),
             subtextLabel.leadingAnchor.constraint(equalTo: iconTile.trailingAnchor, constant: 12),
-            subtextLabel.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -48),
+            // Against the chevron's own leading edge, not a guessed fixed
+            // margin - the chevron only needs ~29pt (11 inset + 18 width),
+            // a flat -48 was leaving space on the table unnecessarily.
+            subtextLabel.trailingAnchor.constraint(lessThanOrEqualTo: chevron.leadingAnchor, constant: -8),
             // Drives the card's actual height when the subtext wraps to two
             // lines - the >= 84 floor above only covers the short-text case.
             card.bottomAnchor.constraint(greaterThanOrEqualTo: subtextLabel.bottomAnchor, constant: 12),
