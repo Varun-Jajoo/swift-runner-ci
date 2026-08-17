@@ -234,7 +234,13 @@ private extension NotificationsViewController {
         tableView.register(NotificationRowCell.self, forCellReuseIdentifier: NotificationRowCell.reuseIdentifier)
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 84
-        tableView.sectionHeaderTopPadding = 0
+        // sectionHeaderTopPadding needs iOS 15 - this target's deployment
+        // target is 13.0. The extra top padding it removes is itself an
+        // iOS 15+ default, so simply not setting it pre-15 is correct,
+        // not just a fallback.
+        if #available(iOS 15.0, *) {
+            tableView.sectionHeaderTopPadding = 0
+        }
         view.addSubview(tableView)
 
         emptyLabel.translatesAutoresizingMaskIntoConstraints = false

@@ -63,12 +63,17 @@ enum NotificationBellInstaller {
             dot.heightAnchor.constraint(equalToConstant: 8),
         ])
 
-        bellButton.addAction(UIAction { [weak hostViewController] _ in
+        // UIAction-based addAction(_:for:) needs iOS 14 - this target's
+        // deployment target is 13.0, so a closure sleeve + classic
+        // target-action is used instead of branching on #available.
+        let sleeve = ClosureSleeve { [weak hostViewController] in
             guard let hostViewController = hostViewController else { return }
             let controller = NotificationsViewController()
             controller.hidesBottomBarWhenPushed = true
             hostViewController.navigationController?.pushViewController(controller, animated: true)
-        }, for: .touchUpInside)
+        }
+        objc_setAssociatedObject(bellButton, &ClosureSleeve.associationKey, sleeve, .OBJC_ASSOCIATION_RETAIN)
+        bellButton.addTarget(sleeve, action: #selector(ClosureSleeve.invoke), for: .touchUpInside)
 
         refreshUnreadBadge(dot)
         return dot
@@ -89,5 +94,23 @@ enum NotificationBellInstaller {
                 dot.isHidden = count <= 0
             }
         }
+    }
+}
+
+/// Closure-based target-action, since `UIControl.addAction(_:for:)` needs
+/// iOS 14 and this target's deployment target is 13.0. Retained on the
+/// control itself via objc_setAssociatedObject so it stays alive exactly as
+/// long as the button does.
+private final class ClosureSleeve {
+    static var associationKey: UInt8 = 0
+
+    private let closure: () -> Void
+
+    init(_ closure: @escaping () -> Void) {
+        self.closure = closure
+    }
+
+    @objc func invoke() {
+        closure()
     }
 }
