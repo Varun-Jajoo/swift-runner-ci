@@ -340,13 +340,15 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
             return
         }
 
-        // Same class-detail screen group_class_detail already opens - a
-        // waitlist join is still "this class", just with a waitlisted state
-        // GroupTrainingDetailViewController already knows how to render.
+        // group_class_detail (booking confirmed, class updated/reminder,
+        // attended, no-show warning) and waitlist_joined are always about a
+        // class this member already has a booking or waitlist row for - land
+        // on that row's actual state (confirmed/cancelled/completed/no-show/
+        // waitlisted) instead of the generic browse-this-class screen.
         if type.caseInsensitiveCompare("waitlist_joined") == .orderedSame
             || type.caseInsensitiveCompare("group_class_detail") == .orderedSame {
             if let scheduleId = scheduleId, !scheduleId.isEmpty {
-                AppDelegate.pushClassDetailScreen(scheduleId: scheduleId)
+                AppDelegate.pushBookingStatusScreen(scheduleId: scheduleId)
             } else {
                 AppDelegate.jumpToPlansTab()
             }
@@ -426,6 +428,117 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
                 controller.input = input
                 controller.hidesBottomBarWhenPushed = true
                 navigationController.pushViewController(controller, animated: true)
+            }
+        }
+    }
+
+    /// `group_class_detail`/`waitlist_joined` for a class this member already
+    /// has a booking or waitlist row for - self-fetches this member's real
+    /// state via `api/my-class-booking-status` and lands on the actual
+    /// confirm/cancelled/completed/no-show/waitlisted screen (reusing
+    /// `SlotConfirmedViewController`/`WaitlistConfirmedViewController`/
+    /// `SlotOpenViewController` exactly as the Bookings-list row tap already
+    /// does) instead of `pushClassDetailScreen()`'s generic browse view.
+    /// Falls back to that generic screen when the lookup itself is empty
+    /// (`state == "none"`) or the request fails outright - nothing more
+    /// specific to show at that point.
+    private static func pushBookingStatusScreen(scheduleId: String) {
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .my_class_booking_status,
+                                             method: .get,
+                                             queries: ["schedule_id": scheduleId],
+                                             isShowLoading: false) { responseData, _ in
+            DispatchQueue.main.async {
+                guard let data = responseData,
+                      let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                      let payload = json["data"] as? [String: Any],
+                      let navigationController = AppDelegate.topNavigationController() else {
+                    AppDelegate.pushClassDetailScreen(scheduleId: scheduleId)
+                    return
+                }
+
+                let state = payload["state"] as? String ?? "none"
+                let classTitle = payload["title"] as? String ?? ""
+                let classTime = payload["timing"] as? String ?? ""
+                let classLocation = payload["location"] as? String ?? ""
+                let trainerName = payload["trainer"] as? String ?? ""
+                let distance = payload["distance"] as? String ?? ""
+                let studioLat = Double(payload["studio_lat"] as? String ?? "") ?? 0
+                let studioLng = Double(payload["studio_long"] as? String ?? "") ?? 0
+
+                switch state {
+                case "booking":
+                    // Same split BookingListViewController's own row-tap
+                    // decision tree makes: a schedule-wide admin cancel gets
+                    // ClassCancelledByAdminViewController, never the shared
+                    // receipt screen - that screen's "cancelled" copy is
+                    // hardcoded to "as per your request", which would be
+                    // wrong here (SlotConfirmedViewController is never
+                    // reached with cancelled_by_admin == true from the
+                    // Bookings list either, for the same reason).
+                    if payload["cancelled_by_admin"] as? Bool == true {
+                        var input = ClassCancelledByAdminInput()
+                        input.classTitle = classTitle
+                        input.classTime = classTime
+                        input.classLocation = classLocation
+                        input.trainerName = trainerName
+                        input.distance = distance
+                        input.studioLat = studioLat
+                        input.studioLng = studioLng
+
+                        let controller = ClassCancelledByAdminViewController()
+                        controller.input = input
+                        controller.hidesBottomBarWhenPushed = true
+                        navigationController.pushViewController(controller, animated: true)
+                        return
+                    }
+
+                    let controller = SlotConfirmedViewController()
+                    controller.classTitle = classTitle
+                    controller.classTime = classTime
+                    controller.classLocation = classLocation
+                    controller.trainerName = trainerName
+                    controller.distance = distance
+                    controller.studioLat = studioLat
+                    controller.studioLng = studioLng
+                    controller.classPrice = payload["price"] as? String ?? ""
+                    controller.isReadOnly = true
+                    controller.bookingId = payload["booking_id"] as? String ?? ""
+                    controller.canCancelBooking = payload["can_cancel_booking"] as? Bool ?? false
+                    controller.bookingStatus = payload["booking_status"] as? String ?? "confirmed"
+                    controller.cancelledReason = payload["cancelled_reason"] as? String ?? ""
+                    controller.noShowCount = (payload["no_show_count"] as? NSNumber)?.intValue ?? 0
+                    controller.noShowBlockedUntil = payload["no_show_blocked_until"] as? String ?? ""
+                    controller.hidesBottomBarWhenPushed = true
+                    navigationController.pushViewController(controller, animated: true)
+
+                case "waitlist":
+                    let hasOpenSpot = payload["has_open_spot"] as? Bool ?? false
+                    if hasOpenSpot {
+                        // Same claim screen the "spot available" push already
+                        // opens - a spot's actually open right now, so the
+                        // countdown/claim flow is the real destination, not
+                        // a static "you're waitlisted" readout.
+                        AppDelegate.pushClaimScreen(scheduleId: scheduleId)
+                        return
+                    }
+                    let controller = WaitlistConfirmedViewController()
+                    controller.classTitle = classTitle
+                    controller.classTime = classTime
+                    controller.classLocation = classLocation
+                    controller.trainerName = trainerName
+                    controller.distance = distance
+                    controller.studioLat = studioLat
+                    controller.studioLng = studioLng
+                    controller.waitlistType = payload["waitlist_type"] as? String ?? "normal"
+                    if let waitlistId = payload["waitlist_id"] as? String, !waitlistId.isEmpty {
+                        controller.bookingId = "wl-" + waitlistId
+                    }
+                    controller.hidesBottomBarWhenPushed = true
+                    navigationController.pushViewController(controller, animated: true)
+
+                default:
+                    AppDelegate.pushClassDetailScreen(scheduleId: scheduleId)
+                }
             }
         }
     }

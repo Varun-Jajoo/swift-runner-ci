@@ -53,10 +53,11 @@ final class SpotTakenViewController: CommonViewController {
         static let pillText = UIColor(hex: "#F0F0F0")
         static let rowTitle = UIColor.white
         static let rowSubtitle = UIColor.white.withAlphaComponent(0.4)
-        // rgba(8, 101, 254, ...) - the same blue token
-        // WaitlistConfirmedViewController's own notify card uses.
+        // Same tokens WaitlistConfirmedViewController's own notify card uses -
+        // this status card now shares that exact look (solid navy fill, faint
+        // blue wash, radial sheen) instead of a flat translucent tint.
         static let statusCardStroke = GroupClassColor.blue.color.withAlphaComponent(0.30)
-        static let statusCardFill = GroupClassColor.blue.color.withAlphaComponent(0.10)
+        static let statusCardFill = GroupClassColor.blueCardBg.color
         static let statusText = UIColor(hex: "#ADCCFF")
         static let statusSubtext = UIColor(hex: "#FFFFFF")
         static let ctaInk = UIColor(hex: "#131416")
@@ -96,7 +97,9 @@ final class SpotTakenViewController: CommonViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = GroupClassColor.bg.color
+        // This screen's own background, not the shared groupClassBg token -
+        // deliberately darker than every other screen in this module.
+        view.backgroundColor = UIColor(hex: "#050505")
         buildLayout()
         populateUI()
     }
@@ -291,7 +294,7 @@ private extension SpotTakenViewController {
         // the headline below it.
         let fade = GradientFadeView()
         fade.translatesAutoresizingMaskIntoConstraints = false
-        fade.setColors([GroupClassColor.bg.color.withAlphaComponent(0), GroupClassColor.bg.color])
+        fade.setColors([UIColor(hex: "#050505").withAlphaComponent(0), UIColor(hex: "#050505")])
         heroImageView.addSubview(fade)
 
         NSLayoutConstraint.activate([
@@ -357,7 +360,13 @@ private extension SpotTakenViewController {
         card.fillAlpha = 1.0
         card.strokeColor = Palette.statusCardStroke
         card.strokeAlpha = 1.0
-        card.showsSheen = false
+        // Same wash + radial sheen WaitlistConfirmedViewController's own
+        // notify card uses - was showsSheen = false (flat), which is what
+        // made the two screens' blue boxes look inconsistent.
+        card.washColors = [GroupClassColor.blue.color.withAlphaComponent(0.098),
+                           GroupClassColor.blue.color.withAlphaComponent(0.0)]
+        card.sheenOrigin = .topCenter
+        card.sheenAlpha = 0.08
 
         let icon = UIImageView(image: SpotTakenViewController
             .icon(["ic_info_hexagon_18", "info-hexagon"], systemFallback: "info.circle")?
