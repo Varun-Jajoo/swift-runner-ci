@@ -28,15 +28,20 @@ struct NotificationEntry {
     let createdAt: Date
 }
 
+private enum NotificationRow {
+    case header(String)
+    case item(NotificationEntry)
+}
+
 final class NotificationsViewController: CommonViewController {
 
-    private enum Palette {
+    fileprivate enum Palette {
         static let bg = UIColor(hex: "#000A04")
         static let title = UIColor.white
         static let sectionLabel = UIColor(hex: "#959595")
         static let divider = UIColor.white.withAlphaComponent(0.10)
         static let cardUnreadFill = UIColor(hex: "#0A0A0B")
-        static let cardUnreadStroke = UIColor(hex: "#E0FE08").withAlphaComponent(0.05)
+        static let cardUnreadStroke = UIColor(hex: "#E0FE08")
         static let cardReadFill = UIColor(hex: "#1E1E1F")
         static let cardReadStroke = UIColor(hex: "#232323")
         static let tileReadFill = UIColor(hex: "#131416")
@@ -51,7 +56,7 @@ final class NotificationsViewController: CommonViewController {
     private let emptyLabel = UILabel()
     private let spinner = UIActivityIndicatorView(style: .medium)
 
-    private var sections: [(label: String, entries: [NotificationEntry])] = []
+    private var rows: [NotificationRow] = []
     private var allEntries: [NotificationEntry] = []
     private var currentPage = 1
     private var lastPage = 1
@@ -105,7 +110,7 @@ final class NotificationsViewController: CommonViewController {
 
         let parsed = array.compactMap { NotificationsViewController.parseEntry($0) }
         allEntries = page == 1 ? parsed : allEntries + parsed
-        sections = NotificationsViewController.bucket(allEntries)
+        rows = NotificationsViewController.bucket(allEntries)
         tableView.reloadData()
         showEmptyState(allEntries.isEmpty)
     }
@@ -151,9 +156,7 @@ final class NotificationsViewController: CommonViewController {
         return nil
     }
 
-    /// Today / Yesterday / This Week / This Month / Older, in that order -
-    /// sections with nothing in them are dropped entirely, same as Android.
-    private static func bucket(_ entries: [NotificationEntry]) -> [(label: String, entries: [NotificationEntry])] {
+    private static func bucket(_ entries: [NotificationEntry]) -> [NotificationRow] {
         let calendar = Calendar.current
         let startOfToday = calendar.startOfDay(for: Date())
         let startOfYesterday = calendar.date(byAdding: .day, value: -1, to: startOfToday)!
@@ -174,12 +177,17 @@ final class NotificationsViewController: CommonViewController {
             else { older.append(entry) }
         }
 
-        var result: [(label: String, entries: [NotificationEntry])] = []
-        if !today.isEmpty { result.append(("TODAY", today)) }
-        if !yesterday.isEmpty { result.append(("YESTERDAY", yesterday)) }
-        if !thisWeek.isEmpty { result.append(("THIS WEEK", thisWeek)) }
-        if !thisMonth.isEmpty { result.append(("THIS MONTH", thisMonth)) }
-        if !older.isEmpty { result.append(("OLDER", older)) }
+        var result: [NotificationRow] = []
+        func addSection(_ label: String, _ items: [NotificationEntry]) {
+            guard !items.isEmpty else { return }
+            result.append(.header(label))
+            items.forEach { result.append(.item($0)) }
+        }
+        addSection("TODAY", today)
+        addSection("YESTERDAY", yesterday)
+        addSection("THIS WEEK", thisWeek)
+        addSection("THIS MONTH", thisMonth)
+        addSection("OLDER", older)
         return result
     }
 
@@ -193,7 +201,7 @@ final class NotificationsViewController: CommonViewController {
     private func rowTapped(_ entry: NotificationEntry) {
         if !entry.isRead, let index = allEntries.firstIndex(where: { $0.id == entry.id }) {
             allEntries[index].isRead = true
-            sections = NotificationsViewController.bucket(allEntries)
+            rows = NotificationsViewController.bucket(allEntries)
             tableView.reloadData()
             NotificationReadTracker.markReadByContext(
                 pushType: NotificationRouting.pushType(forNotificationType: entry.notificationType),
@@ -232,15 +240,9 @@ private extension NotificationsViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(NotificationRowCell.self, forCellReuseIdentifier: NotificationRowCell.reuseIdentifier)
+        tableView.register(NotificationSectionHeaderCell.self, forCellReuseIdentifier: NotificationSectionHeaderCell.reuseIdentifier)
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 84
-        // sectionHeaderTopPadding needs iOS 15 - this target's deployment
-        // target is 13.0. The extra top padding it removes is itself an
-        // iOS 15+ default, so simply not setting it pre-15 is correct,
-        // not just a fallback.
-        if #available(iOS 15.0, *) {
-            tableView.sectionHeaderTopPadding = 0
-        }
         view.addSubview(tableView)
 
         emptyLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -286,58 +288,76 @@ private extension NotificationsViewController {
 
 extension NotificationsViewController: UITableViewDataSource, UITableViewDelegate {
 
-    func numberOfSections(in tableView: UITableView) -> Int { sections.count }
-
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        sections[section].entries.count
+        rows.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: NotificationRowCell.reuseIdentifier, for: indexPath) as? NotificationRowCell else {
-            return UITableViewCell()
+        switch rows[indexPath.row] {
+        case .header(let label):
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: NotificationSectionHeaderCell.reuseIdentifier, for: indexPath) as? NotificationSectionHeaderCell else {
+                return UITableViewCell()
+            }
+            cell.configure(label: label, isFirst: indexPath.row == 0)
+            return cell
+        case .item(let entry):
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: NotificationRowCell.reuseIdentifier, for: indexPath) as? NotificationRowCell else {
+                return UITableViewCell()
+            }
+            cell.configure(entry: entry, palette: (Palette.cardUnreadFill, Palette.cardUnreadStroke, Palette.cardReadFill, Palette.cardReadStroke, Palette.tileReadFill, Palette.tileReadStroke, Palette.subtext, Palette.time, Palette.dotUnread, Palette.dotRead))
+            cell.onTapped = { [weak self] in self?.rowTapped(entry) }
+            return cell
         }
-        let entry = sections[indexPath.section].entries[indexPath.row]
-        cell.configure(entry: entry, palette: (Palette.cardUnreadFill, Palette.cardUnreadStroke, Palette.cardReadFill, Palette.cardReadStroke, Palette.tileReadFill, Palette.tileReadStroke, Palette.subtext, Palette.time, Palette.dotUnread, Palette.dotRead))
-        cell.onTapped = { [weak self] in self?.rowTapped(entry) }
-        return cell
-    }
-
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let container = UIView()
-        container.backgroundColor = .clear
-
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = sections[section].label
-        label.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
-        label.textColor = Palette.sectionLabel
-        container.addSubview(label)
-
-        let line = UIView()
-        line.translatesAutoresizingMaskIntoConstraints = false
-        line.backgroundColor = Palette.divider
-        container.addSubview(line)
-
-        NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            label.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-
-            line.leadingAnchor.constraint(equalTo: label.trailingAnchor, constant: 12),
-            line.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            line.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            line.heightAnchor.constraint(equalToConstant: 1),
-        ])
-        return container
-    }
-
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        section == 0 ? 32 : 52
     }
 
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        guard indexPath.section == sections.count - 1,
-              indexPath.row >= sections[indexPath.section].entries.count - 5,
-              !isLoadingMore, currentPage < lastPage else { return }
+        guard indexPath.row >= rows.count - 5, !isLoadingMore, currentPage < lastPage else { return }
         loadPage(currentPage + 1)
+    }
+}
+
+private final class NotificationSectionHeaderCell: UITableViewCell {
+
+    static let reuseIdentifier = "NotificationSectionHeaderCell"
+
+    private let label = UILabel()
+    private let line = UIView()
+    private var topConstraint: NSLayoutConstraint?
+
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        backgroundColor = .clear
+        contentView.backgroundColor = .clear
+        selectionStyle = .none
+
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
+        label.textColor = NotificationsViewController.Palette.sectionLabel
+        contentView.addSubview(label)
+
+        line.translatesAutoresizingMaskIntoConstraints = false
+        line.backgroundColor = NotificationsViewController.Palette.divider
+        contentView.addSubview(line)
+
+        let top = label.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20)
+        topConstraint = top
+
+        NSLayoutConstraint.activate([
+            top,
+            label.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            label.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
+
+            line.leadingAnchor.constraint(equalTo: label.trailingAnchor, constant: 12),
+            line.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            line.centerYAnchor.constraint(equalTo: label.centerYAnchor),
+            line.heightAnchor.constraint(equalToConstant: 1),
+        ])
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    func configure(label text: String, isFirst: Bool) {
+        label.text = text
+        topConstraint?.constant = isFirst ? 0 : 20
     }
 }

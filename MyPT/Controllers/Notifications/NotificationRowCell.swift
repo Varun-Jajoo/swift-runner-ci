@@ -65,20 +65,24 @@ final class NotificationRowCell: UITableViewCell {
         if entry.isRead {
             card.fillColor = palette.readFill
             card.strokeColor = palette.readStroke
+            card.fillAlpha = 1.0
+            card.strokeAlpha = 1.0
             iconTile.fillColor = palette.tileReadFill
             iconTile.strokeColor = palette.tileReadStroke
+            iconTile.fillAlpha = 1.0
+            iconTile.strokeAlpha = 1.0
             dotView.backgroundColor = palette.dotRead
         } else {
             card.fillColor = palette.unreadFill
             card.strokeColor = palette.unreadStroke
-            iconTile.fillColor = style.tileFill
-            iconTile.strokeColor = style.tileStroke
+            card.fillAlpha = 1.0
+            card.strokeAlpha = 0.05
+            iconTile.fillColor = style.tileHue
+            iconTile.strokeColor = style.tileHue
+            iconTile.fillAlpha = 0.10
+            iconTile.strokeAlpha = style.tileStrokeAlpha
             dotView.backgroundColor = palette.dotUnread
         }
-        card.fillAlpha = 1.0
-        card.strokeAlpha = 1.0
-        iconTile.fillAlpha = 1.0
-        iconTile.strokeAlpha = 1.0
     }
 
     private static func makeGlyph(for style: NotifStyleBridge) -> UIView {
@@ -222,21 +226,19 @@ enum NotifStyleBridge {
         }
     }
 
-    var tileFill: UIColor {
+    var tileHue: UIColor {
         switch self {
-        case .gold: return UIColor(hex: "#FFCC33").withAlphaComponent(0.10)
-        case .red: return UIColor(hex: "#EE4D37").withAlphaComponent(0.10)
-        case .green: return UIColor(hex: "#E0FE08").withAlphaComponent(0.10)
-        case .neutral: return UIColor.white.withAlphaComponent(0.10)
+        case .gold: return UIColor(hex: "#FFCC33")
+        case .red: return UIColor(hex: "#EE4D37")
+        case .green: return UIColor(hex: "#E0FE08")
+        case .neutral: return .white
         }
     }
 
-    var tileStroke: UIColor {
+    var tileStrokeAlpha: CGFloat {
         switch self {
-        case .gold: return UIColor(hex: "#FFCC33").withAlphaComponent(0.50)
-        case .red: return UIColor(hex: "#EE4D37").withAlphaComponent(0.50)
-        case .green: return UIColor(hex: "#E0FE08").withAlphaComponent(0.50)
-        case .neutral: return UIColor.white.withAlphaComponent(0.30)
+        case .neutral: return 0.30
+        default: return 0.50
         }
     }
 }
