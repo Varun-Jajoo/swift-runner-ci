@@ -60,7 +60,7 @@ final class GradientProgressBar: UIView {
         backgroundView.frame = bounds
         backgroundView.layer.cornerRadius = bounds.height / 2
         
-        let width = (currentProgress / total) * bounds.width
+        let width = total > 0 ? (currentProgress / total) * bounds.width : 0
         progressView.frame = CGRect(x: 0, y: 0, width: width, height: bounds.height)
         
         progressView.layer.cornerRadius = bounds.height / 2
@@ -69,7 +69,7 @@ final class GradientProgressBar: UIView {
     }
     
     func setProgress(_ value: CGFloat) {
-        currentProgress = min(max(value, 0), total)
+        currentProgress = total > 0 ? min(max(value, 0), total) : 0
         setNeedsLayout()
     }
 }
