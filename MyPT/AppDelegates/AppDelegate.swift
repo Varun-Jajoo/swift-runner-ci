@@ -284,26 +284,29 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
         guard let type = userInfo["type"] as? String else { return }
         let scheduleId = userInfo["schedule_id"] as? String
 
-        // Genuinely no single class to land on - a waitlist offer that timed
-        // out or an invitation that expired isn't "this class was cancelled"
-        // (ClassCancelledByAdminViewController's copy would be wrong), and
-        // there's no dedicated screen for either outcome, so the Bookings
-        // tab is the honest destination, not a compromise.
+        // Every type below resolves through pushBookingStatusScreen() - the
+        // member's REAL state for that class decides the screen, rather than
+        // each type hardcoding a guess. Only the ban screen is exempt (it
+        // isn't about one class at all), plus my_profile's membership/
+        // lifted-ban rows which carry no schedule to resolve against.
+        //
+        // waitlist_not_converted/waitlist_invitation_expired: still on the
+        // waitlist (offer timed out, or someone else claimed it) - the
+        // resolver lands them on their waitlist entry, not the Bookings tab.
+        //
+        // class_cancelled_by_admin covers both an admin pulling the whole
+        // class AND gx_booking_cancelled_ban (only this member's booking
+        // cancelled, for a ban). Those are NOT the same screen and used to be
+        // routed as if they were: the resolver splits them properly via
+        // cancelled_by_admin - a pulled class gets the rejection screen, a
+        // ban-cascade cancel gets the booking details screen with its own
+        // "REMOVED FROM CLASS" note.
         if type.caseInsensitiveCompare("waitlist_not_converted") == .orderedSame
-            || type.caseInsensitiveCompare("waitlist_invitation_expired") == .orderedSame {
-            AppDelegate.jumpToBookingsTab()
-            return
-        }
-
-        // class_cancelled_by_admin (admin pulled the whole class) and
-        // gx_booking_cancelled_ban (this member's booking specifically was
-        // cancelled because they got banned) both mean the same true thing
-        // from the tapping member's side - "this class has been cancelled" -
-        // so both open the same rejection screen, hydrated fresh via
-        // class-detail since the push/DB payload only ever carries schedule_id.
-        if type.caseInsensitiveCompare("class_cancelled_by_admin") == .orderedSame {
+            || type.caseInsensitiveCompare("waitlist_invitation_expired") == .orderedSame
+            || type.caseInsensitiveCompare("class_cancelled_by_admin") == .orderedSame
+            || type.caseInsensitiveCompare("my_bookings") == .orderedSame {
             if let scheduleId = scheduleId, !scheduleId.isEmpty {
-                AppDelegate.pushCancelledClassScreen(scheduleId: scheduleId)
+                AppDelegate.pushBookingStatusScreen(scheduleId: scheduleId)
             } else {
                 AppDelegate.jumpToBookingsTab()
             }
@@ -328,15 +331,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
             if let scheduleId = scheduleId, !scheduleId.isEmpty {
                 AppDelegate.pushClaimScreen(scheduleId: scheduleId)
             }
-            return
-        }
-
-        // The member's own cancellation - they already saw the confirmation
-        // at the moment they cancelled, so there's nothing deeper to show;
-        // the Bookings tab (where the now-cancelled row lives) is the real
-        // destination, not a shortcut.
-        if type.caseInsensitiveCompare("my_bookings") == .orderedSame {
-            AppDelegate.jumpToBookingsTab()
             return
         }
 
@@ -391,45 +385,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
         controller.tapThrough = tapThrough
         controller.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(controller, animated: true)
-    }
-
-    /// `class_cancelled_by_admin`/`gx_booking_cancelled_ban` - same idea as
-    /// pushClassDetailScreen() above, but the target
-    /// (ClassCancelledByAdminViewController) isn't self-fetching, so this
-    /// does the class-detail lookup itself (same API + fallback-location
-    /// pattern GroupTrainingDetailViewController.fetchClassDetail() uses)
-    /// and hydrates the input before pushing. A failed/empty lookup falls
-    /// back to the Bookings tab rather than pushing a blank rejection screen.
-    private static func pushCancelledClassScreen(scheduleId: String) {
-        let params: [String: String] = [
-            "lat": "\(GroupClassCardFormatter.fallbackLatitude)",
-            "long": "\(GroupClassCardFormatter.fallbackLongitude)",
-            "schdule_id": scheduleId
-        ]
-
-        UpcomingClassVM.classDetailsApi(inputParams: params, isShowLoader: false) { result in
-            DispatchQueue.main.async {
-                guard result?.status == true, let detail = result?.data,
-                      let navigationController = AppDelegate.topNavigationController() else {
-                    AppDelegate.jumpToBookingsTab()
-                    return
-                }
-
-                var input = ClassCancelledByAdminInput()
-                input.classTitle = detail.className ?? ""
-                input.classTime = detail.time ?? ""
-                input.classLocation = detail.location ?? ""
-                input.trainerName = detail.name ?? ""
-                input.distance = detail.distance ?? ""
-                input.studioLat = detail.studioLat?.doubleValue ?? 0
-                input.studioLng = detail.studioLng?.doubleValue ?? 0
-
-                let controller = ClassCancelledByAdminViewController()
-                controller.input = input
-                controller.hidesBottomBarWhenPushed = true
-                navigationController.pushViewController(controller, animated: true)
-            }
-        }
     }
 
     /// `group_class_detail`/`waitlist_joined` for a class this member already
