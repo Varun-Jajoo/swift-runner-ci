@@ -252,9 +252,9 @@ class CommonViewController: UIViewController {
         for titleStr in setTitle.enumerated() {
             if titleStr.offset < leftImgs.count {
                 backButton[titleStr.offset].setTitle("  " + (titleStr.element ?? ""), for: .normal)
+                backButton[titleStr.offset].sizeToFit()
             }
         }
-        
         
         navigationItem.leftBarButtonItems = leftBarButtonsArray
     }
@@ -310,6 +310,7 @@ class CommonViewController: UIViewController {
         for titleStr in setTitle.enumerated() {
             if titleStr.offset < rightImgs.count {
                 rightButton[titleStr.offset].setTitle(titleStr.element, for: .normal)
+                rightButton[titleStr.offset].sizeToFit()
             }
         }
         

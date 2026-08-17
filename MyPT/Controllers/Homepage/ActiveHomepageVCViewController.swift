@@ -600,7 +600,7 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             case 0: // Book Session
                 vc1.hidesBottomBarWhenPushed = true
                 packageExpireVC.hidesBottomBarWhenPushed = true
-                guard let selectedPlan = self.userPlans.first(where: { $0.is_expired == true }) ?? self.userPlans.first else {
+                guard let selectedPlan = self.userPlans.first(where: { $0.is_expired == true && $0.is_membership == false}) ?? self.userPlans.first else {
                     return
                 }
                 packageExpireVC.userPlans = selectedPlan

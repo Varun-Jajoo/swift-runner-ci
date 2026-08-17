@@ -2958,7 +2958,7 @@ preferred times</string>
                                                                                 <rect key="frame" x="20" y="232" width="313" height="30"/>
                                                                                 <subviews>
                                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="SAVE AED 300 - THAT’S 6 FREE SESSIONS" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TQ9-G0-ycf">
-                                                                                        <rect key="frame" x="34.333333333333329" y="8" width="244.33333333333337" height="14.333333333333336"/>
+                                                                                        <rect key="frame" x="34.333333333333329" y="7.6666666666667433" width="244.33333333333337" height="14.333333333333339"/>
                                                                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                                         <color key="textColor" red="0.81960785390000002" green="0.92549020049999997" blue="0.80000001190000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                                         <nil key="highlightedColor"/>
@@ -2998,7 +2998,7 @@ preferred times</string>
                                                                                 <nil key="highlightedColor"/>
                                                                             </label>
                                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I1K-42-SIA">
-                                                                                <rect key="frame" x="333" y="353.66666666666674" width="0.0" height="0.0"/>
+                                                                                <rect key="frame" x="333" y="353.33333333333326" width="0.0" height="0.0"/>
                                                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                                 <color key="textColor" red="0.98039215800000001" green="0.98039215800000001" blue="0.98039215800000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                                 <nil key="highlightedColor"/>
@@ -3011,7 +3011,7 @@ preferred times</string>
                                                                                 </constraints>
                                                                             </imageView>
                                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="This package is non-refundable. Know More" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7U6-Of-WVr">
-                                                                                <rect key="frame" x="43" y="210" width="290" height="14.333333333333343"/>
+                                                                                <rect key="frame" x="43" y="209.66666666666674" width="290" height="14.333333333333343"/>
                                                                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                                 <color key="textColor" red="0.58431372549019611" green="0.58431372549019611" blue="0.58431372549019611" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                                                 <nil key="highlightedColor"/>
@@ -3038,10 +3038,10 @@ preferred times</string>
                                                                             <constraint firstItem="7U6-Of-WVr" firstAttribute="centerY" secondItem="Irn-dZ-hRD" secondAttribute="centerY" id="LkR-AO-HCl"/>
                                                                             <constraint firstItem="oo6-OZ-N4v" firstAttribute="leading" secondItem="iz2-ch-hKJ" secondAttribute="leading" id="Mq5-Lz-E2w"/>
                                                                             <constraint firstItem="I1K-42-SIA" firstAttribute="centerY" secondItem="uWz-fY-r5A" secondAttribute="centerY" id="OS9-RO-Hb0"/>
+                                                                            <constraint firstAttribute="height" constant="386.67000000000002" id="Pxo-kp-esr"/>
                                                                             <constraint firstAttribute="trailing" secondItem="te5-gm-eZZ" secondAttribute="trailing" constant="20" id="QRU-sO-IBM"/>
                                                                             <constraint firstItem="gED-T3-oB9" firstAttribute="leading" secondItem="9qG-pO-ORa" secondAttribute="leading" constant="20" id="Qw6-C5-a7A"/>
                                                                             <constraint firstItem="JJs-eO-9D0" firstAttribute="centerY" secondItem="JX9-cB-9xT" secondAttribute="centerY" id="RJp-9h-Qmf"/>
-                                                                            <constraint firstAttribute="bottom" secondItem="uWz-fY-r5A" secondAttribute="bottom" constant="23" id="TOP-js-0AP"/>
                                                                             <constraint firstItem="E5W-wb-kMJ" firstAttribute="leading" secondItem="JJs-eO-9D0" secondAttribute="leading" id="Ttg-M1-7rG"/>
                                                                             <constraint firstItem="JX9-cB-9xT" firstAttribute="top" secondItem="9qG-pO-ORa" secondAttribute="top" constant="12" id="VBn-Yw-CVL"/>
                                                                             <constraint firstItem="DUJ-qD-S47" firstAttribute="leading" secondItem="CEd-6F-JQc" secondAttribute="leading" id="Vg0-nu-T6i"/>
@@ -3640,7 +3640,8 @@ preferred times</string>
                         <outlet property="btnUpgradePlan" destination="J0N-Vi-pvx" id="m1o-UC-CE2"/>
                         <outlet property="btnViewAllCoupon" destination="K4L-Hz-lmy" id="0sf-vT-AuO"/>
                         <outlet property="heightOfNewGymMembership" destination="Zvb-8B-XvF" id="k2J-5O-TVL"/>
-                        <outlet property="heightOfPackageDetail" destination="vHh-ar-pxk" id="GwV-cP-4DH"/>
+                        <outlet property="heightOfPackageDetail" destination="Pxo-kp-esr" id="7XU-IP-8lH"/>
+                        <outlet property="heightOfSuperPackageDetail" destination="vHh-ar-pxk" id="dzl-3W-iRP"/>
                         <outlet property="imgAddressArrow" destination="ArQ-LU-wHa" id="KGm-j7-jdU"/>
                         <outlet property="imgChoosepayment" destination="56U-hU-uWw" id="31e-UB-4eB"/>
                         <outlet property="imgEarlyClock" destination="Irn-dZ-hRD" id="UTJ-7a-RBx"/>
@@ -3709,6 +3710,7 @@ preferred times</string>
                         <outlet property="lblUpgradeToVIP" destination="c0V-y6-bk0" id="hrY-pe-DvY"/>
                         <outlet property="lblValidity" destination="iz2-ch-hKJ" id="qKi-U3-RhJ"/>
                         <outlet property="lblYouwillBookSession" destination="OJM-nJ-wxN" id="BJg-bw-1EZ"/>
+                        <outlet property="topConstraintOfSeparator" destination="DFh-il-JNN" id="X9Z-2Y-8aW"/>
                         <outlet property="viewCard" destination="BkJ-1v-ogU" id="K5H-vb-cKL"/>
                         <outlet property="viewGymMembershipDetails" destination="txf-KF-aw8" id="H5m-9g-uMQ"/>
                         <outlet property="viewLocation" destination="jmD-vJ-plY" id="WD4-qN-YBz"/>

@@ -79,6 +79,7 @@
                                     <constraint firstItem="PFf-wH-DNi" firstAttribute="leading" secondItem="kwW-P6-R9d" secondAttribute="trailing" constant="6" id="q38-Re-qML"/>
                                     <constraint firstAttribute="height" constant="60" id="vRp-wh-gvV"/>
                                     <constraint firstItem="Hhh-Qk-bcs" firstAttribute="centerY" secondItem="HeE-V8-D6I" secondAttribute="centerY" id="wWr-eW-fll"/>
+                                    <constraint firstItem="kwW-P6-R9d" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="V0E-5n-BHI" secondAttribute="trailing" constant="5" id="ywr-LB-ehT"/>
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mpb-vl-046">

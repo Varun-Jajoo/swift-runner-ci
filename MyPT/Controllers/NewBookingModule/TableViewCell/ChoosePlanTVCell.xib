@@ -84,7 +84,7 @@
                                     <constraint firstAttribute="width" constant="3" id="o5O-bp-YEA"/>
                                 </constraints>
                             </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KLU-Rp-fyc">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="748" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KLU-Rp-fyc">
                                 <rect key="frame" x="77" y="82" width="42" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.79607843140000001" green="0.84705882349999995" blue="0.87843137250000003" alpha="1" colorSpace="calibratedRGB"/>
@@ -139,6 +139,7 @@
                             <constraint firstItem="yQ4-Ec-KEK" firstAttribute="centerY" secondItem="EN5-zb-5uN" secondAttribute="centerY" id="QQc-sE-8Ie"/>
                             <constraint firstItem="woz-bx-dKW" firstAttribute="leading" secondItem="7sN-Is-7Gj" secondAttribute="trailing" constant="10" id="U5K-wv-aRy"/>
                             <constraint firstAttribute="trailing" secondItem="uuN-nO-u5v" secondAttribute="trailing" id="Vua-cS-HmC"/>
+                            <constraint firstItem="RXB-PL-WE7" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="KLU-Rp-fyc" secondAttribute="trailing" constant="5" id="Zcf-i8-4Xx"/>
                             <constraint firstItem="EN5-zb-5uN" firstAttribute="top" secondItem="bkc-h2-OZE" secondAttribute="top" constant="20" id="ZoN-c7-yzS"/>
                             <constraint firstItem="FYl-T2-hal" firstAttribute="centerY" secondItem="RUG-tP-jCI" secondAttribute="centerY" id="agv-c8-bty"/>
                             <constraint firstItem="hGF-uK-oqg" firstAttribute="centerY" secondItem="HzS-m3-QaU" secondAttribute="centerY" id="boa-OH-cHR"/>

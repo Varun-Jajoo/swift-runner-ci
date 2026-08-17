@@ -134,7 +134,9 @@ class BookingReviewPurchaseVC: CommonViewController {
     @IBOutlet weak var btnCheck: UIButton!
     @IBOutlet weak var lblTermCondition: UILabel!
     @IBOutlet weak var heightOfPackageDetail: NSLayoutConstraint!
+    @IBOutlet weak var topConstraintOfSeparator: NSLayoutConstraint!
     @IBOutlet weak var lblPlanExpiredTitle: UILabel!
+    @IBOutlet weak var heightOfSuperPackageDetail: NSLayoutConstraint!
     //    @IBOutlet weak var lblGymRefundable: UILabel!
     
     override func viewDidLoad() {
@@ -153,10 +155,14 @@ class BookingReviewPurchaseVC: CommonViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.setNavigationColor(setColor: .clear)
-        self.statusBarColor(setColor: .clear)
+        self.navigationController?.setNavigationBarHidden(false, animated: animated)
+        self.navigationItem.largeTitleDisplayMode = .never
+        self.navigationController?.navigationBar.prefersLargeTitles = false
+        self.setTranspertNavigation()
         setNavUI()
+        self.navigationController?.navigationBar.layoutIfNeeded()
     }
+
     
     func setNavUI() {
         //        self.setupNavigationBarProgress(progressBarWidth: self.view.frame.size.width*0.37)
@@ -482,7 +488,7 @@ class BookingReviewPurchaseVC: CommonViewController {
         // Package Details
         if let pkg = data.packageDetails {
             self.heightOfNewGymMembership.constant = (pkg.is_early_renew ?? false) ? 310 : 220
-            viewPlanExpired.isHidden = (pkg.is_early_renew ?? false)
+//            viewPlanExpired.isHidden = (pkg.is_early_renew ?? false)
             imgEarlyClock.isHidden = !(pkg.is_early_renew ?? false)
             lblEarlyMsg.isHidden = !(pkg.is_early_renew ?? false)
             imgNewGymEarlyClock.isHidden = !(pkg.is_early_renew ?? false)
@@ -522,8 +528,43 @@ class BookingReviewPurchaseVC: CommonViewController {
             lblTrainerName.text = trainer.name
             lblSelectedGym.text = inputParam?.type == "home" ? "" : "SELECTED GYM"
             lblGymName.text = inputParam?.type == "home" ? "" : data.studio?.name
-//            heightOfPackageDetail.constant = inputParam?.type == "home" ? 400 : (data.packageDetails?.early_renewal_text == nil) || (data.packageDetails?.early_renewal_text == "") ? 400 : 459
         }
+        
+        // Dynamically manage heightOfPackageDetail (9qG-pO-ORa inner view height) and separator constraint for every case
+        let isGym = (inputParam?.type != "home")
+        let isEarlyRenew = data.packageDetails?.is_early_renew ?? false
+        let specialMsgText = (isUpgradeSelected ? data.upgradePlan?.badgeText : data.packageDetails?.early_renewal_text) ?? ""
+        let hasSpecialMsg = !specialMsgText.isEmpty
+        
+        // separator (DUJ-qD-S47) top constraint relative to CEd-6F-JQc bottom
+        // CEd-6F-JQc is ALWAYS in layout (30pt), even when isHidden=true
+        // CEd top = 5X4.bottom(202) + 30(GrH-HO-LXP) = 232, CEd bottom = 262
+        // Without special msg (topConstraintOfSeparator = -40): DUJ top = 262-40 = 222
+        // With special msg    (topConstraintOfSeparator = +20): DUJ top = 262+20 = 282
+        // Delta between two cases = 60pt
+        if hasSpecialMsg {
+            topConstraintOfSeparator?.constant = 20
+        } else {
+            topConstraintOfSeparator?.constant = -40
+        }
+        
+        // Base heights (no early renew, no special msg):
+        //   DUJ bottom = 223, oMa top = 243, oMa bottom = 263.33
+        //   Home base = 263.33 (stops after ALL TRAINER row)
+        //   Gym base  = 263.33 + 20(gap) + 20.33(SELECTED GYM) = 303.67
+        let homeBase: CGFloat = 263.33
+        let gymBase: CGFloat = 303.67
+        var innerDetailHeight: CGFloat = isGym ? gymBase : homeBase
+        
+        if isEarlyRenew {
+            innerDetailHeight += 23.0  // clock icon 16pt + top gap 7pt
+        }
+        if hasSpecialMsg {
+            innerDetailHeight += 60.0  // DUJ shifts from 222→282, adding 60pt to all rows below
+        }
+        
+        self.heightOfPackageDetail.constant = innerDetailHeight
+        self.heightOfSuperPackageDetail?.constant = innerDetailHeight + 72.33
         
         // Address
         if let address = data.address {
