@@ -109,7 +109,10 @@ final class DoubleBookingSheetViewController: CommonViewController, UIAdaptivePr
     /// Copy that is hard-coded in the Android layout / Kotlin.
     private enum Copy {
         static let title = "You Already Have a Free Class Booked"
-        static let subtext = "You\u{2019}ve already got a free class booked, so we can\u{2019}t confirm another free spot for you right away \u{2014} this helps make sure free spots are shared fairly among all our members. To book this one too, you can either manage your current booking, or join the waitlist below and we\u{2019}ll grab you a spot the moment one opens up."
+        // One line deliberately: the "Here's What You Can Do" cards directly
+        // below already spell out both options, so anything past the reason
+        // itself just repeats them at paragraph length.
+        static let subtext = "You already have a free class booked, so we can\u{2019}t confirm another free spot right now."
         static let dividerLabel = "Here\u{2019}s What You Can Do"
         static let manageCardTitle = "Manage Your Current Booking"
         static let manageItem1 = "Complete or cancel your upcoming class"
