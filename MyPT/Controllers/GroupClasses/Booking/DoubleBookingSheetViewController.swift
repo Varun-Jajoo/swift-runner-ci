@@ -108,13 +108,14 @@ final class DoubleBookingSheetViewController: CommonViewController, UIAdaptivePr
 
     /// Copy that is hard-coded in the Android layout / Kotlin.
     private enum Copy {
-        static let title = "You already have an active booking"
-        static let dividerLabel = "To Reserve This Slot"
-        static let manageCardTitle = "Manage Current Booking"
-        static let manageItem1 = "Complete or Cancel your upcoming booking"
-        static let manageItem2 = "Your spot will be available to book this session"
-        static let waitlistCardTitle = "Join the Waitlist"
-        static let waitlistItem2 = "Spots are first-come, first-served"
+        static let title = "You Already Have a Free Class Booked"
+        static let subtext = "You\u{2019}ve already got a free class booked, so we can\u{2019}t confirm another free spot for you right away \u{2014} this helps make sure free spots are shared fairly among all our members. To book this one too, you can either manage your current booking, or join the waitlist below and we\u{2019}ll grab you a spot the moment one opens up."
+        static let dividerLabel = "Here\u{2019}s What You Can Do"
+        static let manageCardTitle = "Manage Your Current Booking"
+        static let manageItem1 = "Complete or cancel your upcoming class"
+        static let manageItem2 = "Your spot here opens right up for you"
+        static let waitlistCardTitle = "Save Your Spot on the Waitlist"
+        static let waitlistItem2 = "First come, first served \u{2014} so don\u{2019}t wait too long!"
         static let manageCTA = "MANAGE YOUR BOOKING"
         static let joinCTA = "JOIN THE WAITLIST"
 
@@ -122,7 +123,7 @@ final class DoubleBookingSheetViewController: CommonViewController, UIAdaptivePr
         /// `"We'll send an alert $notifyHours hour" + (plural ? "s" : "") + " before class if a spot opens"`.
         static func notifyHoursText(_ hours: Int) -> String {
             let unit = hours == 1 ? "hour" : "hours"
-            return "We'll send an alert \(hours) \(unit) before class if a spot opens"
+            return "We\u{2019}ll let you know \(hours) \(unit) before class if a spot opens up"
         }
     }
 
@@ -426,10 +427,18 @@ private extension DoubleBookingSheetViewController {
         contentStack.addArrangedSubview(headline)
         contentStack.setCustomSpacing(11, after: hero)
 
+        // 4b — explanatory subtext, new: the headline alone never actually
+        // said WHY this sheet showed up (that this new class overlaps in
+        // time with something already booked) or what the two cards below
+        // are for.
+        let subtext = makeSubtextLabel()
+        contentStack.addArrangedSubview(subtext)
+        contentStack.setCustomSpacing(8, after: headline)
+
         // 5 — "To Reserve This Slot" gradient divider (marginTop 18dp)
         let dividerRow = makeSectionDividerRow()
         contentStack.addArrangedSubview(dividerRow)
-        contentStack.setCustomSpacing(18, after: headline)
+        contentStack.setCustomSpacing(18, after: subtext)
 
         // 6 — connector + cards row (marginTop 18dp)
         let connectorRow = makeConnectorAndCardsRow()
@@ -554,6 +563,19 @@ private extension DoubleBookingSheetViewController {
         label.textAlignment = .center
         label.numberOfLines = 0
         label.text = Copy.title
+        return label
+    }
+
+    /// New - the headline used to go straight into the "Here's What You Can
+    /// Do" divider with no explanation of why the sheet appeared at all.
+    func makeSubtextLabel() -> UILabel {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
+        label.textColor = Palette.dividerLabel
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        label.text = Copy.subtext
         return label
     }
 

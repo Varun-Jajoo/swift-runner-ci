@@ -47,6 +47,9 @@ final class NotificationRowCell: UITableViewCell {
         timeLabel.text = NotificationRowCell.relativeTime(from: entry.createdAt)
         timeLabel.textColor = palette.time
         subtextLabel.textColor = palette.subtext
+        // Fact rows (no specific destination) don't promise navigation they
+        // can't deliver - see NotificationEntry.hasRedirect's own doc comment.
+        chevron.isHidden = !entry.hasRedirect
 
         let style = NotifStyleBridge.forType(entry.notificationType)
 

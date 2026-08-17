@@ -69,6 +69,7 @@ final class SpotTakenViewController: CommonViewController {
         static let statusSubtext = "We'll notify you if another spot becomes available for this class."
         static let categoryPill = "GROUP CLASS"
         static let exploreCTA = "EXPLORE OTHER CLASSES"
+        static let trainerSubtitle = "Certified MyPT Trainer"
     }
 
     // MARK: Views
@@ -84,6 +85,7 @@ final class SpotTakenViewController: CommonViewController {
     private let locationTitleLabel = UILabel()
     private let locationDistanceLabel = UILabel()
     private let trainerNameLabel = UILabel()
+    private let trainerSubtitleLabel = UILabel()
 
     private let footerView = UIView()
     private let exploreButton = GradientCTAButton()
@@ -456,9 +458,20 @@ private extension SpotTakenViewController {
         trainerNameLabel.numberOfLines = 1
         trainerNameLabel.lineBreakMode = .byTruncatingTail
 
-        let trainerRow = makeSingleLineDetailRow(icon: SpotTakenViewController.icon(["ic_trainer_running_18"], systemFallback: "figure.run"),
-                                                 iconSide: 16,
-                                                 titleLabel: trainerNameLabel)
+        // Matches Android's activity_spot_taken.xml (tvTrainerSub) and this
+        // module's own SlotOpenViewController - both show this caption under
+        // the trainer name; this screen was missing it entirely.
+        trainerSubtitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        trainerSubtitleLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
+        trainerSubtitleLabel.textColor = Palette.rowSubtitle
+        trainerSubtitleLabel.numberOfLines = 1
+        trainerSubtitleLabel.lineBreakMode = .byTruncatingTail
+        trainerSubtitleLabel.text = Copy.trainerSubtitle
+
+        let trainerRow = makeDetailRow(icon: SpotTakenViewController.icon(["ic_trainer_running_18"], systemFallback: "figure.run"),
+                                       iconSide: 16,
+                                       titleLabel: trainerNameLabel,
+                                       subtitleLabel: trainerSubtitleLabel)
 
         let stack = UIStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -545,16 +558,6 @@ private extension SpotTakenViewController {
         textStack.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
         let row = UIStackView(arrangedSubviews: [iconTile, textStack])
-        row.translatesAutoresizingMaskIntoConstraints = false
-        row.axis = .horizontal
-        row.alignment = .center
-        row.spacing = 12
-        return row
-    }
-
-    func makeSingleLineDetailRow(icon: UIImage?, iconSide: CGFloat, titleLabel: UILabel) -> UIStackView {
-        let iconTile = makeIconTile(image: icon, iconSide: iconSide)
-        let row = UIStackView(arrangedSubviews: [iconTile, titleLabel])
         row.translatesAutoresizingMaskIntoConstraints = false
         row.axis = .horizontal
         row.alignment = .center

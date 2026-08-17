@@ -64,10 +64,15 @@ final class DoubleBookingWaitlistConfirmedViewController: CommonViewController {
     }
 
     private enum Copy {
-        static let headerTitle = "You're on the waitlist"
-        static let headerSubtext = "You already have an overlapping booking. We'll notify you as soon as a spot opens up and your priority window opens."
-        static let categoryPill = "OVERLAPPING WAITLIST"
-        static let importantNote = "Priority Notice: Your waitlist position for this overlapping slot becomes active 3 hours prior to class start or if your existing booking is cancelled."
+        static let headerTitle = "You\u{2019}re on the List!"
+        static let headerSubtext = "Since you already have a free class booked, we\u{2019}ve saved your spot on a pending waitlist for this one instead \u{2014} we\u{2019}ll let you know the moment it\u{2019}s your turn."
+        // Android's equivalent screen also handles a "normal" (non-overlapping)
+        // waitlist entry and swaps this pill to plain "WAITLISTED" for that
+        // case (DoubleBookingWaitlistConfirmedActivity.kt) - this screen is
+        // only ever reached for the special/overlapping case, so it keeps
+        // the distinct label unconditionally rather than the generic one.
+        static let categoryPill = "PENDING WAITLIST"
+        static let importantNote = "Heads up: your spot becomes active 3 hours before class starts, or right away if your other booking gets cancelled."
         static let viewBookingCTA = "VIEW BOOKING"
     }
 

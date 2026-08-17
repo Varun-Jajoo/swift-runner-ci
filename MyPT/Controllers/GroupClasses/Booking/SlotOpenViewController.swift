@@ -432,7 +432,18 @@ final class SlotOpenViewController: CommonViewController {
                     fallback: detail.distance
                 )
                 if !resolvedDistance.isEmpty { self.locationDistanceLabel.text = resolvedDistance }
-                if let trainer = detail.name, !trainer.isEmpty { self.trainerTitleLabel.text = "Trainer: \(trainer)" }
+                // Also syncs the trainerName PROPERTY, not just the label -
+                // a claim launched from just a scheduleId (e.g. a
+                // notification tap) starts with trainerName empty, and
+                // every downstream screen (SpotTaken/ClassPayment/
+                // DoubleBookingSheet) forwards self.trainerName, not
+                // whatever the label happens to say. Without this, the
+                // label looks right here but the name is silently dropped
+                // one screen later.
+                if let trainer = detail.name, !trainer.isEmpty {
+                    self.trainerTitleLabel.text = "Trainer: \(trainer)"
+                    self.trainerName = trainer
+                }
                 if let category = detail.classType, !category.isEmpty { self.categoryPillLabel.text = category.uppercased() }
 
                 let capacity = detail.capacity ?? 1

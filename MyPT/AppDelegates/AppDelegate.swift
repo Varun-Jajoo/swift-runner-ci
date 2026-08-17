@@ -284,15 +284,29 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
         guard let type = userInfo["type"] as? String else { return }
         let scheduleId = userInfo["schedule_id"] as? String
 
-        // The push payload only carries the class name + schedule_id, not
-        // full class detail (location/trainer/time) the rejection screen
-        // needs - land on the Bookings tab and let the Cancelled row's own
-        // tap handler (already wired to detect cancelled_by_admin) build the
-        // full screen from there, rather than a second fetch just for this.
-        if type.caseInsensitiveCompare("class_cancelled_by_admin") == .orderedSame
-            || type.caseInsensitiveCompare("waitlist_not_converted") == .orderedSame
+        // Genuinely no single class to land on - a waitlist offer that timed
+        // out or an invitation that expired isn't "this class was cancelled"
+        // (ClassCancelledByAdminViewController's copy would be wrong), and
+        // there's no dedicated screen for either outcome, so the Bookings
+        // tab is the honest destination, not a compromise.
+        if type.caseInsensitiveCompare("waitlist_not_converted") == .orderedSame
             || type.caseInsensitiveCompare("waitlist_invitation_expired") == .orderedSame {
             AppDelegate.jumpToBookingsTab()
+            return
+        }
+
+        // class_cancelled_by_admin (admin pulled the whole class) and
+        // gx_booking_cancelled_ban (this member's booking specifically was
+        // cancelled because they got banned) both mean the same true thing
+        // from the tapping member's side - "this class has been cancelled" -
+        // so both open the same rejection screen, hydrated fresh via
+        // class-detail since the push/DB payload only ever carries schedule_id.
+        if type.caseInsensitiveCompare("class_cancelled_by_admin") == .orderedSame {
+            if let scheduleId = scheduleId, !scheduleId.isEmpty {
+                AppDelegate.pushCancelledClassScreen(scheduleId: scheduleId)
+            } else {
+                AppDelegate.jumpToBookingsTab()
+            }
             return
         }
 
@@ -310,12 +324,174 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
             return
         }
 
-        guard type.caseInsensitiveCompare("waitlist_spot_available") == .orderedSame,
-              let scheduleId = scheduleId, !scheduleId.isEmpty else {
+        if type.caseInsensitiveCompare("waitlist_spot_available") == .orderedSame {
+            if let scheduleId = scheduleId, !scheduleId.isEmpty {
+                AppDelegate.pushClaimScreen(scheduleId: scheduleId)
+            }
             return
         }
 
-        AppDelegate.pushClaimScreen(scheduleId: scheduleId)
+        // The member's own cancellation - they already saw the confirmation
+        // at the moment they cancelled, so there's nothing deeper to show;
+        // the Bookings tab (where the now-cancelled row lives) is the real
+        // destination, not a shortcut.
+        if type.caseInsensitiveCompare("my_bookings") == .orderedSame {
+            AppDelegate.jumpToBookingsTab()
+            return
+        }
+
+        // Same class-detail screen group_class_detail already opens - a
+        // waitlist join is still "this class", just with a waitlisted state
+        // GroupTrainingDetailViewController already knows how to render.
+        if type.caseInsensitiveCompare("waitlist_joined") == .orderedSame
+            || type.caseInsensitiveCompare("group_class_detail") == .orderedSame {
+            if let scheduleId = scheduleId, !scheduleId.isEmpty {
+                AppDelegate.pushClassDetailScreen(scheduleId: scheduleId)
+            } else {
+                AppDelegate.jumpToPlansTab()
+            }
+            return
+        }
+
+        // The actual ban screen (BookingPausedViewController), live-checked
+        // rather than trusting the notification's own snapshot - see
+        // pushBanScreen()'s own doc comment.
+        if type.caseInsensitiveCompare("gx_blacklisted") == .orderedSame {
+            AppDelegate.pushBanScreen(blacklistId: userInfo["blacklist_id"] as? String)
+            return
+        }
+
+        // membership_expired, gx_blacklist_removed, gx_waitlist_removed_ban -
+        // no dedicated screen can be driven from just what these carry
+        // (RenewPlanVC/PackageExpireVC need a pre-fetched plan list injected
+        // by their caller, not just an id to self-fetch from; a lifted ban
+        // or a waitlist removal has no detail screen at all) - Menu tab is
+        // the honest destination for these three, not a shortcut.
+        if type.caseInsensitiveCompare("my_profile") == .orderedSame {
+            AppDelegate.jumpToMenuTab()
+            return
+        }
+    }
+
+    /// `class_booking_confirmed`/`class_updated` (push type
+    /// `group_class_detail`) - only a scheduleId is known from the push
+    /// payload, so seed a minimal GroupClassTapThroughData and let
+    /// GroupTrainingDetailViewController's own viewDidLoad fetch the rest,
+    /// same minimal-seed pattern SlotOpenViewController.redirectToDetailScreen()
+    /// already uses after a claim.
+    private static func pushClassDetailScreen(scheduleId: String) {
+        guard let navigationController = AppDelegate.topNavigationController() else { return }
+
+        var tapThrough = GroupClassTapThroughData()
+        tapThrough.scheduleId = scheduleId
+
+        let controller = GroupTrainingDetailViewController()
+        controller.tapThrough = tapThrough
+        controller.hidesBottomBarWhenPushed = true
+        navigationController.pushViewController(controller, animated: true)
+    }
+
+    /// `class_cancelled_by_admin`/`gx_booking_cancelled_ban` - same idea as
+    /// pushClassDetailScreen() above, but the target
+    /// (ClassCancelledByAdminViewController) isn't self-fetching, so this
+    /// does the class-detail lookup itself (same API + fallback-location
+    /// pattern GroupTrainingDetailViewController.fetchClassDetail() uses)
+    /// and hydrates the input before pushing. A failed/empty lookup falls
+    /// back to the Bookings tab rather than pushing a blank rejection screen.
+    private static func pushCancelledClassScreen(scheduleId: String) {
+        let params: [String: String] = [
+            "lat": "\(GroupClassCardFormatter.fallbackLatitude)",
+            "long": "\(GroupClassCardFormatter.fallbackLongitude)",
+            "schdule_id": scheduleId
+        ]
+
+        UpcomingClassVM.classDetailsApi(inputParams: params, isShowLoader: false) { result in
+            DispatchQueue.main.async {
+                guard result?.status == true, let detail = result?.data,
+                      let navigationController = AppDelegate.topNavigationController() else {
+                    AppDelegate.jumpToBookingsTab()
+                    return
+                }
+
+                var input = ClassCancelledByAdminInput()
+                input.classTitle = detail.className ?? ""
+                input.classTime = detail.time ?? ""
+                input.classLocation = detail.location ?? ""
+                input.trainerName = detail.name ?? ""
+                input.distance = detail.distance ?? ""
+                input.studioLat = detail.studioLat?.doubleValue ?? 0
+                input.studioLng = detail.studioLng?.doubleValue ?? 0
+
+                let controller = ClassCancelledByAdminViewController()
+                controller.input = input
+                controller.hidesBottomBarWhenPushed = true
+                navigationController.pushViewController(controller, animated: true)
+            }
+        }
+    }
+
+    /// `gx_blacklisted` - deliberately does NOT trust hoursBlocked/resumesOn
+    /// off the notification payload itself, even though they ride along in
+    /// it. Those are a snapshot from the moment the ban was imposed; tapping
+    /// an old one after the ban has since been lifted (or just expired) must
+    /// not show stale "you're still banned" data, so this always re-checks
+    /// live via api/blacklist-status first, passing blacklistId (from the
+    /// notification's own data) so a member banned more than once gets THAT
+    /// ban's history, not whichever is most recent. Still banned -> the
+    /// normal live screen. No longer banned but a record was found ->
+    /// same screen in isHistorical mode ("you were banned on X for Y hours").
+    /// Nothing found at all (shouldn't happen from a real gx_blacklisted tap,
+    /// but defensive) -> Menu tab.
+    private static func pushBanScreen(blacklistId: String?) {
+        var queries: [String: String] = [:]
+        if let blacklistId = blacklistId, !blacklistId.isEmpty {
+            queries["blacklist_id"] = blacklistId
+        }
+
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .blacklist_status,
+                                             method: .get,
+                                             queries: queries,
+                                             isShowLoading: false) { responseData, _ in
+            DispatchQueue.main.async {
+                guard let data = responseData,
+                      let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                      let payload = json["data"] as? [String: Any],
+                      let navigationController = AppDelegate.topNavigationController() else {
+                    AppDelegate.jumpToMenuTab()
+                    return
+                }
+
+                let isBlacklisted = payload["is_blacklisted"] as? Bool == true
+                let wasBlacklisted = payload["was_blacklisted"] as? Bool == true
+                guard isBlacklisted || wasBlacklisted else {
+                    AppDelegate.jumpToMenuTab()
+                    return
+                }
+
+                let controller = BookingPausedViewController()
+                controller.isHistorical = !isBlacklisted
+                if let reason = payload["reason"] as? String, !reason.isEmpty {
+                    controller.reason = reason
+                }
+                if isBlacklisted {
+                    if let hoursRemaining = payload["hours_remaining"] as? String, !hoursRemaining.isEmpty {
+                        controller.hoursRemaining = hoursRemaining
+                    }
+                    if let resumesOn = payload["resumes_on"] as? String, !resumesOn.isEmpty {
+                        controller.resumesOn = resumesOn
+                    }
+                } else {
+                    if let hoursBlocked = payload["hours_blocked"] as? String, !hoursBlocked.isEmpty {
+                        controller.hoursRemaining = hoursBlocked
+                    }
+                    if let bannedOn = payload["banned_on"] as? String, !bannedOn.isEmpty {
+                        controller.resumesOn = bannedOn
+                    }
+                }
+                controller.hidesBottomBarWhenPushed = true
+                navigationController.pushViewController(controller, animated: true)
+            }
+        }
     }
 
     /// Every waitlisted member gets the same "a spot opened up" push at once
@@ -372,8 +548,26 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
     /// `navigationController` of its own to fall back on (e.g. a modally
     /// presented sheet) - see `DoubleBookingSheetViewController.manageBookingTapped()`.
     static func jumpToBookingsTab() {
-        let bookingsTabIndex = 2
+        jumpToTab(atIndex: 2)
+    }
 
+    /// Menu tab - Android's equivalent notification types (`my_profile`)
+    /// land on `R.id.menu`, same tab order position here (see
+    /// CustomTabViewController.setupTabbar(): Home, Plans, Bookings, Menu).
+    static func jumpToMenuTab() {
+        jumpToTab(atIndex: 3)
+    }
+
+    /// Plans tab - Android's `group_class_detail`/`waitlist_alert` land on
+    /// `R.id.plans` (their Calendar tab). Only used here as the no-schedule-id
+    /// fallback for `group_class_detail`; when a schedule_id is present,
+    /// routeNotificationTap() pushes straight to GroupTrainingDetailViewController
+    /// instead, which iOS's tab structure makes possible and Android's doesn't.
+    static func jumpToPlansTab() {
+        jumpToTab(atIndex: 1)
+    }
+
+    private static func jumpToTab(atIndex tabIndex: Int) {
         let keyWindow = UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .flatMap { $0.windows }
@@ -391,12 +585,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
 
         guard let tabBarController = tabBarController,
               let tabs = tabBarController.viewControllers,
-              tabs.indices.contains(bookingsTabIndex) else {
+              tabs.indices.contains(tabIndex) else {
             return
         }
 
-        (tabs[bookingsTabIndex] as? UINavigationController)?.popToRootViewController(animated: false)
-        tabBarController.selectedIndex = bookingsTabIndex
+        (tabs[tabIndex] as? UINavigationController)?.popToRootViewController(animated: false)
+        tabBarController.selectedIndex = tabIndex
     }
    
     

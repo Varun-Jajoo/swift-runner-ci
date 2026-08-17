@@ -27,10 +27,19 @@ final class BookingPausedViewController: CommonViewController {
     // carries, with Android's own fallback copy as the default.
 
     var reason: String = "2 consecutive no-shows for group classes"
+    /// Resume date when active, or the original ban date when `isHistorical`
+    /// - same storage slot, same on-screen row, different meaning depending
+    /// on which caption populateUI() puts above it.
     var resumesOn: String = "12 August 2026, 6:00 PM"
-    /// Raw hours-remaining value (e.g. `"24"`) — the "(N hours remaining)" wrapper
-    /// is applied in `populateUI()`, matching Android's own formatting exactly.
+    /// Raw hours value (e.g. `"24"`) — the "(N hours remaining)"/"(banned for
+    /// N hours)" wrapper is applied in `populateUI()` based on `isHistorical`.
     var hoursRemaining: String = "24"
+    /// True when this ban has already ended (lifted or simply expired) and
+    /// this screen is being shown as a historical record from tapping an old
+    /// gx_blacklisted notification, not a live block on booking. Same screen,
+    /// past-tense copy instead of "resumes on"/"remaining" - see
+    /// AppDelegate.pushBanScreen().
+    var isHistorical: Bool = false
 
     // MARK: - Layout constants
 
@@ -91,6 +100,9 @@ final class BookingPausedViewController: CommonViewController {
     private let reasonTitleLabel = UILabel()
     private let resumesDateLabel = UILabel()
     private let daysRemainingLabel = UILabel()
+    private let headerTitleLabel = UILabel()
+    private let headerSubtextLabel = UILabel()
+    private let resumesFieldCaptionLabel = UILabel()
 
     // MARK: - Lifecycle
 
@@ -115,7 +127,18 @@ final class BookingPausedViewController: CommonViewController {
         resumesDateLabel.text = resumesOn
 
         let trimmed = hoursRemaining.trimmingCharacters(in: .whitespacesAndNewlines)
-        daysRemainingLabel.text = trimmed.hasPrefix("(") ? trimmed : "(\(trimmed) hours remaining)"
+
+        if isHistorical {
+            headerTitleLabel.text = "Booking Access\nRestored"
+            headerSubtextLabel.text = "Your booking restriction has ended \u{2014} you\u{2019}re free to book group classes again."
+            resumesFieldCaptionLabel.text = "YOU WERE BANNED ON"
+            daysRemainingLabel.text = trimmed.isEmpty ? "" : "(banned for \(trimmed) hours)"
+        } else {
+            headerTitleLabel.text = Copy.headerTitle
+            headerSubtextLabel.text = Copy.headerSubtext
+            resumesFieldCaptionLabel.text = Copy.resumesFieldLabel
+            daysRemainingLabel.text = trimmed.hasPrefix("(") ? trimmed : "(\(trimmed) hours remaining)"
+        }
     }
 
     // MARK: - Actions
@@ -277,7 +300,7 @@ private extension BookingPausedViewController {
     }
 
     func makeHeaderTitleLabel() -> UILabel {
-        let label = UILabel()
+        let label = headerTitleLabel
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = AppFont.medium.size(28.0, familyName: familyClashDisplay)
         label.textColor = Palette.headerTitle
@@ -288,7 +311,7 @@ private extension BookingPausedViewController {
     }
 
     func makeHeaderSubtextLabel() -> UILabel {
-        let label = UILabel()
+        let label = headerSubtextLabel
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
         label.textColor = Palette.headerSubtext
@@ -326,8 +349,11 @@ private extension BookingPausedViewController {
             ]
         )
 
+        let reasonFieldCaptionLabel = UILabel()
+        reasonFieldCaptionLabel.text = Copy.reasonFieldLabel
+
         let reasonRow = makeFieldRow(icon: BookingPausedViewController.icon(["ic_calendar_cross_18", "calendar-cross"]),
-                                     fieldLabel: Copy.reasonFieldLabel,
+                                     fieldLabelView: reasonFieldCaptionLabel,
                                      valueLabel: reasonTitleLabel,
                                      extraLabel: reasonDescriptionLabel)
 
@@ -341,8 +367,10 @@ private extension BookingPausedViewController {
         daysRemainingLabel.textColor = Palette.daysRemainingColor
         daysRemainingLabel.numberOfLines = 1
 
+        resumesFieldCaptionLabel.text = Copy.resumesFieldLabel
+
         let resumesRow = makeFieldRow(icon: BookingPausedViewController.icon(["ic_calendar_tick_18", "calendar-tick"]),
-                                      fieldLabel: Copy.resumesFieldLabel,
+                                      fieldLabelView: resumesFieldCaptionLabel,
                                       valueLabel: resumesDateLabel,
                                       extraLabel: daysRemainingLabel)
 
@@ -369,7 +397,7 @@ private extension BookingPausedViewController {
 
     /// One "REASON" / "BOOKING ACCESS RESUMES ON" field: a 38pt red icon tile,
     /// an uppercase field label, a value label, and a trailing detail label.
-    func makeFieldRow(icon: UIImage?, fieldLabel: String, valueLabel: UILabel, extraLabel: UILabel) -> UIView {
+    func makeFieldRow(icon: UIImage?, fieldLabelView: UILabel, valueLabel: UILabel, extraLabel: UILabel) -> UIView {
         let row = UIView()
         row.translatesAutoresizingMaskIntoConstraints = false
 
@@ -387,12 +415,10 @@ private extension BookingPausedViewController {
         iconView.contentMode = .scaleAspectFit
         iconContainer.addSubview(iconView)
 
-        let fieldLabelView = UILabel()
         fieldLabelView.translatesAutoresizingMaskIntoConstraints = false
         fieldLabelView.font = AppFont.semibold.size(11.0, familyName: familyFunnelSans)
         fieldLabelView.textColor = Palette.fieldLabel
         fieldLabelView.numberOfLines = 1
-        fieldLabelView.text = fieldLabel
 
         let textStack = UIStackView(arrangedSubviews: [fieldLabelView, valueLabel, extraLabel])
         textStack.translatesAutoresizingMaskIntoConstraints = false
