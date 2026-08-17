@@ -8,6 +8,7 @@
 import UIKit
 import IQKeyboardManagerSwift
 import IQKeyboardToolbarManager
+import Mixpanel
 
 class NameViewController: CommonViewController, UITextFieldDelegate {
     
@@ -199,6 +200,10 @@ class NameViewController: CommonViewController, UITextFieldDelegate {
         }
     
     @IBAction func continueBtnActn(_ sender: Any) {
+        Mixpanel.mainInstance().track(
+            event: "Name_Entered",
+            properties: [:]
+        )
         print("Continiue btn clicked..")
         self.view.endEditing(true)
         self.updateContinueButton(isEnabled: false)

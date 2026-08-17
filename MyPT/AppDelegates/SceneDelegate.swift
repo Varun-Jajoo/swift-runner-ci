@@ -107,16 +107,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func goToMainView() {
         stroyBoard = UIStoryboard(name: "Main", bundle: nil)
         let navController: UINavigationController? = stroyBoard?.instantiateViewController(withIdentifier: "navigation") as? UINavigationController
-    
 //        let vc: ActiveHomepageVCViewController = ActiveHomepageVCViewController.instantiate(appStoryboard: .homepage)
         let vc: MainViewController = MainViewController.instantiate(appStoryboard: .main)
-//        let vc:NewCalenderViewController = NewCalenderViewController.instantiate(appStoryboard: .calendar)
+//        let vc: PackageExpireVC = PackageExpireVC.instantiate(appStoryboard: .newBookingModule)
+//        let vc: NewBookingModuleVC = NewBookingModuleVC.instantiate(appStoryboard: .newBookingModule)
+//        let vc: ChooseTrainWithVC = ChooseTrainWithVC.instantiate(appStoryboard: .newBookingModule)
 //       let vc: TrainingTeamViewController = TrainingTeamViewController.instantiate(appStoryboard: .purchase)
 
 //     let vc: LocationsViewController = LocationsViewController.instantiate(appStoryboard: .main)
 //        let vc: TimeDetailVC = TimeDetailVC.instantiate(appStoryboard: .homepage)
 //        let vc: TrainingTeamViewController = TrainingTeamViewController.instantiate(appStoryboard: .purchase)
 //        let vc: TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+//       let vc: PickTimeForBooking = PickTimeForBooking.instantiate(appStoryboard: .newBookingModule)
        navController?.setViewControllers([vc], animated: false)
         window?.rootViewController = navController
     }

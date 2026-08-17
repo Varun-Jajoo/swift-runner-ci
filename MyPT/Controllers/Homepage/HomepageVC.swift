@@ -7,6 +7,7 @@
 
 import UIKit
 import AVKit
+import Mixpanel
 
 class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
@@ -78,7 +79,12 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         lblAddress.isUserInteractionEnabled = true
         view.isUserInteractionEnabled = true
         notificationUnreadDot = NotificationBellInstaller.install(leftOf: btnNameInitial, in: self)
-
+        Mixpanel.mainInstance().track(
+            event: "Sign Up",
+            properties: [
+                "Signup Type": "Referral",
+            ]
+        )
     }
 
     // MARK: - Group Classes carousel
@@ -116,7 +122,7 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
     private func loadGroupClasses() {
         groupClassesCarousel?.loadClasses(lat: getLat, long: getLong)
     }
-    
+
     private func uiSetup() {
         self.collectionMyPt.delegate = self
         self.collectionMyPt.dataSource = self
@@ -467,6 +473,12 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
     }
     
     @IBAction func onTapBookAssessment(_ sender: UIButton) {
+        Mixpanel.mainInstance().track(
+            event: "FA_Page_Opened"
+//            properties: [
+//                "": "",
+//            ]
+        )
         if self.assesmentStatusData?.can_book ?? false {
             let vc: AssesmentDemoVC = AssesmentDemoVC.instantiate(appStoryboard: .homepage)
             vc.hidesBottomBarWhenPushed = true
@@ -488,17 +500,29 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         TapticEngine.selection.feedback()
         if sender.tag == 0 { // Home
             onTapHomeOrGymPlan(planType: "home")
+            Mixpanel.mainInstance().track(
+                event: "Buy_HomePT_Tapped",
+                properties: [:]
+            )
 //            let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
 //            vc.isHomeOrGymSelected = true
 //            vc.isHomePreSelected = true
 //            self.navigationController?.pushViewController(vc, animated: false)
         } else if sender.tag == 1 { // Gym
             onTapHomeOrGymPlan(planType: "gym")
+            Mixpanel.mainInstance().track(
+                event: "Buy_GymPT_Tapped",
+                properties: [:]
+            )
 //            let vc:CreateTrainerViewController = CreateTrainerViewController.instantiate(appStoryboard: .booking)
 //            vc.isHomeOrGymSelected = true
 //            vc.isHomePreSelected = false
 //            self.navigationController?.pushViewController(vc, animated: false)
         } else  { // Membership
+            Mixpanel.mainInstance().track(
+                event: "Buy_Membership_Tapped",
+                properties: [:]
+            )
             let vc: GymWorkoutViewController = GymWorkoutViewController.instantiate(appStoryboard: .booking)
             vc.flowGymwork = .withoutTrainerMembership
             vc.inputType = "gym"
@@ -519,6 +543,14 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
     }
     
     @IBAction func onTapAssessment(_ sender: UIButton) {
+        
+        Mixpanel.mainInstance().track(
+            event: "FA_Page_Opened"
+//            properties: [
+//                "": "",
+//            ]
+        )
+        
         if self.assesmentStatusData?.can_book ?? false {
             let vc: AssesmentDemoVC = AssesmentDemoVC.instantiate(appStoryboard: .homepage)
             vc.hidesBottomBarWhenPushed = true

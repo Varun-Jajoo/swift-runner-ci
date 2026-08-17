@@ -66,17 +66,21 @@ struct ReviewPackageCheckoutData: Codable {
     let packageDetails: PackageDetails?
     let paymentMsg: String?
     let studio: StudioData?
-    
+    var best_plans: [BestPlanData]?
+    var is_renewal: Bool?
+    var renewal_info: RenewalInfo?
+    var subscription_id: Int?
 
     enum CodingKeys: String, CodingKey {
         case availablePromos = "available_promos"
         case appliedOffer = "applied_offer"
-        case address
+        case address, best_plans
         case upgradePlan = "upgrade_plan"
         case trainerDetail = "trainer_detail"
         case packageDetails = "package_details"
         case paymentMsg = "payment_msg"
-        case studio
+        case studio, subscription_id, is_renewal
+        case renewal_info
     }
 }
 
@@ -115,6 +119,19 @@ struct StudioData: Codable {
         case id
         case address
         case name
+    }
+}
+
+// MARK: - RenewalInfo
+struct RenewalInfo: Codable {
+    let previous_sessions, remaining_sessions: Int?
+    let new_end_date, message, new_start_date, expired_date: String?
+    var is_expired: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case previous_sessions, remaining_sessions
+        case new_end_date, new_start_date, expired_date
+        case message, is_expired
     }
 }
 
@@ -227,26 +244,24 @@ struct PackageDetails: Codable {
     let sessions: Int?
     let bonusSessions: Int?
     let totalSessions: Int?
-
     let packageType: Int?
     let addressID: Int?
     let studioID: Int?
     let trainerID: Int?
     let bestPlanID: Int?
-
     let isBestPlan: Bool?
     let price: Double?
     let pricePerSession: FlexibleValue?
-
     let validity, packageName: String?
     let validityDays: Int?
-
     let taxRate: Int?
     let taxAmount: Double?
     let mainPrice: Double?
-
     let appliedOfferID: Int?
-    let textMsg: String?
+    let textMsg, early_renewal_text: String?
+    let is_early_renew: Bool?
+    let original_price, early_renewal_discount: Double?
+    let start_date, end_date: String?
 
     enum CodingKeys: String, CodingKey {
         case type, sessions
@@ -268,6 +283,8 @@ struct PackageDetails: Codable {
         case mainPrice = "main_price"
         case appliedOfferID = "applied_offer_id"
         case textMsg = "text_msg"
+        case early_renewal_text, is_early_renew, original_price, early_renewal_discount
+        case start_date, end_date
     }
 }
 
@@ -275,12 +292,12 @@ struct PackageDetails: Codable {
 // MARK: - TrainerDetail
 struct ReviewTrainerDetail: Codable {
     let primaryTrainer: ReviewPrimaryTrainer?
-//    let secondaryTrainers: [JSONAny]?
+    let secondaryTrainers: [ReviewPrimaryTrainer]?
     let isGroup: Bool?
 
     enum CodingKeys: String, CodingKey {
         case primaryTrainer = "primary_trainer"
-//        case secondaryTrainers = "secondary_trainers"
+        case secondaryTrainers = "secondary_trainers"
         case isGroup = "is_group"
     }
 }

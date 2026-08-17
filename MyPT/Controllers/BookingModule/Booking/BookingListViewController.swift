@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Mixpanel
 
 class BookingListViewController: CommonViewController {
 
@@ -53,7 +54,10 @@ class BookingListViewController: CommonViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        Mixpanel.mainInstance().track(
+            event: "MyBookings_Viewed",
+            properties: [:]
+        )
         self.setUpFont()
         self.selectedTags = 2
     }

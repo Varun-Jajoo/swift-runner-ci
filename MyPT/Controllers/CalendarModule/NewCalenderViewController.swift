@@ -7,6 +7,7 @@
 
 import UIKit
 import FSCalendar
+import Mixpanel
 
 class NewCalenderViewController: CommonViewController {
 
@@ -542,6 +543,14 @@ extension NewCalenderViewController: FSCalendarDataSource, FSCalendarDelegate, F
             selectedMonthInNumber = String(format: "%02d", monthNumber)
 
             calendar.reloadData()
+
+            let dateString = ymdFormatter.string(from: date)
+            Mixpanel.mainInstance().track(
+                event: "FA_Date_Selected",
+                properties: [
+                    "date": dateString
+                ]
+            )
             handleDateSelected(date)
         }
 
@@ -656,9 +665,6 @@ extension NewCalenderViewController {
 //  KEY FIX: bgImageView has inset padding inside the cell so that even though
 //  FSCalendar stretches cells to fill the full column width, the *visible*
 //  rounded square is smaller — giving the appearance of gaps between cells.
-
-import UIKit
-import FSCalendar
 
 // MARK: - Cell State
 enum CalendarCellState {

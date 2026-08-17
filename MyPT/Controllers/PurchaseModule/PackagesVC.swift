@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Mixpanel
 
 class PackagesVC: CommonViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
@@ -60,6 +61,19 @@ class PackagesVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        if package_type == "4" {
+            Mixpanel.mainInstance().track(
+                event: "Membership_Plan_Viewed",
+                properties: [:]
+            )
+        } else {
+            Mixpanel.mainInstance().track(
+                event: inputType == "home" ? "Home_Pricing_Viewed" : "GymPT_Pricing_Viewed",
+                properties: [
+                    "training_type": package_type == "1" ? "Solo" : package_type == "2" ? "Buddy" : "Group"
+                ]
+            )
+        }
         if let param = inputParam {
             print("inputParam value:", param)
         } else {
@@ -78,7 +92,6 @@ class PackagesVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         viewCustomised.isHidden = true
         viewbEstPlan.isHidden = false
         viewCustomBottom.isHidden = true
-        getBestPlans()
         setupScrollView()
         view.layoutIfNeeded()
         scrollView.contentSize = CGSize(
@@ -93,6 +106,8 @@ class PackagesVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         rulerView.scrollToValue(rulerView: rulerView, scrollView: scrollView, 1)
         //        scrollToInitialValue(1)
         setBottomBarUI(isExpanded: false)
+        updateContinueButton(isEnabled: true)
+        setupContinueButtonIcon(isEnabled: true)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -109,6 +124,7 @@ class PackagesVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         //        btnBestPlan.setTitleColor(.black, for: .normal)
         // Default selection
         updatePlanSelection(isBestPlanSelected: true)
+        getBestPlans()
     }
     
     func setNavUI() {
@@ -152,7 +168,7 @@ class PackagesVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         self.btnCustomization.titleLabel?.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
 //        self.btnContinueSummary.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
 //        self.btnContinueSummary.setTitle("CONTINUE TO SUMMARY  ", for: .normal)
-        self.btnContinueSummary.setImage(UIImage(named: "ButtonContinueToSummary"), for: .normal)
+//        self.btnContinueSummary.setImage(UIImage(named: "ButtonContinueToSummary"), for: .normal)
 //        self.btnContinueSummary.semanticContentAttribute = .forceRightToLeft
 //        self.lblFaltu.font = AppFont.regular.size(14.0, familyName: familyClashDisplay)
 //        self.btnContinueSummary.tintColor = .mainBg   // arrow color
@@ -164,6 +180,7 @@ class PackagesVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
     }
     
     private func setupUI() {
+        self.btnContinueSummary.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
         self.btnContinueSummary.setCornerRadius(borderWidth: 0, borderColor: nil, cornerRadious: 12.0)
     }
     
@@ -204,32 +221,12 @@ class PackagesVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         section.interGroupSpacing = 18   //  was 20 (too much)
         
         section.contentInsets = NSDirectionalEdgeInsets(
-            //            top: 20,
-            //            leading: 16,   //  reduced (cell already has 18)
-            //            bottom: 20,
-            //            trailing: 16
-            
             top: 16,
             leading: 10,   //  reduced (cell already has 18)
             bottom: 16,
             trailing: 10
         )
         
-        // OLD CODE ***********************
-        //        section.visibleItemsInvalidationHandler = { items, offset, env in
-        //            let centerX = offset.x + env.container.contentSize.width / 2
-        //
-        //            items.forEach { item in
-        //                let distance = abs(item.frame.midX - centerX)
-        //                let normalized = min(distance / env.container.contentSize.width, 1)
-        //
-        //                //  Only Y-offset (no scaling)
-        //                let yOffset = normalized * 26   // adjust 22–30 if needed
-        //
-        //                item.transform = CGAffineTransform(translationX: 0, y: yOffset)
-        //                item.zIndex = Int((1 - normalized) * 10)
-        //            }
-        //        }
         section.visibleItemsInvalidationHandler = { [weak self] items, offset, env in
             guard let self = self else { return }
             
@@ -329,6 +326,7 @@ class PackagesVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
             viewCustomBottom.isHidden = true
             viewBottomSelectionPlan.isHidden = false
             self.lblAED.font = AppFont.medium.size(16.0, familyName: familyClashDisplay)
+            getBestPlans()
 //            lblFaltu.textColor = UIColor(red: 255/255, green: 255/255, blue: 255/255, alpha: 1)
         } else {
             // Customization Selected
@@ -368,6 +366,60 @@ class PackagesVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         updateScrollBarUI()
     }
     
+    
+    func updateContinueButton(isEnabled: Bool) {
+        btnContinueSummary.isEnabled = isEnabled
+        btnContinueSummary.isUserInteractionEnabled = isEnabled
+        
+        UIView.animate(withDuration: 0) {
+            self.setupContinueButtonIcon(isEnabled: isEnabled)
+            if isEnabled {
+                self.btnContinueSummary.tintColor = .mainBg   // arrow color
+                self.btnContinueSummary.backgroundColor = .appWhite
+                self.btnContinueSummary.setTitleColor(.mainBg, for: .normal)
+            } else {
+                self.btnContinueSummary.tintColor = .appWhite
+                self.btnContinueSummary.backgroundColor = .appDarkGray
+                self.btnContinueSummary.setTitleColor(.appWhite, for: .normal)
+            }
+        }
+    }
+    
+    func setupContinueButtonIcon(isEnabled: Bool) {
+        if isEnabled {
+            // 🟢 ENABLED → IMAGE ONLY
+            btnContinueSummary.setTitle("CONTINUE TO SUMMARY", for: .normal)
+            btnContinueSummary.setTitleColor(.black, for: .normal)
+
+            let arrowImage = UIImage(named: "blackRightArrow")?
+                .withRenderingMode(.alwaysOriginal)
+            btnContinueSummary.setImage(arrowImage, for: .normal)
+
+            btnContinueSummary.semanticContentAttribute = .forceRightToLeft
+
+            // spacing between text & arrow
+            btnContinueSummary.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
+            btnContinueSummary.titleEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 8)
+            btnContinueSummary.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+
+        } else {
+            // 🔴 DISABLED → TEXT + ARROW
+            btnContinueSummary.setTitle("CONTINUE TO SUMMARY", for: .normal)
+            btnContinueSummary.setTitleColor(.appWhite, for: .normal)
+
+            let arrowImage = UIImage(named: "whiteRightArrow")?
+                .withRenderingMode(.alwaysOriginal)
+            btnContinueSummary.setImage(arrowImage, for: .normal)
+
+            btnContinueSummary.semanticContentAttribute = .forceRightToLeft
+
+            // spacing between text & arrow
+            btnContinueSummary.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
+            btnContinueSummary.titleEdgeInsets = UIEdgeInsets(top: 0, left: -8, bottom: 0, right: 8)
+            btnContinueSummary.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+        }
+    }
+    
     // MARK: - API's
     private func getBestPlans() {
         let params: [String: String] = [
@@ -382,7 +434,14 @@ class PackagesVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
                 self.bestPlans = plans
                 self.collectionBestPlan.reloadData()
                 DispatchQueue.main.async {
+                    self.updateContinueButton(isEnabled: self.bestPlans.isEmpty ? false : true)
+                    self.setupContinueButtonIcon(isEnabled: self.bestPlans.isEmpty ? false : true)
                     self.updateBottomLabelsForBestPlan()
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.updateContinueButton(isEnabled: false)
+                    self.setupContinueButtonIcon(isEnabled: false)
                 }
             }
         }
@@ -398,7 +457,16 @@ class PackagesVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
             guard let self = self else { return }
             if let customisePlan = result?.data {
                 self.gymMembershipData = customisePlan.packageDetail
+                DispatchQueue.main.async {
+                    self.updateContinueButton(isEnabled: self.gymMembershipData == nil ? false : true)
+                    self.setupContinueButtonIcon(isEnabled: self.gymMembershipData == nil ? false : true)
+                }
                 self.collectionCustomised.reloadData()
+            } else {
+                DispatchQueue.main.async {
+                    self.updateContinueButton(isEnabled: false)
+                    self.setupContinueButtonIcon(isEnabled: false)
+                }
             }
         }
     }
@@ -417,7 +485,16 @@ class PackagesVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
                 self.customisePlans = customisePlan
                 //                if customisePlan.details?.sessions == "1" && !initialScrollCompleted {
                 //                }
+                DispatchQueue.main.async {
+                    self.updateContinueButton(isEnabled: self.customisePlans == nil ? false : true)
+                    self.setupContinueButtonIcon(isEnabled: self.customisePlans == nil ? false : true)
+                }
                 self.collectionCustomised.reloadData()
+            } else {
+                DispatchQueue.main.async {
+                    self.updateContinueButton(isEnabled: false)
+                    self.setupContinueButtonIcon(isEnabled: false)
+                }
             }
         }
     }
@@ -505,7 +582,17 @@ class PackagesVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
     func collectionView(_ collectionView: UICollectionView,
                         numberOfItemsInSection section: Int) -> Int {
         if collectionView == collectionBestPlan {
-            return bestPlans.count
+            let count = bestPlans.count
+            if count == 0 {
+                collectionView.showEmptyView(
+                    title: "No Best plans Found",
+                    image: AppImages.search_NoResult,
+                    centerOffset: -100   // adjust if needed
+                )
+            } else {
+                collectionView.restoreEmptyView()
+            }
+            return count
         } else {
             return 1
         }

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Mixpanel
 
 class AssesmentReiviewBookingVC: CommonViewController {
     
@@ -34,6 +35,14 @@ class AssesmentReiviewBookingVC: CommonViewController {
         uiSetup()
         setNavUI()
         reviewAssessmentApi()
+        Mixpanel.mainInstance().track(
+            event: "FA_Review_Viewed",
+            properties: [
+                "service_type": reviewAssessmentData?.type == "gym" ? "Gym" : "Home",
+                "location": reviewAssessmentData?.location_name ?? "",
+                "trainer_id": inputParam?.trainer_id
+            ]
+        )
     }
     
     private func uiSetup() {
@@ -121,6 +130,16 @@ class AssesmentReiviewBookingVC: CommonViewController {
     }
     
     @IBAction func onTapBookTrainer(_ sender: UIButton) {
+        Mixpanel.mainInstance().track(
+            event: "FA_Booking_Confirmed",
+            properties: [
+                "service_type": reviewAssessmentData?.type == "gym" ? "Gym" : "Home",
+                "location": reviewAssessmentData?.location_name ?? "",
+                "trainer_id": inputParam?.trainer_id,
+                "date": reviewAssessmentData?.date ?? "",
+                "time": reviewAssessmentData?.timing ?? ""
+            ]
+        )
         bookAssessmentApi()
     }
     
@@ -148,7 +167,14 @@ class AssesmentReiviewBookingVC: CommonViewController {
         TrainerVM.getAddressApi(viewController: self, inputParms: [:], completion: { [weak self] getResultData in
             guard let self = self, let getResultData = getResultData else { return  }
             print("getResultData", getResultData.data as Any)
-            vc.addressData?.append(contentsOf: getResultData.data ?? [])
+//            vc.addressData?.append(contentsOf: getResultData.data ?? [])
+            let addresses = getResultData.data ?? []
+            vc.addressData?.append(contentsOf: addresses)
+            // Pre-select the address that was previously chosen (match by id)
+            if let selectedId = self.inputParam?.addressData?.id?.value,
+               let matchedIndex = addresses.firstIndex(where: { $0.id?.value == selectedId }) {
+                vc.currentSelectedAddress = matchedIndex
+            }
             present(vc, animated: true)
         })
     }

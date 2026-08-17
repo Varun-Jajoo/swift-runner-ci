@@ -153,13 +153,15 @@ struct SubscriptionSlotTrainer: Codable {
 
 // MARK: - Slot
 struct Slot: Codable {
-    let id: FlexibleValue?
-    let time, startTime, endTime: String?
+    var id: FlexibleValue?
+    var isSelected: Bool?
+    var time, startTime, endTime, time_display: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, time
+        case id, time, isSelected
         case startTime = "start_time"
         case endTime = "end_time"
+        case time_display = "time_display"
     }
 }
 

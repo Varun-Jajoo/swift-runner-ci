@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Mixpanel
 
 class GymWorkoutViewController: CommonViewController {
 
@@ -329,6 +330,10 @@ extension GymWorkoutViewController: UITableViewDataSource, UITableViewDelegate{
             $0.id == Int(sender.accessibilityHint ?? "0")
         })
         if flowGymwork == .withoutTrainerMembership {
+            Mixpanel.mainInstance().track(
+                event: "Buy_Membership_Tapped",
+                properties: [:]
+            )
             let vc: PackagesVC = PackagesVC.instantiate(appStoryboard: .purchase)
             vc.studioIdStr = self.inputParam?.studio_id
             vc.flowGymwork = self.flowGymwork

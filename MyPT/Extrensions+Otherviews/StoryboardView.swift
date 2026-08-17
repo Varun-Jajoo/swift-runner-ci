@@ -18,6 +18,7 @@ enum AppStoryboard: String {
     case profile = "Profile"
     case purchase = "Purchase"
     case homepage = "Homepage"
+    case newBookingModule = "NewBookingModule"
 }
 
 private var backgroundImageViewTag: Int { return 9991 }

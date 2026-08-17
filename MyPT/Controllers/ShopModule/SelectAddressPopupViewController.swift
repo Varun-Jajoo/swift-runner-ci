@@ -139,10 +139,10 @@ class SelectAddressPopupViewController: UIViewController {
         if let touch = touches.first {
             let location = touch.location(in: view)
             if !self.addressPopupMBV.frame.contains(location) {
-                      self.dismiss(animated: true, completion: nil)
-                  }else{
-                      print("tap at popup view.")
-                  }
+                self.dismiss(animated: true, completion: nil)
+            } else {
+                print("tap at popup view.")
+            }
         }
     }
     

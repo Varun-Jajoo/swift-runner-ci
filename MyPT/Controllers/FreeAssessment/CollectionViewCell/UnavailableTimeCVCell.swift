@@ -46,4 +46,28 @@ class UnavailableTimeCVCell: UICollectionViewCell {
             lblTime.textColor = .white
         }
     }
+    
+    func setSelectedSlot(_ selected: Bool) {
+        if selected {
+            // Selected state — highlight border + background
+            viewUnavailableTime.cornersWithBorder(
+                radius: 8,
+                corners: .allCorners,
+                borderColor: UIColor(red: 224/255, green: 254/255, blue: 8.0/255, alpha: 0.4),
+                borderWidth: 2
+            )
+            viewUnavailableTime.backgroundColor = UIColor(red: 224/255, green: 254/255, blue: 8.0/255, alpha: 0.05)
+            lblTime.textColor = .white
+        } else {
+            // Unselected state — default border
+            viewUnavailableTime.cornersWithBorder(
+                radius: 8,
+                corners: .allCorners,
+                borderColor: UIColor(red: 255/255, green: 255/255, blue: 255/255, alpha: 0.1),
+                borderWidth: 2
+            )
+            viewUnavailableTime.backgroundColor = .clear
+            lblTime.textColor = .white
+        }
+    }
 }

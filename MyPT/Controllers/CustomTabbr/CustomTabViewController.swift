@@ -22,8 +22,8 @@ enum vcDashboard: Int {
             return HomepageVC.instantiate(appStoryboard: .homepage)
 //            return DashboardGuestViewController.instantiate(appStoryboard: .dashboard)
         case .dashboard:
-            return HomepageVC.instantiate(appStoryboard: .homepage)
-//            return ActiveHomepageVCViewController.instantiate(appStoryboard: .homepage)
+//            return HomepageVC.instantiate(appStoryboard: .homepage)
+            return ActiveHomepageVCViewController.instantiate(appStoryboard: .homepage)
 //            return DashboardViewController.instantiate(appStoryboard: .dashboard)
         }
     }
@@ -107,9 +107,9 @@ final class CustomTabViewController: UITabBarController, UITabBarControllerDeleg
 
         let homeController: UIViewController
 
-        if isForGeustDashboard == true {
-            homeController = HomepageVC.instantiate(appStoryboard: .homepage)
-        } else {
+//        if isForGeustDashboard == true {
+//            homeController = HomepageVC.instantiate(appStoryboard: .homepage)
+//        } else {
             switch homeType {
             case .guest:
                 homeController = HomepageVC.instantiate(appStoryboard: .homepage)
@@ -117,7 +117,7 @@ final class CustomTabViewController: UITabBarController, UITabBarControllerDeleg
             case .activePackage:
                 homeController = ActiveHomepageVCViewController.instantiate(appStoryboard: .homepage)
             }
-        }
+//        }
 
         // Tab Items
         homeController.tabBarItem = UITabBarItem(

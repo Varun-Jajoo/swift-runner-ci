@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Mixpanel
 
 class PreferredTimeVC: CommonViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
@@ -71,6 +72,13 @@ class PreferredTimeVC: CommonViewController, UICollectionViewDelegate, UICollect
             
             // Update label with both times
             self.updateTimeLabel(start: time)
+//            self.selectedSlotTime = time
+            Mixpanel.mainInstance().track(
+                event: "FA_Time_Selected",
+                properties: [
+                    "time": time
+                ]
+            )
             self.getSlotsByTime(inputParams: self.params?.getParams() ?? [:])
         }
         

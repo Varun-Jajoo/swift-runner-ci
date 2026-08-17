@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Mixpanel
 
 class TrainerListViewController: CommonViewController {
     
@@ -221,6 +222,7 @@ class TrainerListViewController: CommonViewController {
                 vc.inputLong = "\(self.inputLong ?? 0.0)"
                 vc.inputLat = "\(self.inputLat ?? 0.0)"
                 vc.inputParam = inputParam
+                vc.package_type = self.package_type
                 self.navigationController?.pushViewController(vc, animated: true)
             } else {
                 let vc: SearchViewController = SearchViewController.instantiate(appStoryboard: .dashboard)
@@ -232,6 +234,7 @@ class TrainerListViewController: CommonViewController {
                 vc.inputLat = "\(self.inputLat ?? 0.0)"
                 vc.seacrhGymTrainerData = self.gymTrainerData
                 vc.inputParam = inputParam
+                vc.package_type = self.package_type
                 self.navigationController?.pushViewController(vc, animated: true)
             }
         }
@@ -564,6 +567,7 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
                 var inputData = inputParam
                 inputData?.trainer_id = "\(self.trainerData?[indexPath.row].id ?? 0)"
                 vc.inputParam = inputData
+                vc.package_type = package_type
                 self.navigationController?.pushViewController(vc, animated: true)
             } else {
                 let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
@@ -573,6 +577,7 @@ extension TrainerListViewController: UICollectionViewDataSource, UICollectionVie
                 var inputData = inputParam
                 inputData?.trainer_id = "\(self.gymTrainerData?[indexPath.row].id ?? 0)"
                 vc.inputParam = inputData
+                vc.package_type = package_type
                 self.navigationController?.pushViewController(vc, animated: true)
             }
         }
@@ -694,7 +699,7 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
         }
     }
     
-    @objc func bookSlotBtnActn(sender:UIButton) {
+    @objc func bookSlotBtnActn(sender: UIButton) {
         if let isFromHome = isFromHome, isFromHome {
             let getIndx = self.trainerData?.firstIndex(where: {
                 $0.id == Int(sender.accessibilityHint ?? "0")
@@ -702,6 +707,13 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
             if let getIndx = getIndx {
                 let trainerDetails = self.trainerData?[getIndx]
                 if self.inputParam?.isFreeAssessmentSelected ?? false { // only for Free Assessment
+                    Mixpanel.mainInstance().track(
+                        event: "FA_Trainer_Selected",
+                        properties: [
+                            "service_type": self.inputType,
+                            "trainer_id": "\(trainerDetails?.id ?? 0)",
+                        ]
+                    )
                     let vc: NewCalenderViewController = NewCalenderViewController.instantiate(appStoryboard: .calendar)
                     vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
                     vc.studioIdStr = studioId
@@ -712,6 +724,13 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
                     vc.inputParam = newData
                     self.navigationController?.pushViewController(vc, animated: true)
                 } else {
+                    Mixpanel.mainInstance().track(
+                        event: "HomePT_Trainer_Selected",
+                        properties: [
+                            "service_type": self.inputType,
+                            "trainer_id": "\(trainerDetails?.id ?? 0)",
+                        ]
+                    )
                     if trainerDetails?.isPackage ?? false { // Old Flow to book a slot
                         if let isFull = trainerDetails?.isfull, let slotAvail = trainerDetails?.slot?.value, isFull && slotAvail.lowercased() == "no".lowercased() {
                             AlertHelper.shared.alertMesssage(view: self, title: "", message: "No slots available")
@@ -757,6 +776,13 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
                 let trainerDetails = self.gymTrainerData?[getIndx]
                 let currentMonth = Calendar.current.component(.month, from: Date())
                 if self.inputParam?.isFreeAssessmentSelected ?? false { // only for Free Assessment
+                    Mixpanel.mainInstance().track(
+                        event: "FA_Trainer_Selected",
+                        properties: [
+                            "service_type": self.inputType,
+                            "trainer_id": "\(trainerDetails?.id ?? 0)",
+                        ]
+                    )
                     let vc: NewCalenderViewController = NewCalenderViewController.instantiate(appStoryboard: .calendar)
                     vc.trainerIdStr = "\(trainerDetails?.id ?? 0)"
                     vc.studioIdStr = studioId
@@ -767,6 +793,13 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
                     vc.inputParam = newData
                     self.navigationController?.pushViewController(vc, animated: true)
                 } else {
+                    Mixpanel.mainInstance().track(
+                        event: "GymPT_Trainer_Selected",
+                        properties: [
+                            "service_type": self.inputType,
+                            "trainer_id": "\(trainerDetails?.id ?? 0)",
+                        ]
+                    )
                     if trainerDetails?.isPackage ?? false {  // Old Flow to book a slot
                         if let isFull = trainerDetails?.isfull , let slotAvail = trainerDetails?.slot, isFull && slotAvail.lowercased() == "no".lowercased() {
                             AlertHelper.shared.alertMesssage(view: self, title: "", message: "No slots available")
@@ -809,23 +842,24 @@ extension TrainerListViewController: UITableViewDelegate, UITableViewDataSource{
     
     @objc func viewProfileBtnActn(sender:UIButton) {
         if let isFromHome = isFromHome, isFromHome {
-            
-            let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+            let vc: TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
             let getIndx = self.trainerData?.firstIndex(where: {
                 $0.id == Int(sender.accessibilityHint ?? "0")
             })
             var inputData = inputParam
             inputData?.trainer_id = "\(self.trainerData?[getIndx ?? 0].id ?? 0)"
             vc.inputParam = inputData
+            vc.package_type = self.package_type
             self.navigationController?.pushViewController(vc, animated: true)
-        }else{
-            let vc:TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
+        } else{
+            let vc: TrainerDescriptionViewController = TrainerDescriptionViewController.instantiate(appStoryboard: .booking)
             let getIndx = self.gymTrainerData?.firstIndex(where: {
                 $0.id == Int(sender.accessibilityHint ?? "0")
             })
             var inputData = inputParam
             inputData?.trainer_id = "\(self.gymTrainerData?[getIndx ?? 0].id ?? 0)"
             vc.inputParam = inputData
+            vc.package_type = self.package_type
             self.navigationController?.pushViewController(vc, animated: true)
         }
     }

@@ -174,6 +174,11 @@ enum ApiEndPoint: String {
    case getTrainerStudios               =   "api/get-trainer-studios"
    case clientPtTerms               =   "api/get-legal-document/client_pt_terms"
    case skipProfile               =   "api/skip-profile"
+   case newBookingTrainerSlots               =   "api/get-group-trainer-slots"
+   case newBookingGroupDateSlots               =   "api/get-group-date-slots"
+   case newBookingCheckClientGroup              =   "api/check-client-group"
+   case newBookingReviewGroupBooking            =   "api/review-group-booking"
+   case newBookingConfirmGroupBooking            =   "api/confirm-group-booking"
   
     case authLoginOTP = "authLoginOTP"
     case refreshAccessToken = "refreshToken"

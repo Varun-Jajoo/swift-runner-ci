@@ -7,6 +7,7 @@
 
 import UIKit
 import FacebookLogin
+import Mixpanel
 
 class MoreViewController: UIViewController {
     
@@ -416,6 +417,10 @@ extension MoreViewController:UICollectionViewDataSource, UICollectionViewDelegat
             guard self != nil else { return }
             
             if tagGet == 0 {
+                Mixpanel.mainInstance().track(
+                    event: "Logout_Tapped",
+                    properties: [:]
+                )
                 self?.logoutIfFacebookLoggedIn()
                 if appUserDefaults.clearUserDefault() {
                     appSceneDelegate?.goToMainView()

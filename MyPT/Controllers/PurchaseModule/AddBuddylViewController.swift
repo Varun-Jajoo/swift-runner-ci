@@ -172,16 +172,33 @@ class AddBuddylViewController: CommonViewController, AddMemberProtocol {
         self.navigationController?.pushViewController(vc, animated: true)
     }
     @IBAction func onTapAddBuddy(_ sender: UIButton) {
-        let vc: AddMembersVC = AddMembersVC.instantiate(appStoryboard: .booking)
-        vc.modalPresentationStyle = .automatic
-        vc.delegate = self
-        vc.isGroup = isGroup
-        vc.addMaxMember = Int(memberData?.maxMember?.value ?? "0")
-        vc.addedMember = self.memberList?.count
-        var data = inputParam
-        data?.package_type = packageType
-        vc.inputParam = data
-        self.present(vc, animated: true)
+        if isGroup {
+            if let maxMember = memberData?.maxMember?.value, let totalAddMember = self.memberList?.count, (Int(maxMember) ?? 0) > totalAddMember {
+                let vc: AddMembersVC = AddMembersVC.instantiate(appStoryboard: .booking)
+                vc.modalPresentationStyle = .automatic
+                vc.delegate = self
+                vc.isGroup = isGroup
+                vc.addMaxMember = Int(memberData?.maxMember?.value ?? "0")
+                vc.addedMember = self.memberList?.count
+                var data = inputParam
+                data?.package_type = packageType
+                vc.inputParam = data
+                self.present(vc, animated: true)
+            } else {
+                AlertHelper.shared.alertMesssage(view: self, title: "", message: memberData?.limit ?? "")
+            }
+        } else {
+            let vc: AddMembersVC = AddMembersVC.instantiate(appStoryboard: .booking)
+            vc.modalPresentationStyle = .automatic
+            vc.delegate = self
+            vc.isGroup = isGroup
+            vc.addMaxMember = Int(memberData?.maxMember?.value ?? "0")
+            vc.addedMember = self.memberList?.count
+            var data = inputParam
+            data?.package_type = packageType
+            vc.inputParam = data
+            self.present(vc, animated: true)
+        }
     }
 }
 
@@ -311,6 +328,7 @@ extension AddBuddylViewController: UITableViewDelegate, UITableViewDataSource {
                 let vc: AddMembersVC = AddMembersVC.instantiate(appStoryboard: .booking)
                 vc.modalPresentationStyle = .automatic
 //                vc.navCtrnl = self.navigationController
+                vc.isGroup = isGroup
                 vc.addMemberData = memberDetailsData
                 vc.addedMember = (totalAddMember == Int(maxMember) ? totalAddMember - 1: totalAddMember)
                 vc.addMaxMember = Int(maxMember)

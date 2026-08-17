@@ -20,7 +20,7 @@ class AddMembersVC: UIViewController {
     private var currentAddMember: Int = 0
     var addMemberData: MemberModel?
     var delegate: AddMemberProtocol?
-    private var genderStr: String?
+    private var genderStr: String? = "male"
     var isGroup = false
     var inputParam: DetailsParam?
     
@@ -164,14 +164,27 @@ class AddMembersVC: UIViewController {
     }
     private func setupDataIfEdit() {
         guard let data = addMemberData, let id = data.id, id != 0 else { return }
-        
+        let selectedImg = UIImage(named: "Radio")
+        let unSelectedImg = UIImage(named: "Unradio")
         fullNameTxt.text = data.name
         ageTxt.text = data.age?.value
-        
+        genderStr = data.gender?.lowercased()
         if let gender = data.gender?.lowercased() {
-            if gender == "male" { selectGender(sender: maleBtn) }
-            else if gender == "female" { selectGender(sender: femaleBtn) }
-            else { selectGender(sender: otherBtn) }
+            if gender == "male" {
+                femaleBtn?.setImage(unSelectedImg, for: .normal)
+                otherBtn?.setImage(unSelectedImg, for: .normal)
+                maleBtn.setImage(selectedImg, for: .normal)
+            } else if gender == "female" {
+                otherBtn?.setImage(unSelectedImg, for: .normal)
+                maleBtn.setImage(unSelectedImg, for: .normal)
+                femaleBtn.setImage(selectedImg, for: .normal)
+//                selectGender(sender: femaleBtn)
+            } else {
+                femaleBtn?.setImage(unSelectedImg, for: .normal)
+                maleBtn.setImage(unSelectedImg, for: .normal)
+                otherBtn.setImage(selectedImg, for: .normal)
+//                selectGender(sender: otherBtn)
+            }
         }
     }
     

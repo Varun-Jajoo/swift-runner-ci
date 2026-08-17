@@ -27,7 +27,6 @@ class ExpiredPlanCVCell: UICollectionViewCell {
         super.awakeFromNib()
     
             uiSetup()
-            
             progressBar.translatesAutoresizingMaskIntoConstraints = false
             viewProgress.addSubview(progressBar)
 
@@ -48,14 +47,28 @@ class ExpiredPlanCVCell: UICollectionViewCell {
         self.lblSessionUtilization.font = AppFont.regular.size(12, familyName: familyFunnelSans)
         self.lblTotalSesion.font = AppFont.regular.size(12, familyName: familyFunnelSans)
         self.imgPlan.setCornerRadius(cornerRadious: 16)
-        self.viewPlan.setCornerRadius(cornerRadious: 12)
-        self.viewMsg.setCornerRadius(cornerRadious: 12)
+//        self.viewPlan.setCornerRadius(cornerRadious: 12)
+//        self.viewMsg.setCornerRadius(cornerRadious: 12)
         self.btnRenewNow.setTitle("RENEW NOW", for: .normal)
         self.btnRenewNow.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
         self.btnRenewNow.tintColor = .mainBg   // arrow color
         self.btnRenewNow.backgroundColor = .appWhite
         self.btnRenewNow.setTitleColor(.mainBg, for: .normal)
-        self.btnRenewNow.cornersWithBorder(radius: 8, corners: .allCorners)
+        DispatchQueue.main.async {
+            self.viewMsg.cornersWithBorder(
+                radius: 12,
+                corners: .allCorners,
+                borderColor: UIColor(red: 238/255, green: 77/255, blue: 55/255, alpha: 0.13),
+                borderWidth: 3
+            )
+            self.viewPlan.cornersWithBorder(
+                radius: 12,
+                corners: .allCorners,
+                borderColor: UIColor(red: 238/255, green: 77/255, blue: 55/255, alpha: 0.13),
+                borderWidth: 3
+            )
+            self.btnRenewNow.cornersWithBorder(radius: 8, corners: .allCorners)
+        }
     }
     
     func configure(with model: PlanDetailsModel) {
@@ -66,16 +79,19 @@ class ExpiredPlanCVCell: UICollectionViewCell {
         
         // Labels
         lblPlanImg.text = model.name?.value
-        lblRemainingSession.text = "\(Int(remaining)) sessions remaining"
-        lblTotalSesion.text = "Total \(Int(total)) sessions"
+        lblRemainingSession.text = model.is_membership ?? false ? "\(Int(remaining)) days remaining" : "\(Int(remaining)) sessions remaining"
+        lblTotalSesion.text = model.is_membership ?? false ? "Total \(Int(total)) days" : "Total \(Int(total)) sessions"
+        lblSessionUtilization.text = model.is_membership ?? false ? "Days Utilization" : "Session Utilization"
         
         if let remainingDays = model.remaining_days?.intValue {
 //            lblValidDate.text = "Valid for \(remainingDays) days"
         }
         
-        if let imageUrl = model.image {
-            self.imgPlan.loadImage(urlString: imageUrl, placeholder: nil)
-        }
+//        if let imageUrl = model.image {
+//            self.imgPlan.loadImage(urlString: imageUrl, placeholder: nil)
+//        }
+        lblMsg.text = model.msg?.value
+        lblExpiredDate.text = model.end_date?.value
         // Progress
         progressBar.total = total
         progressBar.setProgress(used)

@@ -8,6 +8,7 @@
 import UIKit
 import IQKeyboardManagerSwift
 import IQKeyboardToolbarManager
+import Mixpanel
 
 class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFieldDelegate {
 
@@ -134,6 +135,10 @@ class HeightViewController: CommonViewController, UIScrollViewDelegate, UITextFi
     }
     
     override func rightBtnActn(sender: UIButton) {
+        Mixpanel.mainInstance().track(
+            event: "Profile_Setup_Skipped",
+            properties: [:]
+        )
         skipProfileApi(completion: { data in
             appUserDefaults.setRegistrationSkip(value: true)
             appSceneDelegate?.setupTab(selectedTab: 0, isGoGeustDashboard: !appUserDefaults.getIsPackageCreated())

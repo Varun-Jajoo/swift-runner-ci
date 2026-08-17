@@ -21,10 +21,20 @@ class TrainerSuggestionCVCell: UICollectionViewCell, UICollectionViewDelegate, U
     @IBOutlet weak var imgTrainer: UIImageView!
     @IBOutlet weak var btnStackView: UIStackView!
     @IBOutlet weak var viewInfo: UIView!
+    @IBOutlet weak var lblInfo: UILabel!
+    @IBOutlet weak var heightOfQuickBtn: NSLayoutConstraint!
     
     override func awakeFromNib() {
         super.awakeFromNib()
         uiSetup()
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        heightOfQuickBtn.constant = viewInfo.isHidden ? 42 : 0
+        // Re-apply corners every layout pass so the mask always matches the button's current bounds.
+        // Must be here (not in awakeFromNib async) to handle both fresh and reused cells correctly.
+        btnQuickBook.cornersWithBorder(radius: 8, corners: .allCorners)
     }
     
     private func uiSetup() {
@@ -34,21 +44,35 @@ class TrainerSuggestionCVCell: UICollectionViewCell, UICollectionViewDelegate, U
             UINib(nibName: "TimeSlotCVCell", bundle: nil),
             forCellWithReuseIdentifier: "TimeSlotCVCell"
         )
-        viewBackground.cornersWithBorder(radius: 16, corners: .allCorners)
+//        viewBackground.cornersWithBorder(radius: 16, corners: .allCorners)
         imgBackground.cornersWithBorder(radius: 16, corners: .allCorners)
         imgTrainer.cornersWithBorder(radius: 18, corners: .allCorners)
         self.lblTrainerAvailability.font = AppFont.regular.size(13.0, familyName: familyFunnelSans)
         self.lblTrainerName.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
+        self.lblInfo.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
+        self.btnStackView.alignment = .center
         
         DispatchQueue.main.async {
-             self.btnQuickBook.setTitle("QUICK BOOK  ", for: .normal)
-             self.btnQuickBook.setImage(UIImage(named: "blackRightArrow"), for: .normal)
-             self.btnQuickBook.semanticContentAttribute = .forceRightToLeft
-             self.btnQuickBook.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
-             self.btnQuickBook.tintColor = .mainBg   // arrow color
-             self.btnQuickBook.backgroundColor = .appWhite
-             self.btnQuickBook.setTitleColor(.mainBg, for: .normal)
-             self.btnQuickBook.cornersWithBorder(radius: 8, corners: .allCorners)
+            self.btnQuickBook.setTitle("QUICK BOOK  ", for: .normal)
+            self.btnQuickBook.setImage(UIImage(named: "blackRightArrow"), for: .normal)
+            self.btnQuickBook.semanticContentAttribute = .forceRightToLeft
+            self.btnQuickBook.titleLabel?.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
+            self.btnQuickBook.tintColor = .mainBg   // arrow color
+            self.btnQuickBook.backgroundColor = .appWhite
+            self.btnQuickBook.setTitleColor(.mainBg, for: .normal)
+            // cornersWithBorder for btnQuickBook is handled in layoutSubviews
+            self.viewInfo.cornersWithBorder(
+                radius: 12,
+                corners: .allCorners,
+                borderColor: UIColor(red: 238/255, green: 77/255, blue: 55/255, alpha: 0.13),
+                borderWidth: 3
+            )
+            self.viewBackground.cornersWithBorder(
+                radius: 12,
+                corners: .allCorners,
+                borderColor: UIColor(red: 39/255, green: 40/255, blue: 42/255, alpha: 1),
+                borderWidth: 3
+            )
         }
     }
 
@@ -61,7 +85,6 @@ class TrainerSuggestionCVCell: UICollectionViewCell, UICollectionViewDelegate, U
         }
         collectionTime.reloadData()
     }
-
     
     @IBAction func onTapQuickBook(_ sender: UIButton) {
         if sender.tag == 0 {
@@ -88,7 +111,11 @@ class TrainerSuggestionCVCell: UICollectionViewCell, UICollectionViewDelegate, U
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        
         return CGSize(width: 150, height: 32)
     }
+    
+//    // Prevent inner TimeSlotCVCell highlight from dimming viewInfo/lblInfo
+//    func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool {
+//        return false
+//    }
 }
