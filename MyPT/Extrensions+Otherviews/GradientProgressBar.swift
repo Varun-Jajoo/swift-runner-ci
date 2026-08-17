@@ -69,7 +69,7 @@ final class GradientProgressBar: UIView {
     }
     
     func setProgress(_ value: CGFloat) {
-        currentProgress = min(max(value, 0), total)
+        currentProgress = total > 0 ? min(max(value, 0), total) : 0
         setNeedsLayout()
     }
 }
