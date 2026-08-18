@@ -22,16 +22,12 @@ class  BookingVM {
         NetworkManager.shared.genericAPICall(serviceEndPoint: .get_booking, method: .get , queries: params, parameters:  nil, isShowLoading: false, isShowLoadingWithoutMsg: true, completion: {  ( getResponce, error) in
             do{
                 print(getResponce as Any)
-                if let responceData = getResponce {
-                    let getResult = try JSONDecoder().decode(BookingBaseModel.self, from: responceData)
-                    if (getResult.status == true)  {
-                        completion(getResult)
-                    }
-                    else{
-                        completion(getResult)
-//                        AlertHelper.shared.showCustomeAlert(title: "", message: getResult.errors ?? "", completion: nil)
-                    }
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
                 }
+                let getResult = try JSONDecoder().decode(BookingBaseModel.self, from: responceData)
+                completion(getResult)
                 
                 /*
                 if let responceData = getResponce {
@@ -50,7 +46,17 @@ class  BookingVM {
                 }
                 */
             }catch {
+                // Was a silent dead end - identical to the bug already fixed in
+                // `UpcomingClassVM.classDetailsApi`: neither branch above called
+                // `completion` when the response was missing, and a decode failure
+                // just printed and fell through, so the caller's closure never fired
+                // and the Bookings list/detail stayed frozen on its previous state
+                // with no error surfaced. Because [BookingDataModel] decodes as a
+                // unit, ONE row the decoder cannot read takes the WHOLE list down -
+                // which is why a single newly-created or edited booking can blank
+                // the screen.
                 print(error)
+                completion(nil)
             }
         })
     }
@@ -70,18 +76,24 @@ class  BookingVM {
         NetworkManager.shared.genericAPICall(serviceEndPoint: .booking_detail, method: .get , queries: inputParams, parameters:  nil, isShowLoading: isShowLoader, completion: {  ( getResponce, error) in
             do{
                 print(getResponce as Any)
-                if let responceData = getResponce {
-                    let getResult = try JSONDecoder().decode(BookingDetailsBaseModel.self, from: responceData)
-                    if (getResult.status == true)  {
-                        completion(getResult)
-                    }
-                    else{
-                        completion(getResult)
-//                        AlertHelper.shared.showCustomeAlert(title: "", message: getResult.errors ?? "", completion: nil)
-                    }
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
                 }
+                let getResult = try JSONDecoder().decode(BookingDetailsBaseModel.self, from: responceData)
+                completion(getResult)
             }catch {
+                // Was a silent dead end - identical to the bug already fixed in
+                // `UpcomingClassVM.classDetailsApi`: neither branch above called
+                // `completion` when the response was missing, and a decode failure
+                // just printed and fell through, so the caller's closure never fired
+                // and the Bookings list/detail stayed frozen on its previous state
+                // with no error surfaced. Because [BookingDataModel] decodes as a
+                // unit, ONE row the decoder cannot read takes the WHOLE list down -
+                // which is why a single newly-created or edited booking can blank
+                // the screen.
                 print(error)
+                completion(nil)
             }
         })
     }
@@ -117,7 +129,17 @@ class  BookingVM {
                     }
                 }
             }catch {
+                // Was a silent dead end - identical to the bug already fixed in
+                // `UpcomingClassVM.classDetailsApi`: neither branch above called
+                // `completion` when the response was missing, and a decode failure
+                // just printed and fell through, so the caller's closure never fired
+                // and the Bookings list/detail stayed frozen on its previous state
+                // with no error surfaced. Because [BookingDataModel] decodes as a
+                // unit, ONE row the decoder cannot read takes the WHOLE list down -
+                // which is why a single newly-created or edited booking can blank
+                // the screen.
                 print(error)
+                completion(nil)
             }
         })
     }
@@ -147,7 +169,17 @@ class  BookingVM {
                     }
                 }
             }catch {
+                // Was a silent dead end - identical to the bug already fixed in
+                // `UpcomingClassVM.classDetailsApi`: neither branch above called
+                // `completion` when the response was missing, and a decode failure
+                // just printed and fell through, so the caller's closure never fired
+                // and the Bookings list/detail stayed frozen on its previous state
+                // with no error surfaced. Because [BookingDataModel] decodes as a
+                // unit, ONE row the decoder cannot read takes the WHOLE list down -
+                // which is why a single newly-created or edited booking can blank
+                // the screen.
                 print(error)
+                completion(nil)
             }
         })
     }
@@ -167,18 +199,24 @@ class  BookingVM {
         NetworkManager.shared.genericAPICall(serviceEndPoint: .get_allslots_Reschedule, method: .get , queries: inputParams, parameters:  nil, isShowLoading: isShowLoader, completion: {  ( getResponce, error) in
             do{
                 print(getResponce as Any)
-                if let responceData = getResponce {
-                    let getResult = try JSONDecoder().decode(SlotsBaseModel.self, from: responceData)
-                    if (getResult.status == true)  {
-                        completion(getResult)
-                    }
-                    else{
-                        completion(getResult)
-//                        AlertHelper.shared.showCustomeAlert(title: "", message: getResult.errors ?? "", completion: nil)
-                    }
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
                 }
+                let getResult = try JSONDecoder().decode(SlotsBaseModel.self, from: responceData)
+                completion(getResult)
             }catch {
+                // Was a silent dead end - identical to the bug already fixed in
+                // `UpcomingClassVM.classDetailsApi`: neither branch above called
+                // `completion` when the response was missing, and a decode failure
+                // just printed and fell through, so the caller's closure never fired
+                // and the Bookings list/detail stayed frozen on its previous state
+                // with no error surfaced. Because [BookingDataModel] decodes as a
+                // unit, ONE row the decoder cannot read takes the WHOLE list down -
+                // which is why a single newly-created or edited booking can blank
+                // the screen.
                 print(error)
+                completion(nil)
             }
         })
     }
@@ -214,7 +252,17 @@ class  BookingVM {
                     }
                 }
             }catch {
+                // Was a silent dead end - identical to the bug already fixed in
+                // `UpcomingClassVM.classDetailsApi`: neither branch above called
+                // `completion` when the response was missing, and a decode failure
+                // just printed and fell through, so the caller's closure never fired
+                // and the Bookings list/detail stayed frozen on its previous state
+                // with no error surfaced. Because [BookingDataModel] decodes as a
+                // unit, ONE row the decoder cannot read takes the WHOLE list down -
+                // which is why a single newly-created or edited booking can blank
+                // the screen.
                 print(error)
+                completion(nil)
             }
         })
     }
@@ -248,7 +296,17 @@ class  BookingVM {
                     }
                 }
             }catch {
+                // Was a silent dead end - identical to the bug already fixed in
+                // `UpcomingClassVM.classDetailsApi`: neither branch above called
+                // `completion` when the response was missing, and a decode failure
+                // just printed and fell through, so the caller's closure never fired
+                // and the Bookings list/detail stayed frozen on its previous state
+                // with no error surfaced. Because [BookingDataModel] decodes as a
+                // unit, ONE row the decoder cannot read takes the WHOLE list down -
+                // which is why a single newly-created or edited booking can blank
+                // the screen.
                 print(error)
+                completion(nil)
             }
         })
     }
@@ -268,18 +326,24 @@ class  BookingVM {
             do{
                 print(getResponce as Any)
                 
-                if let responceData = getResponce {
-                    let getResult = try JSONDecoder().decode(BookingDetailsBaseModel.self, from: responceData)
-                    if (getResult.status == true)  {
-                        completion(getResult)
-                    }
-                    else{
-                        completion(getResult)
-//                        AlertHelper.shared.showCustomeAlert(title: "", message: getResult.errors ?? "", completion: nil)
-                    }
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
                 }
+                let getResult = try JSONDecoder().decode(BookingDetailsBaseModel.self, from: responceData)
+                completion(getResult)
             }catch {
+                // Was a silent dead end - identical to the bug already fixed in
+                // `UpcomingClassVM.classDetailsApi`: neither branch above called
+                // `completion` when the response was missing, and a decode failure
+                // just printed and fell through, so the caller's closure never fired
+                // and the Bookings list/detail stayed frozen on its previous state
+                // with no error surfaced. Because [BookingDataModel] decodes as a
+                // unit, ONE row the decoder cannot read takes the WHOLE list down -
+                // which is why a single newly-created or edited booking can blank
+                // the screen.
                 print(error)
+                completion(nil)
             }
         })
     }

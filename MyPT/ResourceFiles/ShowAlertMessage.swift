@@ -9,7 +9,10 @@ import UIKit
 
 class AlertHelper: NSObject {
     static let shared = AlertHelper()
-    
+
+    private var isPresentingAlert = false
+    private var pendingAlerts: [() -> Void] = []
+
     func alertMesssage(view: UIViewController, title: String, message: String) -> Void {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let defaultAction = UIAlertAction(title: "OK", style: .default, handler: { action in
@@ -43,18 +46,59 @@ class AlertHelper: NSObject {
     }
     
     //MARK: -------------------FOR ROOTVIEW
-   private func presentViewController(alertController: UIAlertController, completion: (() -> Void)? = nil) {
-        let scenes = UIApplication.shared.connectedScenes
-        let windowScene = scenes.first as? UIWindowScene
-        if var topController = windowScene?.windows.first?.rootViewController {
-            while let presentedViewController = topController.presentedViewController {
-                topController = presentedViewController
+    /// Guards against UIKit's fatal "Attempt to present <UIAlertController> ...
+    /// while a presentation is in progress" crash: rapid free -> paid -> free
+    /// booking flows can each fire their own alert/loader/sheet transition in
+    /// quick succession, all funnelling through this single shared presenter.
+    /// Alerts requested while one is already up (or the top controller is mid
+    /// present/dismiss) are queued and shown one at a time instead of colliding.
+    private func presentViewController(alertController: UIAlertController, completion: (() -> Void)? = nil) {
+        let work: () -> Void = { [weak self] in
+            guard let self = self else { return }
+            guard let topController = self.topMostViewController() else {
+                self.isPresentingAlert = false
+                self.presentNextPendingAlert()
+                return
             }
-            
-            DispatchQueue.main.async {
-                topController.present(alertController, animated: true, completion: completion)
+            guard topController.presentedViewController == nil,
+                  !topController.isBeingPresented,
+                  !topController.isBeingDismissed else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+                    self?.presentViewController(alertController: alertController, completion: completion)
+                }
+                return
+            }
+            self.isPresentingAlert = true
+            topController.present(alertController, animated: true) { [weak self] in
+                completion?()
+                self?.isPresentingAlert = false
+                self?.presentNextPendingAlert()
             }
         }
+
+        if isPresentingAlert {
+            pendingAlerts.append(work)
+        } else {
+            work()
+        }
+    }
+
+    private func presentNextPendingAlert() {
+        guard !isPresentingAlert, !pendingAlerts.isEmpty else { return }
+        let next = pendingAlerts.removeFirst()
+        next()
+    }
+
+    private func topMostViewController() -> UIViewController? {
+        let scenes = UIApplication.shared.connectedScenes
+        let windowScene = scenes.first as? UIWindowScene
+        guard var topController = windowScene?.windows.first(where: { $0.isKeyWindow })?.rootViewController else {
+            return nil
+        }
+        while let presentedViewController = topController.presentedViewController {
+            topController = presentedViewController
+        }
+        return topController
     }
     private override init() { }
 }

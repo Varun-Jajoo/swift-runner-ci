@@ -75,10 +75,16 @@ class BookingListTableViewCell: UITableViewCell {
     //MARK: -----------FONT SETUP
     private func setUpFont(){
         self.dateLbl.font = AppFont.semibold.size(18, familyName: familyManrope)
-        
+
+        // sessionDescLbl carries the actual class name for group-class rows
+        // (BookingListController.php sets session_type = $class->title) - give
+        // it its own bolder, larger title-style weight instead of the same
+        // 14pt as the other secondary values, so the class name reads as the
+        // row's title rather than just another detail field.
+        self.sessionDescLbl.font = AppFont.bold.size(17, familyName: familyManrope)
+
         [
             self.workoutFocusDescLbl,
-            self.sessionDescLbl,
             self.timeLbl,
             self.trainerNameLbl,
             self.trainingLocDesc
@@ -120,11 +126,24 @@ class BookingListTableViewCell: UITableViewCell {
         self.dateLbl.text = inputData.timing?.value
 //        self.workoutFocusDescLbl.text = inputData.workoutFocus?.joined(separator: ",")
         self.workoutFocusDescLbl.text = inputData.bookingType
-        self.sessionDescLbl.text = inputData.sessionType?.value
+        // sessionType carries the class title for group-class rows
+        // (BookingListController.php sets it to $class->name), the same
+        // text workoutFocusDescLbl just showed above it - swap in a generic
+        // "Group" tag there instead of repeating it.
+        self.sessionDescLbl.text = inputData.isGroupClass ? "Group" : inputData.sessionType?.value
         self.timeLbl.text = inputData.duration?.value
         self.trainerNameLbl.text = inputData.trainer?.value
-        self.trainingLocDesc.text = inputData.location?.value
-       
+
+        // Group-class rows show only the studio name via the same canonical
+        // cleanup the browse cards use (`GroupClassCardFormatter.cleanStudioName`)
+        // - real studio names here are "Gym Type - Branch" (e.g. "Mixed Gym -
+        // Silicon Oasis"), which a comma-only check never actually cleaned.
+        // Every other row keeps the full location string.
+        let rawLocation = inputData.location?.value ?? ""
+        self.trainingLocDesc.text = inputData.isGroupClass
+            ? GroupClassCardFormatter.cleanStudioName(rawLocation)
+            : rawLocation
+
         if type == 2{
             if let isReschedule = inputData.isReschedule, isReschedule {
                 self.rescheduledBtn.isHidden = false
@@ -155,7 +174,25 @@ class BookingListTableViewCell: UITableViewCell {
                 self.addLeftBorder(borderColor: UIColor(red: 93.0/255.0, green: 182.0/255.0, blue: 195.0/255.0, alpha: 1))
             }
         } else if type == 0{
-            self.addLeftBorder(borderColor: UIColor.appRed)
+            // Only paid, refund-eligible cancellations reach this tab at all
+            // (BookingListController excludes free cancellations entirely) -
+            // tag them distinctly instead of a plain red "CANCELLED" look,
+            // the same way Android's Cancelled tab does with its pill.
+            if inputData.isRefund == true {
+                self.addLeftBorder(borderColor: UIColor(red: 0x4C/255.0, green: 0x8D/255.0, blue: 0xFF/255.0, alpha: 1))
+                let text = inputData.timing?.value ?? ""
+                let tag = "  ·  REFUND"
+                let textAttributed = NSAttributedString(string: text, attributes: [.foregroundColor: UIColor.appWhite])
+                let tagAttributed = NSAttributedString(string: tag, attributes: [
+                    .foregroundColor: UIColor(red: 0x4C/255.0, green: 0x8D/255.0, blue: 0xFF/255.0, alpha: 1)
+                ])
+                let finalString = NSMutableAttributedString()
+                finalString.append(textAttributed)
+                finalString.append(tagAttributed)
+                self.dateLbl.attributedText = finalString
+            } else {
+                self.addLeftBorder(borderColor: UIColor.appRed)
+            }
         } else if type == 1{
             self.addLeftBorder(borderColor: UIColor.appGreen)
         }

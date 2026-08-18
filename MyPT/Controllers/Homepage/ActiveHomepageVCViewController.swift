@@ -69,11 +69,23 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     @IBOutlet weak var lblTrainingTeamHeading: UILabel!
     @IBOutlet weak var btnNameInitial: UIButton!
     @IBOutlet weak var pageController: UIPageControl!
+
     @IBOutlet weak var heightOfCollectionPlan: NSLayoutConstraint!
     
+
+
+    /// Group Classes carousel, inserted into the storyboard's content stack view
+    /// at runtime (see `setupGroupClassesSection()`).
+    private var groupClassesCarousel: GroupClassesCarouselView?
+
+    private weak var notificationUnreadDot: UIView?
+
+
     override func viewDidLoad() {
         super.viewDidLoad()
         uiSetup()
+        notificationUnreadDot = NotificationBellInstaller.install(leftOf: btnNameInitial, in: self)
+        setupGroupClassesSection()
         generateDates()
         collectionDate.reloadData()
         //        lblSuggestionNoData.isHidden = true
@@ -83,7 +95,9 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.isNavigationBarHidden = true
-        
+        groupClassesCarousel?.startRealtime()
+        NotificationBellInstaller.refreshUnreadBadge(notificationUnreadDot)
+
         // Reset date selection and suggestions when returning from another tab.
         generateDates()
         selectedIndex = 0
@@ -91,11 +105,17 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         collectionDate.reloadData()
         collectionBookingSuggestion.reloadData()
         
+        // `getLocation()`'s own completion already calls `loadGroupClasses()`
+        // once real coordinates land - calling it again here unconditionally
+        // fired the same "viewall-classes" request twice on every cold-cache
+        // appearance (once with fallback coordinates, once for real).
+        var hasCachedLocation = false
         if let lat = appUserDefaults.getLatLong()?.components(separatedBy: ",").first,
             let long = appUserDefaults.getLatLong()?.components(separatedBy: ",").last {
             print("Current lat", lat)
             self.getLat = Double(lat)
             self.getLong = Double(long)
+            hasCachedLocation = true
             let currentLoc: String? = appUserDefaults.getCurrentAddr()
             if let currentLoc = currentLoc {
                 self.lblAddress.text = String(currentLoc.prefix(25))
@@ -112,12 +132,20 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         bookingListApi()
         getPlansApi()
         getBannerApi()
+        if hasCachedLocation {
+            loadGroupClasses()
+        }
         if let firstDate = dates.first {
             let todayDate = getFormattedDate(from: firstDate)
             callSlotsApi(date: todayDate)
         }
     }
-    
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        groupClassesCarousel?.stopRealtime()
+    }
+
     private func uiSetup() {
         collectionSessionType.delegate = self
         collectionSessionType.dataSource = self
@@ -199,9 +227,46 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             getStoriesApi()
             bookingListApi()
             getPlansApi()
+            loadGroupClasses()
         }
     }
-    
+
+    // MARK: - Group Classes carousel
+
+    /// Inserts the Group Classes carousel directly below the "Smart Suggestions"
+    /// section, matching Android's `fragment_active_user_home_new.xml` where
+    /// `groupClassesSection` sits between the smart-suggestion block and the
+    /// "Your Training Team" header.
+    ///
+    /// The anchor is resolved from the already-wired `lblSmartSuggestion` outlet:
+    /// its enclosing section view (label + date strip + suggestions carousel) is a
+    /// direct arranged subview of the screen's vertical content stack view, so no
+    /// storyboard XML has to change.
+    private func setupGroupClassesSection() {
+        guard groupClassesCarousel == nil else { return }
+
+        groupClassesCarousel = GroupClassesCarouselView.insert(after: lblSmartSuggestion) { [weak self] tapThroughData in
+            guard let self = self else { return }
+            GroupClassNavigator.pushDetail(from: self, data: tapThroughData)
+        }
+        groupClassesCarousel?.onSeeAllTapped = { [weak self] in
+            guard let self = self else { return }
+            let controller = SeeAllGroupClassesViewController()
+            controller.initialLat = self.getLat ?? GroupClassCardFormatter.fallbackLatitude
+            controller.initialLng = self.getLong ?? GroupClassCardFormatter.fallbackLongitude
+            controller.hidesBottomBarWhenPushed = true
+            self.navigationController?.pushViewController(controller, animated: true)
+        }
+
+        if groupClassesCarousel == nil {
+            print("GroupClasses: Smart Suggestions anchor not found — carousel not inserted")
+        }
+    }
+
+    private func loadGroupClasses() {
+        groupClassesCarousel?.loadClasses(lat: getLat, long: getLong)
+    }
+
     private func setUpData() {
         
         // Background Image (id 4)
@@ -565,14 +630,32 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if collectionView == collectionMyBooking {
+            guard let session = self.upcomingSessionData?[indexPath.row] else { return }
+            let typeStr = session.sessionType?.value?.lowercased() ?? ""
+            let bookingType = session.bookingType?.lowercased() ?? ""
+            let isGroupClass = typeStr.contains("group") || typeStr == "class" || bookingType.contains("group") || bookingType == "class"
+            if isGroupClass {
+                let confirmed = SlotConfirmedViewController()
+                let title = session.bookingType?.isEmpty == false ? session.bookingType : session.sessionType?.value
+                confirmed.classTitle = title ?? ""
+                confirmed.classTime = session.timing?.value ?? ""
+                confirmed.classLocation = session.location?.value ?? ""
+                confirmed.trainerName = session.trainer?.value ?? ""
+                confirmed.distance = session.distance?.value ?? ""
+                confirmed.classPrice = session.price?.value ?? ""
+                confirmed.studioLat = Double(session.studioLat?.value ?? "") ?? 0
+                confirmed.studioLng = Double(session.studioLng?.value ?? "") ?? 0
+                confirmed.isReadOnly = true
+                confirmed.bookingId = session.id?.value ?? ""
+                confirmed.canCancelBooking = true
+                confirmed.hidesBottomBarWhenPushed = true
+                self.navigationController?.pushViewController(confirmed, animated: true)
+                return
+            }
             let vc: BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
-            //            if let getIndx = self.upcomingSessionData?.firstIndex(where: {
-            //                $0.id?.value == sender.accessibilityHint ?? "0"
-            //            }) {
             vc.detailsFlow = .upcoming
-            vc.bookingIdStr = "\(self.upcomingSessionData?[indexPath.row].id?.value ?? "0")"
-            vc.typeStr = self.upcomingSessionData?[indexPath.row].sessionType?.value
-            //            }
+            vc.bookingIdStr = "\(session.id?.value ?? "0")"
+            vc.typeStr = session.sessionType?.value
             self.navigationController?.pushViewController(vc, animated: true)
         } else if collectionView == collectionMyPTAction {
             let storiesList = homeStoriesData?[indexPath.row].stories
@@ -843,15 +926,39 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     }
     
     @objc func checkInBtnActn(sender:UIButton) {
+
         let vc: BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
+
         if let getIndx = self.upcomingSessionData?.firstIndex(where: {
             $0.id?.value == sender.accessibilityHint ?? "0"
-        }) {
+        }), let session = self.upcomingSessionData?[getIndx] {
+            let typeStr = session.sessionType?.value?.lowercased() ?? ""
+            let bookingType = session.bookingType?.lowercased() ?? ""
+            let isGroupClass = typeStr.contains("group") || typeStr == "class" || bookingType.contains("group") || bookingType == "class"
+            if isGroupClass {
+                let confirmed = SlotConfirmedViewController()
+                let title = session.bookingType?.isEmpty == false ? session.bookingType : session.sessionType?.value
+                confirmed.classTitle = title ?? ""
+                confirmed.classTime = session.timing?.value ?? ""
+                confirmed.classLocation = session.location?.value ?? ""
+                confirmed.trainerName = session.trainer?.value ?? ""
+                confirmed.distance = session.distance?.value ?? ""
+                confirmed.classPrice = session.price?.value ?? ""
+                confirmed.studioLat = Double(session.studioLat?.value ?? "") ?? 0
+                confirmed.studioLng = Double(session.studioLng?.value ?? "") ?? 0
+                confirmed.isReadOnly = true
+                confirmed.bookingId = session.id?.value ?? ""
+                confirmed.canCancelBooking = true
+                confirmed.hidesBottomBarWhenPushed = true
+                self.navigationController?.pushViewController(confirmed, animated: true)
+                return
+            }
+            let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
             vc.detailsFlow = .upcoming
-            vc.bookingIdStr = "\(self.upcomingSessionData?[getIndx].id?.value ?? "0")"
-            vc.typeStr = self.upcomingSessionData?[getIndx].sessionType?.value
+            vc.bookingIdStr = "\(session.id?.value ?? "0")"
+            vc.typeStr = session.sessionType?.value
+            self.navigationController?.pushViewController(vc, animated: true)
         }
-        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     private func getTopContentsApi() {

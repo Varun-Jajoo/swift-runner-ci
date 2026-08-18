@@ -30,6 +30,10 @@ struct UpcomingDataModel: Codable {
 struct UpcomingClassModel: Codable {
     var classID: Int?
     var className, allClassClass: String?
+    /// Secondary title key. Android reads `json.optString("name")` and falls back
+    /// `class` -> `name` -> "Group Training" when painting a class card, so the key
+    /// has to be decoded here for the two platforms to render the same title.
+    var name: String?
     var scheduleID, categoryID: Int?
     var image: String?
     var status, location, type, studioName: String?
@@ -37,10 +41,20 @@ struct UpcomingClassModel: Codable {
     var price: FlexibleValue?
     var trainedBy: String?
     var trainerImage: String?
+    var access: String?
+    var isMember: Bool?
+    var isBooked: Bool?
+    var isWaitlisted: Bool?
+    // FlexibleValue: backend types are inconsistent (Android reads these with the coercing
+    // optInt/optDouble accessors). Read via `.intValue` / `.doubleValue` / `.value`.
+    var bookedCount, totalCapacity, remainingSeats: FlexibleValue?
+    var distance: String?
+    var studioLat, studioLng: FlexibleValue?
 
     enum CodingKeys: String, CodingKey {
         case classID = "class_id"
         case className = "class"
+        case name
         case scheduleID = "schedule_id"
         case categoryID = "category_id"
         case image, status, location, type
@@ -48,6 +62,15 @@ struct UpcomingClassModel: Codable {
         case time, price, start_end
         case trainedBy = "trained_by"
         case trainerImage = "trainer_image"
+        case access, distance
+        case isMember = "is_member"
+        case isBooked = "is_booked"
+        case isWaitlisted = "is_waitlisted"
+        case bookedCount = "booked_count"
+        case totalCapacity = "total_capacity"
+        case remainingSeats = "remaining_seats"
+        case studioLat = "studio_lat"
+        case studioLng = "studio_lng"
     }
 }
 

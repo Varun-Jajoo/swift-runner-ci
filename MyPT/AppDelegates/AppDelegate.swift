@@ -66,7 +66,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Register with APNs
          application.registerForRemoteNotifications()
-        
+
+        // Safety net alongside the refresh-callback upload in
+        // `messaging(_:didReceiveRegistrationToken:)`: catches a token that
+        // rotated while the app wasn't running to receive that callback, or
+        // simply hasn't been re-confirmed to the server in a while. No-ops
+        // if the cached token is already in sync and recent (see
+        // `FcmTokenSync.needsUpload`), or if nobody's logged in yet.
+        FcmTokenSync.sync(token: appUserDefaults.getReFCMToken())
+
         return true
     }
     
@@ -173,16 +181,56 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
     // FCM token received
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         print("✅ FCM Token: \(fcmToken ?? "None")")
-        
+
         Messaging.messaging().token { token, error in
             if let error = error {
                 print("❌ Error fetching FCM token: \(error)")
             } else if let token = token {
                 print("✅ FCM Token: \(token)")
                 appUserDefaults.setFCMToken(refreshToken: token)
+                // This was the actual bug: the refreshed token was saved
+                // locally and never told to the backend, so the server kept
+                // pushing to the old, dead token once Firebase rotated it -
+                // notifications worked right after login, then silently
+                // stopped until the next one. `upload` unconditionally (not
+                // `sync`'s staleness check) since a genuinely NEW token from
+                // FCM should always be pushed regardless of when the last
+                // sync happened.
+                FcmTokenSync.upload(token)
+                DispatchQueue.main.async {
+                    AppDelegate.showDebugFCMToken(token)
+                }
             }
         }
-        // Optionally send to your server
+    }
+
+    // TEMP DEBUG - remove once the FCM token's been copied out.
+    private static func showDebugFCMToken(_ token: String) {
+        guard let keyWindow = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .flatMap({ $0.windows })
+            .first(where: { $0.isKeyWindow }) else { return }
+
+        keyWindow.viewWithTag(999_888).map { $0.removeFromSuperview() }
+
+        let textView = UITextView()
+        textView.tag = 999_888
+        textView.text = token
+        textView.textColor = .blue
+        textView.backgroundColor = .white
+        textView.font = .systemFont(ofSize: 11)
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        keyWindow.addSubview(textView)
+        keyWindow.bringSubviewToFront(textView)
+
+        NSLayoutConstraint.activate([
+            textView.leadingAnchor.constraint(equalTo: keyWindow.safeAreaLayoutGuide.leadingAnchor, constant: 8),
+            textView.trailingAnchor.constraint(equalTo: keyWindow.safeAreaLayoutGuide.trailingAnchor, constant: -8),
+            textView.topAnchor.constraint(equalTo: keyWindow.safeAreaLayoutGuide.topAnchor, constant: 4),
+            textView.heightAnchor.constraint(equalToConstant: 80)
+        ])
     }
 
    
@@ -215,20 +263,141 @@ extension AppDelegate: UNUserNotificationCenterDelegate, MessagingDelegate {
                                     withCompletionHandler completionHandler: @escaping () -> Void) {
        let userInfo = response.notification.request.content.userInfo
 
-       // ...
-
-       // With swizzling disabled you must let Messaging know about the message, for Analytics
-       // Messaging.messaging().appDidReceiveMessage(userInfo)
-
        // Print full message.
        print(userInfo)
-         
-//         let userInfo = response.notification.request.content.userInfo
 
          Messaging.messaging().appDidReceiveMessage(userInfo)
 
+         AppDelegate.routeNotificationTap(userInfo: userInfo)
+         if let type = userInfo["type"] as? String {
+             NotificationReadTracker.markReadByContext(pushType: type, scheduleId: userInfo["schedule_id"] as? String)
+         }
+
          completionHandler()
      }
+
+    /// Not private: also called directly by NotificationsViewController's row
+    /// tap (NotificationRouting.route(notificationType:data:)) so the list
+    /// screen and an actual push tap can never navigate differently for the
+    /// same type.
+    static func routeNotificationTap(userInfo: [AnyHashable: Any]) {
+        guard let type = userInfo["type"] as? String else { return }
+        let scheduleId = userInfo["schedule_id"] as? String
+
+        // The push payload only carries the class name + schedule_id, not
+        // full class detail (location/trainer/time) the rejection screen
+        // needs - land on the Bookings tab and let the Cancelled row's own
+        // tap handler (already wired to detect cancelled_by_admin) build the
+        // full screen from there, rather than a second fetch just for this.
+        if type.caseInsensitiveCompare("class_cancelled_by_admin") == .orderedSame
+            || type.caseInsensitiveCompare("waitlist_not_converted") == .orderedSame
+            || type.caseInsensitiveCompare("waitlist_invitation_expired") == .orderedSame {
+            AppDelegate.jumpToBookingsTab()
+            return
+        }
+
+        if type.caseInsensitiveCompare("waitlist_open_slots") == .orderedSame {
+            // The local "N spots opened up" notification only carries a
+            // schedule_id when there was exactly one match - go straight to
+            // its claim screen then, same as the specific server-pushed
+            // "waitlist_spot_available" type. With more than one match there's
+            // no single class to deep link to, so fall back to the Bookings tab.
+            if let scheduleId = scheduleId, !scheduleId.isEmpty {
+                AppDelegate.pushClaimScreen(scheduleId: scheduleId)
+            } else {
+                AppDelegate.jumpToBookingsTab()
+            }
+            return
+        }
+
+        guard type.caseInsensitiveCompare("waitlist_spot_available") == .orderedSame,
+              let scheduleId = scheduleId, !scheduleId.isEmpty else {
+            return
+        }
+
+        AppDelegate.pushClaimScreen(scheduleId: scheduleId)
+    }
+
+    /// Every waitlisted member gets the same "a spot opened up" push at once
+    /// (`WaitlistNotifier::notifyAll`), so tapping it needs to open the claim
+    /// screen directly rather than just landing on the home tab. Android's
+    /// equivalent: `MyFirebaseMessagingService.sendNotification`'s
+    /// `waitlist_spot_available` branch.
+    private static func pushClaimScreen(scheduleId: String) {
+        guard let navigationController = AppDelegate.topNavigationController() else { return }
+
+        let controller = SlotOpenViewController()
+        controller.scheduleId = scheduleId
+        controller.onClaimed = { [weak navigationController] classTitle, time, location, trainer in
+            let confirmed = SlotConfirmedViewController()
+            confirmed.classTitle = classTitle
+            confirmed.classTime = time
+            confirmed.classLocation = location
+            confirmed.trainerName = trainer
+            confirmed.hidesBottomBarWhenPushed = true
+            navigationController?.pushViewController(confirmed, animated: true)
+        }
+        controller.hidesBottomBarWhenPushed = true
+        navigationController.pushViewController(controller, animated: true)
+    }
+
+    /// Finds the active scene's navigation controller, unwrapping a tab bar
+    /// root if present, so the push lands on whatever tab the user is
+    /// currently on rather than assuming a fixed root type.
+    private static func topNavigationController() -> UINavigationController? {
+        let keyWindow = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }
+
+        var root = keyWindow?.rootViewController
+        if let nav = root as? UINavigationController {
+            if let tab = nav.viewControllers.first as? UITabBarController,
+               let selectedNav = tab.selectedViewController as? UINavigationController {
+                return selectedNav
+            }
+            return nav
+        }
+        if let tab = root as? UITabBarController {
+            root = tab.selectedViewController
+        }
+        return root as? UINavigationController
+    }
+
+    /// Local "N spots opened up" notification's tap target - the Bookings
+    /// tab itself (index 2, same constant every confirmation screen already
+    /// uses), not any specific class, since the count spans every class
+    /// this member is waitlisted for. Not private: also the shared "land on
+    /// Bookings" target for any sheet/screen that doesn't have a reliable
+    /// `navigationController` of its own to fall back on (e.g. a modally
+    /// presented sheet) - see `DoubleBookingSheetViewController.manageBookingTapped()`.
+    static func jumpToBookingsTab() {
+        let bookingsTabIndex = 2
+
+        let keyWindow = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }
+
+        var candidate = keyWindow?.rootViewController
+        var tabBarController: UITabBarController?
+        while let current = candidate {
+            if let tab = current as? UITabBarController {
+                tabBarController = tab
+                break
+            }
+            candidate = current.presentedViewController ?? current.children.first
+        }
+
+        guard let tabBarController = tabBarController,
+              let tabs = tabBarController.viewControllers,
+              tabs.indices.contains(bookingsTabIndex) else {
+            return
+        }
+
+        (tabs[bookingsTabIndex] as? UINavigationController)?.popToRootViewController(animated: false)
+        tabBarController.selectedIndex = bookingsTabIndex
+    }
    
     
     /*

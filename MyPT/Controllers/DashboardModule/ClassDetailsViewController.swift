@@ -200,7 +200,7 @@ class ClassDetailsViewController: CommonViewController {
             self.trainerBadgeImgView.isHidden = true
         }
         
-        let sessionCountTxt = self.classDetails?.sessions ?? ""
+        let sessionCountTxt = self.classDetails?.sessions?.value ?? ""
         let sessionParts = sessionCountTxt.components(separatedBy: " ")
         if let sessionFirst = sessionParts.first, let sessionSecondPart = sessionParts.dropFirst().joined(separator: " ") as String? {
             self.sessionsCountLbl.text = sessionFirst
@@ -223,7 +223,7 @@ class ClassDetailsViewController: CommonViewController {
             self.bookingBtn.isUserInteractionEnabled = false
             bookingBtn.setTitle(AppStrings.reserve_Slot, for: .normal)
         }else{
-            let classPrice = "@ AED " + (self.classDetails?.price ?? "")
+            let classPrice = "@ AED " + (self.classDetails?.price?.value ?? "")
             
             bookingBtn.setTitle(AppStrings.reserve_Slot + classPrice, for: .normal)
             self.bookingBtn.isUserInteractionEnabled = true
@@ -500,7 +500,7 @@ extension ClassDetailsViewController: UICollectionViewDelegate, UICollectionView
                 cell.cellMBV.addGradient(colors: UIColor.appMultiColor(.gradientColor), locations: [0,1], startPoint: CGPoint(x: 0, y: 1), endPoint: CGPoint(x: 0, y: 0), cornerRadius: 12.0)
             }
             
-            if let getUrl = URL(string: classDetails?.mediaGallery?[indexPath.row].mediaPath ?? "") {
+            if let getUrl = URL(string: classDetails?.mediaGallery?[indexPath.row] ?? "") {
                 getThumbnailImageFromVideoUrl(url: getUrl, completion: { (thumbNailImage) in
                     cell.videoThumbnailImgView.image = thumbNailImage
                     cell.centerImgView.isHidden = false
@@ -541,7 +541,7 @@ extension ClassDetailsViewController: UICollectionViewDelegate, UICollectionView
         if collectionView == WhyTrainwithMeCollView{
             self.videoUrl = classDetails?.trainWithMe
         }else if collectionView == mediaGalleryCollView{
-            self.videoUrl = classDetails?.mediaGallery?[indexPath.row].mediaPath
+            self.videoUrl = classDetails?.mediaGallery?[indexPath.row]
         }
     }
     

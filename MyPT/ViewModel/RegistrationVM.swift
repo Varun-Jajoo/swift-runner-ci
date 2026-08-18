@@ -102,9 +102,9 @@ class RegistrationVM {
             "type": loginType ?? "",
             "email": inputEmail ?? "",
             "device_type": "ios",
-            "device_token": "48r748fjdfbdjdcn"
+            "device_token": appUserDefaults.getReFCMToken() ?? ""
         ]
-        
+
         NetworkManager.shared.genericAPICall(serviceEndPoint: .submit_Otp, method: .post , parameters: params, isShowLoading: true, completion: {  (getResponce, error) in
             print(getResponce as Any)
             do{

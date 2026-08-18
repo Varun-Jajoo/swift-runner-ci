@@ -19,8 +19,8 @@ var recordFound: Int              { return 2001 }
 var noRecordFound: Int            { return 2002 }
 var recordAlreadyExist: Int       { return 2003 }
 
-var isTesting: Bool               { return false}
 
+var isTesting: Bool               { return false}
 
 //App base urls
 enum AppBaseUrl: String {
@@ -94,8 +94,32 @@ enum ApiEndPoint: String {
     case viewall_classes                =  "api/viewall-classes"
     case class_category                 =  "api/class-category"
     case book_class                     =  "api/book-class"
+    case join_waitlist                  =  "api/join-waitlist"
+    case claim_open_spot                =  "api/claim-open-spot"
+    case waitlist_open_slots_count      =  "api/waitlist-open-slots-count"
+    // Free and paid classes show DIFFERENT cancellation/terms text - same
+    // free/paid split every other GX booking rule already uses, just applied
+    // to which doc `type` gets requested.
+    case get_gx_cancellation_policy_free = "api/get-legal-document/gx_cancellation_policy_free"
+    case get_gx_cancellation_policy_paid = "api/get-legal-document/gx_cancellation_policy_paid"
+    case get_gx_terms_free              =  "api/get-legal-document/gx_terms_free"
+    case get_gx_terms_paid              =  "api/get-legal-document/gx_terms_paid"
+    case sync_device_token              =  "api/sync-device-token"
+    case notifications                  =  "api/notifications"
+    case notifications_unread_count     =  "api/notifications/unread-count"
+    case notifications_mark_read_by_context = "api/notifications/mark-read-by-context"
+    case cancel_class_booking           =  "api/cancel-class-booking"
+    case leave_waitlist                 =  "api/leave-waitlist"
 //    case ccaavenue_payment              =  "api/pay"
     case ccaavenue_payment              =  "api/payment/session"
+    /// Raw-HTML CCAvenue gateway page for group-class card payments — Android's
+    /// `ApiURL.payamount` (`api/pay?amount=`), the exact contract
+    /// `CCavenueWebCLassActivity.kt` uses today. Deliberately separate from
+    /// `ccaavenue_payment` above: that endpoint is the newer JSON-wrapped
+    /// contract used by subscription purchases, with no confirmed support for a
+    /// class-booking `payment_for`/`schedule_id` — see Phase 8 of the migration
+    /// plan for why this ports Android's raw endpoint instead of extending that one.
+    case class_ccavenue_pay             =  "api/pay"
     case paymentStatus                  =  "api/payment/verify-status"
     case account_delete                 =  "api/account-delete"
 //    case social_login                   =  "api/social-login"

@@ -12,6 +12,7 @@ class CommonViewController: UIViewController {
     var progressLayer: CAShapeLayer?
     var leftNavButtons: [UIButton] = []
     var rightNavButtons: [UIButton] = []
+    private weak var statusBarOverlayView: UIView?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -335,10 +336,24 @@ class CommonViewController: UIViewController {
         } else {
             frameStatus = UIApplication.shared.statusBarFrame
         }
-        
+
+        // Called again from viewWillAppear every time this screen re-appears,
+        // with no dedup - each call used to addSubview() a fresh (default
+        // interactive, even with a clear background) view on top of
+        // whatever was already there. For a full-screen push that's harmless
+        // (nothing else occupies that strip), but for a sheet/modal - whose
+        // own view doesn't start at the window's (0,0) - this window-relative
+        // status-bar rect lands over the SHEET's own top content instead
+        // (drag handle, close button), and the second call from
+        // viewWillAppear re-added it ON TOP of that content, silently
+        // swallowing every tap there. Track+remove the old one and always
+        // insert at the back so it can never cover anything added afterward.
+        statusBarOverlayView?.removeFromSuperview()
         let statusBarView = UIView(frame: frameStatus)
         statusBarView.backgroundColor = statusbarColor
-        view.addSubview(statusBarView)
+        statusBarView.isUserInteractionEnabled = false
+        view.insertSubview(statusBarView, at: 0)
+        statusBarOverlayView = statusBarView
     }
     
     func showNavigationBar()

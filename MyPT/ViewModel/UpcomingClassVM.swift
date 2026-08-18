@@ -71,18 +71,23 @@ class UpcomingClassVM {
         NetworkManager.shared.genericAPICall(serviceEndPoint: .class_detail, method: .get , queries: inputParams, parameters:  nil, isShowLoading: isShowLoader, completion: {  ( getResponce, error) in
             do{
                 print(getResponce as Any)
-                if let responceData = getResponce {
-                    let getResult = try JSONDecoder().decode(ClassDetailsBaseModel.self, from: responceData)
-                    if (getResult.status == true)  {
-                        completion(getResult)
-                    }
-                    else{
-                        completion(getResult)
-//                        AlertHelper.shared.showCustomeAlert(title: "", message: getResult.errors ?? "", completion: nil)
-                    }
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
                 }
+                let getResult = try JSONDecoder().decode(ClassDetailsBaseModel.self, from: responceData)
+                completion(getResult)
             }catch {
+                // Was a silent dead end: neither branch above called `completion`
+                // when the response was missing, and a decode failure here just
+                // printed and fell through - the caller's completion closure never
+                // fired at all, so the whole detail screen (capacity, why-stands-
+                // out, what-to-bring, everything) stayed on its placeholder state
+                // forever with no error surfaced. `joinWaitlistApi`/`bookGroupClassApi`
+                // just below already call `completion(nil)` from their own catch
+                // blocks - this brings class-detail in line with that.
                 print(error)
+                completion(nil)
             }
         })
     }
@@ -101,18 +106,22 @@ class UpcomingClassVM {
         NetworkManager.shared.genericAPICall(serviceEndPoint: .viewall_classes, method: .get , queries: inputParams, parameters:  nil, isShowLoading: isShowLoader, completion: {  ( getResponce, error) in
             do{
                 print(getResponce as Any)
-                if let responceData = getResponce {
-                    let getResult = try JSONDecoder().decode(ViewAllClassBaseModel.self, from: responceData)
-                    if (getResult.status == true)  {
-                        completion(getResult)
-                    }
-                    else{
-                        completion(getResult)
-//                        AlertHelper.shared.showCustomeAlert(title: "", message: getResult.errors ?? "", completion: nil)
-                    }
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
                 }
+                let getResult = try JSONDecoder().decode(ViewAllClassBaseModel.self, from: responceData)
+                completion(getResult)
             }catch {
+                // Same dead end as `classDetailsApi` had: a decode failure here
+                // (e.g. one `UpcomingClassModel` row from a premium/paid class
+                // carrying a value one of its fields can't decode) used to just
+                // print and never call `completion` at all - the Home carousel
+                // and See All grid ("group activity data") silently kept
+                // showing stale/empty data, and See All's loader (isShowLoader:
+                // true there) spun forever since nothing ever dismissed it.
                 print(error)
+                completion(nil)
             }
         })
     }
@@ -171,8 +180,158 @@ class UpcomingClassVM {
             }
         })
     }
-    
-    
+
+    //MARK: ------------------ api/book-class  (Group Classes booking flow)
+    /*
+     Android reference: GroupTrainingDetailActivity.kt lines 545-603 (free path) —
+     PostMethod(ApiURL.bookclass, {schedule_id, transaction_id, payment_type}).
+
+     Deliberately NOT the same as `bookingClassApi` above:
+     - it sends the full `schedule_id` / `transaction_id` / `payment_type` trio, and
+     - it forwards EVERY decoded response to the caller (including `status == false`)
+       instead of swallowing failures into an alert, because the group-class flow has
+       to inspect a failed response for the blacklist/pause payload before deciding
+       where to navigate. See `BookClassBaseModel` in Model/BookedSlotModel.swift.
+
+     Caveat inherited from `NetworkManager.genericAPICall`: its completion only fires
+     on a 2xx (or with `nil` when there is no internet). A non-2xx never calls back,
+     so callers must not rely on this closure for teardown that has to happen on any
+     outcome.
+     */
+    class func bookGroupClassApi(scheduleId: String?,
+                                 transactionId: String = "",
+                                 paymentType: String = "free",
+                                 confirmSpecialWaitlist: Bool = false,
+                                 isShowLoader: Bool = true,
+                                 completion: @escaping(_ resultData: BookClassBaseModel?) -> Void){
+
+        var params:[String:Any] = [
+            "schedule_id": scheduleId ?? "",
+            "transaction_id": transactionId,
+            "payment_type": paymentType
+        ]
+        // Only set once genuine consent happened (the double-booking sheet's
+        // own "Join Waitlist" tap) - see Android's identical param on
+        // performFreeBooking()'s HashMap.
+        if confirmSpecialWaitlist {
+            params["confirm_special_waitlist"] = "1"
+        }
+
+        print("inputParams = ", params as Any)
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .book_class, method: .post , parameters: params, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
+            do{
+                print(getResponce as Any)
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
+                }
+                let getResult = try JSONDecoder().decode(BookClassBaseModel.self, from: responceData)
+                completion(getResult)
+            }catch {
+                print(error)
+                completion(nil)
+            }
+        })
+    }
+
+    //MARK: ----------------------- api/join-waitlist
+    /// Port of `GroupTrainingDetailActivity.joinWaitlistDirectly`'s param trio —
+    /// note `price`, not `payment_type` (joining a waitlist isn't a payment).
+    /// Reuses `BookClassBaseModel`: the response shape (status/msg/code/
+    /// is_blacklisted/data) is identical to `book-class`.
+    class func joinWaitlistApi(scheduleId: String?,
+                               transactionId: String = "",
+                               price: String = "",
+                               isShowLoader: Bool = true,
+                               completion: @escaping(_ resultData: BookClassBaseModel?) -> Void){
+
+        let params:[String:Any] = [
+            "schedule_id": scheduleId ?? "",
+            "transaction_id": transactionId,
+            "price": price
+        ]
+
+        print("inputParams = ", params as Any)
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .join_waitlist, method: .post , parameters: params, isShowLoading: isShowLoader, completion: {  (getResponce, error) in
+            do{
+                print(getResponce as Any)
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
+                }
+                let getResult = try JSONDecoder().decode(BookClassBaseModel.self, from: responceData)
+                completion(getResult)
+            }catch {
+                print(error)
+                completion(nil)
+            }
+        })
+    }
+
+
+    //MARK: ----------------------- api/claim-open-spot
+    /// Called by both a waitlisted member (tapped the "spot opened up" push)
+    /// and a brand-new user browsing a class with an open spot - everyone
+    /// gets an equal shot, the backend serializes the race with a row lock
+    /// (`GroupClassService::claimOpenSpot`). Same response envelope as
+    /// join-waitlist/book-class: `status:false, code:"SPOT_TAKEN"` means
+    /// someone else won and this user is now on the waitlist instead.
+    class func claimOpenSpotApi(scheduleId: String?,
+                                confirmSpecialWaitlist: Bool = false,
+                                isShowLoader: Bool = true,
+                                completion: @escaping(_ resultData: BookClassBaseModel?) -> Void){
+
+        var params: [String: Any] = [
+            "schedule_id": scheduleId ?? ""
+        ]
+        // See bookGroupClassApi's identical param - only set once genuine
+        // consent happened (the double-booking sheet's own "Join Waitlist" tap).
+        if confirmSpecialWaitlist {
+            params["confirm_special_waitlist"] = "1"
+        }
+
+        print("inputParams = ", params as Any)
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .claim_open_spot, method: .post, parameters: params, isShowLoading: isShowLoader, completion: { (getResponce, error) in
+            do {
+                print(getResponce as Any)
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
+                }
+                let getResult = try JSONDecoder().decode(BookClassBaseModel.self, from: responceData)
+                completion(getResult)
+            } catch {
+                print(error)
+                completion(nil)
+            }
+        })
+    }
+
+    //MARK: ----------------------- api/waitlist-open-slots-count
+    /// This member's active waitlist entries whose class currently has an
+    /// open spot - used to decide whether to fire a local "N spots opened
+    /// up" notification the next time the app backgrounds right after a
+    /// booking/waitlist-join, and to name the class + deep link straight to
+    /// its claim screen when there's exactly one. Android: `ApiURL.waitlistOpenSlotsCount`.
+    class func waitlistOpenSlotsCountApi(isShowLoader: Bool = false,
+                                         completion: @escaping(_ slots: [WaitlistOpenSlot]) -> Void) {
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .waitlist_open_slots_count, method: .get, isShowLoading: isShowLoader, completion: { (getResponce, error) in
+            guard let responceData = getResponce,
+                  let json = try? JSONSerialization.jsonObject(with: responceData) as? [String: Any],
+                  json["status"] as? Bool == true,
+                  let data = json["data"] as? [String: Any],
+                  let rawSlots = data["slots"] as? [[String: Any]] else {
+                completion([])
+                return
+            }
+            let slots = rawSlots.compactMap { raw -> WaitlistOpenSlot? in
+                guard let scheduleId = raw["schedule_id"] as? String, !scheduleId.isEmpty else { return nil }
+                return WaitlistOpenSlot(scheduleId: scheduleId, className: raw["class_name"] as? String ?? "Group Class")
+            }
+            completion(slots)
+        })
+    }
+
     //MARK: ----------------------- api/user-meals
     class func getuserMealsApi(inputDate:String? , isShowLoader:Bool = true, completion: @escaping(_ resultData:UserMealsBaseModel?) -> Void){
         /*

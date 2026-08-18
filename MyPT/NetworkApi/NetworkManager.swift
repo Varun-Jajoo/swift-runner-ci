@@ -595,7 +595,7 @@ class NetworkManager {
 //            Utility.showLoader(message:  AppAlertStrings.please_wait)
             Utility.showLoader(title: AppAlertStrings.almostDone, subtitle: AppAlertStrings.loaderMsg)
         }
-    
+
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = method.rawValue
         urlRequest.headers = headers
@@ -603,14 +603,20 @@ class NetworkManager {
         APILogger.logRequest(urlRequest, parameters: parametersEncode)
 
         AF.request(url, method: method, parameters: parametersEncode, encoder: JSONParameterEncoder.default, headers: headers, interceptor: interceptor ?? self).validate().responseData { response in
-           
+
             APILogger.logResponse(
                 data: response.data,
                 response: response.response,
                 error: response.error
             )
-            
-            Utility.hideLoader() // Dismiss Loader
+
+            // Only dismiss the loader this call actually raised — a fast,
+            // non-loading call (isShowLoading == false) completing while a
+            // slower loading call is still in flight must not tear down that
+            // other call's overlay.
+            if isShowLoading {
+                Utility.hideLoader()
+            }
             switch response.result{
             case .success(_):
                 if let statusCode = response.response?.statusCode {
@@ -703,8 +709,12 @@ class NetworkManager {
                 response: response.response,
                 error: response.error
             )
-            
-            Utility.hideLoader() // Dismiss Loader
+
+            // Only dismiss the loader this call actually raised (see note in
+            // serviceAPICallForArrayObject above).
+            if isShowLoading || isShowLoadingWithoutMsg {
+                Utility.hideLoader()
+            }
             switch response.result{
             case .success(_):
                 if let statusCode = response.response?.statusCode {
@@ -719,17 +729,27 @@ class NetworkManager {
                                 print(error.localizedDescription)
                             }
                             completion(data, nil)
+                        } else {
+                            // A 2xx with no body (e.g. a 204, or a flaky
+                            // proxy/CDN stripping it) must still call back -
+                            // otherwise the caller's completion never fires,
+                            // the tap silently does nothing, and the user
+                            // re-taps into a race with the still in-flight
+                            // first request.
+                            completion(nil, nil)
                         }
                     case badRequest:
                         // Bad Request: Handle the specific error case
                         print("Bad Request")
+                        completion(nil, nil)
                     case InvalidAccessTokenCode:
                         // Unauthorized: Handle the specific error case
                         self.handle401StatusCode(serviceEndPoint)
                         print("INVALID AUTHTOKEN") //when AuthToken is expire
+                        completion(nil, nil)
                     default:
                         print("Status Code: \(statusCode)")
-                        break
+                        completion(nil, nil)
                     }
                 }
                 
@@ -868,7 +888,9 @@ class NetworkManager {
         )
         .validate()
         .responseData { response in
-            Utility.hideLoader()
+            if isShowLoading {
+                Utility.hideLoader()
+            }
             switch response.result {
             case .success(_):
                 if let statusCode = response.response?.statusCode {
@@ -986,7 +1008,9 @@ class NetworkManager {
             },
             to: url, method: .post , headers: headers, interceptor: interceptor ?? self).validate()
             .responseData { (response) in
-                Utility.hideLoader()
+                if isShowLoading {
+                    Utility.hideLoader()
+                }
                 switch response.result{
                 case .success(_):
                     if let statusCode = response.response?.statusCode {
