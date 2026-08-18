@@ -668,36 +668,65 @@ private extension DoubleBookingSheetViewController {
         card.showsSheen = false
         card.heightAnchor.constraint(greaterThanOrEqualToConstant: Metric.cardMinHeight).isActive = true
 
+        // Added BEFORE the content below so the dots/mock render underneath it -
+        // the title is allowed to run over the dot pattern (see below).
+        let graphicColumn = makeGraphicColumn(mockImageName: mockImageName)
+        card.addSubview(graphicColumn)
+
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.font = AppFont.medium.size(15.0, familyName: familyClashDisplay)
         titleLabel.textColor = Palette.cardTitle
         titleLabel.numberOfLines = 1
+        // Last-resort shrink so it stays one line on the narrowest devices
+        // rather than ellipsising - the Android side does the same via
+        // autoSizeTextType="uniform" (11-15sp).
+        titleLabel.adjustsFontSizeToFitWidth = true
+        titleLabel.minimumScaleFactor = 11.0 / 15.0
         titleLabel.text = title
 
-        let textStack = UIStackView(arrangedSubviews: [titleLabel, row1, row2])
-        textStack.translatesAutoresizingMaskIntoConstraints = false
-        textStack.axis = .vertical
-        textStack.alignment = .fill
-        textStack.spacing = 6
-        card.addSubview(textStack)
+        let rowsStack = UIStackView(arrangedSubviews: [row1, row2])
+        rowsStack.translatesAutoresizingMaskIntoConstraints = false
+        rowsStack.axis = .vertical
+        rowsStack.alignment = .fill
+        rowsStack.spacing = 6
 
-        let graphicColumn = makeGraphicColumn(mockImageName: mockImageName)
-        card.addSubview(graphicColumn)
+        // Spans the full card width so the title can be measured against it;
+        // only the numbered rows inside are held clear of the graphic column.
+        let contentContainer = UIView()
+        contentContainer.translatesAutoresizingMaskIntoConstraints = false
+        contentContainer.addSubview(titleLabel)
+        contentContainer.addSubview(rowsStack)
+        card.addSubview(contentContainer)
 
         NSLayoutConstraint.activate([
             // Android centers this block vertically (`gravity="center_vertical"`
             // on the card) when the card is taller than the text needs (i.e. it
-            // hit the 115dp minHeight) - equal slack above and below. Pinning
-            // top AND bottom to exact equality instead forced textStack to
+            // hit the card's minHeight) - equal slack above and below. Pinning
+            // top AND bottom to exact equality instead forced the stack to
             // stretch to fill that slack, which spread out unevenly across
             // title/row1/row2 (whichever had the lowest hugging priority)
             // instead, showing up as an oversized gap between items 1 and 2.
-            textStack.topAnchor.constraint(greaterThanOrEqualTo: card.topAnchor, constant: 12),
-            textStack.bottomAnchor.constraint(lessThanOrEqualTo: card.bottomAnchor, constant: -12),
-            textStack.centerYAnchor.constraint(equalTo: card.centerYAnchor),
-            textStack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 12),
-            textStack.trailingAnchor.constraint(equalTo: graphicColumn.leadingAnchor, constant: -4),
+            contentContainer.topAnchor.constraint(greaterThanOrEqualTo: card.topAnchor, constant: 12),
+            contentContainer.bottomAnchor.constraint(lessThanOrEqualTo: card.bottomAnchor, constant: -12),
+            contentContainer.centerYAnchor.constraint(equalTo: card.centerYAnchor),
+            contentContainer.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 12),
+            contentContainer.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
+
+            // Full container width - deliberately NOT stopped at the graphic
+            // column's leading edge like the rows below it. These titles do not
+            // fit in the ~150pt left column and were ellipsising ("Manage Your
+            // Current Bookin..."); running the single line over the dot pattern
+            // is the intended look. The mock illustration sits bottom-aligned in
+            // that column, so nothing collides with a top-aligned title.
+            titleLabel.topAnchor.constraint(equalTo: contentContainer.topAnchor),
+            titleLabel.leadingAnchor.constraint(equalTo: contentContainer.leadingAnchor),
+            titleLabel.trailingAnchor.constraint(equalTo: contentContainer.trailingAnchor),
+
+            rowsStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 6),
+            rowsStack.leadingAnchor.constraint(equalTo: contentContainer.leadingAnchor),
+            rowsStack.trailingAnchor.constraint(equalTo: graphicColumn.leadingAnchor, constant: -4),
+            rowsStack.bottomAnchor.constraint(equalTo: contentContainer.bottomAnchor),
 
             graphicColumn.topAnchor.constraint(equalTo: card.topAnchor),
             graphicColumn.bottomAnchor.constraint(equalTo: card.bottomAnchor),
