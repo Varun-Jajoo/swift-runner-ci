@@ -109,10 +109,6 @@ final class DoubleBookingSheetViewController: CommonViewController, UIAdaptivePr
     /// Copy that is hard-coded in the Android layout / Kotlin.
     private enum Copy {
         static let title = "You Already Have a Free Class Booked"
-        // One line deliberately: the "Here's What You Can Do" cards directly
-        // below already spell out both options, so anything past the reason
-        // itself just repeats them at paragraph length.
-        static let subtext = "You already have a free class booked, so we can\u{2019}t confirm another free spot right now."
         static let dividerLabel = "Here\u{2019}s What You Can Do"
         static let manageCardTitle = "Manage Your Current Booking"
         static let manageItem1 = "Complete or cancel your upcoming class"
@@ -430,18 +426,13 @@ private extension DoubleBookingSheetViewController {
         contentStack.addArrangedSubview(headline)
         contentStack.setCustomSpacing(11, after: hero)
 
-        // 4b — explanatory subtext, new: the headline alone never actually
-        // said WHY this sheet showed up (that this new class overlaps in
-        // time with something already booked) or what the two cards below
-        // are for.
-        let subtext = makeSubtextLabel()
-        contentStack.addArrangedSubview(subtext)
-        contentStack.setCustomSpacing(8, after: headline)
-
         // 5 — "To Reserve This Slot" gradient divider (marginTop 18dp)
+        // Straight after the headline: the explanatory subtext that used to
+        // sit between them was removed - it only restated the option cards
+        // below it and cost the sheet real height.
         let dividerRow = makeSectionDividerRow()
         contentStack.addArrangedSubview(dividerRow)
-        contentStack.setCustomSpacing(18, after: subtext)
+        contentStack.setCustomSpacing(18, after: headline)
 
         // 6 — connector + cards row (marginTop 18dp)
         let connectorRow = makeConnectorAndCardsRow()
@@ -566,19 +557,6 @@ private extension DoubleBookingSheetViewController {
         label.textAlignment = .center
         label.numberOfLines = 0
         label.text = Copy.title
-        return label
-    }
-
-    /// New - the headline used to go straight into the "Here's What You Can
-    /// Do" divider with no explanation of why the sheet appeared at all.
-    func makeSubtextLabel() -> UILabel {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = AppFont.medium.size(14.0, familyName: familyFunnelSans)
-        label.textColor = Palette.dividerLabel
-        label.textAlignment = .center
-        label.numberOfLines = 0
-        label.text = Copy.subtext
         return label
     }
 
