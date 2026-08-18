@@ -55,6 +55,13 @@ final class GroupClassRealtimeManager: NSObject {
     private var isListingSubscribed = false
     private var pendingListingSubscribe = false
 
+    /// Cancelled on every successful connection_established - a fresh drop
+    /// always gets a fresh backoff instead of stacking retries.
+    private var reconnectAttempt = 0
+    private var reconnectWorkItem: DispatchWorkItem?
+    private static let baseReconnectDelay: TimeInterval = 2
+    private static let maxReconnectDelay: TimeInterval = 30
+
     private override init() {
         super.init()
     }
@@ -150,6 +157,9 @@ final class GroupClassRealtimeManager: NSObject {
     }
 
     private func disconnect() {
+        reconnectWorkItem?.cancel()
+        reconnectWorkItem = nil
+        reconnectAttempt = 0
         socket?.cancel(with: .normalClosure, reason: nil)
         socket = nil
         session = nil
@@ -159,20 +169,55 @@ final class GroupClassRealtimeManager: NSObject {
         isListingSubscribed = false
     }
 
+    /// Reconnects automatically after an unexpected drop, instead of leaving
+    /// the manager permanently dead until some screen's viewWillAppear
+    /// happens to call subscribe() again.
+    ///
+    /// That used to be the ONLY recovery path (see the removed comment in
+    /// listen()'s `.failure` case), which is fine for a drop that coincides
+    /// with the screen backgrounding - but a screen that stays continuously
+    /// in the foreground (or a socket that dies while nothing is being
+    /// touched at all) had no path back to a live connection, ever - it
+    /// would sit there silently showing stale data forever. Verified live on
+    /// the Android counterpart: a class's seat count stopped updating after
+    /// an earlier disconnect and never recovered despite the detail screen
+    /// staying open and several real admin changes happening in the
+    /// meantime - this manager has the identical structure, so the same gap.
+    ///
+    /// Only reconnects while something still wants a connection
+    /// (subscriptions/listingCallback non-empty) - an intentional
+    /// disconnect() (last subscriber left) cancels this instead, matching
+    /// §11c's "closes when the last relevant screen closes" rule; this must
+    /// not fight that by reopening a connection nothing asked for.
+    private func scheduleReconnect() {
+        reconnectWorkItem?.cancel()
+        guard !subscriptions.isEmpty || listingCallback != nil else { return }
+
+        // Re-queue everything that was live on the dead connection so the
+        // next connection_established resubscribes it all, exactly like a
+        // fresh subscribe() would.
+        pendingSubscribes.formUnion(subscriptions.keys)
+        if listingCallback != nil { pendingListingSubscribe = true }
+
+        let delay = min(Self.baseReconnectDelay * pow(2, Double(min(reconnectAttempt, 4))), Self.maxReconnectDelay)
+        reconnectAttempt += 1
+
+        let workItem = DispatchWorkItem { [weak self] in self?.connectIfNeeded() }
+        reconnectWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
+    }
+
     private func listen() {
         socket?.receive { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .failure:
-                // Connection dropped. No reconnect loop here on purpose - the
-                // owning screen already re-fetches via REST on its next
-                // viewWillAppear/foreground (§11c/§13.6), and the next
-                // subscribe() call transparently re-opens the socket.
                 self.socket = nil
                 self.session = nil
                 self.socketId = nil
                 self.isConnecting = false
                 self.isListingSubscribed = false
+                self.scheduleReconnect()
             case .success(let message):
                 self.handle(message)
                 self.listen()
@@ -192,6 +237,11 @@ final class GroupClassRealtimeManager: NSObject {
                   let inner = Self.decodeJSONObject(dataString),
                   let newSocketId = inner["socket_id"] as? String else { return }
             socketId = newSocketId
+            // A connection that actually completes its handshake is healthy -
+            // the next failure (whenever it happens) should start backing
+            // off from zero again, not continue counting up from whatever
+            // this manager had reached before.
+            reconnectAttempt = 0
             for classId in pendingSubscribes {
                 sendSubscribe(classId: classId, socketId: newSocketId)
             }
