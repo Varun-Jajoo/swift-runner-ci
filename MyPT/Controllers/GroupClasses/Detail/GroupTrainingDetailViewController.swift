@@ -338,11 +338,13 @@ final class GroupTrainingDetailViewController: CommonViewController {
         studioLng = tapThrough.studioLng
     }
 
-    /// `access == "free"` -> free, `access == "paid"` -> paid, `mixed` (or an
-    /// unknown value) -> free only for active members.
+    /// `access == "paid"` -> paid, everything else (`free`/`mixed`/unknown)
+    /// -> free only for active members, matching the backend's
+    /// `GroupClassService::isFreeForUser()` - a `free`-access class still
+    /// requires an active gym subscription (any gym), it isn't free for
+    /// literally anyone.
     private func resolveIsFreeForUser(access: String, isMember: Bool) -> Bool {
         let access = access.lowercased()
-        if access == "free" { return true }
         if access == "paid" { return false }
         return isMember
     }
@@ -391,8 +393,6 @@ final class GroupTrainingDetailViewController: CommonViewController {
         let cleanInitialPrice = cleanedPrice(classPrice)
         if isFreeForUser {
             priceLabel.text = "Free for members"
-        } else if classAccess.lowercased() == "free" {
-            priceLabel.text = "FREE"
         } else if !cleanInitialPrice.isEmpty, cleanInitialPrice != "0", cleanInitialPrice != "0.00" {
             priceLabel.text = "AED \(cleanInitialPrice)"
         } else {
@@ -952,8 +952,6 @@ final class GroupTrainingDetailViewController: CommonViewController {
         if !isAlreadyBooked && !isAlreadyWaitlisted {
             if isFreeForUser {
                 priceLabel.text = "Free for members"
-            } else if resolvedAccess.lowercased() == "free" {
-                priceLabel.text = "FREE"
             } else if !cleanPrice.isEmpty, cleanPrice != "0", cleanPrice != "0.00" {
                 priceLabel.text = "AED \(cleanPrice)"
             } else {

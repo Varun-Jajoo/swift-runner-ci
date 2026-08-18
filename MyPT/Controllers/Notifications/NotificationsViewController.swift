@@ -26,6 +26,13 @@ struct NotificationEntry {
     let data: [String: String]
     var isRead: Bool
     let createdAt: Date
+    /// Server-computed (Notification::getHasRedirectAttribute()) - true only
+    /// when this row's tap target is a screen specific to its content, not a
+    /// generic tab fallback. Drives the row's chevron; false means a fact
+    /// row (still marks read on tap, no navigation). Kept server-side so
+    /// this classification isn't a 4th copy alongside the routing switches
+    /// already here and on Android.
+    let hasRedirect: Bool
 }
 
 private enum NotificationRow {
@@ -128,7 +135,8 @@ final class NotificationsViewController: CommonViewController {
             notificationType: obj["notification_type"] as? String ?? "",
             data: dataMap,
             isRead: obj["is_read"] as? Bool ?? false,
-            createdAt: NotificationsViewController.parseDate(obj["created_at"] as? String) ?? Date()
+            createdAt: NotificationsViewController.parseDate(obj["created_at"] as? String) ?? Date(),
+            hasRedirect: obj["has_redirect"] as? Bool ?? false
         )
     }
 
@@ -207,6 +215,11 @@ final class NotificationsViewController: CommonViewController {
                 pushType: NotificationRouting.pushType(forNotificationType: entry.notificationType),
                 scheduleId: entry.data["schedule_id"])
         }
+        // A fact row (hasRedirect == false) only ever had a generic tab
+        // fallback to offer anyway - now that "no redirect" is a first-class
+        // server-computed state, don't even attempt it, rather than relying
+        // on NotificationRouting's own empty-string guard to no-op silently.
+        guard entry.hasRedirect else { return }
         NotificationRouting.route(notificationType: entry.notificationType, data: entry.data)
     }
 

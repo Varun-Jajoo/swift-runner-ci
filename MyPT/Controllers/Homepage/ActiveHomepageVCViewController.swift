@@ -69,17 +69,13 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     @IBOutlet weak var lblTrainingTeamHeading: UILabel!
     @IBOutlet weak var btnNameInitial: UIButton!
     @IBOutlet weak var pageController: UIPageControl!
-
     @IBOutlet weak var heightOfCollectionPlan: NSLayoutConstraint!
-    
-
 
     /// Group Classes carousel, inserted into the storyboard's content stack view
     /// at runtime (see `setupGroupClassesSection()`).
     private var groupClassesCarousel: GroupClassesCarouselView?
 
     private weak var notificationUnreadDot: UIView?
-
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -926,9 +922,6 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     }
     
     @objc func checkInBtnActn(sender:UIButton) {
-
-        let vc: BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
-
         if let getIndx = self.upcomingSessionData?.firstIndex(where: {
             $0.id?.value == sender.accessibilityHint ?? "0"
         }), let session = self.upcomingSessionData?[getIndx] {

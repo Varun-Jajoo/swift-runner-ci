@@ -53,10 +53,11 @@ final class SpotTakenViewController: CommonViewController {
         static let pillText = UIColor(hex: "#F0F0F0")
         static let rowTitle = UIColor.white
         static let rowSubtitle = UIColor.white.withAlphaComponent(0.4)
-        // rgba(8, 101, 254, ...) - the same blue token
-        // WaitlistConfirmedViewController's own notify card uses.
+        // Same tokens WaitlistConfirmedViewController's own notify card uses -
+        // this status card now shares that exact look (solid navy fill, faint
+        // blue wash, radial sheen) instead of a flat translucent tint.
         static let statusCardStroke = GroupClassColor.blue.color.withAlphaComponent(0.30)
-        static let statusCardFill = GroupClassColor.blue.color.withAlphaComponent(0.10)
+        static let statusCardFill = GroupClassColor.blueCardBg.color
         static let statusText = UIColor(hex: "#ADCCFF")
         static let statusSubtext = UIColor(hex: "#FFFFFF")
         static let ctaInk = UIColor(hex: "#131416")
@@ -69,6 +70,7 @@ final class SpotTakenViewController: CommonViewController {
         static let statusSubtext = "We'll notify you if another spot becomes available for this class."
         static let categoryPill = "GROUP CLASS"
         static let exploreCTA = "EXPLORE OTHER CLASSES"
+        static let trainerSubtitle = "Certified MyPT Trainer"
     }
 
     // MARK: Views
@@ -84,6 +86,7 @@ final class SpotTakenViewController: CommonViewController {
     private let locationTitleLabel = UILabel()
     private let locationDistanceLabel = UILabel()
     private let trainerNameLabel = UILabel()
+    private let trainerSubtitleLabel = UILabel()
 
     private let footerView = UIView()
     private let exploreButton = GradientCTAButton()
@@ -94,7 +97,9 @@ final class SpotTakenViewController: CommonViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = GroupClassColor.bg.color
+        // This screen's own background, not the shared groupClassBg token -
+        // deliberately darker than every other screen in this module.
+        view.backgroundColor = UIColor(hex: "#050505")
         buildLayout()
         populateUI()
     }
@@ -289,7 +294,7 @@ private extension SpotTakenViewController {
         // the headline below it.
         let fade = GradientFadeView()
         fade.translatesAutoresizingMaskIntoConstraints = false
-        fade.setColors([GroupClassColor.bg.color.withAlphaComponent(0), GroupClassColor.bg.color])
+        fade.setColors([UIColor(hex: "#050505").withAlphaComponent(0), UIColor(hex: "#050505")])
         heroImageView.addSubview(fade)
 
         NSLayoutConstraint.activate([
@@ -355,7 +360,13 @@ private extension SpotTakenViewController {
         card.fillAlpha = 1.0
         card.strokeColor = Palette.statusCardStroke
         card.strokeAlpha = 1.0
-        card.showsSheen = false
+        // Same wash + radial sheen WaitlistConfirmedViewController's own
+        // notify card uses - was showsSheen = false (flat), which is what
+        // made the two screens' blue boxes look inconsistent.
+        card.washColors = [GroupClassColor.blue.color.withAlphaComponent(0.098),
+                           GroupClassColor.blue.color.withAlphaComponent(0.0)]
+        card.sheenOrigin = .topCenter
+        card.sheenAlpha = 0.08
 
         let icon = UIImageView(image: SpotTakenViewController
             .icon(["ic_info_hexagon_18", "info-hexagon"], systemFallback: "info.circle")?
@@ -456,9 +467,20 @@ private extension SpotTakenViewController {
         trainerNameLabel.numberOfLines = 1
         trainerNameLabel.lineBreakMode = .byTruncatingTail
 
-        let trainerRow = makeSingleLineDetailRow(icon: SpotTakenViewController.icon(["ic_trainer_running_18"], systemFallback: "figure.run"),
-                                                 iconSide: 16,
-                                                 titleLabel: trainerNameLabel)
+        // Matches Android's activity_spot_taken.xml (tvTrainerSub) and this
+        // module's own SlotOpenViewController - both show this caption under
+        // the trainer name; this screen was missing it entirely.
+        trainerSubtitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        trainerSubtitleLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
+        trainerSubtitleLabel.textColor = Palette.rowSubtitle
+        trainerSubtitleLabel.numberOfLines = 1
+        trainerSubtitleLabel.lineBreakMode = .byTruncatingTail
+        trainerSubtitleLabel.text = Copy.trainerSubtitle
+
+        let trainerRow = makeDetailRow(icon: SpotTakenViewController.icon(["ic_trainer_running_18"], systemFallback: "figure.run"),
+                                       iconSide: 16,
+                                       titleLabel: trainerNameLabel,
+                                       subtitleLabel: trainerSubtitleLabel)
 
         let stack = UIStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -545,16 +567,6 @@ private extension SpotTakenViewController {
         textStack.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
         let row = UIStackView(arrangedSubviews: [iconTile, textStack])
-        row.translatesAutoresizingMaskIntoConstraints = false
-        row.axis = .horizontal
-        row.alignment = .center
-        row.spacing = 12
-        return row
-    }
-
-    func makeSingleLineDetailRow(icon: UIImage?, iconSide: CGFloat, titleLabel: UILabel) -> UIStackView {
-        let iconTile = makeIconTile(image: icon, iconSide: iconSide)
-        let row = UIStackView(arrangedSubviews: [iconTile, titleLabel])
         row.translatesAutoresizingMaskIntoConstraints = false
         row.axis = .horizontal
         row.alignment = .center

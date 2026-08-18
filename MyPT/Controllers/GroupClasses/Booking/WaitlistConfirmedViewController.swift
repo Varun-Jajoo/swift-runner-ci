@@ -155,7 +155,7 @@ final class WaitlistConfirmedViewController: CommonViewController {
         // Was static ("GROUP CLASS"). See waitlistType's own doc comment -
         // this chip is now the only thing distinguishing special from normal.
         if waitlistType == "special" {
-            categoryPillLabel.text = "OVERLAPPING WAITLIST"
+            categoryPillLabel.text = "PENDING WAITLIST"
             categoryPillLabel.textColor = UIColor(hex: "#FFCC33")
         } else {
             categoryPillLabel.text = "WAITLISTED"

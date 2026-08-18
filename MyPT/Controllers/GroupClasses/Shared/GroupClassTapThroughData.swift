@@ -125,8 +125,7 @@ enum GroupClassCardFormatter {
     static func isPaid(access: String?, isMember: Bool) -> Bool {
         let access = resolvedAccess(access).lowercased()
         if access == "paid" { return true }
-        if access == "mixed" { return !isMember }
-        return false
+        return !isMember
     }
 
     // MARK: Title / location

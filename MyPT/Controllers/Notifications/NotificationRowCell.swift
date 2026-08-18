@@ -47,6 +47,9 @@ final class NotificationRowCell: UITableViewCell {
         timeLabel.text = NotificationRowCell.relativeTime(from: entry.createdAt)
         timeLabel.textColor = palette.time
         subtextLabel.textColor = palette.subtext
+        // Fact rows (no specific destination) don't promise navigation they
+        // can't deliver - see NotificationEntry.hasRedirect's own doc comment.
+        chevron.isHidden = !entry.hasRedirect
 
         let style = NotifStyleBridge.forType(entry.notificationType)
 
@@ -62,7 +65,14 @@ final class NotificationRowCell: UITableViewCell {
         ])
         iconGlyph = glyph
 
-        if entry.isRead {
+        // Fact rows never show the unread highlight at all, even brand new -
+        // that colour-coding is an attention cue toward something to go do,
+        // and a row with no chevron has nothing to go do. Without this a fact
+        // row would flip from highlighted to neutral the instant it's tapped
+        // (mark-as-read still fires underneath), which reads as the row
+        // reacting to a tap that otherwise visibly does nothing.
+        let showAsRead = entry.isRead || !entry.hasRedirect
+        if showAsRead {
             card.fillColor = palette.readFill
             card.strokeColor = palette.readStroke
             card.fillAlpha = 1.0

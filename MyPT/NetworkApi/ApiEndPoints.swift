@@ -19,8 +19,7 @@ var recordFound: Int              { return 2001 }
 var noRecordFound: Int            { return 2002 }
 var recordAlreadyExist: Int       { return 2003 }
 
-
-var isTesting: Bool               { return false}
+var isTesting: Bool               { return true }
 
 //App base urls
 enum AppBaseUrl: String {
@@ -108,6 +107,8 @@ enum ApiEndPoint: String {
     case notifications                  =  "api/notifications"
     case notifications_unread_count     =  "api/notifications/unread-count"
     case notifications_mark_read_by_context = "api/notifications/mark-read-by-context"
+    case blacklist_status               =  "api/blacklist-status"
+    case my_class_booking_status        =  "api/my-class-booking-status"
     case cancel_class_booking           =  "api/cancel-class-booking"
     case leave_waitlist                 =  "api/leave-waitlist"
 //    case ccaavenue_payment              =  "api/pay"

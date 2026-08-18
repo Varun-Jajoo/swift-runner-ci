@@ -78,16 +78,13 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         setupGroupClassesSection()
         lblAddress.isUserInteractionEnabled = true
         view.isUserInteractionEnabled = true
-
+        notificationUnreadDot = NotificationBellInstaller.install(leftOf: btnNameInitial, in: self)
         Mixpanel.mainInstance().track(
             event: "Sign Up",
             properties: [
                 "Signup Type": "Referral",
             ]
         )
-
-        notificationUnreadDot = NotificationBellInstaller.install(leftOf: btnNameInitial, in: self)
-
     }
 
     // MARK: - Group Classes carousel
@@ -125,7 +122,7 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
     private func loadGroupClasses() {
         groupClassesCarousel?.loadClasses(lat: getLat, long: getLong)
     }
-    
+
     private func uiSetup() {
         self.collectionMyPt.delegate = self
         self.collectionMyPt.dataSource = self
