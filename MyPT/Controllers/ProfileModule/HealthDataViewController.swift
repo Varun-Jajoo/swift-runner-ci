@@ -1045,7 +1045,7 @@ extension HealthDataViewController: UICollectionViewDelegate, UICollectionViewDa
                 
                 let getBaseUrl:String = AppBaseUrl.baseScheme.rawValue + "://" + AppBaseUrl.baseDevUrl.rawValue
                 print(getBaseUrl)
-                
+
                 // let urlString = "https://mobileapp.mypt-me.com/\(self.inputType ?? "")/\(studioDetails?.id ?? 0)/\(gymDetailsFlow)"
                 
                 let urlString = "\(getBaseUrl)/\("health")/\(shareMealsDetails?.id?.value ?? "0")/\("healthProfile")"

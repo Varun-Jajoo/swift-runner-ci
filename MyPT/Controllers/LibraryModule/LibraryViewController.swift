@@ -641,7 +641,7 @@ extension LibraryViewController: UICollectionViewDelegate, UICollectionViewDataS
                     
                     let getBaseUrl:String = AppBaseUrl.baseScheme.rawValue + "://" + AppBaseUrl.baseDevUrl.rawValue
                     print(getBaseUrl)
-                    
+
                     // let urlString = "https://mobileapp.mypt-me.com/\(self.inputType ?? "")/\(studioDetails?.id ?? 0)/\(gymDetailsFlow)"
                     
                     let urlString = "\(getBaseUrl)/\("workout")/\(workoutDetails?.id?.value ?? "0")/\("workoutLibrary")"
@@ -675,7 +675,7 @@ extension LibraryViewController: UICollectionViewDelegate, UICollectionViewDataS
                     
                     let getBaseUrl:String = AppBaseUrl.baseScheme.rawValue + "://" + AppBaseUrl.baseDevUrl.rawValue
                     print(getBaseUrl)
-                    
+
                     // let urlString = "https://mobileapp.mypt-me.com/\(self.inputType ?? "")/\(studioDetails?.id ?? 0)/\(gymDetailsFlow)"
                     
                     let urlString = "\(getBaseUrl)/\("workout")/\(featuredDetails?.id?.value ?? "0")/\("workoutLibrary")"
