@@ -503,7 +503,14 @@ final class SeeAllGroupClassesViewController: CommonViewController {
         // recentered on every apply()).
         UpcomingClassVM.viewAllClassesApi(inputParams: params, isShowLoader: showLoader) { [weak self] result in
             guard let self = self else { return }
-            let allClasses = result?.data?.allClasses ?? []
+            // Free classes are strictly visible ONLY to active gym members -
+            // same rule the home carousel already applies via this shared
+            // helper (GroupClassesCarouselView). Without this, a Home-PT-only
+            // member (no gym subscription) saw free classes here that the
+            // home carousel already hid.
+            let allClasses = (result?.data?.allClasses ?? []).filter {
+                GroupClassCardFormatter.isVisibleOnHome(access: $0.access, isMember: $0.isMember ?? false)
+            }
 
             DispatchQueue.main.async {
                 self.masterClassList = allClasses
