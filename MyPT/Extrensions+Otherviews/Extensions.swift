@@ -44,8 +44,16 @@ enum RemoteImageCache {
     private static let ioQueue = DispatchQueue(label: "com.mypt.remoteimagecache.io", qos: .utility)
 
     private static let directory: URL = {
+        // "_v2": any image with transparency written before this fix had its
+        // alpha silently flattened to solid white by the old always-JPEG
+        // saveToDisk() (see its doc comment) - that corrupted file sits on
+        // disk permanently otherwise, since loadImage() checks disk before
+        // ever re-hitting the network. A new subdirectory starts every
+        // installed copy of the app on a clean slate automatically, without
+        // needing every device that already hit this to manually clear its
+        // cache or reinstall.
         let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        let dir = caches.appendingPathComponent("RemoteImageCache", isDirectory: true)
+        let dir = caches.appendingPathComponent("RemoteImageCache_v2", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir
     }()
@@ -74,9 +82,21 @@ enum RemoteImageCache {
 
     /// Fire-and-forget; failures (disk full, sandbox quirk) just mean the next
     /// load falls back to network again - not worth surfacing.
+    ///
+    /// JPEG has no alpha channel - re-encoding a source image that has one
+    /// (a hero/banner graphic with a soft gradient or fade baked in, say)
+    /// silently flattens every transparent/semi-transparent pixel to solid
+    /// white. The corrupted JPEG then gets read back by every subsequent
+    /// `loadFromDisk` call - including after a full app relaunch, since this
+    /// is the disk tier - while the very first display (straight from the
+    /// network response, before this cache write ever ran) looked correct.
+    /// PNG whenever the source has an alpha channel; JPEG only for images
+    /// that are genuinely fully opaque, where the smaller file size is free.
     static func saveToDisk(_ image: UIImage, for key: NSString) {
         ioQueue.async {
-            guard let data = image.jpegData(compressionQuality: 0.9) else { return }
+            let hasAlpha = (image.cgImage?.alphaInfo ?? .none) != .none
+            let data = hasAlpha ? image.pngData() : image.jpegData(compressionQuality: 0.9)
+            guard let data = data else { return }
             try? data.write(to: diskURL(for: key))
         }
     }

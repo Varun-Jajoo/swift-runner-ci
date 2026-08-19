@@ -7,6 +7,7 @@
 
 import UIKit
 import AVKit
+import SDWebImage
 
 class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
@@ -567,7 +568,13 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         }  else if collectionView == collectionBanner {
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "BannerHomepageCVCell", for: indexPath) as? BannerHomepageCVCell else { return UICollectionViewCell() }
             
-            cell.imgBanner.sd_setImage(with: URL(string: bannerData?[indexPath.row].image ?? ""), placeholderImage: UIImage(named: "placeholder"))
+            // .refreshCached: revalidate against the server instead of trusting
+            // whatever's on disk unconditionally. A single static promo banner
+            // otherwise never gets re-checked once cached, so any bad/corrupt
+            // copy written to disk on a prior load (e.g. an interrupted
+            // download on a fast revisit) sticks around forever, surviving
+            // even a full app relaunch, until the cache is manually cleared.
+            cell.imgBanner.sd_setImage(with: URL(string: bannerData?[indexPath.row].image ?? ""), placeholderImage: UIImage(named: "placeholder"), options: [.refreshCached])
             //            cell.cellConfigure(customData: self.customisePlans)
             //
             return cell

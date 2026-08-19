@@ -8,6 +8,7 @@
 import UIKit
 import AVKit
 import Mixpanel
+import SDWebImage
 
 class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
@@ -748,7 +749,11 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
             return cell
         } else if collectionView == collectionBanner {
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "BannerHomepageCVCell", for: indexPath) as? BannerHomepageCVCell else { return UICollectionViewCell() }
-            cell.imgBanner.sd_setImage(with: URL(string: bannerData?[indexPath.row].image ?? ""), placeholderImage: UIImage(named: "placeholder"))
+            // .refreshCached: revalidate against the server instead of trusting
+            // whatever's on disk unconditionally - see ActiveHomepageVCViewController's
+            // identical fix for why (a bad cached copy otherwise sticks around
+            // forever, surviving even a full app relaunch).
+            cell.imgBanner.sd_setImage(with: URL(string: bannerData?[indexPath.row].image ?? ""), placeholderImage: UIImage(named: "placeholder"), options: [.refreshCached])
             //            cell.cellConfigure(customData: self.customisePlans)
             //
             return cell
