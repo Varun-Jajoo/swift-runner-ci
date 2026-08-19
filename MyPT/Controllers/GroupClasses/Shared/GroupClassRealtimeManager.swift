@@ -34,14 +34,7 @@ final class GroupClassRealtimeManager: NSObject {
     /// else uses.
     private enum Config {
         static let scheme = "wss"
-        // Deliberately NOT gated on the app-wide `isTesting` flag - group
-        // classes are pointed at production while the rest of the app
-        // (isTesting=true) stays on UAT. Revisit together with
-        // GroupClassTapThroughData.swift's own `host` if that ever changes -
-        // group-class listing/booking data itself still comes from
-        // URLBuilder's isTesting-gated baseURL (UAT), so this only makes
-        // sense once that's pointed at the same backend too.
-        static let host = AppBaseUrl.baseProductionUrl.rawValue
+        static let host = isTesting ? AppBaseUrl.baseDevUrl.rawValue : AppBaseUrl.baseProductionUrl.rawValue
         static let port: Int? = 443
         static let appKey = "6j6bpvkxjw3s9flj3cvr"
     }

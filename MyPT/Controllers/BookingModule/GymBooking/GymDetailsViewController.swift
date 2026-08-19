@@ -157,7 +157,7 @@ class GymDetailsViewController: CommonViewController {
                 return
             }
             
-            let getBaseUrl:String = AppBaseUrl.baseScheme.rawValue + "://" + AppBaseUrl.baseDevUrl.rawValue
+            let getBaseUrl:String = AppBaseUrl.baseScheme.rawValue + "://" + (isTesting ? AppBaseUrl.baseDevUrl.rawValue : AppBaseUrl.baseProductionUrl.rawValue)
             print(getBaseUrl)
             
 //            let urlString = "https://mobileapp.mypt-me.com/\(self.inputType ?? "")/\(studioDetails?.id ?? 0)/\(gymDetailsFlow)"

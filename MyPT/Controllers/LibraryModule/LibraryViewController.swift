@@ -638,8 +638,8 @@ extension LibraryViewController: UICollectionViewDelegate, UICollectionViewDataS
                 if let indx = self.getWorkoutData?.firstIndex(where: {$0.id?.value == shareBtnId}){
                     let workoutDetails = self.getWorkoutData?[indx]
                     print("share shareMealsData: ", workoutDetails as Any)
-                    
-                    let getBaseUrl:String = AppBaseUrl.baseScheme.rawValue + "://" + AppBaseUrl.baseDevUrl.rawValue
+
+                    let getBaseUrl:String = AppBaseUrl.baseScheme.rawValue + "://" + (isTesting ? AppBaseUrl.baseDevUrl.rawValue : AppBaseUrl.baseProductionUrl.rawValue)
                     print(getBaseUrl)
 
                     // let urlString = "https://mobileapp.mypt-me.com/\(self.inputType ?? "")/\(studioDetails?.id ?? 0)/\(gymDetailsFlow)"
@@ -672,8 +672,8 @@ extension LibraryViewController: UICollectionViewDelegate, UICollectionViewDataS
                 if let indx = self.gymFeaturedData?.firstIndex(where: {$0.id?.value == shareBtnId}){
                     let featuredDetails = self.gymFeaturedData?[indx]
                     print("share featuredDetails: ", featuredDetails as Any)
-                    
-                    let getBaseUrl:String = AppBaseUrl.baseScheme.rawValue + "://" + AppBaseUrl.baseDevUrl.rawValue
+
+                    let getBaseUrl:String = AppBaseUrl.baseScheme.rawValue + "://" + (isTesting ? AppBaseUrl.baseDevUrl.rawValue : AppBaseUrl.baseProductionUrl.rawValue)
                     print(getBaseUrl)
 
                     // let urlString = "https://mobileapp.mypt-me.com/\(self.inputType ?? "")/\(studioDetails?.id ?? 0)/\(gymDetailsFlow)"

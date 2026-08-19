@@ -156,7 +156,7 @@ class ClassDetailsViewController: CommonViewController {
             guard let self = self , let img = img else {
                 return
             }
-            let getBaseUrl:String = AppBaseUrl.baseScheme.rawValue + "://" + AppBaseUrl.baseDevUrl.rawValue
+            let getBaseUrl:String = AppBaseUrl.baseScheme.rawValue + "://" + (isTesting ? AppBaseUrl.baseDevUrl.rawValue : AppBaseUrl.baseProductionUrl.rawValue)
             print(getBaseUrl)
             let urlString = "\(getBaseUrl)/class/\(scheludeIdStr ?? "")/\(flowClassDetails)"
             Utility.shared.shareSocial(viewController: self, textToShare: classDetails?.className ?? "", imageToShare: img, urlShareStr: urlString)
