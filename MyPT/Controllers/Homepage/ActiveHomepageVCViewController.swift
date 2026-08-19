@@ -932,25 +932,13 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         if let getIndx = self.upcomingSessionData?.firstIndex(where: {
             $0.id?.value == sender.accessibilityHint ?? "0"
         }), let session = self.upcomingSessionData?[getIndx] {
-            let typeStr = session.sessionType?.value?.lowercased() ?? ""
-            let bookingType = session.bookingType?.lowercased() ?? ""
-            let isGroupClass = typeStr.contains("group") || typeStr == "class" || bookingType.contains("group") || bookingType == "class"
-            if isGroupClass {
-                let confirmed = SlotConfirmedViewController()
-                let title = session.bookingType?.isEmpty == false ? session.bookingType : session.sessionType?.value
-                confirmed.classTitle = title ?? ""
-                confirmed.classTime = session.timing?.value ?? ""
-                confirmed.classLocation = session.location?.value ?? ""
-                confirmed.trainerName = session.trainer?.value ?? ""
-                confirmed.distance = session.distance?.value ?? ""
-                confirmed.classPrice = session.price?.value ?? ""
-                confirmed.studioLat = Double(session.studioLat?.value ?? "") ?? 0
-                confirmed.studioLng = Double(session.studioLng?.value ?? "") ?? 0
-                confirmed.isReadOnly = true
-                confirmed.bookingId = session.id?.value ?? ""
-                confirmed.canCancelBooking = true
-                confirmed.hidesBottomBarWhenPushed = true
-                self.navigationController?.pushViewController(confirmed, animated: true)
+            if session.isGroupClass {
+                // Same BookingDataModel, same routing as the Bookings tab -
+                // see GroupClassBookingRouter's own doc comment for why this
+                // must not be a simpler, state-blind copy again. Home's
+                // "Upcoming Bookings" section has no tabs of its own, but its
+                // content is always conceptually the Upcoming tab's data.
+                GroupClassBookingRouter.route(row: session, isUpcomingTab: true, on: self.navigationController)
                 return
             }
             let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
