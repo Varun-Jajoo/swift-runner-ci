@@ -19,7 +19,7 @@ var recordFound: Int              { return 2001 }
 var noRecordFound: Int            { return 2002 }
 var recordAlreadyExist: Int       { return 2003 }
 
-var isTesting: Bool               { return false }
+var isTesting: Bool               { return true }
 
 //App base urls
 enum AppBaseUrl: String {
@@ -91,6 +91,8 @@ enum ApiEndPoint: String {
     case get_resources                  =  "api/get-resources"
     case class_detail                   =  "api/class-detail"
     case viewall_classes                =  "api/viewall-classes"
+    /// Small Group PT (SGPT) home-carousel + See All feed.
+    case sgpt_upcoming                  =  "api/sgpt-upcoming"
     case class_category                 =  "api/class-category"
     case book_class                     =  "api/book-class"
     case join_waitlist                  =  "api/join-waitlist"

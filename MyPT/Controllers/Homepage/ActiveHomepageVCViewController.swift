@@ -72,6 +72,17 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     @IBOutlet weak var pageController: UIPageControl!
     @IBOutlet weak var heightOfCollectionPlan: NSLayoutConstraint!
 
+    // MARK: - SGPT (Small Group PT)
+    // Real storyboard section (unlike the Group Classes carousel below, which
+    // is a hand-built UIView inserted into the stack view at runtime) - see
+    // the SGPT section in Homepage.storyboard, directly below "Smart
+    // Suggestions for You".
+    @IBOutlet weak var imgSgptBg: UIImageView!
+    @IBOutlet weak var collectionSgpt: UICollectionView!
+    @IBOutlet weak var dotsSgpt: GroupClassCarouselDotsView!
+    @IBOutlet weak var btnSeeAllSgpt: GradientCTAButton!
+    private var sgptSessions: [SgptSessionModel] = []
+
     /// Group Classes carousel, inserted into the storyboard's content stack view
     /// at runtime (see `setupGroupClassesSection()`).
     private var groupClassesCarousel: GroupClassesCarouselView?
@@ -131,6 +142,7 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         getBannerApi()
         if hasCachedLocation {
             loadGroupClasses()
+            loadSgptClasses()
         }
         if let firstDate = dates.first {
             let todayDate = getFormattedDate(from: firstDate)
@@ -158,6 +170,8 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         collectionBanner.dataSource = self
         collectionPlan.delegate = self
         collectionPlan.dataSource = self
+        collectionSgpt.delegate = self
+        collectionSgpt.dataSource = self
         if let layout = collectionPlan.collectionViewLayout as? UICollectionViewFlowLayout {
             layout.estimatedItemSize = .zero
             layout.minimumLineSpacing = 15
@@ -195,6 +209,11 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             UINib(nibName: "NewExpiredPlanCVCell", bundle: nil),
             forCellWithReuseIdentifier: "NewExpiredPlanCVCell"
         )
+        collectionSgpt.register(
+            UINib(nibName: "SgptCardCollectionViewCell", bundle: nil),
+            forCellWithReuseIdentifier: SgptCardCollectionViewCell.reuseIdentifier
+        )
+        btnSeeAllSgpt.addTarget(self, action: #selector(onTapSeeAllSgpt), for: .touchUpInside)
         DispatchQueue.main.async {
             self.pageController.currentPageIndicatorTintColor = .white
             self.pageController.pageIndicatorTintColor = UIColor.lightGray.withAlphaComponent(0.5)
@@ -205,6 +224,17 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             [self.lblMyBooking, self.lblSmartSuggestion, self.lblTrainingTEam, self.lblMyPtAction, self.lblTrainingTeamHeading].forEach {
                 $0?.font = AppFont.medium.size(14.0, familyName: familyClashDisplay)
             }
+
+            // Same configuration style as GroupClassesCarouselView's own
+            // "SEE ALL GROUP TRAININGS" CTA.
+            self.btnSeeAllSgpt.bandThickness = 2
+            self.btnSeeAllSgpt.configure(title: "EXPLORE ALL SGPT",
+                                         font: AppFont.semibold.size(14.0, familyName: familyFunnelSans),
+                                         titleColor: UIColor(hex: "#141514"))
+            self.btnSeeAllSgpt.horizontalContentInset = 12
+            self.btnSeeAllSgpt.trailingIconSize = 20
+            self.btnSeeAllSgpt.setTrailingIcon(UIImage(named: "chevron-right") ?? UIImage(systemName: "chevron.right"),
+                                               tint: UIColor(hex: "#141514"))
         }
     }
     
@@ -225,6 +255,7 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             bookingListApi()
             getPlansApi()
             loadGroupClasses()
+            loadSgptClasses()
         }
     }
 
@@ -262,6 +293,35 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
 
     private func loadGroupClasses() {
         groupClassesCarousel?.loadClasses(lat: getLat, long: getLong)
+    }
+
+    // MARK: - SGPT (Small Group PT)
+
+    private func loadSgptClasses() {
+        let requestLat = (getLat ?? 0) == 0 ? GroupClassCardFormatter.fallbackLatitude : (getLat ?? 0)
+        let requestLng = (getLong ?? 0) == 0 ? GroupClassCardFormatter.fallbackLongitude : (getLong ?? 0)
+        let params: [String: String] = [
+            "lat": "\(requestLat)",
+            "long": "\(requestLng)"
+        ]
+        // No loader: this is a passive home-screen section, not a user-initiated action.
+        SgptVM.sgptUpcomingApi(inputParams: params, isShowLoader: false) { [weak self] result in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.sgptSessions = result ?? []
+                self.collectionSgpt.reloadData()
+                self.dotsSgpt.setPageCount(self.sgptSessions.count)
+            }
+        }
+    }
+
+    @objc private func onTapSeeAllSgpt() {
+        TapticEngine.selection.feedback()
+        let controller = SeeAllSgptViewController()
+        controller.initialLat = self.getLat ?? GroupClassCardFormatter.fallbackLatitude
+        controller.initialLng = self.getLong ?? GroupClassCardFormatter.fallbackLongitude
+        controller.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(controller, animated: true)
     }
 
     private func setUpData() {
@@ -335,7 +395,24 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         currentIndex = page
         pageController.currentPage = page
     }
-    
+
+    /// Drives `dotsSgpt` from `collectionSgpt`'s live scroll position - port of
+    /// GroupClassesCarouselView's own `scrollViewDidScroll`, adapted to operate
+    /// directly on the storyboard's `collectionSgpt` instead of a child view's
+    /// private collection view.
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard scrollView === collectionSgpt, !sgptSessions.isEmpty else { return }
+        let pageWidth = SgptCardCollectionViewCell.cardSize.width + 10 // card spacing
+        guard pageWidth > 0 else { return }
+        let maxOffsetX = scrollView.contentSize.width - scrollView.bounds.width
+        if maxOffsetX > 0, scrollView.contentOffset.x >= maxOffsetX - 0.5 {
+            dotsSgpt.setSelectedPage(sgptSessions.count - 1)
+            return
+        }
+        let rawPage = (scrollView.contentOffset.x + scrollView.contentInset.left) / pageWidth
+        dotsSgpt.setSelectedPage(Int(rawPage.rounded()))
+    }
+
     deinit {
         bannerTimer?.invalidate()
     }
@@ -486,10 +563,12 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
                 collectionView.restoreEmptyView()
             }
             return count
+        } else if collectionView == collectionSgpt {
+            return sgptSessions.count
         }
         return 0
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == collectionSessionType {
             let cell = collectionView.dequeueReusableCell(
@@ -607,10 +686,17 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
                 cell.btnUseSession.addTarget(self, action: #selector(useSessionBtnActn(sender: )), for: .touchUpInside)
                 return cell
             }
+        } else if collectionView == collectionSgpt {
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: SgptCardCollectionViewCell.reuseIdentifier,
+                for: indexPath) as? SgptCardCollectionViewCell,
+                  indexPath.item < sgptSessions.count else { return UICollectionViewCell() }
+            cell.configure(with: sgptSessions[indexPath.item])
+            return cell
         }
         return UICollectionViewCell()
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if collectionView == collectionMyPTAction {
             return CGSize(width: (collectionView.frame.size.width - 10) / 4.1, height: 140)
@@ -618,6 +704,8 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             return CGSize(width: collectionView.frame.size.width, height: 330)
         } else if collectionView == collectionMyBooking {
             return CGSize(width: 385, height: 210)
+        } else if collectionView == collectionSgpt {
+            return SgptCardCollectionViewCell.cardSize
         } else if collectionView == collectionDate {
             return CGSize(width: 104, height: 32)
         } else if collectionView == collectionBookingSuggestion {
@@ -741,6 +829,12 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
 
         if collectionView == collectionPlan {
             return 15
+        } else if collectionView == collectionSgpt {
+            // Horizontal single-row carousel: minimumLineSpacing is the gap
+            // that actually separates consecutive cards here (each card is
+            // its own "line" since its height already fills the collection
+            // view) - same value GroupClassesCarouselView.cardSpacing uses.
+            return 10
         }
 
         return 0

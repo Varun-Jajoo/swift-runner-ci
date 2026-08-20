@@ -415,6 +415,59 @@
                                                                     <constraint firstItem="AL3-fb-cjW" firstAttribute="top" secondItem="e37-cz-3yz" secondAttribute="top" id="hcg-DY-UEd"/>
                                                                 </constraints>
                                                             </view>
+                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SGh-00-001">
+                                                                <rect key="frame" x="0.0" y="835" width="440" height="545"/>
+                                                                <subviews>
+                                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="sgpt-bg" translatesAutoresizingMaskIntoConstraints="NO" id="SGh-00-002">
+                                                                        <rect key="frame" x="0.0" y="0.0" width="440" height="545"/>
+                                                                    </imageView>
+                                                                    <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="SGh-00-003">
+                                                                        <rect key="frame" x="16" y="20" width="408" height="426"/>
+                                                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="height" constant="426" id="SGh-01-014"/>
+                                                                        </constraints>
+                                                                        <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="SGh-00-004">
+                                                                            <size key="itemSize" width="0.0" height="0.0"/>
+                                                                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                                                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                                                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                                                        </collectionViewFlowLayout>
+                                                                        <cells/>
+                                                                    </collectionView>
+                                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SGh-00-005" customClass="GroupClassCarouselDotsView" customModule="MyPT_Connect" customModuleProvider="target">
+                                                                        <rect key="frame" x="207.5" y="462" width="25" height="5"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="height" constant="5" id="SGh-01-015"/>
+                                                                        </constraints>
+                                                                    </view>
+                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SGh-00-006" customClass="GradientCTAButton" customModule="MyPT_Connect" customModuleProvider="target">
+                                                                        <rect key="frame" x="20" y="483" width="400" height="42"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="height" constant="42" id="SGh-01-016"/>
+                                                                        </constraints>
+                                                                        <state key="normal" title="EXPLORE ALL SGPT">
+                                                                            <color key="titleColor" red="0.078431372549019607" green="0.082352941176470587" blue="0.078431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                                        </state>
+                                                                    </button>
+                                                                </subviews>
+                                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                                <constraints>
+                                                                    <constraint firstAttribute="height" constant="545" id="SGh-01-001"/>
+                                                                    <constraint firstItem="SGh-00-002" firstAttribute="top" secondItem="SGh-00-001" secondAttribute="top" id="SGh-01-002"/>
+                                                                    <constraint firstItem="SGh-00-002" firstAttribute="leading" secondItem="SGh-00-001" secondAttribute="leading" id="SGh-01-003"/>
+                                                                    <constraint firstAttribute="trailing" secondItem="SGh-00-002" secondAttribute="trailing" id="SGh-01-004"/>
+                                                                    <constraint firstAttribute="bottom" secondItem="SGh-00-002" secondAttribute="bottom" id="SGh-01-005"/>
+                                                                    <constraint firstItem="SGh-00-003" firstAttribute="top" secondItem="SGh-00-001" secondAttribute="top" constant="20" id="SGh-01-006"/>
+                                                                    <constraint firstItem="SGh-00-003" firstAttribute="leading" secondItem="SGh-00-001" secondAttribute="leading" constant="16" id="SGh-01-007"/>
+                                                                    <constraint firstAttribute="trailing" secondItem="SGh-00-003" secondAttribute="trailing" constant="16" id="SGh-01-008"/>
+                                                                    <constraint firstItem="SGh-00-005" firstAttribute="top" secondItem="SGh-00-003" secondAttribute="bottom" constant="16" id="SGh-01-009"/>
+                                                                    <constraint firstItem="SGh-00-005" firstAttribute="centerX" secondItem="SGh-00-001" secondAttribute="centerX" id="SGh-01-010"/>
+                                                                    <constraint firstItem="SGh-00-006" firstAttribute="top" secondItem="SGh-00-005" secondAttribute="bottom" constant="16" id="SGh-01-011"/>
+                                                                    <constraint firstItem="SGh-00-006" firstAttribute="leading" secondItem="SGh-00-001" secondAttribute="leading" constant="20" id="SGh-01-012"/>
+                                                                    <constraint firstAttribute="trailing" secondItem="SGh-00-006" secondAttribute="trailing" constant="20" id="SGh-01-013"/>
+                                                                </constraints>
+                                                            </view>
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gSg-ha-MEk">
                                                                 <rect key="frame" x="0.0" y="860" width="440" height="463"/>
                                                                 <subviews>
@@ -683,15 +736,19 @@
                         <outlet property="btnGymTrainers" destination="E2K-3N-8bs" id="4wc-Ik-S74"/>
                         <outlet property="btnHomeTrainers" destination="srB-N6-VOX" id="vga-zO-oyL"/>
                         <outlet property="btnNameInitial" destination="NXO-MC-Mwd" id="bU7-ua-K3g"/>
+                        <outlet property="btnSeeAllSgpt" destination="SGh-00-006" id="SGh-02-001"/>
                         <outlet property="collectionBanner" destination="AL3-fb-cjW" id="zsE-lD-DZq"/>
                         <outlet property="collectionMyPt" destination="Sbs-2N-fF6" id="OHW-Eu-V8k"/>
+                        <outlet property="collectionSgpt" destination="SGh-00-003" id="SGh-02-002"/>
                         <outlet property="collectionTrainer" destination="N40-J4-NDM" id="iT8-4P-pRc"/>
+                        <outlet property="dotsSgpt" destination="SGh-00-005" id="SGh-02-003"/>
                         <outlet property="imageTop" destination="zwp-2W-Rtd" id="OX4-Pv-T4K"/>
                         <outlet property="img1" destination="HzF-I2-brZ" id="u0Y-TY-8g1"/>
                         <outlet property="img2" destination="kez-jl-Z2s" id="U4C-pn-Cj0"/>
                         <outlet property="img3" destination="vQH-qs-6IM" id="o6r-JF-ujN"/>
                         <outlet property="imgGreenLocation" destination="JaA-hU-7Hc" id="Zy2-KK-14D"/>
                         <outlet property="imgHeader" destination="shD-Ks-p4L" id="62p-sw-gFB"/>
+                        <outlet property="imgSgptBg" destination="SGh-00-002" id="SGh-02-004"/>
                         <outlet property="lbl1" destination="SlE-dh-T8u" id="AOU-Wz-Qf2"/>
                         <outlet property="lbl2" destination="vPH-Ql-zQO" id="9F0-K5-Knh"/>
                         <outlet property="lbl3" destination="zv1-qW-EIE" id="tWS-Fn-nyg"/>
@@ -1010,6 +1067,59 @@
                                                                     <constraint firstItem="tIf-xG-oID" firstAttribute="centerY" secondItem="e1z-6K-UgZ" secondAttribute="centerY" id="qMf-nH-HKl"/>
                                                                     <constraint firstItem="e1z-6K-UgZ" firstAttribute="centerX" secondItem="BhO-Uv-htr" secondAttribute="centerX" id="rDi-NW-dU8"/>
                                                                     <constraint firstItem="e1z-6K-UgZ" firstAttribute="leading" secondItem="tIf-xG-oID" secondAttribute="trailing" constant="15" id="xXD-XB-KaF"/>
+                                                                </constraints>
+                                                            </view>
+                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SGa-00-001">
+                                                                <rect key="frame" x="0.0" y="940.66666666666674" width="440" height="545"/>
+                                                                <subviews>
+                                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="sgpt-bg" translatesAutoresizingMaskIntoConstraints="NO" id="SGa-00-002">
+                                                                        <rect key="frame" x="0.0" y="0.0" width="440" height="545"/>
+                                                                    </imageView>
+                                                                    <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="SGa-00-003">
+                                                                        <rect key="frame" x="16" y="20" width="408" height="426"/>
+                                                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="height" constant="426" id="SGa-01-014"/>
+                                                                        </constraints>
+                                                                        <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="SGa-00-004">
+                                                                            <size key="itemSize" width="0.0" height="0.0"/>
+                                                                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                                                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                                                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                                                        </collectionViewFlowLayout>
+                                                                        <cells/>
+                                                                    </collectionView>
+                                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SGa-00-005" customClass="GroupClassCarouselDotsView" customModule="MyPT_Connect" customModuleProvider="target">
+                                                                        <rect key="frame" x="207.5" y="462" width="25" height="5"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="height" constant="5" id="SGa-01-015"/>
+                                                                        </constraints>
+                                                                    </view>
+                                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SGa-00-006" customClass="GradientCTAButton" customModule="MyPT_Connect" customModuleProvider="target">
+                                                                        <rect key="frame" x="20" y="483" width="400" height="42"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="height" constant="42" id="SGa-01-016"/>
+                                                                        </constraints>
+                                                                        <state key="normal" title="EXPLORE ALL SGPT">
+                                                                            <color key="titleColor" red="0.078431372549019607" green="0.082352941176470587" blue="0.078431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                                        </state>
+                                                                    </button>
+                                                                </subviews>
+                                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                                <constraints>
+                                                                    <constraint firstAttribute="height" constant="545" id="SGa-01-001"/>
+                                                                    <constraint firstItem="SGa-00-002" firstAttribute="top" secondItem="SGa-00-001" secondAttribute="top" id="SGa-01-002"/>
+                                                                    <constraint firstItem="SGa-00-002" firstAttribute="leading" secondItem="SGa-00-001" secondAttribute="leading" id="SGa-01-003"/>
+                                                                    <constraint firstAttribute="trailing" secondItem="SGa-00-002" secondAttribute="trailing" id="SGa-01-004"/>
+                                                                    <constraint firstAttribute="bottom" secondItem="SGa-00-002" secondAttribute="bottom" id="SGa-01-005"/>
+                                                                    <constraint firstItem="SGa-00-003" firstAttribute="top" secondItem="SGa-00-001" secondAttribute="top" constant="20" id="SGa-01-006"/>
+                                                                    <constraint firstItem="SGa-00-003" firstAttribute="leading" secondItem="SGa-00-001" secondAttribute="leading" constant="16" id="SGa-01-007"/>
+                                                                    <constraint firstAttribute="trailing" secondItem="SGa-00-003" secondAttribute="trailing" constant="16" id="SGa-01-008"/>
+                                                                    <constraint firstItem="SGa-00-005" firstAttribute="top" secondItem="SGa-00-003" secondAttribute="bottom" constant="16" id="SGa-01-009"/>
+                                                                    <constraint firstItem="SGa-00-005" firstAttribute="centerX" secondItem="SGa-00-001" secondAttribute="centerX" id="SGa-01-010"/>
+                                                                    <constraint firstItem="SGa-00-006" firstAttribute="top" secondItem="SGa-00-005" secondAttribute="bottom" constant="16" id="SGa-01-011"/>
+                                                                    <constraint firstItem="SGa-00-006" firstAttribute="leading" secondItem="SGa-00-001" secondAttribute="leading" constant="20" id="SGa-01-012"/>
+                                                                    <constraint firstAttribute="trailing" secondItem="SGa-00-006" secondAttribute="trailing" constant="20" id="SGa-01-013"/>
                                                                 </constraints>
                                                             </view>
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="FSF-fB-IWI">
@@ -1363,6 +1473,7 @@
                     </view>
                     <connections>
                         <outlet property="btnNameInitial" destination="Tu1-WV-QPn" id="yf7-tm-1AP"/>
+                        <outlet property="btnSeeAllSgpt" destination="SGa-00-006" id="SGa-02-001"/>
                         <outlet property="collectionBanner" destination="ufO-hK-8Ma" id="Gkg-Wd-Zwf"/>
                         <outlet property="collectionBookingSuggestion" destination="iOo-yn-Oyp" id="pYN-oZ-aH9"/>
                         <outlet property="collectionDate" destination="Ubf-yo-CVY" id="HNm-xv-Znk"/>
@@ -1370,10 +1481,13 @@
                         <outlet property="collectionMyPTAction" destination="efz-kK-ku3" id="SsW-xL-kL0"/>
                         <outlet property="collectionPlan" destination="LPk-Y2-hMR" id="37B-W1-qOg"/>
                         <outlet property="collectionSessionType" destination="2hc-ep-wru" id="fzw-gQ-cPD"/>
+                        <outlet property="collectionSgpt" destination="SGa-00-003" id="SGa-02-002"/>
+                        <outlet property="dotsSgpt" destination="SGa-00-005" id="SGa-02-003"/>
                         <outlet property="heightOfCollectionPlan" destination="mbf-u4-Mak" id="olD-dr-xpk"/>
                         <outlet property="imgBackground" destination="yd0-vU-vY2" id="RWi-2r-hVx"/>
                         <outlet property="imgHeader" destination="FCW-Rn-AIJ" id="ciF-d8-tAb"/>
                         <outlet property="imgOffer" destination="TiQ-vK-cWc" id="Xld-17-3uj"/>
+                        <outlet property="imgSgptBg" destination="SGa-00-002" id="SGa-02-004"/>
                         <outlet property="imgTeam" destination="MDs-BW-MNG" id="Z76-Xb-O7X"/>
                         <outlet property="lblAddress" destination="NgV-sC-AyZ" id="sPZ-MW-4Ie"/>
                         <outlet property="lblAddressType" destination="d2u-2M-EeF" id="mvc-Vy-K3g"/>

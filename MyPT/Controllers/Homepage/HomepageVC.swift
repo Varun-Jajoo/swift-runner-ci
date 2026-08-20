@@ -67,6 +67,16 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
     @IBOutlet weak var pageController: UIPageControl!
     @IBOutlet weak var btnBookFreeAss: UIButton!
 
+    // MARK: - SGPT (Small Group PT)
+    // Real storyboard section (unlike the Group Classes carousel below, which
+    // is a hand-built UIView inserted into the stack view at runtime) - see
+    // the SGPT section in Homepage.storyboard, directly below the banner.
+    @IBOutlet weak var imgSgptBg: UIImageView!
+    @IBOutlet weak var collectionSgpt: UICollectionView!
+    @IBOutlet weak var dotsSgpt: GroupClassCarouselDotsView!
+    @IBOutlet weak var btnSeeAllSgpt: GradientCTAButton!
+    private var sgptSessions: [SgptSessionModel] = []
+
     /// Group Classes carousel, inserted into the storyboard's content stack view
     /// at runtime (see `setupGroupClassesSection()`).
     private var groupClassesCarousel: GroupClassesCarouselView?
@@ -124,6 +134,35 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         groupClassesCarousel?.loadClasses(lat: getLat, long: getLong)
     }
 
+    // MARK: - SGPT (Small Group PT)
+
+    private func loadSgptClasses() {
+        let requestLat = (getLat ?? 0) == 0 ? GroupClassCardFormatter.fallbackLatitude : (getLat ?? 0)
+        let requestLng = (getLong ?? 0) == 0 ? GroupClassCardFormatter.fallbackLongitude : (getLong ?? 0)
+        let params: [String: String] = [
+            "lat": "\(requestLat)",
+            "long": "\(requestLng)"
+        ]
+        // No loader: this is a passive home-screen section, not a user-initiated action.
+        SgptVM.sgptUpcomingApi(inputParams: params, isShowLoader: false) { [weak self] result in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.sgptSessions = result ?? []
+                self.collectionSgpt.reloadData()
+                self.dotsSgpt.setPageCount(self.sgptSessions.count)
+            }
+        }
+    }
+
+    @objc private func onTapSeeAllSgpt() {
+        TapticEngine.selection.feedback()
+        let controller = SeeAllSgptViewController()
+        controller.initialLat = self.getLat ?? GroupClassCardFormatter.fallbackLatitude
+        controller.initialLng = self.getLong ?? GroupClassCardFormatter.fallbackLongitude
+        controller.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(controller, animated: true)
+    }
+
     private func uiSetup() {
         self.collectionMyPt.delegate = self
         self.collectionMyPt.dataSource = self
@@ -131,20 +170,28 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         self.collectionBanner.dataSource = self
         self.collectionTrainer.delegate = self
         self.collectionTrainer.dataSource = self
+        self.collectionSgpt.delegate = self
+        self.collectionSgpt.dataSource = self
         self.collectionMyPt.register(
         UINib(nibName: "SeePtActionCVCell", bundle: nil),
         forCellWithReuseIdentifier: "SeePtActionCVCell"
     )
-    
+
         self.collectionBanner.register(
         UINib(nibName: "BannerHomepageCVCell", bundle: nil),
         forCellWithReuseIdentifier: "BannerHomepageCVCell"
     )
-    
+
         self.collectionTrainer.register(
         UINib(nibName: "GridTrainerCollectionViewCell", bundle: nil),
         forCellWithReuseIdentifier: "GridTrainerCollectionViewCell"
     )
+
+        self.collectionSgpt.register(
+            UINib(nibName: "SgptCardCollectionViewCell", bundle: nil),
+            forCellWithReuseIdentifier: SgptCardCollectionViewCell.reuseIdentifier
+        )
+        self.btnSeeAllSgpt.addTarget(self, action: #selector(onTapSeeAllSgpt), for: .touchUpInside)
         DispatchQueue.main.async {
             self.pageController.currentPageIndicatorTintColor = .white
             self.pageController.pageIndicatorTintColor = UIColor.lightGray.withAlphaComponent(0.5)
@@ -188,9 +235,20 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
             // Reduce spacing between title & image
             self.btnBookFreeAss.imageEdgeInsets = UIEdgeInsets(top: 0, left: 4, bottom: 0, right: -4)
             self.btnBookFreeAss.titleEdgeInsets = UIEdgeInsets(top: 0, left: -4, bottom: 0, right: 4)
+
+            // Same configuration style as GroupClassesCarouselView's own
+            // "SEE ALL GROUP TRAININGS" CTA.
+            self.btnSeeAllSgpt.bandThickness = 2
+            self.btnSeeAllSgpt.configure(title: "EXPLORE ALL SGPT",
+                                         font: AppFont.semibold.size(14.0, familyName: familyFunnelSans),
+                                         titleColor: UIColor(hex: "#141514"))
+            self.btnSeeAllSgpt.horizontalContentInset = 12
+            self.btnSeeAllSgpt.trailingIconSize = 20
+            self.btnSeeAllSgpt.setTrailingIcon(UIImage(named: "chevron-right") ?? UIImage(systemName: "chevron.right"),
+                                               tint: UIColor(hex: "#141514"))
         }
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         viewTrainersType.layer.cornerRadius = 24
         btnHomeTrainers.layer.cornerRadius = 18
@@ -226,6 +284,7 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         getBannerApi()
         checkAssessmentStatusApi()
         loadGroupClasses()
+        loadSgptClasses()
         updateTrainerSelection(isHomeTrainerSelected: true)
         groupClassesCarousel?.startRealtime()
     }
@@ -255,6 +314,7 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
             
             self.getTrainerApi(inputFilter: "0", inpuntTagId: 0)
             self.loadGroupClasses()
+            self.loadSgptClasses()
             //            self.upcomingClassesApi()
         }
     }
@@ -449,7 +509,28 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         currentIndex = page
         pageController.currentPage = page
     }
-    
+
+    /// Drives `dotsSgpt` from `collectionSgpt`'s live scroll position - port of
+    /// GroupClassesCarouselView's own `scrollViewDidScroll`, adapted to operate
+    /// directly on the storyboard's `collectionSgpt` instead of a child view's
+    /// private collection view.
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard scrollView === collectionSgpt, !sgptSessions.isEmpty else { return }
+        let pageWidth = SgptCardCollectionViewCell.cardSize.width + 10 // card spacing
+        guard pageWidth > 0 else { return }
+        // At maximum scroll the last card comes to rest against the trailing
+        // content inset, so contentOffset.x never reaches (count - 1) * pageWidth -
+        // snap the final page explicitly rather than trusting the offset maths
+        // at the very end (same reasoning as GroupClassesCarouselView's identical guard).
+        let maxOffsetX = scrollView.contentSize.width - scrollView.bounds.width
+        if maxOffsetX > 0, scrollView.contentOffset.x >= maxOffsetX - 0.5 {
+            dotsSgpt.setSelectedPage(sgptSessions.count - 1)
+            return
+        }
+        let rawPage = (scrollView.contentOffset.x + scrollView.contentInset.left) / pageWidth
+        dotsSgpt.setSelectedPage(Int(rawPage.rounded()))
+    }
+
     deinit {
         bannerTimer?.invalidate()
     }
@@ -736,10 +817,12 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
                 collectionView.restoreEmptyView()
             }
             return count
+        } else if collectionView == collectionSgpt {
+            return sgptSessions.count
         }
         return 0
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == collectionMyPt {
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SeePtActionCVCell", for: indexPath) as? SeePtActionCVCell else { return UICollectionViewCell() }
@@ -775,10 +858,17 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
             cell.viewProfileBtn.addTarget(self, action: #selector(bookSlotBtnActn(sender: )), for: .touchUpInside)
             //            cell.viewProfileBtn.addTarget(self, action: #selector(viewProfileBtnActn(sender: )), for: .touchUpInside)
             return cell
+        } else if collectionView == collectionSgpt {
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: SgptCardCollectionViewCell.reuseIdentifier,
+                for: indexPath) as? SgptCardCollectionViewCell,
+                  indexPath.item < sgptSessions.count else { return UICollectionViewCell() }
+            cell.configure(with: sgptSessions[indexPath.item])
+            return cell
         }
         return UICollectionViewCell()
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if collectionView == collectionMyPt {
             return CGSize(width: (collectionView.frame.size.width - 10) / 4.1, height: 140)
@@ -787,11 +877,13 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
         } else if collectionView == collectionTrainer {
             let cellWdth = collectionView.frame.size.width/2
             return CGSize(width: cellWdth, height: collectionView.frame.size.height )
+        } else if collectionView == collectionSgpt {
+            return SgptCardCollectionViewCell.cardSize
         }
         return CGSize(width: collectionView.frame.size.width, height: collectionView.frame.size.height)
     }
-    
-    
+
+
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
@@ -799,10 +891,12 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
             return 15
         } else if collectionView == collectionBanner {
             return 20
+        } else if collectionView == collectionSgpt {
+            return 10
         }
         return 15
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         if collectionView == collectionTrainer {
             return 20
