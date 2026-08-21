@@ -279,7 +279,7 @@ private extension SgptPricingViewController {
         return scroll
     }
 
-    func makePlanCard(_ plan: PlanCard) -> UIView {
+    private func makePlanCard(_ plan: PlanCard) -> UIView {
         let width: CGFloat = plan.isCenter ? 146 : 133
         let height: CGFloat = plan.isCenter ? 187 : 170
 
@@ -370,7 +370,7 @@ private extension SgptPricingViewController {
         return row
     }
 
-    func makePriceRow(_ plan: PlanCard) -> UIView {
+    private func makePriceRow(_ plan: PlanCard) -> UIView {
         let priceLabel = UILabel()
         priceLabel.font = AppFont.medium.size(plan.isCenter ? 18 : 16, familyName: familyFunnelSans)
         priceLabel.textColor = plan.isCenter ? .white : .white.withAlphaComponent(0.75)
