@@ -82,6 +82,13 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     @IBOutlet weak var dotsSgpt: GroupClassCarouselDotsView!
     @IBOutlet weak var btnSeeAllSgpt: GradientCTAButton!
     private var sgptSessions: [SgptSessionModel] = []
+    /// The card currently carrying the pulsing "spotlight" glow, so it can be
+    /// turned off there before the newly-centered card gets it.
+    private var sgptGlowingIndexPath: IndexPath?
+    /// `collectionSgpt.bounds.width` as of the last time
+    /// `layoutSgptSpotlightIfNeeded()` re-laid it out - see that method for
+    /// why this guard exists.
+    private var lastSgptLayoutWidth: CGFloat = 0
 
     /// Group Classes carousel, inserted into the storyboard's content stack view
     /// at runtime (see `setupGroupClassesSection()`).
@@ -155,6 +162,36 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         groupClassesCarousel?.stopRealtime()
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        layoutSgptSpotlightIfNeeded()
+    }
+
+    /// `loadSgptClasses()`'s own `reloadData()` + `layoutIfNeeded()` pair
+    /// fires from an async API completion kicked off in `viewWillAppear` -
+    /// which is NOT guaranteed to run after Auto Layout has resolved
+    /// `collectionSgpt`'s real, final width (Apple's own docs are explicit
+    /// that a view's geometry isn't final yet at `viewWillAppear`). If that
+    /// first reload/layout pass lands before it is, `SgptSpotlightFlowLayout`
+    /// computes its `prepare()` sectionInset and
+    /// `layoutAttributesForElements(in:)` centering off a stale/zero bounds
+    /// width, throwing off which card reads as "centered" and by how much.
+    /// `viewDidLayoutSubviews()` only runs once Auto Layout has actually
+    /// settled that frame, so re-triggering the flow layout here - guarded by
+    /// width so this doesn't loop or fight an in-progress drag/rotation -
+    /// guarantees at least one correct pass. Same guarded-width pattern
+    /// `SeeAllSgptViewController.viewDidLayoutSubviews` already uses for this
+    /// exact SGPT-carousel-sizing problem.
+    private func layoutSgptSpotlightIfNeeded() {
+        let width = collectionSgpt.bounds.width
+        guard width > 0, width != lastSgptLayoutWidth else { return }
+        lastSgptLayoutWidth = width
+        collectionSgpt.collectionViewLayout.invalidateLayout()
+        collectionSgpt.layoutIfNeeded()
+        guard !sgptSessions.isEmpty else { return }
+        updateSgptSpotlight(centeredIndex: centeredSgptIndexPath()?.item ?? 0)
+    }
+
     private func uiSetup() {
         collectionSessionType.delegate = self
         collectionSessionType.dataSource = self
@@ -214,6 +251,13 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             forCellWithReuseIdentifier: SgptCardCollectionViewCell.reuseIdentifier
         )
         btnSeeAllSgpt.addTarget(self, action: #selector(onTapSeeAllSgpt), for: .touchUpInside)
+        // Peek insets + centering come from SgptSpotlightFlowLayout's own
+        // `prepare()` (set as the collection view's customClass in
+        // Homepage.storyboard); native paging is off since a peek carousel
+        // snaps to a card CENTER, not a full page width, and `.fast`
+        // deceleration keeps that snap feeling snappy instead of sluggish.
+        collectionSgpt.isPagingEnabled = false
+        collectionSgpt.decelerationRate = .fast
         DispatchQueue.main.async {
             self.pageController.currentPageIndicatorTintColor = .white
             self.pageController.pageIndicatorTintColor = UIColor.lightGray.withAlphaComponent(0.5)
@@ -311,8 +355,51 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
                 self.sgptSessions = result ?? []
                 self.collectionSgpt.reloadData()
                 self.dotsSgpt.setPageCount(self.sgptSessions.count)
+                // First card starts centered (SgptSpotlightFlowLayout's own
+                // sectionInset maths) - layoutIfNeeded so cellForItem(at:)
+                // below can already find it for the initial glow.
+                self.collectionSgpt.layoutIfNeeded()
+                self.updateSgptSpotlight(centeredIndex: 0)
             }
         }
+    }
+
+    /// Card whose (untransformed) layout frame currently contains the
+    /// collection view's own center point - i.e. whichever card
+    /// `SgptSpotlightFlowLayout` has snapped to the middle.
+    private func centeredSgptIndexPath() -> IndexPath? {
+        let center = CGPoint(x: collectionSgpt.contentOffset.x + collectionSgpt.bounds.width / 2,
+                             y: collectionSgpt.bounds.height / 2)
+        return collectionSgpt.indexPathForItem(at: center)
+    }
+
+    /// Pushes whichever card is centered out to every piece of "spotlight"
+    /// UI that isn't already handled automatically by
+    /// `SgptSpotlightFlowLayout` itself (which only owns the live
+    /// scale/alpha interpolation): the dots and the pulsing glow on the
+    /// centered card.
+    private func updateSgptSpotlight(centeredIndex: Int) {
+        guard sgptSessions.indices.contains(centeredIndex) else { return }
+        dotsSgpt.setSelectedPage(centeredIndex)
+
+        let newIndexPath = IndexPath(item: centeredIndex, section: 0)
+        if let previous = sgptGlowingIndexPath, previous != newIndexPath {
+            (collectionSgpt.cellForItem(at: previous) as? SgptCardCollectionViewCell)?.setGlowing(false)
+        }
+        sgptGlowingIndexPath = newIndexPath
+        (collectionSgpt.cellForItem(at: newIndexPath) as? SgptCardCollectionViewCell)?.setGlowing(true)
+    }
+
+    /// Common settle handler for all three ways a drag/scroll on
+    /// `collectionSgpt` can come to rest - see the call sites in
+    /// `scrollViewDidEndDecelerating`/`scrollViewDidEndDragging`/
+    /// `scrollViewDidEndScrollingAnimation` below for why all three exist
+    /// (a slow drag that never enters deceleration only fires the "dragging"
+    /// one; a fast flick only fires "decelerating").
+    private func settleSgptSpotlightIfNeeded(_ scrollView: UIScrollView) {
+        guard scrollView === collectionSgpt, !sgptSessions.isEmpty,
+              let centered = centeredSgptIndexPath() else { return }
+        updateSgptSpotlight(centeredIndex: centered.item)
     }
 
     @objc private func onTapSeeAllSgpt() {
@@ -390,27 +477,31 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         pageController.currentPage = currentIndex
     }
     
+    // scrollView identity matters here: collectionBanner and collectionSgpt
+    // share this one delegate, and the banner-paging math below only makes
+    // sense for collectionBanner's own contentOffset/frame - see
+    // settleSgptSpotlightIfNeeded's doc comment for why SGPT's settle needs
+    // three different UIScrollViewDelegate callbacks, not just this one.
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        let page = Int(scrollView.contentOffset.x / scrollView.frame.size.width)
-        currentIndex = page
-        pageController.currentPage = page
+        if scrollView === collectionBanner {
+            let page = Int(scrollView.contentOffset.x / scrollView.frame.size.width)
+            currentIndex = page
+            pageController.currentPage = page
+        } else if scrollView === collectionSgpt {
+            settleSgptSpotlightIfNeeded(scrollView)
+        }
     }
 
-    /// Drives `dotsSgpt` from `collectionSgpt`'s live scroll position - port of
-    /// GroupClassesCarouselView's own `scrollViewDidScroll`, adapted to operate
-    /// directly on the storyboard's `collectionSgpt` instead of a child view's
-    /// private collection view.
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard scrollView === collectionSgpt, !sgptSessions.isEmpty else { return }
-        let pageWidth = SgptCardCollectionViewCell.cardSize.width + 10 // card spacing
-        guard pageWidth > 0 else { return }
-        let maxOffsetX = scrollView.contentSize.width - scrollView.bounds.width
-        if maxOffsetX > 0, scrollView.contentOffset.x >= maxOffsetX - 0.5 {
-            dotsSgpt.setSelectedPage(sgptSessions.count - 1)
-            return
-        }
-        let rawPage = (scrollView.contentOffset.x + scrollView.contentInset.left) / pageWidth
-        dotsSgpt.setSelectedPage(Int(rawPage.rounded()))
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate: Bool) {
+        // A slow drag that stops without ever entering deceleration never
+        // fires scrollViewDidEndDecelerating - this is the only settle
+        // signal that case gets.
+        guard !willDecelerate else { return }
+        settleSgptSpotlightIfNeeded(scrollView)
+    }
+
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        settleSgptSpotlightIfNeeded(scrollView)
     }
 
     deinit {
@@ -820,9 +911,15 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             }
             vc.hidesBottomBarWhenPushed = true
             self.navigationController?.pushViewController(vc, animated: false)
+        } else if collectionView == collectionSgpt {
+            guard sgptSessions.indices.contains(indexPath.item) else { return }
+            let vc: SgptSessionDetailViewController = .instantiate(appStoryboard: .homepage)
+            vc.session = sgptSessions[indexPath.item]
+            vc.hidesBottomBarWhenPushed = true
+            self.navigationController?.pushViewController(vc, animated: true)
         }
     }
-    
+
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         minimumLineSpacingForSectionAt section: Int) -> CGFloat {
@@ -833,8 +930,10 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             // Horizontal single-row carousel: minimumLineSpacing is the gap
             // that actually separates consecutive cards here (each card is
             // its own "line" since its height already fills the collection
-            // view) - same value GroupClassesCarouselView.cardSpacing uses.
-            return 10
+            // view). Figma spec gap - MUST match
+            // SgptSpotlightFlowLayout.interCardGap (also 16), which reuses
+            // this same 16pt for its item-pitch/overlap-compensation maths.
+            return 16
         }
 
         return 0

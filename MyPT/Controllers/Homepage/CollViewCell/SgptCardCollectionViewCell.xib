@@ -11,57 +11,49 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="Sc0-00-cel" customClass="SgptCardCollectionViewCell" customModule="MyPT_Connect" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="230" height="426"/>
+            <rect key="frame" x="0.0" y="0.0" width="192" height="339"/>
             <autoresizingMask key="autoresizingMask"/>
             <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                <rect key="frame" x="0.0" y="0.0" width="230" height="426"/>
+                <rect key="frame" x="0.0" y="0.0" width="192" height="339"/>
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Sc0-01-crd" customClass="GlassCardView" customModule="MyPT_Connect" customModuleProvider="target">
-                        <rect key="frame" x="0.0" y="0.0" width="230" height="426"/>
+                        <rect key="frame" x="0.0" y="0.0" width="192" height="256"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Sc0-02-img">
-                                <rect key="frame" x="0.0" y="0.0" width="230" height="426"/>
+                                <rect key="frame" x="0.0" y="0.0" width="192" height="256"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            </imageView>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Sc0-03-fad" customClass="GradientFadeView" customModule="MyPT_Connect" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="256" width="230" height="170"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="170" id="Sc0-04-fdh"/>
+                                    <constraint firstAttribute="height" constant="256" id="Sc0-35-c15"/>
                                 </constraints>
-                            </view>
-                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="6" translatesAutoresizingMaskIntoConstraints="NO" id="Sc0-05-stk">
-                                <rect key="frame" x="16" y="356" width="198" height="50"/>
-                                <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Session Name" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="1" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Sc0-06-ttl">
-                                        <rect key="frame" x="0.0" y="0.0" width="198" height="24"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
-                                        <color key="textColor" white="1" alpha="1" colorSpace="calibratedRGB"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Subtitle" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Sc0-07-sub">
-                                        <rect key="frame" x="0.0" y="30" width="198" height="36"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                        <color key="textColor" white="1" alpha="0.55" colorSpace="calibratedRGB"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                </subviews>
-                            </stackView>
+                            </imageView>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="Sc0-02-img" firstAttribute="top" secondItem="Sc0-01-crd" secondAttribute="top" id="Sc0-08-c01"/>
                             <constraint firstItem="Sc0-02-img" firstAttribute="leading" secondItem="Sc0-01-crd" secondAttribute="leading" id="Sc0-09-c02"/>
                             <constraint firstAttribute="trailing" secondItem="Sc0-02-img" secondAttribute="trailing" id="Sc0-10-c03"/>
-                            <constraint firstAttribute="bottom" secondItem="Sc0-02-img" secondAttribute="bottom" id="Sc0-11-c04"/>
-                            <constraint firstItem="Sc0-03-fad" firstAttribute="leading" secondItem="Sc0-01-crd" secondAttribute="leading" id="Sc0-12-c05"/>
-                            <constraint firstAttribute="trailing" secondItem="Sc0-03-fad" secondAttribute="trailing" id="Sc0-13-c06"/>
-                            <constraint firstAttribute="bottom" secondItem="Sc0-03-fad" secondAttribute="bottom" id="Sc0-14-c07"/>
-                            <constraint firstItem="Sc0-05-stk" firstAttribute="leading" secondItem="Sc0-01-crd" secondAttribute="leading" constant="16" id="Sc0-15-c08"/>
-                            <constraint firstAttribute="trailing" secondItem="Sc0-05-stk" secondAttribute="trailing" constant="16" id="Sc0-16-c09"/>
-                            <constraint firstAttribute="bottom" secondItem="Sc0-05-stk" secondAttribute="bottom" constant="20" id="Sc0-17-c10"/>
+                            <constraint firstAttribute="bottom" secondItem="Sc0-02-img" secondAttribute="bottom" id="Sc1-11-c25"/>
                         </constraints>
                     </view>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Session Name" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="1" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Sc0-40-ttl">
+                        <rect key="frame" x="16" y="271" width="160" height="26"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="26" id="Sc0-45-c16"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="15.7"/>
+                        <color key="textColor" white="1" alpha="1" colorSpace="calibratedRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Subtitle" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Sc0-41-sub">
+                        <rect key="frame" x="16" y="303" width="160" height="36"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="36" id="Sc0-46-c17"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="9.5"/>
+                        <color key="textColor" white="1" alpha="0.55" colorSpace="calibratedRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
                 </subviews>
             </view>
             <viewLayoutGuide key="safeArea" id="Sc0-22-safe"/>
@@ -69,15 +61,20 @@
                 <constraint firstItem="Sc0-01-crd" firstAttribute="top" secondItem="Sc0-00-cel" secondAttribute="top" id="Sc0-18-o01"/>
                 <constraint firstItem="Sc0-01-crd" firstAttribute="leading" secondItem="Sc0-00-cel" secondAttribute="leading" id="Sc0-19-o02"/>
                 <constraint firstAttribute="trailing" secondItem="Sc0-01-crd" secondAttribute="trailing" id="Sc0-20-o03"/>
-                <constraint firstAttribute="bottom" secondItem="Sc0-01-crd" secondAttribute="bottom" id="Sc0-21-o04"/>
+                <constraint firstItem="Sc0-40-ttl" firstAttribute="top" secondItem="Sc0-01-crd" secondAttribute="bottom" constant="15" id="Sc1-12-c26"/>
+                <constraint firstItem="Sc0-40-ttl" firstAttribute="leading" secondItem="Sc0-00-cel" secondAttribute="leading" constant="16" id="Sc1-13-c27"/>
+                <constraint firstAttribute="trailing" secondItem="Sc0-40-ttl" secondAttribute="trailing" constant="16" id="Sc1-14-c28"/>
+                <constraint firstItem="Sc0-41-sub" firstAttribute="top" secondItem="Sc0-40-ttl" secondAttribute="bottom" constant="6" id="Sc1-15-c29"/>
+                <constraint firstItem="Sc0-41-sub" firstAttribute="leading" secondItem="Sc0-00-cel" secondAttribute="leading" constant="16" id="Sc1-16-c30"/>
+                <constraint firstAttribute="trailing" secondItem="Sc0-41-sub" secondAttribute="trailing" constant="16" id="Sc1-17-c31"/>
+                <constraint firstAttribute="bottom" secondItem="Sc0-41-sub" secondAttribute="bottom" id="Sc1-18-c32"/>
             </constraints>
-            <size key="customSize" width="230" height="426"/>
+            <size key="customSize" width="192" height="339"/>
             <connections>
                 <outlet property="cardView" destination="Sc0-01-crd" id="Sc0-23-oc1"/>
-                <outlet property="coverFadeView" destination="Sc0-03-fad" id="Sc0-24-oc2"/>
                 <outlet property="coverImageView" destination="Sc0-02-img" id="Sc0-25-oc3"/>
-                <outlet property="subtitleLabel" destination="Sc0-07-sub" id="Sc0-26-oc4"/>
-                <outlet property="titleLabel" destination="Sc0-06-ttl" id="Sc0-27-oc5"/>
+                <outlet property="subtitleLabel" destination="Sc0-41-sub" id="Sc0-51-oc4"/>
+                <outlet property="titleLabel" destination="Sc0-40-ttl" id="Sc0-52-oc5"/>
             </connections>
             <point key="canvasLocation" x="139.69465648854962" y="47.183098591549296"/>
         </collectionViewCell>

@@ -102,8 +102,8 @@ final class SeeAllSgptViewController: CommonViewController {
         gridCollectionView.showsVerticalScrollIndicator = false
         gridCollectionView.delegate = self
         gridCollectionView.dataSource = self
-        gridCollectionView.register(UINib(nibName: "SgptCardCollectionViewCell", bundle: nil),
-                                    forCellWithReuseIdentifier: SgptCardCollectionViewCell.reuseIdentifier)
+        gridCollectionView.register(SgptGridCardCollectionViewCell.self,
+                                    forCellWithReuseIdentifier: SgptGridCardCollectionViewCell.reuseIdentifier)
         view.addSubview(gridCollectionView)
 
         NSLayoutConstraint.activate([
@@ -170,8 +170,8 @@ extension SeeAllSgptViewController: UICollectionViewDataSource, UICollectionView
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: SgptCardCollectionViewCell.reuseIdentifier,
-            for: indexPath) as? SgptCardCollectionViewCell,
+            withReuseIdentifier: SgptGridCardCollectionViewCell.reuseIdentifier,
+            for: indexPath) as? SgptGridCardCollectionViewCell,
               indexPath.item < sessions.count else {
             return UICollectionViewCell()
         }
@@ -189,7 +189,15 @@ extension SeeAllSgptViewController: UICollectionViewDataSource, UICollectionView
         let available = collectionView.bounds.width - sectionInset.left - sectionInset.right
                        - spacing * CGFloat(columns - 1)
         let width = max(available / CGFloat(columns), 0)
-        let scale = width / SgptCardCollectionViewCell.cardSize.width
-        return CGSize(width: width, height: SgptCardCollectionViewCell.cardSize.height * scale)
+        let scale = width / SgptGridCardCollectionViewCell.cardSize.width
+        return CGSize(width: width, height: SgptGridCardCollectionViewCell.cardSize.height * scale)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard sessions.indices.contains(indexPath.item) else { return }
+        let vc = SgptSessionDetailViewController()
+        vc.session = sessions[indexPath.item]
+        vc.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
