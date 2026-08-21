@@ -76,8 +76,6 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
     @IBOutlet weak var dotsSgpt: GroupClassCarouselDotsView!
     @IBOutlet weak var btnSeeAllSgpt: GradientCTAButton!
     private var sgptSessions: [SgptSessionModel] = []
-    /// TEMPORARY - see SgptVM.lastDiagnostic's doc comment.
-    private var didShowSgptDiagnosticAlert = false
     /// The card currently carrying the pulsing "spotlight" glow, so it can be
     /// turned off there before the newly-centered card gets it.
     private var sgptGlowingIndexPath: IndexPath?
@@ -164,15 +162,6 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
                 // below can already find it for the initial glow.
                 self.collectionSgpt.layoutIfNeeded()
                 self.updateSgptSpotlight(centeredIndex: 0)
-
-                // TEMPORARY - see SgptVM.lastDiagnostic's doc comment. Shows
-                // once so this is visible without Xcode/Console.app.
-                if self.sgptSessions.isEmpty && !self.didShowSgptDiagnosticAlert {
-                    self.didShowSgptDiagnosticAlert = true
-                    let alert = UIAlertController(title: "SGPT debug", message: SgptVM.lastDiagnostic, preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .default))
-                    self.present(alert, animated: true)
-                }
             }
         }
     }

@@ -49,7 +49,13 @@ struct SgptUpcomingBaseModel: Codable {
 // MARK: - SgptSessionModel
 
 struct SgptSessionModel: Codable {
-    var id: Int?
+    // FlexibleValue, not Int: confirmed via on-device diagnostic that this
+    // endpoint sends id as a formatted session code string ("SG3011"), not
+    // a number - a plain Int decode throws on the very first real session,
+    // which (since every field in this struct decodes together) discarded
+    // the entire array and was why the SGPT carousel rendered empty on iOS
+    // while Android's more lenient parsing showed the same sessions fine.
+    var id: FlexibleValue?
     var sessionName: String?
     var trainerName: String?
     var studioName: String?
