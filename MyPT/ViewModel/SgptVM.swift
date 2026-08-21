@@ -30,7 +30,14 @@ class SgptVM {
                     return
                 }
                 let getResult = try JSONDecoder().decode(SgptUpcomingBaseModel.self, from: responceData)
-                completion(getResult.status == true ? (getResult.data ?? []) : nil)
+                // A present, non-empty `data` array is real sessions to show
+                // regardless of `status` - don't let an unreliable/ambiguous
+                // status flag hide sessions that actually came back.
+                if let data = getResult.data, !data.isEmpty {
+                    completion(data)
+                } else {
+                    completion(getResult.status == true ? [] : nil)
+                }
             } catch {
                 print(error)
                 completion(nil)

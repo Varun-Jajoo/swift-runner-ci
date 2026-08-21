@@ -14,9 +14,36 @@ import Foundation
 
 // MARK: - SgptUpcomingBaseModel
 
+/// Custom decode instead of plain `Codable` synthesis: `status` is typed
+/// `Bool?`, but if this endpoint ever sends it as `1`/`0` (as some of this
+/// backend's other endpoints are known to for numeric-ish fields - see
+/// `FlexibleValue`'s own rationale below) a strict `Bool` decode throws,
+/// which - since `status`/`data` are decoded together in one synthesized
+/// init - would silently discard an otherwise-valid `data` array too
+/// (`sgptUpcomingApi` catches the throw and calls `completion(nil)`). Decode
+/// `data` independently of `status`'s exact representation so a type quirk
+/// on one field can't hide real sessions that did come back.
 struct SgptUpcomingBaseModel: Codable {
     var status: Bool?
     var data: [SgptSessionModel]?
+
+    enum CodingKeys: String, CodingKey {
+        case status, data
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        if let boolStatus = try? container.decodeIfPresent(Bool.self, forKey: .status) {
+            status = boolStatus
+        } else if let intStatus = try? container.decodeIfPresent(Int.self, forKey: .status) {
+            status = intStatus != 0
+        } else if let stringStatus = try? container.decodeIfPresent(String.self, forKey: .status) {
+            status = ["true", "1"].contains(stringStatus.lowercased())
+        } else {
+            status = nil
+        }
+        data = try container.decodeIfPresent([SgptSessionModel].self, forKey: .data)
+    }
 }
 
 // MARK: - SgptSessionModel
