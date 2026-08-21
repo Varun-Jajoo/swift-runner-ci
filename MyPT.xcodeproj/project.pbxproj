@@ -521,6 +521,7 @@
 		D720CBE12F3CFF9000AFBA5C /* HomepageModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D720CBE02F3CFF9000AFBA5C /* HomepageModel.swift */; };
 		618BA380AB4D5CF7125F0A31 /* SgptSessionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74419EE2C5165CF2269DE129 /* SgptSessionModel.swift */; };
 		D720CBE32F3CFFDA00AFBA5C /* HomePageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D720CBE22F3CFFDA00AFBA5C /* HomePageViewModel.swift */; };
+		8F0D4AF7801AC5D9543FD424 /* SgptVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B919AA4FA2AB46AEB4AB80 /* SgptVM.swift */; };
 		D72BD87B2F2DD9F700EC57E3 /* SessionsRulerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72BD87A2F2DD9F700EC57E3 /* SessionsRulerView.swift */; };
 		D72F841C2F278E2F00182049 /* PurchaseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72F841B2F278E2F00182049 /* PurchaseModel.swift */; };
 		D72F841E2F27903B00182049 /* PurchaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72F841D2F27903B00182049 /* PurchaseViewModel.swift */; };
@@ -1050,6 +1051,7 @@
 		D720CBE02F3CFF9000AFBA5C /* HomepageModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomepageModel.swift; sourceTree = "<group>"; };
 		74419EE2C5165CF2269DE129 /* SgptSessionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SgptSessionModel.swift; sourceTree = "<group>"; };
 		D720CBE22F3CFFDA00AFBA5C /* HomePageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePageViewModel.swift; sourceTree = "<group>"; };
+		A3B919AA4FA2AB46AEB4AB80 /* SgptVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SgptVM.swift; sourceTree = "<group>"; };
 		D72BD87A2F2DD9F700EC57E3 /* SessionsRulerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsRulerView.swift; sourceTree = "<group>"; };
 		D72F841B2F278E2F00182049 /* PurchaseModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseModel.swift; sourceTree = "<group>"; };
 		D72F841D2F27903B00182049 /* PurchaseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseViewModel.swift; sourceTree = "<group>"; };
@@ -2172,6 +2174,7 @@
 				D720CBE22F3CFFDA00AFBA5C /* HomePageViewModel.swift */,
 				388128512FF1076600E115BF /* NewBookingVM.swift */,
 				AA0000022FF200A200E115BF /* PickTimeForBookingVM.swift */,
+				A3B919AA4FA2AB46AEB4AB80 /* SgptVM.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -2756,6 +2759,7 @@
 				B8F719AD2D34E5A7006A8925 /* TapticEngine.swift in Sources */,
 				B8F719B42D350EDE006A8925 /* ThumbTextSlider.swift in Sources */,
 				D720CBE32F3CFFDA00AFBA5C /* HomePageViewModel.swift in Sources */,
+				8F0D4AF7801AC5D9543FD424 /* SgptVM.swift in Sources */,
 				B812067C2D5DDC600026B65F /* SleepGoalsViewController.swift in Sources */,
 				388188562FBF534C004F4CDE /* PickTimeForBooking.swift in Sources */,
 				B81676A72D85B4FF00EDB6EF /* TxtFieldTableViewCell.swift in Sources */,

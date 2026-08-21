@@ -411,7 +411,8 @@ private extension SgptPricingViewController {
         track.backgroundColor = UIColor.white.withAlphaComponent(0.2)
         track.layer.cornerRadius = 2
         track.translatesAutoresizingMaskIntoConstraints = false
-        track.widthAnchor.constraint(equalToConstant: 32).heightAnchor.constraint(equalToConstant: 4).isActive = true
+        track.widthAnchor.constraint(equalToConstant: 32).isActive = true
+        track.heightAnchor.constraint(equalToConstant: 4).isActive = true
         let activeFill = dot(active: true)
         track.addSubview(activeFill)
         NSLayoutConstraint.activate([
