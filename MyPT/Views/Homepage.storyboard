@@ -4686,12 +4686,12 @@ preferred times</string>
                                                     <constraint firstItem="spr011" firstAttribute="leading" secondItem="spr010" secondAttribute="leading" id="spr019"/>
                                                     <constraint firstAttribute="trailing" secondItem="spr011" secondAttribute="trailing" id="spr020"/>
                                                     <constraint firstAttribute="bottom" secondItem="spr010" secondAttribute="bottom" firstItem="spr011" id="spr021"/>
-                                                    <!-- Aspect ratio (614:430, the real exported asset's native size)
-                                                         is what actually gives this view a height - width alone,
-                                                         edge-pinned on all 4 sides with no aspect constraint, is an
-                                                         ambiguous/circular layout (container height depends on the
-                                                         image, image height depends on the container). -->
-                                                    <constraint firstItem="spr011" firstAttribute="height" secondItem="spr011" secondAttribute="width" multiplier="614:430" id="spr023"/>
+                                                    <!-- Aspect ratio (1951:1459, the real exported asset's native
+                                                         size) is what actually gives this view a height - width
+                                                         alone, edge-pinned on all 4 sides with no aspect constraint,
+                                                         is an ambiguous/circular layout (container height depends on
+                                                         the image, image height depends on the container). -->
+                                                    <constraint firstItem="spr011" firstAttribute="height" secondItem="spr011" secondAttribute="width" multiplier="1951:1459" id="spr023"/>
                                                     <constraint firstItem="spr013" firstAttribute="top" secondItem="spr010" secondAttribute="top" constant="8" id="spr026"/>
                                                     <constraint firstItem="spr013" firstAttribute="leading" secondItem="spr010" secondAttribute="leading" constant="16" id="spr027"/>
                                                     <constraint firstItem="spr013" firstAttribute="width" constant="40" id="spr028"/>
@@ -4785,7 +4785,7 @@ preferred times</string>
         <image name="reviewHomeIcon" width="30" height="30"/>
         <image name="seeFullSchedule" width="136" height="36"/>
         <image name="sessionConformIcon" width="120" height="120"/>
-        <image name="sgpt-pricing-hero" width="430" height="614"/>
+        <image name="sgpt-pricing-hero" width="1459" height="1951"/>
         <image name="star" width="16" height="16"/>
         <image name="staticScreen" width="215" height="544"/>
         <image name="statusInfo" width="116" height="16"/>
