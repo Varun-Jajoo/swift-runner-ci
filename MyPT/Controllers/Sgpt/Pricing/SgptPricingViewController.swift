@@ -268,12 +268,20 @@ private extension SgptPricingViewController {
             if plan.isCenter { centerCardView = card }
         }
 
+        // Pinned to contentLayoutGuide, not the scroll view's own anchors -
+        // pinning directly to scroll.leadingAnchor/trailingAnchor would force
+        // row's width to equal the scroll view's visible frame width, which
+        // fights the cards' own fixed-width constraints (146/133pt) since 3
+        // cards + spacing is wider than any phone screen. That conflict was
+        // why nothing in the row rendered at all. contentLayoutGuide lets
+        // row take its own intrinsic (wider) width and derives contentSize
+        // from it, which is what actually makes the row scrollable.
         NSLayoutConstraint.activate([
-            row.topAnchor.constraint(equalTo: scroll.topAnchor),
-            row.bottomAnchor.constraint(equalTo: scroll.bottomAnchor),
-            row.leadingAnchor.constraint(equalTo: scroll.leadingAnchor),
-            row.trailingAnchor.constraint(equalTo: scroll.trailingAnchor),
-            row.heightAnchor.constraint(equalTo: scroll.heightAnchor),
+            row.topAnchor.constraint(equalTo: scroll.contentLayoutGuide.topAnchor),
+            row.bottomAnchor.constraint(equalTo: scroll.contentLayoutGuide.bottomAnchor),
+            row.leadingAnchor.constraint(equalTo: scroll.contentLayoutGuide.leadingAnchor),
+            row.trailingAnchor.constraint(equalTo: scroll.contentLayoutGuide.trailingAnchor),
+            row.heightAnchor.constraint(equalTo: scroll.frameLayoutGuide.heightAnchor),
             scroll.heightAnchor.constraint(equalToConstant: 187)
         ])
         return scroll
