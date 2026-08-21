@@ -145,6 +145,42 @@ final class SgptSessionDetailViewController: CommonViewController {
         updateAboutOverflowState()
     }
 
+    private var didShowSgptDetailDiagnostic = false
+
+    /// TEMPORARY - no Mac/Xcode/Console.app available, so surfacing frame
+    /// sizes on-screen instead of in the debugger to find out why this
+    /// screen renders blank after navigating to it. Fires once, after a
+    /// real layout pass has happened (viewDidAppear, not viewDidLoad) so
+    /// the frames reported are the actual resolved ones, not the storyboard
+    /// canvas's design-time guesses. Remove once root-caused.
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        guard !didShowSgptDetailDiagnostic else { return }
+        didShowSgptDetailDiagnostic = true
+
+        func f(_ name: String, _ view: UIView) -> String {
+            "\(name): \(view.frame)"
+        }
+        let message = """
+        view: \(view.frame)
+        scrollView: \(scrollView.frame) content=\(scrollView.contentSize)
+        heroImageView: \(heroImageView.frame) image=\(heroImageView.image != nil)
+        titleLabel: '\(titleLabel.text ?? "nil")' \(titleLabel.frame)
+        \(f("seatsCardContainer", seatsCardContainer))
+        \(f("detailsGridContainer", detailsGridContainer))
+        \(f("aboutContainer", aboutContainer))
+        \(f("sessionStepsContainer", sessionStepsContainer))
+        \(f("trainerCardContainer", trainerCardContainer))
+        \(f("includedContainer", includedContainer))
+        \(f("howItWorksContainer", howItWorksContainer))
+        \(f("moreContainer", moreContainer))
+        session.sessionName=\(session.sessionName ?? "nil") trainerName=\(session.trainerName ?? "nil")
+        """
+        let alert = UIAlertController(title: "SGPT detail debug", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+
     // MARK: - Populate
 
     private func populate() {
