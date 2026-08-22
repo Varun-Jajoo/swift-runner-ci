@@ -346,7 +346,7 @@
                                                     <constraint firstAttribute="bottom" secondItem="spr010" secondAttribute="bottom" firstItem="spr011" id="spr021"/>
                                                     <constraint firstItem="spr011" firstAttribute="height" secondItem="spr011" secondAttribute="width" multiplier="1951:1459" id="spr023"/>
                                                     <constraint firstItem="spr013" firstAttribute="top" secondItem="spr010" secondAttribute="top" constant="8" id="spr026"/>
-                                                    <constraint firstItem="spr013" firstAttribute="leading" secondItem="spr010" secondAttribute="leading" constant="16" id="sgd027"/>
+                                                    <constraint firstItem="spr013" firstAttribute="leading" secondItem="spr010" secondAttribute="leading" constant="16" id="spr027"/>
                                                     <constraint firstItem="spr013" firstAttribute="width" constant="40" id="spr028"/>
                                                     <constraint firstItem="spr013" firstAttribute="height" constant="40" id="spr029"/>
                                                 </constraints>
