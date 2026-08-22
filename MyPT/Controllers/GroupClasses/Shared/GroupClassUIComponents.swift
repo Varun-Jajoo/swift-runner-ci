@@ -514,7 +514,7 @@ public class PillChipView: UIView {
     public var cornerRadius: CGFloat = 8 { didSet { setNeedsLayout() } }
 
     public var contentInsets = UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10) {
-        didSet { applyInsets() }
+        didSet { applyInsets(); invalidateIntrinsicContentSize() }
     }
 
     public var fillColor: UIColor = UIColor.white.withAlphaComponent(0.08) {
@@ -559,13 +559,14 @@ public class PillChipView: UIView {
         rebuildSheen()
 
         // A chip must never stretch past its own text+insets (Android's
-        // equivalent is always wrap_content). Without this, a horizontal
-        // UIStackView using .fill distribution (the default) can pick this
-        // view as the one to stretch when its sibling is a UILabel: a plain
-        // UIView's default content-hugging priority (250) is lower than
-        // UILabel's (251), so the pill - not the label's invisible trailing
-        // space - absorbed the slack, ballooning it far past its text width
-        // (confirmed on the SGPT session-step duration pills).
+        // equivalent is always wrap_content). Content-hugging/compression-
+        // resistance priorities only govern intrinsic-content-size-based
+        // sizing though, and this view never overrode intrinsicContentSize
+        // (see below) - so setting them alone was a no-op, and a horizontal
+        // UIStackView's .fill distribution kept free to resize this view
+        // however it needed to fill the row, ballooning it far past its
+        // text width (confirmed on the SGPT session-step duration pills,
+        // even after setting these priorities).
         setContentHuggingPriority(.required, for: .horizontal)
         setContentCompressionResistancePriority(.required, for: .horizontal)
 
@@ -585,12 +586,24 @@ public class PillChipView: UIView {
         NSLayoutConstraint.activate(insetConstraints)
     }
 
+    /// Label size + insets - the actual fix for the stack-view stretching
+    /// described above. Without this override, a UIView reports zero
+    /// intrinsic size, so hugging/compression-resistance priorities (which
+    /// only apply to intrinsic-size-derived constraints) have nothing to
+    /// act on and a stack view is free to resize this view arbitrarily.
+    public override var intrinsicContentSize: CGSize {
+        let labelSize = titleLabel.intrinsicContentSize
+        return CGSize(width: labelSize.width + contentInsets.left + contentInsets.right,
+                      height: labelSize.height + contentInsets.top + contentInsets.bottom)
+    }
+
     public func configure(text: String?,
                           font: UIFont? = nil,
                           textColor: UIColor = .white) {
         self.text = text
         if let font = font { titleLabel.font = font }
         titleLabel.textColor = textColor
+        invalidateIntrinsicContentSize()
     }
 
     private func applyInsets() {
