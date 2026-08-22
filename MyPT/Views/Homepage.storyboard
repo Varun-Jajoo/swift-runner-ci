@@ -4699,7 +4699,7 @@ preferred times</string>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="spr010">
                                                 <rect key="frame" x="0.0" y="0.0" width="393" height="559"/>
                                                 <subviews>
-                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="sgpt-pricing-hero" translatesAutoresizingMaskIntoConstraints="NO" id="spr011">
+                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" image="sgpt-pricing-hero" translatesAutoresizingMaskIntoConstraints="NO" id="spr011">
                                                         <rect key="frame" x="0.0" y="0.0" width="393" height="559"/>
                                                     </imageView>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="spr013" customClass="GlassCircularIconButton" customModule="MyPT_Connect" customModuleProvider="target">

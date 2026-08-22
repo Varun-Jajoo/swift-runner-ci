@@ -39,12 +39,39 @@ final class SgptPricingViewController: CommonViewController {
     private enum Palette {
         static let bg = UIColor(hex: "#0E0B14")
         static let cardCenterFill = UIColor(hex: "#0E0B14")
+        static let cardSideFill = UIColor(hex: "#15111E")
         static let centerBorder = UIColor(hex: "#8A2BE1")
         static let badgeCenterFill = UIColor(hex: "#1A062D")
         static let badgeSideFill = UIColor(hex: "#352B45")
         static let dividerMid = UIColor(hex: "#384751")
         static let ctaInk = UIColor(hex: "#141514")
         static let lime = UIColor(hex: "#E0FE08")
+    }
+
+    /// Matches the fixed pt values in makePlanCard() exactly - those are
+    /// each card's *initial* size (Deal of the Day starts centered), these
+    /// are what any card becomes once it's the one the carousel centers on.
+    private enum PricingMetric {
+        static let mainCardWidth: CGFloat = 146
+        static let mainCardHeight: CGFloat = 187
+        static let sideCardWidth: CGFloat = 133
+        static let sideCardHeight: CGFloat = 170
+        static let mainBadgeWidth: CGFloat = 124
+        static let mainBadgeHeight: CGFloat = 34
+        static let sideBadgeWidth: CGFloat = 113
+        static let sideBadgeHeight: CGFloat = 31
+    }
+
+    /// Mirrors SgptPricingActivity.kt's own `PricingCard` - a reference to
+    /// one card's outer view/badge plus the width/height constraints that
+    /// need updating whenever the carousel's centered card changes.
+    private struct PricingCardRef {
+        let card: SgptGlassBorderView
+        let badge: UILabel
+        let cardWidthConstraint: NSLayoutConstraint
+        let cardHeightConstraint: NSLayoutConstraint
+        let badgeWidthConstraint: NSLayoutConstraint
+        let badgeHeightConstraint: NSLayoutConstraint
     }
 
     private struct PlanCard {
@@ -64,7 +91,19 @@ final class SgptPricingViewController: CommonViewController {
     ]
 
     private var cardsScrollView: UIScrollView?
-    private var centerCardView: UIView?
+    private var pricingCardRefs: [PricingCardRef] = []
+    /// Which card to scroll to on first layout - not the same as
+    /// `centeredPricingCard` below, which must start nil (see
+    /// performInitialPricingCenteringIfNeeded()).
+    private var initialCenterPricingCard: UIView?
+    /// Starts nil on purpose, matching SgptPricingActivity.kt's own
+    /// `centeredCard` var: updateCenteredPricingCard() only does its full
+    /// styling+pulse-start work when the nearest card differs from this, so
+    /// pre-seeding it with the initially-centered card would make the very
+    /// first update() call a no-op and the pulse would never start.
+    private var centeredPricingCard: UIView?
+    private var isSettlingPricingScroll = false
+    private var hasCenteredPricingCardsInitially = false
 
     // MARK: - Lifecycle
 
@@ -84,21 +123,24 @@ final class SgptPricingViewController: CommonViewController {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        centerDealOfDayCard()
+        performInitialPricingCenteringIfNeeded()
     }
-
-    private var hasCenteredCards = false
 
     /// Figma's initial state centers "Deal of the Day" with both side cards
     /// peeking equally - the 3 cards together are wider than the screen (the
     /// Figma frame itself is 430pt), so this replicates that as the starting
-    /// scroll position. Runs once, after the scroll view has real bounds.
-    private func centerDealOfDayCard() {
-        guard !hasCenteredCards, let scrollView = cardsScrollView, let centerCard = centerCardView,
-              scrollView.bounds.width > 0 else { return }
-        let target = (centerCard.frame.midX) - scrollView.bounds.width / 2
-        scrollView.contentOffset = CGPoint(x: max(target, 0), y: 0)
-        hasCenteredCards = true
+    /// scroll position. Runs once, after the scroll view has real bounds -
+    /// matches SgptPricingActivity.kt's own `scrollView.post { centerOn(...) }`.
+    private func performInitialPricingCenteringIfNeeded() {
+        guard !hasCenteredPricingCardsInitially, let scrollView = cardsScrollView,
+              scrollView.bounds.width > 0, let target = initialCenterPricingCard else { return }
+        centerPricingCard(target, animated: false)
+        // centeredPricingCard is still nil here, so this does its full
+        // styling+pulse-start work rather than a no-op - matches
+        // SgptPricingActivity.kt's own centerOn(...) + updateCenteredCard()
+        // pairing exactly.
+        updateCenteredPricingCard()
+        hasCenteredPricingCardsInitially = true
     }
 
     @IBAction func backTapped() {
@@ -117,6 +159,22 @@ final class SgptPricingViewController: CommonViewController {
         let alert = UIAlertController(title: "Coming soon", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
+    }
+}
+
+// MARK: - Cards carousel scroll handling
+
+extension SgptPricingViewController: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        updateCenteredPricingCard()
+    }
+
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate { snapPricingCardsToNearest() }
+    }
+
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        snapPricingCardsToNearest()
     }
 }
 
@@ -251,6 +309,7 @@ private extension SgptPricingViewController {
         scroll.translatesAutoresizingMaskIntoConstraints = false
         scroll.showsHorizontalScrollIndicator = false
         scroll.clipsToBounds = false
+        scroll.delegate = self
         cardsScrollView = scroll
 
         let row = UIStackView()
@@ -265,7 +324,7 @@ private extension SgptPricingViewController {
         for plan in plans {
             let card = makePlanCard(plan)
             row.addArrangedSubview(card)
-            if plan.isCenter { centerCardView = card }
+            if plan.isCenter { initialCenterPricingCard = card }
         }
 
         // Pinned to contentLayoutGuide, not the scroll view's own anchors -
@@ -288,64 +347,45 @@ private extension SgptPricingViewController {
     }
 
     private func makePlanCard(_ plan: PlanCard) -> UIView {
-        let width: CGFloat = plan.isCenter ? 146 : 133
-        let height: CGFloat = plan.isCenter ? 187 : 170
-
-        // Android's bg_pricing_card_center is a FLAT solid fill + plain 2dp
-        // violet stroke, no glass ring at all - bg_pricing_card_side is the
-        // glass-ring treatment (SgptGlassBorderView already matches that one
-        // correctly). Using the glass view for BOTH gave the center card an
-        // unwanted extra ring gradient underneath its violet border, and
-        // used the wrong fill (#0E0B14, the center card's own fill) for the
-        // side cards too - Android's real side fill is #15111E, which is
-        // this view's own default so it's simplest to just not override it.
-        let card: UIView
-        if plan.isCenter {
-            let plainCard = UIView()
-            plainCard.backgroundColor = Palette.cardCenterFill
-            plainCard.layer.cornerRadius = 32
-            plainCard.layer.borderWidth = 2
-            plainCard.layer.borderColor = Palette.centerBorder.cgColor
-            card = plainCard
-        } else {
-            let glassCard = SgptGlassBorderView()
-            glassCard.cornerRadius = 29
-            card = glassCard
-        }
+        // Android's cards are all ONE view swapping between
+        // bg_pricing_card_center/_side (and badge_center/_side) as the
+        // carousel's centered card changes on scroll - previously this used
+        // TWO different Swift types (a plain UIView for the always-center
+        // role, SgptGlassBorderView for the always-side role), which can't
+        // support that: whichever card the user scrolls to center needs to
+        // BECOME the glass-ring-free bordered look, then become the glass
+        // ring again once it's no longer centered. SgptGlassBorderView now
+        // exposes setPricingCardStyle(isCenter:) to toggle between both
+        // looks on the same view, matching Android's drawable swap.
+        let card = SgptGlassBorderView()
+        card.setPricingCardStyle(isCenter: plan.isCenter, centerFillColor: Palette.cardCenterFill,
+                                 sideFillColor: Palette.cardSideFill, centerBorderColor: Palette.centerBorder)
         card.translatesAutoresizingMaskIntoConstraints = false
-        card.widthAnchor.constraint(equalToConstant: width).isActive = true
-        card.heightAnchor.constraint(equalToConstant: height).isActive = true
+        let cardWidthConstraint = card.widthAnchor.constraint(equalToConstant: plan.isCenter ? PricingMetric.mainCardWidth : PricingMetric.sideCardWidth)
+        let cardHeightConstraint = card.heightAnchor.constraint(equalToConstant: plan.isCenter ? PricingMetric.mainCardHeight : PricingMetric.sideCardHeight)
+        cardWidthConstraint.isActive = true
+        cardHeightConstraint.isActive = true
 
         let badge = UILabel()
         badge.font = AppFont.medium.size(plan.isCenter ? 13 : 12, familyName: familyClashDisplay)
         badge.textColor = .white
         badge.textAlignment = .center
         badge.text = plan.badge
-        badge.backgroundColor = plan.isCenter ? Palette.badgeCenterFill : Palette.badgeSideFill
-        badge.layer.cornerRadius = (plan.isCenter ? 34 : 31) / 2
-        badge.layer.masksToBounds = true
         // Both badges get a 1pt ~30%-white stroke (bg_pricing_badge_center/
         // side both have one; this had neither).
+        badge.layer.masksToBounds = true
         badge.layer.borderWidth = 1
         badge.layer.borderColor = UIColor.white.withAlphaComponent(0.30).cgColor
         badge.translatesAutoresizingMaskIntoConstraints = false
-        let badgeWidth: CGFloat = plan.isCenter ? 124 : 113
-        let badgeHeight: CGFloat = plan.isCenter ? 34 : 31
-        badge.widthAnchor.constraint(equalToConstant: badgeWidth).isActive = true
-        badge.heightAnchor.constraint(equalToConstant: badgeHeight).isActive = true
+        let badgeWidthConstraint = badge.widthAnchor.constraint(equalToConstant: plan.isCenter ? PricingMetric.mainBadgeWidth : PricingMetric.sideBadgeWidth)
+        let badgeHeightConstraint = badge.heightAnchor.constraint(equalToConstant: plan.isCenter ? PricingMetric.mainBadgeHeight : PricingMetric.sideBadgeHeight)
+        badgeWidthConstraint.isActive = true
+        badgeHeightConstraint.isActive = true
+        applyPricingBadgeStyle(badge, isCenter: plan.isCenter)
 
-        // bg_pricing_badge_center also has a centred violet radial glow
-        // layer the side badge doesn't have - this was missing entirely.
-        if plan.isCenter {
-            let glow = CAGradientLayer()
-            glow.type = .radial
-            glow.colors = [UIColor(hex: "#8A2BE1").withAlphaComponent(0.30).cgColor,
-                           UIColor(hex: "#8A2BE1").withAlphaComponent(0.0).cgColor]
-            glow.startPoint = CGPoint(x: 0.5, y: 0.5)
-            glow.endPoint = CGPoint(x: 1.0, y: 0.5)
-            glow.frame = CGRect(x: 0, y: 0, width: badgeWidth, height: badgeHeight)
-            badge.layer.insertSublayer(glow, at: 0)
-        }
+        pricingCardRefs.append(PricingCardRef(card: card, badge: badge,
+                                              cardWidthConstraint: cardWidthConstraint, cardHeightConstraint: cardHeightConstraint,
+                                              badgeWidthConstraint: badgeWidthConstraint, badgeHeightConstraint: badgeHeightConstraint))
 
         let headline = UILabel()
         headline.font = AppFont.medium.size(plan.isCenter ? 22 : 20, familyName: familyFunnelSans)
@@ -388,6 +428,116 @@ private extension SgptPricingViewController {
             column.centerXAnchor.constraint(equalTo: card.centerXAnchor)
         ])
         return card
+    }
+
+    /// bg_pricing_badge_center also has a centred violet radial glow layer
+    /// the side badge doesn't have. Corner radius is baked into Android's
+    /// two badge drawables too (half of each one's own fixed height), so
+    /// swapping "drawable" means swapping that as well, same as the card.
+    func applyPricingBadgeStyle(_ badge: UILabel, isCenter: Bool) {
+        badge.backgroundColor = isCenter ? Palette.badgeCenterFill : Palette.badgeSideFill
+        badge.layer.cornerRadius = (isCenter ? PricingMetric.mainBadgeHeight : PricingMetric.sideBadgeHeight) / 2
+
+        badge.layer.sublayers?.filter { $0.name == "sgptPricingBadgeGlow" }.forEach { $0.removeFromSuperlayer() }
+        guard isCenter else { return }
+        let glow = CAGradientLayer()
+        glow.name = "sgptPricingBadgeGlow"
+        glow.type = .radial
+        glow.colors = [UIColor(hex: "#8A2BE1").withAlphaComponent(0.30).cgColor,
+                       UIColor(hex: "#8A2BE1").withAlphaComponent(0.0).cgColor]
+        glow.startPoint = CGPoint(x: 0.5, y: 0.5)
+        glow.endPoint = CGPoint(x: 1.0, y: 0.5)
+        glow.frame = CGRect(x: 0, y: 0, width: PricingMetric.mainBadgeWidth, height: PricingMetric.mainBadgeHeight)
+        badge.layer.insertSublayer(glow, at: 0)
+    }
+
+    // MARK: Cards carousel (scroll-driven highlight, matches SgptPricingActivity.kt)
+
+    /// Whichever card's own fixed center is nearest the viewport's center
+    /// (SgptPricingActivity.kt's `cards.minByOrNull { abs(...) }`).
+    func nearestPricingCard(in scrollView: UIScrollView) -> PricingCardRef? {
+        let viewportCenter = scrollView.contentOffset.x + scrollView.bounds.width / 2
+        return pricingCardRefs.min { abs($0.card.frame.midX - viewportCenter) < abs($1.card.frame.midX - viewportCenter) }
+    }
+
+    /// Whichever card is nearest the viewport's center becomes the "main"
+    /// card - Figma's Deal-of-the-Day size/look, plus the elevation-style
+    /// pulse; the other two shrink to the "side" size with the plain look.
+    /// The highlight/size follows whichever plan is centered, it isn't
+    /// fixed to one specific plan.
+    func updateCenteredPricingCard() {
+        guard let scrollView = cardsScrollView, let nearest = nearestPricingCard(in: scrollView),
+              nearest.card !== centeredPricingCard else { return }
+        stopPricingCenterPulse()
+        centeredPricingCard = nearest.card
+        UISelectionFeedbackGenerator().selectionChanged()
+
+        for ref in pricingCardRefs {
+            let isCentered = ref.card === nearest.card
+            ref.card.setPricingCardStyle(isCenter: isCentered, centerFillColor: Palette.cardCenterFill,
+                                         sideFillColor: Palette.cardSideFill, centerBorderColor: Palette.centerBorder)
+            ref.cardWidthConstraint.constant = isCentered ? PricingMetric.mainCardWidth : PricingMetric.sideCardWidth
+            ref.cardHeightConstraint.constant = isCentered ? PricingMetric.mainCardHeight : PricingMetric.sideCardHeight
+            applyPricingBadgeStyle(ref.badge, isCenter: isCentered)
+            ref.badgeWidthConstraint.constant = isCentered ? PricingMetric.mainBadgeWidth : PricingMetric.sideBadgeWidth
+            ref.badgeHeightConstraint.constant = isCentered ? PricingMetric.mainBadgeHeight : PricingMetric.sideBadgeHeight
+        }
+        startPricingCenterPulse(on: nearest.card)
+
+        // Resizing the centered card shifts its own frame within the row
+        // (the other two cards resize too, pushing everything), so its
+        // pre-resize center is now stale - re-center once the resize's
+        // layout pass has actually happened, or this drifts off-center by
+        // however much the row reflowed.
+        view.layoutIfNeeded()
+        centerPricingCard(nearest.card, animated: true)
+    }
+
+    func centerPricingCard(_ card: UIView, animated: Bool) {
+        guard let scrollView = cardsScrollView else { return }
+        let target = card.frame.midX - scrollView.bounds.width / 2
+        let maxOffset = max(scrollView.contentSize.width - scrollView.bounds.width, 0)
+        let clamped = min(max(target, 0), maxOffset)
+        scrollView.setContentOffset(CGPoint(x: clamped, y: 0), animated: animated)
+    }
+
+    /// UIScrollView already has native "did the user stop scrolling" delegate
+    /// callbacks (scrollViewDidEndDragging/scrollViewDidEndDecelerating),
+    /// unlike Android's HorizontalScrollView which has neither - so this
+    /// skips SgptPricingActivity.kt's Handler-based settle-delay polling
+    /// entirely and just calls this from those two delegate methods instead.
+    func snapPricingCardsToNearest() {
+        guard !isSettlingPricingScroll, let scrollView = cardsScrollView,
+              let nearest = nearestPricingCard(in: scrollView) else { return }
+        isSettlingPricingScroll = true
+        centerPricingCard(nearest.card, animated: true)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+            self?.isSettlingPricingScroll = false
+        }
+    }
+
+    /// Same pulsing feel as the home carousel's spotlight effect / this
+    /// screen's Android sibling (elevation looping between two values) -
+    /// but a shadow (View.elevation's iOS equivalent) renders slightly
+    /// OUTSIDE a layer's own bounds, and SgptGlassBorderView sets
+    /// masksToBounds=true on itself (needed so its glass-ring gradient
+    /// doesn't bleed past the card's rounded corners), which clips shadows
+    /// away entirely - a shadow here would just never be visible. Pulsing
+    /// the border width instead stays fully inside the layer's bounds, so
+    /// it isn't clipped, while still reading as a "breathing" highlight.
+    func startPricingCenterPulse(on card: UIView) {
+        let animation = CABasicAnimation(keyPath: "borderWidth")
+        animation.fromValue = 2
+        animation.toValue = 4
+        animation.duration = 2.5
+        animation.autoreverses = true
+        animation.repeatCount = .infinity
+        animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        card.layer.add(animation, forKey: "sgptPricingCenterPulse")
+    }
+
+    func stopPricingCenterPulse() {
+        centeredPricingCard?.layer.removeAnimation(forKey: "sgptPricingCenterPulse")
     }
 
     func makeValidForRow(days: Int, isCenter: Bool) -> UIView {

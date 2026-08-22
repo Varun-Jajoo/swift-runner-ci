@@ -148,23 +148,31 @@ final class SgptSessionDetailViewController: CommonViewController {
 
     override func viewSafeAreaInsetsDidChange() {
         super.viewSafeAreaInsetsDidChange()
-        // The nav row lives inside the hero (so it scrolls away with it),
-        // which means it cannot use the safe-area guide directly. This used
-        // to live in viewDidLayoutSubviews, which fires on every layout
-        // pass including mid-transition ones where safeAreaInsets can still
-        // be transitional; if no further layout pass fires after the view
-        // settles, the constant is left stuck at whatever a mid-transition
-        // frame computed - viewSafeAreaInsetsDidChange only fires once the
-        // real, settled inset is known, which is what actually mattered.
-        // The +12 constant copied from GroupTrainingDetailViewController's
-        // own heroNavTopConstraint read as too much clearance here (that
-        // hero is 364pt vs this one's 400pt) - tightened to +4.
-        heroTopButtonsTopConstraint.constant = view.safeAreaInsets.top + 4
+        updateHeroTopButtonsOffset()
     }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        // Also called from here, not just viewSafeAreaInsetsDidChange -
+        // that hook only fires on an actual CHANGE in safeAreaInsets, and
+        // on this screen's push transition the final inset can already be
+        // correct on the very first layout pass with no further change to
+        // trigger it, so it never fired at all and the button stayed at
+        // whatever the constraint's design-time value was. Recomputing
+        // this here on every layout pass is harmless (same inputs always
+        // give the same constant) and guarantees it's set at least once
+        // with the real, settled value by the time the screen is visible.
+        updateHeroTopButtonsOffset()
         updateAboutOverflowState()
+    }
+
+    /// The nav row lives inside the hero (so it scrolls away with it),
+    /// which means it cannot use the safe-area guide directly. The +12
+    /// constant copied from GroupTrainingDetailViewController's own
+    /// heroNavTopConstraint read as too much clearance here (that hero is
+    /// 364pt vs this one's 400pt) - tightened to +4.
+    private func updateHeroTopButtonsOffset() {
+        heroTopButtonsTopConstraint.constant = view.safeAreaInsets.top + 4
     }
 
     // MARK: - Populate

@@ -92,6 +92,14 @@ public class SgptGlassBorderView: UIView {
 
     private func commonInit() {
         backgroundColor = .clear
+        // Without this, the gradient (added straight to self.layer, sized
+        // to full bounds) has sharp square corners and is never actually
+        // confined to the card's own rounded shape - layer.cornerRadius
+        // alone doesn't clip anything, only masksToBounds does. The ring
+        // effect depends entirely on fillView covering everything except a
+        // thin border, so an unclipped square gradient bled square corners
+        // out past the rounded silhouette at all four corners.
+        layer.masksToBounds = true
         gradientLayer.colors = [
             UIColor.white.withAlphaComponent(0.10).cgColor,
             UIColor.white.withAlphaComponent(0.65).cgColor
@@ -121,6 +129,23 @@ public class SgptGlassBorderView: UIView {
         fillView.layer.cornerRadius = max(cornerRadius - ringInset, 0)
         fillView.layer.masksToBounds = true
         CATransaction.commit()
+    }
+
+    /// Android's pricing cards are all ONE view swapping between
+    /// `bg_pricing_card_center`/`_side` as the carousel's centered card
+    /// changes on scroll - same view, different drawable. This is the iOS
+    /// equivalent of that swap: the "center" look is a flat fill + a plain
+    /// solid border with no ring at all (hide the gradient, since Android's
+    /// center drawable has none), the "side" look is this view's normal
+    /// glass ring.
+    public func setPricingCardStyle(isCenter: Bool, centerFillColor: UIColor, sideFillColor: UIColor, centerBorderColor: UIColor) {
+        // Radius is baked into Android's two drawables too (32dp center,
+        // 29dp side) - swapping the "drawable" means swapping this as well.
+        cornerRadius = isCenter ? 32 : 29
+        gradientLayer.isHidden = isCenter
+        fillColor = isCenter ? centerFillColor : sideFillColor
+        layer.borderWidth = isCenter ? 2 : 0
+        layer.borderColor = isCenter ? centerBorderColor.cgColor : nil
     }
 }
 
