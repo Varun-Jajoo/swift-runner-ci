@@ -4460,20 +4460,46 @@ preferred times</string>
                                                         <nil key="highlightedColor"/>
                                                     </label>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd400"><rect key="frame" x="0.0" y="0.0" width="353" height="16"/><constraints><constraint firstAttribute="height" constant="16" id="sgd401"/></constraints></view>
-                                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="6" translatesAutoresizingMaskIntoConstraints="NO" id="sgd062">
-                                                        <rect key="frame" x="20" y="0.0" width="280" height="24"/>
+                                                    <!-- sgd069 shim: Android's chip row is wrap_content inside a
+                                                         match_parent column - but sgd060 (below) needs alignment=fill
+                                                         so the title label spans full width, and a vertical stack's
+                                                         fill alignment stretches EVERY arranged subview's width
+                                                         equally, no per-child override. Without this shim, sgd062 got
+                                                         forced to the column's full 353pt width, and since every pill
+                                                         inside it now has required horizontal hugging (they must never
+                                                         stretch - see PillChipView.commonInit), the sum of the pills'
+                                                         own required widths conflicted with that forced 353pt at equal
+                                                         priority, and Auto Layout resolved it by unpredictably
+                                                         breaking one pill's width constraint instead - the "only the
+                                                         SMALL GROUP PT pill went long" symptom. Pinning sgd062's
+                                                         trailing to the shim with `<=` instead of `=` lets the shim
+                                                         satisfy the parent's fill alignment while sgd062 itself hugs
+                                                         its pills' real combined width and stays leading-aligned. -->
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd069">
+                                                        <rect key="frame" x="20" y="0.0" width="353" height="24"/>
                                                         <subviews>
-                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd063" customClass="PillChipView" customModule="MyPT_Connect" customModuleProvider="target">
-                                                                <rect key="frame" x="0.0" y="0.0" width="80" height="24"/>
-                                                            </view>
-                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd064" customClass="PillChipView" customModule="MyPT_Connect" customModuleProvider="target">
-                                                                <rect key="frame" x="86" y="0.0" width="90" height="24"/>
-                                                            </view>
-                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd065" customClass="PillChipView" customModule="MyPT_Connect" customModuleProvider="target">
-                                                                <rect key="frame" x="182" y="0.0" width="70" height="24"/>
-                                                            </view>
+                                                            <stackView opaque="NO" contentMode="scaleToFill" spacing="6" translatesAutoresizingMaskIntoConstraints="NO" id="sgd062">
+                                                                <rect key="frame" x="0.0" y="0.0" width="280" height="24"/>
+                                                                <subviews>
+                                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd063" customClass="PillChipView" customModule="MyPT_Connect" customModuleProvider="target">
+                                                                        <rect key="frame" x="0.0" y="0.0" width="80" height="24"/>
+                                                                    </view>
+                                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd064" customClass="PillChipView" customModule="MyPT_Connect" customModuleProvider="target">
+                                                                        <rect key="frame" x="86" y="0.0" width="90" height="24"/>
+                                                                    </view>
+                                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd065" customClass="PillChipView" customModule="MyPT_Connect" customModuleProvider="target">
+                                                                        <rect key="frame" x="182" y="0.0" width="70" height="24"/>
+                                                                    </view>
+                                                                </subviews>
+                                                            </stackView>
                                                         </subviews>
-                                                    </stackView>
+                                                        <constraints>
+                                                            <constraint firstItem="sgd062" firstAttribute="top" secondItem="sgd069" secondAttribute="top" id="sgd066"/>
+                                                            <constraint firstItem="sgd062" firstAttribute="leading" secondItem="sgd069" secondAttribute="leading" id="sgd067"/>
+                                                            <constraint firstItem="sgd062" firstAttribute="bottom" secondItem="sgd069" secondAttribute="bottom" id="sgd068"/>
+                                                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="sgd062" secondAttribute="trailing" id="sgd06a"/>
+                                                        </constraints>
+                                                    </view>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd402"><rect key="frame" x="0.0" y="0.0" width="353" height="16"/><constraints><constraint firstAttribute="height" constant="16" id="sgd403"/></constraints></view>
                                                     <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="sgd070">
                                                         <rect key="frame" x="20" y="0.0" width="200" height="42"/>

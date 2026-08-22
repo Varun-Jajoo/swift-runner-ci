@@ -315,9 +315,11 @@ private extension SgptSessionDetailViewController {
 
         fill(howItWorksContainer, with: makeHowItWorksCard())
 
+        // Same real assets Android uses (ic_person_age_18/ic_clock_18,
+        // already bundled for Group Classes) instead of generic SF Symbols.
         let moreColumn = UIStackView(arrangedSubviews: [
-            makePolicyRow(system: "person.fill", title: "Cancellation policy"),
-            makePolicyRow(system: "clock.fill", title: "Terms and conditions")
+            makePolicyRow(icon: "ic_person_age_18", systemFallback: "person.fill", title: "Cancellation policy"),
+            makePolicyRow(icon: "ic_clock_18", systemFallback: "clock.fill", title: "Terms and conditions")
         ])
         moreColumn.axis = .vertical
         moreColumn.alignment = .fill
@@ -459,13 +461,17 @@ private extension SgptSessionDetailViewController {
     }
 
     func makeGridCell(valueLabel: UILabel, caption: String) -> UIView {
-        let card = UIView()
+        // Android's bg_dark_radial_sheen_12: solid fill + stroke + an 8%
+        // white radial sheen biased top-center - this was a flat fill with
+        // no sheen at all.
+        let card = GlassCardView(cornerRadius: 12)
         card.translatesAutoresizingMaskIntoConstraints = false
-        card.backgroundColor = Palette.cardSurface
-        card.layer.cornerRadius = 12
-        card.layer.borderWidth = 1
-        card.layer.borderColor = Palette.cardStroke.cgColor
-        card.clipsToBounds = true
+        card.fillColor = Palette.cardSurface
+        card.fillAlpha = 1.0
+        card.strokeColor = Palette.cardStroke
+        card.strokeAlpha = 1.0
+        card.sheenOrigin = .topCenter
+        card.sheenAlpha = 0.08
 
         valueLabel.translatesAutoresizingMaskIntoConstraints = false
         valueLabel.font = AppFont.medium.size(16.0, familyName: familyClashDisplay)
@@ -595,7 +601,14 @@ private extension SgptSessionDetailViewController {
         var lastIconTile: UIView?
 
         for step in steps {
-            let iconTile = makeIconTile(image: UIImage(named: step.icon) ?? icon(system: step.systemFallback), iconSide: 20, tileColor: Palette.violetTile, borderColor: Palette.violetStroke)
+            // Android's real bg_icon_tile_violet (its own comment: "bright
+            // violet tile, not the near-black one used before") - a lighter
+            // #3A2058 border (not the app-wide #1A062D violetStroke used on
+            // other cards) and a much stronger, violet-tinted sheen than
+            // the generic 8%-white one every other card on this screen uses.
+            let iconTile = makeIconTile(image: UIImage(named: step.icon) ?? icon(system: step.systemFallback), iconSide: 20,
+                                        tileColor: Palette.violetTile, borderColor: UIColor(hex: "#3A2058"),
+                                        sheenColor: UIColor(hex: "#B98CF0"), sheenAlpha: 0.85)
             firstIconTile = firstIconTile ?? iconTile
             lastIconTile = iconTile
 
@@ -810,12 +823,16 @@ private extension SgptSessionDetailViewController {
     }
 
     func makeStatCell(value: String, caption: String) -> UIView {
-        let card = UIView()
-        card.backgroundColor = Palette.cardSurface
-        card.layer.cornerRadius = 12
-        card.layer.borderWidth = 1
-        card.layer.borderColor = Palette.cardStroke.cgColor
-        card.clipsToBounds = true
+        // Same bg_dark_radial_sheen_12 recipe as makeGridCell() - was
+        // missing the sheen here too.
+        let card = GlassCardView(cornerRadius: 12)
+        card.translatesAutoresizingMaskIntoConstraints = false
+        card.fillColor = Palette.cardSurface
+        card.fillAlpha = 1.0
+        card.strokeColor = Palette.cardStroke
+        card.strokeAlpha = 1.0
+        card.sheenOrigin = .topCenter
+        card.sheenAlpha = 0.08
 
         let valueLabel = UILabel()
         valueLabel.font = AppFont.medium.size(24.0, familyName: familyClashDisplay)
@@ -1016,7 +1033,7 @@ private extension SgptSessionDetailViewController {
 
     // MARK: Policy rows (stubbed — no cancellation/terms content wired for SGPT yet)
 
-    func makePolicyRow(system: String, title: String) -> UIView {
+    func makePolicyRow(icon iconName: String, systemFallback: String, title: String) -> UIView {
         let container = UIStackView()
         container.translatesAutoresizingMaskIntoConstraints = false
         container.axis = .vertical
@@ -1025,7 +1042,8 @@ private extension SgptSessionDetailViewController {
         container.isUserInteractionEnabled = true
         container.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(policyRowTapped)))
 
-        let iconTile = makeIconTile(image: icon(system: system), iconSide: 18, tileColor: Palette.cardSurface, borderColor: Palette.cardStroke)
+        let iconImage = UIImage(named: iconName) ?? icon(system: systemFallback)
+        let iconTile = makeIconTile(image: iconImage, iconSide: 18, tileColor: Palette.cardSurface, borderColor: Palette.cardStroke)
 
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -1113,7 +1131,8 @@ private extension SgptSessionDetailViewController {
         return line
     }
 
-    func makeIconTile(image: UIImage?, iconSide: CGFloat, tileColor: UIColor, borderColor: UIColor) -> UIView {
+    func makeIconTile(image: UIImage?, iconSide: CGFloat, tileColor: UIColor, borderColor: UIColor,
+                      sheenColor: UIColor = .white, sheenAlpha: CGFloat = 0.08) -> UIView {
         let tile = GlassCardView(cornerRadius: 12)
         tile.translatesAutoresizingMaskIntoConstraints = false
         tile.fillColor = tileColor
@@ -1121,7 +1140,8 @@ private extension SgptSessionDetailViewController {
         tile.strokeColor = borderColor
         tile.strokeAlpha = 1.0
         tile.sheenOrigin = .topCenter
-        tile.sheenAlpha = 0.08
+        tile.sheenColor = sheenColor
+        tile.sheenAlpha = sheenAlpha
 
         let iconView = UIImageView(image: image?.withRenderingMode(.alwaysTemplate))
         iconView.translatesAutoresizingMaskIntoConstraints = false
