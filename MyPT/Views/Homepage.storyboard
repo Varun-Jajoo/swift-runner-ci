@@ -4601,12 +4601,14 @@ preferred times</string>
                                     </stackView>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstItem="sgd004" firstAttribute="top" secondItem="sgd003" secondAttribute="top" id="sgd210"/>
-                                    <constraint firstItem="sgd004" firstAttribute="leading" secondItem="sgd003" secondAttribute="leading" id="sgd211"/>
-                                    <constraint firstAttribute="trailing" secondItem="sgd004" secondAttribute="trailing" id="sgd212"/>
-                                    <constraint firstAttribute="bottom" secondItem="sgd004" secondAttribute="bottom" constant="32" id="sgd213"/>
-                                    <constraint firstItem="sgd004" firstAttribute="width" secondItem="sgd003" secondAttribute="width" id="sgd214"/>
+                                    <constraint firstItem="sgd004" firstAttribute="top" secondItem="sgd215" secondAttribute="top" id="sgd210"/>
+                                    <constraint firstItem="sgd004" firstAttribute="leading" secondItem="sgd215" secondAttribute="leading" id="sgd211"/>
+                                    <constraint firstItem="sgd215" firstAttribute="trailing" secondItem="sgd004" secondAttribute="trailing" id="sgd212"/>
+                                    <constraint firstItem="sgd215" firstAttribute="bottom" secondItem="sgd004" secondAttribute="bottom" constant="32" id="sgd213"/>
+                                    <constraint firstItem="sgd004" firstAttribute="width" secondItem="sgd216" secondAttribute="width" id="sgd214"/>
                                 </constraints>
+                                <viewLayoutGuide key="contentLayoutGuide" id="sgd215"/>
+                                <viewLayoutGuide key="frameLayoutGuide" id="sgd216"/>
                             </scrollView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sgd220" customClass="GradientCTAButton" customModule="MyPT_Connect" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="768" width="393" height="84"/>
@@ -4627,7 +4629,7 @@ preferred times</string>
                             <constraint firstItem="sgd220" firstAttribute="top" secondItem="sgd003" secondAttribute="bottom" id="sgd233"/>
                             <constraint firstItem="sgd220" firstAttribute="leading" secondItem="sgd002" secondAttribute="leading" id="sgd411"/>
                             <constraint firstAttribute="trailing" secondItem="sgd220" secondAttribute="trailing" id="sgd412"/>
-                            <constraint firstItem="sgd410" firstAttribute="bottom" secondItem="sgd220" secondAttribute="bottom" id="sgd413"/>
+                            <constraint firstItem="sgd410" firstAttribute="bottom" secondItem="sgd220" secondAttribute="bottom" constant="16" id="sgd413"/>
                         </constraints>
                     </view>
                     <connections>
@@ -4636,6 +4638,7 @@ preferred times</string>
                         <outlet property="detailsGridContainer" destination="sgd090" id="sgd302"/>
                         <outlet property="heroFadeView" destination="sgd012" id="sgd320"/>
                         <outlet property="heroImageView" destination="sgd011" id="sgd303"/>
+                        <outlet property="heroTopButtonsTopConstraint" destination="sgd026" id="sgd322"/>
                         <outlet property="howItWorksContainer" destination="sgd180" id="sgd304"/>
                         <outlet property="includedContainer" destination="sgd160" id="sgd305"/>
                         <outlet property="moreContainer" destination="sgd200" id="sgd306"/>

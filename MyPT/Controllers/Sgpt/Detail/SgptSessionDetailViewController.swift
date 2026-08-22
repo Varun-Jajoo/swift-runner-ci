@@ -58,6 +58,13 @@ final class SgptSessionDetailViewController: CommonViewController {
     @IBOutlet weak var trainerRowNameLabel: UILabel!
     @IBOutlet weak var bottomBarButton: GradientCTAButton!
 
+    /// Top offset of the back/share buttons above the hero image. Storyboard
+    /// ships a `52` design-time constant (roughly right for a notched
+    /// iPhone); `viewDidLayoutSubviews` overwrites it with the real device's
+    /// `safeAreaInsets.top`, since a flat constant sits too close to the
+    /// Dynamic Island on newer phones and leaves excess gap on others.
+    @IBOutlet weak var heroTopButtonsTopConstraint: NSLayoutConstraint!
+
     @IBOutlet weak var seatsCardContainer: UIView!
     @IBOutlet weak var detailsGridContainer: UIView!
     @IBOutlet weak var aboutContainer: UIView!
@@ -142,6 +149,11 @@ final class SgptSessionDetailViewController: CommonViewController {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        // `view.safeAreaInsets.top` is 0 until the first real layout pass,
+        // so this can't move to viewDidLoad/viewWillAppear - it has to live
+        // here, re-running on every layout pass (rotation, size class
+        // change) since the inset itself can change under those.
+        heroTopButtonsTopConstraint.constant = view.safeAreaInsets.top + 22
         updateAboutOverflowState()
     }
 
