@@ -126,6 +126,37 @@ final class SgptPricingViewController: CommonViewController {
         performInitialPricingCenteringIfNeeded()
     }
 
+    private var didShowHeroDiagnostic = false
+
+    /// TEMPORARY - a reported left/right gap around the hero photo has
+    /// persisted through two fix attempts (contentMode + a 4pt overscan)
+    /// despite the aspect-ratio constraint matching the real asset's pixel
+    /// dimensions exactly and every edge constraint being zero-inset, so
+    /// static analysis of the storyboard has been ruled out as the next
+    /// step - this reports the actual resolved frames so the real cause
+    /// (an actual layout gap vs. e.g. a color-similarity illusion at the
+    /// edge, or the image's own decoded pixel size not matching what the
+    /// asset catalog reports) can be confirmed from real numbers instead of
+    /// guessed at again. Fires once, after layout has actually settled.
+    /// Remove once root-caused.
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        guard !didShowHeroDiagnostic, let heroSuperview = heroImageView.superview else { return }
+        didShowHeroDiagnostic = true
+
+        let message = """
+        screen: \(view.frame)
+        heroContainer (spr010): \(heroSuperview.frame)
+        heroImageView (spr011): \(heroImageView.frame)
+        image.size: \(heroImageView.image.map { "\($0.size) scale=\($0.scale)" } ?? "nil")
+        contentMode: \(heroImageView.contentMode.rawValue)
+        clipsToBounds: container=\(heroSuperview.clipsToBounds) image=\(heroImageView.clipsToBounds)
+        """
+        let alert = UIAlertController(title: "Hero frame debug", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+
     /// Figma's initial state centers "Deal of the Day" with both side cards
     /// peeking equally - the 3 cards together are wider than the screen (the
     /// Figma frame itself is 430pt), so this replicates that as the starting
@@ -138,8 +169,13 @@ final class SgptPricingViewController: CommonViewController {
         // centeredPricingCard is still nil here, so this does its full
         // styling+pulse-start work rather than a no-op - matches
         // SgptPricingActivity.kt's own centerOn(...) + updateCenteredCard()
-        // pairing exactly.
+        // pairing exactly. Sizes are applied explicitly too, even though
+        // they're a no-op in practice (makePlanCard already gives Deal of
+        // the Day the main size up front) - keeps this path honest about
+        // what actually determines the on-screen sizes, rather than relying
+        // on the initial constants happening to already agree.
         updateCenteredPricingCard()
+        applyPricingCardSizes(centeredCard: target, animated: false)
         hasCenteredPricingCardsInitially = true
     }
 
@@ -460,11 +496,14 @@ private extension SgptPricingViewController {
         return pricingCardRefs.min { abs($0.card.frame.midX - viewportCenter) < abs($1.card.frame.midX - viewportCenter) }
     }
 
-    /// Whichever card is nearest the viewport's center becomes the "main"
-    /// card - Figma's Deal-of-the-Day size/look, plus the elevation-style
-    /// pulse; the other two shrink to the "side" size with the plain look.
-    /// The highlight/size follows whichever plan is centered, it isn't
-    /// fixed to one specific plan.
+    /// Whichever card is nearest the viewport's center gets the "main" card's
+    /// LOOK (violet border, glass ring hidden, glowing badge) plus the
+    /// pulse, live, continuously, during an active drag - this part is safe
+    /// to run mid-gesture because it never changes any view's SIZE, so it
+    /// can't shift a card's frame or feed back into the next scroll delta's
+    /// own "which card is nearest" calculation. The actual discrete resize
+    /// is a separate step (applyPricingCardSizes below) deferred to settle -
+    /// see its own comment for why that split exists.
     func updateCenteredPricingCard() {
         guard let scrollView = cardsScrollView, let nearest = nearestPricingCard(in: scrollView),
               nearest.card !== centeredPricingCard else { return }
@@ -476,32 +515,40 @@ private extension SgptPricingViewController {
             let isCentered = ref.card === nearest.card
             ref.card.setPricingCardStyle(isCenter: isCentered, centerFillColor: Palette.cardCenterFill,
                                          sideFillColor: Palette.cardSideFill, centerBorderColor: Palette.centerBorder)
+            applyPricingBadgeStyle(ref.badge, isCenter: isCentered)
+        }
+        startPricingCenterPulse(on: nearest.card)
+    }
+
+    /// The actual 146x187/133x170 (and badge) resize - Figma's Deal-of-the-
+    /// Day size for whichever card is centered, "side" size for the other
+    /// two. Deliberately NOT called from updateCenteredPricingCard() above:
+    /// resizing shifts every card's frame within the row (the other two
+    /// resize too, pushing everything), and scrollViewDidScroll fires
+    /// continuously while the user's finger is still down - if the resize
+    /// ran on every "nearest changed" event during an active drag, each
+    /// resize's own frame-shift could flip which card reads as nearest on
+    /// the very next scroll delta, whose own resize flips it back, and so
+    /// on - a feedback loop, independent of (and not fixed by) skipping the
+    /// animated recenter alone. This is why previously "scrolls for a split
+    /// second then snaps back to the middle card" persisted even after
+    /// gating centerPricingCard() on isTracking/isDragging: the recenter
+    /// wasn't the only thing fighting the gesture, the resize was too. Only
+    /// called from snapPricingCardsToNearest() (post drag/deceleration) and
+    /// the initial-centering path now, never mid-gesture.
+    func applyPricingCardSizes(centeredCard: UIView, animated: Bool) {
+        for ref in pricingCardRefs {
+            let isCentered = ref.card === centeredCard
             ref.cardWidthConstraint.constant = isCentered ? PricingMetric.mainCardWidth : PricingMetric.sideCardWidth
             ref.cardHeightConstraint.constant = isCentered ? PricingMetric.mainCardHeight : PricingMetric.sideCardHeight
-            applyPricingBadgeStyle(ref.badge, isCenter: isCentered)
             ref.badgeWidthConstraint.constant = isCentered ? PricingMetric.mainBadgeWidth : PricingMetric.sideBadgeWidth
             ref.badgeHeightConstraint.constant = isCentered ? PricingMetric.mainBadgeHeight : PricingMetric.sideBadgeHeight
         }
-        startPricingCenterPulse(on: nearest.card)
-        view.layoutIfNeeded()
-
-        // Resizing the centered card shifts its own frame within the row
-        // (the other two cards resize too, pushing everything), so its
-        // pre-resize center is stale - normally worth a re-center once the
-        // resize's layout pass has happened. But scrollViewDidScroll (and
-        // so this whole method) fires continuously WHILE the user's finger
-        // is still down and actively panning, and calling
-        // setContentOffset(animated:) in the middle of that fights the live
-        // pan gesture - the gesture's own next touch-move event overrides
-        // it almost immediately, which is exactly what read as "scrolls for
-        // a split second then snaps back to the middle card": every tiny
-        // drag delta was re-triggering this correction and fighting itself.
-        // Skip the correction entirely while the user is actually touching
-        // the scroll view - scrollViewDidEndDragging/DidEndDecelerating's
-        // snapPricingCardsToNearest() already re-centers properly once they
-        // let go, so nothing is lost by not fighting the live drag here.
-        guard !scrollView.isTracking, !scrollView.isDragging else { return }
-        centerPricingCard(nearest.card, animated: true)
+        if animated {
+            UIView.animate(withDuration: 0.25) { [weak self] in self?.view.layoutIfNeeded() }
+        } else {
+            view.layoutIfNeeded()
+        }
     }
 
     func centerPricingCard(_ card: UIView, animated: Bool) {
@@ -517,10 +564,15 @@ private extension SgptPricingViewController {
     /// unlike Android's HorizontalScrollView which has neither - so this
     /// skips SgptPricingActivity.kt's Handler-based settle-delay polling
     /// entirely and just calls this from those two delegate methods instead.
+    /// This is also the ONLY place the actual card/badge resize happens now
+    /// (see applyPricingCardSizes()'s comment) - the user's finger is
+    /// guaranteed to be off the screen and any momentum spent by the time
+    /// either delegate method fires this, so there's nothing left to fight.
     func snapPricingCardsToNearest() {
         guard !isSettlingPricingScroll, let scrollView = cardsScrollView,
               let nearest = nearestPricingCard(in: scrollView) else { return }
         isSettlingPricingScroll = true
+        applyPricingCardSizes(centeredCard: nearest.card, animated: true)
         centerPricingCard(nearest.card, animated: true)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
             self?.isSettlingPricingScroll = false
