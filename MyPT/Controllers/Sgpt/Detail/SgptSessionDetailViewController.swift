@@ -149,17 +149,17 @@ final class SgptSessionDetailViewController: CommonViewController {
     override func viewSafeAreaInsetsDidChange() {
         super.viewSafeAreaInsetsDidChange()
         // The nav row lives inside the hero (so it scrolls away with it),
-        // which means it cannot use the safe-area guide directly - matches
-        // GroupTrainingDetailViewController's identical heroNavTopConstraint
-        // fix (+12) exactly. This used to live in viewDidLayoutSubviews,
-        // which fires on every layout pass including mid-transition ones
-        // where safeAreaInsets can still be transitional; if no further
-        // layout pass fires after the view settles, the constant is left
-        // stuck at whatever a mid-transition frame computed - which is
-        // exactly why the buttons were rendering lower than intended.
-        // viewSafeAreaInsetsDidChange only fires when the real, settled
-        // inset is actually known.
-        heroTopButtonsTopConstraint.constant = view.safeAreaInsets.top + 12
+        // which means it cannot use the safe-area guide directly. This used
+        // to live in viewDidLayoutSubviews, which fires on every layout
+        // pass including mid-transition ones where safeAreaInsets can still
+        // be transitional; if no further layout pass fires after the view
+        // settles, the constant is left stuck at whatever a mid-transition
+        // frame computed - viewSafeAreaInsetsDidChange only fires once the
+        // real, settled inset is known, which is what actually mattered.
+        // The +12 constant copied from GroupTrainingDetailViewController's
+        // own heroNavTopConstraint read as too much clearance here (that
+        // hero is 364pt vs this one's 400pt) - tightened to +4.
+        heroTopButtonsTopConstraint.constant = view.safeAreaInsets.top + 4
     }
 
     override func viewDidLayoutSubviews() {
@@ -640,7 +640,19 @@ private extension SgptSessionDetailViewController {
             tag.contentInsets = UIEdgeInsets(top: 4, left: 12, bottom: 4, right: 12)
             tag.configure(text: step.tag, font: AppFont.medium.size(12.0, familyName: familyFunnelSans), textColor: UIColor(hex: "#F0F0F0"))
 
-            let titleRow = UIStackView(arrangedSubviews: [stepTitle, tag])
+            // Android packs title+pill together at the leading edge with a
+            // fixed 10px gap and lets the row's own trailing space sit
+            // empty (no grow on either child) - now that the pill has a
+            // real intrinsic size (previous fix), simply putting it next to
+            // a plain UILabel with no trailing spacer let the label (the
+            // only view *without* required hugging) absorb 100% of this
+            // row's slack width, pushing the pill all the way to the far
+            // right instead of sitting beside the title. The trailing
+            // spacer is the one that should absorb the slack instead.
+            stepTitle.setContentHuggingPriority(.required, for: .horizontal)
+            let titleRowSpacer = UIView()
+
+            let titleRow = UIStackView(arrangedSubviews: [stepTitle, tag, titleRowSpacer])
             titleRow.axis = .horizontal
             titleRow.alignment = .center
             titleRow.spacing = 10
@@ -1157,47 +1169,53 @@ private extension SgptSessionDetailViewController {
 
         // Figma's exact CTA bar surface: 16pt top corners only, a 2pt blue
         // (#01368F) top border, and an 8%-white radial sheen centred just
-        // above the bar (not the plain transparent background this used to
-        // sit on with no surface of its own).
-        let card = GlassCardView(cornerRadius: 16)
+        // above the bar. A flat 2pt strip laid on top of the rounded card
+        // doesn't work - the corner mask clips a straight rectangle before
+        // it reaches the curve, so the border faded out right at both
+        // corners instead of following the rounded edge. Using the same
+        // "colored outer box + inset inner surface" trick
+        // GroupTrainingDetailViewController's own bottom bar already proves
+        // (buildBottomBar(): bottomBar/surface) sidesteps that entirely -
+        // both layers share the identical corner mask, so the 2pt reveal
+        // follows the curve exactly instead of being clipped by it.
+        let card = UIView()
         card.translatesAutoresizingMaskIntoConstraints = false
+        card.backgroundColor = UIColor(hex: "#01368F")
+        card.layer.cornerRadius = 16
         card.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        card.fillColor = UIColor(hex: "#131416")
-        card.fillAlpha = 1.0
-        card.showsSheen = true
-        card.sheenOrigin = .topCenter
-        card.sheenAlpha = 0.08
+        card.clipsToBounds = true
 
-        let topBorder = UIView()
-        topBorder.translatesAutoresizingMaskIntoConstraints = false
-        topBorder.backgroundColor = UIColor(hex: "#01368F")
-        card.addSubview(topBorder)
-        card.addSubview(row)
+        let surface = GlassCardView(cornerRadius: 16)
+        surface.translatesAutoresizingMaskIntoConstraints = false
+        surface.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        surface.fillColor = UIColor(hex: "#131416")
+        surface.fillAlpha = 1.0
+        surface.showsSheen = true
+        surface.sheenOrigin = .topCenter
+        surface.sheenAlpha = 0.08
+        card.addSubview(surface)
+        surface.addSubview(row)
 
         NSLayoutConstraint.activate([
-            topBorder.topAnchor.constraint(equalTo: card.topAnchor),
-            topBorder.leadingAnchor.constraint(equalTo: card.leadingAnchor),
-            topBorder.trailingAnchor.constraint(equalTo: card.trailingAnchor),
-            topBorder.heightAnchor.constraint(equalToConstant: 2),
+            surface.topAnchor.constraint(equalTo: card.topAnchor, constant: 2),
+            surface.leadingAnchor.constraint(equalTo: card.leadingAnchor),
+            surface.trailingAnchor.constraint(equalTo: card.trailingAnchor),
+            surface.bottomAnchor.constraint(equalTo: card.bottomAnchor),
 
-            row.topAnchor.constraint(equalTo: card.topAnchor),
-            row.leadingAnchor.constraint(equalTo: card.leadingAnchor),
-            row.trailingAnchor.constraint(equalTo: card.trailingAnchor),
-            // card's OWN safe area guide, not view.safeAreaLayoutGuide -
-            // this method returns `card` before it's ever added to the view
+            row.topAnchor.constraint(equalTo: surface.topAnchor),
+            row.leadingAnchor.constraint(equalTo: surface.leadingAnchor),
+            row.trailingAnchor.constraint(equalTo: surface.trailingAnchor),
+            // surface's OWN safe area guide, not view's or card's - this
+            // method returns `card` before it's ever added to the view
             // hierarchy (fill() does that afterward, from buildSections()),
-            // so activating a constraint against self.view here crashes
-            // with "no common ancestor" (confirmed via crash log: it threw
-            // inside this exact activate call). card and row already share
-            // an ancestor (card itself) regardless of attachment, and once
-            // fill() attaches card lower on the screen than the bottom
-            // bar container, card's safeAreaLayoutGuide resolves to the
-            // same real inset view.safeAreaLayoutGuide would have anyway -
-            // the card (sgd220 in the storyboard) sits flush against the
-            // screen's true bottom edge with no gap, so its dark surface
-            // extends behind the home indicator like a real bottom sheet,
-            // while the button/price content is pulled up 12pt to clear it.
-            row.bottomAnchor.constraint(equalTo: card.safeAreaLayoutGuide.bottomAnchor, constant: -12)
+            // so activating a constraint against anything outside this
+            // subtree crashes with "no common ancestor" (confirmed via
+            // crash log). surface and row already share an ancestor
+            // (surface itself) regardless of attachment, and once fill()
+            // attaches card flush to the screen's bottom edge, surface's
+            // safe area guide resolves to the identical real inset the
+            // view's own guide would have anyway.
+            row.bottomAnchor.constraint(equalTo: surface.safeAreaLayoutGuide.bottomAnchor, constant: -12)
         ])
         return card
     }

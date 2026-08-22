@@ -291,17 +291,30 @@ private extension SgptPricingViewController {
         let width: CGFloat = plan.isCenter ? 146 : 133
         let height: CGFloat = plan.isCenter ? 187 : 170
 
-        let card = SgptGlassBorderView()
+        // Android's bg_pricing_card_center is a FLAT solid fill + plain 2dp
+        // violet stroke, no glass ring at all - bg_pricing_card_side is the
+        // glass-ring treatment (SgptGlassBorderView already matches that one
+        // correctly). Using the glass view for BOTH gave the center card an
+        // unwanted extra ring gradient underneath its violet border, and
+        // used the wrong fill (#0E0B14, the center card's own fill) for the
+        // side cards too - Android's real side fill is #15111E, which is
+        // this view's own default so it's simplest to just not override it.
+        let card: UIView
+        if plan.isCenter {
+            let plainCard = UIView()
+            plainCard.backgroundColor = Palette.cardCenterFill
+            plainCard.layer.cornerRadius = 32
+            plainCard.layer.borderWidth = 2
+            plainCard.layer.borderColor = Palette.centerBorder.cgColor
+            card = plainCard
+        } else {
+            let glassCard = SgptGlassBorderView()
+            glassCard.cornerRadius = 29
+            card = glassCard
+        }
         card.translatesAutoresizingMaskIntoConstraints = false
-        card.cornerRadius = plan.isCenter ? 32 : 29
-        card.fillColor = Palette.cardCenterFill
         card.widthAnchor.constraint(equalToConstant: width).isActive = true
         card.heightAnchor.constraint(equalToConstant: height).isActive = true
-
-        if plan.isCenter {
-            card.layer.borderWidth = 2
-            card.layer.borderColor = Palette.centerBorder.cgColor
-        }
 
         let badge = UILabel()
         badge.font = AppFont.medium.size(plan.isCenter ? 13 : 12, familyName: familyClashDisplay)
@@ -311,9 +324,28 @@ private extension SgptPricingViewController {
         badge.backgroundColor = plan.isCenter ? Palette.badgeCenterFill : Palette.badgeSideFill
         badge.layer.cornerRadius = (plan.isCenter ? 34 : 31) / 2
         badge.layer.masksToBounds = true
+        // Both badges get a 1pt ~30%-white stroke (bg_pricing_badge_center/
+        // side both have one; this had neither).
+        badge.layer.borderWidth = 1
+        badge.layer.borderColor = UIColor.white.withAlphaComponent(0.30).cgColor
         badge.translatesAutoresizingMaskIntoConstraints = false
-        badge.widthAnchor.constraint(equalToConstant: plan.isCenter ? 124 : 113).isActive = true
-        badge.heightAnchor.constraint(equalToConstant: plan.isCenter ? 34 : 31).isActive = true
+        let badgeWidth: CGFloat = plan.isCenter ? 124 : 113
+        let badgeHeight: CGFloat = plan.isCenter ? 34 : 31
+        badge.widthAnchor.constraint(equalToConstant: badgeWidth).isActive = true
+        badge.heightAnchor.constraint(equalToConstant: badgeHeight).isActive = true
+
+        // bg_pricing_badge_center also has a centred violet radial glow
+        // layer the side badge doesn't have - this was missing entirely.
+        if plan.isCenter {
+            let glow = CAGradientLayer()
+            glow.type = .radial
+            glow.colors = [UIColor(hex: "#8A2BE1").withAlphaComponent(0.30).cgColor,
+                           UIColor(hex: "#8A2BE1").withAlphaComponent(0.0).cgColor]
+            glow.startPoint = CGPoint(x: 0.5, y: 0.5)
+            glow.endPoint = CGPoint(x: 1.0, y: 0.5)
+            glow.frame = CGRect(x: 0, y: 0, width: badgeWidth, height: badgeHeight)
+            badge.layer.insertSublayer(glow, at: 0)
+        }
 
         let headline = UILabel()
         headline.font = AppFont.medium.size(plan.isCenter ? 22 : 20, familyName: familyFunnelSans)
