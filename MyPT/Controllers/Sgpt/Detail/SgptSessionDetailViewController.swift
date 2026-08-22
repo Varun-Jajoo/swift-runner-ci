@@ -1183,15 +1183,21 @@ private extension SgptSessionDetailViewController {
             row.topAnchor.constraint(equalTo: card.topAnchor),
             row.leadingAnchor.constraint(equalTo: card.leadingAnchor),
             row.trailingAnchor.constraint(equalTo: card.trailingAnchor),
-            // Pinned to the VIEW's safe area, not the card's own bottom -
-            // the card (sgd220 in the storyboard) now sits flush against
-            // the screen's true bottom edge with no gap, so its dark
-            // surface extends behind the home indicator the way a bottom
-            // sheet should. The actual button/price content still needs to
-            // clear the indicator, so it's pulled up 12pt above the safe
-            // area instead - the exact same split GroupTrainingDetailViewController's
-            // own bottom bar already uses (ctaButton.bottomAnchor there).
-            row.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
+            // card's OWN safe area guide, not view.safeAreaLayoutGuide -
+            // this method returns `card` before it's ever added to the view
+            // hierarchy (fill() does that afterward, from buildSections()),
+            // so activating a constraint against self.view here crashes
+            // with "no common ancestor" (confirmed via crash log: it threw
+            // inside this exact activate call). card and row already share
+            // an ancestor (card itself) regardless of attachment, and once
+            // fill() attaches card lower on the screen than the bottom
+            // bar container, card's safeAreaLayoutGuide resolves to the
+            // same real inset view.safeAreaLayoutGuide would have anyway -
+            // the card (sgd220 in the storyboard) sits flush against the
+            // screen's true bottom edge with no gap, so its dark surface
+            // extends behind the home indicator like a real bottom sheet,
+            // while the button/price content is pulled up 12pt to clear it.
+            row.bottomAnchor.constraint(equalTo: card.safeAreaLayoutGuide.bottomAnchor, constant: -12)
         ])
         return card
     }
