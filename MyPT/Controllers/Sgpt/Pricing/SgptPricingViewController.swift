@@ -455,7 +455,7 @@ private extension SgptPricingViewController {
 
     /// Whichever card's own fixed center is nearest the viewport's center
     /// (SgptPricingActivity.kt's `cards.minByOrNull { abs(...) }`).
-    func nearestPricingCard(in scrollView: UIScrollView) -> PricingCardRef? {
+    private func nearestPricingCard(in scrollView: UIScrollView) -> PricingCardRef? {
         let viewportCenter = scrollView.contentOffset.x + scrollView.bounds.width / 2
         return pricingCardRefs.min { abs($0.card.frame.midX - viewportCenter) < abs($1.card.frame.midX - viewportCenter) }
     }
