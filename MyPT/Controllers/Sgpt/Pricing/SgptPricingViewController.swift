@@ -31,8 +31,10 @@ final class SgptPricingViewController: CommonViewController {
 
     // MARK: - Outlets
 
+    @IBOutlet weak var mainScrollView: UIScrollView!
     @IBOutlet weak var heroImageView: UIImageView!
     @IBOutlet weak var contentContainer: UIView!
+    @IBOutlet weak var backButtonTopConstraint: NSLayoutConstraint!
 
     // MARK: - Palette / copy
 
@@ -111,8 +113,10 @@ final class SgptPricingViewController: CommonViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        mainScrollView?.contentInsetAdjustmentBehavior = .never
         view.backgroundColor = Palette.bg
         heroImageView.image = UIImage(named: "sgpt-pricing-hero")
+        heroImageView.contentMode = .scaleAspectFill
         buildContent()
         setupScrollDebugLabel()
     }
@@ -124,6 +128,8 @@ final class SgptPricingViewController: CommonViewController {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        let topInset = view.safeAreaInsets.top
+        backButtonTopConstraint?.constant = max(topInset, 20) + 8
         performInitialPricingCenteringIfNeeded()
     }
 

@@ -1126,7 +1126,7 @@ class HomepageVC: CommonViewController, UICollectionViewDelegate, UICollectionVi
             }
         } else if collectionView == collectionSgpt {
             guard sgptSessions.indices.contains(indexPath.item) else { return }
-            let vc: SgptSessionDetailViewController = .instantiate(appStoryboard: .homepage)
+            let vc: SgptSessionDetailViewController = .instantiate(appStoryboard: .sgpt)
             vc.session = sgptSessions[indexPath.item]
             vc.hidesBottomBarWhenPushed = true
             self.navigationController?.pushViewController(vc, animated: true)

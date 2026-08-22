@@ -279,7 +279,7 @@ final class SgptSessionDetailViewController: CommonViewController {
     }
 
     @IBAction func reserveTapped() {
-        let vc: SgptPricingViewController = .instantiate(appStoryboard: .homepage)
+        let vc: SgptPricingViewController = .instantiate(appStoryboard: .sgpt)
         navigationController?.pushViewController(vc, animated: true)
     }
 

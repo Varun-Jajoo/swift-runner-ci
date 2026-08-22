@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		3826D2AD2FA906D2001C5C64 /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = 3826D2AC2FA906D2001C5C64 /* Mixpanel */; };
 		3869CA522FB4E1FE0012D199 /* NewBookingModule.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3869CA512FB4E1FE0012D199 /* NewBookingModule.storyboard */; };
+		38SGPT022FB4E1FE0012D199 /* Sgpt.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 38SGPT012FB4E1FE0012D199 /* Sgpt.storyboard */; };
 		3869CA552FB4E2A80012D199 /* NewBookingModuleVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3869CA542FB4E2A80012D199 /* NewBookingModuleVC.swift */; };
 		386E8A0B2FFA6F8C00D1E13E /* ReviewBookingTVCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 386E8A0A2FFA6F8C00D1E13E /* ReviewBookingTVCell.xib */; };
 		386E8A0C2FFA6F8C00D1E13E /* ReviewBookingTVCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 386E8A092FFA6F8C00D1E13E /* ReviewBookingTVCell.swift */; };
@@ -1058,6 +1059,7 @@
 		D773529D2F43A11B00C597AD /* GradientProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientProgressBar.swift; sourceTree = "<group>"; };
 		D786250B2F229B3C007EBF30 /* LocationDetailsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationDetailsVC.swift; sourceTree = "<group>"; };
 		D7B0B6C32F37AE3E00A0579E /* Homepage.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Homepage.storyboard; sourceTree = "<group>"; };
+		38SGPT012FB4E1FE0012D199 /* Sgpt.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Sgpt.storyboard; sourceTree = "<group>"; };
 		D7B210232F4487F600721F84 /* StoryBars.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryBars.swift; sourceTree = "<group>"; };
 		D7B302AE2F6549740018C2A0 /* CustomTimePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTimePickerView.swift; sourceTree = "<group>"; };
 		D7D2AD312F23E519008A1170 /* AvailableLocationsTVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailableLocationsTVC.swift; sourceTree = "<group>"; };
@@ -2155,6 +2157,7 @@
 				EE9D2B8E2F17EB51008A83D1 /* Purchase.storyboard */,
 				D7B0B6C32F37AE3E00A0579E /* Homepage.storyboard */,
 				3869CA512FB4E1FE0012D199 /* NewBookingModule.storyboard */,
+				38SGPT012FB4E1FE0012D199 /* Sgpt.storyboard */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -2515,6 +2518,7 @@
 				38D951A7302F292100A6A85C /* RenewPlanTVCell.xib in Resources */,
 				B84F78982CEB195200FF7D52 /* More.storyboard in Resources */,
 				D7B0B6C42F37AE3E00A0579E /* Homepage.storyboard in Resources */,
+				38SGPT022FB4E1FE0012D199 /* Sgpt.storyboard in Resources */,
 				B8B9A3D62E41D58E00E0FA16 /* BookingNotificationTableViewCell.xib in Resources */,
 				B89EC8242D00620A00FF5814 /* PackageDetailsTableViewCell.xib in Resources */,
 				B852554F2DC36B1D00AF59B3 /* overpass-mono-bold.otf in Resources */,

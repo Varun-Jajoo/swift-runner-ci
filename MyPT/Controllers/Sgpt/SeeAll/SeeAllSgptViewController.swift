@@ -195,11 +195,11 @@ extension SeeAllSgptViewController: UICollectionViewDataSource, UICollectionView
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard sessions.indices.contains(indexPath.item) else { return }
-        // Must load from Homepage.storyboard, not a plain init - this
+        // Must load from Sgpt.storyboard, not a plain init - this
         // screen's every IBOutlet (scrollView, titleLabel, all the section
         // containers) is wired in Interface Builder, so a plain init leaves
         // them all nil and crashes on the first line of buildSections().
-        let vc: SgptSessionDetailViewController = .instantiate(appStoryboard: .homepage)
+        let vc: SgptSessionDetailViewController = .instantiate(appStoryboard: .sgpt)
         vc.session = sessions[indexPath.item]
         vc.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(vc, animated: true)
