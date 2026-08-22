@@ -483,13 +483,24 @@ private extension SgptPricingViewController {
             ref.badgeHeightConstraint.constant = isCentered ? PricingMetric.mainBadgeHeight : PricingMetric.sideBadgeHeight
         }
         startPricingCenterPulse(on: nearest.card)
+        view.layoutIfNeeded()
 
         // Resizing the centered card shifts its own frame within the row
         // (the other two cards resize too, pushing everything), so its
-        // pre-resize center is now stale - re-center once the resize's
-        // layout pass has actually happened, or this drifts off-center by
-        // however much the row reflowed.
-        view.layoutIfNeeded()
+        // pre-resize center is stale - normally worth a re-center once the
+        // resize's layout pass has happened. But scrollViewDidScroll (and
+        // so this whole method) fires continuously WHILE the user's finger
+        // is still down and actively panning, and calling
+        // setContentOffset(animated:) in the middle of that fights the live
+        // pan gesture - the gesture's own next touch-move event overrides
+        // it almost immediately, which is exactly what read as "scrolls for
+        // a split second then snaps back to the middle card": every tiny
+        // drag delta was re-triggering this correction and fighting itself.
+        // Skip the correction entirely while the user is actually touching
+        // the scroll view - scrollViewDidEndDragging/DidEndDecelerating's
+        // snapPricingCardsToNearest() already re-centers properly once they
+        // let go, so nothing is lost by not fighting the live drag here.
+        guard !scrollView.isTracking, !scrollView.isDragging else { return }
         centerPricingCard(nearest.card, animated: true)
     }
 

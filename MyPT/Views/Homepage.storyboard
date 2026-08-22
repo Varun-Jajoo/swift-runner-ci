@@ -4696,7 +4696,7 @@ preferred times</string>
                                                  "BUILT AS ONE" title baked in as one image), not hand-layered -
                                                  same lesson learned on Android after an earlier hand-built
                                                  version didn't match. -->
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="spr010">
+                                            <view contentMode="scaleToFill" clipsSubviews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="spr010">
                                                 <rect key="frame" x="0.0" y="0.0" width="393" height="559"/>
                                                 <subviews>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" image="sgpt-pricing-hero" translatesAutoresizingMaskIntoConstraints="NO" id="spr011">
@@ -4713,8 +4713,19 @@ preferred times</string>
                                                 </subviews>
                                                 <constraints>
                                                     <constraint firstItem="spr011" firstAttribute="top" secondItem="spr010" secondAttribute="top" id="spr018"/>
-                                                    <constraint firstItem="spr011" firstAttribute="leading" secondItem="spr010" secondAttribute="leading" id="spr019"/>
-                                                    <constraint firstAttribute="trailing" secondItem="spr011" secondAttribute="trailing" id="spr020"/>
+                                                    <!-- 4pt overscan on each side (spr010 now clips it) - a small,
+                                                         deliberate safety margin against sub-pixel gaps: reported
+                                                         twice as thin bare-background strips down the left/right
+                                                         edges even with the aspect ratio (1951:1459) matching the
+                                                         real asset's own pixel dimensions exactly, contentMode
+                                                         already scaleAspectFill, and every constraint already
+                                                         edge-to-edge with zero inset - extending the image slightly
+                                                         past its container and letting the container crop the
+                                                         overhang makes a gap structurally impossible regardless of
+                                                         cause, at the cost of an imperceptible few points cropped
+                                                         off a decorative photo's edges. -->
+                                                    <constraint firstItem="spr011" firstAttribute="leading" secondItem="spr010" secondAttribute="leading" constant="-4" id="spr019"/>
+                                                    <constraint firstAttribute="trailing" secondItem="spr011" secondAttribute="trailing" constant="-4" id="spr020"/>
                                                     <constraint firstAttribute="bottom" secondItem="spr010" secondAttribute="bottom" firstItem="spr011" id="spr021"/>
                                                     <!-- Aspect ratio (1951:1459, the real exported asset's native
                                                          size) is what actually gives this view a height - width
