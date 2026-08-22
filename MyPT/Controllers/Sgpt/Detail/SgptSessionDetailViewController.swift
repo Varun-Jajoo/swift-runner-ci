@@ -617,9 +617,15 @@ private extension SgptSessionDetailViewController {
             // #3A2058 border (not the app-wide #1A062D violetStroke used on
             // other cards) and a much stronger, violet-tinted sheen than
             // the generic 8%-white one every other card on this screen uses.
+            // Android's own glow is also a small, TIGHT 24dp-radius spot
+            // near the top (gradientRadius=24dp on a 38dp tile), not a
+            // gradient spanning the whole tile - sheenEdge=.center keeps
+            // the radius to about half the tile instead of the default
+            // .bottomRight's full-diagonal span, which read as a diffuse
+            // wash rather than a contained glow.
             let iconTile = makeIconTile(image: UIImage(named: step.icon) ?? icon(system: step.systemFallback), iconSide: 20,
                                         tileColor: Palette.violetTile, borderColor: UIColor(hex: "#3A2058"),
-                                        sheenColor: UIColor(hex: "#B98CF0"), sheenAlpha: 0.85)
+                                        sheenColor: UIColor(hex: "#B98CF0"), sheenAlpha: 0.85, sheenEdge: .center)
             firstIconTile = firstIconTile ?? iconTile
             lastIconTile = iconTile
 
@@ -1201,7 +1207,8 @@ private extension SgptSessionDetailViewController {
     }
 
     func makeIconTile(image: UIImage?, iconSide: CGFloat, tileColor: UIColor, borderColor: UIColor,
-                      sheenColor: UIColor = .white, sheenAlpha: CGFloat = 0.08) -> UIView {
+                      sheenColor: UIColor = .white, sheenAlpha: CGFloat = 0.08,
+                      sheenEdge: CAGradientPoint = .bottomRight) -> UIView {
         let tile = GlassCardView(cornerRadius: 12)
         tile.translatesAutoresizingMaskIntoConstraints = false
         tile.fillColor = tileColor
@@ -1209,6 +1216,7 @@ private extension SgptSessionDetailViewController {
         tile.strokeColor = borderColor
         tile.strokeAlpha = 1.0
         tile.sheenOrigin = .topCenter
+        tile.sheenEdge = sheenEdge
         tile.sheenColor = sheenColor
         tile.sheenAlpha = sheenAlpha
 
