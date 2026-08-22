@@ -341,8 +341,8 @@
                                                 </subviews>
                                                 <constraints>
                                                     <constraint firstItem="spr011" firstAttribute="top" secondItem="spr010" secondAttribute="top" id="spr018"/>
-                                                    <constraint firstItem="spr011" firstAttribute="leading" secondItem="spr010" secondAttribute="leading" constant="-4" id="spr019"/>
-                                                    <constraint firstAttribute="trailing" secondItem="spr011" secondAttribute="trailing" constant="-4" id="spr020"/>
+                                                    <constraint firstItem="spr011" firstAttribute="leading" secondItem="spr010" secondAttribute="leading" constant="-20" id="spr019"/>
+                                                    <constraint firstAttribute="trailing" secondItem="spr011" secondAttribute="trailing" constant="-20" id="spr020"/>
                                                     <constraint firstAttribute="bottom" secondItem="spr010" secondAttribute="bottom" firstItem="spr011" id="spr021"/>
                                                     <constraint firstItem="spr011" firstAttribute="height" secondItem="spr011" secondAttribute="width" multiplier="1951:1459" id="spr023"/>
                                                     <constraint firstItem="spr013" firstAttribute="top" secondItem="spr010" secondAttribute="top" constant="8" id="spr026"/>

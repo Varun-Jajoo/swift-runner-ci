@@ -117,6 +117,7 @@ final class SgptPricingViewController: CommonViewController {
         view.backgroundColor = Palette.bg
         heroImageView.image = UIImage(named: "sgpt-pricing-hero")
         heroImageView.contentMode = .scaleAspectFill
+        heroImageView.clipsToBounds = true
         buildContent()
         setupScrollDebugLabel()
     }
