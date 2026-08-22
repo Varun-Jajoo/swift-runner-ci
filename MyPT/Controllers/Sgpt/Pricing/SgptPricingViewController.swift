@@ -114,6 +114,7 @@ final class SgptPricingViewController: CommonViewController {
         view.backgroundColor = Palette.bg
         heroImageView.image = UIImage(named: "sgpt-pricing-hero")
         buildContent()
+        setupScrollDebugLabel()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -126,35 +127,57 @@ final class SgptPricingViewController: CommonViewController {
         performInitialPricingCenteringIfNeeded()
     }
 
-    private var didShowHeroDiagnostic = false
+    // The hero-frame diagnostic that used to live here confirmed the frame
+    // geometry is actually correct (heroImageView resolves to x=-4, width
+    // 401 on a 393pt screen - a full 4pt overscan past both edges, with the
+    // container's clipsToBounds=true cropping it exactly to the screen), so
+    // whatever's still visible isn't a missing/gap region in the layout.
+    // Removed now that it answered that question.
 
-    /// TEMPORARY - a reported left/right gap around the hero photo has
-    /// persisted through two fix attempts (contentMode + a 4pt overscan)
-    /// despite the aspect-ratio constraint matching the real asset's pixel
-    /// dimensions exactly and every edge constraint being zero-inset, so
-    /// static analysis of the storyboard has been ruled out as the next
-    /// step - this reports the actual resolved frames so the real cause
-    /// (an actual layout gap vs. e.g. a color-similarity illusion at the
-    /// edge, or the image's own decoded pixel size not matching what the
-    /// asset catalog reports) can be confirmed from real numbers instead of
-    /// guessed at again. Fires once, after layout has actually settled.
-    /// Remove once root-caused.
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        guard !didShowHeroDiagnostic, let heroSuperview = heroImageView.superview else { return }
-        didShowHeroDiagnostic = true
+    /// TEMPORARY - the carousel snap-back report persisted even after
+    /// splitting live style-swap from the deferred resize (see
+    /// updateCenteredPricingCard()/applyPricingCardSizes()'s comments), so
+    /// there's still something wrong with the live scroll state that static
+    /// reasoning about the code hasn't caught. A modal alert can't diagnose
+    /// this one - presenting it would cancel the very touch gesture being
+    /// tested. This is a plain, non-blocking overlay label instead, updated
+    /// on every scroll/settle callback, so a screenshot taken mid-drag (the
+    /// physical volume+side-button shortcut, which doesn't interrupt an
+    /// active touch) can capture exactly what the code believes is
+    /// happening at the moment the snap-back is visible. Remove once
+    /// root-caused.
+    private let scrollDebugLabel = UILabel()
 
-        let message = """
-        screen: \(view.frame)
-        heroContainer (spr010): \(heroSuperview.frame)
-        heroImageView (spr011): \(heroImageView.frame)
-        image.size: \(heroImageView.image.map { "\($0.size) scale=\($0.scale)" } ?? "nil")
-        contentMode: \(heroImageView.contentMode.rawValue)
-        clipsToBounds: container=\(heroSuperview.clipsToBounds) image=\(heroImageView.clipsToBounds)
+    private func setupScrollDebugLabel() {
+        scrollDebugLabel.translatesAutoresizingMaskIntoConstraints = false
+        scrollDebugLabel.numberOfLines = 0
+        scrollDebugLabel.font = .monospacedSystemFont(ofSize: 10, weight: .regular)
+        scrollDebugLabel.textColor = .white
+        scrollDebugLabel.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+        scrollDebugLabel.text = "scroll debug: waiting for first scroll event"
+        view.addSubview(scrollDebugLabel)
+        NSLayoutConstraint.activate([
+            scrollDebugLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 4),
+            scrollDebugLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 4),
+            scrollDebugLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -4)
+        ])
+    }
+
+    private func updateScrollDebugLabel(context: String) {
+        guard let scrollView = cardsScrollView else { return }
+        let names = pricingCardRefs.map { ref -> String in
+            if ref.card === centeredPricingCard { return "*" }
+            return " "
+        }
+        let nearestIndex = nearestPricingCard(in: scrollView).flatMap { nearest in
+            pricingCardRefs.firstIndex { $0.card === nearest.card }
+        }
+        scrollDebugLabel.text = """
+        [\(context)] offset=\(Int(scrollView.contentOffset.x)) inset L=\(Int(scrollView.contentInset.left)) R=\(Int(scrollView.contentInset.right))
+        tracking=\(scrollView.isTracking ? "T" : "F") dragging=\(scrollView.isDragging ? "T" : "F") decel=\(scrollView.isDecelerating ? "T" : "F") settling=\(isSettlingPricingScroll ? "T" : "F")
+        nearestIdx=\(nearestIndex.map(String.init) ?? "-") centered=\(names.joined())
+        card widths=\(pricingCardRefs.map { Int($0.cardWidthConstraint.constant) })
         """
-        let alert = UIAlertController(title: "Hero frame debug", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
     }
 
     /// Figma's initial state centers "Deal of the Day" with both side cards
@@ -165,6 +188,24 @@ final class SgptPricingViewController: CommonViewController {
     private func performInitialPricingCenteringIfNeeded() {
         guard !hasCenteredPricingCardsInitially, let scrollView = cardsScrollView,
               scrollView.bounds.width > 0, let target = initialCenterPricingCard else { return }
+        // The actual root cause of the reported "pulls back to middle card"
+        // bug: row.leadingAnchor/trailingAnchor pin flush to
+        // contentLayoutGuide, so contentSize is only as wide as the 3 cards
+        // + spacing + the 24pt peek margins (~502pt on a 393pt screen ->
+        // maxOffset ~109). Centering a SIDE card requires the viewport's
+        // CENTER x to cross the midpoint between it and the main card, which
+        // works out to needing the viewport center to swing further than
+        // offset 0/maxOffset allow on EITHER edge - so a side card can
+        // never become "nearest" no matter how hard the user drags: they
+        // hit the hard content edge first and the native scroll-view
+        // rubber-band bounces back, which is exactly the "scrolls for a
+        // split second then pulls back to the middle card" symptom. This
+        // was never a delegate-logic bug - it's a missing-scroll-headroom
+        // bug. Fix: pad both edges with contentInset so the scrollable
+        // range extends far enough past the last real card for it to
+        // actually reach the viewport's center once it grows to main size.
+        let sideInset = max((scrollView.bounds.width - PricingMetric.mainCardWidth) / 2, 0)
+        scrollView.contentInset = UIEdgeInsets(top: 0, left: sideInset, bottom: 0, right: sideInset)
         centerPricingCard(target, animated: false)
         // centeredPricingCard is still nil here, so this does its full
         // styling+pulse-start work rather than a no-op - matches
@@ -203,14 +244,21 @@ final class SgptPricingViewController: CommonViewController {
 extension SgptPricingViewController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         updateCenteredPricingCard()
+        updateScrollDebugLabel(context: "didScroll")
     }
 
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        updateScrollDebugLabel(context: "endDragging decelerate=\(decelerate)")
         if !decelerate { snapPricingCardsToNearest() }
     }
 
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        updateScrollDebugLabel(context: "endDecelerating")
         snapPricingCardsToNearest()
+    }
+
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        updateScrollDebugLabel(context: "willBeginDragging")
     }
 }
 
@@ -554,8 +602,15 @@ private extension SgptPricingViewController {
     func centerPricingCard(_ card: UIView, animated: Bool) {
         guard let scrollView = cardsScrollView else { return }
         let target = card.frame.midX - scrollView.bounds.width / 2
-        let maxOffset = max(scrollView.contentSize.width - scrollView.bounds.width, 0)
-        let clamped = min(max(target, 0), maxOffset)
+        // Must clamp against the INSET-aware range, not [0, contentSize -
+        // bounds]: the whole point of the contentInset padding added in
+        // performInitialPricingCenteringIfNeeded() is to let an edge card's
+        // centered position fall in the padding beyond the real content, so
+        // clamping to the un-padded range would silently cap it right back
+        // to the old too-short range and undo that fix.
+        let minOffset = -scrollView.adjustedContentInset.left
+        let maxOffset = max(scrollView.contentSize.width - scrollView.bounds.width + scrollView.adjustedContentInset.right, minOffset)
+        let clamped = min(max(target, minOffset), maxOffset)
         scrollView.setContentOffset(CGPoint(x: clamped, y: 0), animated: animated)
     }
 
