@@ -383,7 +383,7 @@ private extension SgptSessionDetailViewController {
         personTile.backgroundColor = UIColor(hex: "#8A2BE2").withAlphaComponent(0.5)
         personTile.layer.cornerRadius = 6.3
 
-        let personIcon = UIImageView(image: icon(system: "person.2.fill"))
+        let personIcon = UIImageView(image: UIImage(named: "sgpt-ic-profile-2user") ?? icon(system: "person.2.fill"))
         personIcon.translatesAutoresizingMaskIntoConstraints = false
         personIcon.tintColor = .white
         personIcon.contentMode = .scaleAspectFit
@@ -739,7 +739,7 @@ private extension SgptSessionDetailViewController {
         nameLabel.text = trainerRowNameLabel.text
 
         // Static placeholder rating — no per-trainer rating API for SGPT.
-        let starIcon = UIImageView(image: icon(system: "star.fill"))
+        let starIcon = UIImageView(image: UIImage(named: "sgpt-ic-star") ?? icon(system: "star.fill"))
         starIcon.tintColor = UIColor(hex: "#FFCC33")
         starIcon.contentMode = .scaleAspectFit
         let ratingLabel = UILabel()
@@ -758,9 +758,27 @@ private extension SgptSessionDetailViewController {
 
         // Static placeholder specialities — no skills/tags API for SGPT trainers.
         let skillsRow = UIStackView(arrangedSubviews: Copy.trainerSkills.map { self.makeSkillChip($0) })
+        skillsRow.translatesAutoresizingMaskIntoConstraints = false
         skillsRow.axis = .horizontal
         skillsRow.alignment = .center
         skillsRow.spacing = 5
+
+        // Same fix as the header chip row (sgd069 shim in the storyboard):
+        // every arranged subview here is a required-hugging pill with no
+        // flexible sibling to absorb slack, so letting column's .fill
+        // alignment force-stretch this row wide creates the identical
+        // unsatisfiable conflict - one pill's width breaking unpredictably.
+        // A shim satisfies column's fill alignment while skillsRow itself
+        // hugs its real combined width and stays leading-aligned.
+        let skillsRowShim = UIView()
+        skillsRowShim.translatesAutoresizingMaskIntoConstraints = false
+        skillsRowShim.addSubview(skillsRow)
+        NSLayoutConstraint.activate([
+            skillsRow.topAnchor.constraint(equalTo: skillsRowShim.topAnchor),
+            skillsRow.leadingAnchor.constraint(equalTo: skillsRowShim.leadingAnchor),
+            skillsRow.bottomAnchor.constraint(equalTo: skillsRowShim.bottomAnchor),
+            skillsRowShim.trailingAnchor.constraint(greaterThanOrEqualTo: skillsRow.trailingAnchor)
+        ])
 
         let bioLabel = UILabel()
         bioLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -792,11 +810,11 @@ private extension SgptSessionDetailViewController {
         viewProfileButton.addTarget(self, action: #selector(policyRowTapped), for: .touchUpInside)
         viewProfileButton.heightAnchor.constraint(equalToConstant: 42).isActive = true
         viewProfileButton.semanticContentAttribute = .forceRightToLeft
-        viewProfileButton.setImage(icon(system: "chevron.right"), for: .normal)
+        viewProfileButton.setImage(UIImage(named: "sgpt-ic-chevron-right") ?? icon(system: "chevron.right"), for: .normal)
         viewProfileButton.tintColor = .white.withAlphaComponent(0.4)
         viewProfileButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
 
-        let column = UIStackView(arrangedSubviews: [nameLabel, ratingRow, skillsRow, bioLabel, statsRow, viewProfileButton])
+        let column = UIStackView(arrangedSubviews: [nameLabel, ratingRow, skillsRowShim, bioLabel, statsRow, viewProfileButton])
         column.translatesAutoresizingMaskIntoConstraints = false
         column.axis = .vertical
         column.alignment = .fill
@@ -948,7 +966,7 @@ private extension SgptSessionDetailViewController {
         headingLine.widthAnchor.constraint(equalToConstant: 198).isActive = true
         headingLine.heightAnchor.constraint(equalToConstant: 1).isActive = true
 
-        let headingStar = UIImageView(image: icon(system: "sparkle"))
+        let headingStar = UIImageView(image: UIImage(named: "sgpt-ic-sparkle") ?? icon(system: "sparkle"))
         headingStar.tintColor = UIColor(hex: "#D9D9D9")
         headingStar.contentMode = .scaleAspectFit
         headingStar.widthAnchor.constraint(equalToConstant: 8).isActive = true
@@ -1053,7 +1071,7 @@ private extension SgptSessionDetailViewController {
         label.text = title
         label.setContentHuggingPriority(.defaultLow, for: .horizontal)
 
-        let chevron = UIImageView(image: icon(system: "chevron.right"))
+        let chevron = UIImageView(image: UIImage(named: "sgpt-ic-chevron-right") ?? icon(system: "chevron.right"))
         chevron.translatesAutoresizingMaskIntoConstraints = false
         chevron.tintColor = .white.withAlphaComponent(0.4)
         chevron.contentMode = .scaleAspectFit
@@ -1102,7 +1120,7 @@ private extension SgptSessionDetailViewController {
         let button = GradientCTAButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.configure(title: Copy.ctaTitle, font: AppFont.medium.size(14.0, familyName: familyFunnelSans), titleColor: Palette.ctaInk)
-        button.setTrailingIcon(icon(system: "chevron.right"), tint: Palette.ctaInk)
+        button.setTrailingIcon(UIImage(named: "sgpt-ic-chevron-right") ?? icon(system: "chevron.right"), tint: Palette.ctaInk)
         button.addTarget(self, action: #selector(reserveTapped), for: .touchUpInside)
         button.setContentHuggingPriority(.required, for: .horizontal)
         button.heightAnchor.constraint(equalToConstant: Metric.ctaHeight).isActive = true
@@ -1118,7 +1136,38 @@ private extension SgptSessionDetailViewController {
         // already sits 16pt above the safe area (sgd413 in the storyboard),
         // so an additional bottom margin here would double up that gap.
         row.layoutMargins = UIEdgeInsets(top: 12, left: 20, bottom: 0, right: 20)
-        return row
+
+        // Figma's exact CTA bar surface: 16pt top corners only, a 2pt blue
+        // (#01368F) top border, and an 8%-white radial sheen centred just
+        // above the bar (not the plain transparent background this used to
+        // sit on with no surface of its own).
+        let card = GlassCardView(cornerRadius: 16)
+        card.translatesAutoresizingMaskIntoConstraints = false
+        card.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        card.fillColor = UIColor(hex: "#131416")
+        card.fillAlpha = 1.0
+        card.showsSheen = true
+        card.sheenOrigin = .topCenter
+        card.sheenAlpha = 0.08
+
+        let topBorder = UIView()
+        topBorder.translatesAutoresizingMaskIntoConstraints = false
+        topBorder.backgroundColor = UIColor(hex: "#01368F")
+        card.addSubview(topBorder)
+        card.addSubview(row)
+
+        NSLayoutConstraint.activate([
+            topBorder.topAnchor.constraint(equalTo: card.topAnchor),
+            topBorder.leadingAnchor.constraint(equalTo: card.leadingAnchor),
+            topBorder.trailingAnchor.constraint(equalTo: card.trailingAnchor),
+            topBorder.heightAnchor.constraint(equalToConstant: 2),
+
+            row.topAnchor.constraint(equalTo: card.topAnchor),
+            row.leadingAnchor.constraint(equalTo: card.leadingAnchor),
+            row.trailingAnchor.constraint(equalTo: card.trailingAnchor),
+            row.bottomAnchor.constraint(equalTo: card.bottomAnchor)
+        ])
+        return card
     }
 
     // MARK: Small builders

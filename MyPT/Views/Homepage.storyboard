@@ -4366,7 +4366,7 @@ preferred times</string>
                                                     </view>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sgd013" customClass="GlassCircularIconButton" customModule="MyPT_Connect" customModuleProvider="target">
                                                         <rect key="frame" x="16" y="52" width="40" height="40"/>
-                                                        <state key="normal" image="chevron.left" catalog="system"/>
+                                                        <state key="normal" image="sgpt-ic-back-chevron"/>
                                                         <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                         <connections>
                                                             <action selector="backTapped" destination="sgd001" eventType="touchUpInside" id="sgd014"/>
@@ -4374,7 +4374,7 @@ preferred times</string>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sgd015" customClass="GlassCircularIconButton" customModule="MyPT_Connect" customModuleProvider="target">
                                                         <rect key="frame" x="337" y="52" width="40" height="40"/>
-                                                        <state key="normal" image="square.and.arrow.up" catalog="system"/>
+                                                        <state key="normal" image="sgpt-ic-share"/>
                                                         <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                         <connections>
                                                             <action selector="shareTapped" destination="sgd001" eventType="touchUpInside" id="sgd016"/>
