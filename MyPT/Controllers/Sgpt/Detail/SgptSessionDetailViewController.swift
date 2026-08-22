@@ -146,13 +146,24 @@ final class SgptSessionDetailViewController: CommonViewController {
         navigationController?.isNavigationBarHidden = true
     }
 
+    override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+        // The nav row lives inside the hero (so it scrolls away with it),
+        // which means it cannot use the safe-area guide directly - matches
+        // GroupTrainingDetailViewController's identical heroNavTopConstraint
+        // fix (+12) exactly. This used to live in viewDidLayoutSubviews,
+        // which fires on every layout pass including mid-transition ones
+        // where safeAreaInsets can still be transitional; if no further
+        // layout pass fires after the view settles, the constant is left
+        // stuck at whatever a mid-transition frame computed - which is
+        // exactly why the buttons were rendering lower than intended.
+        // viewSafeAreaInsetsDidChange only fires when the real, settled
+        // inset is actually known.
+        heroTopButtonsTopConstraint.constant = view.safeAreaInsets.top + 12
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // `view.safeAreaInsets.top` is 0 until the first real layout pass,
-        // so this can't move to viewDidLoad/viewWillAppear - it has to live
-        // here, re-running on every layout pass (rotation, size class
-        // change) since the inset itself can change under those.
-        heroTopButtonsTopConstraint.constant = view.safeAreaInsets.top + 22
         updateAboutOverflowState()
     }
 
@@ -1132,9 +1143,10 @@ private extension SgptSessionDetailViewController {
         row.alignment = .center
         row.spacing = 12
         row.isLayoutMarginsRelativeArrangement = true
-        // Only top/left/right padding here - the container's own bottom
-        // already sits 16pt above the safe area (sgd413 in the storyboard),
-        // so an additional bottom margin here would double up that gap.
+        // Left/right/top only - the bottom gap above the home indicator is
+        // handled below by pinning the row itself to the safe area, not by
+        // padding here, since the card's own surface needs to extend all
+        // the way to the true screen edge (see the note on row.bottomAnchor).
         row.layoutMargins = UIEdgeInsets(top: 12, left: 20, bottom: 0, right: 20)
 
         // Figma's exact CTA bar surface: 16pt top corners only, a 2pt blue
@@ -1165,7 +1177,15 @@ private extension SgptSessionDetailViewController {
             row.topAnchor.constraint(equalTo: card.topAnchor),
             row.leadingAnchor.constraint(equalTo: card.leadingAnchor),
             row.trailingAnchor.constraint(equalTo: card.trailingAnchor),
-            row.bottomAnchor.constraint(equalTo: card.bottomAnchor)
+            // Pinned to the VIEW's safe area, not the card's own bottom -
+            // the card (sgd220 in the storyboard) now sits flush against
+            // the screen's true bottom edge with no gap, so its dark
+            // surface extends behind the home indicator the way a bottom
+            // sheet should. The actual button/price content still needs to
+            // clear the indicator, so it's pulled up 12pt above the safe
+            // area instead - the exact same split GroupTrainingDetailViewController's
+            // own bottom bar already uses (ctaButton.bottomAnchor there).
+            row.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
         ])
         return card
     }

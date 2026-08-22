@@ -4649,7 +4649,7 @@ preferred times</string>
                             <constraint firstItem="sgd220" firstAttribute="top" secondItem="sgd003" secondAttribute="bottom" id="sgd233"/>
                             <constraint firstItem="sgd220" firstAttribute="leading" secondItem="sgd002" secondAttribute="leading" id="sgd411"/>
                             <constraint firstAttribute="trailing" secondItem="sgd220" secondAttribute="trailing" id="sgd412"/>
-                            <constraint firstItem="sgd410" firstAttribute="bottom" secondItem="sgd220" secondAttribute="bottom" constant="16" id="sgd413"/>
+                            <constraint firstAttribute="bottom" secondItem="sgd220" secondAttribute="bottom" id="sgd413"/>
                         </constraints>
                     </view>
                     <connections>
