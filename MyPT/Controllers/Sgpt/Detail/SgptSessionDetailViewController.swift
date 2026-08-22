@@ -56,7 +56,7 @@ final class SgptSessionDetailViewController: CommonViewController {
     @IBOutlet weak var pillDuration: PillChipView!
     @IBOutlet weak var trainerPhotoView: UIImageView!
     @IBOutlet weak var trainerRowNameLabel: UILabel!
-    @IBOutlet weak var bottomBarButton: GradientCTAButton!
+    @IBOutlet weak var bottomBarContainer: UIView!
 
     /// Top offset of the back/share buttons above the hero image. Storyboard
     /// ships a `52` design-time constant (roughly right for a notched
@@ -104,11 +104,10 @@ final class SgptSessionDetailViewController: CommonViewController {
         static let about = "A small group personal training session — the trainer adapts pacing and coaching to whoever's in the room that day, not a fixed script. Suitable for all levels, with modifications offered throughout."
         static let readMore = "READ MORE ABOUT THE SESSION"
         static let showLess = "SHOW LESS ABOUT THE SESSION"
-        static let trainerSubtitle = "Certified Trainer · MyPT"
         static let trainerBio = "Certified trainer with hands-on experience coaching small groups — programming that adapts mid-session to the group's real output, not just the plan."
         static let trainerRatingValue = "4.2"
         static let trainerRatingCount = "12k ratings"
-        static let trainerSkills = ["STRENGTH", "MOBILITY", "CONDITIONING", "+2"]
+        static let trainerSkills = ["STRENGTH", "MOBILITY", "+2"]
         static let howItWorksTitle = "How Small Group PT works"
         static let priceFallback = "1 credit"
         static let ctaTitle = "GET CREDIT & RESERVE"
@@ -196,9 +195,6 @@ final class SgptSessionDetailViewController: CommonViewController {
         timeValueLabel.text = SgptSessionDetailViewController.formattedTime(session.time)
         durationValueLabel.text = "\(GroupClassCardFormatter.intValue(session.duration, defaultValue: 60)) min"
         venueValueLabel.text = (session.studioName?.trimmingCharacters(in: .whitespacesAndNewlines)).flatMap { $0.isEmpty ? nil : $0 } ?? "MyPT Studio"
-
-        bottomBarButton.configure(title: Copy.ctaTitle, font: AppFont.medium.size(14.0, familyName: familyFunnelSans), titleColor: Palette.ctaInk)
-        bottomBarButton.setTrailingIcon(icon(system: "chevron.right"), tint: Palette.ctaInk)
     }
 
     private func styleChip(_ chip: PillChipView) {
@@ -327,6 +323,8 @@ private extension SgptSessionDetailViewController {
         moreColumn.alignment = .fill
         moreColumn.spacing = 8
         fill(moreContainer, with: moreColumn)
+
+        fill(bottomBarContainer, with: makeBottomBar())
     }
 
     /// Pins `content` to fill `container` and lets `container`'s own height
@@ -346,14 +344,26 @@ private extension SgptSessionDetailViewController {
     // MARK: Group seats card
 
     func makeSeatsCard() -> UIView {
-        let card = GlassCardView(cornerRadius: 12)
+        // Matches Android's bg_group_seats_photo: a flattened Figma export
+        // (the card's actual violet glow/gradient look, not reproducible
+        // with a flat fill + stroke), clipped to the card's own corner
+        // radius with no separate border on top - see sgpt-seats-card-bg
+        // in Assets.xcassets/Sgpt.
+        let card = UIView()
         card.translatesAutoresizingMaskIntoConstraints = false
-        card.fillColor = Palette.cardSurface
-        card.fillAlpha = 1.0
-        card.strokeColor = Palette.violetStroke
-        card.strokeAlpha = 1.0
-        card.sheenOrigin = .topCenter
-        card.sheenAlpha = 0.08
+        card.layer.cornerRadius = 12
+        card.clipsToBounds = true
+
+        let bgImageView = UIImageView(image: UIImage(named: "sgpt-seats-card-bg"))
+        bgImageView.translatesAutoresizingMaskIntoConstraints = false
+        bgImageView.contentMode = .scaleToFill
+        card.addSubview(bgImageView)
+        NSLayoutConstraint.activate([
+            bgImageView.topAnchor.constraint(equalTo: card.topAnchor),
+            bgImageView.leadingAnchor.constraint(equalTo: card.leadingAnchor),
+            bgImageView.trailingAnchor.constraint(equalTo: card.trailingAnchor),
+            bgImageView.bottomAnchor.constraint(equalTo: card.bottomAnchor)
+        ])
 
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -549,20 +559,45 @@ private extension SgptSessionDetailViewController {
     // MARK: Session steps (static — no per-session breakdown API)
 
     func makeSessionSteps() -> UIView {
-        let steps: [(system: String, title: String, tag: String, body: String)] = [
-            ("figure.flexibility", "Warm-up", "10 MINS", "Dynamic mobility work and activation drills to get the group moving safely."),
-            ("dumbbell.fill", "Main Training", "35 MINS", "Coached sets and supersets, paced and adjusted to the group in the room."),
-            ("figure.mind.and.body", "Cool-down", "5 MINS", "Stretching and a breathing reset to close out the session.")
+        // Icons are the same real Figma glyphs Android uses (workout-
+        // stretching / equipment-bench-press / yoga-02, downloaded straight
+        // from the Figma node), not generic SF Symbol stand-ins - see
+        // ic_workout_stretching_22/ic_equipment_bench_press_20/ic_yoga_02_18
+        // in Assets.xcassets/Sgpt.
+        let steps: [(icon: String, systemFallback: String, title: String, tag: String, body: String)] = [
+            ("ic_workout_stretching_22", "figure.flexibility", "Warm-up", "10 MINS", "Dynamic mobility work and activation drills to get the group moving safely."),
+            ("ic_equipment_bench_press_20", "dumbbell.fill", "Main Training", "35 MINS", "Coached sets and supersets, paced and adjusted to the group in the room."),
+            ("ic_yoga_02_18", "figure.mind.and.body", "Cool-down", "5 MINS", "Stretching and a breathing reset to close out the session.")
         ]
+
+        let container = UIView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+
+        // Figma node 11150:61492: 1pt line connecting the FIRST icon tile's
+        // centre to the LAST tile's centre, #ACADAF fading to transparent
+        // at ~60% and back - matches Android's bg_session_steps_connector
+        // and layoutStepsConnector(), which this was missing entirely.
+        let connectorLine = GradientFadeView()
+        connectorLine.translatesAutoresizingMaskIntoConstraints = false
+        let connectorColor = UIColor(hex: "#ACADAF")
+        connectorLine.setColors([connectorColor, connectorColor.withAlphaComponent(0), connectorColor],
+                                 locations: [0, 0.6, 1])
+        container.addSubview(connectorLine)
 
         let column = UIStackView()
         column.translatesAutoresizingMaskIntoConstraints = false
         column.axis = .vertical
         column.alignment = .fill
         column.spacing = 20
+        container.addSubview(column)
+
+        var firstIconTile: UIView?
+        var lastIconTile: UIView?
 
         for step in steps {
-            let iconTile = makeIconTile(image: icon(system: step.system), iconSide: 20, tileColor: Palette.violetTile, borderColor: Palette.violetStroke)
+            let iconTile = makeIconTile(image: UIImage(named: step.icon) ?? icon(system: step.systemFallback), iconSide: 20, tileColor: Palette.violetTile, borderColor: Palette.violetStroke)
+            firstIconTile = firstIconTile ?? iconTile
+            lastIconTile = iconTile
 
             let stepTitle = UILabel()
             stepTitle.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
@@ -598,50 +633,97 @@ private extension SgptSessionDetailViewController {
             row.spacing = 10
             column.addArrangedSubview(row)
         }
-        return column
+
+        NSLayoutConstraint.activate([
+            column.topAnchor.constraint(equalTo: container.topAnchor),
+            column.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            column.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            column.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+        ])
+        if let first = firstIconTile, let last = lastIconTile {
+            NSLayoutConstraint.activate([
+                connectorLine.widthAnchor.constraint(equalToConstant: 1),
+                connectorLine.centerXAnchor.constraint(equalTo: first.centerXAnchor),
+                connectorLine.topAnchor.constraint(equalTo: first.centerYAnchor),
+                connectorLine.bottomAnchor.constraint(equalTo: last.centerYAnchor)
+            ])
+        }
+        return container
     }
 
     // MARK: Trainer card (static rating/bio — no per-trainer profile API for SGPT)
 
     func makeTrainerCard() -> UIView {
-        let card = GlassCardView(cornerRadius: 20)
+        // Matches Android's real trainer card: a 200pt full-width photo
+        // banner (violet-wash gradient backdrop + placeholder glyph +
+        // bottom scrim fading into the info section) above the padded
+        // info column - this used to build a small 64x64 circular avatar
+        // inline next to the name instead, a completely different layout.
+        let card = UIView()
         card.translatesAutoresizingMaskIntoConstraints = false
-        card.fillColor = Palette.cardSurface
-        card.fillAlpha = 1.0
-        card.strokeColor = Palette.cardStroke
-        card.strokeAlpha = 1.0
-        card.sheenOrigin = .topCenter
-        card.sheenAlpha = 0.10
+        card.backgroundColor = Palette.cardSurface
+        card.layer.cornerRadius = 20
+        card.clipsToBounds = true
 
-        let avatar = UIImageView(image: icon(system: "person.crop.circle.fill"))
-        avatar.translatesAutoresizingMaskIntoConstraints = false
-        avatar.contentMode = .scaleAspectFill
-        avatar.clipsToBounds = true
-        avatar.layer.cornerRadius = 16
-        avatar.backgroundColor = Palette.cardStroke
-        avatar.tintColor = .white.withAlphaComponent(0.4)
-        card.addSubview(avatar)
+        // Photo banner: Figma's "Image Frame" gradient backdrop
+        // (#000A04 -> #1A062D -> rgba(138,43,225,0.1)), a placeholder glyph
+        // standing in for the real trainer photo (no photo API for SGPT
+        // trainers yet), and a bottom scrim fading into the card's own
+        // surface color so the banner blends into the info section below.
+        let photoBanner = UIView()
+        photoBanner.translatesAutoresizingMaskIntoConstraints = false
+        photoBanner.clipsToBounds = true
+        card.addSubview(photoBanner)
 
+        let backdropGradient = GradientFadeView()
+        backdropGradient.translatesAutoresizingMaskIntoConstraints = false
+        backdropGradient.setColors([UIColor(hex: "#000A04"), UIColor(hex: "#1A062D"), UIColor(hex: "#8A2BE2").withAlphaComponent(0.1)])
+        photoBanner.addSubview(backdropGradient)
+
+        let avatarIcon = UIImageView(image: icon(system: "person.crop.circle.fill"))
+        avatarIcon.translatesAutoresizingMaskIntoConstraints = false
+        avatarIcon.contentMode = .scaleAspectFit
+        avatarIcon.tintColor = .white.withAlphaComponent(0.25)
+        photoBanner.addSubview(avatarIcon)
+
+        let photoScrim = GradientFadeView()
+        photoScrim.translatesAutoresizingMaskIntoConstraints = false
+        photoScrim.setColors([Palette.cardSurface.withAlphaComponent(0), Palette.cardSurface.withAlphaComponent(0), Palette.cardSurface],
+                              locations: [0, 0.38, 1])
+        photoBanner.addSubview(photoScrim)
+
+        NSLayoutConstraint.activate([
+            photoBanner.topAnchor.constraint(equalTo: card.topAnchor),
+            photoBanner.leadingAnchor.constraint(equalTo: card.leadingAnchor),
+            photoBanner.trailingAnchor.constraint(equalTo: card.trailingAnchor),
+            photoBanner.heightAnchor.constraint(equalToConstant: 200),
+
+            backdropGradient.topAnchor.constraint(equalTo: photoBanner.topAnchor),
+            backdropGradient.leadingAnchor.constraint(equalTo: photoBanner.leadingAnchor),
+            backdropGradient.trailingAnchor.constraint(equalTo: photoBanner.trailingAnchor),
+            backdropGradient.bottomAnchor.constraint(equalTo: photoBanner.bottomAnchor),
+
+            avatarIcon.centerXAnchor.constraint(equalTo: photoBanner.centerXAnchor),
+            avatarIcon.centerYAnchor.constraint(equalTo: photoBanner.centerYAnchor),
+            avatarIcon.widthAnchor.constraint(equalToConstant: 88),
+            avatarIcon.heightAnchor.constraint(equalToConstant: 88),
+
+            photoScrim.leadingAnchor.constraint(equalTo: photoBanner.leadingAnchor),
+            photoScrim.trailingAnchor.constraint(equalTo: photoBanner.trailingAnchor),
+            photoScrim.bottomAnchor.constraint(equalTo: photoBanner.bottomAnchor),
+            photoScrim.heightAnchor.constraint(equalToConstant: 90)
+        ])
+
+        // Name is its OWN row - Android stacks it above the rating row
+        // (rather than Figma's single row) so a normal-length real trainer
+        // name never truncates behind the rating block.
         let nameLabel = UILabel()
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
-        nameLabel.font = AppFont.medium.size(20.0, familyName: familyClashDisplay)
-        nameLabel.textColor = .white
-        nameLabel.numberOfLines = 1
+        nameLabel.font = AppFont.medium.size(24.0, familyName: familyClashDisplay)
+        nameLabel.textColor = UIColor(hex: "#F0F0F0")
+        nameLabel.numberOfLines = 2
         nameLabel.lineBreakMode = .byTruncatingTail
         nameLabel.text = trainerRowNameLabel.text
-
-        let subtitleLabel = UILabel()
-        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        subtitleLabel.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
-        subtitleLabel.textColor = UIColor(hex: "#898384")
-        subtitleLabel.numberOfLines = 1
-        subtitleLabel.text = Copy.trainerSubtitle
-
-        let textStack = UIStackView(arrangedSubviews: [nameLabel, subtitleLabel])
-        textStack.translatesAutoresizingMaskIntoConstraints = false
-        textStack.axis = .vertical
-        textStack.alignment = .fill
-        textStack.spacing = 4
 
         // Static placeholder rating — no per-trainer rating API for SGPT.
         let starIcon = UIImageView(image: icon(system: "star.fill"))
@@ -660,12 +742,6 @@ private extension SgptSessionDetailViewController {
         ratingRow.alignment = .center
         ratingRow.spacing = 4
         NSLayoutConstraint.activate([starIcon.widthAnchor.constraint(equalToConstant: 16), starIcon.heightAnchor.constraint(equalToConstant: 16)])
-
-        let headerRow = UIStackView(arrangedSubviews: [avatar, textStack])
-        headerRow.translatesAutoresizingMaskIntoConstraints = false
-        headerRow.axis = .horizontal
-        headerRow.alignment = .center
-        headerRow.spacing = 16
 
         // Static placeholder specialities — no skills/tags API for SGPT trainers.
         let skillsRow = UIStackView(arrangedSubviews: Copy.trainerSkills.map { self.makeSkillChip($0) })
@@ -707,19 +783,16 @@ private extension SgptSessionDetailViewController {
         viewProfileButton.tintColor = .white.withAlphaComponent(0.4)
         viewProfileButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
 
-        let column = UIStackView(arrangedSubviews: [headerRow, ratingRow, skillsRow, bioLabel, statsRow, viewProfileButton])
+        let column = UIStackView(arrangedSubviews: [nameLabel, ratingRow, skillsRow, bioLabel, statsRow, viewProfileButton])
         column.translatesAutoresizingMaskIntoConstraints = false
         column.axis = .vertical
         column.alignment = .fill
         column.spacing = 16
-        column.setCustomSpacing(4, after: headerRow)
+        column.setCustomSpacing(4, after: nameLabel)
         card.addSubview(column)
 
         NSLayoutConstraint.activate([
-            avatar.widthAnchor.constraint(equalToConstant: 64),
-            avatar.heightAnchor.constraint(equalToConstant: 64),
-
-            column.topAnchor.constraint(equalTo: card.topAnchor, constant: 16),
+            column.topAnchor.constraint(equalTo: photoBanner.bottomAnchor, constant: 16),
             column.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 16),
             column.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
             column.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -16)
@@ -774,18 +847,24 @@ private extension SgptSessionDetailViewController {
 
     // MARK: What's included rows
 
-    static var whatsIncludedRows: [(system: String, text: String)] {
+    // Icons and copy match Android's includedTowel/Rope/Shoes/Clothes rows
+    // exactly (ic_towel_18/ic_skipping_18/ic_shoes_18/ic_clothes_18 - the
+    // same assets already bundled for Group Classes' "what to bring" list).
+    // This used to show generic SF Symbols and the wrong second row copy
+    // ("Bring your own water bottle" instead of "Bring your skipping rope").
+    static var whatsIncludedRows: [(icon: String, systemFallback: String, text: String)] {
         return [
-            ("drop.fill", "Bring a towel — sweating is guaranteed"),
-            ("figure.walk", "Bring your own water bottle"),
-            ("shoeprints.fill", "Training shoes with lateral support"),
-            ("tshirt.fill", "Comfortable workout clothing")
+            ("ic_towel_18", "drop.fill", "Bring a towel — sweating is guaranteed"),
+            ("ic_skipping_18", "figure.walk", "Bring your skipping rope"),
+            ("ic_shoes_18", "shoeprints.fill", "Training shoes with lateral support"),
+            ("ic_clothes_18", "tshirt.fill", "Comfortable workout clothing")
         ]
     }
 
-    func appendInfoRows(_ rows: [(system: String, text: String)], to column: UIStackView) {
+    func appendInfoRows(_ rows: [(icon: String, systemFallback: String, text: String)], to column: UIStackView) {
         for (index, row) in rows.enumerated() {
-            let view = makeInfoRow(icon: icon(system: row.system), text: row.text)
+            let image = UIImage(named: row.icon) ?? icon(system: row.systemFallback)
+            let view = makeInfoRow(icon: image, text: row.text)
             column.addArrangedSubview(view)
             if index < rows.count - 1 {
                 column.setCustomSpacing(10, after: view)
@@ -814,13 +893,26 @@ private extension SgptSessionDetailViewController {
     // MARK: How Small Group PT works
 
     func makeHowItWorksCard() -> UIView {
+        // Matches Android's bg_how_it_works_photo: same flattened-export
+        // trick as the seats card - the real on-device tone is dark/
+        // saturated purple (confirmed on Android's own on-device
+        // screenshot), not the flat violetFillLight this used before, and
+        // there's no separate border on top of it.
         let card = UIView()
         card.translatesAutoresizingMaskIntoConstraints = false
-        card.backgroundColor = Palette.violetFillLight
         card.layer.cornerRadius = 12
-        card.layer.borderWidth = 1
-        card.layer.borderColor = Palette.violetStroke.cgColor
         card.clipsToBounds = true
+
+        let bgImageView = UIImageView(image: UIImage(named: "sgpt-how-it-works-bg"))
+        bgImageView.translatesAutoresizingMaskIntoConstraints = false
+        bgImageView.contentMode = .scaleToFill
+        card.addSubview(bgImageView)
+        NSLayoutConstraint.activate([
+            bgImageView.topAnchor.constraint(equalTo: card.topAnchor),
+            bgImageView.leadingAnchor.constraint(equalTo: card.leadingAnchor),
+            bgImageView.trailingAnchor.constraint(equalTo: card.trailingAnchor),
+            bgImageView.bottomAnchor.constraint(equalTo: card.bottomAnchor)
+        ])
 
         let heading = UILabel()
         heading.font = AppFont.medium.size(16.0, familyName: familyClashDisplay)
@@ -828,20 +920,35 @@ private extension SgptSessionDetailViewController {
         heading.text = Copy.howItWorksTitle
         heading.setContentHuggingPriority(.required, for: .horizontal)
 
+        // Line/star tints match Android's exact values (#4DFFFFFF / #D9D9D9)
+        // - the previous 10%-white hairline + #F0F0F0 star were too faint
+        // to read against the busier photo background. And per Android's own
+        // comment on this block: the line+star sit on their OWN row below
+        // the heading text, a fixed ~220pt-wide accent - not stretched full
+        // width beside the heading, which is what this used to do.
         let headingLine = UIView()
-        headingLine.backgroundColor = Palette.hairline
+        headingLine.backgroundColor = UIColor.white.withAlphaComponent(0.30)
+        headingLine.widthAnchor.constraint(equalToConstant: 198).isActive = true
         headingLine.heightAnchor.constraint(equalToConstant: 1).isActive = true
 
         let headingStar = UIImageView(image: icon(system: "sparkle"))
-        headingStar.tintColor = UIColor(hex: "#F0F0F0")
+        headingStar.tintColor = UIColor(hex: "#D9D9D9")
         headingStar.contentMode = .scaleAspectFit
         headingStar.widthAnchor.constraint(equalToConstant: 8).isActive = true
         headingStar.heightAnchor.constraint(equalToConstant: 8).isActive = true
 
-        let headingRow = UIStackView(arrangedSubviews: [heading, headingLine, headingStar])
+        let lineStarRow = UIStackView(arrangedSubviews: [headingLine, headingStar])
+        lineStarRow.translatesAutoresizingMaskIntoConstraints = false
+        lineStarRow.axis = .horizontal
+        lineStarRow.alignment = .center
+        lineStarRow.spacing = 6
+        lineStarRow.isLayoutMarginsRelativeArrangement = true
+        lineStarRow.layoutMargins = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
+
+        let headingRow = UIStackView(arrangedSubviews: [heading, lineStarRow])
         headingRow.translatesAutoresizingMaskIntoConstraints = false
-        headingRow.axis = .horizontal
-        headingRow.alignment = .center
+        headingRow.axis = .vertical
+        headingRow.alignment = .leading
         headingRow.spacing = 8
 
         let items: [(number: String, title: String, body: String)] = [
@@ -949,6 +1056,51 @@ private extension SgptSessionDetailViewController {
         container.addArrangedSubview(row)
         container.addArrangedSubview(makeHairline(color: Palette.hairline))
         return container
+    }
+
+    // MARK: Bottom CTA bar
+
+    /// Matches Android's bottomBarLayout: a price label on the left and a
+    /// compact button on the right, not one button stretched full width -
+    /// this used to be a single edge-to-edge GradientCTAButton with no price
+    /// shown at all.
+    func makeBottomBar() -> UIView {
+        let feeLabel = UILabel()
+        feeLabel.font = AppFont.regular.size(10.0, familyName: familyFunnelSans)
+        feeLabel.textColor = .white.withAlphaComponent(0.4)
+        feeLabel.text = "PER SESSION FEE"
+
+        let priceLabel = UILabel()
+        priceLabel.font = AppFont.medium.size(24.0, familyName: familyClashDisplay)
+        priceLabel.textColor = .white
+        priceLabel.text = Copy.priceFallback
+
+        let priceStack = UIStackView(arrangedSubviews: [feeLabel, priceLabel])
+        priceStack.axis = .vertical
+        priceStack.alignment = .leading
+        priceStack.spacing = 2
+        priceStack.setContentHuggingPriority(.defaultLow, for: .horizontal)
+
+        let button = GradientCTAButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.configure(title: Copy.ctaTitle, font: AppFont.medium.size(14.0, familyName: familyFunnelSans), titleColor: Palette.ctaInk)
+        button.setTrailingIcon(icon(system: "chevron.right"), tint: Palette.ctaInk)
+        button.addTarget(self, action: #selector(reserveTapped), for: .touchUpInside)
+        button.setContentHuggingPriority(.required, for: .horizontal)
+        button.heightAnchor.constraint(equalToConstant: Metric.ctaHeight).isActive = true
+        button.widthAnchor.constraint(greaterThanOrEqualToConstant: 140).isActive = true
+
+        let row = UIStackView(arrangedSubviews: [priceStack, button])
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.axis = .horizontal
+        row.alignment = .center
+        row.spacing = 12
+        row.isLayoutMarginsRelativeArrangement = true
+        // Only top/left/right padding here - the container's own bottom
+        // already sits 16pt above the safe area (sgd413 in the storyboard),
+        // so an additional bottom margin here would double up that gap.
+        row.layoutMargins = UIEdgeInsets(top: 12, left: 20, bottom: 0, right: 20)
+        return row
     }
 
     // MARK: Small builders

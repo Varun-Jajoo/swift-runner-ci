@@ -4610,15 +4610,9 @@ preferred times</string>
                                 <viewLayoutGuide key="contentLayoutGuide" id="sgd215"/>
                                 <viewLayoutGuide key="frameLayoutGuide" id="sgd216"/>
                             </scrollView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sgd220" customClass="GradientCTAButton" customModule="MyPT_Connect" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="768" width="393" height="84"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="84" id="sgd404"/>
-                                </constraints>
-                                <connections>
-                                    <action selector="reserveTapped" destination="sgd001" eventType="touchUpInside" id="sgd221"/>
-                                </connections>
-                            </button>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd220">
+                                <rect key="frame" x="0.0" y="768" width="393" height="76"/>
+                            </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="sgd410"/>
                         <color key="backgroundColor" red="0.0" green="0.039215686274509803" blue="0.015686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -4634,7 +4628,7 @@ preferred times</string>
                     </view>
                     <connections>
                         <outlet property="aboutContainer" destination="sgd100" id="sgd300"/>
-                        <outlet property="bottomBarButton" destination="sgd220" id="sgd301"/>
+                        <outlet property="bottomBarContainer" destination="sgd220" id="sgd301"/>
                         <outlet property="detailsGridContainer" destination="sgd090" id="sgd302"/>
                         <outlet property="heroFadeView" destination="sgd012" id="sgd320"/>
                         <outlet property="heroImageView" destination="sgd011" id="sgd303"/>
