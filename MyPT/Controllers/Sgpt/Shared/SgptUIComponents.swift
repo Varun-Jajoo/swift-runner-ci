@@ -206,7 +206,15 @@ public class SgptSeatsProgressView: UIView {
         puckGlowLayer.colors = [UIColor.white.withAlphaComponent(0.7).cgColor,
                                 UIColor.white.withAlphaComponent(0.0).cgColor]
         puckGlowLayer.startPoint = CGPoint(x: 0.5, y: 0.5)
-        puckGlowLayer.endPoint = CGPoint(x: 1.0, y: 1.0)
+        // A radial gradient's radius is the unit-space distance from start
+        // to end point. (1.0, 1.0) measures to the CORNER (~0.707), so the
+        // glow's true radius overshot the container's own half-width and
+        // got hard-clipped at the view's edge instead of fading out inside
+        // it - a visible harsh ring instead of a soft bloom. (1.0, 0.5)
+        // measures to the edge midpoint (0.5, exactly half the width for
+        // this square container), so it fades to transparent right at the
+        // edge with no clipping.
+        puckGlowLayer.endPoint = CGPoint(x: 1.0, y: 0.5)
         puckContainer.layer.addSublayer(puckGlowLayer)
 
         puckCore.backgroundColor = .white

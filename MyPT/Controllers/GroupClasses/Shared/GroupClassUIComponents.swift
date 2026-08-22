@@ -558,6 +558,17 @@ public class PillChipView: UIView {
         layer.masksToBounds = true
         rebuildSheen()
 
+        // A chip must never stretch past its own text+insets (Android's
+        // equivalent is always wrap_content). Without this, a horizontal
+        // UIStackView using .fill distribution (the default) can pick this
+        // view as the one to stretch when its sibling is a UILabel: a plain
+        // UIView's default content-hugging priority (250) is lower than
+        // UILabel's (251), so the pill - not the label's invisible trailing
+        // space - absorbed the slack, ballooning it far past its text width
+        // (confirmed on the SGPT session-step duration pills).
+        setContentHuggingPriority(.required, for: .horizontal)
+        setContentCompressionResistancePriority(.required, for: .horizontal)
+
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
         titleLabel.textColor = .white
