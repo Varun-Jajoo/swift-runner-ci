@@ -4586,17 +4586,24 @@ preferred times</string>
                             </scrollView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sgd220" customClass="GradientCTAButton" customModule="MyPT_Connect" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="768" width="393" height="84"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="84" id="sgd404"/>
+                                </constraints>
                                 <connections>
                                     <action selector="reserveTapped" destination="sgd001" eventType="touchUpInside" id="sgd221"/>
                                 </connections>
                             </button>
                         </subviews>
+                        <viewLayoutGuide key="safeArea" id="sgd400"/>
                         <color key="backgroundColor" red="0.0" green="0.039215686274509803" blue="0.015686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="sgd003" firstAttribute="top" secondItem="sgd002" secondAttribute="top" id="sgd230"/>
                             <constraint firstItem="sgd003" firstAttribute="leading" secondItem="sgd002" secondAttribute="leading" id="sgd231"/>
                             <constraint firstAttribute="trailing" secondItem="sgd003" secondAttribute="trailing" id="sgd232"/>
-                            <constraint firstItem="sgd220" firstAttribute="bottom" secondItem="sgd003" secondAttribute="bottom" id="sgd233"/>
+                            <constraint firstItem="sgd220" firstAttribute="top" secondItem="sgd003" secondAttribute="bottom" id="sgd233"/>
+                            <constraint firstItem="sgd220" firstAttribute="leading" secondItem="sgd002" secondAttribute="leading" id="sgd401"/>
+                            <constraint firstAttribute="trailing" secondItem="sgd220" secondAttribute="trailing" id="sgd402"/>
+                            <constraint firstItem="sgd400" firstAttribute="bottom" secondItem="sgd220" secondAttribute="bottom" id="sgd403"/>
                         </constraints>
                     </view>
                     <connections>
