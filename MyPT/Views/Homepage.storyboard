@@ -4500,79 +4500,103 @@ preferred times</string>
                                                 </constraints>
                                                 <edgeInsets key="layoutMargins" top="0.0" left="20" bottom="0.0" right="20" flexible="YES"/>
                                             </stackView>
+                                            <!-- Gap between the title/trainer block and the first content
+                                                 section - sgd004 itself has zero spacing (needs to stay that way
+                                                 so the full-bleed hero/pager above aren't pushed apart). -->
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd499"><rect key="frame" x="0.0" y="0.0" width="393" height="24"/><constraints><constraint firstAttribute="height" constant="24" id="sgd499h"/></constraints></view>
                                             <!-- Below this point, each section is an empty container built by
                                                  SgptSessionDetailViewController in code (bindSeatsCard(), etc.) -
                                                  mirrors the Kotlin bind*() methods 1:1. Keeping the *content* in
                                                  Swift instead of hand-authored Auto Layout XML for every nested
                                                  card/grid/row is the same reliability trade the module already
                                                  makes elsewhere (GroupTrainingDetailViewController's
-                                                 `appendInfoRows` populates its checklist stacks in code, not IB). -->
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd080">
-                                                <rect key="frame" x="20" y="0.0" width="353" height="120"/>
-                                            </view>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="Session Details" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="1" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sgd082">
-                                                <rect key="frame" x="20" y="0.0" width="200" height="19"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd090">
-                                                <rect key="frame" x="20" y="0.0" width="353" height="160"/>
-                                            </view>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="About the session" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="1" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sgd092">
-                                                <rect key="frame" x="20" y="0.0" width="200" height="19"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd100">
-                                                <rect key="frame" x="20" y="0.0" width="353" height="150"/>
-                                            </view>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="What the session looks like" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="1" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sgd110">
-                                                <rect key="frame" x="20" y="0.0" width="250" height="19"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd120">
-                                                <rect key="frame" x="20" y="0.0" width="353" height="220"/>
-                                            </view>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="Your trainer" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="1" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sgd130">
-                                                <rect key="frame" x="20" y="0.0" width="200" height="19"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd140">
-                                                <rect key="frame" x="0.0" y="0.0" width="393" height="420"/>
-                                            </view>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="What's included" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="1" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sgd150">
-                                                <rect key="frame" x="20" y="0.0" width="200" height="19"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd160">
-                                                <rect key="frame" x="20" y="0.0" width="353" height="280"/>
-                                            </view>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="How Small Group PT works" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="1" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sgd170">
-                                                <rect key="frame" x="20" y="0.0" width="250" height="19"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd180">
-                                                <rect key="frame" x="0.0" y="0.0" width="393" height="300"/>
-                                            </view>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="More" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="1" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sgd190">
-                                                <rect key="frame" x="20" y="0.0" width="200" height="19"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd200">
-                                                <rect key="frame" x="20" y="0.0" width="353" height="120"/>
-                                            </view>
+                                                 `appendInfoRows` populates its checklist stacks in code, not IB).
+                                                 All of it lives inside one 20pt-margined, 12pt-spaced stack
+                                                 (sgd500) so headers get a left/right gutter and everything gets
+                                                 breathing room - the flat unwrapped/unspaced version of this list
+                                                 rendered every header flush to the screen edge with zero gap
+                                                 above or below it. Extra fixed-height spacer views between a
+                                                 section's container and the next section's header widen just
+                                                 that gap, since this hand-authored XML doesn't use per-item
+                                                 stack custom spacing (no existing example of it in this file). -->
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="12" isLayoutMarginsRelativeArrangement="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sgd500">
+                                                <rect key="frame" x="0.0" y="0.0" width="393" height="1900"/>
+                                                <subviews>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd080">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="120"/>
+                                                    </view>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd501"><rect key="frame" x="0.0" y="0.0" width="353" height="20"/><constraints><constraint firstAttribute="height" constant="20" id="sgd502"/></constraints></view>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="Session Details" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="1" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sgd082">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="19"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd090">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="160"/>
+                                                    </view>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd503"><rect key="frame" x="0.0" y="0.0" width="353" height="20"/><constraints><constraint firstAttribute="height" constant="20" id="sgd504"/></constraints></view>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="About the session" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="1" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sgd092">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="19"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd100">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="150"/>
+                                                    </view>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd505"><rect key="frame" x="0.0" y="0.0" width="353" height="20"/><constraints><constraint firstAttribute="height" constant="20" id="sgd506"/></constraints></view>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="What the session looks like" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="1" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sgd110">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="19"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd120">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="220"/>
+                                                    </view>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd507"><rect key="frame" x="0.0" y="0.0" width="353" height="20"/><constraints><constraint firstAttribute="height" constant="20" id="sgd508"/></constraints></view>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="Your trainer" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="1" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sgd130">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="19"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd140">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="420"/>
+                                                    </view>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd509"><rect key="frame" x="0.0" y="0.0" width="353" height="20"/><constraints><constraint firstAttribute="height" constant="20" id="sgd510"/></constraints></view>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="What's included" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="1" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sgd150">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="19"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd160">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="280"/>
+                                                    </view>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd511"><rect key="frame" x="0.0" y="0.0" width="353" height="20"/><constraints><constraint firstAttribute="height" constant="20" id="sgd512"/></constraints></view>
+                                                    <!-- No plain-text header here on purpose: makeHowItWorksCard()
+                                                         already renders "How Small Group PT works" as its own
+                                                         styled heading (with the line+sparkle accent) inside the
+                                                         card. A second plain label above the card duplicated that
+                                                         exact heading text on screen. -->
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd180">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="300"/>
+                                                    </view>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd513"><rect key="frame" x="0.0" y="0.0" width="353" height="20"/><constraints><constraint firstAttribute="height" constant="20" id="sgd514"/></constraints></view>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="More" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="1" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sgd190">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="19"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgd200">
+                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="120"/>
+                                                    </view>
+                                                </subviews>
+                                                <edgeInsets key="layoutMargins" top="0.0" left="20" bottom="0.0" right="20" flexible="YES"/>
+                                            </stackView>
                                         </subviews>
                                     </stackView>
                                 </subviews>
