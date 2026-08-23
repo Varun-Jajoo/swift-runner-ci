@@ -172,7 +172,6 @@ public class SgptSeatsProgressView: UIView {
     private var dotViews: [UIView] = []
     private let fillCapsule = UIView()
     private let puckContainer = UIView()
-    private let puckGlowLayer = CAGradientLayer()
     private let puckCore = UIView()
 
     private var fillWidthConstraint: NSLayoutConstraint?
@@ -236,29 +235,28 @@ public class SgptSeatsProgressView: UIView {
         // still ends up frontmost of all three since it's added last.
         dotViews.forEach { bringSubviewToFront($0) }
 
-        // Puck: radial white glow behind a solid white core with a ring.
+        // Puck: exact Figma spec (node 11144:60673) - a solid white 14pt
+        // circle, a 1.5pt ~80%-white ring, and `filter: drop-shadow(-2.8px
+        // 0 7px #FFF)` - a real directional shadow offset left, not a
+        // symmetric bloom. Previously approximated with a radial-gradient
+        // "glow" layer behind the core, which read close but wasn't this;
+        // switched to an actual CALayer shadow on the core so it matches
+        // the given values directly instead of eyeballing an equivalent.
         puckContainer.translatesAutoresizingMaskIntoConstraints = false
         puckContainer.backgroundColor = .clear
         addSubview(puckContainer)
 
-        puckGlowLayer.type = .radial
-        puckGlowLayer.colors = [UIColor.white.withAlphaComponent(0.7).cgColor,
-                                UIColor.white.withAlphaComponent(0.0).cgColor]
-        puckGlowLayer.startPoint = CGPoint(x: 0.5, y: 0.5)
-        // A radial gradient's radius is the unit-space distance from start
-        // to end point. (1.0, 1.0) measures to the CORNER (~0.707), so the
-        // glow's true radius overshot the container's own half-width and
-        // got hard-clipped at the view's edge instead of fading out inside
-        // it - a visible harsh ring instead of a soft bloom. (1.0, 0.5)
-        // measures to the edge midpoint (0.5, exactly half the width for
-        // this square container), so it fades to transparent right at the
-        // edge with no clipping.
-        puckGlowLayer.endPoint = CGPoint(x: 1.0, y: 0.5)
-        puckContainer.layer.addSublayer(puckGlowLayer)
-
         puckCore.backgroundColor = .white
-        puckCore.layer.borderWidth = 1
+        puckCore.layer.borderWidth = 1.5
         puckCore.layer.borderColor = UIColor.white.withAlphaComponent(0.8).cgColor
+        puckCore.layer.shadowColor = UIColor.white.cgColor
+        puckCore.layer.shadowOpacity = 1.0
+        puckCore.layer.shadowOffset = CGSize(width: -2.8, height: 0)
+        puckCore.layer.shadowRadius = 7
+        puckCore.layer.masksToBounds = false
+        puckCore.layer.shadowPath = UIBezierPath(ovalIn: CGRect(x: 0, y: 0,
+                                                                 width: SgptSeatsProgressView.puckCoreSide,
+                                                                 height: SgptSeatsProgressView.puckCoreSide)).cgPath
         puckCore.translatesAutoresizingMaskIntoConstraints = false
         puckContainer.addSubview(puckCore)
 
@@ -306,7 +304,6 @@ public class SgptSeatsProgressView: UIView {
         trackLayer.cornerRadius = SgptSeatsProgressView.barHeight / 2
 
         fillCapsule.layer.cornerRadius = SgptSeatsProgressView.barHeight / 2
-        puckGlowLayer.frame = puckContainer.bounds
         puckCore.layer.cornerRadius = SgptSeatsProgressView.puckCoreSide / 2
 
         let fillWidth = bounds.width * progress
