@@ -452,6 +452,8 @@ private extension SgptPricingViewController {
         card.setPricingCardStyle(isCenter: plan.isCenter, centerFillColor: Palette.cardCenterFill,
                                  sideFillColor: Palette.cardSideFill, centerBorderColor: Palette.centerBorder)
         card.translatesAutoresizingMaskIntoConstraints = false
+        card.isUserInteractionEnabled = true
+        card.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(pricingCardTapped(_:))))
         let cardWidthConstraint = card.widthAnchor.constraint(equalToConstant: plan.isCenter ? PricingMetric.mainCardWidth : PricingMetric.sideCardWidth)
         let cardHeightConstraint = card.heightAnchor.constraint(equalToConstant: plan.isCenter ? PricingMetric.mainCardHeight : PricingMetric.sideCardHeight)
         cardWidthConstraint.isActive = true
@@ -552,45 +554,64 @@ private extension SgptPricingViewController {
     }
 
     /// Whichever card is nearest the viewport's center gets the "main" card's
-    /// LOOK (violet border, glass ring hidden, glowing badge) plus the
-    /// pulse, live, continuously, during an active drag - this part is safe
-    /// to run mid-gesture because it never changes any view's SIZE, so it
-    /// can't shift a card's frame or feed back into the next scroll delta's
-    /// own "which card is nearest" calculation. The actual discrete resize
-    /// is a separate step (applyPricingCardSizes below) deferred to settle -
-    /// see its own comment for why that split exists.
+    /// LOOK (violet border, glass ring hidden, glowing badge, pulse) AND the
+    /// actual resize, together, live during an active drag. These two used
+    /// to be split - style live, resize deferred to snapPricingCardsToNearest()
+    /// - out of a (mistaken) worry that resizing mid-gesture would flip
+    /// "nearest" back and forth every scroll delta. In practice this method
+    /// only ever runs once per actual nearest-change (the guard below), not
+    /// on every delta, so there's nothing to oscillate; what the split
+    /// actually caused was worse - a side card would instantly get the
+    /// center LOOK (violet border, no glass ring) while still sitting at
+    /// its small side SIZE until the drag ended, reading as a half-updated/
+    /// flattened card. The real snap-back bug this split was guarding
+    /// against turned out to be the missing scroll headroom fixed in
+    /// performInitialPricingCenteringIfNeeded() (contentInset), not this.
     func updateCenteredPricingCard() {
-        guard let scrollView = cardsScrollView, let nearest = nearestPricingCard(in: scrollView),
-              nearest.card !== centeredPricingCard else { return }
+        guard let scrollView = cardsScrollView, let nearest = nearestPricingCard(in: scrollView) else { return }
+        selectPricingCard(nearest)
+    }
+
+    /// Style + size + pulse for whichever card becomes centered, shared by
+    /// both selection paths: scroll-driven (updateCenteredPricingCard,
+    /// derives "nearest" from viewport geometry) and tap-driven
+    /// (pricingCardTapped, already knows exactly which card). Recentering
+    /// the scroll itself is deliberately NOT done here - scroll-driven
+    /// selection must never fight the live gesture by re-offsetting the
+    /// scroll view, only a tap (or the post-drag settle) should do that.
+    private func selectPricingCard(_ ref: PricingCardRef) {
+        guard ref.card !== centeredPricingCard else { return }
         stopPricingCenterPulse()
-        centeredPricingCard = nearest.card
+        centeredPricingCard = ref.card
         UISelectionFeedbackGenerator().selectionChanged()
 
-        for ref in pricingCardRefs {
-            let isCentered = ref.card === nearest.card
-            ref.card.setPricingCardStyle(isCenter: isCentered, centerFillColor: Palette.cardCenterFill,
-                                         sideFillColor: Palette.cardSideFill, centerBorderColor: Palette.centerBorder)
-            applyPricingBadgeStyle(ref.badge, isCenter: isCentered)
+        for other in pricingCardRefs {
+            let isCentered = other.card === ref.card
+            other.card.setPricingCardStyle(isCenter: isCentered, centerFillColor: Palette.cardCenterFill,
+                                           sideFillColor: Palette.cardSideFill, centerBorderColor: Palette.centerBorder)
+            applyPricingBadgeStyle(other.badge, isCenter: isCentered)
         }
-        startPricingCenterPulse(on: nearest.card)
+        applyPricingCardSizes(centeredCard: ref.card, animated: true)
+        startPricingCenterPulse(on: ref.card)
+    }
+
+    /// Tapping a side card ("Best Deal"/"Value Price") selects AND scrolls
+    /// it to center, same as Android's own card-tap-to-center behavior -
+    /// dragging shouldn't be the only way to bring a side card forward.
+    @objc private func pricingCardTapped(_ gesture: UITapGestureRecognizer) {
+        guard let tappedCard = gesture.view,
+              let ref = pricingCardRefs.first(where: { $0.card === tappedCard }) else { return }
+        selectPricingCard(ref)
+        centerPricingCard(ref.card, animated: true)
     }
 
     /// The actual 146x187/133x170 (and badge) resize - Figma's Deal-of-the-
     /// Day size for whichever card is centered, "side" size for the other
-    /// two. Deliberately NOT called from updateCenteredPricingCard() above:
-    /// resizing shifts every card's frame within the row (the other two
-    /// resize too, pushing everything), and scrollViewDidScroll fires
-    /// continuously while the user's finger is still down - if the resize
-    /// ran on every "nearest changed" event during an active drag, each
-    /// resize's own frame-shift could flip which card reads as nearest on
-    /// the very next scroll delta, whose own resize flips it back, and so
-    /// on - a feedback loop, independent of (and not fixed by) skipping the
-    /// animated recenter alone. This is why previously "scrolls for a split
-    /// second then snaps back to the middle card" persisted even after
-    /// gating centerPricingCard() on isTracking/isDragging: the recenter
-    /// wasn't the only thing fighting the gesture, the resize was too. Only
-    /// called from snapPricingCardsToNearest() (post drag/deceleration) and
-    /// the initial-centering path now, never mid-gesture.
+    /// two. Called from updateCenteredPricingCard() above (live, gated on an
+    /// actual nearest-change) and from snapPricingCardsToNearest()/the
+    /// initial-centering path as a final-state safety net - both paths
+    /// agreeing on the same sizes makes the second call a no-op in the
+    /// normal case.
     func applyPricingCardSizes(centeredCard: UIView, animated: Bool) {
         for ref in pricingCardRefs {
             let isCentered = ref.card === centeredCard
