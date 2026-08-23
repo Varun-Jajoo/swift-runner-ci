@@ -96,6 +96,22 @@ public class GlassCardView: UIView {
     public var sheenAlpha: CGFloat = 0.10 { didSet { rebuildSheen() } }
     public var showsSheen: Bool = true { didSet { rebuildSheen() } }
 
+    /// Raw unit-space (0...1) overrides for the sheen's center/edge, for
+    /// callers that need a hotspot Android's named-drawable gradients don't
+    /// land on any of CAGradientPoint's 9 fixed spots (e.g. the SGPT session
+    /// step tile's center at y=0.34 with a 24/38 radius). `nil` (the
+    /// default) falls back to `sheenOrigin`/`sheenEdge` exactly as before -
+    /// every other GlassCardView consumer is unaffected.
+    public var sheenCenterOverride: CGPoint? { didSet { rebuildSheen() } }
+    public var sheenEdgeOverride: CGPoint? { didSet { rebuildSheen() } }
+    /// The sheen's outer stop defaults to `sheenColor` at 0 alpha (fades to
+    /// fully transparent). Some Android gradients (again, the SGPT tile)
+    /// fade to a *different*, still-partly-opaque hue instead - set both to
+    /// reproduce that; leaving them at the defaults preserves the old
+    /// fade-to-transparent look everywhere else.
+    public var sheenEndColor: UIColor? { didSet { rebuildSheen() } }
+    public var sheenEndAlpha: CGFloat = 0 { didSet { rebuildSheen() } }
+
     /// Top-to-bottom linear wash sandwiched between the fill and the sheen.
     /// `nil` (the default) omits the layer entirely.
     public var washColors: [UIColor]? { didSet { rebuildWash() } }
@@ -145,11 +161,13 @@ public class GlassCardView: UIView {
         sheenLayer = nil
         guard showsSheen else { return }
 
-        let sheen = CAGradientLayer(start: sheenOrigin,
-                                    end: sheenEdge,
-                                    colors: [sheenColor.withAlphaComponent(sheenAlpha).cgColor,
-                                             sheenColor.withAlphaComponent(0.0).cgColor],
-                                    type: .radial)
+        let sheen = CAGradientLayer()
+        sheen.type = .radial
+        sheen.startPoint = sheenCenterOverride ?? sheenOrigin.point
+        sheen.endPoint = sheenEdgeOverride ?? sheenEdge.point
+        sheen.colors = [sheenColor.withAlphaComponent(sheenAlpha).cgColor,
+                        (sheenEndColor ?? sheenColor).withAlphaComponent(sheenEndAlpha).cgColor]
+        sheen.locations = [0, 1]
         sheen.frame = bounds
         // Stays above the wash (if any) — fill(back) -> wash(middle) -> sheen(front).
         if let washLayer = washLayer {

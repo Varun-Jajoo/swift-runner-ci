@@ -183,6 +183,14 @@ public class SgptSeatsProgressView: UIView {
     private static let puckContainerSide: CGFloat = 26
     private static let puckCoreSide: CGFloat = 14
     private static let barHeight: CGFloat = 14
+    private static let dotColor = UIColor(hex: "#D8B8F5")
+    /// Fill color a dot switches to once the progress fill has passed it.
+    /// Dots were added to the view BEFORE fillCapsule, so the opaque fill
+    /// (added after = drawn on top in a plain UIView z-order) painted
+    /// straight over every dot behind it - not a color/alpha bug, the dot
+    /// was simply hidden behind an opaque layer. Fixed below by bringing
+    /// the dots back in front of the fill once it's added.
+    private static let dotCompletedColor = UIColor(hex: "#663890")
 
     public private(set) var progress: CGFloat = 0
 
@@ -206,7 +214,7 @@ public class SgptSeatsProgressView: UIView {
         // 15 fixed decorative dots, #D8B8F5.
         for _ in 0..<SgptSeatsProgressView.dotCount {
             let dot = UIView()
-            dot.backgroundColor = UIColor(hex: "#D8B8F5")
+            dot.backgroundColor = SgptSeatsProgressView.dotColor
             dot.translatesAutoresizingMaskIntoConstraints = false
             addSubview(dot)
             dotViews.append(dot)
@@ -221,6 +229,12 @@ public class SgptSeatsProgressView: UIView {
         fillCapsule.layer.borderWidth = 2
         fillCapsule.layer.borderColor = UIColor(hex: "#D288F9").withAlphaComponent(0.65).cgColor
         addSubview(fillCapsule)
+
+        // Dots were added first (above), so the opaque fill capsule just
+        // added would draw on top of - i.e. completely hide - every dot it
+        // grows past. Bring them back in front now; the puck (added below)
+        // still ends up frontmost of all three since it's added last.
+        dotViews.forEach { bringSubviewToFront($0) }
 
         // Puck: radial white glow behind a solid white core with a ring.
         puckContainer.translatesAutoresizingMaskIntoConstraints = false
@@ -318,12 +332,16 @@ public class SgptSeatsProgressView: UIView {
         let dotSide: CGFloat = 10
         let usableWidth = bounds.width - dotSide
         let spacing = dotViews.count > 1 ? usableWidth / CGFloat(dotViews.count - 1) : 0
+        let filledWidth = bounds.width * progress
         for (index, dot) in dotViews.enumerated() {
             dot.frame = CGRect(x: spacing * CGFloat(index),
                                y: (bounds.height - dotSide) / 2,
                                width: dotSide,
                                height: dotSide)
             dot.layer.cornerRadius = dotSide / 2
+            dot.backgroundColor = dot.frame.midX <= filledWidth
+                ? SgptSeatsProgressView.dotCompletedColor
+                : SgptSeatsProgressView.dotColor
         }
     }
 }

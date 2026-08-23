@@ -625,15 +625,22 @@ private extension SgptSessionDetailViewController {
             // #3A2058 border (not the app-wide #1A062D violetStroke used on
             // other cards) and a much stronger, violet-tinted sheen than
             // the generic 8%-white one every other card on this screen uses.
-            // Android's own glow is also a small, TIGHT 24dp-radius spot
-            // near the top (gradientRadius=24dp on a 38dp tile), not a
-            // gradient spanning the whole tile - sheenEdge=.center keeps
-            // the radius to about half the tile instead of the default
-            // .bottomRight's full-diagonal span, which read as a diffuse
-            // wash rather than a contained glow.
+            // Android's own glow (bg_icon_tile_violet.xml) is a radial spot
+            // centered at (0.5, 0.34) - slightly above middle, not the top
+            // edge - with gradientRadius=24dp on a 38dp tile, AND it fades
+            // to a still-partly-opaque #4D8A2BE1 (30% alpha blueviolet) at
+            // its edge rather than fully transparent, which is what keeps a
+            // violet tint at the tile's corners instead of settling back to
+            // the flat base fill. The center/edge overrides reproduce that
+            // exact hotspot+radius (iconTileSide is also 38pt here, so the
+            // dp numbers carry over 1:1); sheenEndColor/Alpha reproduce the
+            // partly-opaque fade.
             let iconTile = makeIconTile(image: UIImage(named: step.icon) ?? icon(system: step.systemFallback), iconSide: 20,
                                         tileColor: Palette.violetTile, borderColor: UIColor(hex: "#3A2058"),
-                                        sheenColor: UIColor(hex: "#B98CF0"), sheenAlpha: 0.85, sheenEdge: .center)
+                                        sheenColor: UIColor(hex: "#B98CF0"), sheenAlpha: 0.85,
+                                        sheenCenterOverride: CGPoint(x: 0.5, y: 0.34),
+                                        sheenEdgeOverride: CGPoint(x: 0.5, y: 0.34 + 24.0 / 38.0),
+                                        sheenEndColor: UIColor(hex: "#8A2BE1"), sheenEndAlpha: 0.30)
             firstIconTile = firstIconTile ?? iconTile
             lastIconTile = iconTile
 
@@ -1240,7 +1247,9 @@ private extension SgptSessionDetailViewController {
 
     func makeIconTile(image: UIImage?, iconSide: CGFloat, tileColor: UIColor, borderColor: UIColor,
                       sheenColor: UIColor = .white, sheenAlpha: CGFloat = 0.08,
-                      sheenEdge: CAGradientPoint = .bottomRight) -> UIView {
+                      sheenEdge: CAGradientPoint = .bottomRight,
+                      sheenCenterOverride: CGPoint? = nil, sheenEdgeOverride: CGPoint? = nil,
+                      sheenEndColor: UIColor? = nil, sheenEndAlpha: CGFloat = 0) -> UIView {
         let tile = GlassCardView(cornerRadius: 12)
         tile.translatesAutoresizingMaskIntoConstraints = false
         tile.fillColor = tileColor
@@ -1251,6 +1260,10 @@ private extension SgptSessionDetailViewController {
         tile.sheenEdge = sheenEdge
         tile.sheenColor = sheenColor
         tile.sheenAlpha = sheenAlpha
+        tile.sheenCenterOverride = sheenCenterOverride
+        tile.sheenEdgeOverride = sheenEdgeOverride
+        tile.sheenEndColor = sheenEndColor
+        tile.sheenEndAlpha = sheenEndAlpha
 
         let iconView = UIImageView(image: image?.withRenderingMode(.alwaysTemplate))
         iconView.translatesAutoresizingMaskIntoConstraints = false
