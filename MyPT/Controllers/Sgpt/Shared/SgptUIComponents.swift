@@ -322,16 +322,12 @@ public class SgptSeatsProgressView: UIView {
 
     private func layoutDots() {
         guard bounds.width > 0, !dotViews.isEmpty else { return }
-        // Evenly spaced across the track, matching the asset's fixed pitch.
-        // Android's bg_seats_dot is a 10dp circle (its own comment: "5px
-        // radius at the asset's native 360x14 scale") - this was 4pt,
-        // rendering as faint specks instead of visible beaded dots.
         let dotSide: CGFloat = 10
-        let usableWidth = bounds.width - dotSide
-        let spacing = dotViews.count > 1 ? usableWidth / CGFloat(dotViews.count - 1) : 0
+        let cellWidth = bounds.width / CGFloat(dotViews.count)
         let filledWidth = bounds.width * progress
         for (index, dot) in dotViews.enumerated() {
-            dot.frame = CGRect(x: spacing * CGFloat(index),
+            let dotCenterX = (CGFloat(index) + 0.5) * cellWidth
+            dot.frame = CGRect(x: dotCenterX - dotSide / 2,
                                y: (bounds.height - dotSide) / 2,
                                width: dotSide,
                                height: dotSide)
