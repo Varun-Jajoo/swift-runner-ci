@@ -278,7 +278,41 @@ final class SgptSessionDetailViewController: CommonViewController {
         present(UIActivityViewController(activityItems: [text], applicationActivities: nil), animated: true)
     }
 
+    /// Reserve routes on credit balance: holding credits opens the checkout
+    /// sheet, otherwise the member goes to pricing to buy some. A failed or
+    /// unauthenticated balance lookup falls through to pricing too, so the CTA
+    /// always leads somewhere. Mirrors Android's
+    /// SgptSessionDetailActivity.openCheckoutOrPricing().
     @IBAction func reserveTapped() {
+        SgptVM.sgptCreditsApi(isShowLoader: true) { [weak self] credits in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+
+                let balance = credits?.remainingCredits ?? 0
+                guard credits?.hasCredits == true, balance > 0 else {
+                    self.pushPricing()
+                    return
+                }
+
+                let input = SgptCheckoutInput(
+                    session: self.session,
+                    creditsUsed: 1,
+                    creditsBalance: balance,
+                    expiresInDays: credits?.expiresInDays
+                )
+                let sheet = SgptCheckoutSheetViewController(input: input)
+                sheet.onConfirm = { [weak self] in
+                    self?.showComingSoon()
+                }
+                sheet.onViewProfile = { [weak self] in
+                    self?.showComingSoon()
+                }
+                self.present(sheet, animated: true)
+            }
+        }
+    }
+
+    private func pushPricing() {
         let vc: SgptPricingViewController = .instantiate(appStoryboard: .sgpt)
         navigationController?.pushViewController(vc, animated: true)
     }

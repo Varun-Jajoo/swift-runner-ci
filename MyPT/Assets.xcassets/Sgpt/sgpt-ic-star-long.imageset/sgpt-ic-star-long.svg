@@ -1,0 +1,18 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="11" height="14" viewBox="0 0 11 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="star/filled/long">
+<g id="star/long">
+<path d="M5.5 0L5.75891 2.07117C6.06666 4.53298 7.95753 6.49886 10.4055 6.90208L11 7L10.4055 7.09792C7.95753 7.50114 6.06666 9.46702 5.75891 11.9288L5.5 14L5.24109 11.9288C4.93335 9.46702 3.04247 7.50114 0.594482 7.09792L0 7L0.594483 6.90208C3.04247 6.49886 4.93334 4.53298 5.24109 2.07117L5.5 0Z" fill="white"/>
+<path d="M5.5 0L5.75891 2.07117C6.06666 4.53298 7.95753 6.49886 10.4055 6.90208L11 7L10.4055 7.09792C7.95753 7.50114 6.06666 9.46702 5.75891 11.9288L5.5 14L5.24109 11.9288C4.93335 9.46702 3.04247 7.50114 0.594482 7.09792L0 7L0.594483 6.90208C3.04247 6.49886 4.93334 4.53298 5.24109 2.07117L5.5 0Z" fill="url(#paint0_linear_0_260)"/>
+</g>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_260" x1="11.0001" y1="7.00007" x2="3.54052e-05" y2="7.00007" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="0.2279" stop-color="#AFAFAF"/>
+<stop offset="0.414" stop-color="#EAEAEA"/>
+<stop offset="0.586" stop-color="#D7D7D7"/>
+<stop offset="0.7721" stop-color="white"/>
+<stop offset="1" stop-color="#B5B5B5"/>
+</linearGradient>
+</defs>
+</svg>

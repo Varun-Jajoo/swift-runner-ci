@@ -254,6 +254,17 @@ extension SgptPricingViewController: UIScrollViewDelegate {
         updateScrollDebugLabel(context: "didScroll")
     }
 
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        let proposedTargetX = targetContentOffset.pointee.x
+        let viewportCenter = proposedTargetX + scrollView.bounds.width / 2
+        if let nearest = pricingCardRefs.min(by: { abs($0.card.frame.midX - viewportCenter) < abs($1.card.frame.midX - viewportCenter) }) {
+            let targetOffset = nearest.card.frame.midX - scrollView.bounds.width / 2
+            let minOffset = -scrollView.adjustedContentInset.left
+            let maxOffset = max(scrollView.contentSize.width - scrollView.bounds.width + scrollView.adjustedContentInset.right, minOffset)
+            targetContentOffset.pointee.x = min(max(targetOffset, minOffset), maxOffset)
+        }
+    }
+
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         updateScrollDebugLabel(context: "endDragging decelerate=\(decelerate)")
         if !decelerate { snapPricingCardsToNearest() }
@@ -504,9 +515,7 @@ private extension SgptPricingViewController {
         perSession.textAlignment = .center
         perSession.text = plan.perSession
 
-        let column = UIStackView(arrangedSubviews: plan.isCenter
-            ? [badge, headline, validRow, priceRow, perSession, divider]
-            : [badge, headline, validRow, divider, priceRow, perSession])
+        let column = UIStackView(arrangedSubviews: [badge, headline, validRow, divider, priceRow, perSession])
         column.translatesAutoresizingMaskIntoConstraints = false
         column.axis = .vertical
         column.alignment = .center
@@ -523,25 +532,34 @@ private extension SgptPricingViewController {
         return card
     }
 
-    /// bg_pricing_badge_center also has a centred violet radial glow layer
-    /// the side badge doesn't have. Corner radius is baked into Android's
-    /// two badge drawables too (half of each one's own fixed height), so
-    /// swapping "drawable" means swapping that as well, same as the card.
+    /// Deal of the Day badge: exact Figma radial sheen gradient style (node 11226:22491) -
+    /// rich dark purple background (#1F0833) with a vibrant radial sheen/glow layer (#A855F7 -> #6B1FB3 -> #1F0833)
+    /// and a 1pt #C084FC border.
     func applyPricingBadgeStyle(_ badge: UILabel, isCenter: Bool) {
-        badge.backgroundColor = isCenter ? Palette.badgeCenterFill : Palette.badgeSideFill
+        badge.backgroundColor = isCenter ? UIColor(hex: "#1F0833") : Palette.badgeSideFill
         badge.layer.cornerRadius = (isCenter ? PricingMetric.mainBadgeHeight : PricingMetric.sideBadgeHeight) / 2
+        badge.clipsToBounds = true
 
         badge.layer.sublayers?.filter { $0.name == "sgptPricingBadgeGlow" }.forEach { $0.removeFromSuperlayer() }
-        guard isCenter else { return }
+        guard isCenter else {
+            badge.layer.borderWidth = 1
+            badge.layer.borderColor = UIColor.white.withAlphaComponent(0.30).cgColor
+            return
+        }
+
         let glow = CAGradientLayer()
         glow.name = "sgptPricingBadgeGlow"
         glow.type = .radial
-        glow.colors = [UIColor(hex: "#8A2BE1").withAlphaComponent(0.30).cgColor,
-                       UIColor(hex: "#8A2BE1").withAlphaComponent(0.0).cgColor]
-        glow.startPoint = CGPoint(x: 0.5, y: 0.5)
-        glow.endPoint = CGPoint(x: 1.0, y: 0.5)
+        glow.colors = [UIColor(hex: "#A855F7").withAlphaComponent(0.85).cgColor,
+                       UIColor(hex: "#6B1FB3").withAlphaComponent(0.65).cgColor,
+                       UIColor(hex: "#1F0833").cgColor]
+        glow.locations = [0.0, 0.5, 1.0]
+        glow.startPoint = CGPoint(x: 0.5, y: 0.1)
+        glow.endPoint = CGPoint(x: 1.0, y: 1.0)
         glow.frame = CGRect(x: 0, y: 0, width: PricingMetric.mainBadgeWidth, height: PricingMetric.mainBadgeHeight)
         badge.layer.insertSublayer(glow, at: 0)
+        badge.layer.borderWidth = 1.0
+        badge.layer.borderColor = UIColor(hex: "#C084FC").withAlphaComponent(0.45).cgColor
     }
 
     // MARK: Cards carousel (scroll-driven highlight, matches SgptPricingActivity.kt)
@@ -613,17 +631,23 @@ private extension SgptPricingViewController {
     /// agreeing on the same sizes makes the second call a no-op in the
     /// normal case.
     func applyPricingCardSizes(centeredCard: UIView, animated: Bool) {
-        for ref in pricingCardRefs {
-            let isCentered = ref.card === centeredCard
-            ref.cardWidthConstraint.constant = isCentered ? PricingMetric.mainCardWidth : PricingMetric.sideCardWidth
-            ref.cardHeightConstraint.constant = isCentered ? PricingMetric.mainCardHeight : PricingMetric.sideCardHeight
-            ref.badgeWidthConstraint.constant = isCentered ? PricingMetric.mainBadgeWidth : PricingMetric.sideBadgeWidth
-            ref.badgeHeightConstraint.constant = isCentered ? PricingMetric.mainBadgeHeight : PricingMetric.sideBadgeHeight
+        let block = { [weak self] in
+            guard let self = self else { return }
+            for ref in self.pricingCardRefs {
+                let isCentered = ref.card === centeredCard
+                ref.cardWidthConstraint.constant = isCentered ? PricingMetric.mainCardWidth : PricingMetric.sideCardWidth
+                ref.cardHeightConstraint.constant = isCentered ? PricingMetric.mainCardHeight : PricingMetric.sideCardHeight
+                ref.badgeWidthConstraint.constant = isCentered ? PricingMetric.mainBadgeWidth : PricingMetric.sideBadgeWidth
+                ref.badgeHeightConstraint.constant = isCentered ? PricingMetric.mainBadgeHeight : PricingMetric.sideBadgeHeight
+                let scale: CGFloat = isCentered ? 1.0 : (133.0 / 146.0)
+                ref.card.transform = CGAffineTransform(scaleX: scale, y: scale)
+            }
+            self.view.layoutIfNeeded()
         }
         if animated {
-            UIView.animate(withDuration: 0.25) { [weak self] in self?.view.layoutIfNeeded() }
+            UIView.animate(withDuration: 0.25, delay: 0, options: [.curveEaseOut, .beginFromCurrentState], animations: block)
         } else {
-            view.layoutIfNeeded()
+            block()
         }
     }
 

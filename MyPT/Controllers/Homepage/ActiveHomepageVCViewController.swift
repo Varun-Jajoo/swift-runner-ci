@@ -404,7 +404,7 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
 
     @objc private func onTapSeeAllSgpt() {
         TapticEngine.selection.feedback()
-        let controller = SeeAllSgptViewController()
+        let controller: SeeAllSgptViewController = .instantiate(appStoryboard: .sgpt)
         controller.initialLat = self.getLat ?? GroupClassCardFormatter.fallbackLatitude
         controller.initialLng = self.getLong ?? GroupClassCardFormatter.fallbackLongitude
         controller.hidesBottomBarWhenPushed = true

@@ -272,7 +272,7 @@
                             </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="sgd410"/>
-                        <color key="backgroundColor" red="0.0" green="0.039215686274509803" blue="0.015686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" red="0.054901960784313725" green="0.043137254901960784" blue="0.078431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="sgd003" firstAttribute="top" secondItem="sgd002" secondAttribute="top" id="sgd230"/>
                             <constraint firstItem="sgd003" firstAttribute="leading" secondItem="sgd002" secondAttribute="leading" id="sgd231"/>
@@ -385,10 +385,299 @@
             </objects>
             <point key="canvasLocation" x="-1400" y="1600"/>
         </scene>
+        <!--SeeAllSgptViewController-->
+        <scene sceneID="salScn">
+            <objects>
+                <viewController storyboardIdentifier="SeeAllSgptViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="sal001" customClass="SeeAllSgptViewController" customModule="MyPT_Connect" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="sal002">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sal003">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="sal004">
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="2600"/>
+                                        <subviews>
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sal010">
+                                                <rect key="frame" x="0.0" y="0.0" width="393" height="456"/>
+                                                <subviews>
+                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" image="sgpt-listing-hero" translatesAutoresizingMaskIntoConstraints="NO" id="sal011">
+                                                        <rect key="frame" x="0.0" y="-20" width="393" height="476"/>
+                                                    </imageView>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sal015" customClass="GlassCircularIconButton" customModule="MyPT_Connect" customModuleProvider="target">
+                                                        <rect key="frame" x="20" y="52" width="40" height="40"/>
+                                                        <state key="normal" image="sgpt-ic-back-chevron"/>
+                                                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <connections>
+                                                            <action selector="backTapped" destination="sal001" eventType="touchUpInside" id="sal016"/>
+                                                        </connections>
+                                                    </button>
+                                                </subviews>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="366" id="sal017"/>
+                                                    <constraint firstItem="sal011" firstAttribute="top" secondItem="sal010" secondAttribute="top" constant="-20" id="sal018"/>
+                                                    <constraint firstItem="sal011" firstAttribute="leading" secondItem="sal010" secondAttribute="leading" id="sal019"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sal011" secondAttribute="trailing" id="sal020"/>
+                                                    <constraint firstItem="sal011" firstAttribute="height" constant="476" id="sal021"/>
+                                                    <constraint firstItem="sal015" firstAttribute="top" secondItem="sal010" secondAttribute="top" constant="52" id="sal034"/>
+                                                    <constraint firstItem="sal015" firstAttribute="leading" secondItem="sal010" secondAttribute="leading" constant="20" id="sal035"/>
+                                                    <constraint firstItem="sal015" firstAttribute="width" constant="40" id="sal036"/>
+                                                    <constraint firstItem="sal015" firstAttribute="height" constant="40" id="sal037"/>
+                                                </constraints>
+                                            </view>
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sal040">
+                                                <rect key="frame" x="0.0" y="456" width="393" height="80"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Trending On MyPT" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sal041">
+                                                        <rect key="frame" x="20" y="28" width="353" height="26"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" image="sgpt-listing-divider" translatesAutoresizingMaskIntoConstraints="NO" id="sal042">
+                                                        <rect key="frame" x="129.8" y="64" width="133.47" height="14"/>
+                                                    </imageView>
+                                                </subviews>
+                                                <constraints>
+                                                    <constraint firstItem="sal041" firstAttribute="top" secondItem="sal040" secondAttribute="top" constant="28" id="sal043"/>
+                                                    <constraint firstItem="sal041" firstAttribute="leading" secondItem="sal040" secondAttribute="leading" constant="20" id="sal044"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sal041" secondAttribute="trailing" constant="20" id="sal045"/>
+                                                    <constraint firstItem="sal042" firstAttribute="top" secondItem="sal041" secondAttribute="bottom" constant="10" id="sal046"/>
+                                                    <constraint firstItem="sal042" firstAttribute="centerX" secondItem="sal040" secondAttribute="centerX" id="sal047"/>
+                                                    <constraint firstItem="sal042" firstAttribute="width" constant="133.47" id="sal048"/>
+                                                    <constraint firstItem="sal042" firstAttribute="height" constant="14" id="sal049"/>
+                                                    <constraint firstAttribute="bottom" secondItem="sal042" secondAttribute="bottom" id="sal050"/>
+                                                </constraints>
+                                            </view>
+                                            <collectionView clipsSubviews="NO" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="sal060">
+                                                <rect key="frame" x="0.0" y="536" width="393" height="514"/>
+                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="424" id="sal061"/>
+                                                </constraints>
+                                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="16" minimumInteritemSpacing="16" id="sal062">
+                                                    <size key="itemSize" width="192" height="339"/>
+                                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                                </collectionViewFlowLayout>
+                                            </collectionView>
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sal070">
+                                                <rect key="frame" x="0.0" y="1050" width="393" height="26"/>
+                                                <subviews>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sal071" customClass="SgptCarouselPagerView" customModule="MyPT_Connect" customModuleProvider="target">
+                                                        <rect key="frame" x="148.5" y="12" width="96" height="14"/>
+                                                    </view>
+                                                </subviews>
+                                                <constraints>
+                                                    <constraint firstItem="sal071" firstAttribute="top" secondItem="sal070" secondAttribute="top" constant="12" id="sal072"/>
+                                                    <constraint firstItem="sal071" firstAttribute="centerX" secondItem="sal070" secondAttribute="centerX" id="sal073"/>
+                                                    <constraint firstItem="sal071" firstAttribute="height" constant="14" id="sal074"/>
+                                                    <constraint firstAttribute="bottom" secondItem="sal071" secondAttribute="bottom" id="sal075"/>
+                                                </constraints>
+                                            </view>
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sal080">
+                                                <rect key="frame" x="0.0" y="1076" width="393" height="86"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Upcoming Classes" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sal081">
+                                                        <rect key="frame" x="20" y="34" width="353" height="26"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" image="sgpt-listing-divider" translatesAutoresizingMaskIntoConstraints="NO" id="sal082">
+                                                        <rect key="frame" x="129.8" y="70" width="133.47" height="14"/>
+                                                    </imageView>
+                                                </subviews>
+                                                <constraints>
+                                                    <constraint firstItem="sal081" firstAttribute="top" secondItem="sal080" secondAttribute="top" constant="34" id="sal083"/>
+                                                    <constraint firstItem="sal081" firstAttribute="leading" secondItem="sal080" secondAttribute="leading" constant="20" id="sal084"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sal081" secondAttribute="trailing" constant="20" id="sal085"/>
+                                                    <constraint firstItem="sal082" firstAttribute="top" secondItem="sal081" secondAttribute="bottom" constant="10" id="sal086"/>
+                                                    <constraint firstItem="sal082" firstAttribute="centerX" secondItem="sal080" secondAttribute="centerX" id="sal087"/>
+                                                    <constraint firstItem="sal082" firstAttribute="width" constant="133.47" id="sal088"/>
+                                                    <constraint firstItem="sal082" firstAttribute="height" constant="14" id="sal089"/>
+                                                    <constraint firstAttribute="bottom" secondItem="sal082" secondAttribute="bottom" id="sal090"/>
+                                                </constraints>
+                                            </view>
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sal100">
+                                                <rect key="frame" x="0.0" y="1162" width="393" height="46"/>
+                                                <subviews>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sal101">
+                                                        <rect key="frame" x="16" y="14" width="34" height="32"/>
+                                                        <subviews>
+                                                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" image="sgpt-ic-filter" translatesAutoresizingMaskIntoConstraints="NO" id="sal102">
+                                                                <rect key="frame" x="8" y="7" width="18" height="18"/>
+                                                            </imageView>
+                                                        </subviews>
+                                                        <constraints>
+                                                            <constraint firstAttribute="width" constant="34" id="sal103"/>
+                                                            <constraint firstAttribute="height" constant="32" id="sal104"/>
+                                                            <constraint firstItem="sal102" firstAttribute="centerX" secondItem="sal101" secondAttribute="centerX" id="sal105"/>
+                                                            <constraint firstItem="sal102" firstAttribute="centerY" secondItem="sal101" secondAttribute="centerY" id="sal106"/>
+                                                            <constraint firstItem="sal102" firstAttribute="width" constant="18" id="sal107"/>
+                                                            <constraint firstItem="sal102" firstAttribute="height" constant="18" id="sal108"/>
+                                                        </constraints>
+                                                    </view>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sal109">
+                                                        <rect key="frame" x="62" y="20.5" width="1" height="19"/>
+                                                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.10000000000000001" colorSpace="custom" customColorSpace="sRGB"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="width" constant="1" id="sal110"/>
+                                                            <constraint firstAttribute="height" constant="19" id="sal111"/>
+                                                        </constraints>
+                                                    </view>
+                                                    <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sal112">
+                                                        <rect key="frame" x="75" y="14" width="318" height="32"/>
+                                                        <subviews>
+                                                            <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="sal113">
+                                                                <rect key="frame" x="0.0" y="0.0" width="318" height="32"/>
+                                                            </stackView>
+                                                        </subviews>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="32" id="sal114"/>
+                                                            <constraint firstItem="sal113" firstAttribute="top" secondItem="sal112" secondAttribute="top" id="sal115"/>
+                                                            <constraint firstItem="sal113" firstAttribute="leading" secondItem="sal112" secondAttribute="leading" id="sal116"/>
+                                                            <constraint firstAttribute="trailing" secondItem="sal113" secondAttribute="trailing" constant="16" id="sal117"/>
+                                                            <constraint firstAttribute="bottom" secondItem="sal113" secondAttribute="bottom" id="sal118"/>
+                                                            <constraint firstItem="sal113" firstAttribute="height" secondItem="sal112" secondAttribute="height" id="sal119"/>
+                                                        </constraints>
+                                                    </scrollView>
+                                                </subviews>
+                                                <constraints>
+                                                    <constraint firstItem="sal101" firstAttribute="top" secondItem="sal100" secondAttribute="top" constant="14" id="sal120"/>
+                                                    <constraint firstItem="sal101" firstAttribute="leading" secondItem="sal100" secondAttribute="leading" constant="16" id="sal121"/>
+                                                    <constraint firstAttribute="bottom" secondItem="sal101" secondAttribute="bottom" id="sal122"/>
+                                                    <constraint firstItem="sal109" firstAttribute="leading" secondItem="sal101" secondAttribute="trailing" constant="12" id="sal123"/>
+                                                    <constraint firstItem="sal109" firstAttribute="centerY" secondItem="sal101" secondAttribute="centerY" id="sal124"/>
+                                                    <constraint firstItem="sal112" firstAttribute="leading" secondItem="sal109" secondAttribute="trailing" constant="12" id="sal125"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sal112" secondAttribute="trailing" id="sal126"/>
+                                                    <constraint firstItem="sal112" firstAttribute="centerY" secondItem="sal101" secondAttribute="centerY" id="sal127"/>
+                                                </constraints>
+                                            </view>
+                                            <collectionView clipsSubviews="NO" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="sal130">
+                                                <rect key="frame" x="0.0" y="1208" width="393" height="135"/>
+                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="135" id="sal131"/>
+                                                </constraints>
+                                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="15" minimumInteritemSpacing="15" id="sal132">
+                                                    <size key="itemSize" width="81" height="121"/>
+                                                    <inset key="sectionInset" minX="20" minY="0.0" maxX="20" maxY="0.0"/>
+                                                </collectionViewFlowLayout>
+                                            </collectionView>
+                                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="sal140">
+                                                <rect key="frame" x="0.0" y="1343" width="393" height="0.0"/>
+                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="0.0" id="sal141"/>
+                                                </constraints>
+                                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="vertical" minimumLineSpacing="22" minimumInteritemSpacing="13" id="sal142">
+                                                    <size key="itemSize" width="180" height="330"/>
+                                                    <inset key="sectionInset" minX="12" minY="0.0" maxX="12" maxY="0.0"/>
+                                                </collectionViewFlowLayout>
+                                            </collectionView>
+                                            <view contentMode="scaleToFill" clipsSubviews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sal150">
+                                                <rect key="frame" x="0.0" y="1343" width="393" height="419"/>
+                                                <subviews>
+                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" alpha="0.80000000000000004" image="sgpt-listing-footer-bg" translatesAutoresizingMaskIntoConstraints="NO" id="sal151">
+                                                        <rect key="frame" x="-5.5" y="189" width="404" height="230"/>
+                                                    </imageView>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sal152">
+                                                        <rect key="frame" x="2" y="24" width="389" height="1"/>
+                                                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.14999999999999999" colorSpace="custom" customColorSpace="sRGB"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="1" id="sal153"/>
+                                                            <constraint firstAttribute="width" constant="389" id="sal154"/>
+                                                        </constraints>
+                                                    </view>
+                                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" image="sgpt-ic-quote" translatesAutoresizingMaskIntoConstraints="NO" id="sal155">
+                                                        <rect key="frame" x="187.7" y="53.8" width="17.48" height="12.64"/>
+                                                    </imageView>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Believe you can and you're halfway there" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sal156">
+                                                        <rect key="frame" x="24" y="83" width="345" height="52"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                                        <color key="textColor" red="0.58431372549019611" green="0.58431372549019611" blue="0.58431372549019611" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-Theodore Roosevelt" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sal157">
+                                                        <rect key="frame" x="24" y="151" width="345" height="15"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                        <color key="textColor" red="0.37647058823529411" green="0.37647058823529411" blue="0.37647058823529411" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                </subviews>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="419" id="sal158"/>
+                                                    <constraint firstItem="sal152" firstAttribute="top" secondItem="sal150" secondAttribute="top" constant="24" id="sal159"/>
+                                                    <constraint firstItem="sal152" firstAttribute="centerX" secondItem="sal150" secondAttribute="centerX" id="sal160"/>
+                                                    <constraint firstItem="sal155" firstAttribute="top" secondItem="sal150" secondAttribute="top" constant="53.8" id="sal161"/>
+                                                    <constraint firstItem="sal155" firstAttribute="centerX" secondItem="sal150" secondAttribute="centerX" id="sal162"/>
+                                                    <constraint firstItem="sal155" firstAttribute="width" constant="17.48" id="sal163"/>
+                                                    <constraint firstItem="sal155" firstAttribute="height" constant="12.64" id="sal164"/>
+                                                    <constraint firstItem="sal156" firstAttribute="top" secondItem="sal155" secondAttribute="bottom" constant="16.6" id="sal165"/>
+                                                    <constraint firstItem="sal156" firstAttribute="leading" secondItem="sal150" secondAttribute="leading" constant="24" id="sal166"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sal156" secondAttribute="trailing" constant="24" id="sal167"/>
+                                                    <constraint firstItem="sal157" firstAttribute="top" secondItem="sal156" secondAttribute="bottom" constant="16" id="sal168"/>
+                                                    <constraint firstItem="sal157" firstAttribute="leading" secondItem="sal150" secondAttribute="leading" constant="24" id="sal169"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sal157" secondAttribute="trailing" constant="24" id="sal170"/>
+                                                    <constraint firstItem="sal151" firstAttribute="centerX" secondItem="sal150" secondAttribute="centerX" id="sal171"/>
+                                                    <constraint firstAttribute="bottom" secondItem="sal151" secondAttribute="bottom" id="sal172"/>
+                                                    <constraint firstItem="sal151" firstAttribute="width" secondItem="sal150" secondAttribute="width" constant="11" id="sal173"/>
+                                                    <constraint firstItem="sal151" firstAttribute="height" constant="230" id="sal174"/>
+                                                </constraints>
+                                            </view>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="sal004" firstAttribute="top" secondItem="sal003" secondAttribute="top" id="sal180"/>
+                                    <constraint firstItem="sal004" firstAttribute="leading" secondItem="sal003" secondAttribute="leading" id="sal181"/>
+                                    <constraint firstAttribute="trailing" secondItem="sal004" secondAttribute="trailing" id="sal182"/>
+                                    <constraint firstAttribute="bottom" secondItem="sal004" secondAttribute="bottom" id="sal183"/>
+                                    <constraint firstItem="sal004" firstAttribute="width" secondItem="sal003" secondAttribute="width" id="sal184"/>
+                                </constraints>
+                            </scrollView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="sal190"/>
+                        <color key="backgroundColor" red="0.0" green="0.039215686274509803" blue="0.015686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="sal003" firstAttribute="top" secondItem="sal002" secondAttribute="top" id="sal191"/>
+                            <constraint firstItem="sal003" firstAttribute="leading" secondItem="sal002" secondAttribute="leading" id="sal192"/>
+                            <constraint firstAttribute="trailing" secondItem="sal003" secondAttribute="trailing" id="sal193"/>
+                            <constraint firstAttribute="bottom" secondItem="sal003" secondAttribute="bottom" id="sal194"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="contentStack" destination="sal004" id="sal200"/>
+                        <outlet property="filterChipView" destination="sal101" id="sal214"/>
+                        <outlet property="gridCollectionView" destination="sal140" id="sal201"/>
+                        <outlet property="gridHeightConstraint" destination="sal141" id="sal202"/>
+                        <outlet property="heroImageView" destination="sal011" id="sal203"/>
+                        <outlet property="pagerView" destination="sal071" id="sal204"/>
+                        <outlet property="quoteAuthorLabel" destination="sal157" id="sal205"/>
+                        <outlet property="quoteLabel" destination="sal156" id="sal206"/>
+                        <outlet property="scrollView" destination="sal003" id="sal207"/>
+                        <outlet property="tabsStack" destination="sal113" id="sal208"/>
+                        <outlet property="trainerCollectionView" destination="sal130" id="sal209"/>
+                        <outlet property="trainerHeightConstraint" destination="sal131" id="sal210"/>
+                        <outlet property="trendingCollectionView" destination="sal060" id="sal211"/>
+                        <outlet property="trendingTitleLabel" destination="sal041" id="sal212"/>
+                        <outlet property="upcomingTitleLabel" destination="sal081" id="sal213"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="sal999" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1400" y="2700"/>
+        </scene>
     </scenes>
     <resources>
         <image name="sgpt-ic-back-chevron" width="24" height="24"/>
         <image name="sgpt-ic-share" width="24" height="24"/>
         <image name="sgpt-pricing-hero" width="1459" height="1951"/>
+        <image name="sgpt-listing-hero" width="1290" height="1434"/>
+        <image name="sgpt-listing-footer-bg" width="1290" height="690"/>
+        <image name="sgpt-listing-divider" width="134" height="14"/>
+        <image name="sgpt-ic-filter" width="18" height="18"/>
+        <image name="sgpt-ic-quote" width="18" height="13"/>
     </resources>
 </document>

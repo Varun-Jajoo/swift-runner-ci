@@ -93,6 +93,8 @@ enum ApiEndPoint: String {
     case viewall_classes                =  "api/viewall-classes"
     /// Small Group PT (SGPT) home-carousel + See All feed.
     case sgpt_upcoming                  =  "api/sgpt-upcoming"
+    /// Signed-in member's remaining SGPT credit balance (checkout sheet gate).
+    case sgpt_credits                   =  "api/sgpt-credits"
     case class_category                 =  "api/class-category"
     case book_class                     =  "api/book-class"
     case join_waitlist                  =  "api/join-waitlist"
