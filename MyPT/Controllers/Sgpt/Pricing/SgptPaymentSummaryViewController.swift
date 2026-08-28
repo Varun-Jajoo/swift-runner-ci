@@ -602,8 +602,13 @@ private extension SgptPaymentSummaryViewController {
         return "4 payments of \(currency(Double(price) / 4.0))"
     }
 
-    func makePaymentRow(logo: UIImage?, title: String, chip: String, subtitle: String,
-                        option: PayOption, action: Selector) -> UIView {
+    // Explicitly `private`, not just relying on the enclosing `private
+    // extension` - that only grants members fileprivate-level access, which
+    // is wider than the `private enum PayOption` this takes as a parameter,
+    // and Swift requires a function to be no more accessible than its own
+    // signature.
+    private func makePaymentRow(logo: UIImage?, title: String, chip: String, subtitle: String,
+                                option: PayOption, action: Selector) -> UIView {
         let row = UIView()
         row.translatesAutoresizingMaskIntoConstraints = false
         row.backgroundColor = Palette.payRowFill
@@ -776,6 +781,10 @@ private extension SgptPaymentSummaryViewController {
         note.translatesAutoresizingMaskIntoConstraints = false
         note.backgroundColor = Palette.noteFill
         note.layer.cornerRadius = 16
+        // Square top corners - the panel above covers them anyway, and a
+        // rounded top edge peeking out at the sides of the overlap reads as a
+        // seam. Matches the equivalent Android fix.
+        note.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         note.layer.masksToBounds = true
 
         let iconNames = icon.map { [$0] } ?? []
