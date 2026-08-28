@@ -95,6 +95,12 @@ enum ApiEndPoint: String {
     case sgpt_upcoming                  =  "api/sgpt-upcoming"
     /// Signed-in member's remaining SGPT credit balance (checkout sheet gate).
     case sgpt_credits                   =  "api/sgpt-credits"
+    /// Purchasable SGPT credit packs (pricing + payment screens).
+    case sgpt_packages                  =  "api/sgpt-packages"
+    /// Full detail for one SGPT session.
+    case sgpt_detail                    =  "api/sgpt-detail"
+    /// Reserve an SGPT seat against the member's credits.
+    case sgpt_book                      =  "api/sgpt-book"
     case class_category                 =  "api/class-category"
     case book_class                     =  "api/book-class"
     case join_waitlist                  =  "api/join-waitlist"

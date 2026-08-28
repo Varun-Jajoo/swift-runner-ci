@@ -17,12 +17,17 @@
 //  which isn't bundled in this project, and is the exact same asset already
 //  verified pixel-for-pixel on the Android build.
 //
-//  Scope: there is no plans/pricing/purchase API for SGPT yet, so the 3 plan
-//  cards, copy, and countdown below are static app content matching Figma
-//  exactly, not per-session or per-user data. The countdown is a frozen
-//  display (01:59:48, as Figma shows it), not a real ticking deadline - there
-//  is no backend expiry to count down to. The purchase CTA and Terms &
-//  Conditions link are stubs.
+//  Plan cards come from api/sgpt-packages (credits, price, validity, and the
+//  admin's highlight/deal pill). Three placeholder cards render first so the
+//  screen is never empty, then the column is rebuilt once packs arrive.
+//
+//  The countdown is real: a pack flagged as a limited-time deal carries the
+//  seconds remaining, counted down here as days / hours / minutes. The server
+//  only reports a deal while it is still running, so an expired one simply
+//  arrives as a normal plan and the row hides itself. Seconds (not an end
+//  timestamp) keep it immune to device clock skew.
+//
+//  Purchase hands off to the payment summary; Terms & Conditions is a stub.
 //
 
 import UIKit
@@ -86,11 +91,23 @@ final class SgptPricingViewController: CommonViewController {
         let perSession: String
     }
 
-    private let plans: [PlanCard] = [
+    /// Placeholder cards shown until api/sgpt-packages returns, so the screen
+    /// never renders empty. Replaced wholesale by `applyPacks(_:)`.
+    private var plans: [PlanCard] = [
         PlanCard(badge: "Best Deal", isCenter: false, headline: "10 credit", validDays: 90, price: "AED 1,100", originalPrice: nil, perSession: "AED 110/session"),
         PlanCard(badge: "Deal of the Day", isCenter: true, headline: "16 sessions", validDays: 120, price: "AED 1,848", originalPrice: "1,998", perSession: "AED 84/session"),
         PlanCard(badge: "Value Price", isCenter: false, headline: "24 credit", validDays: 90, price: "AED 1,100", originalPrice: nil, perSession: "AED 110/session")
     ]
+
+    /// Club whose pricing to show; blank fetches every club's packs.
+    var studioId: String = ""
+
+    private var packs: [SgptPackModel] = []
+    private var featuredPack: SgptPackModel?
+    private var dealSecondsLeft: Int = 0
+    private var countdownTimer: Timer?
+    private var countdownValueLabels: [UILabel] = []
+    private var countdownRow: UIView?
 
     private var cardsScrollView: UIScrollView?
     private var pricingCardRefs: [PricingCardRef] = []
@@ -120,6 +137,120 @@ final class SgptPricingViewController: CommonViewController {
         heroImageView.clipsToBounds = true
         buildContent()
         setupScrollDebugLabel()
+        loadPacks()
+    }
+
+    deinit {
+        countdownTimer?.invalidate()
+    }
+
+    // MARK: - Packs
+
+    /// Credit packs from api/sgpt-packages. The screen ships three placeholder
+    /// cards so it never renders empty; once packs arrive the whole content
+    /// column is rebuilt from them.
+    private func loadPacks() {
+        SgptVM.sgptPackagesApi(studioId: studioId) { [weak self] result in
+            guard let self = self, let packs = result, !packs.isEmpty else { return }
+            DispatchQueue.main.async {
+                self.applyPacks(packs)
+            }
+        }
+    }
+
+    private func applyPacks(_ packs: [SgptPackModel]) {
+        self.packs = packs
+
+        // The middle card is the one the CTA buys, matching Android.
+        let centerIndex = packs.count > 1 ? 1 : 0
+        featuredPack = packs[centerIndex]
+
+        plans = packs.enumerated().map { index, pack in
+            let credits = pack.credits ?? 0
+            let pill = (pack.dealPillText?.isEmpty == false ? pack.dealPillText : pack.specialMsg) ?? ""
+
+            return PlanCard(
+                badge: pill.isEmpty ? (pack.name ?? "Plan") : pill,
+                isCenter: index == centerIndex,
+                headline: credits == 1 ? "1 credit" : "\(credits) credits",
+                validDays: pack.validity ?? 0,
+                price: Self.money(pack.price ?? 0),
+                originalPrice: Self.originalPrice(for: pack),
+                perSession: "\(Self.money(pack.pricePerSession ?? 0))/session"
+            )
+        }
+
+        rebuildContent()
+        startDealCountdown()
+    }
+
+    /// Struck-through "before" price, derived from the saving badge the admin
+    /// set (e.g. "SAVE AED 300"). No badge means nothing to strike through.
+    private static func originalPrice(for pack: SgptPackModel) -> String? {
+        let digits = (pack.msg ?? "").filter { $0.isNumber }
+        guard let saving = Double(digits), saving > 0, let price = pack.price else { return nil }
+        return money(price + saving)
+    }
+
+    private static func money(_ value: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.maximumFractionDigits = value.truncatingRemainder(dividingBy: 1) == 0 ? 0 : 2
+        let number = formatter.string(from: NSNumber(value: value)) ?? "\(Int(value))"
+        return "AED \(number)"
+    }
+
+    /// Rebuilds the card column in place once real packs land.
+    private func rebuildContent() {
+        contentContainer.subviews.forEach { $0.removeFromSuperview() }
+        pricingCardRefs.removeAll()
+        cardsScrollView = nil
+        centeredPricingCard = nil
+        initialCenterPricingCard = nil
+        hasCenteredPricingCardsInitially = false
+        buildContent()
+        view.setNeedsLayout()
+    }
+
+    /// Counts the featured deal down as days / hours / minutes.
+    ///
+    /// The server sends seconds remaining rather than an end timestamp, so the
+    /// countdown is decremented locally and never drifts with device clock
+    /// skew. With no live deal the row is hidden rather than frozen at zero.
+    private func startDealCountdown() {
+        countdownTimer?.invalidate()
+
+        guard let deal = packs.first(where: { ($0.isDeal ?? false) && ($0.dealEndsInSeconds ?? 0) > 0 }),
+              let seconds = deal.dealEndsInSeconds else {
+            countdownRow?.isHidden = true
+            return
+        }
+
+        countdownRow?.isHidden = false
+        dealSecondsLeft = seconds
+        renderCountdown()
+
+        countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
+            guard let self = self else { timer.invalidate(); return }
+            self.dealSecondsLeft -= 1
+            if self.dealSecondsLeft <= 0 {
+                self.countdownRow?.isHidden = true
+                timer.invalidate()
+                return
+            }
+            self.renderCountdown()
+        }
+    }
+
+    private func renderCountdown() {
+        guard countdownValueLabels.count >= 3 else { return }
+        let days = dealSecondsLeft / 86400
+        let hours = (dealSecondsLeft % 86400) / 3600
+        let minutes = (dealSecondsLeft % 3600) / 60
+        countdownValueLabels[0].text = String(format: "%02d", days)
+        countdownValueLabels[1].text = String(format: "%02d", hours)
+        countdownValueLabels[2].text = String(format: "%02d", minutes)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -819,6 +950,7 @@ private extension SgptPricingViewController {
             container.heightAnchor.constraint(equalToConstant: 40).isActive = true
 
             let valueLabel = UILabel()
+            countdownValueLabels.append(valueLabel)
             valueLabel.font = AppFont.medium.size(16.0, familyName: familyClashDisplay)
             valueLabel.textColor = .white
             valueLabel.textAlignment = .center
@@ -840,7 +972,9 @@ private extension SgptPricingViewController {
             return colonLabel
         }
 
-        let row = UIStackView(arrangedSubviews: [label, box("01"), colon(), box("59"), colon(), box("48")])
+        countdownValueLabels.removeAll()
+        let row = UIStackView(arrangedSubviews: [label, box("00"), colon(), box("00"), colon(), box("00")])
+        countdownRow = row
         row.axis = .horizontal
         row.alignment = .center
         row.spacing = 4

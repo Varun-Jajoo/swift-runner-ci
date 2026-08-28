@@ -302,7 +302,7 @@ final class SgptSessionDetailViewController: CommonViewController {
                 )
                 let sheet = SgptCheckoutSheetViewController(input: input)
                 sheet.onConfirm = { [weak self] in
-                    self?.showComingSoon()
+                    self?.bookWithCredits()
                 }
                 sheet.onViewProfile = { [weak self] in
                     self?.showComingSoon()
@@ -315,6 +315,48 @@ final class SgptSessionDetailViewController: CommonViewController {
     private func pushPricing() {
         let vc: SgptPricingViewController = .instantiate(appStoryboard: .sgpt)
         navigationController?.pushViewController(vc, animated: true)
+    }
+
+    /// Spends a credit on this session via api/sgpt-book, then re-reads the
+    /// session so the seats card reflects the booking just made.
+    private func bookWithCredits() {
+        let sessionId = session.id?.value ?? ""
+        guard !sessionId.isEmpty else { return }
+
+        SgptVM.sgptBookApi(sessionId: sessionId) { [weak self] result, errorMessage in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+
+                guard let result = result else {
+                    let message = errorMessage ?? "Could not reserve this session. Please try again."
+                    let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .default))
+                    self.present(alert, animated: true)
+                    return
+                }
+
+                let remaining = result.remainingCredits ?? 0
+                let alert = UIAlertController(
+                    title: "Seat reserved",
+                    message: "\(remaining) credits left.",
+                    preferredStyle: .alert
+                )
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(alert, animated: true)
+
+                // Reflect the seat just taken without re-fetching the screen.
+                if let seats = result.remainingSeats {
+                    let maxSize = GroupClassCardFormatter.intValue(self.session.maxSize, defaultValue: 0)
+                    let booked = max(0, maxSize - seats)
+                    self.session.remainingSeats = FlexibleValue(value: String(seats))
+                    self.session.bookedCount = FlexibleValue(value: String(booked))
+
+                    let progress = maxSize > 0 ? CGFloat(booked) / CGFloat(maxSize) : 0
+                    self.seatsProgressBar.setProgress(progress)
+                    self.seatsCountLabel.attributedText = self.seatsCountText(booked: booked, maxSize: maxSize)
+                }
+            }
+        }
     }
 
     @objc private func readMoreTapped() {
