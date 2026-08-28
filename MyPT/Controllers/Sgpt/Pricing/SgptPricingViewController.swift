@@ -362,8 +362,27 @@ final class SgptPricingViewController: CommonViewController {
         navigationController?.popViewController(animated: true)
     }
 
+    /// Never blocks, even if api/sgpt-packages hasn't returned yet - Android
+    /// hit exactly this bug (a null featuredPack toasting "still loading" and
+    /// going nowhere) and had to be fixed to always fall back to whatever's
+    /// currently on screen, matching that fix here.
     @objc private func purchaseTapped() {
-        showComingSoon(message: "Purchasing Small Group PT credits from the app isn't available yet.")
+        let credits: Int
+        let price: Int
+        let savings: Int
+
+        if let pack = featuredPack {
+            credits = pack.credits ?? 0
+            price = Int(pack.price ?? 0)
+            savings = Int((pack.msg ?? "").filter { $0.isNumber }) ?? 0
+        } else {
+            let fallback = plans.first(where: { $0.isCenter }) ?? plans.first
+            credits = Int((fallback?.headline ?? "").filter { $0.isNumber }) ?? 0
+            price = Int((fallback?.price ?? "").filter { $0.isNumber }) ?? 0
+            savings = 0
+        }
+
+        SgptPaymentSummaryViewController.start(from: self, credits: credits, price: price, savings: savings)
     }
 
     @objc private func termsTapped() {
