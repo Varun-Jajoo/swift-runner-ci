@@ -60,9 +60,7 @@ class BookingHomepageCVCell: UICollectionViewCell {
 
         // Trainer Image
         imgTrainer.loadImage(urlString: data.trainer_image?.value,
-                             // Freelance classes return no trainer image on purpose,
-                             // so this placeholder is what those cards actually show.
-                             placeholder: UIImage(named: "ic_mypt_trainer_avatar"))
+                             placeholder: nil)
     }
     
     func formatDate(_ dateString: String) -> String {

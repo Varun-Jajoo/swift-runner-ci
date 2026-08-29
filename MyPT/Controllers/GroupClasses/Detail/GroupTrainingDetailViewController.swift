@@ -2564,7 +2564,7 @@ private extension GroupTrainingDetailViewController {
         trainerAvatarView.translatesAutoresizingMaskIntoConstraints = false
         trainerAvatarView.contentMode = .scaleAspectFill
         trainerAvatarView.clipsToBounds = true
-        trainerAvatarView.layer.cornerRadius = 16
+        trainerAvatarView.layer.cornerRadius = 32
         trainerAvatarView.backgroundColor = GroupClassColor.bg3.color
         trainerAvatarView.tintColor = .white.withAlphaComponent(0.4)
         trainerAvatarView.image = GroupTrainingDetailViewController.icon(["dummy_trainer"], systemFallback: "person.crop.circle.fill")?
