@@ -12,6 +12,12 @@ jobs:
     name: Build iOS on macOS Cloud Runner
     runs-on: macos-14
 
+    # Needed so the built-in GITHUB_TOKEN can publish the IPA as a release
+    # asset. Release assets do not count against the Actions artifact storage
+    # quota, which is what was blocking uploads.
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout Current Branch
         uses: actions/checkout@v4
@@ -65,9 +71,59 @@ jobs:
           echo "=== XCODEBUILD COMPILER ERRORS ==="
           grep -E "(error:|fatal error:|\*\* BUILD FAILED \*\*)" xcodebuild.log || cat xcodebuild.log | tail -n 150
 
-      - name: Upload IPA Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: MyPT-iOS-IPA
-          path: MyPT.ipa
-          if-no-files-found: error
+      - name: Publish IPA to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test -f MyPT.ipa || { echo "MyPT.ipa missing - not publishing"; exit 1; }
+
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          TAG="ios-build-${GITHUB_RUN_NUMBER}-${SHORT_SHA}"
+
+          cat > release_notes.md <<'NOTES'
+          Automated iOS CI build.
+          NOTES
+          {
+            echo "Branch: ${GITHUB_REF_NAME}"
+            echo "Commit: ${GITHUB_SHA}"
+            echo ""
+            echo "Unsigned Debug build - for inspection / CI verification, not device install."
+          } >> release_notes.md
+
+          gh release create "$TAG" MyPT.ipa             --title "iOS build #${GITHUB_RUN_NUMBER} - ${GITHUB_REF_NAME}"             --notes-file release_notes.md             --target "${GITHUB_SHA}"             --prerelease
+
+          RELEASE_URL=$(gh release view "$TAG" --json url --jq .url)
+          IPA_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/MyPT.ipa"
+
+          echo "Release: $RELEASE_URL"
+          echo "IPA:     $IPA_URL"
+
+          # Surfaces both links on the workflow run's summary page, so the build
+          # is one click away instead of buried in this step's log output.
+          {
+            echo "### iOS build #${GITHUB_RUN_NUMBER}"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Branch | \`${GITHUB_REF_NAME}\` |"
+            echo "| Commit | \`${GITHUB_SHA}\` |"
+            echo "| Release | [$TAG]($RELEASE_URL) |"
+            echo "| Download | [MyPT.ipa]($IPA_URL) |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Release assets are not auto-expired the way Actions artifacts are, so
+      # prune old CI builds to stop them growing without bound.
+      - name: Prune old CI build releases (keep newest 10)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release list --limit 200 --json tagName,createdAt             --jq '[.[] | select(.tagName | startswith("ios-build-"))] | sort_by(.createdAt) | reverse | .[10:] | .[].tagName'             > stale_tags.txt || true
+
+          while read -r tag; do
+            [ -z "$tag" ] && continue
+            echo "Deleting old release $tag"
+            gh release delete "$tag" --cleanup-tag --yes || true
+          done < stale_tags.txt
