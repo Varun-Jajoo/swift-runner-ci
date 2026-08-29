@@ -26,10 +26,32 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     var homeStories: GetStoriesData?
     var storyList: [Story] = []
     var homeStoriesData: [Datum]?
+    /// Storyboard height of `collectionMyBooking`, captured so the section can
+    /// be collapsed to zero and restored without hardcoding the number twice.
+    private var myBookingCollectionHeight: CGFloat = 192.67
+
     var upcomingSessionData:[BookingDataModel]? = [] {
         didSet{
             self.collectionMyBooking.reloadData()
+            self.updateMyBookingSectionVisibility()
         }
+    }
+
+    /// With nothing booked the whole section goes away - heading, list and the
+    /// "View all" control - instead of leaving an "Upcoming Bookings" title over
+    /// an empty-state placeholder at the top of Home. The collection has a fixed
+    /// height constraint and is not inside a stack view, so hiding the views
+    /// alone would leave its ~193pt gap behind; the constraint has to collapse
+    /// too.
+    private func updateMyBookingSectionVisibility() {
+        guard isViewLoaded else { return }
+        let hasBookings = (upcomingSessionData?.count ?? 0) > 0
+
+        lblMyBooking?.isHidden = !hasBookings
+        collectionMyBooking?.isHidden = !hasBookings
+        viewAllButton?.isHidden = !hasBookings
+        myBookingHeightConstraint?.constant = hasBookings ? myBookingCollectionHeight : 0
+        view.layoutIfNeeded()
     }
     var userPlans: [PlanDetailsModel] = [] {
         didSet {
@@ -50,6 +72,8 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     @IBOutlet weak var collectionSessionType: UICollectionView!
     @IBOutlet weak var lblMyBooking: UILabel!
     @IBOutlet weak var collectionMyBooking: UICollectionView!
+    @IBOutlet weak var myBookingHeightConstraint: NSLayoutConstraint!
+    @IBOutlet weak var viewAllButton: UIButton!
     @IBOutlet weak var lblSmartSuggestion: UILabel!
     @IBOutlet weak var collectionDate: UICollectionView!
     @IBOutlet weak var collectionBookingSuggestion: UICollectionView!
@@ -81,6 +105,10 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     override func viewDidLoad() {
         super.viewDidLoad()
         uiSetup()
+        // Start collapsed: the data assignment that drives this happens before
+        // the view loads, so without this the section would sit open at full
+        // height until the bookings call comes back.
+        updateMyBookingSectionVisibility()
         notificationUnreadDot = NotificationBellInstaller.install(leftOf: btnNameInitial, in: self)
         setupGroupClassesSection()
         generateDates()
@@ -431,17 +459,11 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         if collectionView == collectionSessionType {
             return 4
         } else if collectionView == collectionMyBooking {
-            let count = upcomingSessionData?.count ?? 0
-            if count == 0 {
-                collectionView.showEmptyView(
-                    title: "You have no upcoming bookings",
-                    image: AppImages.search_NoResult,
-                    centerOffset: -30   // adjust if needed
-                )
-            } else {
-                collectionView.restoreEmptyView()
-            }
-            return count
+            // No empty-state placeholder here any more: with nothing booked the
+            // entire section is collapsed by updateMyBookingSectionVisibility(),
+            // so there is no visible collection left to put a message inside.
+            collectionView.restoreEmptyView()
+            return upcomingSessionData?.count ?? 0
         } else if collectionView == collectionDate {
             return dates.count
         } else if collectionView == collectionBookingSuggestion {
@@ -676,7 +698,6 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             let selectedDate = getFormattedDate(from: dates[indexPath.row])
             callSlotsApi(date: selectedDate)
         } else if collectionView == collectionSessionType {
-            let vc : TopPlanVC = TopPlanVC.instantiate(appStoryboard: .homepage)
             let vc1: NewBookingModuleVC = NewBookingModuleVC.instantiate(appStoryboard: .newBookingModule)
             let packageExpireVC: PackageExpireVC = PackageExpireVC.instantiate(appStoryboard: .newBookingModule)
             let myTrainersVC: MyTrainersVC = MyTrainersVC.instantiate(appStoryboard: .newBookingModule)
@@ -725,13 +746,20 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
                 self.navigationController?.pushViewController(myTrainersVC, animated: false)
                 return
             case 3: // Group Classes
-//                vc.selectedPlanType = .upgrade
-                vc.selectedPlanType = .groupClasses
+                // Goes to the Group Classes listing, not TopPlanVC's plan
+                // picker - this tile is a shortcut into the GX catalogue, and
+                // the .groupClasses plan type only ever rendered a plans
+                // screen. Same push the section's own "See All" uses, lat/lng
+                // included so the listing opens already sorted by distance.
+                let seeAllGroupClasses = SeeAllGroupClassesViewController()
+                seeAllGroupClasses.initialLat = self.getLat ?? GroupClassCardFormatter.fallbackLatitude
+                seeAllGroupClasses.initialLng = self.getLong ?? GroupClassCardFormatter.fallbackLongitude
+                seeAllGroupClasses.hidesBottomBarWhenPushed = true
+                self.navigationController?.pushViewController(seeAllGroupClasses, animated: true)
+                return
             default:
                 return
             }
-            vc.hidesBottomBarWhenPushed = true
-            self.navigationController?.pushViewController(vc, animated: false)
         }
     }
     
