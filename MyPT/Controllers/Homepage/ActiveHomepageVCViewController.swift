@@ -47,6 +47,10 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         guard isViewLoaded else { return }
         let hasBookings = (upcomingSessionData?.count ?? 0) > 0
 
+        // Collapsing the stack-arranged wrapper is what actually removes the
+        // space; the rest just keeps the inner views consistent if the wrapper
+        // is ever shown outside a stack context.
+        myBookingSectionView?.isHidden = !hasBookings
         lblMyBooking?.isHidden = !hasBookings
         collectionMyBooking?.isHidden = !hasBookings
         viewAllButton?.isHidden = !hasBookings
@@ -73,6 +77,12 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     @IBOutlet weak var lblMyBooking: UILabel!
     @IBOutlet weak var collectionMyBooking: UICollectionView!
     @IBOutlet weak var myBookingHeightConstraint: NSLayoutConstraint!
+    /// Wrapper holding the "Upcoming Bookings" heading + list. It is an arranged
+    /// subview of the page's stack view, so hiding THIS collapses the section
+    /// and its stack spacing outright - hiding the heading and list individually
+    /// left their surrounding spacing behind, which is why an empty section
+    /// still occupied space.
+    @IBOutlet weak var myBookingSectionView: UIView!
     @IBOutlet weak var viewAllButton: UIButton!
     @IBOutlet weak var lblSmartSuggestion: UILabel!
     @IBOutlet weak var collectionDate: UICollectionView!
@@ -1023,7 +1033,19 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             guard let self = self else { return }
             
             if result?.status == true {
-                self.upcomingSessionData = result?.data ?? []
+                // Home's "Upcoming Bookings" shows only what is genuinely still
+                // upcoming. The endpoint also returns waitlist entries and
+                // cancelled/completed rows (the Bookings tab has dedicated tabs
+                // for those), which were being listed here as upcoming - Android
+                // already filters the same three cases out on this screen.
+                self.upcomingSessionData = (result?.data ?? []).filter { row in
+                    if row.isWaitlistRow { return false }
+                    if let bookingType = row.bookingType?.lowercased(),
+                       bookingType.contains("waitlist") { return false }
+                    if let status = row.bookingStatus?.lowercased(),
+                       status.contains("cancel") || status.contains("complete") { return false }
+                    return true
+                }
                 
                 DispatchQueue.main.async {
                     self.collectionMyBooking.reloadData()

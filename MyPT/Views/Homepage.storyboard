@@ -1367,6 +1367,7 @@
                         <outlet property="collectionBookingSuggestion" destination="iOo-yn-Oyp" id="pYN-oZ-aH9"/>
                         <outlet property="collectionDate" destination="Ubf-yo-CVY" id="HNm-xv-Znk"/>
                         <outlet property="viewAllButton" destination="b4W-Ro-csY" id="myB-va-002"/>
+                        <outlet property="myBookingSectionView" destination="cNG-mB-hT2" id="myB-sv-003"/>
                         <outlet property="myBookingHeightConstraint" destination="3RF-te-Zju" id="myB-hc-001"/>
                         <outlet property="collectionMyBooking" destination="4zk-c4-3QV" id="aeU-oa-q1E"/>
                         <outlet property="collectionMyPTAction" destination="efz-kK-ku3" id="SsW-xL-kL0"/>
