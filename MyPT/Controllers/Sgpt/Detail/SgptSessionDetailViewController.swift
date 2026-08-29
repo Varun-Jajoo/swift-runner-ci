@@ -166,13 +166,17 @@ final class SgptSessionDetailViewController: CommonViewController {
         updateAboutOverflowState()
     }
 
-    /// The nav row lives inside the hero (so it scrolls away with it),
-    /// which means it cannot use the safe-area guide directly. The +12
-    /// constant copied from GroupTrainingDetailViewController's own
-    /// heroNavTopConstraint read as too much clearance here (that hero is
-    /// 364pt vs this one's 400pt) - tightened to +4.
+    /// The nav row lives inside the hero (so it scrolls away with it), which
+    /// means it cannot use the safe-area guide directly.
+    ///
+    /// This was previously +4 (tightened from +12 because this hero is 400pt
+    /// vs Group Classes' 364pt), but that put the back button at a different
+    /// height from every other Group Classes / SGPT screen. Hero height changes
+    /// where the hero *ends*, not where the status bar is, so the back button's
+    /// offset from the top shouldn't follow it - realigned to the module-wide
+    /// safeArea + 12.
     private func updateHeroTopButtonsOffset() {
-        heroTopButtonsTopConstraint.constant = view.safeAreaInsets.top + 4
+        heroTopButtonsTopConstraint.constant = view.safeAreaInsets.top + 12
     }
 
     // MARK: - Populate

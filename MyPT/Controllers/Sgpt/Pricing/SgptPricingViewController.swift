@@ -260,8 +260,11 @@ final class SgptPricingViewController: CommonViewController {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        let topInset = view.safeAreaInsets.top
-        backButtonTopConstraint?.constant = max(topInset, 20) + 8
+        // safeArea + 12 is the module-wide back-button offset (Group Classes'
+        // SeeAll/payment screens and SgptPaymentSummary all use it). This screen
+        // previously used max(topInset, 20) + 8, which put its back button at a
+        // different height from every other Group Classes / SGPT screen.
+        backButtonTopConstraint?.constant = view.safeAreaInsets.top + 12
         performInitialPricingCenteringIfNeeded()
     }
 

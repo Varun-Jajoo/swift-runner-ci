@@ -61,11 +61,11 @@
                                                     <constraint firstAttribute="bottom" secondItem="sgd012" secondAttribute="bottom" id="sgd024"/>
                                                     <constraint firstItem="sgd012" firstAttribute="height" constant="200" id="sgd025"/>
                                                     <constraint firstItem="sgd013" firstAttribute="top" secondItem="sgd010" secondAttribute="top" constant="52" id="sgd026"/>
-                                                    <constraint firstItem="sgd013" firstAttribute="leading" secondItem="sgd010" secondAttribute="leading" constant="16" id="sgd027"/>
+                                                    <constraint firstItem="sgd013" firstAttribute="leading" secondItem="sgd010" secondAttribute="leading" constant="20" id="sgd027"/>
                                                     <constraint firstItem="sgd013" firstAttribute="width" constant="40" id="sgd028"/>
                                                     <constraint firstItem="sgd013" firstAttribute="height" constant="40" id="sgd029"/>
                                                     <constraint firstItem="sgd015" firstAttribute="centerY" secondItem="sgd013" secondAttribute="centerY" id="sgd030"/>
-                                                    <constraint firstAttribute="trailing" secondItem="sgd015" secondAttribute="trailing" constant="16" id="sgd031"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sgd015" secondAttribute="trailing" constant="20" id="sgd031"/>
                                                     <constraint firstItem="sgd015" firstAttribute="width" constant="40" id="sgd032"/>
                                                     <constraint firstItem="sgd015" firstAttribute="height" constant="40" id="sgd033"/>
                                                 </constraints>
@@ -346,7 +346,7 @@
                                                     <constraint firstAttribute="bottom" secondItem="spr010" secondAttribute="bottom" firstItem="spr011" id="spr021"/>
                                                     <constraint firstItem="spr011" firstAttribute="height" secondItem="spr011" secondAttribute="width" multiplier="1951:1459" id="spr023"/>
                                                     <constraint firstItem="spr013" firstAttribute="top" secondItem="spr010" secondAttribute="top" constant="8" id="spr026"/>
-                                                    <constraint firstItem="spr013" firstAttribute="leading" secondItem="spr010" secondAttribute="leading" constant="16" id="spr027"/>
+                                                    <constraint firstItem="spr013" firstAttribute="leading" secondItem="spr010" secondAttribute="leading" constant="20" id="spr027"/>
                                                     <constraint firstItem="spr013" firstAttribute="width" constant="40" id="spr028"/>
                                                     <constraint firstItem="spr013" firstAttribute="height" constant="40" id="spr029"/>
                                                 </constraints>
@@ -648,7 +648,8 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="contentStack" destination="sal004" id="sal200"/>
+                        <outlet property="backTopConstraint" destination="sal034" id="sal220"/>
+                                <outlet property="contentStack" destination="sal004" id="sal200"/>
                         <outlet property="filterChipView" destination="sal101" id="sal214"/>
                         <outlet property="gridCollectionView" destination="sal140" id="sal201"/>
                         <outlet property="gridHeightConstraint" destination="sal141" id="sal202"/>

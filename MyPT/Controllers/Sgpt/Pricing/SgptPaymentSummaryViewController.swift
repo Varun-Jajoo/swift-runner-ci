@@ -121,7 +121,10 @@ final class SgptPaymentSummaryViewController: CommonViewController {
         static let noteOverlap: CGFloat = 16
         static let payRowHeight: CGFloat = 62
         static let radioSide: CGFloat = 20
-        static let ctaHeight: CGFloat = 56
+        // 48, matching ClassPaymentViewController and the SGPT pricing screen's
+        // own "PURCHASE n CREDITS" button - 56 made this CTA visibly taller than
+        // the button the user just came from.
+        static let ctaHeight: CGFloat = 48
     }
 
     // MARK: - Views

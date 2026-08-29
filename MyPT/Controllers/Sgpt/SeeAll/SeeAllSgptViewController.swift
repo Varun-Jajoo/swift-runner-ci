@@ -36,6 +36,11 @@ final class SeeAllSgptViewController: CommonViewController {
     @IBOutlet private weak var gridHeightConstraint: NSLayoutConstraint!
     @IBOutlet private weak var quoteLabel: UILabel!
     @IBOutlet private weak var quoteAuthorLabel: UILabel!
+    /// Back button's top offset inside the hero. The storyboard ships a static
+    /// 52pt guess; this screen is the one SGPT/Group Classes screen that never
+    /// adjusted it for the safe area, so the button sat at a different height
+    /// from every other screen in both modules (and from itself across devices).
+    @IBOutlet private weak var backTopConstraint: NSLayoutConstraint!
 
     var initialLat: Double = GroupClassCardFormatter.fallbackLatitude
     var initialLng: Double = GroupClassCardFormatter.fallbackLongitude
@@ -83,6 +88,10 @@ final class SeeAllSgptViewController: CommonViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         backgroundGradient.frame = view.bounds
+        // Set before the width guard below - that guard returns early on every
+        // pass except a width change, which would leave the back button at the
+        // storyboard's static constant on a normal layout pass.
+        backTopConstraint?.constant = view.safeAreaInsets.top + 12
         guard view.bounds.width != lastLayoutWidth, view.bounds.width > 0 else { return }
         lastLayoutWidth = view.bounds.width
         updateGridHeight()
