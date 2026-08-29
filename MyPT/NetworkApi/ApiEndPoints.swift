@@ -19,7 +19,7 @@ var recordFound: Int              { return 2001 }
 var noRecordFound: Int            { return 2002 }
 var recordAlreadyExist: Int       { return 2003 }
 
-var isTesting: Bool               { return true }
+var isTesting: Bool               { return false }
 
 //App base urls
 enum AppBaseUrl: String {
