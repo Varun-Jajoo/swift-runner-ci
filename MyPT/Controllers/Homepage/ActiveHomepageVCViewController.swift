@@ -26,10 +26,36 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     var homeStories: GetStoriesData?
     var storyList: [Story] = []
     var homeStoriesData: [Datum]?
+    /// Storyboard height of `collectionMyBooking`, captured so the section can
+    /// be collapsed to zero and restored without hardcoding the number twice.
+    private var myBookingCollectionHeight: CGFloat = 192.67
+
     var upcomingSessionData:[BookingDataModel]? = [] {
         didSet{
             self.collectionMyBooking.reloadData()
+            self.updateMyBookingSectionVisibility()
         }
+    }
+
+    /// With nothing booked the whole section goes away - heading, list and the
+    /// "View all" control - instead of leaving an "Upcoming Bookings" title over
+    /// an empty-state placeholder at the top of Home. The collection has a fixed
+    /// height constraint and is not inside a stack view, so hiding the views
+    /// alone would leave its ~193pt gap behind; the constraint has to collapse
+    /// too.
+    private func updateMyBookingSectionVisibility() {
+        guard isViewLoaded else { return }
+        let hasBookings = (upcomingSessionData?.count ?? 0) > 0
+
+        // Collapsing the stack-arranged wrapper is what actually removes the
+        // space; the rest just keeps the inner views consistent if the wrapper
+        // is ever shown outside a stack context.
+        myBookingSectionView?.isHidden = !hasBookings
+        lblMyBooking?.isHidden = !hasBookings
+        collectionMyBooking?.isHidden = !hasBookings
+        viewAllButton?.isHidden = !hasBookings
+        myBookingHeightConstraint?.constant = hasBookings ? myBookingCollectionHeight : 0
+        view.layoutIfNeeded()
     }
     var userPlans: [PlanDetailsModel] = [] {
         didSet {
@@ -50,6 +76,14 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     @IBOutlet weak var collectionSessionType: UICollectionView!
     @IBOutlet weak var lblMyBooking: UILabel!
     @IBOutlet weak var collectionMyBooking: UICollectionView!
+    @IBOutlet weak var myBookingHeightConstraint: NSLayoutConstraint!
+    /// Wrapper holding the "Upcoming Bookings" heading + list. It is an arranged
+    /// subview of the page's stack view, so hiding THIS collapses the section
+    /// and its stack spacing outright - hiding the heading and list individually
+    /// left their surrounding spacing behind, which is why an empty section
+    /// still occupied space.
+    @IBOutlet weak var myBookingSectionView: UIView!
+    @IBOutlet weak var viewAllButton: UIButton!
     @IBOutlet weak var lblSmartSuggestion: UILabel!
     @IBOutlet weak var collectionDate: UICollectionView!
     @IBOutlet weak var collectionBookingSuggestion: UICollectionView!
@@ -99,6 +133,10 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     override func viewDidLoad() {
         super.viewDidLoad()
         uiSetup()
+        // Start collapsed: the data assignment that drives this happens before
+        // the view loads, so without this the section would sit open at full
+        // height until the bookings call comes back.
+        updateMyBookingSectionVisibility()
         notificationUnreadDot = NotificationBellInstaller.install(leftOf: btnNameInitial, in: self)
         setupGroupClassesSection()
         generateDates()
@@ -599,17 +637,11 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         if collectionView == collectionSessionType {
             return 4
         } else if collectionView == collectionMyBooking {
-            let count = upcomingSessionData?.count ?? 0
-            if count == 0 {
-                collectionView.showEmptyView(
-                    title: "You have no upcoming bookings",
-                    image: AppImages.search_NoResult,
-                    centerOffset: -30   // adjust if needed
-                )
-            } else {
-                collectionView.restoreEmptyView()
-            }
-            return count
+            // No empty-state placeholder here any more: with nothing booked the
+            // entire section is collapsed by updateMyBookingSectionVisibility(),
+            // so there is no visible collection left to put a message inside.
+            collectionView.restoreEmptyView()
+            return upcomingSessionData?.count ?? 0
         } else if collectionView == collectionDate {
             return dates.count
         } else if collectionView == collectionBookingSuggestion {
@@ -813,32 +845,8 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if collectionView == collectionMyBooking {
             guard let session = self.upcomingSessionData?[indexPath.row] else { return }
-            let typeStr = session.sessionType?.value?.lowercased() ?? ""
-            let bookingType = session.bookingType?.lowercased() ?? ""
-            let isGroupClass = typeStr.contains("group") || typeStr == "class" || bookingType.contains("group") || bookingType == "class"
-            if isGroupClass {
-                let confirmed = SlotConfirmedViewController()
-                let title = session.bookingType?.isEmpty == false ? session.bookingType : session.sessionType?.value
-                confirmed.classTitle = title ?? ""
-                confirmed.classTime = session.timing?.value ?? ""
-                confirmed.classLocation = session.location?.value ?? ""
-                confirmed.trainerName = session.trainer?.value ?? ""
-                confirmed.distance = session.distance?.value ?? ""
-                confirmed.classPrice = session.price?.value ?? ""
-                confirmed.studioLat = Double(session.studioLat?.value ?? "") ?? 0
-                confirmed.studioLng = Double(session.studioLng?.value ?? "") ?? 0
-                confirmed.isReadOnly = true
-                confirmed.bookingId = session.id?.value ?? ""
-                confirmed.canCancelBooking = true
-                confirmed.hidesBottomBarWhenPushed = true
-                self.navigationController?.pushViewController(confirmed, animated: true)
-                return
-            }
-            let vc: BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
-            vc.detailsFlow = .upcoming
-            vc.bookingIdStr = "\(session.id?.value ?? "0")"
-            vc.typeStr = session.sessionType?.value
-            self.navigationController?.pushViewController(vc, animated: true)
+            // Identical to tapping CHECK-IN on the same card, by construction.
+            openUpcomingBooking(session)
         } else if collectionView == collectionMyPTAction {
             let storiesList = homeStoriesData?[indexPath.row].stories
             let vc : ViewStoryVC = ViewStoryVC.instantiate(appStoryboard: .homepage)
@@ -855,7 +863,6 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             let selectedDate = getFormattedDate(from: dates[indexPath.row])
             callSlotsApi(date: selectedDate)
         } else if collectionView == collectionSessionType {
-            let vc : TopPlanVC = TopPlanVC.instantiate(appStoryboard: .homepage)
             let vc1: NewBookingModuleVC = NewBookingModuleVC.instantiate(appStoryboard: .newBookingModule)
             let packageExpireVC: PackageExpireVC = PackageExpireVC.instantiate(appStoryboard: .newBookingModule)
             let myTrainersVC: MyTrainersVC = MyTrainersVC.instantiate(appStoryboard: .newBookingModule)
@@ -904,8 +911,17 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
                 self.navigationController?.pushViewController(myTrainersVC, animated: false)
                 return
             case 3: // Group Classes
-//                vc.selectedPlanType = .upgrade
-                vc.selectedPlanType = .groupClasses
+                // Goes to the Group Classes listing, not TopPlanVC's plan
+                // picker - this tile is a shortcut into the GX catalogue, and
+                // the .groupClasses plan type only ever rendered a plans
+                // screen. Same push the section's own "See All" uses, lat/lng
+                // included so the listing opens already sorted by distance.
+                let seeAllGroupClasses = SeeAllGroupClassesViewController()
+                seeAllGroupClasses.initialLat = self.getLat ?? GroupClassCardFormatter.fallbackLatitude
+                seeAllGroupClasses.initialLng = self.getLong ?? GroupClassCardFormatter.fallbackLongitude
+                seeAllGroupClasses.hidesBottomBarWhenPushed = true
+                self.navigationController?.pushViewController(seeAllGroupClasses, animated: true)
+                return
             default:
                 return
             }
@@ -1125,21 +1141,35 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
         if let getIndx = self.upcomingSessionData?.firstIndex(where: {
             $0.id?.value == sender.accessibilityHint ?? "0"
         }), let session = self.upcomingSessionData?[getIndx] {
-            if session.isGroupClass {
-                // Same BookingDataModel, same routing as the Bookings tab -
-                // see GroupClassBookingRouter's own doc comment for why this
-                // must not be a simpler, state-blind copy again. Home's
-                // "Upcoming Bookings" section has no tabs of its own, but its
-                // content is always conceptually the Upcoming tab's data.
-                GroupClassBookingRouter.route(row: session, isUpcomingTab: true, on: self.navigationController)
-                return
-            }
-            let vc:BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
-            vc.detailsFlow = .upcoming
-            vc.bookingIdStr = "\(session.id?.value ?? "0")"
-            vc.typeStr = session.sessionType?.value
-            self.navigationController?.pushViewController(vc, animated: true)
+            openUpcomingBooking(session)
         }
+    }
+
+    /// The one place an "Upcoming Bookings" row decides where it goes.
+    ///
+    /// Tapping the card and tapping CHECK-IN are the same intent, so they must
+    /// land on the same screen. They used to be two separate implementations:
+    /// this one, and an inline copy in `didSelectItemAt` that re-derived
+    /// "is this a group class?" from `sessionType`/`bookingType` only. That copy
+    /// never looked at `type` - the field that actually carries `group_class` -
+    /// so a class named e.g. "Zumba" failed the check and fell through to the
+    /// old `BookingDetailsViewController` receipt, and it also bypassed the
+    /// router's waitlist / open-spot / cancelled-by-admin handling.
+    private func openUpcomingBooking(_ session: BookingDataModel) {
+        if session.isGroupClass {
+            // Same BookingDataModel, same routing as the Bookings tab - see
+            // GroupClassBookingRouter's own doc comment for why this must not
+            // become a simpler, state-blind copy again. Home's "Upcoming
+            // Bookings" section has no tabs of its own, but its content is
+            // always conceptually the Upcoming tab's data.
+            GroupClassBookingRouter.route(row: session, isUpcomingTab: true, on: self.navigationController)
+            return
+        }
+        let vc: BookingDetailsViewController = BookingDetailsViewController.instantiate(appStoryboard: .booking)
+        vc.detailsFlow = .upcoming
+        vc.bookingIdStr = "\(session.id?.value ?? "0")"
+        vc.typeStr = session.sessionType?.value
+        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     private func getTopContentsApi() {
@@ -1188,7 +1218,19 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             guard let self = self else { return }
             
             if result?.status == true {
-                self.upcomingSessionData = result?.data ?? []
+                // Home's "Upcoming Bookings" shows only what is genuinely still
+                // upcoming. The endpoint also returns waitlist entries and
+                // cancelled/completed rows (the Bookings tab has dedicated tabs
+                // for those), which were being listed here as upcoming - Android
+                // already filters the same three cases out on this screen.
+                self.upcomingSessionData = (result?.data ?? []).filter { row in
+                    if row.isWaitlistRow { return false }
+                    if let bookingType = row.bookingType?.lowercased(),
+                       bookingType.contains("waitlist") { return false }
+                    if let status = row.bookingStatus?.lowercased(),
+                       status.contains("cancel") || status.contains("complete") { return false }
+                    return true
+                }
                 
                 DispatchQueue.main.async {
                     self.collectionMyBooking.reloadData()

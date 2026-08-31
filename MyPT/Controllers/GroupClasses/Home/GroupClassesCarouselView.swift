@@ -50,10 +50,14 @@ final class GroupClassCarouselDotsView: UIView {
     private static let spacing: CGFloat = 4
     private static let selectedColor = UIColor(hex: "#FAFAFA")
     private static let unselectedColor = UIColor(hex: "#31343A")
+    private static let maxVisibleDots: Int = 5
+    /// Edge dot shown smaller to signal "the list continues this way".
+    private static let edgeDotSize: CGFloat = 3
 
     private let stackView = UIStackView()
     private var dotViews: [UIView] = []
     private var widthConstraints: [NSLayoutConstraint] = []
+    private var heightConstraints: [NSLayoutConstraint] = []
 
     private(set) var pageCount: Int = 0
     private(set) var selectedPage: Int = 0
@@ -88,6 +92,20 @@ final class GroupClassCarouselDotsView: UIView {
         ])
     }
 
+    /// First page currently represented by a dot. Below `maxVisibleDots` this is
+    /// always 0 and every page keeps its own dot, so short carousels are
+    /// unchanged; past it the window slides to keep the selection centred.
+    private var windowStart: Int {
+        guard pageCount > GroupClassCarouselDotsView.maxVisibleDots else { return 0 }
+        let half = GroupClassCarouselDotsView.maxVisibleDots / 2
+        let maxStart = pageCount - GroupClassCarouselDotsView.maxVisibleDots
+        return min(max(selectedPage - half, 0), maxStart)
+    }
+
+    private var visibleDotCount: Int {
+        min(pageCount, GroupClassCarouselDotsView.maxVisibleDots)
+    }
+
     func setPageCount(_ count: Int) {
         pageCount = max(count, 0)
         selectedPage = min(selectedPage, max(pageCount - 1, 0))
@@ -95,8 +113,9 @@ final class GroupClassCarouselDotsView: UIView {
         dotViews.forEach { $0.removeFromSuperview() }
         dotViews.removeAll()
         widthConstraints.removeAll()
+        heightConstraints.removeAll()
 
-        for _ in 0..<pageCount {
+        for _ in 0..<visibleDotCount {
             let dot = UIView()
             dot.translatesAutoresizingMaskIntoConstraints = false
             dot.layer.cornerRadius = GroupClassCarouselDotsView.dotSize / 2
@@ -105,7 +124,9 @@ final class GroupClassCarouselDotsView: UIView {
             let widthConstraint = dot.widthAnchor.constraint(equalToConstant: GroupClassCarouselDotsView.dotSize)
             widthConstraint.isActive = true
             widthConstraints.append(widthConstraint)
-            dot.heightAnchor.constraint(equalToConstant: GroupClassCarouselDotsView.dotSize).isActive = true
+            let heightConstraint = dot.heightAnchor.constraint(equalToConstant: GroupClassCarouselDotsView.dotSize)
+            heightConstraint.isActive = true
+            heightConstraints.append(heightConstraint)
 
             stackView.addArrangedSubview(dot)
             dotViews.append(dot)
@@ -118,7 +139,15 @@ final class GroupClassCarouselDotsView: UIView {
         guard pageCount > 0 else { return }
         let clamped = min(max(page, 0), pageCount - 1)
         guard clamped != selectedPage else { return }
+        let previousWindowStart = windowStart
         selectedPage = clamped
+        // Moving pages can slide the window, which changes WHICH pages the dots
+        // represent - restyling the existing dots in place would then map them
+        // to the wrong pages.
+        if windowStart != previousWindowStart {
+            applySelection()
+            return
+        }
         // The selected dot grows 5pt -> 25pt and swaps colour. Writing that
         // straight into the width constraint makes it jump; animating the layout
         // pass lets it glide instead. `.beginFromCurrentState` so a fast scroll
@@ -134,20 +163,33 @@ final class GroupClassCarouselDotsView: UIView {
     }
 
     private func applySelection() {
+        let start = windowStart
         for (index, dot) in dotViews.enumerated() {
-            let isSelected = (index == selectedPage)
+            let page = start + index
+            let isSelected = (page == selectedPage)
+            // Only a dot with more pages beyond it shrinks - a window resting at
+            // the very start or end has nothing further that way to hint at.
+            let isLeadingEdge = index == 0 && start > 0
+            let isTrailingEdge = index == dotViews.count - 1 && (start + dotViews.count) < pageCount
+            let unselectedWidth = (isLeadingEdge || isTrailingEdge)
+                ? GroupClassCarouselDotsView.edgeDotSize
+                : GroupClassCarouselDotsView.dotSize
             widthConstraints[index].constant = isSelected
                 ? GroupClassCarouselDotsView.selectedWidth
+                : unselectedWidth
+            heightConstraints[index].constant = (!isSelected && (isLeadingEdge || isTrailingEdge))
+                ? GroupClassCarouselDotsView.edgeDotSize
                 : GroupClassCarouselDotsView.dotSize
             dot.backgroundColor = isSelected
                 ? GroupClassCarouselDotsView.selectedColor
                 : GroupClassCarouselDotsView.unselectedColor
-            // Exactly half the dot's own 5pt height, not a fixed larger
+            // Half the dot's ACTUAL height so an edge dot stays a circle too.
+            // Exactly half its own height, not a fixed larger
             // value assumed to clamp - Android's equivalent (`CarouselIndicatorView`)
             // used to request a flat 8dp against a 5dp bar and rendered with
             // visibly squared corners on some paths; this stays a guaranteed
             // capsule regardless of the bar's width.
-            dot.layer.cornerRadius = GroupClassCarouselDotsView.dotSize / 2
+            dot.layer.cornerRadius = heightConstraints[index].constant / 2
             dot.layer.masksToBounds = true
         }
     }

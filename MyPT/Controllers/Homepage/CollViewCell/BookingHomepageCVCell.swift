@@ -35,8 +35,18 @@ class BookingHomepageCVCell: UICollectionViewCell {
 
         guard let data = data else { return }
 
-        // Trainer Name
-        lblTrainerName.text = data.trainer?.value ?? ""
+        // A group class is identified by its own name ("Zumba"), not by whoever
+        // is teaching it - showing the trainer here made every class card read
+        // as the instructor's name. Same title resolution GroupClassBookingRouter
+        // uses (bookingType is $class->name, sessionType is the same value as a
+        // fallback), so the card and the screen it opens agree.
+        if data.isGroupClass {
+            let bookingType = data.bookingType?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let resolvedTitle = (bookingType?.isEmpty == false ? bookingType : data.sessionType?.value) ?? ""
+            lblTrainerName.text = resolvedTitle.isEmpty ? "Group Class" : resolvedTitle
+        } else {
+            lblTrainerName.text = data.trainer?.value ?? ""
+        }
 
         // Time Slot
         lblTime.text = data.selected_slot?.value
@@ -50,7 +60,7 @@ class BookingHomepageCVCell: UICollectionViewCell {
 
         // Trainer Image
         imgTrainer.loadImage(urlString: data.trainer_image?.value,
-                             placeholder: UIImage(named: "bookingTrainer"))
+                             placeholder: nil)
     }
     
     func formatDate(_ dateString: String) -> String {

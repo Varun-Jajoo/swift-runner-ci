@@ -12,12 +12,19 @@ class  BookingVM {
     //MARK: -----------------------api/get-booking
     class func getBookingApi(inputType: String?, inputDate: String?, inputSessionType: String?, inputLocation: String?, isShowLoader:Bool = true, completion: @escaping(_ resultData:BookingBaseModel?) -> Void){
         
-         let params:[String:String] = [
+         var params:[String:String] = [
             "type": inputType ?? ""               //type: 0, 1 => completed, 2 => upcoming, 0 => cancel
 //            "session_type": inputSessionType ?? ""  //session_type : home , gym
 //            "location": inputLocation ?? "",         //location: home ,gym
 //            "date": inputDate ?? ""                  //date: 2025-05
          ]
+
+         let storedLatLong = appUserDefaults.getLatLong()?.components(separatedBy: ",")
+         if let lat = storedLatLong?.first, let long = storedLatLong?.last,
+            !lat.isEmpty, !long.isEmpty {
+             params["lat"] = lat
+             params["long"] = long
+         }
         
         NetworkManager.shared.genericAPICall(serviceEndPoint: .get_booking, method: .get , queries: params, parameters:  nil, isShowLoading: false, isShowLoadingWithoutMsg: true, completion: {  ( getResponce, error) in
             do{
@@ -362,9 +369,16 @@ class  BookingVM {
                                 onError: ((String) -> Void)? = nil,
                                 completion: @escaping (_ resultData: [String: Any]?) -> Void) {
            
-           let params: [String: String] = [
+           var params: [String: String] = [
                "type": inputType ?? ""
            ]
+
+           let storedLatLong = appUserDefaults.getLatLong()?.components(separatedBy: ",")
+           if let lat = storedLatLong?.first, let long = storedLatLong?.last,
+              !lat.isEmpty, !long.isEmpty {
+               params["lat"] = lat
+               params["long"] = long
+           }
            
            NetworkManager.shared.genericAPICall(
                serviceEndPoint: .get_booking,

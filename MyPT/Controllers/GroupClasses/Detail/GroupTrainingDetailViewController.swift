@@ -421,11 +421,19 @@ final class GroupTrainingDetailViewController: CommonViewController {
     }
 
     private func applyTrainerImage(_ path: String) {
+        // Freelance classes deliberately return no trainer image (their
+        // admin-uploaded photos have inconsistent aspect ratios), so a blank
+        // value must fall back to the bundled MyPT avatar rather than leave the
+        // view empty.
+        let fallback = UIImage(named: "ic_mypt_trainer_avatar")
+
         // Android hands the raw value straight to Glide; `absoluteImageURL` passes
         // absolute URLs through untouched and additionally resolves bare storage
         // paths, so it is a strict superset of that behaviour.
         if let absoluteURL = GroupClassCardFormatter.absoluteImageURL(path), let url = URL(string: absoluteURL) {
-            trainerAvatarView.sd_setImage(with: url, placeholderImage: nil)
+            trainerAvatarView.sd_setImage(with: url, placeholderImage: fallback)
+        } else {
+            trainerAvatarView.image = fallback
         }
     }
 
@@ -2556,7 +2564,7 @@ private extension GroupTrainingDetailViewController {
         trainerAvatarView.translatesAutoresizingMaskIntoConstraints = false
         trainerAvatarView.contentMode = .scaleAspectFill
         trainerAvatarView.clipsToBounds = true
-        trainerAvatarView.layer.cornerRadius = 16
+        trainerAvatarView.layer.cornerRadius = 32
         trainerAvatarView.backgroundColor = GroupClassColor.bg3.color
         trainerAvatarView.tintColor = .white.withAlphaComponent(0.4)
         trainerAvatarView.image = GroupTrainingDetailViewController.icon(["dummy_trainer"], systemFallback: "person.crop.circle.fill")?
