@@ -7,6 +7,8 @@ import UIKit
 
 final class SeeAllSgptViewController: CommonViewController {
 
+    private var storeToken: UUID?
+
     enum FilterTab: Int, CaseIterable {
         case all
         case thisWeek
@@ -83,6 +85,26 @@ final class SeeAllSgptViewController: CommonViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.isNavigationBarHidden = true
+
+        SgptStore.shared.startWatchingListing()
+        if storeToken == nil {
+            storeToken = SgptStore.shared.observe { [weak self] event in
+                guard let self = self else { return }
+                switch event {
+                case .seatsChanged, .statusChanged, .sessionUpdated, .sessionCreated:
+                    self.loadSessions(showLoader: false)
+                default:
+                    break
+                }
+            }
+        }
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        SgptStore.shared.removeObserver(storeToken)
+        storeToken = nil
+        SgptStore.shared.stopWatchingListing()
     }
 
     override func viewDidLayoutSubviews() {
@@ -151,7 +173,6 @@ final class SeeAllSgptViewController: CommonViewController {
             button.setTitle(title, for: .normal)
             button.titleLabel?.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
             button.setTitleColor(SgptListingColor.neutral200, for: .normal)
-            button.contentEdgeInsets = UIEdgeInsets(top: 4, left: 12, bottom: 4, right: 12)
             button.layer.cornerRadius = 8
             button.tag = index
             button.addTarget(self, action: #selector(tabTapped(_:)), for: .touchUpInside)
@@ -172,6 +193,9 @@ final class SeeAllSgptViewController: CommonViewController {
             button.layer.borderColor = isActive
                 ? SgptListingColor.limeGreen.withAlphaComponent(0.4).cgColor
                 : UIColor.clear.cgColor
+            button.contentEdgeInsets = isActive
+                ? UIEdgeInsets(top: 4, left: 12, bottom: 4, right: 12)
+                : UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8)
         }
     }
 
@@ -354,8 +378,7 @@ extension SeeAllSgptViewController: UICollectionViewDataSource, UICollectionView
         let available = collectionView.bounds.width - sectionInset.left - sectionInset.right
                        - spacing * CGFloat(columns - 1)
         let width = max(available / CGFloat(columns), 0)
-        let scale = width / SgptGridCardCollectionViewCell.cardSize.width
-        return CGSize(width: width, height: SgptGridCardCollectionViewCell.cardSize.height * scale)
+        return CGSize(width: width, height: SgptGridCardCollectionViewCell.heightForWidth(width))
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

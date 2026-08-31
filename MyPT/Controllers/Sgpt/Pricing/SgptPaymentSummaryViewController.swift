@@ -149,7 +149,7 @@ final class SgptPaymentSummaryViewController: CommonViewController {
     private let savingsChipWrapper = UIView()
     private let autoBookNoteLabel = UILabel()
 
-    private var headerBottomAnchor: NSLayoutYAxisAnchor?
+    private var headerView: UIView?
 
     // MARK: - Lifecycle
 
@@ -336,7 +336,7 @@ private extension SgptPaymentSummaryViewController {
     func buildHeader() {
         let header = UIView()
         header.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(header)
+        headerView = header
 
         let backButton = GlassCircularIconButton()
         backButton.translatesAutoresizingMaskIntoConstraints = false
@@ -353,10 +353,6 @@ private extension SgptPaymentSummaryViewController {
         header.addSubview(titleLabel)
 
         NSLayoutConstraint.activate([
-            header.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 12),
-            header.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Metric.horizontalInset),
-            header.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Metric.horizontalInset),
-
             backButton.leadingAnchor.constraint(equalTo: header.leadingAnchor),
             backButton.topAnchor.constraint(equalTo: header.topAnchor),
             backButton.bottomAnchor.constraint(equalTo: header.bottomAnchor, constant: -12),
@@ -364,10 +360,9 @@ private extension SgptPaymentSummaryViewController {
             backButton.heightAnchor.constraint(equalToConstant: 40),
 
             titleLabel.leadingAnchor.constraint(equalTo: backButton.trailingAnchor, constant: 20),
-            titleLabel.centerYAnchor.constraint(equalTo: backButton.centerYAnchor)
+            titleLabel.centerYAnchor.constraint(equalTo: backButton.centerYAnchor),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: header.trailingAnchor)
         ])
-
-        headerBottomAnchor = header.bottomAnchor
     }
 
     // MARK: Footer CTA
@@ -436,7 +431,7 @@ private extension SgptPaymentSummaryViewController {
         scrollView.addSubview(contentStack)
 
         NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: headerBottomAnchor ?? view.safeAreaLayoutGuide.topAnchor),
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: footerView.topAnchor),
@@ -460,6 +455,11 @@ private extension SgptPaymentSummaryViewController {
         autoBookNoteLabel.numberOfLines = 0
         let autoBookNote = buildNote(icon: nil, systemFallback: "figure.strengthtraining.traditional", contentLabel: autoBookNoteLabel)
         let summaryBlock = makeOverlappingBlock(panel: makeOrderSummaryCard(), note: autoBookNote)
+
+        if let header = headerView {
+            contentStack.addArrangedSubview(header)
+            contentStack.setCustomSpacing(20, after: header)
+        }
 
         contentStack.addArrangedSubview(bookingLabel)
         contentStack.setCustomSpacing(12, after: bookingLabel)

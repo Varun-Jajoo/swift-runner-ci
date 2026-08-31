@@ -10,6 +10,8 @@ import AVKit
 import SDWebImage
 
 class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+
+    private var sgptStoreToken: UUID?
     
     var getLat: Double?
     var getLong: Double?
@@ -189,6 +191,19 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
             loadGroupClasses()
             loadSgptClasses()
         }
+
+        SgptStore.shared.startWatchingListing()
+        if sgptStoreToken == nil {
+            sgptStoreToken = SgptStore.shared.observe { [weak self] event in
+                guard let self = self else { return }
+                switch event {
+                case .seatsChanged, .statusChanged, .sessionUpdated, .sessionCreated:
+                    self.loadSgptClasses()
+                default:
+                    break
+                }
+            }
+        }
         if let firstDate = dates.first {
             let todayDate = getFormattedDate(from: firstDate)
             callSlotsApi(date: todayDate)
@@ -198,6 +213,9 @@ class ActiveHomepageVCViewController: UIViewController, UICollectionViewDelegate
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         groupClassesCarousel?.stopRealtime()
+        SgptStore.shared.removeObserver(sgptStoreToken)
+        sgptStoreToken = nil
+        SgptStore.shared.stopWatchingListing()
     }
 
     override func viewDidLayoutSubviews() {

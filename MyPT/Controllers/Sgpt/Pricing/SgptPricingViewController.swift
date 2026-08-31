@@ -105,6 +105,7 @@ final class SgptPricingViewController: CommonViewController {
     private var packs: [SgptPackModel] = []
     private var featuredPack: SgptPackModel?
     private var dealSecondsLeft: Int = 0
+    private var pricingStoreToken: UUID?
     private var countdownTimer: Timer?
     private var countdownValueLabels: [UILabel] = []
     private var countdownRow: UIView?
@@ -136,7 +137,6 @@ final class SgptPricingViewController: CommonViewController {
         heroImageView.contentMode = .scaleAspectFill
         heroImageView.clipsToBounds = true
         buildContent()
-        setupScrollDebugLabel()
         loadPacks()
     }
 
@@ -215,9 +215,6 @@ final class SgptPricingViewController: CommonViewController {
 
     /// Counts the featured deal down as days / hours / minutes.
     ///
-    /// The server sends seconds remaining rather than an end timestamp, so the
-    /// countdown is decremented locally and never drifts with device clock
-    /// skew. With no live deal the row is hidden rather than frozen at zero.
     private func startDealCountdown() {
         countdownTimer?.invalidate()
 
@@ -227,18 +224,26 @@ final class SgptPricingViewController: CommonViewController {
             return
         }
 
+        let endsAt: Date
+        if let iso = deal.dealEndsAt, let parsed = ISO8601DateFormatter().date(from: iso) {
+            endsAt = parsed
+        } else {
+            endsAt = Date().addingTimeInterval(TimeInterval(seconds))
+        }
+
         countdownRow?.isHidden = false
-        dealSecondsLeft = seconds
+        dealSecondsLeft = max(0, Int(endsAt.timeIntervalSinceNow))
         renderCountdown()
 
         countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
             guard let self = self else { timer.invalidate(); return }
-            self.dealSecondsLeft -= 1
-            if self.dealSecondsLeft <= 0 {
+            let remaining = Int(endsAt.timeIntervalSinceNow)
+            if remaining <= 0 {
                 self.countdownRow?.isHidden = true
                 timer.invalidate()
                 return
             }
+            self.dealSecondsLeft = remaining
             self.renderCountdown()
         }
     }
@@ -256,6 +261,22 @@ final class SgptPricingViewController: CommonViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.isNavigationBarHidden = true
+
+        SgptStore.shared.startWatchingPricing()
+        if pricingStoreToken == nil {
+            pricingStoreToken = SgptStore.shared.observe { [weak self] event in
+                if case .pricingPublished = event { self?.loadPacks() }
+            }
+        }
+        startDealCountdown()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        SgptStore.shared.removeObserver(pricingStoreToken)
+        pricingStoreToken = nil
+        SgptStore.shared.stopWatchingPricing()
+        countdownTimer?.invalidate()
     }
 
     override func viewDidLayoutSubviews() {
@@ -274,52 +295,6 @@ final class SgptPricingViewController: CommonViewController {
     // container's clipsToBounds=true cropping it exactly to the screen), so
     // whatever's still visible isn't a missing/gap region in the layout.
     // Removed now that it answered that question.
-
-    /// TEMPORARY - the carousel snap-back report persisted even after
-    /// splitting live style-swap from the deferred resize (see
-    /// updateCenteredPricingCard()/applyPricingCardSizes()'s comments), so
-    /// there's still something wrong with the live scroll state that static
-    /// reasoning about the code hasn't caught. A modal alert can't diagnose
-    /// this one - presenting it would cancel the very touch gesture being
-    /// tested. This is a plain, non-blocking overlay label instead, updated
-    /// on every scroll/settle callback, so a screenshot taken mid-drag (the
-    /// physical volume+side-button shortcut, which doesn't interrupt an
-    /// active touch) can capture exactly what the code believes is
-    /// happening at the moment the snap-back is visible. Remove once
-    /// root-caused.
-    private let scrollDebugLabel = UILabel()
-
-    private func setupScrollDebugLabel() {
-        scrollDebugLabel.translatesAutoresizingMaskIntoConstraints = false
-        scrollDebugLabel.numberOfLines = 0
-        scrollDebugLabel.font = .monospacedSystemFont(ofSize: 10, weight: .regular)
-        scrollDebugLabel.textColor = .white
-        scrollDebugLabel.backgroundColor = UIColor.black.withAlphaComponent(0.7)
-        scrollDebugLabel.text = "scroll debug: waiting for first scroll event"
-        view.addSubview(scrollDebugLabel)
-        NSLayoutConstraint.activate([
-            scrollDebugLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 4),
-            scrollDebugLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 4),
-            scrollDebugLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -4)
-        ])
-    }
-
-    private func updateScrollDebugLabel(context: String) {
-        guard let scrollView = cardsScrollView else { return }
-        let names = pricingCardRefs.map { ref -> String in
-            if ref.card === centeredPricingCard { return "*" }
-            return " "
-        }
-        let nearestIndex = nearestPricingCard(in: scrollView).flatMap { nearest in
-            pricingCardRefs.firstIndex { $0.card === nearest.card }
-        }
-        scrollDebugLabel.text = """
-        [\(context)] offset=\(Int(scrollView.contentOffset.x)) inset L=\(Int(scrollView.contentInset.left)) R=\(Int(scrollView.contentInset.right))
-        tracking=\(scrollView.isTracking ? "T" : "F") dragging=\(scrollView.isDragging ? "T" : "F") decel=\(scrollView.isDecelerating ? "T" : "F") settling=\(isSettlingPricingScroll ? "T" : "F")
-        nearestIdx=\(nearestIndex.map(String.init) ?? "-") centered=\(names.joined())
-        card widths=\(pricingCardRefs.map { Int($0.cardWidthConstraint.constant) })
-        """
-    }
 
     /// Figma's initial state centers "Deal of the Day" with both side cards
     /// peeking equally - the 3 cards together are wider than the screen (the
@@ -404,14 +379,13 @@ final class SgptPricingViewController: CommonViewController {
 extension SgptPricingViewController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         updateCenteredPricingCard()
-        updateScrollDebugLabel(context: "didScroll")
     }
 
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         let proposedTargetX = targetContentOffset.pointee.x
         let viewportCenter = proposedTargetX + scrollView.bounds.width / 2
-        if let nearest = pricingCardRefs.min(by: { abs($0.card.frame.midX - viewportCenter) < abs($1.card.frame.midX - viewportCenter) }) {
-            let targetOffset = nearest.card.frame.midX - scrollView.bounds.width / 2
+        if let nearest = pricingCardRefs.min(by: { abs($0.card.center.x - viewportCenter) < abs($1.card.center.x - viewportCenter) }) {
+            let targetOffset = nearest.card.center.x - scrollView.bounds.width / 2
             let minOffset = -scrollView.adjustedContentInset.left
             let maxOffset = max(scrollView.contentSize.width - scrollView.bounds.width + scrollView.adjustedContentInset.right, minOffset)
             targetContentOffset.pointee.x = min(max(targetOffset, minOffset), maxOffset)
@@ -419,17 +393,14 @@ extension SgptPricingViewController: UIScrollViewDelegate {
     }
 
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        updateScrollDebugLabel(context: "endDragging decelerate=\(decelerate)")
         if !decelerate { snapPricingCardsToNearest() }
     }
 
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        updateScrollDebugLabel(context: "endDecelerating")
         snapPricingCardsToNearest()
     }
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        updateScrollDebugLabel(context: "willBeginDragging")
     }
 }
 
@@ -534,7 +505,7 @@ private extension SgptPricingViewController {
         rightLine.widthAnchor.constraint(equalToConstant: 51).isActive = true
         rightLine.heightAnchor.constraint(equalToConstant: 1).isActive = true
 
-        let star = UIImageView(image: UIImage(systemName: "sparkle"))
+        let star = UIImageView(image: UIImage(named: "sgpt-ic-sparkle") ?? UIImage(systemName: "sparkle"))
         star.tintColor = UIColor(white: 0.85, alpha: 1)
         star.contentMode = .scaleAspectFit
         star.widthAnchor.constraint(equalToConstant: 11).isActive = true
@@ -624,7 +595,7 @@ private extension SgptPricingViewController {
         cardHeightConstraint.isActive = true
 
         let badge = UILabel()
-        badge.font = AppFont.medium.size(plan.isCenter ? 13 : 12, familyName: familyClashDisplay)
+        badge.font = AppFont.medium.size(13, familyName: familyClashDisplay)
         badge.textColor = .white
         badge.textAlignment = .center
         badge.text = plan.badge
@@ -693,15 +664,25 @@ private extension SgptPricingViewController {
         badge.layer.cornerRadius = (isCenter ? PricingMetric.mainBadgeHeight : PricingMetric.sideBadgeHeight) / 2
         badge.clipsToBounds = true
 
-        badge.layer.sublayers?.filter { $0.name == "sgptPricingBadgeGlow" }.forEach { $0.removeFromSuperlayer() }
         guard isCenter else {
             badge.layer.borderWidth = 1
             badge.layer.borderColor = UIColor.white.withAlphaComponent(0.30).cgColor
             return
         }
 
+        let size = CGSize(width: PricingMetric.mainBadgeWidth, height: PricingMetric.mainBadgeHeight)
+        if let image = Self.radialBadgeImage(size: size) {
+            badge.backgroundColor = UIColor(patternImage: image)
+        }
+        badge.textColor = .white
+        badge.layer.borderWidth = 1.0
+        badge.layer.borderColor = UIColor(hex: "#C084FC").withAlphaComponent(0.45).cgColor
+    }
+
+    private static func radialBadgeImage(size: CGSize) -> UIImage? {
+        guard size.width > 0, size.height > 0 else { return nil }
+
         let glow = CAGradientLayer()
-        glow.name = "sgptPricingBadgeGlow"
         glow.type = .radial
         glow.colors = [UIColor(hex: "#A855F7").withAlphaComponent(0.85).cgColor,
                        UIColor(hex: "#6B1FB3").withAlphaComponent(0.65).cgColor,
@@ -709,10 +690,11 @@ private extension SgptPricingViewController {
         glow.locations = [0.0, 0.5, 1.0]
         glow.startPoint = CGPoint(x: 0.5, y: 0.1)
         glow.endPoint = CGPoint(x: 1.0, y: 1.0)
-        glow.frame = CGRect(x: 0, y: 0, width: PricingMetric.mainBadgeWidth, height: PricingMetric.mainBadgeHeight)
-        badge.layer.insertSublayer(glow, at: 0)
-        badge.layer.borderWidth = 1.0
-        badge.layer.borderColor = UIColor(hex: "#C084FC").withAlphaComponent(0.45).cgColor
+        glow.frame = CGRect(origin: .zero, size: size)
+
+        return UIGraphicsImageRenderer(size: size).image { context in
+            glow.render(in: context.cgContext)
+        }
     }
 
     // MARK: Cards carousel (scroll-driven highlight, matches SgptPricingActivity.kt)
@@ -721,7 +703,7 @@ private extension SgptPricingViewController {
     /// (SgptPricingActivity.kt's `cards.minByOrNull { abs(...) }`).
     private func nearestPricingCard(in scrollView: UIScrollView) -> PricingCardRef? {
         let viewportCenter = scrollView.contentOffset.x + scrollView.bounds.width / 2
-        return pricingCardRefs.min { abs($0.card.frame.midX - viewportCenter) < abs($1.card.frame.midX - viewportCenter) }
+        return pricingCardRefs.min { abs($0.card.center.x - viewportCenter) < abs($1.card.center.x - viewportCenter) }
     }
 
     /// Whichever card is nearest the viewport's center gets the "main" card's
@@ -795,7 +777,7 @@ private extension SgptPricingViewController {
                 let scale: CGFloat = isCentered ? 1.0 : (133.0 / 146.0)
                 ref.card.transform = CGAffineTransform(scaleX: scale, y: scale)
             }
-            self.view.layoutIfNeeded()
+            self.cardsScrollView?.layoutIfNeeded()
         }
         if animated {
             UIView.animate(withDuration: 0.25, delay: 0, options: [.curveEaseOut, .beginFromCurrentState], animations: block)
@@ -806,7 +788,7 @@ private extension SgptPricingViewController {
 
     func centerPricingCard(_ card: UIView, animated: Bool) {
         guard let scrollView = cardsScrollView else { return }
-        let target = card.frame.midX - scrollView.bounds.width / 2
+        let target = card.center.x - scrollView.bounds.width / 2
         // Must clamp against the INSET-aware range, not [0, contentSize -
         // bounds]: the whole point of the contentInset padding added in
         // performInitialPricingCenteringIfNeeded() is to let an edge card's
@@ -885,7 +867,9 @@ private extension SgptPricingViewController {
 
     private func makePriceRow(_ plan: PlanCard) -> UIView {
         let priceLabel = UILabel()
-        priceLabel.font = AppFont.medium.size(plan.isCenter ? 18 : 16, familyName: familyFunnelSans)
+        priceLabel.font = plan.isCenter
+            ? AppFont.medium.size(18, familyName: familyFunnelSans)
+            : AppFont.regular.size(16, familyName: familyFunnelSans)
         priceLabel.textColor = plan.isCenter ? .white : .white.withAlphaComponent(0.75)
         priceLabel.text = plan.price
 

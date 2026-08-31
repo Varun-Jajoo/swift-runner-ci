@@ -1,23 +1,3 @@
-//
-//  SgptGridCardCollectionViewCell.swift
-//  MyPT
-//
-//  Self-contained SGPT card for the See All grid - title/subtitle overlaid
-//  directly on the cover photo behind a bottom scrim, unlike the home
-//  carousel's `SgptCardCollectionViewCell`, which stacks its title/subtitle
-//  below the cover photo instead - see that type's own doc comment.
-//
-//  A vertically-scrolling grid showing many cards at once has no single
-//  "spotlight" card to hang shared labels off of, so each card needs to
-//  carry its own info exactly like it used to - this is a deliberate split
-//  into two cell types, not an oversight. Same relationship as Group
-//  Classes' `GroupClassCardCollectionViewCell` (home carousel) vs.
-//  `SeeAllGridCollectionViewCell` (See All grid): two different cell types
-//  for two different presentation contexts that happen to share a data model.
-//
-//  Code-based (no xib), matching `SeeAllGridCollectionViewCell`'s own
-//  construction style for this exact "See All" screen family.
-//
 
 import UIKit
 import SDWebImage
@@ -26,23 +6,23 @@ final class SgptGridCardCollectionViewCell: UICollectionViewCell {
 
     static let reuseIdentifier = "SgptGridCardCollectionViewCell"
 
-    /// Reference aspect ratio for the grid's responsive sizing
-    /// (`SeeAllSgptViewController.sizeForItemAt` scales this to the actual
-    /// per-column width) - the original SGPT card proportions, unrelated to
-    /// the home carousel's own (since-revised) card sizes.
-    static let cardSize = CGSize(width: 230, height: 426)
+    static let cardSize = CGSize(width: 196.5, height: 322)
 
-    private static let cardCornerRadius: CGFloat = 21.406
+    private static let imageAspectRatio: CGFloat = 271.0 / 196.5
 
-    /// Matches `GroupClassCardCollectionViewCell`'s own card fill, for visual
-    /// consistency with the Group Classes grid living in the same app.
-    private static let scrimColor = UIColor(hex: "#0D1918")
+    private static let infoBlockHeight: CGFloat = 43
+    private static let imageToInfoGap: CGFloat = 8
 
-    private let cardView = GlassCardView(cornerRadius: SgptGridCardCollectionViewCell.cardCornerRadius)
+    static func heightForWidth(_ width: CGFloat) -> CGFloat {
+        width * imageAspectRatio + imageToInfoGap + infoBlockHeight
+    }
+
+    private static let cornerRadius: CGFloat = 12
+
+    private let imageContainer = UIView()
     private let coverImageView = UIImageView()
-    private let coverFadeView = GradientFadeView()
     private let titleLabel = UILabel()
-    private let subtitleLabel = UILabel()
+    private let dateLabel = UILabel()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -58,75 +38,68 @@ final class SgptGridCardCollectionViewCell: UICollectionViewCell {
         contentView.backgroundColor = .clear
         backgroundColor = .clear
 
-        cardView.translatesAutoresizingMaskIntoConstraints = false
-        // Full-bleed cover photo sits in front of it, so the sheen highlight
-        // (drawn behind every subview) would never actually be visible.
-        cardView.showsSheen = false
-        contentView.addSubview(cardView)
+        imageContainer.translatesAutoresizingMaskIntoConstraints = false
+        imageContainer.layer.cornerRadius = SgptGridCardCollectionViewCell.cornerRadius
+        imageContainer.clipsToBounds = true
+        imageContainer.backgroundColor = UIColor(red: 0.0505, green: 0.0995, blue: 0.0943, alpha: 1)
+        contentView.addSubview(imageContainer)
 
         coverImageView.translatesAutoresizingMaskIntoConstraints = false
         coverImageView.contentMode = .scaleAspectFill
         coverImageView.clipsToBounds = true
-        cardView.addSubview(coverImageView)
-
-        coverFadeView.translatesAutoresizingMaskIntoConstraints = false
-        coverFadeView.setColors([SgptGridCardCollectionViewCell.scrimColor.withAlphaComponent(0.0),
-                                 SgptGridCardCollectionViewCell.scrimColor.withAlphaComponent(0.55),
-                                 SgptGridCardCollectionViewCell.scrimColor.withAlphaComponent(0.92)],
-                                locations: [0.0, 0.45, 1.0])
-        cardView.addSubview(coverFadeView)
+        imageContainer.addSubview(coverImageView)
 
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.font = AppFont.medium.size(20.0, familyName: familyClashDisplay)
+        titleLabel.font = AppFont.medium.size(16.0, familyName: familyClashDisplay)
         titleLabel.textColor = .white
         titleLabel.textAlignment = .center
         titleLabel.numberOfLines = 1
 
-        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        subtitleLabel.textAlignment = .center
-        subtitleLabel.numberOfLines = 0
+        dateLabel.translatesAutoresizingMaskIntoConstraints = false
+        dateLabel.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
+        dateLabel.textColor = .white.withAlphaComponent(0.55)
+        dateLabel.textAlignment = .center
+        dateLabel.numberOfLines = 1
 
-        let stack = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.axis = .vertical
-        stack.alignment = .center
-        stack.spacing = 6
-        cardView.addSubview(stack)
+        let infoStack = UIStackView(arrangedSubviews: [titleLabel, dateLabel])
+        infoStack.translatesAutoresizingMaskIntoConstraints = false
+        infoStack.axis = .vertical
+        infoStack.alignment = .center
+        infoStack.spacing = 7
+        contentView.addSubview(infoStack)
 
         NSLayoutConstraint.activate([
-            cardView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            cardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            cardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            cardView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            imageContainer.topAnchor.constraint(equalTo: contentView.topAnchor),
+            imageContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            imageContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
 
-            coverImageView.topAnchor.constraint(equalTo: cardView.topAnchor),
-            coverImageView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
-            coverImageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
-            coverImageView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor),
+            coverImageView.topAnchor.constraint(equalTo: imageContainer.topAnchor),
+            coverImageView.leadingAnchor.constraint(equalTo: imageContainer.leadingAnchor),
+            coverImageView.trailingAnchor.constraint(equalTo: imageContainer.trailingAnchor),
+            coverImageView.bottomAnchor.constraint(equalTo: imageContainer.bottomAnchor),
 
-            coverFadeView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
-            coverFadeView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
-            coverFadeView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor),
-            coverFadeView.heightAnchor.constraint(equalToConstant: 170),
-
-            stack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 16),
-            stack.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -16),
-            stack.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -20)
+            infoStack.topAnchor.constraint(equalTo: imageContainer.bottomAnchor, constant: 8),
+            infoStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            infoStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            infoStack.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor)
         ])
+
+        imageContainer.heightAnchor.constraint(
+            equalTo: imageContainer.widthAnchor,
+            multiplier: SgptGridCardCollectionViewCell.imageAspectRatio
+        ).isActive = true
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
         coverImageView.image = nil
         titleLabel.text = nil
-        subtitleLabel.attributedText = nil
+        dateLabel.text = nil
     }
 
-    // MARK: Configure
-
     func configure(with item: SgptSessionModel) {
-        titleLabel.text = SgptCardCollectionViewCell.titleText(for: item)
-        subtitleLabel.attributedText = SgptCardCollectionViewCell.subtitleText(for: item)
+        titleLabel.text = Self.titleText(for: item)
+        dateLabel.text = Self.dateText(for: item)
 
         let fallback = UIImage(named: "class-card-placeholder")
         if let imageURL = item.image, !imageURL.isEmpty, let url = URL(string: imageURL) {
@@ -134,5 +107,35 @@ final class SgptGridCardCollectionViewCell: UICollectionViewCell {
         } else {
             coverImageView.image = fallback
         }
+    }
+
+    private static func titleText(for item: SgptSessionModel) -> String {
+        if let name = item.sessionName, !name.isEmpty {
+            return name
+        }
+        return "Small Group PT"
+    }
+
+    private static func dateText(for item: SgptSessionModel) -> String {
+        let studio = GroupClassCardFormatter.chipLabel(item.studioName)
+
+        guard let dateStr = item.date, !dateStr.isEmpty,
+              let timeStr = item.time, !timeStr.isEmpty else {
+            return studio
+        }
+
+        let combinedFormatter = DateFormatter()
+        combinedFormatter.locale = Locale(identifier: "en_US_POSIX")
+        combinedFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        guard let start = combinedFormatter.date(from: "\(dateStr) \(timeStr)") else {
+            return studio
+        }
+
+        let displayFormatter = DateFormatter()
+        displayFormatter.locale = Locale(identifier: "en_US_POSIX")
+        displayFormatter.dateFormat = "EEE, d MMM, h:mm a"
+        let schedule = displayFormatter.string(from: start)
+
+        return studio.isEmpty ? schedule : "\(schedule) - \(studio)"
     }
 }

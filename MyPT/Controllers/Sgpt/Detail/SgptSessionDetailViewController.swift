@@ -44,6 +44,7 @@ final class SgptSessionDetailViewController: CommonViewController {
 
     /// Set before this screen is pushed.
     var session = SgptSessionModel()
+    private var storeToken: UUID?
 
     // MARK: - Outlets (declared in Homepage.storyboard)
 
@@ -144,6 +145,57 @@ final class SgptSessionDetailViewController: CommonViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.isNavigationBarHidden = true
+
+        let sessionId = session.id?.value ?? ""
+        guard !sessionId.isEmpty else { return }
+
+        SgptStore.shared.startWatching(sessionId: sessionId)
+        if storeToken == nil {
+            storeToken = SgptStore.shared.observe { [weak self] event in
+                guard let self = self else { return }
+                switch event {
+                case .seatsChanged(let id) where id == sessionId:
+                    self.applyLiveState()
+                case .statusChanged(let id, _) where id == sessionId:
+                    self.applyLiveState()
+                case .sessionUpdated(let id, _) where id == sessionId:
+                    self.applyLiveState()
+                default:
+                    break
+                }
+            }
+        }
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        SgptStore.shared.removeObserver(storeToken)
+        storeToken = nil
+        let sessionId = session.id?.value ?? ""
+        if !sessionId.isEmpty {
+            SgptStore.shared.stopWatching(sessionId: sessionId)
+        }
+    }
+
+    private func applyLiveState() {
+        let sessionId = session.id?.value ?? ""
+        guard !sessionId.isEmpty, let state = SgptStore.shared.state(for: sessionId) else { return }
+
+        if let maxSize = state.maxSize {
+            session.maxSize = FlexibleValue(value: String(maxSize))
+        }
+        if let booked = state.bookedCount {
+            session.bookedCount = FlexibleValue(value: String(booked))
+        }
+        if let remaining = state.remainingSeats {
+            session.remainingSeats = FlexibleValue(value: String(remaining))
+        }
+
+        let maxSize = GroupClassCardFormatter.intValue(session.maxSize, defaultValue: 0)
+        let booked = GroupClassCardFormatter.intValue(session.bookedCount, defaultValue: 0)
+        let progress = maxSize > 0 ? CGFloat(booked) / CGFloat(maxSize) : 0
+        seatsProgressBar.setProgress(progress)
+        seatsCountLabel.attributedText = seatsCountText(booked: booked, maxSize: maxSize)
     }
 
     override func viewSafeAreaInsetsDidChange() {

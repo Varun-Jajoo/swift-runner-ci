@@ -61,6 +61,7 @@ struct SgptPackModel: Codable {
     var isDeal: Bool?
     var dealPillText: String?
     var dealEndsInSeconds: Int?
+    var dealEndsAt: String?
 
     enum CodingKeys: String, CodingKey {
         case id, name, credits, price, validity, msg
@@ -71,6 +72,7 @@ struct SgptPackModel: Codable {
         case isDeal = "is_deal"
         case dealPillText = "deal_pill_text"
         case dealEndsInSeconds = "deal_ends_in_seconds"
+        case dealEndsAt = "deal_ends_at"
     }
 }
 

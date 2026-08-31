@@ -496,7 +496,7 @@
                                                     <constraint firstItem="sal082" firstAttribute="centerX" secondItem="sal080" secondAttribute="centerX" id="sal087"/>
                                                     <constraint firstItem="sal082" firstAttribute="width" constant="133.47" id="sal088"/>
                                                     <constraint firstItem="sal082" firstAttribute="height" constant="14" id="sal089"/>
-                                                    <constraint firstAttribute="bottom" secondItem="sal082" secondAttribute="bottom" id="sal090"/>
+                                                    <constraint firstAttribute="bottom" secondItem="sal082" secondAttribute="bottom" constant="14" id="sal090"/>
                                                 </constraints>
                                             </view>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sal100">
@@ -544,9 +544,9 @@
                                                     </scrollView>
                                                 </subviews>
                                                 <constraints>
-                                                    <constraint firstItem="sal101" firstAttribute="top" secondItem="sal100" secondAttribute="top" constant="14" id="sal120"/>
+                                                    <constraint firstItem="sal101" firstAttribute="top" secondItem="sal100" secondAttribute="top" constant="8" id="sal120"/>
                                                     <constraint firstItem="sal101" firstAttribute="leading" secondItem="sal100" secondAttribute="leading" constant="16" id="sal121"/>
-                                                    <constraint firstAttribute="bottom" secondItem="sal101" secondAttribute="bottom" id="sal122"/>
+                                                    <constraint firstAttribute="bottom" secondItem="sal101" secondAttribute="bottom" constant="22" id="sal122"/>
                                                     <constraint firstItem="sal109" firstAttribute="leading" secondItem="sal101" secondAttribute="trailing" constant="12" id="sal123"/>
                                                     <constraint firstItem="sal109" firstAttribute="centerY" secondItem="sal101" secondAttribute="centerY" id="sal124"/>
                                                     <constraint firstItem="sal112" firstAttribute="leading" secondItem="sal109" secondAttribute="trailing" constant="12" id="sal125"/>
@@ -558,7 +558,7 @@
                                                 <rect key="frame" x="0.0" y="1208" width="393" height="135"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="height" constant="135" id="sal131"/>
+                                                    <constraint firstAttribute="height" constant="149" id="sal131"/>
                                                 </constraints>
                                                 <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="15" minimumInteritemSpacing="15" id="sal132">
                                                     <size key="itemSize" width="81" height="121"/>
