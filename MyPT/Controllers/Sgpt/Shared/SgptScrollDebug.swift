@@ -91,6 +91,39 @@ final class SgptScrollDebug {
         log(parts.joined(separator: " "))
     }
 
+    // MARK: - contentSize culprit
+
+    private var sizeObservation: NSKeyValueObservation?
+
+    /// contentSize is shrinking by exactly the overscroll amount, and it is not
+    /// the view controller's layout doing it. KVO fires inside the setter, so
+    /// the call stack at that moment names whatever is actually resizing the
+    /// content.
+    func watchContentSize(_ scrollView: UIScrollView) {
+        guard Self.isEnabled else { return }
+
+        sizeObservation = scrollView.observe(\.contentSize, options: [.old, .new]) { [weak self] _, change in
+            guard let old = change.oldValue, let new = change.newValue, old.height != new.height else { return }
+
+            self?.log(String(format: "contentSize %.1f -> %.1f", old.height, new.height))
+
+            // Only this app's frames - the UIKit ones in between are noise.
+            let frames = Thread.callStackSymbols
+                .filter { $0.contains("MyPT") }
+                .prefix(6)
+
+            if frames.isEmpty {
+                self?.log("   (no MyPT frames - set by UIKit/Auto Layout)")
+            } else {
+                for f in frames {
+                    // Trim the address/offset columns, keep the symbol.
+                    let parts = f.split(separator: " ").dropFirst(3).prefix(4).joined(separator: " ")
+                    self?.log("   " + parts)
+                }
+            }
+        }
+    }
+
     // MARK: - Output
 
     var dump: String {

@@ -161,6 +161,9 @@ final class SgptPricingViewController: CommonViewController {
         // isPricingCarousel(), so behaviour is unchanged.
         mainScrollView?.delegate = self
         SgptScrollDebug.shared.attachOverlay(to: view)
+        if let main = mainScrollView {
+            SgptScrollDebug.shared.watchContentSize(main)
+        }
         SgptScrollDebug.shared.log("viewDidLoad")
     }
 
@@ -181,7 +184,12 @@ final class SgptPricingViewController: CommonViewController {
             return
         }
         lastDebugGeometry = key
-        debugSnapshot(label + " GEOMETRY-CHANGED")
+        debugSnapshot(String(
+            format: "GEOM cont=%.1f hero=%.1f | %@",
+            contentContainer?.frame.height ?? -1,
+            heroImageView?.frame.height ?? -1,
+            label
+        ))
     }
 
     private func debugSnapshot(_ label: String) {
