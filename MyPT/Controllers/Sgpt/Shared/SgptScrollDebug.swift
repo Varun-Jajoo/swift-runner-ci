@@ -63,7 +63,19 @@ final class SgptScrollDebug {
         var parts: [String] = [label]
 
         if let main = main {
-            parts.append(String(format: "mainY=%.1f", main.contentOffset.y))
+            // contentSize / inset / maxOffset are what a damped oscillation at
+            // the bottom limit is actually about: if the reachable bottom moves
+            // while the scroll view is pinned there, it re-clamps and springs.
+            let maxY = main.contentSize.height - main.bounds.height + main.adjustedContentInset.bottom
+            parts.append(String(
+                format: "mainY=%.1f max=%.1f csH=%.1f bH=%.1f insB=%.1f over=%.1f",
+                main.contentOffset.y,
+                maxY,
+                main.contentSize.height,
+                main.bounds.height,
+                main.adjustedContentInset.bottom,
+                main.contentOffset.y - maxY
+            ))
         }
         if let c = carousel {
             parts.append(String(format: "carX=%.1f", c.contentOffset.x))

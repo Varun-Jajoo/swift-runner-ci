@@ -169,6 +169,21 @@ final class SgptPricingViewController: CommonViewController {
         pricingCardRefs.map { $0.card }
     }
 
+    /// Only emits when the geometry that matters actually changes - the raw
+    /// per-frame stream buried the signal and made the overlay itself expensive.
+    private var lastDebugGeometry: String = ""
+
+    private func debugSnapshotIfChanged(_ label: String) {
+        guard let main = mainScrollView else { return }
+        let maxY = main.contentSize.height - main.bounds.height + main.adjustedContentInset.bottom
+        let key = String(format: "%.0f|%.0f|%.0f", main.contentSize.height, main.adjustedContentInset.bottom, maxY)
+        if key == lastDebugGeometry {
+            return
+        }
+        lastDebugGeometry = key
+        debugSnapshot(label + " GEOMETRY-CHANGED")
+    }
+
     private func debugSnapshot(_ label: String) {
         SgptScrollDebug.shared.snapshot(
             label,
@@ -444,7 +459,7 @@ extension SgptPricingViewController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         // Logged for BOTH scroll views: if the cards move while only the
         // vertical one is scrolling, the cause is layout, not the carousel.
-        debugSnapshot(isPricingCarousel(scrollView) ? "carScroll" : "mainScroll")
+        debugSnapshotIfChanged(isPricingCarousel(scrollView) ? "carScroll" : "mainScroll")
         guard isPricingCarousel(scrollView), (scrollView.isDragging || scrollView.isDecelerating) else { return }
         updateCenteredPricingCard()
     }
