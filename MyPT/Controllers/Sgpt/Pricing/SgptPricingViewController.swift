@@ -505,12 +505,11 @@ private extension SgptPricingViewController {
         column.addArrangedSubview(makeTermsLabel())
 
         // Pull the plan content up to start where the hero's own baked-in
-        // fade completes rather than leaving a dead gap of solid background
-        // - same tuning correction made on Android after the first pass left
-        // too much empty space between the fade and "Select your plan".
+        // fade completes without using UIStackView negative spacing (which causes
+        // jumpy/broken layout calculations inside a UIScrollView during vertical scroll).
         if let stack = contentContainer.superview as? UIStackView,
            let heroView = stack.arrangedSubviews.first {
-            stack.setCustomSpacing(-100, after: heroView)
+            stack.setCustomSpacing(0, after: heroView)
         }
     }
 
@@ -562,7 +561,7 @@ private extension SgptPricingViewController {
         let scroll = UIScrollView()
         scroll.translatesAutoresizingMaskIntoConstraints = false
         scroll.showsHorizontalScrollIndicator = false
-        scroll.clipsToBounds = false
+        scroll.clipsToBounds = true
         scroll.delegate = self
         cardsScrollView = scroll
 
@@ -595,7 +594,7 @@ private extension SgptPricingViewController {
             row.leadingAnchor.constraint(equalTo: scroll.contentLayoutGuide.leadingAnchor),
             row.trailingAnchor.constraint(equalTo: scroll.contentLayoutGuide.trailingAnchor),
             row.heightAnchor.constraint(equalTo: scroll.frameLayoutGuide.heightAnchor),
-            scroll.heightAnchor.constraint(equalToConstant: 187)
+            scroll.heightAnchor.constraint(equalToConstant: 195)
         ])
         return scroll
     }
