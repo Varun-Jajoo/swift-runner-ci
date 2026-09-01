@@ -370,6 +370,18 @@ final class SgptSessionDetailViewController: CommonViewController {
 
     private func pushPricing() {
         let vc: SgptPricingViewController = .instantiate(appStoryboard: .sgpt)
+        vc.studioId = session.studioId?.value ?? ""
+        vc.sessionName = session.sessionName ?? ""
+        vc.sessionTrainerName = session.trainerName ?? ""
+        // Formatted here rather than downstream: these helpers live on this
+        // screen and already produce the exact strings the summary card shows.
+        // "--" is their empty marker, which the summary's meta line should
+        // drop rather than print.
+        let date = Self.formattedDate(session.date)
+        let time = Self.formattedTime(session.time)
+        vc.sessionDate = date == "--" ? "" : date
+        vc.sessionTime = time == "--" ? "" : time
+        vc.sessionImageURL = session.image ?? ""
         navigationController?.pushViewController(vc, animated: true)
     }
 

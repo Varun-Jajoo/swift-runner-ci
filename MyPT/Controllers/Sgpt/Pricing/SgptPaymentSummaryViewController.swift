@@ -84,7 +84,7 @@ final class SgptPaymentSummaryViewController: CommonViewController {
         static let savingsText = UIColor(hex: "#89C5C0")
         static let noteText = UIColor.white
         static let noteSubtext = UIColor(hex: "#FAFAFA").withAlphaComponent(0.55)
-        static let ctaInk = UIColor(hex: "#000502")
+        static let ctaInk = UIColor(hex: "#141514")
         static let footerFill = UIColor(hex: "#131416")
         static let footerAccent = UIColor(hex: "#2A8DFF")
         static let imageTileTop = UIColor(hex: "#1A0A3D")
@@ -380,24 +380,18 @@ private extension SgptPaymentSummaryViewController {
         // GradientCTAButton's default near-white body (#FFFFFF -> #F0F0F0) plus
         // its #808080 offset band already match Figma's CTA gradient and hard
         // shadow (`shadow-[1px_2.5px_0px_0px_#808080]`) with no overrides needed.
+        // Same treatment as the detail screen's "GET CREDIT & RESERVE" CTA the
+        // user arrives from - Funnel Sans medium 14, #141514 ink, trailing
+        // chevron - so the two read as one button carried across the flow.
         ctaButton.translatesAutoresizingMaskIntoConstraints = false
         ctaButton.bandThickness = 3
         ctaButton.configure(title: Copy.ctaTitle,
-                            font: AppFont.bold.size(16.0, familyName: familyFunnelSans),
+                            font: AppFont.medium.size(14.0, familyName: familyFunnelSans),
                             titleColor: Palette.ctaInk,
                             cornerRadius: 12)
-        // configure() calls setTitle(_:for:) internally; a plain title has no
-        // letter-spacing hook, so the uppercase CTA's 1pt tracking needs its
-        // own setAttributedTitle pass on top - mutating titleLabel.text/
-        // attributedText directly doesn't stick, UIButton owns that state.
-        ctaButton.setAttributedTitle(
-            NSAttributedString(string: Copy.ctaTitle, attributes: [
-                .kern: 1.0,
-                .foregroundColor: Palette.ctaInk,
-                .font: AppFont.bold.size(16.0, familyName: familyFunnelSans)
-            ]),
-            for: .normal
-        )
+        ctaButton.setTrailingIcon(UIImage(named: "sgpt-ic-chevron-right")
+                                  ?? UIImage(systemName: "chevron.right"),
+                                  tint: Palette.ctaInk)
         ctaButton.addTarget(self, action: #selector(confirmTapped), for: .touchUpInside)
         footerView.addSubview(ctaButton)
 
@@ -759,6 +753,8 @@ private extension SgptPaymentSummaryViewController {
     }
 
     func makeSummaryRow(labelLabel: UILabel, valueLabel: UILabel) -> UIView {
+        labelLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
+        labelLabel.textColor = Palette.summaryLabel
         valueLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
         valueLabel.textColor = Palette.summaryValue
         valueLabel.textAlignment = .right

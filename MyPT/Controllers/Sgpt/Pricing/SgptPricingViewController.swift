@@ -67,6 +67,14 @@ final class SgptPricingViewController: CommonViewController {
         static let mainBadgeHeight: CGFloat = 34
         static let sideBadgeWidth: CGFloat = 113
         static let sideBadgeHeight: CGFloat = 31
+
+        /// Cards are built at the main size and shrunk by transform, never by
+        /// mutating constraints - a constraint-only shrink left the card's
+        /// fixed-size contents at center size inside a side-size box, which is
+        /// what cropped them. Figma's four main->side ratios all agree
+        /// (133/146, 170/187, 113/124, 31/34 - within 0.3pt), so one uniform
+        /// scale reproduces every one of them.
+        static let sideScale: CGFloat = sideCardWidth / mainCardWidth
     }
 
     /// Mirrors SgptPricingActivity.kt's own `PricingCard` - a reference to
@@ -75,10 +83,6 @@ final class SgptPricingViewController: CommonViewController {
     private struct PricingCardRef {
         let card: SgptGlassBorderView
         let badge: UILabel
-        let cardWidthConstraint: NSLayoutConstraint
-        let cardHeightConstraint: NSLayoutConstraint
-        let badgeWidthConstraint: NSLayoutConstraint
-        let badgeHeightConstraint: NSLayoutConstraint
     }
 
     private struct PlanCard {
@@ -102,6 +106,14 @@ final class SgptPricingViewController: CommonViewController {
     /// Club whose pricing to show; blank fetches every club's packs.
     var studioId: String = ""
 
+    /// Session the user came from, forwarded to the payment summary so its
+    /// top card shows the real class rather than the generic fallback.
+    var sessionName: String = ""
+    var sessionTrainerName: String = ""
+    var sessionDate: String = ""
+    var sessionTime: String = ""
+    var sessionImageURL: String = ""
+
     private var packs: [SgptPackModel] = []
     private var featuredPack: SgptPackModel?
     private var dealSecondsLeft: Int = 0
@@ -111,6 +123,7 @@ final class SgptPricingViewController: CommonViewController {
     private var countdownRow: UIView?
 
     private var cardsScrollView: UIScrollView?
+    private let pricingDots = GroupClassCarouselDotsView()
     private var pricingCardRefs: [PricingCardRef] = []
     /// Which card to scroll to on first layout - not the same as
     /// `centeredPricingCard` below, which must start nil (see
@@ -360,7 +373,15 @@ final class SgptPricingViewController: CommonViewController {
             savings = 0
         }
 
-        SgptPaymentSummaryViewController.start(from: self, credits: credits, price: price, savings: savings)
+        SgptPaymentSummaryViewController.start(from: self,
+                                               credits: credits,
+                                               price: price,
+                                               savings: savings,
+                                               sessionName: sessionName,
+                                               trainerName: sessionTrainerName,
+                                               date: sessionDate,
+                                               time: sessionTime,
+                                               image: sessionImageURL)
     }
 
     @objc private func termsTapped() {
@@ -377,11 +398,19 @@ final class SgptPricingViewController: CommonViewController {
 // MARK: - Cards carousel scroll handling
 
 extension SgptPricingViewController: UIScrollViewDelegate {
+    // Carousel-only: the outer vertical scroll view must never drive card
+    // recentring/resizing, or scrolling the page top-to-bottom judders.
+    private func isPricingCarousel(_ scrollView: UIScrollView) -> Bool {
+        scrollView === cardsScrollView
+    }
+
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard isPricingCarousel(scrollView) else { return }
         updateCenteredPricingCard()
     }
 
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        guard isPricingCarousel(scrollView) else { return }
         let proposedTargetX = targetContentOffset.pointee.x
         let viewportCenter = proposedTargetX + scrollView.bounds.width / 2
         if let nearest = pricingCardRefs.min(by: { abs($0.card.center.x - viewportCenter) < abs($1.card.center.x - viewportCenter) }) {
@@ -393,14 +422,13 @@ extension SgptPricingViewController: UIScrollViewDelegate {
     }
 
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        guard isPricingCarousel(scrollView) else { return }
         if !decelerate { snapPricingCardsToNearest() }
     }
 
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        guard isPricingCarousel(scrollView) else { return }
         snapPricingCardsToNearest()
-    }
-
-    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
     }
 }
 
@@ -589,10 +617,10 @@ private extension SgptPricingViewController {
         card.translatesAutoresizingMaskIntoConstraints = false
         card.isUserInteractionEnabled = true
         card.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(pricingCardTapped(_:))))
-        let cardWidthConstraint = card.widthAnchor.constraint(equalToConstant: plan.isCenter ? PricingMetric.mainCardWidth : PricingMetric.sideCardWidth)
-        let cardHeightConstraint = card.heightAnchor.constraint(equalToConstant: plan.isCenter ? PricingMetric.mainCardHeight : PricingMetric.sideCardHeight)
-        cardWidthConstraint.isActive = true
-        cardHeightConstraint.isActive = true
+        // Main size for every card, centered or not - see PricingMetric.sideScale.
+        card.widthAnchor.constraint(equalToConstant: PricingMetric.mainCardWidth).isActive = true
+        card.heightAnchor.constraint(equalToConstant: PricingMetric.mainCardHeight).isActive = true
+        card.transform = plan.isCenter ? .identity : CGAffineTransform(scaleX: PricingMetric.sideScale, y: PricingMetric.sideScale)
 
         let badge = UILabel()
         badge.font = AppFont.medium.size(13, familyName: familyClashDisplay)
@@ -605,36 +633,32 @@ private extension SgptPricingViewController {
         badge.layer.borderWidth = 1
         badge.layer.borderColor = UIColor.white.withAlphaComponent(0.30).cgColor
         badge.translatesAutoresizingMaskIntoConstraints = false
-        let badgeWidthConstraint = badge.widthAnchor.constraint(equalToConstant: plan.isCenter ? PricingMetric.mainBadgeWidth : PricingMetric.sideBadgeWidth)
-        let badgeHeightConstraint = badge.heightAnchor.constraint(equalToConstant: plan.isCenter ? PricingMetric.mainBadgeHeight : PricingMetric.sideBadgeHeight)
-        badgeWidthConstraint.isActive = true
-        badgeHeightConstraint.isActive = true
+        badge.widthAnchor.constraint(equalToConstant: PricingMetric.mainBadgeWidth).isActive = true
+        badge.heightAnchor.constraint(equalToConstant: PricingMetric.mainBadgeHeight).isActive = true
         applyPricingBadgeStyle(badge, isCenter: plan.isCenter)
 
-        pricingCardRefs.append(PricingCardRef(card: card, badge: badge,
-                                              cardWidthConstraint: cardWidthConstraint, cardHeightConstraint: cardHeightConstraint,
-                                              badgeWidthConstraint: badgeWidthConstraint, badgeHeightConstraint: badgeHeightConstraint))
+        pricingCardRefs.append(PricingCardRef(card: card, badge: badge))
 
         let headline = UILabel()
-        headline.font = AppFont.medium.size(plan.isCenter ? 22 : 20, familyName: familyFunnelSans)
+        headline.font = AppFont.medium.size(22, familyName: familyFunnelSans)
         headline.textColor = .white
         headline.textAlignment = .center
         headline.text = plan.headline
 
-        let validRow = makeValidForRow(days: plan.validDays, isCenter: plan.isCenter)
+        let validRow = makeValidForRow(days: plan.validDays)
 
         let divider = GradientFadeView()
         divider.gradientLayer.startPoint = CGPoint(x: 0.0, y: 0.5)
         divider.gradientLayer.endPoint = CGPoint(x: 1.0, y: 0.5)
         divider.setColors([Palette.dividerMid.withAlphaComponent(0), Palette.dividerMid, Palette.dividerMid.withAlphaComponent(0)], locations: [0, 0.5, 1])
         divider.translatesAutoresizingMaskIntoConstraints = false
-        divider.widthAnchor.constraint(equalToConstant: plan.isCenter ? 120 : 109).isActive = true
+        divider.widthAnchor.constraint(equalToConstant: 120).isActive = true
         divider.heightAnchor.constraint(equalToConstant: 1).isActive = true
 
         let priceRow = makePriceRow(plan)
 
         let perSession = UILabel()
-        perSession.font = AppFont.regular.size(plan.isCenter ? 12 : 11, familyName: familyFunnelSans)
+        perSession.font = AppFont.regular.size(12, familyName: familyFunnelSans)
         perSession.textColor = .white.withAlphaComponent(0.55)
         perSession.textAlignment = .center
         perSession.text = plan.perSession
@@ -643,12 +667,12 @@ private extension SgptPricingViewController {
         column.translatesAutoresizingMaskIntoConstraints = false
         column.axis = .vertical
         column.alignment = .center
-        column.spacing = plan.isCenter ? 10 : 9
-        column.setCustomSpacing(plan.isCenter ? 15 : 12, after: badge)
+        column.spacing = 10
+        column.setCustomSpacing(15, after: badge)
         card.addSubview(column)
 
         NSLayoutConstraint.activate([
-            column.topAnchor.constraint(equalTo: card.topAnchor, constant: plan.isCenter ? 8 : 9),
+            column.topAnchor.constraint(equalTo: card.topAnchor, constant: 8),
             column.leadingAnchor.constraint(greaterThanOrEqualTo: card.leadingAnchor, constant: 6),
             column.trailingAnchor.constraint(lessThanOrEqualTo: card.trailingAnchor, constant: -6),
             column.centerXAnchor.constraint(equalTo: card.centerXAnchor)
@@ -661,7 +685,7 @@ private extension SgptPricingViewController {
     /// and a 1pt #C084FC border.
     func applyPricingBadgeStyle(_ badge: UILabel, isCenter: Bool) {
         badge.backgroundColor = isCenter ? UIColor(hex: "#1F0833") : Palette.badgeSideFill
-        badge.layer.cornerRadius = (isCenter ? PricingMetric.mainBadgeHeight : PricingMetric.sideBadgeHeight) / 2
+        badge.layer.cornerRadius = PricingMetric.mainBadgeHeight / 2
         badge.clipsToBounds = true
 
         guard isCenter else {
@@ -745,6 +769,9 @@ private extension SgptPricingViewController {
             applyPricingBadgeStyle(other.badge, isCenter: isCentered)
         }
         applyPricingCardSizes(centeredCard: ref.card, animated: true)
+        if let index = pricingCardRefs.firstIndex(where: { $0.card === ref.card }) {
+            pricingDots.setSelectedPage(index)
+        }
         startPricingCenterPulse(on: ref.card)
     }
 
@@ -758,26 +785,19 @@ private extension SgptPricingViewController {
         centerPricingCard(ref.card, animated: true)
     }
 
-    /// The actual 146x187/133x170 (and badge) resize - Figma's Deal-of-the-
-    /// Day size for whichever card is centered, "side" size for the other
-    /// two. Called from updateCenteredPricingCard() above (live, gated on an
-    /// actual nearest-change) and from snapPricingCardsToNearest()/the
-    /// initial-centering path as a final-state safety net - both paths
-    /// agreeing on the same sizes makes the second call a no-op in the
-    /// normal case.
+    /// The 146x187 -> 133x170 resize, done purely as a scale transform (see
+    /// PricingMetric.sideScale). Needs no layout pass, so unlike the previous
+    /// constraint-driven version it can't disturb either scroll view
+    /// mid-gesture.
     func applyPricingCardSizes(centeredCard: UIView, animated: Bool) {
         let block = { [weak self] in
             guard let self = self else { return }
             for ref in self.pricingCardRefs {
                 let isCentered = ref.card === centeredCard
-                ref.cardWidthConstraint.constant = isCentered ? PricingMetric.mainCardWidth : PricingMetric.sideCardWidth
-                ref.cardHeightConstraint.constant = isCentered ? PricingMetric.mainCardHeight : PricingMetric.sideCardHeight
-                ref.badgeWidthConstraint.constant = isCentered ? PricingMetric.mainBadgeWidth : PricingMetric.sideBadgeWidth
-                ref.badgeHeightConstraint.constant = isCentered ? PricingMetric.mainBadgeHeight : PricingMetric.sideBadgeHeight
-                let scale: CGFloat = isCentered ? 1.0 : (133.0 / 146.0)
-                ref.card.transform = CGAffineTransform(scaleX: scale, y: scale)
+                ref.card.transform = isCentered
+                    ? .identity
+                    : CGAffineTransform(scaleX: PricingMetric.sideScale, y: PricingMetric.sideScale)
             }
-            self.cardsScrollView?.layoutIfNeeded()
         }
         if animated {
             UIView.animate(withDuration: 0.25, delay: 0, options: [.curveEaseOut, .beginFromCurrentState], animations: block)
@@ -845,9 +865,9 @@ private extension SgptPricingViewController {
         centeredPricingCard?.layer.removeAnimation(forKey: "sgptPricingCenterPulse")
     }
 
-    func makeValidForRow(days: Int, isCenter: Bool) -> UIView {
+    func makeValidForRow(days: Int) -> UIView {
         let label = UILabel()
-        label.font = AppFont.regular.size(isCenter ? 12 : 10, familyName: familyFunnelSans)
+        label.font = AppFont.regular.size(12, familyName: familyFunnelSans)
         label.textColor = .white.withAlphaComponent(0.55)
         label.text = "Valid for \(days) days"
 
@@ -861,19 +881,21 @@ private extension SgptPricingViewController {
         let row = UIStackView(arrangedSubviews: [leftDot, label, rightDot])
         row.axis = .horizontal
         row.alignment = .center
-        row.spacing = isCenter ? 7 : 6
+        row.spacing = 7
         return row
     }
 
     private func makePriceRow(_ plan: PlanCard) -> UIView {
         let priceLabel = UILabel()
-        priceLabel.font = plan.isCenter
-            ? AppFont.medium.size(18, familyName: familyFunnelSans)
-            : AppFont.regular.size(16, familyName: familyFunnelSans)
-        priceLabel.textColor = plan.isCenter ? .white : .white.withAlphaComponent(0.75)
+        priceLabel.font = AppFont.medium.size(18, familyName: familyFunnelSans)
+        priceLabel.textColor = .white
         priceLabel.text = plan.price
 
-        guard plan.isCenter, let original = plan.originalPrice else {
+        // Driven by whether this pack HAS a saving to strike through, not by
+        // which card happens to be centered at build time - the centered card
+        // changes as the carousel scrolls, so gating on plan.isCenter meant a
+        // side card that later became centered could never show its old price.
+        guard let original = plan.originalPrice else {
             return priceLabel
         }
 
@@ -893,45 +915,32 @@ private extension SgptPricingViewController {
 
     // MARK: Dot pager (static decorative)
 
+    /// Same indicator the home carousels use, so this one is bounded the same
+    /// way: GroupClassCarouselDotsView renders at most `maxVisibleDots` and
+    /// slides that window as the selection moves, instead of growing one dot
+    /// per pack forever. Previously these dots were a fixed decorative row
+    /// that neither counted the real packs nor tracked the centered card.
     func makeDotPager() -> UIView {
-        func dot(active: Bool) -> UIView {
-            let view = UIView()
-            view.backgroundColor = UIColor.white.withAlphaComponent(active ? 0.94 : 0.2)
-            view.translatesAutoresizingMaskIntoConstraints = false
-            view.widthAnchor.constraint(equalToConstant: active ? 14 : 4).isActive = true
-            view.heightAnchor.constraint(equalToConstant: 4).isActive = true
-            view.layer.cornerRadius = 2
-            return view
-        }
+        pricingDots.translatesAutoresizingMaskIntoConstraints = false
+        pricingDots.setPageCount(plans.count)
+        pricingDots.setSelectedPage(plans.firstIndex(where: { $0.isCenter }) ?? 0)
 
-        let track = UIView()
-        track.backgroundColor = UIColor.white.withAlphaComponent(0.2)
-        track.layer.cornerRadius = 2
-        track.translatesAutoresizingMaskIntoConstraints = false
-        track.widthAnchor.constraint(equalToConstant: 32).isActive = true
-        track.heightAnchor.constraint(equalToConstant: 4).isActive = true
-        let activeFill = dot(active: true)
-        track.addSubview(activeFill)
-        NSLayoutConstraint.activate([
-            activeFill.leadingAnchor.constraint(equalTo: track.leadingAnchor),
-            activeFill.centerYAnchor.constraint(equalTo: track.centerYAnchor)
-        ])
-
-        let row = UIStackView(arrangedSubviews: [dot(active: false), dot(active: false), track, dot(active: false), dot(active: false)])
-        row.axis = .horizontal
-        row.alignment = .center
-        row.spacing = 4
-        row.isLayoutMarginsRelativeArrangement = true
-        row.layoutMargins = UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
+        let row = UIView()
+        row.translatesAutoresizingMaskIntoConstraints = false
         row.backgroundColor = UIColor(hex: "#131416")
         row.layer.cornerRadius = 10
         row.layer.masksToBounds = true
-        row.translatesAutoresizingMaskIntoConstraints = false
+        row.addSubview(pricingDots)
 
         let wrapper = UIView()
         wrapper.translatesAutoresizingMaskIntoConstraints = false
         wrapper.addSubview(row)
         NSLayoutConstraint.activate([
+            pricingDots.topAnchor.constraint(equalTo: row.topAnchor, constant: 8),
+            pricingDots.bottomAnchor.constraint(equalTo: row.bottomAnchor, constant: -8),
+            pricingDots.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 10),
+            pricingDots.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -10),
+
             row.topAnchor.constraint(equalTo: wrapper.topAnchor),
             row.bottomAnchor.constraint(equalTo: wrapper.bottomAnchor),
             row.centerXAnchor.constraint(equalTo: wrapper.centerXAnchor)
