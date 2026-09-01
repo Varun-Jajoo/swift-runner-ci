@@ -154,6 +154,28 @@ final class SgptPricingViewController: CommonViewController {
         heroImageView.clipsToBounds = true
         buildContent()
         loadPacks()
+
+        // TEMPORARY - see SgptScrollDebug. The vertical scroll view gets a
+        // delegate purely so the trace can record where the page is while the
+        // cards move; every delegate method already ignores it via
+        // isPricingCarousel(), so behaviour is unchanged.
+        mainScrollView?.delegate = self
+        SgptScrollDebug.shared.attachOverlay(to: view)
+        SgptScrollDebug.shared.log("viewDidLoad")
+    }
+
+    /// TEMPORARY diagnostic helper - the three plan cards, in row order.
+    private var debugCards: [UIView] {
+        pricingCardRefs.map { $0.card }
+    }
+
+    private func debugSnapshot(_ label: String) {
+        SgptScrollDebug.shared.snapshot(
+            label,
+            carousel: cardsScrollView,
+            cards: debugCards,
+            main: mainScrollView
+        )
     }
 
     deinit {
@@ -302,8 +324,10 @@ final class SgptPricingViewController: CommonViewController {
         // SeeAll/payment screens and SgptPaymentSummary all use it). This screen
         // previously used max(topInset, 20) + 8, which put its back button at a
         // different height from every other Group Classes / SGPT screen.
+        debugSnapshot("layoutSubviews>")
         backButtonTopConstraint?.constant = view.safeAreaInsets.top + 12
         performInitialPricingCenteringIfNeeded()
+        debugSnapshot("layoutSubviews<")
     }
 
     // The hero-frame diagnostic that used to live here confirmed the frame
@@ -418,6 +442,9 @@ extension SgptPricingViewController: UIScrollViewDelegate {
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        // Logged for BOTH scroll views: if the cards move while only the
+        // vertical one is scrolling, the cause is layout, not the carousel.
+        debugSnapshot(isPricingCarousel(scrollView) ? "carScroll" : "mainScroll")
         guard isPricingCarousel(scrollView), (scrollView.isDragging || scrollView.isDecelerating) else { return }
         updateCenteredPricingCard()
     }
@@ -808,6 +835,7 @@ private extension SgptPricingViewController {
     }
 
     func applyPricingCardSizes(centeredCard: UIView, animated: Bool) {
+        debugSnapshot("applySizes")
         let block = { [weak self] in
             guard let self = self else { return }
             for ref in self.pricingCardRefs {
@@ -825,6 +853,7 @@ private extension SgptPricingViewController {
     }
 
     func centerPricingCard(_ card: UIView, animated: Bool) {
+        debugSnapshot("centerCard")
         guard let scrollView = cardsScrollView else { return }
         let target = card.center.x - scrollView.bounds.width / 2
         let minOffset = -scrollView.adjustedContentInset.left
@@ -843,6 +872,7 @@ private extension SgptPricingViewController {
     }
 
     func snapPricingCardsToNearest() {
+        debugSnapshot("snapToNearest")
         guard !isSettlingPricingScroll, let scrollView = cardsScrollView,
               let nearest = nearestPricingCard(in: scrollView) else { return }
         isSettlingPricingScroll = true
@@ -1063,9 +1093,15 @@ final class HorizontalOnlyScrollView: UIScrollView {
         // No translation yet (a tap, or the very first callback) - defer to the
         // default so taps on a card still work.
         if translation.x == 0 && translation.y == 0 {
+            SgptScrollDebug.shared.log("gestureBegin dx=0 dy=0 -> default")
             return super.gestureRecognizerShouldBegin(gestureRecognizer)
         }
 
-        return abs(translation.x) > abs(translation.y)
+        let horizontal = abs(translation.x) > abs(translation.y)
+        SgptScrollDebug.shared.log(String(
+            format: "gestureBegin dx=%.1f dy=%.1f -> %@",
+            translation.x, translation.y, horizontal ? "CAROUSEL" : "rejected"
+        ))
+        return horizontal
     }
 }
