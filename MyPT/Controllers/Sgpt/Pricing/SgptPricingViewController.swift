@@ -405,7 +405,7 @@ extension SgptPricingViewController: UIScrollViewDelegate {
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard isPricingCarousel(scrollView) else { return }
+        guard isPricingCarousel(scrollView), (scrollView.isDragging || scrollView.isDecelerating) else { return }
         updateCenteredPricingCard()
     }
 
@@ -841,28 +841,14 @@ private extension SgptPricingViewController {
         }
     }
 
-    /// Same pulsing feel as the home carousel's spotlight effect / this
-    /// screen's Android sibling (elevation looping between two values) -
-    /// but a shadow (View.elevation's iOS equivalent) renders slightly
-    /// OUTSIDE a layer's own bounds, and SgptGlassBorderView sets
-    /// masksToBounds=true on itself (needed so its glass-ring gradient
-    /// doesn't bleed past the card's rounded corners), which clips shadows
-    /// away entirely - a shadow here would just never be visible. Pulsing
-    /// the border width instead stays fully inside the layer's bounds, so
-    /// it isn't clipped, while still reading as a "breathing" highlight.
+    /// Highlights the centered card cleanly without running an infinite layer
+    /// animation loop that invalidates GPU layers during vertical scrolling.
     func startPricingCenterPulse(on card: UIView) {
-        let animation = CABasicAnimation(keyPath: "borderWidth")
-        animation.fromValue = 2
-        animation.toValue = 4
-        animation.duration = 2.5
-        animation.autoreverses = true
-        animation.repeatCount = .infinity
-        animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        card.layer.add(animation, forKey: "sgptPricingCenterPulse")
+        card.layer.borderWidth = 2.0
     }
 
     func stopPricingCenterPulse() {
-        centeredPricingCard?.layer.removeAnimation(forKey: "sgptPricingCenterPulse")
+        // No-op: handled by setPricingCardStyle
     }
 
     func makeValidForRow(days: Int) -> UIView {
