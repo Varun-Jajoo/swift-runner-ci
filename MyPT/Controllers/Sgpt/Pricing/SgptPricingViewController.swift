@@ -571,7 +571,10 @@ private extension SgptPricingViewController {
     // MARK: Pricing cards
 
     func makeCardsRow() -> UIView {
-        let scroll = UIScrollView()
+        // HorizontalOnlyScrollView, not UIScrollView: a vertical drag must
+        // never engage this carousel, or scrolling the page (especially the
+        // bounce at the very bottom) shifts and re-scales the cards.
+        let scroll = HorizontalOnlyScrollView()
         scroll.translatesAutoresizingMaskIntoConstraints = false
         scroll.showsHorizontalScrollIndicator = false
         scroll.showsVerticalScrollIndicator = false
@@ -827,6 +830,15 @@ private extension SgptPricingViewController {
         let minOffset = -scrollView.adjustedContentInset.left
         let maxOffset = max(scrollView.contentSize.width - scrollView.bounds.width + scrollView.adjustedContentInset.right, minOffset)
         let clamped = min(max(target, minOffset), maxOffset)
+
+        // Already there: re-setting the same offset still starts an animation,
+        // which reads as a small sideways yank if this is reached while the
+        // page is being scrolled vertically. Sub-pixel tolerance because the
+        // clamped target rarely lands on an exact match.
+        if abs(scrollView.contentOffset.x - clamped) < 0.5 {
+            return
+        }
+
         scrollView.setContentOffset(CGPoint(x: clamped, y: 0), animated: animated)
     }
 
@@ -1022,5 +1034,38 @@ private extension SgptPricingViewController {
         label.isUserInteractionEnabled = true
         label.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(termsTapped)))
         return label
+    }
+}
+
+/// Horizontal carousel that refuses to claim a vertical drag.
+///
+/// `isDirectionalLockEnabled` is not enough on its own: it constrains a scroll
+/// only AFTER that scroll has begun, so a mostly-vertical swipe that starts on
+/// the carousel still engages it. Scrolling the page to the very bottom does
+/// exactly that - the rubber-band at the end of the vertical scroll hands the
+/// carousel a gesture, which changes which card is "nearest", which re-centres
+/// and re-scales the cards. That is the jitter/pop seen at the bottom of the
+/// pricing screen.
+///
+/// Deciding at `gestureRecognizerShouldBegin` means a vertical gesture is never
+/// claimed at all and stays with the enclosing page scroll view, so the cards
+/// cannot move while the user is scrolling up or down.
+final class HorizontalOnlyScrollView: UIScrollView {
+
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard let pan = gestureRecognizer as? UIPanGestureRecognizer,
+              pan === panGestureRecognizer else {
+            return super.gestureRecognizerShouldBegin(gestureRecognizer)
+        }
+
+        let translation = pan.translation(in: self)
+
+        // No translation yet (a tap, or the very first callback) - defer to the
+        // default so taps on a card still work.
+        if translation.x == 0 && translation.y == 0 {
+            return super.gestureRecognizerShouldBegin(gestureRecognizer)
+        }
+
+        return abs(translation.x) > abs(translation.y)
     }
 }
