@@ -125,6 +125,8 @@ final class SgptPricingViewController: CommonViewController {
     private var cardsScrollView: UIScrollView?
     private let pricingDots = GroupClassCarouselDotsView()
     private var pricingCardRefs: [PricingCardRef] = []
+    private var selectedPricingCardIndex: Int?
+    private var purchaseButton: GradientCTAButton?
     /// Which card to scroll to on first layout - not the same as
     /// `centeredPricingCard` below, which must start nil (see
     /// performInitialPricingCenteringIfNeeded()).
@@ -145,6 +147,7 @@ final class SgptPricingViewController: CommonViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         mainScrollView?.contentInsetAdjustmentBehavior = .never
+        mainScrollView?.isDirectionalLockEnabled = true
         view.backgroundColor = Palette.bg
         heroImageView.image = UIImage(named: "sgpt-pricing-hero")
         heroImageView.contentMode = .scaleAspectFill
@@ -174,9 +177,10 @@ final class SgptPricingViewController: CommonViewController {
     private func applyPacks(_ packs: [SgptPackModel]) {
         self.packs = packs
 
-        // The middle card is the one the CTA buys, matching Android.
+        // The middle card is the one the CTA buys initially, matching Android.
         let centerIndex = packs.count > 1 ? 1 : 0
         featuredPack = packs[centerIndex]
+        selectedPricingCardIndex = centerIndex
 
         plans = packs.enumerated().map { index, pack in
             let credits = pack.credits ?? 0
@@ -353,23 +357,32 @@ final class SgptPricingViewController: CommonViewController {
         navigationController?.popViewController(animated: true)
     }
 
-    /// Never blocks, even if api/sgpt-packages hasn't returned yet - Android
-    /// hit exactly this bug (a null featuredPack toasting "still loading" and
-    /// going nowhere) and had to be fixed to always fall back to whatever's
-    /// currently on screen, matching that fix here.
+    /// Purchases whichever card is currently centered/selected.
     @objc private func purchaseTapped() {
         let credits: Int
         let price: Int
         let savings: Int
 
-        if let pack = featuredPack {
+        let chosenPack: SgptPackModel? = {
+            if let index = selectedPricingCardIndex, index < packs.count {
+                return packs[index]
+            }
+            return featuredPack
+        }()
+
+        if let pack = chosenPack {
             credits = pack.credits ?? 0
             price = Int(pack.price ?? 0)
             savings = Int((pack.msg ?? "").filter { $0.isNumber }) ?? 0
         } else {
-            let fallback = plans.first(where: { $0.isCenter }) ?? plans.first
-            credits = Int((fallback?.headline ?? "").filter { $0.isNumber }) ?? 0
-            price = Int((fallback?.price ?? "").filter { $0.isNumber }) ?? 0
+            let chosenCard: PlanCard? = {
+                if let index = selectedPricingCardIndex, index < plans.count {
+                    return plans[index]
+                }
+                return plans.first(where: { $0.isCenter }) ?? plans.first
+            }()
+            credits = Int((chosenCard?.headline ?? "").filter { $0.isNumber }) ?? 0
+            price = Int((chosenCard?.price ?? "").filter { $0.isNumber }) ?? 0
             savings = 0
         }
 
@@ -561,6 +574,11 @@ private extension SgptPricingViewController {
         let scroll = UIScrollView()
         scroll.translatesAutoresizingMaskIntoConstraints = false
         scroll.showsHorizontalScrollIndicator = false
+        scroll.showsVerticalScrollIndicator = false
+        scroll.alwaysBounceVertical = false
+        scroll.alwaysBounceHorizontal = true
+        scroll.isDirectionalLockEnabled = true
+        scroll.decelerationRate = .fast
         scroll.clipsToBounds = true
         scroll.delegate = self
         cardsScrollView = scroll
@@ -580,14 +598,6 @@ private extension SgptPricingViewController {
             if plan.isCenter { initialCenterPricingCard = card }
         }
 
-        // Pinned to contentLayoutGuide, not the scroll view's own anchors -
-        // pinning directly to scroll.leadingAnchor/trailingAnchor would force
-        // row's width to equal the scroll view's visible frame width, which
-        // fights the cards' own fixed-width constraints (146/133pt) since 3
-        // cards + spacing is wider than any phone screen. That conflict was
-        // why nothing in the row rendered at all. contentLayoutGuide lets
-        // row take its own intrinsic (wider) width and derives contentSize
-        // from it, which is what actually makes the row scrollable.
         NSLayoutConstraint.activate([
             row.topAnchor.constraint(equalTo: scroll.contentLayoutGuide.topAnchor),
             row.bottomAnchor.constraint(equalTo: scroll.contentLayoutGuide.bottomAnchor),
@@ -745,17 +755,12 @@ private extension SgptPricingViewController {
     /// performInitialPricingCenteringIfNeeded() (contentInset), not this.
     func updateCenteredPricingCard() {
         guard let scrollView = cardsScrollView, let nearest = nearestPricingCard(in: scrollView) else { return }
-        selectPricingCard(nearest)
+        selectPricingCard(nearest, animated: false)
     }
 
     /// Style + size + pulse for whichever card becomes centered, shared by
-    /// both selection paths: scroll-driven (updateCenteredPricingCard,
-    /// derives "nearest" from viewport geometry) and tap-driven
-    /// (pricingCardTapped, already knows exactly which card). Recentering
-    /// the scroll itself is deliberately NOT done here - scroll-driven
-    /// selection must never fight the live gesture by re-offsetting the
-    /// scroll view, only a tap (or the post-drag settle) should do that.
-    private func selectPricingCard(_ ref: PricingCardRef) {
+    /// both selection paths: scroll-driven and tap-driven.
+    private func selectPricingCard(_ ref: PricingCardRef, animated: Bool = true) {
         guard ref.card !== centeredPricingCard else { return }
         stopPricingCenterPulse()
         centeredPricingCard = ref.card
@@ -767,11 +772,26 @@ private extension SgptPricingViewController {
                                            sideFillColor: Palette.cardSideFill, centerBorderColor: Palette.centerBorder)
             applyPricingBadgeStyle(other.badge, isCenter: isCentered)
         }
-        applyPricingCardSizes(centeredCard: ref.card, animated: true)
+        applyPricingCardSizes(centeredCard: ref.card, animated: animated)
         if let index = pricingCardRefs.firstIndex(where: { $0.card === ref.card }) {
+            selectedPricingCardIndex = index
             pricingDots.setSelectedPage(index)
+            updatePurchaseButtonLabel()
         }
         startPricingCenterPulse(on: ref.card)
+    }
+
+    private func updatePurchaseButtonLabel() {
+        let credits: Int
+        if let index = selectedPricingCardIndex, index < packs.count, let c = packs[index].credits {
+            credits = c
+        } else if let index = selectedPricingCardIndex, index < plans.count {
+            credits = Int(plans[index].headline.filter { $0.isNumber }) ?? 16
+        } else {
+            credits = 16
+        }
+        let title = "PURCHASE \(credits) \(credits == 1 ? "CREDIT" : "CREDITS")"
+        purchaseButton?.configure(title: title, font: AppFont.medium.size(14.0, familyName: familyFunnelSans), titleColor: Palette.ctaInk)
     }
 
     /// Tapping a side card ("Best Deal"/"Value Price") selects AND scrolls
@@ -780,14 +800,10 @@ private extension SgptPricingViewController {
     @objc private func pricingCardTapped(_ gesture: UITapGestureRecognizer) {
         guard let tappedCard = gesture.view,
               let ref = pricingCardRefs.first(where: { $0.card === tappedCard }) else { return }
-        selectPricingCard(ref)
+        selectPricingCard(ref, animated: true)
         centerPricingCard(ref.card, animated: true)
     }
 
-    /// The 146x187 -> 133x170 resize, done purely as a scale transform (see
-    /// PricingMetric.sideScale). Needs no layout pass, so unlike the previous
-    /// constraint-driven version it can't disturb either scroll view
-    /// mid-gesture.
     func applyPricingCardSizes(centeredCard: UIView, animated: Bool) {
         let block = { [weak self] in
             guard let self = self else { return }
@@ -799,7 +815,7 @@ private extension SgptPricingViewController {
             }
         }
         if animated {
-            UIView.animate(withDuration: 0.25, delay: 0, options: [.curveEaseOut, .beginFromCurrentState], animations: block)
+            UIView.animate(withDuration: 0.20, delay: 0, options: [.curveEaseOut, .beginFromCurrentState], animations: block)
         } else {
             block()
         }
@@ -808,34 +824,19 @@ private extension SgptPricingViewController {
     func centerPricingCard(_ card: UIView, animated: Bool) {
         guard let scrollView = cardsScrollView else { return }
         let target = card.center.x - scrollView.bounds.width / 2
-        // Must clamp against the INSET-aware range, not [0, contentSize -
-        // bounds]: the whole point of the contentInset padding added in
-        // performInitialPricingCenteringIfNeeded() is to let an edge card's
-        // centered position fall in the padding beyond the real content, so
-        // clamping to the un-padded range would silently cap it right back
-        // to the old too-short range and undo that fix.
         let minOffset = -scrollView.adjustedContentInset.left
         let maxOffset = max(scrollView.contentSize.width - scrollView.bounds.width + scrollView.adjustedContentInset.right, minOffset)
         let clamped = min(max(target, minOffset), maxOffset)
         scrollView.setContentOffset(CGPoint(x: clamped, y: 0), animated: animated)
     }
 
-    /// UIScrollView already has native "did the user stop scrolling" delegate
-    /// callbacks (scrollViewDidEndDragging/scrollViewDidEndDecelerating),
-    /// unlike Android's HorizontalScrollView which has neither - so this
-    /// skips SgptPricingActivity.kt's Handler-based settle-delay polling
-    /// entirely and just calls this from those two delegate methods instead.
-    /// This is also the ONLY place the actual card/badge resize happens now
-    /// (see applyPricingCardSizes()'s comment) - the user's finger is
-    /// guaranteed to be off the screen and any momentum spent by the time
-    /// either delegate method fires this, so there's nothing left to fight.
     func snapPricingCardsToNearest() {
         guard !isSettlingPricingScroll, let scrollView = cardsScrollView,
               let nearest = nearestPricingCard(in: scrollView) else { return }
         isSettlingPricingScroll = true
-        applyPricingCardSizes(centeredCard: nearest.card, animated: true)
+        selectPricingCard(nearest, animated: true)
         centerPricingCard(nearest.card, animated: true)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
             self?.isSettlingPricingScroll = false
         }
     }
@@ -999,6 +1000,8 @@ private extension SgptPricingViewController {
         button.configure(title: "PURCHASE 16 CREDITS", font: AppFont.medium.size(14.0, familyName: familyFunnelSans), titleColor: Palette.ctaInk)
         button.setTrailingIcon(UIImage(systemName: "chevron.right"), tint: Palette.ctaInk)
         button.addTarget(self, action: #selector(purchaseTapped), for: .touchUpInside)
+        self.purchaseButton = button
+        updatePurchaseButtonLabel()
         return button
     }
 

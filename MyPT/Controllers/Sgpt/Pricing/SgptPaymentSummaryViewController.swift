@@ -369,20 +369,26 @@ private extension SgptPaymentSummaryViewController {
 
     func buildFooter() {
         footerView.translatesAutoresizingMaskIntoConstraints = false
-        footerView.backgroundColor = Palette.footerFill
+        footerView.backgroundColor = UIColor(hex: "#01368F")
         footerView.layer.cornerRadius = 16
         footerView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        footerView.layer.masksToBounds = true
-        footerView.layer.borderWidth = 2
-        footerView.layer.borderColor = Palette.footerAccent.cgColor
+        footerView.clipsToBounds = true
         view.addSubview(footerView)
+
+        let surface = GlassCardView(cornerRadius: 16)
+        surface.translatesAutoresizingMaskIntoConstraints = false
+        surface.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        surface.fillColor = Palette.footerFill
+        surface.fillAlpha = 1.0
+        surface.showsSheen = true
+        surface.sheenOrigin = .topCenter
+        surface.sheenAlpha = 0.08
+        footerView.addSubview(surface)
 
         // GradientCTAButton's default near-white body (#FFFFFF -> #F0F0F0) plus
         // its #808080 offset band already match Figma's CTA gradient and hard
-        // shadow (`shadow-[1px_2.5px_0px_0px_#808080]`) with no overrides needed.
-        // Same treatment as the detail screen's "GET CREDIT & RESERVE" CTA the
-        // user arrives from - Funnel Sans medium 14, #141514 ink, trailing
-        // chevron - so the two read as one button carried across the flow.
+        // shadow (`shadow-[1px_2.5px_0px_0px_#808080]`).
+        // Matches the detail screen's "GET CREDIT & RESERVE" CTA bar exactly.
         ctaButton.translatesAutoresizingMaskIntoConstraints = false
         ctaButton.bandThickness = 3
         ctaButton.configure(title: Copy.ctaTitle,
@@ -393,17 +399,22 @@ private extension SgptPaymentSummaryViewController {
                                   ?? UIImage(systemName: "chevron.right"),
                                   tint: Palette.ctaInk)
         ctaButton.addTarget(self, action: #selector(confirmTapped), for: .touchUpInside)
-        footerView.addSubview(ctaButton)
+        surface.addSubview(ctaButton)
 
         NSLayoutConstraint.activate([
             footerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             footerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             footerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
-            ctaButton.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 24),
-            ctaButton.leadingAnchor.constraint(equalTo: footerView.leadingAnchor, constant: Metric.horizontalInset),
-            ctaButton.trailingAnchor.constraint(equalTo: footerView.trailingAnchor, constant: -Metric.horizontalInset),
-            ctaButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+            surface.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 2),
+            surface.leadingAnchor.constraint(equalTo: footerView.leadingAnchor),
+            surface.trailingAnchor.constraint(equalTo: footerView.trailingAnchor),
+            surface.bottomAnchor.constraint(equalTo: footerView.bottomAnchor),
+
+            ctaButton.topAnchor.constraint(equalTo: surface.topAnchor, constant: 16),
+            ctaButton.leadingAnchor.constraint(equalTo: surface.leadingAnchor, constant: 20),
+            ctaButton.trailingAnchor.constraint(equalTo: surface.trailingAnchor, constant: -20),
+            ctaButton.bottomAnchor.constraint(equalTo: surface.safeAreaLayoutGuide.bottomAnchor, constant: -12),
             ctaButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight)
         ])
     }
