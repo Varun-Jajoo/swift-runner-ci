@@ -358,12 +358,14 @@
                                     </stackView>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstItem="spr004" firstAttribute="top" secondItem="spr003" secondAttribute="top" id="spr050"/>
-                                    <constraint firstItem="spr004" firstAttribute="leading" secondItem="spr003" secondAttribute="leading" id="spr051"/>
-                                    <constraint firstAttribute="trailing" secondItem="spr004" secondAttribute="trailing" id="spr052"/>
-                                    <constraint firstAttribute="bottom" secondItem="spr004" secondAttribute="bottom" id="spr053"/>
-                                    <constraint firstItem="spr004" firstAttribute="width" secondItem="spr003" secondAttribute="width" id="spr054"/>
+                                    <constraint firstItem="spr004" firstAttribute="top" secondItem="sprCLG" secondAttribute="top" id="spr050"/>
+                                    <constraint firstItem="spr004" firstAttribute="leading" secondItem="sprCLG" secondAttribute="leading" id="spr051"/>
+                                    <constraint firstItem="sprCLG" firstAttribute="trailing" secondItem="spr004" secondAttribute="trailing" id="spr052"/>
+                                    <constraint firstItem="sprCLG" firstAttribute="bottom" secondItem="spr004" secondAttribute="bottom" id="spr053"/>
+                                    <constraint firstItem="spr004" firstAttribute="width" secondItem="sprFLG" secondAttribute="width" id="spr054"/>
                                 </constraints>
+                                <viewLayoutGuide key="contentLayoutGuide" id="sprCLG"/>
+                                <viewLayoutGuide key="frameLayoutGuide" id="sprFLG"/>
                             </scrollView>
                         </subviews>
                         <color key="backgroundColor" red="0.054901960784313725" green="0.043137254901960784" blue="0.078431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
