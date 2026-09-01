@@ -370,7 +370,10 @@ final class SgptSessionDetailViewController: CommonViewController {
 
     private func pushPricing() {
         let vc: SgptPricingViewController = .instantiate(appStoryboard: .sgpt)
-        vc.studioId = session.studioId?.value ?? ""
+        // studioId is deliberately left blank: api/sgpt-upcoming returns
+        // studio_name/lat/lng but no studio_id, so there is no club id to
+        // forward. Blank makes the pricing screen fetch every club's packs,
+        // which is what this screen did before it passed anything at all.
         vc.sessionName = session.sessionName ?? ""
         vc.sessionTrainerName = session.trainerName ?? ""
         // Formatted here rather than downstream: these helpers live on this
