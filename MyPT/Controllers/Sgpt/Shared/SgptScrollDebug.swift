@@ -27,7 +27,7 @@ final class SgptScrollDebug {
     /// can never be misread as coming from a build it did not come from. Two
     /// identical traces from "before" and "after" a fix cost a whole round trip
     /// to notice otherwise.
-    static let buildMarker = "storyboard-contentLayoutGuide-fix (c9e8d37)"
+    static let buildMarker = "constraint-dump probe"
 
     /// Whether the pricing scroll view is wired the way the fix intends.
     /// Reported at trace start: if this says NO on a build that should have the
@@ -132,6 +132,13 @@ final class SgptScrollDebug {
 
             self?.log(String(format: "contentSize %.1f -> %.1f", old.height, new.height))
 
+            // Ask Auto Layout which constraints it is actually using for the
+            // vertical axis, once, on the first shrink. Guessing at the cause
+            // has now failed twice; this makes the engine name them.
+            if new.height < old.height {
+                self?.dumpVerticalConstraintsOnce(scrollView)
+            }
+
             // Only this app's frames - the UIKit ones in between are noise.
             let frames = Thread.callStackSymbols
                 .filter { $0.contains("MyPT") }
@@ -147,6 +154,35 @@ final class SgptScrollDebug {
                 }
             }
         }
+    }
+
+    private var dumpedConstraints = false
+
+    /// One-shot dump of every constraint Auto Layout is using vertically for
+    /// the scroll view and its content view, printed at the moment contentSize
+    /// first shrinks.
+    private func dumpVerticalConstraintsOnce(_ scrollView: UIScrollView) {
+        guard !dumpedConstraints else { return }
+        dumpedConstraints = true
+
+        log("=== VERTICAL CONSTRAINTS AT FIRST SHRINK ===")
+
+        func dump(_ label: String, _ view: UIView) {
+            let list = view.constraintsAffectingLayout(for: .vertical)
+            log("-- \(label): \(list.count) constraint(s)")
+            for c in list.prefix(14) {
+                // Trim UIKit's very long descriptions to the informative part.
+                var text = c.description
+                if let r = text.range(of: "') ") { text = String(text[r.upperBound...]) }
+                log("   " + String(text.prefix(150)))
+            }
+        }
+
+        dump("scrollView", scrollView)
+        if let content = scrollView.subviews.first {
+            dump("contentView", content)
+        }
+        log("=== END CONSTRAINTS ===")
     }
 
     // MARK: - Output
