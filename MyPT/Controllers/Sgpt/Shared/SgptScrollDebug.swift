@@ -21,7 +21,12 @@ final class SgptScrollDebug {
     static let shared = SgptScrollDebug()
 
     /// Master switch. Set false to compile the overlay out of the UI entirely.
-    static var isEnabled = true
+    // Off: the pricing bottom-scroll jitter this was built to find is fixed
+    // (column.insetsLayoutMarginsFromSafeArea). Left in place rather than
+    // deleted since it's the author's tool to remove - but it must not run:
+    // the overlay's per-line UITextView append and the callStackSymbols in the
+    // contentSize KVO cost real frame time in the exact bounce it measures.
+    static var isEnabled = false
 
     /// Bumped with every fix, and printed at the top of the trace, so a capture
     /// can never be misread as coming from a build it did not come from. Two

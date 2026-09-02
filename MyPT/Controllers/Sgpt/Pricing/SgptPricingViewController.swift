@@ -507,6 +507,18 @@ private extension SgptPricingViewController {
         column.spacing = 0
         column.isLayoutMarginsRelativeArrangement = true
         column.layoutMargins = UIEdgeInsets(top: 0, left: 0, bottom: 24, right: 0)
+        // THE bottom-of-scroll jitter. A view inside a scroll view gets its
+        // safeAreaInsets recomputed from where it currently sits ON SCREEN, so
+        // as this column passes through the home-indicator strip its effective
+        // bottom margin grows by however much of that 34pt strip it overlaps
+        // (partially - hence the observed -7 / -9.4 / -34 steps). That changes
+        // the column's height, which changes the scroll view's contentSize,
+        // which moves the bottom limit WHILE the user is rubber-banding against
+        // it: it re-clamps, springs back, and oscillates. Trace showed
+        // contentSize cycling 1175.7 <-> 1141.7 with no app frames on the
+        // stack - Auto Layout, not code. The margins here are fixed design
+        // values; they must not follow the safe area.
+        column.insetsLayoutMarginsFromSafeArea = false
         contentContainer.addSubview(column)
         NSLayoutConstraint.activate([
             column.topAnchor.constraint(equalTo: contentContainer.topAnchor),
