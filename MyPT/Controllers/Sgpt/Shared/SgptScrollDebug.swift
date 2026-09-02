@@ -23,6 +23,28 @@ final class SgptScrollDebug {
     /// Master switch. Set false to compile the overlay out of the UI entirely.
     static var isEnabled = true
 
+    /// Bumped with every fix, and printed at the top of the trace, so a capture
+    /// can never be misread as coming from a build it did not come from. Two
+    /// identical traces from "before" and "after" a fix cost a whole round trip
+    /// to notice otherwise.
+    static let buildMarker = "storyboard-contentLayoutGuide-fix (c9e8d37)"
+
+    /// Whether the pricing scroll view is wired the way the fix intends.
+    /// Reported at trace start: if this says NO on a build that should have the
+    /// fix, the storyboard change did not reach the device.
+    static func contentGuideStatus(_ scrollView: UIScrollView) -> String {
+        guard let content = scrollView.subviews.first else { return "no content view" }
+
+        // A constraint from the content to the scroll view's own bottom is the
+        // broken wiring; to the contentLayoutGuide is the fixed one.
+        let bottomToScrollView = scrollView.constraints.contains { c in
+            (c.firstItem === scrollView && c.firstAttribute == .bottom && c.secondItem === content)
+                || (c.secondItem === scrollView && c.secondAttribute == .bottom && c.firstItem === content)
+        }
+
+        return bottomToScrollView ? "BOTTOM PINNED TO SCROLL VIEW (unfixed)" : "bottom pinned to content guide (fixed)"
+    }
+
     private var events: [String] = []
     private let maxEvents = 400
     private var start = CACurrentMediaTime()
@@ -37,6 +59,7 @@ final class SgptScrollDebug {
         events.removeAll()
         start = CACurrentMediaTime()
         log("--- trace started ---")
+        log("build: " + Self.buildMarker)
     }
 
     /// One line in the trace. `tag` groups related events so the dump is
@@ -101,6 +124,8 @@ final class SgptScrollDebug {
     /// content.
     func watchContentSize(_ scrollView: UIScrollView) {
         guard Self.isEnabled else { return }
+
+        log("wiring: " + Self.contentGuideStatus(scrollView))
 
         sizeObservation = scrollView.observe(\.contentSize, options: [.old, .new]) { [weak self] _, change in
             guard let old = change.oldValue, let new = change.newValue, old.height != new.height else { return }
