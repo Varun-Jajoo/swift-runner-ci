@@ -12,7 +12,12 @@ struct BookingBaseModel: Codable {
     var status: Bool?
     var data: [BookingDataModel]?
     var msg: String?
-    let errors: String? 
+    /// Laravel returns `errors` as a field->messages OBJECT, never a bare
+    /// string - the shape every other base model in this codebase already
+    /// declares, and the shape this file's own callers assume when they read
+    /// `errors.values.first?.first`. Typed `String?` it threw a typeMismatch
+    /// that took the WHOLE list down (see `BookingVM.getBookingApi`'s catch).
+    let errors: [String: [String]]?
 }
 
 //MARK: ------------ BookingDataModel
