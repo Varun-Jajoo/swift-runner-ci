@@ -192,13 +192,18 @@ final class SgptCheckoutSheetViewController: UIViewController {
             config.imagePadding = 6
             config.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12)
             config.baseForegroundColor = .white
-            config.attributedTitle = AttributedString(
-                "VIEW PROFILE",
-                attributes: AttributeContainer([
-                    .font: AppFont.medium.size(12.0, familyName: familyFunnelSans)
-                ])
-            )
+            config.preferredSymbolConfigurationForImage =
+                UIImage.SymbolConfiguration(pointSize: 9, weight: .semibold)
+            config.title = "VIEW PROFILE"
+            // The transformer runs last, so the 12pt face survives the Dynamic
+            // Type scaling Configuration otherwise applies to the title.
+            config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+                var out = incoming
+                out.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
+                return out
+            }
             viewProfileButton.configuration = config
+            viewProfileButton.titleLabel?.adjustsFontForContentSizeCategory = false
         } else {
             viewProfileButton.setImage(chevron, for: .normal)
             viewProfileButton.tintColor = .white
@@ -280,11 +285,11 @@ final class SgptCheckoutSheetViewController: UIViewController {
         return result
     }
 
-    /// Two capsule tracks of four segments each, matching the Figma credits
-    /// meter: segments fill left-to-right for the credits left after this
-    /// booking, the rest sit dimmed.
+    /// Share of the wallet still unspent once this booking is paid for. The
+    /// denominator is the balance held *before* booking - adding creditsUsed to
+    /// it counted the spent credit twice and read low against the success screen.
     private func applyCreditsProgress() {
-        let total = max(input.creditsUsed + input.creditsBalance, 1)
+        let total = max(input.creditsBalance, 1)
         creditsBar.progress = CGFloat(max(input.creditsBalance - input.creditsUsed, 0)) / CGFloat(total)
     }
 

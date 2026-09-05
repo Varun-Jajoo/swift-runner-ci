@@ -339,70 +339,6 @@ public class SgptSeatsProgressView: UIView {
     }
 }
 
-// MARK: - SgptCreditSegmentView
-
-/// One capsule in the credits meter. Figma 11641:20612 is a white capsule with
-/// an inset violet glow (`inset 0 0 8px #D288F9`), which UIKit has no native
-/// equivalent for - it is drawn as an even-odd ring whose shadow falls inward,
-/// masked back to the capsule so the glow only shows inside the edge.
-public class SgptCreditSegmentView: UIView {
-
-    public static let glowColor = UIColor(hex: "#D288F9")
-
-    /// A dimmed, unlit segment - the credits already spent.
-    public var isFilled: Bool = true {
-        didSet { applyState() }
-    }
-
-    private let glowLayer = CAShapeLayer()
-
-    public override init(frame: CGRect) {
-        super.init(frame: frame)
-        commonInit()
-    }
-
-    public required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        commonInit()
-    }
-
-    private func commonInit() {
-        clipsToBounds = true
-        glowLayer.fillRule = .evenOdd
-        glowLayer.shadowColor = SgptCreditSegmentView.glowColor.cgColor
-        glowLayer.shadowOffset = .zero
-        glowLayer.shadowOpacity = 1
-        // CSS blur 8 maps to roughly half that as a Core Animation radius.
-        glowLayer.shadowRadius = 4
-        layer.addSublayer(glowLayer)
-        applyState()
-    }
-
-    private func applyState() {
-        backgroundColor = isFilled ? .white : UIColor.white.withAlphaComponent(0.2)
-        glowLayer.isHidden = !isFilled
-    }
-
-    public override func layoutSubviews() {
-        super.layoutSubviews()
-        let radius = bounds.height / 2
-        layer.cornerRadius = radius
-
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        glowLayer.frame = bounds
-
-        // Outer ring minus the capsule: the shadow of this shape reads as a
-        // glow pressed inward from the edge once clipped to bounds.
-        let outer = UIBezierPath(rect: bounds.insetBy(dx: -12, dy: -12))
-        let inner = UIBezierPath(roundedRect: bounds, cornerRadius: radius)
-        outer.append(inner.reversing())
-        glowLayer.path = outer.cgPath
-        glowLayer.shadowPath = inner.cgPath
-        CATransaction.commit()
-    }
-}
-
 // MARK: - SgptCreditsBarView
 
 /// The credits meter: a dark capsule track with an inset gap, and a white fill
@@ -419,6 +355,21 @@ public class SgptCreditsBarView: UIView {
         didSet {
             progress = min(max(progress, 0), 1)
             setNeedsLayout()
+        }
+    }
+
+    /// Runs the fill from where it is to `value`, so the screen can show the
+    /// credit being spent rather than landing on the post-booking number.
+    public func setProgress(_ value: CGFloat, animated: Bool, duration: TimeInterval = 0.6) {
+        guard animated, window != nil else {
+            progress = value
+            return
+        }
+        progress = value
+        UIView.animate(withDuration: duration,
+                       delay: 0,
+                       options: [.curveEaseOut, .beginFromCurrentState]) {
+            self.layoutIfNeeded()
         }
     }
 
@@ -442,12 +393,18 @@ public class SgptCreditsBarView: UIView {
 
         fillView.translatesAutoresizingMaskIntoConstraints = false
         fillView.backgroundColor = .white
+        fillView.clipsToBounds = true
         addSubview(fillView)
 
-        glowLayer.fillRule = .evenOdd
+        // fillColor is left unset on a CAShapeLayer at your peril: it defaults
+        // to opaque black, which painted a black slug on the bar. The glow is a
+        // stroke plus its own blur, clipped inside the fill.
+        glowLayer.fillColor = UIColor.clear.cgColor
+        glowLayer.strokeColor = SgptCreditsBarView.glowColor.cgColor
+        glowLayer.lineWidth = 2
         glowLayer.shadowColor = SgptCreditsBarView.glowColor.cgColor
         glowLayer.shadowOffset = .zero
-        glowLayer.shadowOpacity = 1
+        glowLayer.shadowOpacity = 0.9
         glowLayer.shadowRadius = 4
         fillView.layer.addSublayer(glowLayer)
 
@@ -474,11 +431,10 @@ public class SgptCreditsBarView: UIView {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         glowLayer.frame = fillView.bounds
-        let outer = UIBezierPath(rect: fillView.bounds.insetBy(dx: -12, dy: -12))
-        let inner = UIBezierPath(roundedRect: fillView.bounds, cornerRadius: radius)
-        outer.append(inner.reversing())
-        glowLayer.path = outer.cgPath
-        glowLayer.shadowPath = inner.cgPath
+        let rim = UIBezierPath(roundedRect: fillView.bounds.insetBy(dx: 1, dy: 1),
+                               cornerRadius: max(radius - 1, 0))
+        glowLayer.path = rim.cgPath
+        glowLayer.shadowPath = rim.cgPath
         CATransaction.commit()
     }
 }

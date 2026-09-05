@@ -216,6 +216,9 @@ final class SgptBookingSuccessViewController: UIViewController {
     /// Tapped "BACK TO CLASSES".
     var onBackToClasses: (() -> Void)?
 
+    private var creditsTargetProgress: CGFloat = 0
+    private var hasRunCreditsDeduction = false
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -231,6 +234,11 @@ final class SgptBookingSuccessViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        runCreditsDeduction()
     }
 
     override func viewSafeAreaInsetsDidChange() {
@@ -363,7 +371,7 @@ final class SgptBookingSuccessViewController: UIViewController {
 
         durationChip.text = "\(GroupClassCardFormatter.intValue(input.session.duration, defaultValue: 60)) MINS"
         sessionNameLabel.text = SgptCardCollectionViewCell.titleText(for: input.session)
-        sessionMetaLabel.attributedText = SgptCardCollectionViewCell.subtitleText(for: input.session)
+        sessionMetaLabel.attributedText = metaText(for: input.session)
 
         creditsUsedLabel.text = creditLabel(input.creditsUsed)
         creditsRemainingLabel.text = creditLabel(input.creditsRemaining)
@@ -387,15 +395,45 @@ final class SgptBookingSuccessViewController: UIViewController {
     }
     // MARK: Segments
 
+    /// Starts at the balance held before the booking so the bar can run down to
+    /// the post-booking figure on appear - the credit being spent, not just its
+    /// result. Same denominator as the checkout sheet.
     private func applyCreditsProgress() {
         let total = max(input.creditsUsed + input.creditsRemaining, 1)
-        creditsProgressBar.progress = CGFloat(input.creditsRemaining) / CGFloat(total)
+        creditsProgressBar.progress = 1
+        creditsTargetProgress = CGFloat(input.creditsRemaining) / CGFloat(total)
+    }
+
+    private func runCreditsDeduction() {
+        guard !hasRunCreditsDeduction else { return }
+        hasRunCreditsDeduction = true
+        creditsProgressBar.setProgress(creditsTargetProgress, animated: true)
     }
 
     // MARK: Helpers
 
     private func creditLabel(_ value: Int) -> String {
         value == 1 ? "1 credit" : "\(value) credits"
+    }
+
+    /// The card cell's subtitle carries a 9.5pt face and a chip-trimmed studio
+    /// ("Mixed Gym"), both wrong on a full-width poster - schedule and the whole
+    /// venue name, at the poster's own size, like the checkout sheet shows.
+    private func metaText(for session: SgptSessionModel) -> NSAttributedString {
+        let base = SgptCardCollectionViewCell.subtitleText(for: session).string
+        let schedule = base.components(separatedBy: "\n").first ?? base
+        let studio = (session.studioName ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let text = studio.isEmpty ? schedule : "\(schedule)\n\(studio)"
+
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = .center
+        paragraph.lineSpacing = 2
+
+        return NSAttributedString(string: text, attributes: [
+            .font: AppFont.semibold.size(14.0, familyName: familyFunnelSans),
+            .foregroundColor: UIColor.white.withAlphaComponent(0.75),
+            .paragraphStyle: paragraph
+        ])
     }
 
     private func expiryText() -> NSAttributedString {
