@@ -26,9 +26,6 @@ final class SeeAllSgptViewController: CommonViewController {
     @IBOutlet private weak var scrollView: UIScrollView!
     @IBOutlet private weak var contentStack: UIStackView!
     @IBOutlet private weak var heroImageView: UIImageView!
-    /// The hero is taller than its container, so without this it ended on a
-    /// hard horizontal cut instead of dissolving into the page.
-    @IBOutlet private weak var heroFadeView: GradientFadeView!
     @IBOutlet private weak var trendingTitleLabel: UILabel!
     @IBOutlet private weak var trendingCollectionView: UICollectionView!
     @IBOutlet private weak var pagerView: SgptCarouselPagerView!
@@ -69,8 +66,6 @@ final class SeeAllSgptViewController: CommonViewController {
         super.viewDidLoad()
 
         view.backgroundColor = SgptListingColor.backgroundTop
-        heroFadeView?.setColors([SgptListingColor.backgroundTop.withAlphaComponent(0),
-                                 SgptListingColor.backgroundTop])
         backgroundGradient.colors = [
             SgptListingColor.backgroundTop.cgColor,
             SgptListingColor.backgroundBottom.cgColor
