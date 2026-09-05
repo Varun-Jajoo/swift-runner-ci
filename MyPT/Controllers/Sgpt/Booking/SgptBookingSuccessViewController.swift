@@ -393,12 +393,8 @@ final class SgptBookingSuccessViewController: UIViewController {
             trackView.clipsToBounds = true
 
             for index in 0..<4 {
-                let segment = UIView()
-                let absolute = track * 4 + index
-                segment.backgroundColor = absolute < filledCount
-                    ? .white
-                    : UIColor.white.withAlphaComponent(0.2)
-                segment.layer.cornerRadius = 5
+                let segment = SgptCreditSegmentView()
+                segment.isFilled = (track * 4 + index) < filledCount
                 trackView.addArrangedSubview(segment)
             }
             segmentsStack.addArrangedSubview(trackView)

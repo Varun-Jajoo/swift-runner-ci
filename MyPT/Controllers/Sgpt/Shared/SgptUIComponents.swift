@@ -338,3 +338,67 @@ public class SgptSeatsProgressView: UIView {
         }
     }
 }
+
+// MARK: - SgptCreditSegmentView
+
+/// One capsule in the credits meter. Figma 11641:20612 is a white capsule with
+/// an inset violet glow (`inset 0 0 8px #D288F9`), which UIKit has no native
+/// equivalent for - it is drawn as an even-odd ring whose shadow falls inward,
+/// masked back to the capsule so the glow only shows inside the edge.
+public class SgptCreditSegmentView: UIView {
+
+    public static let glowColor = UIColor(hex: "#D288F9")
+
+    /// A dimmed, unlit segment - the credits already spent.
+    public var isFilled: Bool = true {
+        didSet { applyState() }
+    }
+
+    private let glowLayer = CAShapeLayer()
+
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        commonInit()
+    }
+
+    public required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        commonInit()
+    }
+
+    private func commonInit() {
+        clipsToBounds = true
+        glowLayer.fillRule = .evenOdd
+        glowLayer.shadowColor = SgptCreditSegmentView.glowColor.cgColor
+        glowLayer.shadowOffset = .zero
+        glowLayer.shadowOpacity = 1
+        // CSS blur 8 maps to roughly half that as a Core Animation radius.
+        glowLayer.shadowRadius = 4
+        layer.addSublayer(glowLayer)
+        applyState()
+    }
+
+    private func applyState() {
+        backgroundColor = isFilled ? .white : UIColor.white.withAlphaComponent(0.2)
+        glowLayer.isHidden = !isFilled
+    }
+
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        let radius = bounds.height / 2
+        layer.cornerRadius = radius
+
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        glowLayer.frame = bounds
+
+        // Outer ring minus the capsule: the shadow of this shape reads as a
+        // glow pressed inward from the edge once clipped to bounds.
+        let outer = UIBezierPath(rect: bounds.insetBy(dx: -12, dy: -12))
+        let inner = UIBezierPath(roundedRect: bounds, cornerRadius: radius)
+        outer.append(inner.reversing())
+        glowLayer.path = outer.cgPath
+        glowLayer.shadowPath = inner.cgPath
+        CATransaction.commit()
+    }
+}

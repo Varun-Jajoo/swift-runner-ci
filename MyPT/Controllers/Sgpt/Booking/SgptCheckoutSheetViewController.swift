@@ -43,7 +43,7 @@ final class SgptCheckoutSheetViewController: UIViewController {
     @IBOutlet weak var sessionNameLabel: UILabel!
     @IBOutlet weak var sessionWhenLabel: UILabel!
     @IBOutlet weak var sessionWhereLabel: UILabel!
-    @IBOutlet weak var durationChip: UILabel!
+    @IBOutlet weak var durationChip: PillChipView!
 
     @IBOutlet weak var creditsCard: UIView!
     @IBOutlet weak var creditsUsedTitleLabel: UILabel!
@@ -55,7 +55,7 @@ final class SgptCheckoutSheetViewController: UIViewController {
     @IBOutlet weak var segmentsStack: UIStackView!
     @IBOutlet weak var walletTileView: UIView!
 
-    @IBOutlet weak var trainerCard: UIView!
+    @IBOutlet weak var trainerCard: GlassCardView!
     @IBOutlet weak var trainerImageView: UIImageView!
     @IBOutlet weak var trainerNameLabel: UILabel!
     @IBOutlet weak var trainerExpLabel: UILabel!
@@ -116,13 +116,13 @@ final class SgptCheckoutSheetViewController: UIViewController {
         sessionWhereLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
         sessionWhereLabel.textColor = UIColor.white.withAlphaComponent(0.4)
 
-        durationChip.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
-        durationChip.textColor = SgptListingColor.neutral200
-        durationChip.layer.cornerRadius = 8
-        durationChip.layer.borderWidth = 1
-        durationChip.layer.borderColor = SgptListingColor.text20.cgColor
-        durationChip.backgroundColor = UIColor.white.withAlphaComponent(0.15)
-        durationChip.clipsToBounds = true
+        durationChip.cornerRadius = 8
+        durationChip.fillColor = UIColor.white.withAlphaComponent(0.15)
+        durationChip.strokeColor = SgptListingColor.text20
+        durationChip.sheenColor = .white
+        durationChip.sheenAlpha = 0.20
+        durationChip.titleLabel.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
+        durationChip.titleLabel.textColor = SgptListingColor.neutral200
 
         creditsCard.backgroundColor = UIColor(hex: "#241040")
         creditsCard.layer.cornerRadius = 12
@@ -147,10 +147,14 @@ final class SgptCheckoutSheetViewController: UIViewController {
 
         creditsExpiryLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
 
-        trainerCard.backgroundColor = UIColor(hex: "#1E1E1F")
-        trainerCard.layer.cornerRadius = 12
-        trainerCard.layer.borderWidth = 1
-        trainerCard.layer.borderColor = UIColor(hex: "#29292A").cgColor
+        trainerCard.cornerRadius = 12
+        trainerCard.fillColor = UIColor(hex: "#1E1E1F")
+        trainerCard.fillAlpha = 1.0
+        trainerCard.strokeColor = UIColor(hex: "#29292A")
+        trainerCard.strokeAlpha = 1.0
+        trainerCard.showsSheen = true
+        trainerCard.sheenOrigin = .topCenter
+        trainerCard.sheenAlpha = 0.08
 
         trainerImageView.layer.cornerRadius = 9.188
         trainerImageView.backgroundColor = UIColor(hex: "#1A1A1A")
@@ -168,6 +172,13 @@ final class SgptCheckoutSheetViewController: UIViewController {
         viewProfileButton.layer.borderWidth = 1
         viewProfileButton.layer.borderColor = SgptListingColor.stroke10.cgColor
         viewProfileButton.contentEdgeInsets = UIEdgeInsets(top: 4, left: 12, bottom: 4, right: 12)
+        viewProfileButton.setImage(UIImage(named: "sgpt-ic-chevron-right")
+                                   ?? UIImage(systemName: "chevron.right"), for: .normal)
+        viewProfileButton.tintColor = .white
+        // UIButton puts the image before the title; flipping the axis moves the
+        // chevron to the trailing edge without hand-laying-out a stack.
+        viewProfileButton.semanticContentAttribute = .forceRightToLeft
+        viewProfileButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 6, bottom: 0, right: -6)
 
         policyLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
 
@@ -259,11 +270,8 @@ final class SgptCheckoutSheetViewController: UIViewController {
             trackView.clipsToBounds = true
 
             for index in 0..<4 {
-                let segment = UIView()
-                segment.backgroundColor = (track * 4 + index) < filledCount
-                    ? .white
-                    : UIColor.white.withAlphaComponent(0.2)
-                segment.layer.cornerRadius = 2.5
+                let segment = SgptCreditSegmentView()
+                segment.isFilled = (track * 4 + index) < filledCount
                 trackView.addArrangedSubview(segment)
             }
             segmentsStack.addArrangedSubview(trackView)

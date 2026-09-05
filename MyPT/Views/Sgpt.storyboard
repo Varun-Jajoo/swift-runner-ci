@@ -1166,7 +1166,7 @@
                                     <constraint firstAttribute="width" constant="24" id="sch015"/>
                                     <constraint firstAttribute="height" constant="24" id="sch016"/>
                                 </constraints>
-                                <state key="normal" image="xmark.circle" catalog="system"/>
+                                <state key="normal" image="xmark" catalog="system"/>
                                 <connections>
                                     <action selector="closeTapped" destination="sch001" eventType="touchUpInside" id="sch017"/>
                                 </connections>
@@ -1196,20 +1196,20 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sch026">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sch026" customClass="PillChipView" customModule="MyPT_Connect" customModuleProvider="target">
                                 <rect key="frame" x="299" y="80" width="74" height="24"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="24" id="sch027"/>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="74" id="sch028"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
+                            </view>
 
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sch030">
+                            <view contentMode="scaleToFill" clipsSubviews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sch030">
                                 <rect key="frame" x="20" y="160" width="353" height="137"/>
                                 <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" image="sgpt-seats-card-bg" translatesAutoresizingMaskIntoConstraints="NO" id="sch029">
+                                        <rect key="frame" x="0.0" y="0.0" width="353" height="137"/>
+                                    </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Credits use for this session" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sch031">
                                         <rect key="frame" x="15" y="12" width="200" height="18"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -1274,6 +1274,10 @@
                                     </label>
                                 </subviews>
                                 <constraints>
+                                    <constraint firstItem="sch029" firstAttribute="top" secondItem="sch030" secondAttribute="top" id="sch140"/>
+                                    <constraint firstItem="sch029" firstAttribute="leading" secondItem="sch030" secondAttribute="leading" id="sch141"/>
+                                    <constraint firstAttribute="trailing" secondItem="sch029" secondAttribute="trailing" id="sch142"/>
+                                    <constraint firstAttribute="bottom" secondItem="sch029" secondAttribute="bottom" id="sch143"/>
                                     <constraint firstItem="sch031" firstAttribute="top" secondItem="sch030" secondAttribute="top" constant="12" id="sch050"/>
                                     <constraint firstItem="sch031" firstAttribute="leading" secondItem="sch030" secondAttribute="leading" constant="15" id="sch051"/>
                                     <constraint firstItem="sch032" firstAttribute="centerY" secondItem="sch031" secondAttribute="centerY" id="sch052"/>
@@ -1297,7 +1301,7 @@
                                 </constraints>
                             </view>
 
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sch070">
+                            <view contentMode="scaleToFill" clipsSubviews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sch070" customClass="GlassCardView" customModule="MyPT_Connect" customModuleProvider="target">
                                 <rect key="frame" x="20" y="317" width="353" height="66"/>
                                 <subviews>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="sch071">
@@ -1393,7 +1397,7 @@
                             <constraint firstItem="sch091" firstAttribute="top" secondItem="sch090" secondAttribute="bottom" constant="16" id="sch128"/>
                             <constraint firstItem="sch091" firstAttribute="leading" secondItem="sch002" secondAttribute="leading" constant="20" id="sch129"/>
                             <constraint firstAttribute="trailing" secondItem="sch091" secondAttribute="trailing" constant="20" id="sch130"/>
-                            <constraint firstItem="schSAG" firstAttribute="bottom" secondItem="sch091" secondAttribute="bottom" constant="20" id="sch131"/>
+                            <constraint firstItem="schSAG" firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="sch091" secondAttribute="bottom" constant="20" id="sch131"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="schSAG"/>
                     </view>
@@ -1567,6 +1571,8 @@
         <image name="sgpt-pricing-hero" width="1459" height="1951"/>
         <image name="sgpt-success-bg" width="860" height="1746"/>
         <image name="sgpt-ic-wallet" width="10" height="10"/>
+        <image name="sgpt-seats-card-bg" width="702" height="274"/>
+        <image name="ic_masterCard_icon" width="30" height="24"/>
         <image name="sgpt-listing-hero" width="1290" height="1434"/>
         <image name="sgpt-listing-footer-bg" width="1290" height="690"/>
         <image name="sgpt-listing-divider" width="134" height="14"/>
