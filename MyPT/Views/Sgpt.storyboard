@@ -722,11 +722,26 @@
                                                                 <rect key="frame" x="0.0" y="0.0" width="380" height="380"/>
                                                             </imageView>
                                                             <view contentMode="scaleToFill" userInteractionEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs222" customClass="GradientFadeView" customModule="MyPT_Connect" customModuleProvider="target">
-                                                                <rect key="frame" x="0.0" y="250" width="380" height="130"/>
+                                                                <rect key="frame" x="0.0" y="180" width="380" height="200"/>
                                                                 <constraints>
-                                                                    <constraint firstAttribute="height" constant="130" id="sbs223"/>
+                                                                    <constraint firstAttribute="height" constant="200" id="sbs223"/>
                                                                 </constraints>
                                                             </view>
+                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs240" customClass="PillChipView" customModule="MyPT_Connect" customModuleProvider="target">
+                                                                <rect key="frame" x="160" y="256" width="61" height="26"/>
+                                                            </view>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs241">
+                                                                <rect key="frame" x="16" y="292" width="348" height="24"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs242">
+                                                                <rect key="frame" x="16" y="323" width="348" height="18"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
                                                         </subviews>
                                                         <constraints>
                                                             <constraint firstAttribute="width" secondItem="sbs220" secondAttribute="height" id="sbs224"/>
@@ -737,24 +752,17 @@
                                                             <constraint firstItem="sbs222" firstAttribute="leading" secondItem="sbs220" secondAttribute="leading" id="sbs230"/>
                                                             <constraint firstAttribute="trailing" secondItem="sbs222" secondAttribute="trailing" id="sbs231"/>
                                                             <constraint firstAttribute="bottom" secondItem="sbs222" secondAttribute="bottom" id="sbs232"/>
+                                                            <constraint firstItem="sbs242" firstAttribute="leading" secondItem="sbs220" secondAttribute="leading" constant="16" id="sbs233"/>
+                                                            <constraint firstAttribute="trailing" secondItem="sbs242" secondAttribute="trailing" constant="16" id="sbs234"/>
+                                                            <constraint firstAttribute="bottom" secondItem="sbs242" secondAttribute="bottom" constant="20" id="sbs235"/>
+                                                            <constraint firstItem="sbs241" firstAttribute="leading" secondItem="sbs220" secondAttribute="leading" constant="16" id="sbs236"/>
+                                                            <constraint firstAttribute="trailing" secondItem="sbs241" secondAttribute="trailing" constant="16" id="sbs237"/>
+                                                            <constraint firstItem="sbs242" firstAttribute="top" secondItem="sbs241" secondAttribute="bottom" constant="7" id="sbs238"/>
+                                                            <constraint firstItem="sbs240" firstAttribute="centerX" secondItem="sbs220" secondAttribute="centerX" id="sbs239"/>
+                                                            <constraint firstItem="sbs241" firstAttribute="top" secondItem="sbs240" secondAttribute="bottom" constant="10" id="sbs243"/>
                                                         </constraints>
                                                     </view>
 
-                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs240" customClass="PillChipView" customModule="MyPT_Connect" customModuleProvider="target">
-                                                        <rect key="frame" x="166" y="577" width="61" height="26"/>
-                                                    </view>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs241">
-                                                        <rect key="frame" x="20" y="610" width="353" height="24"/>
-                                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
-                                                        <nil key="textColor"/>
-                                                        <nil key="highlightedColor"/>
-                                                    </label>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs242">
-                                                        <rect key="frame" x="20" y="641" width="353" height="18"/>
-                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                        <nil key="textColor"/>
-                                                        <nil key="highlightedColor"/>
-                                                    </label>
 
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs250">
                                                         <rect key="frame" x="20" y="683" width="353" height="1"/>
@@ -766,6 +774,9 @@
                                                     <view contentMode="scaleToFill" clipsSubviews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sbs260">
                                                         <rect key="frame" x="20" y="708" width="353" height="137"/>
                                                         <subviews>
+                                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" image="sgpt-seats-card-bg" translatesAutoresizingMaskIntoConstraints="NO" id="sbs259">
+                                                                <rect key="frame" x="0.0" y="0.0" width="353" height="137"/>
+                                                            </imageView>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Credits used for this session" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs261">
                                                                 <rect key="frame" x="15" y="12" width="200" height="18"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -796,12 +807,12 @@
                                                                 <nil key="textColor"/>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
-                                                            <stackView opaque="NO" contentMode="scaleToFill" axis="horizontal" distribution="fillEqually" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="sbs267">
-                                                                <rect key="frame" x="15" y="83" width="323" height="14"/>
+                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs267" customClass="SpotProgressBarView" customModule="MyPT_Connect" customModuleProvider="target">
+                                                                <rect key="frame" x="15" y="83" width="323" height="8"/>
                                                                 <constraints>
-                                                                    <constraint firstAttribute="height" constant="14" id="sbs268"/>
+                                                                    <constraint firstAttribute="height" constant="8" id="sbs268"/>
                                                                 </constraints>
-                                                            </stackView>
+                                                            </view>
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs269">
                                                                 <rect key="frame" x="15" y="109" width="20" height="20"/>
                                                                 <subviews>
@@ -829,6 +840,10 @@
                                                             </label>
                                                         </subviews>
                                                         <constraints>
+                                                            <constraint firstItem="sbs259" firstAttribute="top" secondItem="sbs260" secondAttribute="top" id="sbs2792"/>
+                                                            <constraint firstItem="sbs259" firstAttribute="leading" secondItem="sbs260" secondAttribute="leading" id="sbs278"/>
+                                                            <constraint firstAttribute="trailing" secondItem="sbs259" secondAttribute="trailing" id="sbs279"/>
+                                                            <constraint firstAttribute="bottom" secondItem="sbs259" secondAttribute="bottom" id="sbs2791"/>
                                                             <constraint firstItem="sbs261" firstAttribute="top" secondItem="sbs260" secondAttribute="top" constant="12" id="sbs280"/>
                                                             <constraint firstItem="sbs261" firstAttribute="leading" secondItem="sbs260" secondAttribute="leading" constant="15" id="sbs281"/>
                                                             <constraint firstItem="sbs262" firstAttribute="centerY" secondItem="sbs261" secondAttribute="centerY" id="sbs282"/>
@@ -984,15 +999,7 @@
                                                     <constraint firstItem="sbs220" firstAttribute="centerX" secondItem="sbs040" secondAttribute="centerX" id="sbs369"/>
                                                     <constraint firstItem="sbs220" firstAttribute="leading" secondItem="sbs040" secondAttribute="leading" constant="25" id="sbs370"/>
                                                     <constraint firstAttribute="trailing" secondItem="sbs220" secondAttribute="trailing" constant="25" id="sbs392"/>
-                                                    <constraint firstItem="sbs240" firstAttribute="top" secondItem="sbs220" secondAttribute="bottom" constant="16" id="sbs371"/>
-                                                    <constraint firstItem="sbs240" firstAttribute="centerX" secondItem="sbs040" secondAttribute="centerX" id="sbs372"/>
-                                                    <constraint firstItem="sbs241" firstAttribute="top" secondItem="sbs240" secondAttribute="bottom" constant="7" id="sbs373"/>
-                                                    <constraint firstItem="sbs241" firstAttribute="leading" secondItem="sbs040" secondAttribute="leading" constant="20" id="sbs374"/>
-                                                    <constraint firstAttribute="trailing" secondItem="sbs241" secondAttribute="trailing" constant="20" id="sbs375"/>
-                                                    <constraint firstItem="sbs242" firstAttribute="top" secondItem="sbs241" secondAttribute="bottom" constant="7" id="sbs376"/>
-                                                    <constraint firstItem="sbs242" firstAttribute="leading" secondItem="sbs040" secondAttribute="leading" constant="20" id="sbs377"/>
-                                                    <constraint firstAttribute="trailing" secondItem="sbs242" secondAttribute="trailing" constant="20" id="sbs378"/>
-                                                    <constraint firstItem="sbs250" firstAttribute="top" secondItem="sbs242" secondAttribute="bottom" constant="24" id="sbs379"/>
+                                                    <constraint firstItem="sbs250" firstAttribute="top" secondItem="sbs220" secondAttribute="bottom" constant="24" id="sbs379"/>
                                                     <constraint firstItem="sbs250" firstAttribute="leading" secondItem="sbs040" secondAttribute="leading" constant="20" id="sbs380"/>
                                                     <constraint firstAttribute="trailing" secondItem="sbs250" secondAttribute="trailing" constant="20" id="sbs381"/>
                                                     <constraint firstItem="sbs260" firstAttribute="top" secondItem="sbs250" secondAttribute="bottom" constant="24" id="sbs382"/>
@@ -1021,6 +1028,16 @@
                                 <viewLayoutGuide key="contentLayoutGuide" id="sbsCLG"/>
                                 <viewLayoutGuide key="frameLayoutGuide" id="sbsFLG"/>
                             </scrollView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sbs400" customClass="GlassCircularIconButton" customModule="MyPT_Connect" customModuleProvider="target">
+                                <rect key="frame" x="20" y="60" width="40" height="40"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="40" id="sbs401"/>
+                                    <constraint firstAttribute="height" constant="40" id="sbs402"/>
+                                </constraints>
+                                <connections>
+                                    <action selector="backTapped" destination="sbs001" eventType="touchUpInside" id="sbs403"/>
+                                </connections>
+                            </button>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs060">
                                 <rect key="frame" x="0.0" y="766" width="393" height="86"/>
                                 <subviews>
@@ -1058,6 +1075,7 @@
                                     </button>
                                 </subviews>
                                 <color key="backgroundColor" red="0.0" green="0.039215686274509803" blue="0.015686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <viewLayoutGuide key="safeArea" id="sbs060SAG"/>
                                 <constraints>
                                     <constraint firstItem="sbs061" firstAttribute="top" secondItem="sbs060" secondAttribute="top" id="sbs070"/>
                                     <constraint firstItem="sbs061" firstAttribute="leading" secondItem="sbs060" secondAttribute="leading" id="sbs071"/>
@@ -1068,15 +1086,17 @@
                                     <constraint firstAttribute="trailing" secondItem="sbs066" secondAttribute="trailing" constant="20" id="sbs076"/>
                                     <constraint firstItem="sbs066" firstAttribute="centerY" secondItem="sbs063" secondAttribute="centerY" id="sbs077"/>
                                     <constraint firstItem="sbs066" firstAttribute="width" secondItem="sbs063" secondAttribute="width" id="sbs078"/>
+                                    <constraint firstItem="sbs060SAG" firstAttribute="bottom" secondItem="sbs063" secondAttribute="bottom" constant="19" id="sbs079"/>
                                 </constraints>
                             </view>
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="0.039215686274509803" blue="0.015686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <viewLayoutGuide key="safeArea" id="sbsSAG"/>
                         <constraints>
                             <constraint firstItem="sbs010" firstAttribute="top" secondItem="sbs002" secondAttribute="top" id="sbs080"/>
                             <constraint firstItem="sbs010" firstAttribute="leading" secondItem="sbs002" secondAttribute="leading" id="sbs081"/>
                             <constraint firstAttribute="trailing" secondItem="sbs010" secondAttribute="trailing" id="sbs082"/>
-                            <constraint firstItem="sbs010" firstAttribute="height" secondItem="sbs002" secondAttribute="height" multiplier="0.62" id="sbs083"/>
+                            <constraint firstAttribute="bottom" secondItem="sbs010" secondAttribute="bottom" id="sbs083"/>
                             <constraint firstItem="sbs011" firstAttribute="leading" secondItem="sbs002" secondAttribute="leading" id="sbs084"/>
                             <constraint firstAttribute="trailing" secondItem="sbs011" secondAttribute="trailing" id="sbs085"/>
                             <constraint firstItem="sbs011" firstAttribute="bottom" secondItem="sbs010" secondAttribute="bottom" id="sbs086"/>
@@ -1088,10 +1108,13 @@
                             <constraint firstItem="sbs060" firstAttribute="leading" secondItem="sbs002" secondAttribute="leading" id="sbs094"/>
                             <constraint firstAttribute="trailing" secondItem="sbs060" secondAttribute="trailing" id="sbs095"/>
                             <constraint firstAttribute="bottom" secondItem="sbs060" secondAttribute="bottom" id="sbs096"/>
+                            <constraint firstItem="sbs400" firstAttribute="leading" secondItem="sbs002" secondAttribute="leading" constant="20" id="sbs404"/>
+                            <constraint firstItem="sbs400" firstAttribute="top" secondItem="sbsSAG" secondAttribute="top" constant="8" id="sbs405"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="backToClassesButton" destination="sbs063" id="sbs110"/>
+                        <outlet property="backButton" destination="sbs400" id="sbsC950"/>
                         <outlet property="paymentBottomConstraint" destination="sbs391" id="sbsC900"/>
                         <outlet property="creditsBottomConstraint" destination="sbs393" id="sbsC901"/>
                         <outlet property="titleLabel" destination="sbs210" id="sbsC000"/>
@@ -1109,7 +1132,7 @@
                         <outlet property="creditsDividerView" destination="sbs263" id="sbsC012"/>
                         <outlet property="creditsRemainingTitleLabel" destination="sbs265" id="sbsC013"/>
                         <outlet property="creditsRemainingLabel" destination="sbs266" id="sbsC014"/>
-                        <outlet property="segmentsStack" destination="sbs267" id="sbsC015"/>
+                        <outlet property="creditsProgressBar" destination="sbs267" id="sbsC015"/>
                         <outlet property="walletTileView" destination="sbs269" id="sbsC016"/>
                         <outlet property="creditsExpiryLabel" destination="sbs277" id="sbsC017"/>
                         <outlet property="paymentSummaryTitleLabel" destination="sbs300" id="sbsC018"/>
@@ -1397,7 +1420,7 @@
                             <constraint firstItem="sch091" firstAttribute="top" secondItem="sch090" secondAttribute="bottom" constant="16" id="sch128"/>
                             <constraint firstItem="sch091" firstAttribute="leading" secondItem="sch002" secondAttribute="leading" constant="20" id="sch129"/>
                             <constraint firstAttribute="trailing" secondItem="sch091" secondAttribute="trailing" constant="20" id="sch130"/>
-                            <constraint firstItem="schSAG" firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="sch091" secondAttribute="bottom" constant="20" id="sch131"/>
+                            <constraint firstItem="schSAG" firstAttribute="bottom" secondItem="sch091" secondAttribute="bottom" constant="6" id="sch131"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="schSAG"/>
                     </view>

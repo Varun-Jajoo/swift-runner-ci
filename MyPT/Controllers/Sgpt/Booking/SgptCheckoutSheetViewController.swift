@@ -75,21 +75,30 @@ final class SgptCheckoutSheetViewController: UIViewController {
         view.backgroundColor = SgptListingColor.surfaceLow
         styleScene()
         bind()
+        configureSheetDetent()
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        if #available(iOS 15.0, *), let sheet = sheetPresentationController {
-            sheet.preferredCornerRadius = Metric.sheetCornerRadius
-            sheet.prefersGrabberVisible = false
-            if #available(iOS 16.0, *) {
-                let height = view.systemLayoutSizeFitting(
-                    CGSize(width: view.bounds.width, height: UIView.layoutFittingCompressedSize.height)
-                ).height
-                sheet.detents = [.custom { _ in height }]
-            } else {
-                sheet.detents = [.medium(), .large()]
-            }
+    /// Sized before the sheet animates in. Doing this in viewDidAppear meant it
+    /// presented at the default full height and then snapped down to fit.
+    private func configureSheetDetent() {
+        guard #available(iOS 15.0, *), let sheet = sheetPresentationController else { return }
+        sheet.preferredCornerRadius = Metric.sheetCornerRadius
+        sheet.prefersGrabberVisible = false
+
+        let width = UIScreen.main.bounds.width
+        view.frame = CGRect(x: 0, y: 0, width: width, height: UIScreen.main.bounds.height)
+        view.layoutIfNeeded()
+
+        let height = view.systemLayoutSizeFitting(
+            CGSize(width: width, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        ).height
+
+        if #available(iOS 16.0, *) {
+            sheet.detents = [.custom { _ in height }]
+        } else {
+            sheet.detents = [.medium()]
         }
     }
 
@@ -171,14 +180,17 @@ final class SgptCheckoutSheetViewController: UIViewController {
         viewProfileButton.layer.cornerRadius = 8
         viewProfileButton.layer.borderWidth = 1
         viewProfileButton.layer.borderColor = SgptListingColor.stroke10.cgColor
-        viewProfileButton.contentEdgeInsets = UIEdgeInsets(top: 4, left: 12, bottom: 4, right: 12)
-        viewProfileButton.setImage(UIImage(named: "sgpt-ic-chevron-right")
-                                   ?? UIImage(systemName: "chevron.right"), for: .normal)
+        let chevron = UIImage(systemName: "chevron.right",
+                              withConfiguration: UIImage.SymbolConfiguration(pointSize: 10, weight: .semibold))
+        viewProfileButton.setImage(chevron, for: .normal)
         viewProfileButton.tintColor = .white
-        // UIButton puts the image before the title; flipping the axis moves the
+        viewProfileButton.imageView?.contentMode = .scaleAspectFit
+        // UIButton draws the image before the title; flipping the axis moves the
         // chevron to the trailing edge without hand-laying-out a stack.
         viewProfileButton.semanticContentAttribute = .forceRightToLeft
-        viewProfileButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 6, bottom: 0, right: -6)
+        viewProfileButton.contentEdgeInsets = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
+        viewProfileButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
+        viewProfileButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: -2, bottom: 0, right: 2)
 
         policyLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
 
@@ -194,7 +206,12 @@ final class SgptCheckoutSheetViewController: UIViewController {
         let session = input.session
 
         sessionNameLabel.text = SgptCardCollectionViewCell.titleText(for: session)
-        sessionWhenLabel.attributedText = SgptCardCollectionViewCell.subtitleText(for: session)
+        if let when = SgptCardCollectionViewCell.subtitleText(for: session).mutableCopy() as? NSMutableAttributedString {
+            when.addAttribute(.font,
+                              value: AppFont.regular.size(12.0, familyName: familyFunnelSans),
+                              range: NSRange(location: 0, length: when.length))
+            sessionWhenLabel.attributedText = when
+        }
         sessionWhereLabel.text = session.studioName ?? ""
 
         durationChip.text = "\(GroupClassCardFormatter.intValue(session.duration, defaultValue: 60)) MINS"

@@ -267,15 +267,11 @@ final class SgptPaymentSummaryViewController: CommonViewController {
     }
 
     @IBAction func confirmTapped() {
-        guard !tierId.isEmpty else {
-            let alert = UIAlertController(title: nil, message: Copy.comingSoon, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            present(alert, animated: true)
-            return
-        }
-
         ctaButton.isEnabled = false
-        SgptVM.sgptPurchaseApi(tierId: tierId, studioId: studioId, sessionId: sessionId) { [weak self] result, errorMessage in
+        SgptVM.sgptPurchaseApi(tierId: tierId,
+                               credits: credits,
+                               studioId: studioId,
+                               sessionId: sessionId) { [weak self] result, errorMessage in
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 self.ctaButton.isEnabled = true

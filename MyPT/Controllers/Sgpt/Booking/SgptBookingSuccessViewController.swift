@@ -185,7 +185,8 @@ final class SgptBookingSuccessViewController: UIViewController {
     @IBOutlet weak var creditsDividerView: UIView!
     @IBOutlet weak var creditsRemainingTitleLabel: UILabel!
     @IBOutlet weak var creditsRemainingLabel: UILabel!
-    @IBOutlet weak var segmentsStack: UIStackView!
+    @IBOutlet weak var creditsProgressBar: SpotProgressBarView!
+    @IBOutlet weak var backButton: GlassCircularIconButton!
     @IBOutlet weak var walletTileView: UIView!
     @IBOutlet weak var creditsExpiryLabel: UILabel!
     @IBOutlet weak var paymentSummaryTitleLabel: UILabel!
@@ -222,7 +223,7 @@ final class SgptBookingSuccessViewController: UIViewController {
         styleContent()
         bindContent()
         applyMode()
-        buildSegments(filled: input.creditsRemaining)
+        applyCreditsProgress()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -243,6 +244,10 @@ final class SgptBookingSuccessViewController: UIViewController {
         backdropFadeView.setColors([Palette.bg.withAlphaComponent(0), Palette.bg])
 
         footerView.backgroundColor = Palette.bg
+
+        backButton.configure(icon: UIImage(named: "sgpt-ic-back-chevron")
+                             ?? UIImage(systemName: "chevron.left"), diameter: 40)
+        backButton.tintColor = .white
 
         backToClassesButton.backgroundColor = Palette.secondaryFill
         backToClassesButton.layer.cornerRadius = 8
@@ -275,14 +280,12 @@ final class SgptBookingSuccessViewController: UIViewController {
         sessionNameLabel.font = AppFont.medium.size(20.0, familyName: familyClashDisplay)
         sessionNameLabel.textColor = .white
         sessionMetaLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
-        sessionMetaLabel.textColor = Palette.text55
+        sessionMetaLabel.textColor = UIColor.white.withAlphaComponent(0.75)
 
         headerDividerView.backgroundColor = Palette.stroke10
 
-        creditsCard.backgroundColor = Palette.creditsFill
         creditsCard.layer.cornerRadius = Metric.cardCorner
-        creditsCard.layer.borderWidth = 1
-        creditsCard.layer.borderColor = SgptListingColor.violet500.cgColor
+        creditsCard.clipsToBounds = true
         creditsUsedTitleLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
         creditsUsedTitleLabel.textColor = .white
         creditsUsedLabel.font = AppFont.medium.size(20.0, familyName: familyClashDisplay)
@@ -377,28 +380,11 @@ final class SgptBookingSuccessViewController: UIViewController {
     }
     // MARK: Segments
 
-    private func buildSegments(filled: Int) {
-        segmentsStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        let filledCount = min(max(filled, 0), Metric.creditSegments)
-
-        for track in 0..<2 {
-            let trackView = UIStackView()
-            trackView.axis = .horizontal
-            trackView.spacing = 2
-            trackView.distribution = .fillEqually
-            trackView.isLayoutMarginsRelativeArrangement = true
-            trackView.layoutMargins = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
-            trackView.backgroundColor = UIColor.white.withAlphaComponent(0.05)
-            trackView.layer.cornerRadius = 7
-            trackView.clipsToBounds = true
-
-            for index in 0..<4 {
-                let segment = SgptCreditSegmentView()
-                segment.isFilled = (track * 4 + index) < filledCount
-                trackView.addArrangedSubview(segment)
-            }
-            segmentsStack.addArrangedSubview(trackView)
-        }
+    private func applyCreditsProgress() {
+        let total = max(input.creditsUsed + input.creditsRemaining, 1)
+        creditsProgressBar.barHeight = 8
+        creditsProgressBar.trackColor = UIColor.white.withAlphaComponent(0.10)
+        creditsProgressBar.setProgress(CGFloat(input.creditsRemaining) / CGFloat(total))
     }
 
     // MARK: Helpers
@@ -431,6 +417,11 @@ final class SgptBookingSuccessViewController: UIViewController {
         } else {
             navigationController?.popToRootViewController(animated: true)
         }
+    }
+
+    @IBAction func backTapped() {
+        TapticEngine.selection.feedback()
+        navigationController?.popViewController(animated: true)
     }
 
     @IBAction func backToClassesTapped() {

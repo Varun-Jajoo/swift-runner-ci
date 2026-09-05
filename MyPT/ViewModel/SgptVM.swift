@@ -162,11 +162,13 @@ class SgptVM {
     /// credits granted are real. Passing `sessionId` books that session in the
     /// same call, which is the buy-then-book flow.
     class func sgptPurchaseApi(tierId: String,
+                               credits: Int,
                                studioId: String,
                                sessionId: String?,
                                isShowLoader: Bool = true,
                                completion: @escaping (_ result: SgptPurchaseResultModel?, _ errorMessage: String?) -> Void) {
-        var params: [String: Any] = ["tier_id": tierId, "studio_id": studioId]
+        var params: [String: Any] = ["studio_id": studioId, "credits": credits]
+        if !tierId.isEmpty { params["tier_id"] = tierId }
         if let sessionId = sessionId, !sessionId.isEmpty {
             params["session_id"] = sessionId
         }
