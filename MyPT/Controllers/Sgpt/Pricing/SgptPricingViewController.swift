@@ -38,8 +38,6 @@ final class SgptPricingViewController: CommonViewController {
 
     @IBOutlet weak var mainScrollView: UIScrollView!
     @IBOutlet weak var heroImageView: UIImageView!
-    /// Fades the hero's cropped bottom into the page instead of ending on a cut.
-    @IBOutlet weak var heroFadeView: GradientFadeView!
     @IBOutlet weak var contentContainer: UIView!
     @IBOutlet weak var backButtonTopConstraint: NSLayoutConstraint!
 
@@ -157,7 +155,6 @@ final class SgptPricingViewController: CommonViewController {
         heroImageView.image = UIImage(named: "sgpt-pricing-hero")
         heroImageView.contentMode = .scaleAspectFill
         heroImageView.clipsToBounds = true
-        heroFadeView?.setColors([Palette.bg.withAlphaComponent(0), Palette.bg])
         buildContent()
         loadPacks()
 
@@ -479,6 +476,7 @@ extension SgptPricingViewController: UIScrollViewDelegate {
         // vertical one is scrolling, the cause is layout, not the carousel.
         debugSnapshotIfChanged(isPricingCarousel(scrollView) ? "carScroll" : "mainScroll")
         guard isPricingCarousel(scrollView), (scrollView.isDragging || scrollView.isDecelerating) else { return }
+        updatePricingCardScales()
         updateCenteredPricingCard()
     }
 
@@ -879,6 +877,24 @@ private extension SgptPricingViewController {
         centerPricingCard(ref.card, animated: true)
     }
 
+    /// Scales every card by how far it sits from the viewport centre, so a card
+    /// grows and shrinks as it is dragged rather than jumping a step once it
+    /// becomes the nearest one. applyPricingCardSizes still sets the settled
+    /// end state; this only tracks the drag in between.
+    private func updatePricingCardScales() {
+        guard let scroll = cardsScrollView, !pricingCardRefs.isEmpty else { return }
+        let viewportCenter = scroll.contentOffset.x + scroll.bounds.width / 2
+        // One card plus the row's spacing: the distance over which a card goes
+        // from fully centered to fully side-sized.
+        let span = PricingMetric.mainCardWidth + 21
+
+        for ref in pricingCardRefs {
+            let distance = min(abs(ref.card.center.x - viewportCenter) / span, 1)
+            let scale = 1 + (PricingMetric.sideScale - 1) * distance
+            ref.card.transform = CGAffineTransform(scaleX: scale, y: scale)
+        }
+    }
+
     func applyPricingCardSizes(centeredCard: UIView, animated: Bool) {
         debugSnapshot("applySizes")
         let block = { [weak self] in
@@ -888,15 +904,6 @@ private extension SgptPricingViewController {
                 ref.card.transform = isCentered
                     ? .identity
                     : CGAffineTransform(scaleX: PricingMetric.sideScale, y: PricingMetric.sideScale)
-                // Scale alone left every card wearing the look it was built
-                // with, so the centered one stayed flat and whichever started
-                // centered kept the highlight. This is the toggle the single
-                // shared card type exists for.
-                ref.card.setPricingCardStyle(isCenter: isCentered,
-                                             centerFillColor: Palette.cardCenterFill,
-                                             sideFillColor: Palette.cardSideFill,
-                                             centerBorderColor: Palette.centerBorder)
-                self.applyPricingBadgeStyle(ref.badge, isCenter: isCentered)
             }
         }
         if animated {

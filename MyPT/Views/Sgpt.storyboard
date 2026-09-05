@@ -324,18 +324,12 @@
                                         <rect key="frame" x="0.0" y="0.0" width="393" height="1600"/>
                                         <subviews>
                                             <!-- Hero -->
-                                            <view contentMode="scaleToFill" clipsSubviews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="spr010">
+                                            <view contentMode="scaleToFill" clipsSubviews="NO" translatesAutoresizingMaskIntoConstraints="NO" id="spr010">
                                                 <rect key="frame" x="0.0" y="0.0" width="393" height="559"/>
                                                 <subviews>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" image="sgpt-pricing-hero" translatesAutoresizingMaskIntoConstraints="NO" id="spr011">
                                                         <rect key="frame" x="0.0" y="0.0" width="393" height="559"/>
                                                     </imageView>
-                                                    <view contentMode="scaleToFill" userInteractionEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="spr015" customClass="GradientFadeView" customModule="MyPT_Connect" customModuleProvider="target">
-                                                        <rect key="frame" x="0.0" y="399" width="393" height="160"/>
-                                                        <constraints>
-                                                            <constraint firstAttribute="height" constant="160" id="spr016"/>
-                                                        </constraints>
-                                                    </view>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="spr013" customClass="GlassCircularIconButton" customModule="MyPT_Connect" customModuleProvider="target">
                                                         <rect key="frame" x="16" y="8" width="40" height="40"/>
                                                         <state key="normal" image="chevron.left" catalog="system"/>
@@ -349,11 +343,8 @@
                                                     <constraint firstItem="spr011" firstAttribute="top" secondItem="spr010" secondAttribute="top" id="spr018"/>
                                                     <constraint firstItem="spr011" firstAttribute="leading" secondItem="spr010" secondAttribute="leading" constant="-20" id="spr019"/>
                                                     <constraint firstAttribute="trailing" secondItem="spr011" secondAttribute="trailing" constant="-20" id="spr020"/>
-                                                    <constraint firstItem="spr010" firstAttribute="height" secondItem="spr010" secondAttribute="width" multiplier="1.18" id="spr021"/>
+                                                    <constraint firstItem="spr010" firstAttribute="height" secondItem="spr010" secondAttribute="width" multiplier="1.15" id="spr021"/>
                                                     <constraint firstItem="spr011" firstAttribute="height" secondItem="spr011" secondAttribute="width" multiplier="1951:1459" id="spr023"/>
-                                                    <constraint firstItem="spr015" firstAttribute="leading" secondItem="spr010" secondAttribute="leading" id="spr030"/>
-                                                    <constraint firstAttribute="trailing" secondItem="spr015" secondAttribute="trailing" id="spr031"/>
-                                                    <constraint firstAttribute="bottom" secondItem="spr015" secondAttribute="bottom" id="spr032"/>
                                                     <constraint firstItem="spr013" firstAttribute="top" secondItem="spr010" secondAttribute="top" constant="8" id="spr026"/>
                                                     <constraint firstItem="spr013" firstAttribute="leading" secondItem="spr010" secondAttribute="leading" constant="20" id="spr027"/>
                                                     <constraint firstItem="spr013" firstAttribute="width" constant="40" id="spr028"/>
@@ -388,7 +379,6 @@
                     <connections>
                         <outlet property="backButtonTopConstraint" destination="spr026" id="spr073"/>
                         <outlet property="contentContainer" destination="spr040" id="spr070"/>
-                        <outlet property="heroFadeView" destination="spr015" id="sprC960"/>
                         <outlet property="heroImageView" destination="spr011" id="spr071"/>
                         <outlet property="mainScrollView" destination="spr003" id="spr072"/>
                     </connections>
@@ -417,6 +407,12 @@
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" image="sgpt-listing-hero" translatesAutoresizingMaskIntoConstraints="NO" id="sal011">
                                                         <rect key="frame" x="0.0" y="-20" width="393" height="476"/>
                                                     </imageView>
+                                                    <view contentMode="scaleToFill" userInteractionEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sal012" customClass="GradientFadeView" customModule="MyPT_Connect" customModuleProvider="target">
+                                                        <rect key="frame" x="0.0" y="206" width="393" height="160"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="160" id="sal013"/>
+                                                        </constraints>
+                                                    </view>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sal015" customClass="GlassCircularIconButton" customModule="MyPT_Connect" customModuleProvider="target">
                                                         <rect key="frame" x="20" y="52" width="40" height="40"/>
                                                         <state key="normal" image="sgpt-ic-back-chevron"/>
@@ -431,6 +427,9 @@
                                                     <constraint firstItem="sal011" firstAttribute="top" secondItem="sal010" secondAttribute="top" constant="-20" id="sal018"/>
                                                     <constraint firstItem="sal011" firstAttribute="leading" secondItem="sal010" secondAttribute="leading" id="sal019"/>
                                                     <constraint firstAttribute="trailing" secondItem="sal011" secondAttribute="trailing" id="sal020"/>
+                                                    <constraint firstItem="sal012" firstAttribute="leading" secondItem="sal010" secondAttribute="leading" id="sal022"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sal012" secondAttribute="trailing" id="sal023"/>
+                                                    <constraint firstAttribute="bottom" secondItem="sal012" secondAttribute="bottom" id="sal024"/>
                                                     <constraint firstItem="sal011" firstAttribute="height" constant="476" id="sal021"/>
                                                     <constraint firstItem="sal015" firstAttribute="top" secondItem="sal010" secondAttribute="top" constant="52" id="sal034"/>
                                                     <constraint firstItem="sal015" firstAttribute="leading" secondItem="sal010" secondAttribute="leading" constant="20" id="sal035"/>
@@ -468,7 +467,7 @@
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="424" id="sal061"/>
                                                 </constraints>
-                                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="16" minimumInteritemSpacing="16" id="sal062">
+                                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="sal062" customClass="SgptSpotlightFlowLayout" customModule="MyPT_Connect" customModuleProvider="target">
                                                     <size key="itemSize" width="192" height="339"/>
                                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                                 </collectionViewFlowLayout>
@@ -673,6 +672,7 @@
                         <outlet property="tabsStack" destination="sal113" id="sal208"/>
                         <outlet property="trainerCollectionView" destination="sal130" id="sal209"/>
                         <outlet property="trainerHeightConstraint" destination="sal131" id="sal210"/>
+                        <outlet property="heroFadeView" destination="sal012" id="salC970"/>
                         <outlet property="trendingCollectionView" destination="sal060" id="sal211"/>
                         <outlet property="trendingTitleLabel" destination="sal041" id="sal212"/>
                         <outlet property="upcomingTitleLabel" destination="sal081" id="sal213"/>

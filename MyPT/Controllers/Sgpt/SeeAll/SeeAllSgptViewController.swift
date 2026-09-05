@@ -26,6 +26,9 @@ final class SeeAllSgptViewController: CommonViewController {
     @IBOutlet private weak var scrollView: UIScrollView!
     @IBOutlet private weak var contentStack: UIStackView!
     @IBOutlet private weak var heroImageView: UIImageView!
+    /// The hero is taller than its container, so without this it ended on a
+    /// hard horizontal cut instead of dissolving into the page.
+    @IBOutlet private weak var heroFadeView: GradientFadeView!
     @IBOutlet private weak var trendingTitleLabel: UILabel!
     @IBOutlet private weak var trendingCollectionView: UICollectionView!
     @IBOutlet private weak var pagerView: SgptCarouselPagerView!
@@ -66,6 +69,8 @@ final class SeeAllSgptViewController: CommonViewController {
         super.viewDidLoad()
 
         view.backgroundColor = SgptListingColor.backgroundTop
+        heroFadeView?.setColors([SgptListingColor.backgroundTop.withAlphaComponent(0),
+                                 SgptListingColor.backgroundTop])
         backgroundGradient.colors = [
             SgptListingColor.backgroundTop.cgColor,
             SgptListingColor.backgroundBottom.cgColor
@@ -136,7 +141,11 @@ final class SeeAllSgptViewController: CommonViewController {
         trendingCollectionView.showsHorizontalScrollIndicator = false
         trendingCollectionView.decelerationRate = .fast
         trendingCollectionView.clipsToBounds = false
-        trendingCollectionView.setCollectionViewLayout(SgptSpotlightFlowLayout(), animated: false)
+        // The layout comes from the storyboard (customClass), same as Homepage.
+        // Swapping in a fresh one here meant prepare() first ran against
+        // whatever bounds existed at viewDidLoad, so the centering insets - and
+        // with them the snapping and the scale ramp - were computed off.
+        trendingCollectionView.isPagingEnabled = false
         trendingCollectionView.delegate = self
         trendingCollectionView.dataSource = self
         trendingCollectionView.register(UINib(nibName: "SgptCardCollectionViewCell", bundle: nil),
