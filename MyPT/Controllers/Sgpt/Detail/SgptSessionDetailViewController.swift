@@ -356,20 +356,20 @@ final class SgptSessionDetailViewController: CommonViewController {
                     creditsBalance: balance,
                     expiresInDays: credits?.expiresInDays
                 )
-                let sheet = SgptCheckoutSheetViewController(input: input)
-                sheet.onConfirm = { [weak self] in
-                    self?.bookWithCredits()
-                }
-                sheet.onViewProfile = { [weak self] in
-                    self?.showComingSoon()
-                }
-                self.present(sheet, animated: true)
+                SgptCheckoutSheetViewController.present(
+                    from: self,
+                    input: input,
+                    onConfirm: { [weak self] in self?.bookWithCredits() },
+                    onViewProfile: { [weak self] in self?.showComingSoon() }
+                )
             }
         }
     }
 
     private func pushPricing() {
         let vc: SgptPricingViewController = .instantiate(appStoryboard: .sgpt)
+        vc.sessionId = session.id?.value ?? ""
+        vc.session = session
         // studioId is deliberately left blank: api/sgpt-upcoming returns
         // studio_name/lat/lng but no studio_id, so there is no club id to
         // forward. Blank makes the pricing screen fetch every club's packs,
@@ -407,13 +407,6 @@ final class SgptSessionDetailViewController: CommonViewController {
                 }
 
                 let remaining = result.remainingCredits ?? 0
-                let alert = UIAlertController(
-                    title: "Seat reserved",
-                    message: "\(remaining) credits left.",
-                    preferredStyle: .alert
-                )
-                alert.addAction(UIAlertAction(title: "OK", style: .default))
-                self.present(alert, animated: true)
 
                 // Reflect the seat just taken without re-fetching the screen.
                 if let seats = result.remainingSeats {
@@ -426,6 +419,12 @@ final class SgptSessionDetailViewController: CommonViewController {
                     self.seatsProgressBar.setProgress(progress)
                     self.seatsCountLabel.attributedText = self.seatsCountText(booked: booked, maxSize: maxSize)
                 }
+
+                var input = SgptBookingSuccessInput(session: self.session)
+                input.mode = .bookedWithExistingCredits
+                input.creditsUsed = 1
+                input.creditsRemaining = remaining
+                SgptBookingSuccessViewController.start(from: self, input: input)
             }
         }
     }

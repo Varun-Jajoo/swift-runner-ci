@@ -14,7 +14,7 @@ import UIKit
 // second (optional), `action` a third segment kept only for gym's existing
 // calendar-flow suffix (e.g. `/gym/123/booking`).
 func navigateUniversalLink(_ url: URL, window: UIWindow?) {
-    guard let rootNav = window?.rootViewController as? UINavigationController else {
+    guard let rootNav = resolveTopNavigationController(window: window) else {
         return
     }
 
@@ -27,8 +27,13 @@ func navigateUniversalLink(_ url: URL, window: UIWindow?) {
 
     switch screenType {
     case "class":
-        let vc: ClassDetailsViewController = ClassDetailsViewController.instantiate(appStoryboard: .dashboard)
-        vc.scheludeIdStr = id
+        guard let id = id, !id.isEmpty else { return }
+        var tapThrough = GroupClassTapThroughData()
+        tapThrough.scheduleId = id
+
+        let vc = GroupTrainingDetailViewController()
+        vc.tapThrough = tapThrough
+        vc.hidesBottomBarWhenPushed = true
         rootNav.pushViewController(vc, animated: true)
 
     case "gym":
@@ -54,4 +59,35 @@ func navigateUniversalLink(_ url: URL, window: UIWindow?) {
     default:
         return
     }
+}
+
+private func resolveTopNavigationController(window: UIWindow?) -> UINavigationController? {
+    let keyWindow = window ?? UIApplication.shared.connectedScenes
+        .compactMap { $0 as? UIWindowScene }
+        .flatMap { $0.windows }
+        .first { $0.isKeyWindow }
+
+    var root = keyWindow?.rootViewController
+    if let nav = root as? UINavigationController {
+        if let tab = nav.viewControllers.first as? UITabBarController,
+           let selectedNav = tab.selectedViewController as? UINavigationController {
+            return selectedNav
+        }
+        return nav
+    }
+    if let tab = root as? UITabBarController {
+        if let selectedNav = tab.selectedViewController as? UINavigationController {
+            return selectedNav
+        }
+        root = tab.selectedViewController
+    }
+    
+    var candidate = root
+    while let current = candidate {
+        if let nav = current as? UINavigationController {
+            return nav
+        }
+        candidate = current.presentedViewController ?? current.children.first
+    }
+    return root as? UINavigationController
 }

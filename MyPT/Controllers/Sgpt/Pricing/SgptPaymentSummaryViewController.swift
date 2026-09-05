@@ -43,6 +43,13 @@ final class SgptPaymentSummaryViewController: CommonViewController {
     var sessionTime: String = ""
     var sessionImageURL: String = ""
 
+    /// Package tier being bought, plus the club and (optionally) the session to
+    /// book in the same step. Needed by api/sgpt-purchase.
+    var tierId: String = ""
+    var studioId: String = ""
+    var sessionId: String = ""
+    var session: SgptSessionModel?
+
     // MARK: - Payment selection state
 
     private enum PayOption {
@@ -129,10 +136,16 @@ final class SgptPaymentSummaryViewController: CommonViewController {
 
     // MARK: - Views
 
-    private let scrollView = UIScrollView()
+    @IBOutlet weak var scrollView: UIScrollView!
+    @IBOutlet weak var contentContainer: UIView!
+    @IBOutlet weak var footerView: UIView!
+    @IBOutlet weak var footerSurfaceView: GlassCardView!
+    @IBOutlet weak var ctaButton: GradientCTAButton!
+    @IBOutlet weak var ambientGlowView: UIView!
+    @IBOutlet weak var headerView: UIView!
+    @IBOutlet weak var headerTitleLabel: UILabel!
+
     private let contentStack = UIStackView()
-    private let footerView = UIView()
-    private let ctaButton = GradientCTAButton()
 
     private let sessionTitleLabel = UILabel()
     private let sessionMetaLabel = UILabel()
@@ -149,7 +162,6 @@ final class SgptPaymentSummaryViewController: CommonViewController {
     private let savingsChipWrapper = UIView()
     private let autoBookNoteLabel = UILabel()
 
-    private var headerView: UIView?
 
     // MARK: - Lifecycle
 
@@ -250,14 +262,43 @@ final class SgptPaymentSummaryViewController: CommonViewController {
     @objc private func tamaraRowTapped() { TapticEngine.selection.feedback(); selectedOption = .tamara }
     @objc private func cardRowTapped() { TapticEngine.selection.feedback(); selectedOption = .card }
 
-    @objc private func backTapped() {
+    @IBAction func backTapped() {
         navigationController?.popViewController(animated: true)
     }
 
-    @objc private func confirmTapped() {
-        let alert = UIAlertController(title: nil, message: Copy.comingSoon, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
+    @IBAction func confirmTapped() {
+        guard !tierId.isEmpty else {
+            let alert = UIAlertController(title: nil, message: Copy.comingSoon, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+            return
+        }
+
+        ctaButton.isEnabled = false
+        SgptVM.sgptPurchaseApi(tierId: tierId, studioId: studioId, sessionId: sessionId) { [weak self] result, errorMessage in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.ctaButton.isEnabled = true
+
+                guard let result = result else {
+                    let message = errorMessage ?? "Could not complete the purchase. Please try again."
+                    let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .default))
+                    self.present(alert, animated: true)
+                    return
+                }
+
+                var input = SgptBookingSuccessInput(session: self.session ?? SgptSessionModel())
+                input.mode = .purchasedAndBooked
+                input.packCredits = result.creditsPurchased ?? self.credits
+                input.creditsUsed = (result.booked ?? false) ? 1 : 0
+                input.creditsRemaining = result.remainingCredits ?? 0
+                input.expiresInDays = result.expiresInDays
+                input.packPrice = result.price ?? Double(self.price)
+                input.vatPercent = self.vatPercent
+                SgptBookingSuccessViewController.start(from: self, input: input)
+            }
+        }
     }
 
     // MARK: - Entry point
@@ -272,8 +313,16 @@ final class SgptPaymentSummaryViewController: CommonViewController {
                       trainerName: String = "",
                       date: String = "",
                       time: String = "",
-                      image: String = "") {
-        let screen = SgptPaymentSummaryViewController()
+                      image: String = "",
+                      tierId: String = "",
+                      studioId: String = "",
+                      sessionId: String = "",
+                      session: SgptSessionModel? = nil) {
+        let screen: SgptPaymentSummaryViewController = .instantiate(appStoryboard: .sgpt)
+        screen.tierId = tierId
+        screen.studioId = studioId
+        screen.sessionId = sessionId
+        screen.session = session
         screen.credits = credits
         screen.price = price
         screen.fee = fee
@@ -295,8 +344,8 @@ private extension SgptPaymentSummaryViewController {
 
     func buildLayout() {
         buildAmbientGlow()
-        buildFooter()
-        buildHeader()
+        styleFooter()
+        styleHeader()
         buildScrollView()
     }
 
@@ -305,11 +354,6 @@ private extension SgptPaymentSummaryViewController {
     /// UIKit has no blur-filter layer type. Same treatment as the Android fix
     /// (bg_sgpt_ambient_glow.xml).
     func buildAmbientGlow() {
-        let glow = UIView()
-        glow.translatesAutoresizingMaskIntoConstraints = false
-        glow.isUserInteractionEnabled = false
-        view.addSubview(glow)
-
         let gradient = CAGradientLayer()
         gradient.type = .radial
         gradient.colors = [Palette.glow.withAlphaComponent(0.10).cgColor,
@@ -317,79 +361,42 @@ private extension SgptPaymentSummaryViewController {
         gradient.locations = [0, 1]
         gradient.startPoint = CGPoint(x: 0.5, y: 0.5)
         gradient.endPoint = CGPoint(x: 1.0, y: 0.5)
-        glow.layer.addSublayer(gradient)
+        ambientGlowView.layer.addSublayer(gradient)
 
-        NSLayoutConstraint.activate([
-            glow.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            glow.topAnchor.constraint(equalTo: view.topAnchor, constant: -120),
-            glow.widthAnchor.constraint(equalToConstant: 386),
-            glow.heightAnchor.constraint(equalToConstant: 386)
-        ])
-
-        DispatchQueue.main.async {
-            gradient.frame = glow.bounds
+        DispatchQueue.main.async { [weak ambientGlowView] in
+            gradient.frame = ambientGlowView?.bounds ?? .zero
         }
     }
 
     // MARK: Header
 
-    func buildHeader() {
-        let header = UIView()
-        header.translatesAutoresizingMaskIntoConstraints = false
-        headerView = header
+    func styleHeader() {
+        headerTitleLabel.font = AppFont.medium.size(18.0, familyName: familyFunnelSans)
+        headerTitleLabel.textColor = .white
+        headerTitleLabel.text = Copy.headerTitle
 
-        let backButton = GlassCircularIconButton()
-        backButton.translatesAutoresizingMaskIntoConstraints = false
-        backButton.configure(icon: SgptPaymentSummaryViewController.icon(["ic_chevron_left_24"], systemFallback: "chevron.left"),
-                             diameter: 40)
-        backButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
-        header.addSubview(backButton)
-
-        let titleLabel = UILabel()
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.font = AppFont.medium.size(18.0, familyName: familyFunnelSans)
-        titleLabel.textColor = .white
-        titleLabel.text = Copy.headerTitle
-        header.addSubview(titleLabel)
-
-        NSLayoutConstraint.activate([
-            backButton.leadingAnchor.constraint(equalTo: header.leadingAnchor),
-            backButton.topAnchor.constraint(equalTo: header.topAnchor),
-            backButton.bottomAnchor.constraint(equalTo: header.bottomAnchor, constant: -12),
-            backButton.widthAnchor.constraint(equalToConstant: 40),
-            backButton.heightAnchor.constraint(equalToConstant: 40),
-
-            titleLabel.leadingAnchor.constraint(equalTo: backButton.trailingAnchor, constant: 20),
-            titleLabel.centerYAnchor.constraint(equalTo: backButton.centerYAnchor),
-            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: header.trailingAnchor)
-        ])
+        if let backButton = headerView.subviews.compactMap({ $0 as? GlassCircularIconButton }).first {
+            backButton.configure(icon: SgptPaymentSummaryViewController.icon(["ic_chevron_left_24"], systemFallback: "chevron.left"),
+                                 diameter: 40)
+        }
     }
 
     // MARK: Footer CTA
 
-    func buildFooter() {
-        footerView.translatesAutoresizingMaskIntoConstraints = false
+    func styleFooter() {
         footerView.backgroundColor = UIColor(hex: "#01368F")
         footerView.layer.cornerRadius = 16
         footerView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         footerView.clipsToBounds = true
-        view.addSubview(footerView)
 
-        let surface = GlassCardView(cornerRadius: 16)
-        surface.translatesAutoresizingMaskIntoConstraints = false
-        surface.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        surface.fillColor = Palette.footerFill
-        surface.fillAlpha = 1.0
-        surface.showsSheen = true
-        surface.sheenOrigin = .topCenter
-        surface.sheenAlpha = 0.08
-        footerView.addSubview(surface)
+        footerSurfaceView.cornerRadius = 16
+        footerSurfaceView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        footerSurfaceView.fillColor = Palette.footerFill
+        footerSurfaceView.fillAlpha = 1.0
+        footerSurfaceView.showsSheen = true
+        footerSurfaceView.sheenOrigin = .topCenter
+        footerSurfaceView.sheenAlpha = 0.08
 
-        // GradientCTAButton's default near-white body (#FFFFFF -> #F0F0F0) plus
-        // its #808080 offset band already match Figma's CTA gradient and hard
-        // shadow (`shadow-[1px_2.5px_0px_0px_#808080]`).
-        // Matches the detail screen's "GET CREDIT & RESERVE" CTA bar exactly.
-        ctaButton.translatesAutoresizingMaskIntoConstraints = false
         ctaButton.bandThickness = 3
         ctaButton.configure(title: Copy.ctaTitle,
                             font: AppFont.medium.size(14.0, familyName: familyFunnelSans),
@@ -398,34 +405,10 @@ private extension SgptPaymentSummaryViewController {
         ctaButton.setTrailingIcon(UIImage(named: "sgpt-ic-chevron-right")
                                   ?? UIImage(systemName: "chevron.right"),
                                   tint: Palette.ctaInk)
-        ctaButton.addTarget(self, action: #selector(confirmTapped), for: .touchUpInside)
-        surface.addSubview(ctaButton)
-
-        NSLayoutConstraint.activate([
-            footerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            footerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            footerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-
-            surface.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 2),
-            surface.leadingAnchor.constraint(equalTo: footerView.leadingAnchor),
-            surface.trailingAnchor.constraint(equalTo: footerView.trailingAnchor),
-            surface.bottomAnchor.constraint(equalTo: footerView.bottomAnchor),
-
-            ctaButton.topAnchor.constraint(equalTo: surface.topAnchor, constant: 16),
-            ctaButton.leadingAnchor.constraint(equalTo: surface.leadingAnchor, constant: 20),
-            ctaButton.trailingAnchor.constraint(equalTo: surface.trailingAnchor, constant: -20),
-            ctaButton.bottomAnchor.constraint(equalTo: surface.safeAreaLayoutGuide.bottomAnchor, constant: -12),
-            ctaButton.heightAnchor.constraint(equalToConstant: Metric.ctaHeight)
-        ])
     }
 
-    // MARK: Scroll container
-
     func buildScrollView() {
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.backgroundColor = .clear
-        scrollView.showsVerticalScrollIndicator = false
-        view.insertSubview(scrollView, belowSubview: footerView)
 
         contentStack.translatesAutoresizingMaskIntoConstraints = false
         contentStack.axis = .vertical
@@ -433,19 +416,13 @@ private extension SgptPaymentSummaryViewController {
         contentStack.spacing = 0
         contentStack.isLayoutMarginsRelativeArrangement = true
         contentStack.layoutMargins = UIEdgeInsets(top: 16, left: Metric.horizontalInset, bottom: 24, right: Metric.horizontalInset)
-        scrollView.addSubview(contentStack)
+        contentContainer.addSubview(contentStack)
 
         NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: footerView.topAnchor),
-
-            contentStack.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            contentStack.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            contentStack.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-            contentStack.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            contentStack.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
+            contentStack.topAnchor.constraint(equalTo: contentContainer.topAnchor),
+            contentStack.leadingAnchor.constraint(equalTo: contentContainer.leadingAnchor),
+            contentStack.trailingAnchor.constraint(equalTo: contentContainer.trailingAnchor),
+            contentStack.bottomAnchor.constraint(equalTo: contentContainer.bottomAnchor)
         ])
 
         let bookingLabel = makeSectionLabel(Copy.bookingLabel)
@@ -460,11 +437,6 @@ private extension SgptPaymentSummaryViewController {
         autoBookNoteLabel.numberOfLines = 0
         let autoBookNote = buildNote(icon: nil, systemFallback: "figure.strengthtraining.traditional", contentLabel: autoBookNoteLabel)
         let summaryBlock = makeOverlappingBlock(panel: makeOrderSummaryCard(), note: autoBookNote)
-
-        if let header = headerView {
-            contentStack.addArrangedSubview(header)
-            contentStack.setCustomSpacing(20, after: header)
-        }
 
         contentStack.addArrangedSubview(bookingLabel)
         contentStack.setCustomSpacing(12, after: bookingLabel)

@@ -672,11 +672,901 @@
             </objects>
             <point key="canvasLocation" x="-1400" y="2700"/>
         </scene>
+        <!--SgptBookingSuccessViewController-->
+        <scene sceneID="sbsScn">
+            <objects>
+                <viewController storyboardIdentifier="SgptBookingSuccessViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="sbs001" customClass="SgptBookingSuccessViewController" customModule="MyPT_Connect" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="sbs002">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" image="sgpt-success-bg" translatesAutoresizingMaskIntoConstraints="NO" id="sbs010">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="620"/>
+                            </imageView>
+                            <view contentMode="scaleToFill" userInteractionEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs011" customClass="GradientFadeView" customModule="MyPT_Connect" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="440" width="393" height="180"/>
+                            </view>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsVerticalScrollIndicator="NO" showsHorizontalScrollIndicator="NO" contentInsetAdjustmentBehavior="never" translatesAutoresizingMaskIntoConstraints="NO" id="sbs003">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="766"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="sbs004">
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="1400"/>
+                                        <subviews>
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs040">
+                                                <rect key="frame" x="0.0" y="0.0" width="393" height="1400"/>
+                                                <subviews>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs200" customClass="SgptSuccessBadgeView" customModule="MyPT_Connect" customModuleProvider="target">
+                                                        <rect key="frame" x="156.5" y="6" width="80" height="80"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="width" constant="80" id="sbs201"/>
+                                                            <constraint firstAttribute="height" constant="80" id="sbs202"/>
+                                                        </constraints>
+                                                    </view>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Credits &amp; Session Locked In!" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs210">
+                                                        <rect key="frame" x="20" y="91" width="353" height="29"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs211">
+                                                        <rect key="frame" x="20" y="130" width="353" height="18"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+
+                                                    <view contentMode="scaleToFill" clipsSubviews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sbs220">
+                                                        <rect key="frame" x="6.5" y="181" width="380" height="380"/>
+                                                        <subviews>
+                                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs221">
+                                                                <rect key="frame" x="0.0" y="0.0" width="380" height="380"/>
+                                                            </imageView>
+                                                            <view contentMode="scaleToFill" userInteractionEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs222" customClass="GradientFadeView" customModule="MyPT_Connect" customModuleProvider="target">
+                                                                <rect key="frame" x="0.0" y="250" width="380" height="130"/>
+                                                                <constraints>
+                                                                    <constraint firstAttribute="height" constant="130" id="sbs223"/>
+                                                                </constraints>
+                                                            </view>
+                                                        </subviews>
+                                                        <constraints>
+                                                            <constraint firstAttribute="width" secondItem="sbs220" secondAttribute="height" id="sbs224"/>
+                                                            <constraint firstItem="sbs221" firstAttribute="top" secondItem="sbs220" secondAttribute="top" id="sbs226"/>
+                                                            <constraint firstItem="sbs221" firstAttribute="leading" secondItem="sbs220" secondAttribute="leading" id="sbs227"/>
+                                                            <constraint firstAttribute="trailing" secondItem="sbs221" secondAttribute="trailing" id="sbs228"/>
+                                                            <constraint firstAttribute="bottom" secondItem="sbs221" secondAttribute="bottom" id="sbs229"/>
+                                                            <constraint firstItem="sbs222" firstAttribute="leading" secondItem="sbs220" secondAttribute="leading" id="sbs230"/>
+                                                            <constraint firstAttribute="trailing" secondItem="sbs222" secondAttribute="trailing" id="sbs231"/>
+                                                            <constraint firstAttribute="bottom" secondItem="sbs222" secondAttribute="bottom" id="sbs232"/>
+                                                        </constraints>
+                                                    </view>
+
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs240" customClass="PillChipView" customModule="MyPT_Connect" customModuleProvider="target">
+                                                        <rect key="frame" x="166" y="577" width="61" height="26"/>
+                                                    </view>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs241">
+                                                        <rect key="frame" x="20" y="610" width="353" height="24"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs242">
+                                                        <rect key="frame" x="20" y="641" width="353" height="18"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs250">
+                                                        <rect key="frame" x="20" y="683" width="353" height="1"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="1" id="sbs251"/>
+                                                        </constraints>
+                                                    </view>
+
+                                                    <view contentMode="scaleToFill" clipsSubviews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sbs260">
+                                                        <rect key="frame" x="20" y="708" width="353" height="137"/>
+                                                        <subviews>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Credits used for this session" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs261">
+                                                                <rect key="frame" x="15" y="12" width="200" height="18"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="right" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs262">
+                                                                <rect key="frame" x="258" y="9" width="80" height="24"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs263">
+                                                                <rect key="frame" x="15" y="42" width="323" height="1"/>
+                                                                <constraints>
+                                                                    <constraint firstAttribute="height" constant="1" id="sbs264"/>
+                                                                </constraints>
+                                                            </view>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Credits remaining after" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs265">
+                                                                <rect key="frame" x="15" y="55" width="180" height="16"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="right" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs266">
+                                                                <rect key="frame" x="268" y="54" width="70" height="18"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                            <stackView opaque="NO" contentMode="scaleToFill" axis="horizontal" distribution="fillEqually" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="sbs267">
+                                                                <rect key="frame" x="15" y="83" width="323" height="14"/>
+                                                                <constraints>
+                                                                    <constraint firstAttribute="height" constant="14" id="sbs268"/>
+                                                                </constraints>
+                                                            </stackView>
+                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs269">
+                                                                <rect key="frame" x="15" y="109" width="20" height="20"/>
+                                                                <subviews>
+                                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="sgpt-ic-wallet" translatesAutoresizingMaskIntoConstraints="NO" id="sbs270">
+                                                                        <rect key="frame" x="5" y="5" width="10" height="10"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="10" id="sbs271"/>
+                                                                            <constraint firstAttribute="height" constant="10" id="sbs272"/>
+                                                                        </constraints>
+                                                                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                                    </imageView>
+                                                                </subviews>
+                                                                <constraints>
+                                                                    <constraint firstAttribute="width" constant="20" id="sbs273"/>
+                                                                    <constraint firstAttribute="height" constant="20" id="sbs274"/>
+                                                                    <constraint firstItem="sbs270" firstAttribute="centerX" secondItem="sbs269" secondAttribute="centerX" id="sbs275"/>
+                                                                    <constraint firstItem="sbs270" firstAttribute="centerY" secondItem="sbs269" secondAttribute="centerY" id="sbs276"/>
+                                                                </constraints>
+                                                            </view>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs277">
+                                                                <rect key="frame" x="43" y="111" width="200" height="16"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                        </subviews>
+                                                        <constraints>
+                                                            <constraint firstItem="sbs261" firstAttribute="top" secondItem="sbs260" secondAttribute="top" constant="12" id="sbs280"/>
+                                                            <constraint firstItem="sbs261" firstAttribute="leading" secondItem="sbs260" secondAttribute="leading" constant="15" id="sbs281"/>
+                                                            <constraint firstItem="sbs262" firstAttribute="centerY" secondItem="sbs261" secondAttribute="centerY" id="sbs282"/>
+                                                            <constraint firstAttribute="trailing" secondItem="sbs262" secondAttribute="trailing" constant="15" id="sbs283"/>
+                                                            <constraint firstItem="sbs263" firstAttribute="top" secondItem="sbs261" secondAttribute="bottom" constant="12" id="sbs284"/>
+                                                            <constraint firstItem="sbs263" firstAttribute="leading" secondItem="sbs260" secondAttribute="leading" constant="15" id="sbs285"/>
+                                                            <constraint firstAttribute="trailing" secondItem="sbs263" secondAttribute="trailing" constant="15" id="sbs286"/>
+                                                            <constraint firstItem="sbs265" firstAttribute="top" secondItem="sbs263" secondAttribute="bottom" constant="12" id="sbs287"/>
+                                                            <constraint firstItem="sbs265" firstAttribute="leading" secondItem="sbs260" secondAttribute="leading" constant="15" id="sbs288"/>
+                                                            <constraint firstItem="sbs266" firstAttribute="centerY" secondItem="sbs265" secondAttribute="centerY" id="sbs289"/>
+                                                            <constraint firstAttribute="trailing" secondItem="sbs266" secondAttribute="trailing" constant="15" id="sbs290"/>
+                                                            <constraint firstItem="sbs267" firstAttribute="top" secondItem="sbs265" secondAttribute="bottom" constant="12" id="sbs291"/>
+                                                            <constraint firstItem="sbs267" firstAttribute="leading" secondItem="sbs260" secondAttribute="leading" constant="15" id="sbs292"/>
+                                                            <constraint firstAttribute="trailing" secondItem="sbs267" secondAttribute="trailing" constant="15" id="sbs293"/>
+                                                            <constraint firstItem="sbs269" firstAttribute="top" secondItem="sbs267" secondAttribute="bottom" constant="12" id="sbs294"/>
+                                                            <constraint firstItem="sbs269" firstAttribute="leading" secondItem="sbs260" secondAttribute="leading" constant="15" id="sbs295"/>
+                                                            <constraint firstAttribute="bottom" secondItem="sbs269" secondAttribute="bottom" constant="12" id="sbs296"/>
+                                                            <constraint firstItem="sbs277" firstAttribute="centerY" secondItem="sbs269" secondAttribute="centerY" id="sbs297"/>
+                                                            <constraint firstItem="sbs277" firstAttribute="leading" secondItem="sbs269" secondAttribute="trailing" constant="8" id="sbs298"/>
+                                                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="sbs277" secondAttribute="trailing" constant="15" id="sbs299"/>
+                                                        </constraints>
+                                                    </view>
+
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Payment Summary" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs300">
+                                                        <rect key="frame" x="20" y="869" width="353" height="24"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+
+                                                    <view contentMode="scaleToFill" clipsSubviews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sbs310">
+                                                        <rect key="frame" x="20" y="905" width="353" height="164"/>
+                                                        <subviews>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs311">
+                                                                <rect key="frame" x="15" y="11" width="200" height="16"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="right" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs312">
+                                                                <rect key="frame" x="238" y="10" width="100" height="19"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs313">
+                                                                <rect key="frame" x="15" y="35" width="200" height="16"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="right" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs314">
+                                                                <rect key="frame" x="238" y="34" width="100" height="19"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs315">
+                                                                <rect key="frame" x="15" y="61" width="323" height="1"/>
+                                                                <constraints>
+                                                                    <constraint firstAttribute="height" constant="1" id="sbs316"/>
+                                                                </constraints>
+                                                            </view>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Total charged" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs317">
+                                                                <rect key="frame" x="15" y="71" width="200" height="18"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="right" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs318">
+                                                                <rect key="frame" x="238" y="71" width="100" height="18"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                            <view contentMode="scaleToFill" clipsSubviews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sbs320">
+                                                                <rect key="frame" x="15" y="101" width="323" height="32"/>
+                                                                <subviews>
+                                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="ic_masterCard_icon" translatesAutoresizingMaskIntoConstraints="NO" id="sbs321">
+                                                                        <rect key="frame" x="8" y="4" width="30" height="24"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="30.857" id="sbs322"/>
+                                                                            <constraint firstAttribute="height" constant="24" id="sbs323"/>
+                                                                        </constraints>
+                                                                    </imageView>
+                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Payment Successful" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs324">
+                                                                        <rect key="frame" x="50" y="8" width="120" height="16"/>
+                                                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                                        <nil key="textColor"/>
+                                                                        <nil key="highlightedColor"/>
+                                                                    </label>
+                                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs325" customClass="SgptDiamondView" customModule="MyPT_Connect" customModuleProvider="target">
+                                                                        <rect key="frame" x="182" y="14" width="4" height="4"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="4" id="sbs326"/>
+                                                                            <constraint firstAttribute="height" constant="4" id="sbs327"/>
+                                                                        </constraints>
+                                                                    </view>
+                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Receipt send to your phone" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sbs328">
+                                                                        <rect key="frame" x="198" y="8" width="160" height="16"/>
+                                                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                                        <nil key="textColor"/>
+                                                                        <nil key="highlightedColor"/>
+                                                                    </label>
+                                                                </subviews>
+                                                                <constraints>
+                                                                    <constraint firstAttribute="height" constant="32" id="sbs329"/>
+                                                                    <constraint firstItem="sbs321" firstAttribute="leading" secondItem="sbs320" secondAttribute="leading" constant="8" id="sbs330"/>
+                                                                    <constraint firstItem="sbs321" firstAttribute="centerY" secondItem="sbs320" secondAttribute="centerY" id="sbs331"/>
+                                                                    <constraint firstItem="sbs324" firstAttribute="leading" secondItem="sbs321" secondAttribute="trailing" constant="12" id="sbs332"/>
+                                                                    <constraint firstItem="sbs324" firstAttribute="centerY" secondItem="sbs320" secondAttribute="centerY" id="sbs333"/>
+                                                                    <constraint firstItem="sbs325" firstAttribute="leading" secondItem="sbs324" secondAttribute="trailing" constant="12" id="sbs334"/>
+                                                                    <constraint firstItem="sbs325" firstAttribute="centerY" secondItem="sbs320" secondAttribute="centerY" id="sbs335"/>
+                                                                    <constraint firstItem="sbs328" firstAttribute="leading" secondItem="sbs325" secondAttribute="trailing" constant="12" id="sbs336"/>
+                                                                    <constraint firstItem="sbs328" firstAttribute="centerY" secondItem="sbs320" secondAttribute="centerY" id="sbs337"/>
+                                                                    <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="sbs328" secondAttribute="trailing" constant="8" id="sbs338"/>
+                                                                </constraints>
+                                                            </view>
+                                                        </subviews>
+                                                        <constraints>
+                                                            <constraint firstItem="sbs311" firstAttribute="top" secondItem="sbs310" secondAttribute="top" constant="11" id="sbs340"/>
+                                                            <constraint firstItem="sbs311" firstAttribute="leading" secondItem="sbs310" secondAttribute="leading" constant="15" id="sbs341"/>
+                                                            <constraint firstItem="sbs312" firstAttribute="centerY" secondItem="sbs311" secondAttribute="centerY" id="sbs342"/>
+                                                            <constraint firstAttribute="trailing" secondItem="sbs312" secondAttribute="trailing" constant="15" id="sbs343"/>
+                                                            <constraint firstItem="sbs313" firstAttribute="top" secondItem="sbs312" secondAttribute="bottom" constant="8" id="sbs344"/>
+                                                            <constraint firstItem="sbs313" firstAttribute="leading" secondItem="sbs310" secondAttribute="leading" constant="15" id="sbs345"/>
+                                                            <constraint firstItem="sbs314" firstAttribute="centerY" secondItem="sbs313" secondAttribute="centerY" id="sbs346"/>
+                                                            <constraint firstAttribute="trailing" secondItem="sbs314" secondAttribute="trailing" constant="15" id="sbs347"/>
+                                                            <constraint firstItem="sbs315" firstAttribute="top" secondItem="sbs314" secondAttribute="bottom" constant="8" id="sbs348"/>
+                                                            <constraint firstItem="sbs315" firstAttribute="leading" secondItem="sbs310" secondAttribute="leading" constant="15" id="sbs349"/>
+                                                            <constraint firstAttribute="trailing" secondItem="sbs315" secondAttribute="trailing" constant="15" id="sbs350"/>
+                                                            <constraint firstItem="sbs317" firstAttribute="top" secondItem="sbs315" secondAttribute="bottom" constant="8" id="sbs351"/>
+                                                            <constraint firstItem="sbs317" firstAttribute="leading" secondItem="sbs310" secondAttribute="leading" constant="15" id="sbs352"/>
+                                                            <constraint firstItem="sbs318" firstAttribute="centerY" secondItem="sbs317" secondAttribute="centerY" id="sbs353"/>
+                                                            <constraint firstAttribute="trailing" secondItem="sbs318" secondAttribute="trailing" constant="15" id="sbs354"/>
+                                                            <constraint firstItem="sbs320" firstAttribute="top" secondItem="sbs318" secondAttribute="bottom" constant="8" id="sbs355"/>
+                                                            <constraint firstItem="sbs320" firstAttribute="leading" secondItem="sbs310" secondAttribute="leading" constant="15" id="sbs356"/>
+                                                            <constraint firstAttribute="trailing" secondItem="sbs320" secondAttribute="trailing" constant="15" id="sbs357"/>
+                                                            <constraint firstAttribute="bottom" secondItem="sbs320" secondAttribute="bottom" constant="13" id="sbs358"/>
+                                                        </constraints>
+                                                    </view>
+                                                </subviews>
+                                                <constraints>
+                                                    <constraint firstItem="sbs200" firstAttribute="top" secondItem="sbs040" secondAttribute="top" constant="6" id="sbs360"/>
+                                                    <constraint firstItem="sbs200" firstAttribute="centerX" secondItem="sbs040" secondAttribute="centerX" id="sbs361"/>
+                                                    <constraint firstItem="sbs210" firstAttribute="top" secondItem="sbs200" secondAttribute="bottom" constant="5" id="sbs362"/>
+                                                    <constraint firstItem="sbs210" firstAttribute="leading" secondItem="sbs040" secondAttribute="leading" constant="20" id="sbs363"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sbs210" secondAttribute="trailing" constant="20" id="sbs364"/>
+                                                    <constraint firstItem="sbs211" firstAttribute="top" secondItem="sbs210" secondAttribute="bottom" constant="10" id="sbs365"/>
+                                                    <constraint firstItem="sbs211" firstAttribute="leading" secondItem="sbs040" secondAttribute="leading" constant="20" id="sbs366"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sbs211" secondAttribute="trailing" constant="20" id="sbs367"/>
+                                                    <constraint firstItem="sbs220" firstAttribute="top" secondItem="sbs211" secondAttribute="bottom" constant="33" id="sbs368"/>
+                                                    <constraint firstItem="sbs220" firstAttribute="centerX" secondItem="sbs040" secondAttribute="centerX" id="sbs369"/>
+                                                    <constraint firstItem="sbs220" firstAttribute="leading" secondItem="sbs040" secondAttribute="leading" constant="25" id="sbs370"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sbs220" secondAttribute="trailing" constant="25" id="sbs392"/>
+                                                    <constraint firstItem="sbs240" firstAttribute="top" secondItem="sbs220" secondAttribute="bottom" constant="16" id="sbs371"/>
+                                                    <constraint firstItem="sbs240" firstAttribute="centerX" secondItem="sbs040" secondAttribute="centerX" id="sbs372"/>
+                                                    <constraint firstItem="sbs241" firstAttribute="top" secondItem="sbs240" secondAttribute="bottom" constant="7" id="sbs373"/>
+                                                    <constraint firstItem="sbs241" firstAttribute="leading" secondItem="sbs040" secondAttribute="leading" constant="20" id="sbs374"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sbs241" secondAttribute="trailing" constant="20" id="sbs375"/>
+                                                    <constraint firstItem="sbs242" firstAttribute="top" secondItem="sbs241" secondAttribute="bottom" constant="7" id="sbs376"/>
+                                                    <constraint firstItem="sbs242" firstAttribute="leading" secondItem="sbs040" secondAttribute="leading" constant="20" id="sbs377"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sbs242" secondAttribute="trailing" constant="20" id="sbs378"/>
+                                                    <constraint firstItem="sbs250" firstAttribute="top" secondItem="sbs242" secondAttribute="bottom" constant="24" id="sbs379"/>
+                                                    <constraint firstItem="sbs250" firstAttribute="leading" secondItem="sbs040" secondAttribute="leading" constant="20" id="sbs380"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sbs250" secondAttribute="trailing" constant="20" id="sbs381"/>
+                                                    <constraint firstItem="sbs260" firstAttribute="top" secondItem="sbs250" secondAttribute="bottom" constant="24" id="sbs382"/>
+                                                    <constraint firstItem="sbs260" firstAttribute="leading" secondItem="sbs040" secondAttribute="leading" constant="20" id="sbs383"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sbs260" secondAttribute="trailing" constant="20" id="sbs384"/>
+                                                    <constraint firstItem="sbs300" firstAttribute="top" secondItem="sbs260" secondAttribute="bottom" constant="24" id="sbs385"/>
+                                                    <constraint firstItem="sbs300" firstAttribute="leading" secondItem="sbs040" secondAttribute="leading" constant="20" id="sbs386"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sbs300" secondAttribute="trailing" constant="20" id="sbs387"/>
+                                                    <constraint firstItem="sbs310" firstAttribute="top" secondItem="sbs300" secondAttribute="bottom" constant="12" id="sbs388"/>
+                                                    <constraint firstItem="sbs310" firstAttribute="leading" secondItem="sbs040" secondAttribute="leading" constant="20" id="sbs389"/>
+                                                    <constraint firstAttribute="trailing" secondItem="sbs310" secondAttribute="trailing" constant="20" id="sbs390"/>
+                                                    <constraint firstAttribute="bottom" secondItem="sbs310" secondAttribute="bottom" constant="24" id="sbs391"/>
+                                                    <constraint firstAttribute="bottom" secondItem="sbs260" secondAttribute="bottom" constant="24" id="sbs393"/>
+                                                </constraints>
+                                            </view>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="sbs004" firstAttribute="top" secondItem="sbsCLG" secondAttribute="top" id="sbs050"/>
+                                    <constraint firstItem="sbs004" firstAttribute="leading" secondItem="sbsCLG" secondAttribute="leading" id="sbs051"/>
+                                    <constraint firstItem="sbsCLG" firstAttribute="trailing" secondItem="sbs004" secondAttribute="trailing" id="sbs052"/>
+                                    <constraint firstItem="sbsCLG" firstAttribute="bottom" secondItem="sbs004" secondAttribute="bottom" id="sbs053"/>
+                                    <constraint firstItem="sbs004" firstAttribute="width" secondItem="sbsFLG" secondAttribute="width" id="sbs054"/>
+                                </constraints>
+                                <viewLayoutGuide key="contentLayoutGuide" id="sbsCLG"/>
+                                <viewLayoutGuide key="frameLayoutGuide" id="sbsFLG"/>
+                            </scrollView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs060">
+                                <rect key="frame" x="0.0" y="766" width="393" height="86"/>
+                                <subviews>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs061">
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="1"/>
+                                        <color key="backgroundColor" white="1" alpha="0.10000000000000001" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="1" id="sbs062"/>
+                                        </constraints>
+                                    </view>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sbs063">
+                                        <rect key="frame" x="20" y="19" width="169" height="48"/>
+                                        <color key="backgroundColor" red="0.11372549019607843" green="0.11764705882352941" blue="0.11372549019607843" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="48" id="sbs064"/>
+                                        </constraints>
+                                        <state key="normal" title="BACK TO CLASSES">
+                                            <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="backToClassesTapped" destination="sbs001" eventType="touchUpInside" id="sbs065"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sbs066" customClass="GradientCTAButton" customModule="MyPT_Connect" customModuleProvider="target">
+                                        <rect key="frame" x="204" y="19" width="169" height="48"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="48" id="sbs067"/>
+                                        </constraints>
+                                        <state key="normal" title="VIEW MY BOOKINGS">
+                                            <color key="titleColor" red="0.078431372549019607" green="0.082352941176470587" blue="0.078431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="viewBookingsTapped" destination="sbs001" eventType="touchUpInside" id="sbs068"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" red="0.0" green="0.039215686274509803" blue="0.015686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstItem="sbs061" firstAttribute="top" secondItem="sbs060" secondAttribute="top" id="sbs070"/>
+                                    <constraint firstItem="sbs061" firstAttribute="leading" secondItem="sbs060" secondAttribute="leading" id="sbs071"/>
+                                    <constraint firstAttribute="trailing" secondItem="sbs061" secondAttribute="trailing" id="sbs072"/>
+                                    <constraint firstItem="sbs063" firstAttribute="leading" secondItem="sbs060" secondAttribute="leading" constant="20" id="sbs073"/>
+                                    <constraint firstItem="sbs063" firstAttribute="top" secondItem="sbs060" secondAttribute="top" constant="19" id="sbs074"/>
+                                    <constraint firstItem="sbs066" firstAttribute="leading" secondItem="sbs063" secondAttribute="trailing" constant="15" id="sbs075"/>
+                                    <constraint firstAttribute="trailing" secondItem="sbs066" secondAttribute="trailing" constant="20" id="sbs076"/>
+                                    <constraint firstItem="sbs066" firstAttribute="centerY" secondItem="sbs063" secondAttribute="centerY" id="sbs077"/>
+                                    <constraint firstItem="sbs066" firstAttribute="width" secondItem="sbs063" secondAttribute="width" id="sbs078"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" red="0.0" green="0.039215686274509803" blue="0.015686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="sbs010" firstAttribute="top" secondItem="sbs002" secondAttribute="top" id="sbs080"/>
+                            <constraint firstItem="sbs010" firstAttribute="leading" secondItem="sbs002" secondAttribute="leading" id="sbs081"/>
+                            <constraint firstAttribute="trailing" secondItem="sbs010" secondAttribute="trailing" id="sbs082"/>
+                            <constraint firstItem="sbs010" firstAttribute="height" secondItem="sbs002" secondAttribute="height" multiplier="0.62" id="sbs083"/>
+                            <constraint firstItem="sbs011" firstAttribute="leading" secondItem="sbs002" secondAttribute="leading" id="sbs084"/>
+                            <constraint firstAttribute="trailing" secondItem="sbs011" secondAttribute="trailing" id="sbs085"/>
+                            <constraint firstItem="sbs011" firstAttribute="bottom" secondItem="sbs010" secondAttribute="bottom" id="sbs086"/>
+                            <constraint firstItem="sbs011" firstAttribute="height" constant="180" id="sbs087"/>
+                            <constraint firstItem="sbs003" firstAttribute="top" secondItem="sbs002" secondAttribute="top" id="sbs090"/>
+                            <constraint firstItem="sbs003" firstAttribute="leading" secondItem="sbs002" secondAttribute="leading" id="sbs091"/>
+                            <constraint firstAttribute="trailing" secondItem="sbs003" secondAttribute="trailing" id="sbs092"/>
+                            <constraint firstItem="sbs060" firstAttribute="top" secondItem="sbs003" secondAttribute="bottom" id="sbs093"/>
+                            <constraint firstItem="sbs060" firstAttribute="leading" secondItem="sbs002" secondAttribute="leading" id="sbs094"/>
+                            <constraint firstAttribute="trailing" secondItem="sbs060" secondAttribute="trailing" id="sbs095"/>
+                            <constraint firstAttribute="bottom" secondItem="sbs060" secondAttribute="bottom" id="sbs096"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="backToClassesButton" destination="sbs063" id="sbs110"/>
+                        <outlet property="paymentBottomConstraint" destination="sbs391" id="sbsC900"/>
+                        <outlet property="creditsBottomConstraint" destination="sbs393" id="sbsC901"/>
+                        <outlet property="titleLabel" destination="sbs210" id="sbsC000"/>
+                        <outlet property="subtitleLabel" destination="sbs211" id="sbsC001"/>
+                        <outlet property="posterCard" destination="sbs220" id="sbsC002"/>
+                        <outlet property="posterImageView" destination="sbs221" id="sbsC003"/>
+                        <outlet property="posterScrim" destination="sbs222" id="sbsC004"/>
+                        <outlet property="durationChip" destination="sbs240" id="sbsC005"/>
+                        <outlet property="sessionNameLabel" destination="sbs241" id="sbsC006"/>
+                        <outlet property="sessionMetaLabel" destination="sbs242" id="sbsC007"/>
+                        <outlet property="headerDividerView" destination="sbs250" id="sbsC008"/>
+                        <outlet property="creditsCard" destination="sbs260" id="sbsC009"/>
+                        <outlet property="creditsUsedTitleLabel" destination="sbs261" id="sbsC010"/>
+                        <outlet property="creditsUsedLabel" destination="sbs262" id="sbsC011"/>
+                        <outlet property="creditsDividerView" destination="sbs263" id="sbsC012"/>
+                        <outlet property="creditsRemainingTitleLabel" destination="sbs265" id="sbsC013"/>
+                        <outlet property="creditsRemainingLabel" destination="sbs266" id="sbsC014"/>
+                        <outlet property="segmentsStack" destination="sbs267" id="sbsC015"/>
+                        <outlet property="walletTileView" destination="sbs269" id="sbsC016"/>
+                        <outlet property="creditsExpiryLabel" destination="sbs277" id="sbsC017"/>
+                        <outlet property="paymentSummaryTitleLabel" destination="sbs300" id="sbsC018"/>
+                        <outlet property="paymentCard" destination="sbs310" id="sbsC019"/>
+                        <outlet property="packLineLabel" destination="sbs311" id="sbsC020"/>
+                        <outlet property="packPriceLabel" destination="sbs312" id="sbsC021"/>
+                        <outlet property="vatLabel" destination="sbs313" id="sbsC022"/>
+                        <outlet property="vatValueLabel" destination="sbs314" id="sbsC023"/>
+                        <outlet property="paymentDividerView" destination="sbs315" id="sbsC024"/>
+                        <outlet property="totalTitleLabel" destination="sbs317" id="sbsC025"/>
+                        <outlet property="totalValueLabel" destination="sbs318" id="sbsC026"/>
+                        <outlet property="receiptStrip" destination="sbs320" id="sbsC027"/>
+                        <outlet property="receiptLogoView" destination="sbs321" id="sbsC028"/>
+                        <outlet property="receiptStatusLabel" destination="sbs324" id="sbsC029"/>
+                        <outlet property="receiptDiamondView" destination="sbs325" id="sbsC030"/>
+                        <outlet property="receiptNoteLabel" destination="sbs328" id="sbsC031"/>
+                        <outlet property="backdropImageView" destination="sbs010" id="sbs111"/>
+                        <outlet property="backdropFadeView" destination="sbs011" id="sbs112"/>
+                        <outlet property="contentContainer" destination="sbs040" id="sbs113"/>
+                        <outlet property="footerView" destination="sbs060" id="sbs114"/>
+                        <outlet property="mainScrollView" destination="sbs003" id="sbs115"/>
+                        <outlet property="viewBookingsButton" destination="sbs066" id="sbs116"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="sbs999" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1400" y="3800"/>
+        </scene>
+        <!--SgptCheckoutSheetViewController-->
+        <scene sceneID="schScn">
+            <objects>
+                <viewController storyboardIdentifier="SgptCheckoutSheetViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="sch001" customClass="SgptCheckoutSheetViewController" customModule="MyPT_Connect" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="sch002">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="640"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sch010">
+                                <rect key="frame" x="176" y="10" width="40" height="4"/>
+                                <color key="backgroundColor" red="0.22352941176470587" green="0.23529411764705882" blue="0.26274509803921569" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="40" id="sch011"/>
+                                    <constraint firstAttribute="height" constant="4" id="sch012"/>
+                                </constraints>
+                            </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Confirm Booking" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sch013">
+                                <rect key="frame" x="20" y="32" width="180" height="24"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sch014">
+                                <rect key="frame" x="349" y="32" width="24" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="24" id="sch015"/>
+                                    <constraint firstAttribute="height" constant="24" id="sch016"/>
+                                </constraints>
+                                <state key="normal" image="xmark.circle" catalog="system"/>
+                                <connections>
+                                    <action selector="closeTapped" destination="sch001" eventType="touchUpInside" id="sch017"/>
+                                </connections>
+                            </button>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="sch020">
+                                <rect key="frame" x="20" y="76" width="64" height="64"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="64" id="sch021"/>
+                                    <constraint firstAttribute="height" constant="64" id="sch022"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sch023">
+                                <rect key="frame" x="96" y="76" width="180" height="20"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sch024">
+                                <rect key="frame" x="96" y="100" width="180" height="16"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sch025">
+                                <rect key="frame" x="96" y="118" width="180" height="16"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sch026">
+                                <rect key="frame" x="299" y="80" width="74" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="24" id="sch027"/>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="74" id="sch028"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sch030">
+                                <rect key="frame" x="20" y="160" width="353" height="137"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Credits use for this session" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sch031">
+                                        <rect key="frame" x="15" y="12" width="200" height="18"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="right" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sch032">
+                                        <rect key="frame" x="258" y="9" width="80" height="24"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sch033">
+                                        <rect key="frame" x="15" y="42" width="323" height="1"/>
+                                        <color key="backgroundColor" white="1" alpha="0.10000000000000001" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="1" id="sch034"/>
+                                        </constraints>
+                                    </view>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Credits remaining after" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sch035">
+                                        <rect key="frame" x="15" y="55" width="180" height="16"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="right" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sch036">
+                                        <rect key="frame" x="268" y="54" width="70" height="18"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="horizontal" distribution="fillEqually" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="sch037">
+                                        <rect key="frame" x="15" y="83" width="323" height="14"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="14" id="sch038"/>
+                                        </constraints>
+                                    </stackView>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sch039">
+                                        <rect key="frame" x="15" y="109" width="20" height="20"/>
+                                        <subviews>
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="sgpt-ic-wallet" translatesAutoresizingMaskIntoConstraints="NO" id="sch041">
+                                                <rect key="frame" x="5" y="5" width="10" height="10"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="width" constant="10" id="sch042"/>
+                                                    <constraint firstAttribute="height" constant="10" id="sch043"/>
+                                                </constraints>
+                                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            </imageView>
+                                        </subviews>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="20" id="sch044"/>
+                                            <constraint firstAttribute="height" constant="20" id="sch045"/>
+                                            <constraint firstItem="sch041" firstAttribute="centerX" secondItem="sch039" secondAttribute="centerX" id="sch046"/>
+                                            <constraint firstItem="sch041" firstAttribute="centerY" secondItem="sch039" secondAttribute="centerY" id="sch047"/>
+                                        </constraints>
+                                    </view>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sch048">
+                                        <rect key="frame" x="43" y="111" width="200" height="16"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="sch031" firstAttribute="top" secondItem="sch030" secondAttribute="top" constant="12" id="sch050"/>
+                                    <constraint firstItem="sch031" firstAttribute="leading" secondItem="sch030" secondAttribute="leading" constant="15" id="sch051"/>
+                                    <constraint firstItem="sch032" firstAttribute="centerY" secondItem="sch031" secondAttribute="centerY" id="sch052"/>
+                                    <constraint firstAttribute="trailing" secondItem="sch032" secondAttribute="trailing" constant="15" id="sch053"/>
+                                    <constraint firstItem="sch033" firstAttribute="top" secondItem="sch031" secondAttribute="bottom" constant="12" id="sch054"/>
+                                    <constraint firstItem="sch033" firstAttribute="leading" secondItem="sch030" secondAttribute="leading" constant="15" id="sch055"/>
+                                    <constraint firstAttribute="trailing" secondItem="sch033" secondAttribute="trailing" constant="15" id="sch056"/>
+                                    <constraint firstItem="sch035" firstAttribute="top" secondItem="sch033" secondAttribute="bottom" constant="12" id="sch057"/>
+                                    <constraint firstItem="sch035" firstAttribute="leading" secondItem="sch030" secondAttribute="leading" constant="15" id="sch058"/>
+                                    <constraint firstItem="sch036" firstAttribute="centerY" secondItem="sch035" secondAttribute="centerY" id="sch059"/>
+                                    <constraint firstAttribute="trailing" secondItem="sch036" secondAttribute="trailing" constant="15" id="sch060"/>
+                                    <constraint firstItem="sch037" firstAttribute="top" secondItem="sch035" secondAttribute="bottom" constant="12" id="sch061"/>
+                                    <constraint firstItem="sch037" firstAttribute="leading" secondItem="sch030" secondAttribute="leading" constant="15" id="sch062"/>
+                                    <constraint firstAttribute="trailing" secondItem="sch037" secondAttribute="trailing" constant="15" id="sch063"/>
+                                    <constraint firstItem="sch039" firstAttribute="top" secondItem="sch037" secondAttribute="bottom" constant="12" id="sch064"/>
+                                    <constraint firstItem="sch039" firstAttribute="leading" secondItem="sch030" secondAttribute="leading" constant="15" id="sch065"/>
+                                    <constraint firstAttribute="bottom" secondItem="sch039" secondAttribute="bottom" constant="12" id="sch066"/>
+                                    <constraint firstItem="sch048" firstAttribute="centerY" secondItem="sch039" secondAttribute="centerY" id="sch067"/>
+                                    <constraint firstItem="sch048" firstAttribute="leading" secondItem="sch039" secondAttribute="trailing" constant="8" id="sch068"/>
+                                    <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="sch048" secondAttribute="trailing" constant="15" id="sch069"/>
+                                </constraints>
+                            </view>
+
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sch070">
+                                <rect key="frame" x="20" y="317" width="353" height="66"/>
+                                <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="sch071">
+                                        <rect key="frame" x="12" y="12" width="42" height="42"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="42" id="sch072"/>
+                                            <constraint firstAttribute="height" constant="42" id="sch073"/>
+                                        </constraints>
+                                    </imageView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sch074">
+                                        <rect key="frame" x="66" y="13" width="160" height="20"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sch075">
+                                        <rect key="frame" x="66" y="35" width="160" height="16"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sch076">
+                                        <rect key="frame" x="245" y="15" width="96" height="36"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="36" id="sch077"/>
+                                        </constraints>
+                                        <state key="normal" title="VIEW PROFILE"/>
+                                        <connections>
+                                            <action selector="viewProfileTapped" destination="sch001" eventType="touchUpInside" id="sch078"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="66" id="sch079"/>
+                                    <constraint firstItem="sch071" firstAttribute="leading" secondItem="sch070" secondAttribute="leading" constant="12" id="sch080"/>
+                                    <constraint firstItem="sch071" firstAttribute="centerY" secondItem="sch070" secondAttribute="centerY" id="sch081"/>
+                                    <constraint firstItem="sch074" firstAttribute="leading" secondItem="sch071" secondAttribute="trailing" constant="12" id="sch082"/>
+                                    <constraint firstItem="sch070" firstAttribute="centerY" secondItem="sch074" secondAttribute="bottom" constant="-1" id="sch083"/>
+                                    <constraint firstItem="sch075" firstAttribute="leading" secondItem="sch074" secondAttribute="leading" id="sch084"/>
+                                    <constraint firstItem="sch075" firstAttribute="top" secondItem="sch074" secondAttribute="bottom" constant="2" id="sch085"/>
+                                    <constraint firstItem="sch076" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="sch074" secondAttribute="trailing" constant="8" id="sch086"/>
+                                    <constraint firstAttribute="trailing" secondItem="sch076" secondAttribute="trailing" constant="12" id="sch087"/>
+                                    <constraint firstItem="sch076" firstAttribute="centerY" secondItem="sch070" secondAttribute="centerY" id="sch088"/>
+                                </constraints>
+                            </view>
+
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sch090">
+                                <rect key="frame" x="20" y="403" width="353" height="32"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sch091" customClass="GradientCTAButton" customModule="MyPT_Connect" customModuleProvider="target">
+                                <rect key="frame" x="20" y="451" width="353" height="48"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="sch092"/>
+                                </constraints>
+                                <connections>
+                                    <action selector="confirmTapped" destination="sch001" eventType="touchUpInside" id="sch093"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" red="0.074509803921568626" green="0.078431372549019607" blue="0.086274509803921567" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="sch010" firstAttribute="top" secondItem="sch002" secondAttribute="top" constant="10" id="sch100"/>
+                            <constraint firstItem="sch010" firstAttribute="centerX" secondItem="sch002" secondAttribute="centerX" id="sch101"/>
+                            <constraint firstItem="sch013" firstAttribute="top" secondItem="sch010" secondAttribute="bottom" constant="18" id="sch102"/>
+                            <constraint firstItem="sch013" firstAttribute="leading" secondItem="sch002" secondAttribute="leading" constant="20" id="sch103"/>
+                            <constraint firstItem="sch014" firstAttribute="centerY" secondItem="sch013" secondAttribute="centerY" id="sch104"/>
+                            <constraint firstAttribute="trailing" secondItem="sch014" secondAttribute="trailing" constant="20" id="sch105"/>
+                            <constraint firstItem="sch020" firstAttribute="top" secondItem="sch013" secondAttribute="bottom" constant="20" id="sch106"/>
+                            <constraint firstItem="sch020" firstAttribute="leading" secondItem="sch002" secondAttribute="leading" constant="20" id="sch107"/>
+                            <constraint firstItem="sch023" firstAttribute="top" secondItem="sch020" secondAttribute="top" id="sch108"/>
+                            <constraint firstItem="sch023" firstAttribute="leading" secondItem="sch020" secondAttribute="trailing" constant="12" id="sch109"/>
+                            <constraint firstItem="sch026" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="sch023" secondAttribute="trailing" constant="8" id="sch110"/>
+                            <constraint firstItem="sch024" firstAttribute="top" secondItem="sch023" secondAttribute="bottom" constant="4" id="sch111"/>
+                            <constraint firstItem="sch024" firstAttribute="leading" secondItem="sch023" secondAttribute="leading" id="sch112"/>
+                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="sch024" secondAttribute="trailing" constant="20" id="sch113"/>
+                            <constraint firstItem="sch025" firstAttribute="top" secondItem="sch024" secondAttribute="bottom" constant="2" id="sch114"/>
+                            <constraint firstItem="sch025" firstAttribute="leading" secondItem="sch023" secondAttribute="leading" id="sch115"/>
+                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="sch025" secondAttribute="trailing" constant="20" id="sch116"/>
+                            <constraint firstItem="sch026" firstAttribute="top" secondItem="sch020" secondAttribute="top" constant="4" id="sch117"/>
+                            <constraint firstAttribute="trailing" secondItem="sch026" secondAttribute="trailing" constant="20" id="sch118"/>
+                            <constraint firstItem="sch030" firstAttribute="top" secondItem="sch020" secondAttribute="bottom" constant="20" id="sch119"/>
+                            <constraint firstItem="sch030" firstAttribute="leading" secondItem="sch002" secondAttribute="leading" constant="20" id="sch120"/>
+                            <constraint firstAttribute="trailing" secondItem="sch030" secondAttribute="trailing" constant="20" id="sch121"/>
+                            <constraint firstItem="sch070" firstAttribute="top" secondItem="sch030" secondAttribute="bottom" constant="20" id="sch122"/>
+                            <constraint firstItem="sch070" firstAttribute="leading" secondItem="sch002" secondAttribute="leading" constant="20" id="sch123"/>
+                            <constraint firstAttribute="trailing" secondItem="sch070" secondAttribute="trailing" constant="20" id="sch124"/>
+                            <constraint firstItem="sch090" firstAttribute="top" secondItem="sch070" secondAttribute="bottom" constant="20" id="sch125"/>
+                            <constraint firstItem="sch090" firstAttribute="leading" secondItem="sch002" secondAttribute="leading" constant="20" id="sch126"/>
+                            <constraint firstAttribute="trailing" secondItem="sch090" secondAttribute="trailing" constant="20" id="sch127"/>
+                            <constraint firstItem="sch091" firstAttribute="top" secondItem="sch090" secondAttribute="bottom" constant="16" id="sch128"/>
+                            <constraint firstItem="sch091" firstAttribute="leading" secondItem="sch002" secondAttribute="leading" constant="20" id="sch129"/>
+                            <constraint firstAttribute="trailing" secondItem="sch091" secondAttribute="trailing" constant="20" id="sch130"/>
+                            <constraint firstItem="schSAG" firstAttribute="bottom" secondItem="sch091" secondAttribute="bottom" constant="20" id="sch131"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="schSAG"/>
+                    </view>
+                    <connections>
+                        <outlet property="closeButton" destination="sch014" id="sch200"/>
+                        <outlet property="confirmButton" destination="sch091" id="sch201"/>
+                        <outlet property="creditsCard" destination="sch030" id="sch202"/>
+                        <outlet property="creditsExpiryLabel" destination="sch048" id="sch203"/>
+                        <outlet property="creditsRemainingLabel" destination="sch036" id="sch204"/>
+                        <outlet property="creditsUsedLabel" destination="sch032" id="sch205"/>
+                        <outlet property="creditsUsedTitleLabel" destination="sch031" id="sch206"/>
+                        <outlet property="creditsRemainingTitleLabel" destination="sch035" id="sch207"/>
+                        <outlet property="creditsDividerView" destination="sch033" id="sch208"/>
+                        <outlet property="durationChip" destination="sch026" id="sch209"/>
+                        <outlet property="handleView" destination="sch010" id="sch210"/>
+                        <outlet property="policyLabel" destination="sch090" id="sch211"/>
+                        <outlet property="segmentsStack" destination="sch037" id="sch212"/>
+                        <outlet property="sessionImageView" destination="sch020" id="sch213"/>
+                        <outlet property="sessionNameLabel" destination="sch023" id="sch214"/>
+                        <outlet property="sessionWhenLabel" destination="sch024" id="sch215"/>
+                        <outlet property="sessionWhereLabel" destination="sch025" id="sch216"/>
+                        <outlet property="titleLabel" destination="sch013" id="sch217"/>
+                        <outlet property="trainerCard" destination="sch070" id="sch218"/>
+                        <outlet property="trainerExpLabel" destination="sch075" id="sch219"/>
+                        <outlet property="trainerImageView" destination="sch071" id="sch220"/>
+                        <outlet property="trainerNameLabel" destination="sch074" id="sch221"/>
+                        <outlet property="viewProfileButton" destination="sch076" id="sch222"/>
+                        <outlet property="walletTileView" destination="sch039" id="sch223"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="sch999" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1400" y="4900"/>
+        </scene>
+        <!--SgptPaymentSummaryViewController-->
+        <scene sceneID="spsScn">
+            <objects>
+                <viewController storyboardIdentifier="SgptPaymentSummaryViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="sps001" customClass="SgptPaymentSummaryViewController" customModule="MyPT_Connect" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="sps002">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" userInteractionEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sps010">
+                                <rect key="frame" x="3.5" y="-120" width="386" height="386"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="386" id="sps011"/>
+                                    <constraint firstAttribute="height" constant="386" id="sps012"/>
+                                </constraints>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sps020">
+                                <rect key="frame" x="20" y="59" width="353" height="52"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sps021" customClass="GlassCircularIconButton" customModule="MyPT_Connect" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="0.0" width="40" height="40"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="40" id="sps022"/>
+                                            <constraint firstAttribute="height" constant="40" id="sps023"/>
+                                        </constraints>
+                                        <connections>
+                                            <action selector="backTapped" destination="sps001" eventType="touchUpInside" id="sps024"/>
+                                        </connections>
+                                    </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="SGPT Credits" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sps025">
+                                        <rect key="frame" x="60" y="9" width="150" height="22"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="18"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="sps021" firstAttribute="leading" secondItem="sps020" secondAttribute="leading" id="sps026"/>
+                                    <constraint firstItem="sps021" firstAttribute="top" secondItem="sps020" secondAttribute="top" id="sps027"/>
+                                    <constraint firstAttribute="bottom" secondItem="sps021" secondAttribute="bottom" constant="12" id="sps028"/>
+                                    <constraint firstItem="sps025" firstAttribute="leading" secondItem="sps021" secondAttribute="trailing" constant="20" id="sps029"/>
+                                    <constraint firstItem="sps025" firstAttribute="centerY" secondItem="sps021" secondAttribute="centerY" id="sps030"/>
+                                    <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="sps025" secondAttribute="trailing" id="sps031"/>
+                                </constraints>
+                            </view>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsVerticalScrollIndicator="NO" showsHorizontalScrollIndicator="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sps003">
+                                <rect key="frame" x="0.0" y="111" width="393" height="641"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="sps004">
+                                        <rect key="frame" x="0.0" y="0.0" width="393" height="1200"/>
+                                        <subviews>
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sps040">
+                                                <rect key="frame" x="0.0" y="0.0" width="393" height="1200"/>
+                                            </view>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="sps004" firstAttribute="top" secondItem="spsCLG" secondAttribute="top" id="sps050"/>
+                                    <constraint firstItem="sps004" firstAttribute="leading" secondItem="spsCLG" secondAttribute="leading" id="sps051"/>
+                                    <constraint firstItem="spsCLG" firstAttribute="trailing" secondItem="sps004" secondAttribute="trailing" id="sps052"/>
+                                    <constraint firstItem="spsCLG" firstAttribute="bottom" secondItem="sps004" secondAttribute="bottom" id="sps053"/>
+                                    <constraint firstItem="sps004" firstAttribute="width" secondItem="spsFLG" secondAttribute="width" id="sps054"/>
+                                </constraints>
+                                <viewLayoutGuide key="contentLayoutGuide" id="spsCLG"/>
+                                <viewLayoutGuide key="frameLayoutGuide" id="spsFLG"/>
+                            </scrollView>
+                            <view contentMode="scaleToFill" clipsSubviews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sps060">
+                                <rect key="frame" x="0.0" y="752" width="393" height="100"/>
+                                <subviews>
+                                    <view contentMode="scaleToFill" clipsSubviews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sps061" customClass="GlassCardView" customModule="MyPT_Connect" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="2" width="393" height="98"/>
+                                        <subviews>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sps062" customClass="GradientCTAButton" customModule="MyPT_Connect" customModuleProvider="target">
+                                                <rect key="frame" x="20" y="16" width="353" height="48"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="48" id="sps063"/>
+                                                </constraints>
+                                                <connections>
+                                                    <action selector="confirmTapped" destination="sps001" eventType="touchUpInside" id="sps064"/>
+                                                </connections>
+                                            </button>
+                                        </subviews>
+                                        <constraints>
+                                            <constraint firstItem="sps062" firstAttribute="top" secondItem="sps061" secondAttribute="top" constant="16" id="sps065"/>
+                                            <constraint firstItem="sps062" firstAttribute="leading" secondItem="sps061" secondAttribute="leading" constant="20" id="sps066"/>
+                                            <constraint firstAttribute="trailing" secondItem="sps062" secondAttribute="trailing" constant="20" id="sps067"/>
+                                            <constraint firstItem="sps061SAG" firstAttribute="bottom" secondItem="sps062" secondAttribute="bottom" constant="12" id="sps068"/>
+                                        </constraints>
+                                        <viewLayoutGuide key="safeArea" id="sps061SAG"/>
+                                    </view>
+                                </subviews>
+                                <color key="backgroundColor" red="0.0039215686274509803" green="0.21176470588235294" blue="0.56078431372549020" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstItem="sps061" firstAttribute="top" secondItem="sps060" secondAttribute="top" constant="2" id="sps069"/>
+                                    <constraint firstItem="sps061" firstAttribute="leading" secondItem="sps060" secondAttribute="leading" id="sps070"/>
+                                    <constraint firstAttribute="trailing" secondItem="sps061" secondAttribute="trailing" id="sps071"/>
+                                    <constraint firstAttribute="bottom" secondItem="sps061" secondAttribute="bottom" id="sps072"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" red="0.0" green="0.039215686274509803" blue="0.015686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="sps010" firstAttribute="centerX" secondItem="sps002" secondAttribute="centerX" id="sps080"/>
+                            <constraint firstItem="sps010" firstAttribute="top" secondItem="sps002" secondAttribute="top" constant="-120" id="sps081"/>
+                            <constraint firstItem="sps020" firstAttribute="top" secondItem="spsSAG" secondAttribute="top" constant="12" id="sps082"/>
+                            <constraint firstItem="sps020" firstAttribute="leading" secondItem="sps002" secondAttribute="leading" constant="20" id="sps083"/>
+                            <constraint firstAttribute="trailing" secondItem="sps020" secondAttribute="trailing" constant="20" id="sps084"/>
+                            <constraint firstItem="sps003" firstAttribute="top" secondItem="sps020" secondAttribute="bottom" id="sps085"/>
+                            <constraint firstItem="sps003" firstAttribute="leading" secondItem="sps002" secondAttribute="leading" id="sps086"/>
+                            <constraint firstAttribute="trailing" secondItem="sps003" secondAttribute="trailing" id="sps087"/>
+                            <constraint firstItem="sps060" firstAttribute="top" secondItem="sps003" secondAttribute="bottom" id="sps088"/>
+                            <constraint firstItem="sps060" firstAttribute="leading" secondItem="sps002" secondAttribute="leading" id="sps089"/>
+                            <constraint firstAttribute="trailing" secondItem="sps060" secondAttribute="trailing" id="sps090"/>
+                            <constraint firstAttribute="bottom" secondItem="sps060" secondAttribute="bottom" id="sps091"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="spsSAG"/>
+                    </view>
+                    <connections>
+                        <outlet property="ambientGlowView" destination="sps010" id="sps100"/>
+                        <outlet property="contentContainer" destination="sps040" id="sps101"/>
+                        <outlet property="ctaButton" destination="sps062" id="sps102"/>
+                        <outlet property="footerSurfaceView" destination="sps061" id="sps103"/>
+                        <outlet property="footerView" destination="sps060" id="sps104"/>
+                        <outlet property="headerTitleLabel" destination="sps025" id="sps105"/>
+                        <outlet property="headerView" destination="sps020" id="sps106"/>
+                        <outlet property="scrollView" destination="sps003" id="sps107"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="sps999" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1400" y="6100"/>
+        </scene>
     </scenes>
     <resources>
         <image name="sgpt-ic-back-chevron" width="24" height="24"/>
         <image name="sgpt-ic-share" width="24" height="24"/>
         <image name="sgpt-pricing-hero" width="1459" height="1951"/>
+        <image name="sgpt-success-bg" width="860" height="1746"/>
+        <image name="sgpt-ic-wallet" width="10" height="10"/>
         <image name="sgpt-listing-hero" width="1290" height="1434"/>
         <image name="sgpt-listing-footer-bg" width="1290" height="690"/>
         <image name="sgpt-listing-divider" width="134" height="14"/>

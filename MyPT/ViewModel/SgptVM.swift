@@ -97,6 +97,35 @@ struct SgptBookResultModel: Codable {
     }
 }
 
+/// Result of the UAT mock purchase. The payment is faked; the credits are real.
+struct SgptPurchaseResultModel: Codable {
+    var subscriptionId: FlexibleValue?
+    var creditsPurchased: Int?
+    var remainingCredits: Int?
+    var price: Double?
+    var expiresInDays: Int?
+    var booked: Bool?
+    var bookingMessage: String?
+    var remainingSeats: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case price, booked
+        case subscriptionId = "subscription_id"
+        case creditsPurchased = "credits_purchased"
+        case remainingCredits = "remaining_credits"
+        case expiresInDays = "expires_in_days"
+        case bookingMessage = "booking_message"
+        case remainingSeats = "remaining_seats"
+    }
+}
+
+struct SgptPurchaseBaseModel: Codable {
+    var status: Bool?
+    var msg: String?
+    var errors: String?
+    var data: SgptPurchaseResultModel?
+}
+
 class SgptVM {
     //MARK: ----------------------- api/sgpt-book
 
@@ -114,6 +143,41 @@ class SgptVM {
                     return
                 }
                 let getResult = try JSONDecoder().decode(SgptBookBaseModel.self, from: responceData)
+                if getResult.status == true, let data = getResult.data {
+                    completion(data, nil)
+                } else {
+                    let reason = getResult.errors?.isEmpty == false ? getResult.errors : getResult.msg
+                    completion(nil, reason)
+                }
+            } catch {
+                print(error)
+                completion(nil, nil)
+            }
+        })
+    }
+
+    //MARK: ----------------------- api/sgpt-purchase
+
+    /// Buys a credit pack. In UAT the payment is mocked server-side but the
+    /// credits granted are real. Passing `sessionId` books that session in the
+    /// same call, which is the buy-then-book flow.
+    class func sgptPurchaseApi(tierId: String,
+                               studioId: String,
+                               sessionId: String?,
+                               isShowLoader: Bool = true,
+                               completion: @escaping (_ result: SgptPurchaseResultModel?, _ errorMessage: String?) -> Void) {
+        var params: [String: Any] = ["tier_id": tierId, "studio_id": studioId]
+        if let sessionId = sessionId, !sessionId.isEmpty {
+            params["session_id"] = sessionId
+        }
+
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .sgpt_purchase, method: .post, queries: nil, parameters: params, isShowLoading: isShowLoader, completion: { (getResponce, error) in
+            do {
+                guard let responceData = getResponce else {
+                    completion(nil, nil)
+                    return
+                }
+                let getResult = try JSONDecoder().decode(SgptPurchaseBaseModel.self, from: responceData)
                 if getResult.status == true, let data = getResult.data {
                     completion(data, nil)
                 } else {

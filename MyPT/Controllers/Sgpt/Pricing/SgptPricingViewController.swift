@@ -113,6 +113,9 @@ final class SgptPricingViewController: CommonViewController {
     var sessionDate: String = ""
     var sessionTime: String = ""
     var sessionImageURL: String = ""
+    /// Session the purchase should book once paid, if the user came from one.
+    var sessionId: String = ""
+    var session: SgptSessionModel?
 
     private var packs: [SgptPackModel] = []
     private var featuredPack: SgptPackModel?
@@ -441,7 +444,11 @@ final class SgptPricingViewController: CommonViewController {
                                                trainerName: sessionTrainerName,
                                                date: sessionDate,
                                                time: sessionTime,
-                                               image: sessionImageURL)
+                                               image: sessionImageURL,
+                                               tierId: chosenPack?.id?.value ?? "",
+                                               studioId: studioId,
+                                               sessionId: sessionId,
+                                               session: session)
     }
 
     @objc private func termsTapped() {

@@ -35,50 +35,45 @@ final class SgptCheckoutSheetViewController: UIViewController {
         static let creditSegments = 8
     }
 
-    private let input: SgptCheckoutInput
+    @IBOutlet weak var handleView: UIView!
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var closeButton: UIButton!
+
+    @IBOutlet weak var sessionImageView: UIImageView!
+    @IBOutlet weak var sessionNameLabel: UILabel!
+    @IBOutlet weak var sessionWhenLabel: UILabel!
+    @IBOutlet weak var sessionWhereLabel: UILabel!
+    @IBOutlet weak var durationChip: UILabel!
+
+    @IBOutlet weak var creditsCard: UIView!
+    @IBOutlet weak var creditsUsedTitleLabel: UILabel!
+    @IBOutlet weak var creditsUsedLabel: UILabel!
+    @IBOutlet weak var creditsDividerView: UIView!
+    @IBOutlet weak var creditsRemainingTitleLabel: UILabel!
+    @IBOutlet weak var creditsRemainingLabel: UILabel!
+    @IBOutlet weak var creditsExpiryLabel: UILabel!
+    @IBOutlet weak var segmentsStack: UIStackView!
+    @IBOutlet weak var walletTileView: UIView!
+
+    @IBOutlet weak var trainerCard: UIView!
+    @IBOutlet weak var trainerImageView: UIImageView!
+    @IBOutlet weak var trainerNameLabel: UILabel!
+    @IBOutlet weak var trainerExpLabel: UILabel!
+    @IBOutlet weak var viewProfileButton: UIButton!
+
+    @IBOutlet weak var policyLabel: UILabel!
+    @IBOutlet weak var confirmButton: GradientCTAButton!
+
+    /// Set before presenting; `present(from:input:)` does it for you.
+    var input = SgptCheckoutInput(session: SgptSessionModel())
 
     var onConfirm: (() -> Void)?
     var onViewProfile: (() -> Void)?
 
-    private let handleView = UIView()
-    private let titleLabel = UILabel()
-    private let closeButton = UIButton(type: .system)
-
-    private let sessionImageView = UIImageView()
-    private let sessionNameLabel = UILabel()
-    private let sessionWhenLabel = UILabel()
-    private let sessionWhereLabel = UILabel()
-    private let durationChip = UILabel()
-
-    private let creditsCard = UIView()
-    private let creditsUsedLabel = UILabel()
-    private let creditsRemainingLabel = UILabel()
-    private let creditsExpiryLabel = UILabel()
-    private let segmentsStack = UIStackView()
-
-    private let trainerCard = UIView()
-    private let trainerImageView = UIImageView()
-    private let trainerNameLabel = UILabel()
-    private let trainerExpLabel = UILabel()
-    private let viewProfileButton = UIButton(type: .system)
-
-    private let policyLabel = UILabel()
-    private let confirmButton = GradientCTAButton()
-
-    init(input: SgptCheckoutInput) {
-        self.input = input
-        super.init(nibName: nil, bundle: nil)
-        modalPresentationStyle = .pageSheet
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = SgptListingColor.surfaceLow
-        buildLayout()
+        styleScene()
         bind()
     }
 
@@ -98,263 +93,74 @@ final class SgptCheckoutSheetViewController: UIViewController {
         }
     }
 
-    private func buildLayout() {
-        handleView.translatesAutoresizingMaskIntoConstraints = false
+    /// The scene owns the hierarchy and constraints; this only applies the
+    /// colours, fonts and corner radii Interface Builder can't express.
+    private func styleScene() {
         handleView.backgroundColor = UIColor(hex: "#393C43")
         handleView.layer.cornerRadius = 2
-        view.addSubview(handleView)
 
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.font = AppFont.medium.size(20.0, familyName: familyClashDisplay)
         titleLabel.textColor = SgptListingColor.neutral200
-        titleLabel.text = "Confirm Booking"
-        view.addSubview(titleLabel)
 
-        closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.setImage(UIImage(systemName: "xmark.circle"), for: .normal)
         closeButton.tintColor = SgptListingColor.neutral200
-        closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
-        view.addSubview(closeButton)
 
-        sessionImageView.translatesAutoresizingMaskIntoConstraints = false
-        sessionImageView.contentMode = .scaleAspectFill
-        sessionImageView.clipsToBounds = true
         sessionImageView.layer.cornerRadius = 12
         sessionImageView.backgroundColor = UIColor(hex: "#1A0A3D")
-        view.addSubview(sessionImageView)
 
-        sessionNameLabel.translatesAutoresizingMaskIntoConstraints = false
         sessionNameLabel.font = AppFont.semibold.size(16.0, familyName: familyClashDisplay)
         sessionNameLabel.textColor = .white
-        view.addSubview(sessionNameLabel)
 
-        sessionWhenLabel.translatesAutoresizingMaskIntoConstraints = false
         sessionWhenLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
         sessionWhenLabel.textColor = UIColor.white.withAlphaComponent(0.5)
-        view.addSubview(sessionWhenLabel)
 
-        sessionWhereLabel.translatesAutoresizingMaskIntoConstraints = false
         sessionWhereLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
         sessionWhereLabel.textColor = UIColor.white.withAlphaComponent(0.4)
-        view.addSubview(sessionWhereLabel)
 
-        durationChip.translatesAutoresizingMaskIntoConstraints = false
         durationChip.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
         durationChip.textColor = SgptListingColor.neutral200
-        durationChip.textAlignment = .center
         durationChip.layer.cornerRadius = 8
         durationChip.layer.borderWidth = 1
         durationChip.layer.borderColor = SgptListingColor.text20.cgColor
         durationChip.backgroundColor = UIColor.white.withAlphaComponent(0.15)
         durationChip.clipsToBounds = true
-        view.addSubview(durationChip)
 
-        buildCreditsCard()
-        buildTrainerCard()
-
-        policyLabel.translatesAutoresizingMaskIntoConstraints = false
-        policyLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
-        policyLabel.textAlignment = .center
-        policyLabel.numberOfLines = 0
-        view.addSubview(policyLabel)
-
-        confirmButton.translatesAutoresizingMaskIntoConstraints = false
-        confirmButton.bandThickness = 2
-        confirmButton.horizontalContentInset = 16
-        confirmButton.configure(title: "CONFIRM YOUR SLOT",
-                                font: AppFont.medium.size(14.0, familyName: familyFunnelSans),
-                                titleColor: .black)
-        confirmButton.setTrailingIcon(UIImage(named: "sgpt-ic-chevron-right"), tint: .black)
-        confirmButton.addTarget(self, action: #selector(confirmTapped), for: .touchUpInside)
-        view.addSubview(confirmButton)
-
-        let inset = Metric.horizontalInset
-
-        NSLayoutConstraint.activate([
-            handleView.topAnchor.constraint(equalTo: view.topAnchor, constant: 10),
-            handleView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            handleView.widthAnchor.constraint(equalToConstant: 40),
-            handleView.heightAnchor.constraint(equalToConstant: 4),
-
-            titleLabel.topAnchor.constraint(equalTo: handleView.bottomAnchor, constant: 18),
-            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: inset),
-
-            closeButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
-            closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -inset),
-            closeButton.widthAnchor.constraint(equalToConstant: 24),
-            closeButton.heightAnchor.constraint(equalToConstant: 24),
-
-            sessionImageView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
-            sessionImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: inset),
-            sessionImageView.widthAnchor.constraint(equalToConstant: 64),
-            sessionImageView.heightAnchor.constraint(equalToConstant: 64),
-
-            sessionNameLabel.topAnchor.constraint(equalTo: sessionImageView.topAnchor),
-            sessionNameLabel.leadingAnchor.constraint(equalTo: sessionImageView.trailingAnchor, constant: 12),
-            sessionNameLabel.trailingAnchor.constraint(lessThanOrEqualTo: durationChip.leadingAnchor, constant: -8),
-
-            sessionWhenLabel.topAnchor.constraint(equalTo: sessionNameLabel.bottomAnchor, constant: 4),
-            sessionWhenLabel.leadingAnchor.constraint(equalTo: sessionNameLabel.leadingAnchor),
-            sessionWhenLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -inset),
-
-            sessionWhereLabel.topAnchor.constraint(equalTo: sessionWhenLabel.bottomAnchor, constant: 2),
-            sessionWhereLabel.leadingAnchor.constraint(equalTo: sessionNameLabel.leadingAnchor),
-            sessionWhereLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -inset),
-
-            durationChip.topAnchor.constraint(equalTo: sessionImageView.topAnchor, constant: 4),
-            durationChip.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -inset),
-            durationChip.heightAnchor.constraint(equalToConstant: 24),
-            durationChip.widthAnchor.constraint(greaterThanOrEqualToConstant: 74),
-
-            creditsCard.topAnchor.constraint(equalTo: sessionImageView.bottomAnchor, constant: 20),
-            creditsCard.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: inset),
-            creditsCard.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -inset),
-
-            trainerCard.topAnchor.constraint(equalTo: creditsCard.bottomAnchor, constant: 20),
-            trainerCard.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: inset),
-            trainerCard.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -inset),
-            trainerCard.heightAnchor.constraint(equalToConstant: 66),
-
-            policyLabel.topAnchor.constraint(equalTo: trainerCard.bottomAnchor, constant: 20),
-            policyLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: inset),
-            policyLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -inset),
-
-            confirmButton.topAnchor.constraint(equalTo: policyLabel.bottomAnchor, constant: 16),
-            confirmButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: inset),
-            confirmButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -inset),
-            confirmButton.heightAnchor.constraint(equalToConstant: 48),
-            confirmButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
-        ])
-    }
-
-    private func buildCreditsCard() {
-        creditsCard.translatesAutoresizingMaskIntoConstraints = false
         creditsCard.backgroundColor = UIColor(hex: "#241040")
         creditsCard.layer.cornerRadius = 12
         creditsCard.layer.borderWidth = 1
         creditsCard.layer.borderColor = SgptListingColor.violet500.cgColor
         creditsCard.clipsToBounds = true
-        view.addSubview(creditsCard)
 
-        let usedTitle = UILabel()
-        usedTitle.translatesAutoresizingMaskIntoConstraints = false
-        usedTitle.text = "Credits use for this session"
-        usedTitle.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
-        usedTitle.textColor = .white
-        creditsCard.addSubview(usedTitle)
-
-        creditsUsedLabel.translatesAutoresizingMaskIntoConstraints = false
+        creditsUsedTitleLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
+        creditsUsedTitleLabel.textColor = .white
         creditsUsedLabel.font = AppFont.medium.size(20.0, familyName: familyClashDisplay)
         creditsUsedLabel.textColor = .white
-        creditsCard.addSubview(creditsUsedLabel)
 
-        let divider = UIView()
-        divider.translatesAutoresizingMaskIntoConstraints = false
-        divider.backgroundColor = SgptListingColor.stroke10
-        creditsCard.addSubview(divider)
+        creditsDividerView.backgroundColor = SgptListingColor.stroke10
 
-        let remainingTitle = UILabel()
-        remainingTitle.translatesAutoresizingMaskIntoConstraints = false
-        remainingTitle.text = "Credits remaining after"
-        remainingTitle.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
-        remainingTitle.textColor = UIColor(hex: "#FAFAFA").withAlphaComponent(0.75)
-        creditsCard.addSubview(remainingTitle)
-
-        creditsRemainingLabel.translatesAutoresizingMaskIntoConstraints = false
+        creditsRemainingTitleLabel.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
+        creditsRemainingTitleLabel.textColor = UIColor(hex: "#FAFAFA").withAlphaComponent(0.75)
         creditsRemainingLabel.font = AppFont.medium.size(14.0, familyName: familyClashDisplay)
         creditsRemainingLabel.textColor = UIColor(hex: "#FAFAFA").withAlphaComponent(0.75)
-        creditsCard.addSubview(creditsRemainingLabel)
 
-        segmentsStack.translatesAutoresizingMaskIntoConstraints = false
-        segmentsStack.axis = .horizontal
-        segmentsStack.spacing = 4
-        segmentsStack.distribution = .fillEqually
-        creditsCard.addSubview(segmentsStack)
+        walletTileView.backgroundColor = UIColor(hex: "#8A2BE1").withAlphaComponent(0.5)
+        walletTileView.layer.cornerRadius = 6.316
 
-        let walletTile = UIView()
-        walletTile.translatesAutoresizingMaskIntoConstraints = false
-        walletTile.backgroundColor = UIColor(hex: "#8A2BE1").withAlphaComponent(0.5)
-        walletTile.layer.cornerRadius = 6.316
-        creditsCard.addSubview(walletTile)
-
-        let walletIcon = UIImageView()
-        walletIcon.translatesAutoresizingMaskIntoConstraints = false
-        walletIcon.image = UIImage(systemName: "wallet.pass")
-        walletIcon.tintColor = .white
-        walletIcon.contentMode = .scaleAspectFit
-        walletTile.addSubview(walletIcon)
-
-        creditsExpiryLabel.translatesAutoresizingMaskIntoConstraints = false
         creditsExpiryLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
-        creditsCard.addSubview(creditsExpiryLabel)
 
-        NSLayoutConstraint.activate([
-            usedTitle.topAnchor.constraint(equalTo: creditsCard.topAnchor, constant: 12),
-            usedTitle.leadingAnchor.constraint(equalTo: creditsCard.leadingAnchor, constant: 15),
-
-            creditsUsedLabel.centerYAnchor.constraint(equalTo: usedTitle.centerYAnchor),
-            creditsUsedLabel.trailingAnchor.constraint(equalTo: creditsCard.trailingAnchor, constant: -15),
-
-            divider.topAnchor.constraint(equalTo: usedTitle.bottomAnchor, constant: 12),
-            divider.leadingAnchor.constraint(equalTo: creditsCard.leadingAnchor, constant: 15),
-            divider.trailingAnchor.constraint(equalTo: creditsCard.trailingAnchor, constant: -15),
-            divider.heightAnchor.constraint(equalToConstant: 1),
-
-            remainingTitle.topAnchor.constraint(equalTo: divider.bottomAnchor, constant: 12),
-            remainingTitle.leadingAnchor.constraint(equalTo: creditsCard.leadingAnchor, constant: 15),
-
-            creditsRemainingLabel.centerYAnchor.constraint(equalTo: remainingTitle.centerYAnchor),
-            creditsRemainingLabel.trailingAnchor.constraint(equalTo: creditsCard.trailingAnchor, constant: -15),
-
-            segmentsStack.topAnchor.constraint(equalTo: remainingTitle.bottomAnchor, constant: 12),
-            segmentsStack.leadingAnchor.constraint(equalTo: creditsCard.leadingAnchor, constant: 15),
-            segmentsStack.trailingAnchor.constraint(equalTo: creditsCard.trailingAnchor, constant: -15),
-            segmentsStack.heightAnchor.constraint(equalToConstant: 14),
-
-            walletTile.topAnchor.constraint(equalTo: segmentsStack.bottomAnchor, constant: 12),
-            walletTile.leadingAnchor.constraint(equalTo: creditsCard.leadingAnchor, constant: 15),
-            walletTile.widthAnchor.constraint(equalToConstant: 20),
-            walletTile.heightAnchor.constraint(equalToConstant: 20),
-            walletTile.bottomAnchor.constraint(equalTo: creditsCard.bottomAnchor, constant: -12),
-
-            walletIcon.centerXAnchor.constraint(equalTo: walletTile.centerXAnchor),
-            walletIcon.centerYAnchor.constraint(equalTo: walletTile.centerYAnchor),
-            walletIcon.widthAnchor.constraint(equalToConstant: 10),
-            walletIcon.heightAnchor.constraint(equalToConstant: 10),
-
-            creditsExpiryLabel.centerYAnchor.constraint(equalTo: walletTile.centerYAnchor),
-            creditsExpiryLabel.leadingAnchor.constraint(equalTo: walletTile.trailingAnchor, constant: 8),
-            creditsExpiryLabel.trailingAnchor.constraint(lessThanOrEqualTo: creditsCard.trailingAnchor, constant: -15)
-        ])
-    }
-
-    private func buildTrainerCard() {
-        trainerCard.translatesAutoresizingMaskIntoConstraints = false
         trainerCard.backgroundColor = UIColor(hex: "#1E1E1F")
         trainerCard.layer.cornerRadius = 12
         trainerCard.layer.borderWidth = 1
         trainerCard.layer.borderColor = UIColor(hex: "#29292A").cgColor
-        view.addSubview(trainerCard)
 
-        trainerImageView.translatesAutoresizingMaskIntoConstraints = false
-        trainerImageView.contentMode = .scaleAspectFill
-        trainerImageView.clipsToBounds = true
         trainerImageView.layer.cornerRadius = 9.188
         trainerImageView.backgroundColor = UIColor(hex: "#1A1A1A")
-        trainerCard.addSubview(trainerImageView)
 
-        trainerNameLabel.translatesAutoresizingMaskIntoConstraints = false
         trainerNameLabel.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
         trainerNameLabel.textColor = UIColor(hex: "#FAFAFA").withAlphaComponent(0.75)
-        trainerCard.addSubview(trainerNameLabel)
 
-        trainerExpLabel.translatesAutoresizingMaskIntoConstraints = false
         trainerExpLabel.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
         trainerExpLabel.textColor = SgptListingColor.text55
-        trainerCard.addSubview(trainerExpLabel)
 
-        viewProfileButton.translatesAutoresizingMaskIntoConstraints = false
-        viewProfileButton.setTitle("VIEW PROFILE", for: .normal)
         viewProfileButton.titleLabel?.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
         viewProfileButton.setTitleColor(.white, for: .normal)
         viewProfileButton.backgroundColor = UIColor(hex: "#1D1E1D")
@@ -362,26 +168,15 @@ final class SgptCheckoutSheetViewController: UIViewController {
         viewProfileButton.layer.borderWidth = 1
         viewProfileButton.layer.borderColor = SgptListingColor.stroke10.cgColor
         viewProfileButton.contentEdgeInsets = UIEdgeInsets(top: 4, left: 12, bottom: 4, right: 12)
-        viewProfileButton.addTarget(self, action: #selector(viewProfileTapped), for: .touchUpInside)
-        trainerCard.addSubview(viewProfileButton)
 
-        NSLayoutConstraint.activate([
-            trainerImageView.leadingAnchor.constraint(equalTo: trainerCard.leadingAnchor, constant: 12),
-            trainerImageView.centerYAnchor.constraint(equalTo: trainerCard.centerYAnchor),
-            trainerImageView.widthAnchor.constraint(equalToConstant: 42),
-            trainerImageView.heightAnchor.constraint(equalToConstant: 42),
+        policyLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
 
-            trainerNameLabel.leadingAnchor.constraint(equalTo: trainerImageView.trailingAnchor, constant: 12),
-            trainerNameLabel.bottomAnchor.constraint(equalTo: trainerCard.centerYAnchor, constant: 1),
-            trainerNameLabel.trailingAnchor.constraint(lessThanOrEqualTo: viewProfileButton.leadingAnchor, constant: -8),
-
-            trainerExpLabel.leadingAnchor.constraint(equalTo: trainerNameLabel.leadingAnchor),
-            trainerExpLabel.topAnchor.constraint(equalTo: trainerNameLabel.bottomAnchor, constant: 2),
-
-            viewProfileButton.trailingAnchor.constraint(equalTo: trainerCard.trailingAnchor, constant: -12),
-            viewProfileButton.centerYAnchor.constraint(equalTo: trainerCard.centerYAnchor),
-            viewProfileButton.heightAnchor.constraint(equalToConstant: 36)
-        ])
+        confirmButton.bandThickness = 2
+        confirmButton.horizontalContentInset = 16
+        confirmButton.configure(title: "CONFIRM YOUR SLOT",
+                                font: AppFont.medium.size(14.0, familyName: familyFunnelSans),
+                                titleColor: .black)
+        confirmButton.setTrailingIcon(UIImage(named: "sgpt-ic-chevron-right"), tint: .black)
     }
 
     private func bind() {
@@ -475,17 +270,31 @@ final class SgptCheckoutSheetViewController: UIViewController {
         }
     }
 
-    @objc private func closeTapped() {
+    @IBAction func closeTapped() {
         dismiss(animated: true)
     }
 
-    @objc private func confirmTapped() {
+    @IBAction func confirmTapped() {
         dismiss(animated: true) { [weak self] in
             self?.onConfirm?()
         }
     }
 
-    @objc private func viewProfileTapped() {
+    @IBAction func viewProfileTapped() {
         onViewProfile?()
+    }
+
+    // MARK: Entry point
+
+    static func present(from controller: UIViewController,
+                        input: SgptCheckoutInput,
+                        onConfirm: (() -> Void)? = nil,
+                        onViewProfile: (() -> Void)? = nil) {
+        let sheet: SgptCheckoutSheetViewController = .instantiate(appStoryboard: .sgpt)
+        sheet.input = input
+        sheet.onConfirm = onConfirm
+        sheet.onViewProfile = onViewProfile
+        sheet.modalPresentationStyle = .pageSheet
+        controller.present(sheet, animated: true)
     }
 }
