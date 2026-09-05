@@ -52,7 +52,7 @@ final class SgptCheckoutSheetViewController: UIViewController {
     @IBOutlet weak var creditsRemainingTitleLabel: UILabel!
     @IBOutlet weak var creditsRemainingLabel: UILabel!
     @IBOutlet weak var creditsExpiryLabel: UILabel!
-    @IBOutlet weak var segmentsStack: UIStackView!
+    @IBOutlet weak var creditsBar: SgptCreditsBarView!
     @IBOutlet weak var walletTileView: UIView!
 
     @IBOutlet weak var trainerCard: GlassCardView!
@@ -181,16 +181,33 @@ final class SgptCheckoutSheetViewController: UIViewController {
         viewProfileButton.layer.borderWidth = 1
         viewProfileButton.layer.borderColor = SgptListingColor.stroke10.cgColor
         let chevron = UIImage(systemName: "chevron.right",
-                              withConfiguration: UIImage.SymbolConfiguration(pointSize: 10, weight: .semibold))
-        viewProfileButton.setImage(chevron, for: .normal)
-        viewProfileButton.tintColor = .white
+                              withConfiguration: UIImage.SymbolConfiguration(pointSize: 9, weight: .semibold))
+        if #available(iOS 15.0, *) {
+            // Configuration places the image trailing natively. The old
+            // semanticContentAttribute flip also mirrored the left/right insets,
+            // which is what left more padding on one side than the other.
+            var config = UIButton.Configuration.plain()
+            config.image = chevron
+            config.imagePlacement = .trailing
+            config.imagePadding = 6
+            config.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12)
+            config.baseForegroundColor = .white
+            config.attributedTitle = AttributedString(
+                "VIEW PROFILE",
+                attributes: AttributeContainer([
+                    .font: AppFont.medium.size(12.0, familyName: familyFunnelSans)
+                ])
+            )
+            viewProfileButton.configuration = config
+        } else {
+            viewProfileButton.setImage(chevron, for: .normal)
+            viewProfileButton.tintColor = .white
+            viewProfileButton.semanticContentAttribute = .forceRightToLeft
+            viewProfileButton.contentEdgeInsets = UIEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
+            viewProfileButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 6, bottom: 0, right: -6)
+        }
         viewProfileButton.imageView?.contentMode = .scaleAspectFit
-        // UIButton draws the image before the title; flipping the axis moves the
-        // chevron to the trailing edge without hand-laying-out a stack.
-        viewProfileButton.semanticContentAttribute = .forceRightToLeft
-        viewProfileButton.contentEdgeInsets = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
-        viewProfileButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: -8)
-        viewProfileButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: -2, bottom: 0, right: 2)
+        viewProfileButton.clipsToBounds = true
 
         policyLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
 
@@ -244,8 +261,7 @@ final class SgptCheckoutSheetViewController: UIViewController {
 
         trainerNameLabel.text = session.trainerName ?? ""
         trainerExpLabel.text = "MyPT Trainer"
-
-        buildSegments(filled: remainingAfter)
+        applyCreditsProgress()
     }
 
     private func creditLabel(_ value: Int) -> String {
@@ -267,32 +283,9 @@ final class SgptCheckoutSheetViewController: UIViewController {
     /// Two capsule tracks of four segments each, matching the Figma credits
     /// meter: segments fill left-to-right for the credits left after this
     /// booking, the rest sit dimmed.
-    private func buildSegments(filled: Int) {
-        segmentsStack.arrangedSubviews.forEach {
-            segmentsStack.removeArrangedSubview($0)
-            $0.removeFromSuperview()
-        }
-
-        let filledCount = min(max(filled, 0), Metric.creditSegments)
-
-        for track in 0..<2 {
-            let trackView = UIStackView()
-            trackView.axis = .horizontal
-            trackView.spacing = 2
-            trackView.distribution = .fillEqually
-            trackView.isLayoutMarginsRelativeArrangement = true
-            trackView.layoutMargins = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
-            trackView.backgroundColor = UIColor.white.withAlphaComponent(0.05)
-            trackView.layer.cornerRadius = 7
-            trackView.clipsToBounds = true
-
-            for index in 0..<4 {
-                let segment = SgptCreditSegmentView()
-                segment.isFilled = (track * 4 + index) < filledCount
-                trackView.addArrangedSubview(segment)
-            }
-            segmentsStack.addArrangedSubview(trackView)
-        }
+    private func applyCreditsProgress() {
+        let total = max(input.creditsUsed + input.creditsBalance, 1)
+        creditsBar.progress = CGFloat(max(input.creditsBalance - input.creditsUsed, 0)) / CGFloat(total)
     }
 
     @IBAction func closeTapped() {

@@ -153,6 +153,8 @@ final class SgptBookingSuccessViewController: UIViewController {
         static let stroke10 = UIColor.white.withAlphaComponent(0.10)
         static let stroke20 = UIColor.white.withAlphaComponent(0.20)
         static let ctaInk = UIColor(hex: "#141514")
+        /// The colour the poster fades into so it blends with the page.
+        static let blend = UIColor(hex: "#000805")
     }
 
     private enum Metric {
@@ -172,7 +174,7 @@ final class SgptBookingSuccessViewController: UIViewController {
 
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var subtitleLabel: UILabel!
-    @IBOutlet weak var posterCard: UIView!
+    @IBOutlet weak var posterCard: SgptBlendCardView!
     @IBOutlet weak var posterImageView: UIImageView!
     @IBOutlet weak var posterScrim: GradientFadeView!
     @IBOutlet weak var durationChip: PillChipView!
@@ -185,7 +187,7 @@ final class SgptBookingSuccessViewController: UIViewController {
     @IBOutlet weak var creditsDividerView: UIView!
     @IBOutlet weak var creditsRemainingTitleLabel: UILabel!
     @IBOutlet weak var creditsRemainingLabel: UILabel!
-    @IBOutlet weak var creditsProgressBar: SpotProgressBarView!
+    @IBOutlet weak var creditsProgressBar: SgptCreditsBarView!
     @IBOutlet weak var backButton: GlassCircularIconButton!
     @IBOutlet weak var walletTileView: UIView!
     @IBOutlet weak var creditsExpiryLabel: UILabel!
@@ -267,10 +269,15 @@ final class SgptBookingSuccessViewController: UIViewController {
         subtitleLabel.font = AppFont.regular.size(14.0, familyName: familyFunnelSans)
         subtitleLabel.textColor = Palette.text55
 
-        posterCard.layer.cornerRadius = 20
-        posterCard.layer.borderWidth = 1
-        posterCard.layer.borderColor = Palette.stroke20.cgColor
-        posterScrim.setColors([UIColor(hex: "#000F06").withAlphaComponent(0), UIColor(hex: "#000A04")])
+        posterCard.cornerRadius = 20
+        posterCard.borderWidth = 1
+        posterCard.borderColor = Palette.stroke20
+        // Ends on the page colour so the card's bottom edge dissolves rather
+        // than stopping on a line.
+        posterScrim.setColors([Palette.blend.withAlphaComponent(0),
+                               Palette.blend.withAlphaComponent(0.85),
+                               Palette.blend],
+                              locations: [0, 0.55, 1])
 
         durationChip.fillColor = UIColor.white.withAlphaComponent(0.20)
         durationChip.strokeColor = Palette.text55.withAlphaComponent(0.20)
@@ -382,9 +389,7 @@ final class SgptBookingSuccessViewController: UIViewController {
 
     private func applyCreditsProgress() {
         let total = max(input.creditsUsed + input.creditsRemaining, 1)
-        creditsProgressBar.barHeight = 8
-        creditsProgressBar.trackColor = UIColor.white.withAlphaComponent(0.10)
-        creditsProgressBar.setProgress(CGFloat(input.creditsRemaining) / CGFloat(total))
+        creditsProgressBar.progress = CGFloat(input.creditsRemaining) / CGFloat(total)
     }
 
     // MARK: Helpers

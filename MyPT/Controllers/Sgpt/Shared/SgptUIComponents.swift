@@ -402,3 +402,147 @@ public class SgptCreditSegmentView: UIView {
         CATransaction.commit()
     }
 }
+
+// MARK: - SgptCreditsBarView
+
+/// The credits meter: a dark capsule track with an inset gap, and a white fill
+/// that glows. Not SpotProgressBarView - that is a flat 4pt bar with no track
+/// padding or glow, and reusing it made the meter read as a plain rule.
+public class SgptCreditsBarView: UIView {
+
+    public static let glowColor = UIColor(hex: "#D288F9")
+
+    /// Gap between the track edge and the fill, so the fill floats inside it.
+    public var trackInset: CGFloat = 2 { didSet { setNeedsLayout() } }
+
+    public var progress: CGFloat = 0 {
+        didSet {
+            progress = min(max(progress, 0), 1)
+            setNeedsLayout()
+        }
+    }
+
+    private let fillView = UIView()
+    private let glowLayer = CAShapeLayer()
+    private var fillWidth: NSLayoutConstraint?
+
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        commonInit()
+    }
+
+    public required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        commonInit()
+    }
+
+    private func commonInit() {
+        backgroundColor = UIColor.white.withAlphaComponent(0.05)
+        clipsToBounds = true
+
+        fillView.translatesAutoresizingMaskIntoConstraints = false
+        fillView.backgroundColor = .white
+        addSubview(fillView)
+
+        glowLayer.fillRule = .evenOdd
+        glowLayer.shadowColor = SgptCreditsBarView.glowColor.cgColor
+        glowLayer.shadowOffset = .zero
+        glowLayer.shadowOpacity = 1
+        glowLayer.shadowRadius = 4
+        fillView.layer.addSublayer(glowLayer)
+
+        let width = fillView.widthAnchor.constraint(equalToConstant: 0)
+        fillWidth = width
+        NSLayoutConstraint.activate([
+            fillView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: trackInset),
+            fillView.topAnchor.constraint(equalTo: topAnchor, constant: trackInset),
+            fillView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -trackInset),
+            width
+        ])
+    }
+
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        layer.cornerRadius = bounds.height / 2
+
+        let usable = max(bounds.width - trackInset * 2, 0)
+        fillWidth?.constant = usable * progress
+
+        let radius = max(fillView.bounds.height / 2, 0)
+        fillView.layer.cornerRadius = radius
+
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        glowLayer.frame = fillView.bounds
+        let outer = UIBezierPath(rect: fillView.bounds.insetBy(dx: -12, dy: -12))
+        let inner = UIBezierPath(roundedRect: fillView.bounds, cornerRadius: radius)
+        outer.append(inner.reversing())
+        glowLayer.path = outer.cgPath
+        glowLayer.shadowPath = inner.cgPath
+        CATransaction.commit()
+    }
+}
+
+// MARK: - SgptBlendCardView
+
+/// A card that is a card at the top and stops being one at the bottom: rounded
+/// top corners with a hairline down the top, left and right edges only, and no
+/// bottom edge at all - the artwork inside fades into the page colour so the
+/// silhouette dissolves into the background instead of ending on a line.
+public class SgptBlendCardView: UIView {
+
+    public var cornerRadius: CGFloat = 20 { didSet { setNeedsLayout() } }
+    public var borderColor: UIColor = UIColor.white.withAlphaComponent(0.2) {
+        didSet { borderLayer.strokeColor = borderColor.cgColor }
+    }
+    public var borderWidth: CGFloat = 1 {
+        didSet { borderLayer.lineWidth = borderWidth; setNeedsLayout() }
+    }
+
+    private let borderLayer = CAShapeLayer()
+
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        commonInit()
+    }
+
+    public required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        commonInit()
+    }
+
+    private func commonInit() {
+        clipsToBounds = true
+        borderLayer.fillColor = UIColor.clear.cgColor
+        borderLayer.strokeColor = borderColor.cgColor
+        borderLayer.lineWidth = borderWidth
+        layer.addSublayer(borderLayer)
+    }
+
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        // Top corners only, so the bottom can run off into the page.
+        layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        layer.cornerRadius = cornerRadius
+
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        borderLayer.frame = bounds
+
+        let inset = borderWidth / 2
+        let r = max(cornerRadius - inset, 0)
+        let path = UIBezierPath()
+        path.move(to: CGPoint(x: inset, y: bounds.maxY))
+        path.addLine(to: CGPoint(x: inset, y: inset + r))
+        path.addArc(withCenter: CGPoint(x: inset + r, y: inset + r), radius: r,
+                    startAngle: .pi, endAngle: .pi * 1.5, clockwise: true)
+        path.addLine(to: CGPoint(x: bounds.maxX - inset - r, y: inset))
+        path.addArc(withCenter: CGPoint(x: bounds.maxX - inset - r, y: inset + r), radius: r,
+                    startAngle: .pi * 1.5, endAngle: 0, clockwise: true)
+        path.addLine(to: CGPoint(x: bounds.maxX - inset, y: bounds.maxY))
+        borderLayer.path = path.cgPath
+        CATransaction.commit()
+
+        borderLayer.zPosition = 1
+    }
+}

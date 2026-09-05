@@ -715,7 +715,7 @@
                                                         <nil key="highlightedColor"/>
                                                     </label>
 
-                                                    <view contentMode="scaleToFill" clipsSubviews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sbs220">
+                                                    <view contentMode="scaleToFill" clipsSubviews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sbs220" customClass="SgptBlendCardView" customModule="MyPT_Connect" customModuleProvider="target">
                                                         <rect key="frame" x="6.5" y="181" width="380" height="380"/>
                                                         <subviews>
                                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs221">
@@ -807,10 +807,10 @@
                                                                 <nil key="textColor"/>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
-                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs267" customClass="SpotProgressBarView" customModule="MyPT_Connect" customModuleProvider="target">
+                                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs267" customClass="SgptCreditsBarView" customModule="MyPT_Connect" customModuleProvider="target">
                                                                 <rect key="frame" x="15" y="83" width="323" height="8"/>
                                                                 <constraints>
-                                                                    <constraint firstAttribute="height" constant="8" id="sbs268"/>
+                                                                    <constraint firstAttribute="height" constant="14" id="sbs268"/>
                                                                 </constraints>
                                                             </view>
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sbs269">
@@ -1264,12 +1264,12 @@
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <stackView opaque="NO" contentMode="scaleToFill" axis="horizontal" distribution="fillEqually" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="sch037">
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sch037" customClass="SgptCreditsBarView" customModule="MyPT_Connect" customModuleProvider="target">
                                         <rect key="frame" x="15" y="83" width="323" height="14"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="14" id="sch038"/>
                                         </constraints>
-                                    </stackView>
+                                    </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sch039">
                                         <rect key="frame" x="15" y="109" width="20" height="20"/>
                                         <subviews>
@@ -1437,7 +1437,7 @@
                         <outlet property="durationChip" destination="sch026" id="sch209"/>
                         <outlet property="handleView" destination="sch010" id="sch210"/>
                         <outlet property="policyLabel" destination="sch090" id="sch211"/>
-                        <outlet property="segmentsStack" destination="sch037" id="sch212"/>
+                        <outlet property="creditsBar" destination="sch037" id="sch212"/>
                         <outlet property="sessionImageView" destination="sch020" id="sch213"/>
                         <outlet property="sessionNameLabel" destination="sch023" id="sch214"/>
                         <outlet property="sessionWhenLabel" destination="sch024" id="sch215"/>
