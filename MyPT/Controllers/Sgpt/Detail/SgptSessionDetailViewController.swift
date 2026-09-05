@@ -350,17 +350,20 @@ final class SgptSessionDetailViewController: CommonViewController {
                     return
                 }
 
+                let total = credits?.totalCredits ?? 0
                 let input = SgptCheckoutInput(
                     session: self.session,
                     creditsUsed: 1,
                     creditsBalance: balance,
+                    creditsTotal: total,
                     expiresInDays: credits?.expiresInDays
                 )
                 SgptCheckoutSheetViewController.present(
                     from: self,
                     input: input,
                     onConfirm: { [weak self] in
-                        self?.bookWithCredits(expiresInDays: credits?.expiresInDays)
+                        self?.bookWithCredits(expiresInDays: credits?.expiresInDays,
+                                              creditsTotal: total)
                     },
                     onViewProfile: { [weak self] in self?.showComingSoon() }
                 )
@@ -392,7 +395,7 @@ final class SgptSessionDetailViewController: CommonViewController {
 
     /// Spends a credit on this session via api/sgpt-book, then re-reads the
     /// session so the seats card reflects the booking just made.
-    private func bookWithCredits(expiresInDays: Int?) {
+    private func bookWithCredits(expiresInDays: Int?, creditsTotal: Int) {
         let sessionId = session.id?.value ?? ""
         guard !sessionId.isEmpty else { return }
 
@@ -427,6 +430,7 @@ final class SgptSessionDetailViewController: CommonViewController {
                 input.creditsUsed = 1
                 input.creditsRemaining = remaining
                 input.expiresInDays = expiresInDays
+                input.creditsTotal = creditsTotal
                 SgptBookingSuccessViewController.start(from: self, input: input)
             }
         }

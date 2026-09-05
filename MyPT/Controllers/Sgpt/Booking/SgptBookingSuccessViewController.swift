@@ -34,6 +34,9 @@ struct SgptBookingSuccessInput {
     var packCredits: Int = 8
     var creditsUsed: Int = 1
     var creditsRemaining: Int = 7
+    /// Size of the wallet the remaining credits are a share of - the bar's
+    /// denominator. Falls back to used + remaining when the API sends none.
+    var creditsTotal: Int = 0
     var expiresInDays: Int?
     var packPrice: Double = 0
     var vatPercent: Int = 5
@@ -153,8 +156,10 @@ final class SgptBookingSuccessViewController: UIViewController {
         static let stroke10 = UIColor.white.withAlphaComponent(0.10)
         static let stroke20 = UIColor.white.withAlphaComponent(0.20)
         static let ctaInk = UIColor(hex: "#141514")
-        /// The colour the poster fades into so it blends with the page.
-        static let blend = UIColor(hex: "#000805")
+        /// The colour the poster fades into so it blends with the page. It has
+        /// to *be* the page colour - at #000805 against a #000A04 page it landed
+        /// a shade off and the card's bottom read as an edge rather than a fade.
+        static let blend = bg
     }
 
     private enum Metric {
@@ -395,13 +400,14 @@ final class SgptBookingSuccessViewController: UIViewController {
     }
     // MARK: Segments
 
-    /// Starts at the balance held before the booking so the bar can run down to
-    /// the post-booking figure on appear - the credit being spent, not just its
-    /// result. Same denominator as the checkout sheet.
+    /// Remaining credits as a share of the whole wallet - the same denominator
+    /// the checkout sheet uses. Starts at the pre-booking balance so the bar can
+    /// run down to the post-booking figure on appear.
     private func applyCreditsProgress() {
-        let total = max(input.creditsUsed + input.creditsRemaining, 1)
-        creditsProgressBar.progress = 1
-        creditsTargetProgress = CGFloat(input.creditsRemaining) / CGFloat(total)
+        let before = input.creditsUsed + input.creditsRemaining
+        let total = max(input.creditsTotal > 0 ? input.creditsTotal : before, 1)
+        creditsProgressBar.progress = CGFloat(min(before, total)) / CGFloat(total)
+        creditsTargetProgress = CGFloat(min(input.creditsRemaining, total)) / CGFloat(total)
     }
 
     private func runCreditsDeduction() {

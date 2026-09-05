@@ -24,6 +24,9 @@ struct SgptCheckoutInput {
     var creditsUsed: Int = 1
     /// Balance the member holds *before* this booking.
     var creditsBalance: Int = 0
+    /// Size of the wallet the balance is a share of - the bar's denominator.
+    /// Falls back to the balance when the API doesn't send one.
+    var creditsTotal: Int = 0
     var expiresInDays: Int?
 }
 
@@ -285,12 +288,12 @@ final class SgptCheckoutSheetViewController: UIViewController {
         return result
     }
 
-    /// Share of the wallet still unspent once this booking is paid for. The
-    /// denominator is the balance held *before* booking - adding creditsUsed to
-    /// it counted the spent credit twice and read low against the success screen.
+    /// Credits left after this booking as a share of the whole wallet, so the
+    /// bar means the same thing here and on the success screen.
     private func applyCreditsProgress() {
-        let total = max(input.creditsBalance, 1)
-        creditsBar.progress = CGFloat(max(input.creditsBalance - input.creditsUsed, 0)) / CGFloat(total)
+        let total = max(input.creditsTotal > 0 ? input.creditsTotal : input.creditsBalance, 1)
+        let after = max(input.creditsBalance - input.creditsUsed, 0)
+        creditsBar.progress = CGFloat(min(after, total)) / CGFloat(total)
     }
 
     @IBAction func closeTapped() {

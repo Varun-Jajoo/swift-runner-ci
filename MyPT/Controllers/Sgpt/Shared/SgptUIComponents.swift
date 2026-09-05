@@ -400,8 +400,10 @@ public class SgptCreditsBarView: UIView {
         // to opaque black, which painted a black slug on the bar. The glow is a
         // stroke plus its own blur, clipped inside the fill.
         glowLayer.fillColor = UIColor.clear.cgColor
-        glowLayer.strokeColor = SgptCreditsBarView.glowColor.cgColor
-        glowLayer.lineWidth = 2
+        // A thin rim, not a band: at 2pt on a ~10pt fill the violet covered most
+        // of the bar and it read lavender instead of white.
+        glowLayer.strokeColor = SgptCreditsBarView.glowColor.withAlphaComponent(0.55).cgColor
+        glowLayer.lineWidth = 1
         glowLayer.shadowColor = SgptCreditsBarView.glowColor.cgColor
         glowLayer.shadowOffset = .zero
         glowLayer.shadowOpacity = 0.9
@@ -455,7 +457,12 @@ public class SgptBlendCardView: UIView {
         didSet { borderLayer.lineWidth = borderWidth; setNeedsLayout() }
     }
 
+    /// Where down the card the side rails have faded to nothing. Keeps the
+    /// bottom from ending on two blunt vertical lines.
+    public var borderFadeStart: CGFloat = 0.45
+
     private let borderLayer = CAShapeLayer()
+    private let borderFadeMask = CAGradientLayer()
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -472,6 +479,11 @@ public class SgptBlendCardView: UIView {
         borderLayer.fillColor = UIColor.clear.cgColor
         borderLayer.strokeColor = borderColor.cgColor
         borderLayer.lineWidth = borderWidth
+
+        borderFadeMask.colors = [UIColor.white.cgColor,
+                                 UIColor.white.cgColor,
+                                 UIColor.clear.cgColor]
+        borderLayer.mask = borderFadeMask
         layer.addSublayer(borderLayer)
     }
 
@@ -497,6 +509,9 @@ public class SgptBlendCardView: UIView {
                     startAngle: .pi * 1.5, endAngle: 0, clockwise: true)
         path.addLine(to: CGPoint(x: bounds.maxX - inset, y: bounds.maxY))
         borderLayer.path = path.cgPath
+
+        borderFadeMask.frame = bounds
+        borderFadeMask.locations = [0, NSNumber(value: Double(borderFadeStart)), 1]
         CATransaction.commit()
 
         borderLayer.zPosition = 1
