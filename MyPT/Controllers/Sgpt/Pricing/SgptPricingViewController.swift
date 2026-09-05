@@ -34,11 +34,6 @@ import UIKit
 
 final class SgptPricingViewController: CommonViewController {
 
-    private enum Metric {
-        /// How far the content column rides up over the hero's fade.
-        static let heroOverlap: CGFloat = 90
-    }
-
     // MARK: - Outlets
 
     @IBOutlet weak var mainScrollView: UIScrollView!
@@ -532,12 +527,8 @@ private extension SgptPricingViewController {
         // values; they must not follow the safe area.
         column.insetsLayoutMarginsFromSafeArea = false
         contentContainer.addSubview(column)
-        // The title belongs at the start of the hero's gradient, not below the
-        // image, so the column is pulled up to overlap the fade.
-        contentContainer.clipsToBounds = false
         NSLayoutConstraint.activate([
-            column.topAnchor.constraint(equalTo: contentContainer.topAnchor,
-                                        constant: -Metric.heroOverlap),
+            column.topAnchor.constraint(equalTo: contentContainer.topAnchor),
             column.leadingAnchor.constraint(equalTo: contentContainer.leadingAnchor),
             column.trailingAnchor.constraint(equalTo: contentContainer.trailingAnchor),
             column.bottomAnchor.constraint(equalTo: contentContainer.bottomAnchor)
