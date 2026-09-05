@@ -57,6 +57,19 @@ final class SgptCardCollectionViewCell: UICollectionViewCell {
         subtitleLabel.numberOfLines = 2
     }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // The glow's shadowPath was baked once, from whatever bounds the cell
+        // had when it became centered. The carousel then resizes/scales the
+        // cell and the stale path stayed behind as a dark shape sticking out
+        // under the card. Re-cut it whenever the geometry changes.
+        guard contentView.layer.shadowOpacity > 0 else { return }
+        contentView.layer.shadowPath = UIBezierPath(
+            roundedRect: contentView.bounds,
+            cornerRadius: SgptCardCollectionViewCell.cardCornerRadius
+        ).cgPath
+    }
+
     override func prepareForReuse() {
         super.prepareForReuse()
         coverImageView.image = nil

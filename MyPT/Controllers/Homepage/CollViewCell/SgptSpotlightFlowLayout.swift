@@ -19,6 +19,14 @@ final class SgptSpotlightFlowLayout: UICollectionViewFlowLayout {
             super.prepare()
             return
         }
+        // Spacing is part of this layout's contract, not the caller's: the
+        // snapping and the scale/alpha ramp both assume a stride of exactly
+        // one card. Homepage got 0 from its storyboard, but See All builds the
+        // layout in code, where UIKit's default 10 shifted every card off the
+        // ramp and made the carousel snap between cards.
+        minimumLineSpacing = 0
+        minimumInteritemSpacing = 0
+
         let itemSize = SgptCardCollectionViewCell.cardSize
         let verticalInset = max((collectionView.bounds.height - itemSize.height) / 2, 0)
         let horizontalInset = max((collectionView.bounds.width - itemSize.width) / 2, 0)

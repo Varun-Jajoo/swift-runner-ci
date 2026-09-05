@@ -112,6 +112,7 @@ final class SgptSessionDetailViewController: CommonViewController {
         static let howItWorksTitle = "How Small Group PT works"
         static let priceFallback = "1 credit"
         static let ctaTitle = "GET CREDIT & RESERVE"
+        static let ctaBookedTitle = "BOOKED"
         static let ctaComingSoonTitle = "Coming soon"
         static let ctaComingSoonMessage = "Reserving Small Group PT sessions from the app isn't available yet."
     }
@@ -125,6 +126,12 @@ final class SgptSessionDetailViewController: CommonViewController {
     private let aboutLabel = UILabel()
     private let aboutFadeView = GradientFadeView()
     private var isAboutExpanded = false
+
+    /// This member already holds a seat, so the CTA reads BOOKED and no longer
+    /// reserves. Comes from is_booked on the detail response, and is set again
+    /// locally the moment a booking succeeds.
+    private var isAlreadyBooked = false
+    private weak var reserveButton: GradientCTAButton?
     private let readMoreButton = UIButton(type: .system)
     private let dateValueLabel = UILabel()
     private let timeValueLabel = UILabel()
@@ -140,6 +147,8 @@ final class SgptSessionDetailViewController: CommonViewController {
         view.backgroundColor = Palette.bg
         buildSections()
         populate()
+        isAlreadyBooked = session.isBooked ?? false
+        applyBookedState()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -340,6 +349,7 @@ final class SgptSessionDetailViewController: CommonViewController {
     /// always leads somewhere. Mirrors Android's
     /// SgptSessionDetailActivity.openCheckoutOrPricing().
     @IBAction func reserveTapped() {
+        guard !isAlreadyBooked else { return }
         SgptVM.sgptCreditsApi(isShowLoader: true) { [weak self] credits in
             DispatchQueue.main.async {
                 guard let self = self else { return }
@@ -425,6 +435,10 @@ final class SgptSessionDetailViewController: CommonViewController {
                     self.seatsCountLabel.attributedText = self.seatsCountText(booked: booked, maxSize: maxSize)
                 }
 
+                self.session.isBooked = true
+                self.isAlreadyBooked = true
+                self.applyBookedState()
+
                 var input = SgptBookingSuccessInput(session: self.session)
                 input.mode = .bookedWithExistingCredits
                 input.creditsUsed = 1
@@ -446,6 +460,19 @@ final class SgptSessionDetailViewController: CommonViewController {
 
     @objc private func policyRowTapped() {
         showComingSoon()
+    }
+
+    private func applyBookedState() {
+        guard let button = reserveButton else { return }
+        let title = isAlreadyBooked ? Copy.ctaBookedTitle : Copy.ctaTitle
+        button.configure(title: title,
+                         font: AppFont.medium.size(14.0, familyName: familyFunnelSans),
+                         titleColor: Palette.ctaInk)
+        button.setTrailingIcon(isAlreadyBooked ? nil
+                                              : (UIImage(named: "sgpt-ic-chevron-right") ?? icon(system: "chevron.right")),
+                               tint: Palette.ctaInk)
+        button.isEnabled = !isAlreadyBooked
+        button.alpha = isAlreadyBooked ? 0.55 : 1
     }
 
     private func showComingSoon() {
@@ -1315,6 +1342,7 @@ private extension SgptSessionDetailViewController {
         priceStack.setContentHuggingPriority(.defaultLow, for: .horizontal)
 
         let button = GradientCTAButton()
+        reserveButton = button
         button.translatesAutoresizingMaskIntoConstraints = false
         button.configure(title: Copy.ctaTitle, font: AppFont.medium.size(14.0, familyName: familyFunnelSans), titleColor: Palette.ctaInk)
         button.setTrailingIcon(UIImage(named: "sgpt-ic-chevron-right") ?? icon(system: "chevron.right"), tint: Palette.ctaInk)

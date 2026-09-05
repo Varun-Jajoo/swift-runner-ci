@@ -330,6 +330,12 @@
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" image="sgpt-pricing-hero" translatesAutoresizingMaskIntoConstraints="NO" id="spr011">
                                                         <rect key="frame" x="0.0" y="0.0" width="393" height="559"/>
                                                     </imageView>
+                                                    <view contentMode="scaleToFill" userInteractionEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="spr015" customClass="GradientFadeView" customModule="MyPT_Connect" customModuleProvider="target">
+                                                        <rect key="frame" x="0.0" y="399" width="393" height="160"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="160" id="spr016"/>
+                                                        </constraints>
+                                                    </view>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="spr013" customClass="GlassCircularIconButton" customModule="MyPT_Connect" customModuleProvider="target">
                                                         <rect key="frame" x="16" y="8" width="40" height="40"/>
                                                         <state key="normal" image="chevron.left" catalog="system"/>
@@ -343,8 +349,11 @@
                                                     <constraint firstItem="spr011" firstAttribute="top" secondItem="spr010" secondAttribute="top" id="spr018"/>
                                                     <constraint firstItem="spr011" firstAttribute="leading" secondItem="spr010" secondAttribute="leading" constant="-20" id="spr019"/>
                                                     <constraint firstAttribute="trailing" secondItem="spr011" secondAttribute="trailing" constant="-20" id="spr020"/>
-                                                    <constraint firstAttribute="bottom" secondItem="spr010" secondAttribute="bottom" firstItem="spr011" id="spr021"/>
+                                                    <constraint firstItem="spr010" firstAttribute="height" secondItem="spr010" secondAttribute="width" multiplier="1.18" id="spr021"/>
                                                     <constraint firstItem="spr011" firstAttribute="height" secondItem="spr011" secondAttribute="width" multiplier="1951:1459" id="spr023"/>
+                                                    <constraint firstItem="spr015" firstAttribute="leading" secondItem="spr010" secondAttribute="leading" id="spr030"/>
+                                                    <constraint firstAttribute="trailing" secondItem="spr015" secondAttribute="trailing" id="spr031"/>
+                                                    <constraint firstAttribute="bottom" secondItem="spr015" secondAttribute="bottom" id="spr032"/>
                                                     <constraint firstItem="spr013" firstAttribute="top" secondItem="spr010" secondAttribute="top" constant="8" id="spr026"/>
                                                     <constraint firstItem="spr013" firstAttribute="leading" secondItem="spr010" secondAttribute="leading" constant="20" id="spr027"/>
                                                     <constraint firstItem="spr013" firstAttribute="width" constant="40" id="spr028"/>
@@ -379,6 +388,7 @@
                     <connections>
                         <outlet property="backButtonTopConstraint" destination="spr026" id="spr073"/>
                         <outlet property="contentContainer" destination="spr040" id="spr070"/>
+                        <outlet property="heroFadeView" destination="spr015" id="sprC960"/>
                         <outlet property="heroImageView" destination="spr011" id="spr071"/>
                         <outlet property="mainScrollView" destination="spr003" id="spr072"/>
                     </connections>

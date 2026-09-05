@@ -75,6 +75,8 @@ struct SgptSessionModel: Codable {
     var remainingSeats: FlexibleValue?
     var studioLat: FlexibleValue?
     var studioLng: FlexibleValue?
+    /// Whether the signed-in member already holds a seat on this session.
+    var isBooked: Bool?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -87,5 +89,6 @@ struct SgptSessionModel: Codable {
         case remainingSeats = "remaining_seats"
         case studioLat = "studio_lat"
         case studioLng = "studio_lng"
+        case isBooked = "is_booked"
     }
 }

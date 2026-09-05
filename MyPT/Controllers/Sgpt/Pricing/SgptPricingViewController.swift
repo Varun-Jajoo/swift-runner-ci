@@ -38,6 +38,8 @@ final class SgptPricingViewController: CommonViewController {
 
     @IBOutlet weak var mainScrollView: UIScrollView!
     @IBOutlet weak var heroImageView: UIImageView!
+    /// Fades the hero's cropped bottom into the page instead of ending on a cut.
+    @IBOutlet weak var heroFadeView: GradientFadeView!
     @IBOutlet weak var contentContainer: UIView!
     @IBOutlet weak var backButtonTopConstraint: NSLayoutConstraint!
 
@@ -155,6 +157,7 @@ final class SgptPricingViewController: CommonViewController {
         heroImageView.image = UIImage(named: "sgpt-pricing-hero")
         heroImageView.contentMode = .scaleAspectFill
         heroImageView.clipsToBounds = true
+        heroFadeView?.setColors([Palette.bg.withAlphaComponent(0), Palette.bg])
         buildContent()
         loadPacks()
 
@@ -885,6 +888,15 @@ private extension SgptPricingViewController {
                 ref.card.transform = isCentered
                     ? .identity
                     : CGAffineTransform(scaleX: PricingMetric.sideScale, y: PricingMetric.sideScale)
+                // Scale alone left every card wearing the look it was built
+                // with, so the centered one stayed flat and whichever started
+                // centered kept the highlight. This is the toggle the single
+                // shared card type exists for.
+                ref.card.setPricingCardStyle(isCenter: isCentered,
+                                             centerFillColor: Palette.cardCenterFill,
+                                             sideFillColor: Palette.cardSideFill,
+                                             centerBorderColor: Palette.centerBorder)
+                self.applyPricingBadgeStyle(ref.badge, isCenter: isCentered)
             }
         }
         if animated {
