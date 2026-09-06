@@ -117,7 +117,6 @@ final class SgptSessionDetailViewController: CommonViewController {
     }
 
     private static let aboutCollapsedLineLimit = 5
-    private static let skillRowLimit = 2
 
     // MARK: - Views populated in code (kept for later reference from populate())
 
@@ -248,52 +247,34 @@ final class SgptSessionDetailViewController: CommonViewController {
 
         let cardWidth = trainerCardContainer.bounds.width > 0 ? trainerCardContainer.bounds.width : view.bounds.width - 40
         let budget = cardWidth - 32
-        let spacing: CGFloat = 5
+        let spacing = trainerSkillsRow.spacing
 
-        var rows: [[UIView]] = [[]]
-        var rowWidth: CGFloat = 0
+        let chips = specialities
+            .map { name -> (chip: UIView, width: CGFloat) in
+                let chip = makeSkillChip(name.uppercased())
+                return (chip, chip.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).width)
+            }
+            .sorted { $0.width < $1.width }
+
+        var used: CGFloat = 0
         var shown = 0
-
-        for (index, name) in specialities.enumerated() {
-            let chip = makeSkillChip(name.uppercased())
-            let chipWidth = chip.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).width
-            let advance = chipWidth + (rows[rows.count - 1].isEmpty ? 0 : spacing)
-
-            if rowWidth + advance > budget && !rows[rows.count - 1].isEmpty {
-                if rows.count == SgptSessionDetailViewController.skillRowLimit { break }
-                rows.append([])
-                rowWidth = 0
-            }
-
-            let leftoverAfter = specialities.count - (index + 1)
-            if leftoverAfter > 0, rows.count == SgptSessionDetailViewController.skillRowLimit {
-                let reserve = overflowChipWidth(leftoverAfter) + (rows[rows.count - 1].isEmpty ? 0 : spacing)
-                if rowWidth + chipWidth + (rows[rows.count - 1].isEmpty ? 0 : spacing) + reserve > budget,
-                   !(rows.count == 1 && rows[0].isEmpty) {
-                    break
-                }
-            }
-
-            rows[rows.count - 1].append(chip)
-            rowWidth += chipWidth + (rows[rows.count - 1].count > 1 ? spacing : 0)
+        for (index, entry) in chips.enumerated() {
+            let advance = entry.width + (shown > 0 ? spacing : 0)
+            let leftoverAfter = chips.count - (index + 1)
+            let reserve: CGFloat = leftoverAfter > 0 ? overflowChipWidth(leftoverAfter) + spacing : 0
+            if used + advance + reserve > budget && shown > 0 { break }
+            trainerSkillsRow.addArrangedSubview(entry.chip)
+            used += advance
             shown += 1
         }
 
         if shown == 0 {
-            rows[0].append(makeSkillChip(specialities[0].uppercased()))
+            trainerSkillsRow.addArrangedSubview(chips[0].chip)
             shown = 1
         }
-        let remaining = specialities.count - shown
+        let remaining = chips.count - shown
         if remaining > 0 {
-            rows[rows.count - 1].append(makeSkillChip("+\(remaining)"))
-        }
-
-        for chips in rows where !chips.isEmpty {
-            let row = UIStackView(arrangedSubviews: chips)
-            row.axis = .horizontal
-            row.alignment = .center
-            row.spacing = spacing
-            trainerSkillsRow.addArrangedSubview(row)
+            trainerSkillsRow.addArrangedSubview(makeSkillChip("+\(remaining)"))
         }
     }
 
@@ -1187,8 +1168,8 @@ private extension SgptSessionDetailViewController {
 
         let skillsRow = trainerSkillsRow
         skillsRow.translatesAutoresizingMaskIntoConstraints = false
-        skillsRow.axis = .vertical
-        skillsRow.alignment = .leading
+        skillsRow.axis = .horizontal
+        skillsRow.alignment = .center
         skillsRow.spacing = 5
         skillsRow.isHidden = true
 
