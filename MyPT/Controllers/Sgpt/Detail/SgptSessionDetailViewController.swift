@@ -117,6 +117,7 @@ final class SgptSessionDetailViewController: CommonViewController {
     }
 
     private static let aboutCollapsedLineLimit = 5
+    private static let skillRowLimit = 2
 
     // MARK: - Views populated in code (kept for later reference from populate())
 
@@ -216,7 +217,7 @@ final class SgptSessionDetailViewController: CommonViewController {
 
     private static func experienceStatText(_ raw: String?) -> String {
         let years = experienceYears(raw)
-        return years.isEmpty ? "—" : "\(years)yrs"
+        return years.isEmpty ? "—" : years
     }
 
     private static func experienceYears(_ raw: String?) -> String {
@@ -247,29 +248,52 @@ final class SgptSessionDetailViewController: CommonViewController {
 
         let cardWidth = trainerCardContainer.bounds.width > 0 ? trainerCardContainer.bounds.width : view.bounds.width - 40
         let budget = cardWidth - 32
-        let spacing = trainerSkillsRow.spacing
+        let spacing: CGFloat = 5
 
-        var used: CGFloat = 0
+        var rows: [[UIView]] = [[]]
+        var rowWidth: CGFloat = 0
         var shown = 0
+
         for (index, name) in specialities.enumerated() {
             let chip = makeSkillChip(name.uppercased())
             let chipWidth = chip.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).width
+            let advance = chipWidth + (rows[rows.count - 1].isEmpty ? 0 : spacing)
+
+            if rowWidth + advance > budget && !rows[rows.count - 1].isEmpty {
+                if rows.count == SgptSessionDetailViewController.skillRowLimit { break }
+                rows.append([])
+                rowWidth = 0
+            }
+
             let leftoverAfter = specialities.count - (index + 1)
-            let reserve: CGFloat = leftoverAfter > 0 ? overflowChipWidth(leftoverAfter) + spacing : 0
-            let advance = chipWidth + (shown > 0 ? spacing : 0)
-            if used + advance + reserve > budget && shown > 0 { break }
-            trainerSkillsRow.addArrangedSubview(chip)
-            used += advance
+            if leftoverAfter > 0, rows.count == SgptSessionDetailViewController.skillRowLimit {
+                let reserve = overflowChipWidth(leftoverAfter) + (rows[rows.count - 1].isEmpty ? 0 : spacing)
+                if rowWidth + chipWidth + (rows[rows.count - 1].isEmpty ? 0 : spacing) + reserve > budget,
+                   !(rows.count == 1 && rows[0].isEmpty) {
+                    break
+                }
+            }
+
+            rows[rows.count - 1].append(chip)
+            rowWidth += chipWidth + (rows[rows.count - 1].count > 1 ? spacing : 0)
             shown += 1
         }
 
         if shown == 0 {
-            trainerSkillsRow.addArrangedSubview(makeSkillChip(specialities[0].uppercased()))
+            rows[0].append(makeSkillChip(specialities[0].uppercased()))
             shown = 1
         }
         let remaining = specialities.count - shown
         if remaining > 0 {
-            trainerSkillsRow.addArrangedSubview(makeSkillChip("+\(remaining)"))
+            rows[rows.count - 1].append(makeSkillChip("+\(remaining)"))
+        }
+
+        for chips in rows where !chips.isEmpty {
+            let row = UIStackView(arrangedSubviews: chips)
+            row.axis = .horizontal
+            row.alignment = .center
+            row.spacing = spacing
+            trainerSkillsRow.addArrangedSubview(row)
         }
     }
 
@@ -1163,8 +1187,8 @@ private extension SgptSessionDetailViewController {
 
         let skillsRow = trainerSkillsRow
         skillsRow.translatesAutoresizingMaskIntoConstraints = false
-        skillsRow.axis = .horizontal
-        skillsRow.alignment = .center
+        skillsRow.axis = .vertical
+        skillsRow.alignment = .leading
         skillsRow.spacing = 5
         skillsRow.isHidden = true
 
@@ -1194,7 +1218,7 @@ private extension SgptSessionDetailViewController {
 
         let statsRow = UIStackView(arrangedSubviews: [
             makeStatCell(valueLabel: trainerRatingStatLabel, value: Copy.trainerRatingValue, caption: "Rating"),
-            makeStatCell(valueLabel: trainerExperienceStatLabel, value: "—", caption: "Experience"),
+            makeStatCell(valueLabel: trainerExperienceStatLabel, value: "—", caption: "years Exp."),
             makeStatCell(value: "504", caption: "Session held")
         ])
         statsRow.axis = .horizontal
