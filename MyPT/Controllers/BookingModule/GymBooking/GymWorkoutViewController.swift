@@ -321,8 +321,8 @@ extension GymWorkoutViewController: UITableViewDataSource, UITableViewDelegate{
         let studioId = String(studio?.id ?? 0)
         let studioName = studio?.name ?? ""
 
-        // In picker mode for members who already hold a gym package, treat view profile as a pick:
-        if let pick = onStudioPicked, (hasGymPackage ?? false) {
+        // In picker mode, treat view profile as a pick:
+        if let pick = onStudioPicked {
             pick(studioId, studioName)
             if self.navigationController?.topViewController === self {
                 self.navigationController?.popViewController(animated: true)
@@ -351,6 +351,14 @@ extension GymWorkoutViewController: UITableViewDataSource, UITableViewDelegate{
         let studioId = String(studio?.id ?? 0)
         let studioName = studio?.name ?? ""
 
+        if let pick = onStudioPicked {
+            pick(studioId, studioName)
+            if self.navigationController?.topViewController === self {
+                self.navigationController?.popViewController(animated: true)
+            }
+            return
+        }
+
         // When user has no membership (non-member) or flowGymwork is withoutTrainerMembership:
         if flowGymwork == .withoutTrainerMembership || !(hasGymPackage ?? false) {
             Mixpanel.mainInstance().track(
@@ -368,14 +376,6 @@ extension GymWorkoutViewController: UITableViewDataSource, UITableViewDelegate{
             inputData.type = "gym"
             vc.inputParam = inputData
             self.navigationController?.pushViewController(vc, animated: false)
-            return
-        }
-
-        if let pick = onStudioPicked {
-            pick(studioId, studioName)
-            if self.navigationController?.topViewController === self {
-                self.navigationController?.popViewController(animated: true)
-            }
             return
         }
             if inputParam?.isFreeAssessmentSelected ?? false { // Only for Free Assessment flow
