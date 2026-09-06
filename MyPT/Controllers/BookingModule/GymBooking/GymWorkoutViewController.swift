@@ -338,7 +338,7 @@ extension GymWorkoutViewController: UITableViewDataSource, UITableViewDelegate{
         vc.gymDetailsFlow = (flowGymwork == .withoutTrainerMembership || !(hasGymPackage ?? false)) ? .withoutTrainerMembership : flowGymwork
         vc.hasGymPackage = hasGymPackage
         var inputData = self.inputParam ?? DetailsParam()
-        inputData?.studio_id = studioId
+        inputData.studio_id = studioId
         vc.inputParam = inputData
         self.navigationController?.pushViewController(vc, animated: true)
     }
@@ -363,9 +363,9 @@ extension GymWorkoutViewController: UITableViewDataSource, UITableViewDelegate{
             vc.inputType = self.inputType ?? "gym"
             vc.package_type = "4" // -> Gym membership
             var inputData = self.inputParam ?? DetailsParam()
-            inputData?.studio_id = studioId
-            inputData?.package_type = "4" 
-            inputData?.type = "gym"
+            inputData.studio_id = studioId
+            inputData.package_type = "4" 
+            inputData.type = "gym"
             vc.inputParam = inputData
             self.navigationController?.pushViewController(vc, animated: false)
             return
