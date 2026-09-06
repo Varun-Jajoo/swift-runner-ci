@@ -304,7 +304,13 @@ final class SgptBookingSuccessViewController: UIViewController {
 
         headerDividerView.backgroundColor = Palette.stroke10
 
+        // Same treatment as the checkout sheet's credits card: the violet fill
+        // and rim were missing here, which is why the meter read flatter than
+        // the sheet's even though the bar itself is the same control.
+        creditsCard.backgroundColor = UIColor(hex: "#241040")
         creditsCard.layer.cornerRadius = Metric.cardCorner
+        creditsCard.layer.borderWidth = 1
+        creditsCard.layer.borderColor = SgptListingColor.violet500.cgColor
         creditsCard.clipsToBounds = true
         creditsUsedTitleLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
         creditsUsedTitleLabel.textColor = .white

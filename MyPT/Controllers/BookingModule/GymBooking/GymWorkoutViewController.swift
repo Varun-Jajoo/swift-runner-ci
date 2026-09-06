@@ -68,6 +68,12 @@ class GymWorkoutViewController: CommonViewController {
     private func setNavUI(){
 //        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: ["\(gymCountNear ?? 0) Gyms Near You."], setTintColor: .black, setTitleColor: UIColor.appWhite)
         self.setLeftMenu(leftImgs: [AppImages.backArrowWithBg], setTitle: [" Gyms"], setTintColor: .black, setTitleColor: UIColor.appWhite)
+
+        // The grid cell has no select button at all (only VIEW PROFILE), so in
+        // picker mode switching to grid leaves no way to choose a gym. Offer
+        // only the list there.
+        guard onStudioPicked == nil else { return }
+
         self.setRighMenu(rightImgs: [AppImages.grid?.resized(to: CGSize(width: 20.0, height: 20.0)), AppImages.menuNav?.resized(to: CGSize(width: 20.0, height: 20.0))], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
 //        self.setRighMenu(rightImgs: [AppImages.backArrowWithBg], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
     }
@@ -313,10 +319,22 @@ extension GymWorkoutViewController: UITableViewDataSource, UITableViewDelegate{
  
     //MARK: -----------------BTN ACTN
     @objc func viewDetailsBtnActn(sender: UIButton){
-        let vc: GymDetailsViewController = GymDetailsViewController.instantiate(appStoryboard: .booking)
         let getIndx = self.studiosData?.firstIndex(where: {
             $0.id == Int(sender.accessibilityHint ?? "0")
         })
+
+        // In picker mode this button is the way OUT of the picker: gym details
+        // pushes the whole gym-purchase stack (PackagesVC / TrainerList / ...)
+        // on top of the SGPT checkout, with inputParam nil so the chosen studio
+        // is dropped. Treat it as a pick instead.
+        if let pick = onStudioPicked {
+            let studio = self.studiosData?[getIndx ?? 0]
+            pick(String(studio?.id ?? 0), studio?.name ?? "")
+            navigationController?.popViewController(animated: true)
+            return
+        }
+
+        let vc: GymDetailsViewController = GymDetailsViewController.instantiate(appStoryboard: .booking)
         vc.inputStudioId = sender.accessibilityHint
         vc.inputLat = self.inputLat
         vc.inputLong = self.inputLong

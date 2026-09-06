@@ -118,6 +118,10 @@ final class SgptPricingViewController: CommonViewController {
     var session: SgptSessionModel?
 
     private var packs: [SgptPackModel] = []
+    /// Set when the screen is selling bundles (membership + credits) because the
+    /// member has no gym access at this club.
+    private var bundles: [SgptBundleModel] = []
+    private var isShowingBundles = false
     private var featuredPack: SgptPackModel?
     private var dealSecondsLeft: Int = 0
     private var pricingStoreToken: UUID?
@@ -213,13 +217,78 @@ final class SgptPricingViewController: CommonViewController {
     /// Credit packs from api/sgpt-packages. The screen ships three placeholder
     /// cards so it never renders empty; once packs arrive the whole content
     /// column is rebuilt from them.
+    /// Asks the server what this member may buy before deciding what to show.
+    /// Without gym access at the club, plain credits are unusable - the server
+    /// refuses to enrol them in a club session - so the only sellable product
+    /// is a bundle that includes membership.
     private func loadPacks() {
+        SgptVM.sgptEligibilityApi(studioId: studioId) { [weak self] eligibility in
+            guard let self = self else { return }
+
+            // Nil means the check failed, not that access was denied - fall back
+            // to credits rather than hiding the normal product behind an outage.
+            if eligibility?.needsBundle == true {
+                self.loadBundles()
+            } else {
+                self.loadCreditPacks()
+            }
+        }
+    }
+
+    private func loadCreditPacks() {
         SgptVM.sgptPackagesApi(studioId: studioId) { [weak self] result in
             guard let self = self, let packs = result, !packs.isEmpty else { return }
             DispatchQueue.main.async {
+                self.isShowingBundles = false
                 self.applyPacks(packs)
             }
         }
+    }
+
+    private func loadBundles() {
+        SgptVM.sgptBundlesApi(studioId: studioId) { [weak self] result in
+            guard let self = self else { return }
+
+            // A club with no bundle configured would otherwise show nothing at
+            // all; credit packs at least let a member who does have access buy.
+            guard let bundles = result, !bundles.isEmpty else {
+                self.loadCreditPacks()
+                return
+            }
+
+            DispatchQueue.main.async {
+                self.isShowingBundles = true
+                self.applyBundles(bundles)
+            }
+        }
+    }
+
+    /// Bundles reuse the credit-pack card layout - same shape, different
+    /// product - so only the card copy differs.
+    private func applyBundles(_ bundles: [SgptBundleModel]) {
+        self.bundles = bundles
+
+        let centerIndex = bundles.count > 1 ? 1 : 0
+        selectedPricingCardIndex = centerIndex
+
+        plans = bundles.enumerated().map { index, bundle in
+            let credits = bundle.credits ?? 0
+            let saving = bundle.saving ?? 0
+
+            return PlanCard(
+                badge: saving > 0 ? "SAVE \(Self.money(saving))" : (bundle.name ?? "Bundle"),
+                isCenter: index == centerIndex,
+                headline: credits == 1 ? "1 credit" : "\(credits) credits",
+                validDays: bundle.validity ?? 0,
+                price: Self.money(bundle.price ?? 0),
+                originalPrice: (bundle.listPrice ?? 0) > (bundle.price ?? 0)
+                    ? Self.money(bundle.listPrice ?? 0)
+                    : nil,
+                perSession: "+ gym membership"
+            )
+        }
+
+        rebuildContent()
     }
 
     private func applyPacks(_ packs: [SgptPackModel]) {
@@ -408,7 +477,71 @@ final class SgptPricingViewController: CommonViewController {
     }
 
     /// Purchases whichever card is currently centered/selected.
+    /// Buys the selected bundle through the real payment gateway.
+    ///
+    /// Nothing is granted here: the server does that when the gateway confirms,
+    /// so a member can never end up with credits for a payment that failed.
+    private func purchaseBundle() {
+        let chosen: SgptBundleModel? = {
+            if let index = selectedPricingCardIndex, index < bundles.count {
+                return bundles[index]
+            }
+            return bundles.first
+        }()
+
+        guard let bundle = chosen, let bundleId = bundle.id?.value, !bundleId.isEmpty else {
+            showComingSoon(message: "This bundle can't be purchased right now.")
+            return
+        }
+
+        let vc: CCAvenuePaymentViewController = .instantiate(appStoryboard: .booking)
+        vc.modalPresentationStyle = .overFullScreen
+        vc.bundleId = bundleId
+        vc.bundleAmount = bundle.price
+        vc.bundleStudioId = bundle.studioId?.isEmpty == false ? bundle.studioId : studioId
+        vc.costAmt = bundle.price
+        // Only auto-book when the member is still buying at the class's own
+        // club - after a gym switch the session belongs somewhere else.
+        vc.bundleSessionId = sessionId.isEmpty ? nil : sessionId
+
+        vc.paymentSuccess = { [weak self] success, _, _ in
+            guard let self = self, success == true else { return }
+            DispatchQueue.main.async {
+                self.showSeeAllAfterBundlePurchase()
+            }
+        }
+
+        navigationController?.present(vc, animated: true)
+    }
+
+    /// After buying a bundle the member is a member: send them to the listing,
+    /// which now shows their own club's classes.
+    private func showSeeAllAfterBundlePurchase() {
+        let seeAll: SeeAllSgptViewController = .instantiate(appStoryboard: .sgpt)
+        seeAll.hidesBottomBarWhenPushed = true
+
+        guard var stack = navigationController?.viewControllers else {
+            navigationController?.pushViewController(seeAll, animated: true)
+            return
+        }
+        if let selfIndex = stack.firstIndex(where: { $0 === self }) {
+            stack.removeSubrange(selfIndex...)
+        }
+        stack.append(seeAll)
+        navigationController?.setViewControllers(stack, animated: true)
+    }
+
     @objc private func purchaseTapped() {
+        // A bundle sells a real gym membership, so it cannot go through the
+        // credit-pack checkout - that posts a package tier to api/sgpt-purchase
+        // and would take money without granting the membership half. It goes to
+        // the real gateway instead, and the server grants every component (and
+        // books the session, if any) on the payment callback.
+        if isShowingBundles {
+            purchaseBundle()
+            return
+        }
+
         let credits: Int
         let price: Int
         let savings: Int

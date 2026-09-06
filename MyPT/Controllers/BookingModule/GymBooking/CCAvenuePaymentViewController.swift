@@ -22,6 +22,15 @@ class CCAvenuePaymentViewController: CommonViewController, WKNavigationDelegate{
     var studioId: String?
     var bestPlanId: String?
     var inputParam: DetailsParam?
+    /// Bundle purchase (SGPT non-member flow). Set these INSTEAD of
+    /// packageDetails/inputParam: a bundle is several products in one payment,
+    /// so it carries its own id rather than a package tier. Nil for every other
+    /// caller, which leaves the normal request untouched.
+    var bundleId: String?
+    var bundleAmount: Double?
+    var bundleStudioId: String?
+    /// Session to auto-book once payment grants the access booking needs.
+    var bundleSessionId: String?
     var paymetMethod: String? = "ccavenue"
     var requestData = PaymentModel()
     var paymentId = Int()
@@ -137,6 +146,22 @@ class CCAvenuePaymentViewController: CommonViewController, WKNavigationDelegate{
         requestData.validity_days = packageDetails?.validityDays
         requestData.price = packageDetails?.price
         requestData.studio_id = inputParam?.studio_id
+
+        // A bundle overrides the package-tier shaped request above: package_type
+        // 5 tells the server to snapshot the bundle's components and grant them
+        // all on the gateway callback.
+        if let bundleId = bundleId {
+            requestData.package_type = 5
+            requestData.bundle_id = bundleId
+            requestData.session_id = bundleSessionId
+            requestData.studio_id = bundleStudioId
+            requestData.type = "gym"
+            requestData.payment_for = "subscription"
+            requestData.amount = bundleAmount
+            requestData.price = bundleAmount
+            requestData.best_plan_id = nil
+            requestData.sessions = nil
+        }
        
         print("inputParams: ",requestData.getParams())
         
@@ -338,6 +363,10 @@ struct PaymentModel {
     var booking_id: String?
     var payment_id: String?
     var order_ref, studio_id, trainer_id: String?
+    /// Bundle purchase (package_type 5): the bundle being bought, and the
+    /// session to book once payment grants the access booking requires.
+    var bundle_id: String?
+    var session_id: String?
     
     func getParams() -> [String: Any] {
         var dict: [String: Any] = [:]
@@ -356,6 +385,8 @@ struct PaymentModel {
         if let price = price { dict["price"] = price }
         if let studio_id = studio_id { dict["studio_id"] = studio_id }
         if let trainer_id = trainer_id { dict["trainer_id"] = trainer_id }
+        if let bundle_id = bundle_id { dict["bundle_id"] = bundle_id }
+        if let session_id = session_id { dict["session_id"] = session_id }
         
         return dict
     }

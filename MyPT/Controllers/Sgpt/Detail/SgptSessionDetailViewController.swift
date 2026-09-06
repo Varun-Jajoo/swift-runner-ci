@@ -145,6 +145,10 @@ final class SgptSessionDetailViewController: CommonViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = Palette.bg
+        // Without this the scroll view inherits `.automatic`, which inserts a
+        // top inset the height of the safe area and pushes the hero down off
+        // the top edge. Every other hero screen in the module sets it.
+        scrollView.contentInsetAdjustmentBehavior = .never
         buildSections()
         populate()
         isAlreadyBooked = session.isBooked ?? false
@@ -203,7 +207,9 @@ final class SgptSessionDetailViewController: CommonViewController {
         let maxSize = GroupClassCardFormatter.intValue(session.maxSize, defaultValue: 0)
         let booked = GroupClassCardFormatter.intValue(session.bookedCount, defaultValue: 0)
         let progress = maxSize > 0 ? CGFloat(booked) / CGFloat(maxSize) : 0
-        seatsProgressBar.setProgress(progress)
+        // A seat taken by someone else while this screen is open should be seen
+        // moving; first paint stays instant so it doesn't run up from empty.
+        seatsProgressBar.setProgress(progress, animated: viewIfLoaded?.window != nil)
         seatsCountLabel.attributedText = seatsCountText(booked: booked, maxSize: maxSize)
     }
 
@@ -431,7 +437,7 @@ final class SgptSessionDetailViewController: CommonViewController {
                     self.session.bookedCount = FlexibleValue(value: String(booked))
 
                     let progress = maxSize > 0 ? CGFloat(booked) / CGFloat(maxSize) : 0
-                    self.seatsProgressBar.setProgress(progress)
+                    self.seatsProgressBar.setProgress(progress, animated: true)
                     self.seatsCountLabel.attributedText = self.seatsCountText(booked: booked, maxSize: maxSize)
                 }
 

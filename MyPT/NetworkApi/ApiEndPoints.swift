@@ -102,6 +102,8 @@ enum ApiEndPoint: String {
     /// Reserve an SGPT seat against the member's credits.
     case sgpt_book                      =  "api/sgpt-book"
     case sgpt_purchase                  =  "api/sgpt-purchase"
+    case sgpt_eligibility               =  "api/sgpt-eligibility"
+    case sgpt_bundles                   =  "api/sgpt-bundles"
     case class_category                 =  "api/class-category"
     case book_class                     =  "api/book-class"
     case join_waitlist                  =  "api/join-waitlist"

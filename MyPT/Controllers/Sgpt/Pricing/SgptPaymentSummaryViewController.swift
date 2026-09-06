@@ -47,8 +47,8 @@ final class SgptPaymentSummaryViewController: CommonViewController {
     /// book in the same step. Needed by api/sgpt-purchase.
     var tierId: String = ""
     var studioId: String = ""
-    /// Club shown on the Training Location row. Changing it re-prices the same
-    /// bundle against the newly chosen club.
+    /// Club shown on the Training Location row. Changing it restarts the
+    /// purchase at that club's pricing rather than re-pricing this screen.
     var studioName: String = ""
     var sessionId: String = ""
     var session: SgptSessionModel?
@@ -546,29 +546,36 @@ private extension SgptPaymentSummaryViewController {
         vc.flowGymwork = .bookTrainerGymWorkout
         vc.onStudioPicked = { [weak self] pickedId, pickedName in
             guard let self = self else { return }
-            self.studioId = pickedId
-            self.studioName = pickedName
-            self.trainingLocationLabel?.text = pickedName
-            self.repriceForSelectedStudio()
+            self.showPricing(forStudioId: pickedId, studioName: pickedName)
         }
         navigationController?.pushViewController(vc, animated: true)
     }
 
-    /// The same bundle costs a different amount per club, and tier ids are
-    /// per-club too, so the pack is re-matched on credits rather than id.
-    private func repriceForSelectedStudio() {
-        SgptVM.sgptPackagesApi(studioId: studioId, isShowLoader: true) { [weak self] packs in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                guard let match = packs?.first(where: { $0.credits == self.credits }) else {
-                    AlertHelper.shared.showCustomeAlert(message: "This package isn't available at that gym.")
-                    return
-                }
-                self.tierId = match.id?.value ?? ""
-                self.price = Int(match.price ?? Double(self.price))
-                self.populateOrderSummary()
-            }
+    /// Changing club doesn't re-price this checkout - it starts the purchase
+    /// again for the new club. Packages are per-club, a bundle may not exist
+    /// there at all, and the member may need a different product entirely, none
+    /// of which a price swap on this screen can express.
+    ///
+    /// The session is deliberately dropped: it belongs to the club just left,
+    /// so nothing should auto-book after this purchase.
+    private func showPricing(forStudioId pickedId: String, studioName pickedName: String) {
+        let pricing: SgptPricingViewController = .instantiate(appStoryboard: .sgpt)
+        pricing.studioId = pickedId
+        pricing.sessionName = pickedName
+        pricing.hidesBottomBarWhenPushed = true
+
+        guard var stack = navigationController?.viewControllers else {
+            navigationController?.pushViewController(pricing, animated: true)
+            return
         }
+
+        // Replace this checkout rather than stacking on top of it - going back
+        // to a summary priced for the previous club makes no sense.
+        if let selfIndex = stack.firstIndex(where: { $0 === self }) {
+            stack.removeSubrange(selfIndex...)
+        }
+        stack.append(pricing)
+        navigationController?.setViewControllers(stack, animated: true)
     }
 
     func makeSessionCard() -> UIView {

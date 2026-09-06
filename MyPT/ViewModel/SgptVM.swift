@@ -41,6 +41,60 @@ struct SgptPacksBaseModel: Codable {
     var data: [SgptPackModel]?
 }
 
+/// What `api/sgpt-eligibility` says the pricing screen should offer. Without
+/// gym access at the club the only sellable thing is a bundle that includes it,
+/// which is the same rule the server enforces at book and purchase time.
+struct SgptEligibilityModel: Codable {
+    var authenticated: Bool?
+    var studioId: String?
+    var hasGymAccess: Bool?
+    var remainingCredits: Int?
+    var canBuyCredits: Bool?
+    var needsBundle: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case authenticated
+        case studioId = "studio_id"
+        case hasGymAccess = "has_gym_access"
+        case remainingCredits = "remaining_credits"
+        case canBuyCredits = "can_buy_credits"
+        case needsBundle = "needs_bundle"
+    }
+}
+
+struct SgptEligibilityBaseModel: Codable {
+    var status: Bool?
+    var data: SgptEligibilityModel?
+}
+
+/// One bundle (membership + credits) from `api/sgpt-bundles`.
+struct SgptBundleModel: Codable {
+    var id: FlexibleValue?
+    var name: String?
+    var description: String?
+    var studioId: String?
+    var price: Double?
+    var listPrice: Double?
+    var saving: Double?
+    var credits: Int?
+    var validity: Int?
+    var pricePerSession: Double?
+    var includesGymAccess: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, description, price, credits, validity, saving
+        case studioId = "studio_id"
+        case listPrice = "list_price"
+        case pricePerSession = "price_per_session"
+        case includesGymAccess = "includes_gym_access"
+    }
+}
+
+struct SgptBundlesBaseModel: Codable {
+    var status: Bool?
+    var data: [SgptBundleModel]?
+}
+
 /// One purchasable credit pack from `api/sgpt-packages`.
 ///
 /// `isDeal` is only true while a limited-time deal is still running - the
@@ -196,6 +250,52 @@ class SgptVM {
     //MARK: ----------------------- api/sgpt-packages
 
     /// Credit packs, optionally narrowed to one club's pricing.
+    /// Whether this member can book at a club, and therefore whether the
+    /// pricing screen should sell credits or a bundle. Token-optional server
+    /// side, so a signed-out browser gets a truthful "no access".
+    class func sgptEligibilityApi(studioId: String? = nil, isShowLoader: Bool = false, completion: @escaping (_ result: SgptEligibilityModel?) -> Void) {
+        var queries: [String: String] = [:]
+        if let studioId = studioId, !studioId.isEmpty {
+            queries["studio_id"] = studioId
+        }
+
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .sgpt_eligibility, method: .get, queries: queries.isEmpty ? nil : queries, parameters: nil, isShowLoading: isShowLoader, completion: { (getResponce, error) in
+            do {
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
+                }
+                let getResult = try JSONDecoder().decode(SgptEligibilityBaseModel.self, from: responceData)
+                completion(getResult.data)
+            } catch {
+                print(error)
+                completion(nil)
+            }
+        })
+    }
+
+    /// Bundles (membership + credits) a club sells - what a non-member buys.
+    class func sgptBundlesApi(studioId: String? = nil, isShowLoader: Bool = false, completion: @escaping (_ resultData: [SgptBundleModel]?) -> Void) {
+        var queries: [String: String] = [:]
+        if let studioId = studioId, !studioId.isEmpty {
+            queries["studio_id"] = studioId
+        }
+
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .sgpt_bundles, method: .get, queries: queries.isEmpty ? nil : queries, parameters: nil, isShowLoading: isShowLoader, completion: { (getResponce, error) in
+            do {
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
+                }
+                let getResult = try JSONDecoder().decode(SgptBundlesBaseModel.self, from: responceData)
+                completion(getResult.data)
+            } catch {
+                print(error)
+                completion(nil)
+            }
+        })
+    }
+
     class func sgptPackagesApi(studioId: String? = nil, isShowLoader: Bool = false, completion: @escaping (_ resultData: [SgptPackModel]?) -> Void) {
         var queries: [String: String] = [:]
         if let studioId = studioId, !studioId.isEmpty {

@@ -292,6 +292,21 @@ public class SgptSeatsProgressView: UIView {
         setNeedsLayout()
     }
 
+    /// Slides the fill and puck to `value` instead of snapping, so a seat taken
+    /// by someone else while the screen is open reads as movement.
+    public func setProgress(_ value: CGFloat, animated: Bool, duration: TimeInterval = 0.35) {
+        guard animated, window != nil, bounds.width > 0 else {
+            setProgress(value)
+            return
+        }
+        setProgress(value)
+        UIView.animate(withDuration: duration,
+                       delay: 0,
+                       options: [.curveEaseOut, .beginFromCurrentState]) {
+            self.layoutIfNeeded()
+        }
+    }
+
     public override func layoutSubviews() {
         super.layoutSubviews()
         CATransaction.begin()
@@ -306,6 +321,10 @@ public class SgptSeatsProgressView: UIView {
         fillCapsule.layer.cornerRadius = SgptSeatsProgressView.barHeight / 2
         puckCore.layer.cornerRadius = SgptSeatsProgressView.puckCoreSide / 2
 
+        CATransaction.commit()
+
+        // Outside the disable-actions transaction above: these two drive the
+        // moving parts, and suppressing their actions made every change snap.
         let fillWidth = bounds.width * progress
         fillWidthConstraint?.constant = fillWidth
 
@@ -316,7 +335,6 @@ public class SgptSeatsProgressView: UIView {
         let clampedCenter = min(max(rawCenter, halfPuck), bounds.width - halfPuck)
         puckLeadingConstraint?.constant = clampedCenter - halfPuck
 
-        CATransaction.commit()
         layoutDots()
     }
 
