@@ -412,8 +412,7 @@ extension GymWorkoutViewController: UITableViewDataSource, UITableViewDelegate{
                     self.navigationController?.pushViewController(vc, animated: true)
                 }
             }
-        }
-        
+
 //        switch flowGymwork {
 //        case .bookTrainerGymWorkout:
 //            let vc: CreatePackageViewViewController = CreatePackageViewViewController.instantiate(appStoryboard: .booking)
