@@ -21,6 +21,10 @@ class GymWorkoutViewController: CommonViewController {
     var categorySelectedIndex:IndexPath?
     var flowGymwork:calendarFlow = .defaultFlow
     var inputParam: DetailsParam?
+    /// Set to use this listing as a gym *picker*: "SELECT THIS GYM" hands the
+    /// studio back and pops instead of continuing into a purchase flow. Nil for
+    /// every existing caller, so those routes are unchanged.
+    var onStudioPicked: ((_ studioId: String, _ studioName: String) -> Void)?
     var hasGymPackage: Bool? = false
 //    var gymCountNear: Int? {
 //        didSet{
@@ -329,6 +333,12 @@ extension GymWorkoutViewController: UITableViewDataSource, UITableViewDelegate{
         let getIndx = self.studiosData?.firstIndex(where: {
             $0.id == Int(sender.accessibilityHint ?? "0")
         })
+        if let pick = onStudioPicked {
+            let studio = self.studiosData?[getIndx ?? 0]
+            pick(String(studio?.id ?? 0), studio?.name ?? "")
+            navigationController?.popViewController(animated: true)
+            return
+        }
         if flowGymwork == .withoutTrainerMembership {
             Mixpanel.mainInstance().track(
                 event: "Buy_Membership_Tapped",

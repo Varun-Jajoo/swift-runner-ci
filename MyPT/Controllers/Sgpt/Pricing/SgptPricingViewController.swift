@@ -447,6 +447,7 @@ final class SgptPricingViewController: CommonViewController {
                                                image: sessionImageURL,
                                                tierId: chosenPack?.id?.value ?? "",
                                                studioId: studioId,
+                                               studioName: session?.studioName ?? "",
                                                sessionId: sessionId,
                                                session: session)
     }

@@ -47,6 +47,9 @@ final class SgptPaymentSummaryViewController: CommonViewController {
     /// book in the same step. Needed by api/sgpt-purchase.
     var tierId: String = ""
     var studioId: String = ""
+    /// Club shown on the Training Location row. Changing it re-prices the same
+    /// bundle against the newly chosen club.
+    var studioName: String = ""
     var sessionId: String = ""
     var session: SgptSessionModel?
 
@@ -55,6 +58,8 @@ final class SgptPaymentSummaryViewController: CommonViewController {
     private enum PayOption {
         case tabby, tamara, card
     }
+
+    private weak var trainingLocationLabel: UILabel?
 
     private var selectedOption: PayOption = .card {
         didSet { applySelectionUI() }
@@ -102,6 +107,7 @@ final class SgptPaymentSummaryViewController: CommonViewController {
         static let headerTitle = "SGPT Credits"
         static let bookingLabel = "Booking this session after purchase"
         static let fallbackSessionName = "Small Group PT"
+        static let trainingLocationLabel = "Training Location"
         static let paymentOptionLabel = "Payment Option"
         static let cancelPolicy = "Cancel > 6 hours before credit refunded. Freeze anytime. Top-up anytime."
         static let orderSummaryLabel = "Order Summary"
@@ -312,11 +318,13 @@ final class SgptPaymentSummaryViewController: CommonViewController {
                       image: String = "",
                       tierId: String = "",
                       studioId: String = "",
+                      studioName: String = "",
                       sessionId: String = "",
                       session: SgptSessionModel? = nil) {
         let screen: SgptPaymentSummaryViewController = .instantiate(appStoryboard: .sgpt)
         screen.tierId = tierId
         screen.studioId = studioId
+        screen.studioName = studioName
         screen.sessionId = sessionId
         screen.session = session
         screen.credits = credits
@@ -439,6 +447,13 @@ private extension SgptPaymentSummaryViewController {
         contentStack.addArrangedSubview(sessionCard)
         contentStack.setCustomSpacing(24, after: sessionCard)
 
+        let locationLabel = makeSectionLabel(Copy.trainingLocationLabel)
+        let locationCard = makeTrainingLocationCard()
+        contentStack.addArrangedSubview(locationLabel)
+        contentStack.setCustomSpacing(12, after: locationLabel)
+        contentStack.addArrangedSubview(locationCard)
+        contentStack.setCustomSpacing(24, after: locationCard)
+
         contentStack.addArrangedSubview(paymentLabel)
         contentStack.setCustomSpacing(12, after: paymentLabel)
         contentStack.addArrangedSubview(paymentBlock)
@@ -473,6 +488,88 @@ private extension SgptPaymentSummaryViewController {
     }
 
     // MARK: Session card
+
+    /// Training Location, ported from PurchaseReviewPackageVC's row - with the
+    /// difference that here it is tappable: the gym flow locks the club once a
+    /// studio_id is set, but an SGPT bundle is priced per club, so switching
+    /// clubs is the whole point of the row.
+    func makeTrainingLocationCard() -> UIView {
+        let card = UIView()
+        card.translatesAutoresizingMaskIntoConstraints = false
+        card.backgroundColor = Palette.cardFill
+        card.layer.cornerRadius = 12
+        card.layer.borderWidth = 1
+        card.layer.borderColor = Palette.cardStroke.cgColor
+
+        let nameLabel = UILabel()
+        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        nameLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
+        nameLabel.textColor = .white
+        nameLabel.numberOfLines = 0
+        nameLabel.text = studioName.isEmpty ? "Select a gym" : studioName
+        trainingLocationLabel = nameLabel
+
+        let chevron = UIImageView(image: UIImage(named: "sgpt-ic-chevron-right")
+                                  ?? UIImage(systemName: "chevron.right"))
+        chevron.translatesAutoresizingMaskIntoConstraints = false
+        chevron.contentMode = .scaleAspectFit
+        chevron.tintColor = .white.withAlphaComponent(0.55)
+
+        card.addSubview(nameLabel)
+        card.addSubview(chevron)
+        NSLayoutConstraint.activate([
+            nameLabel.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 15),
+            nameLabel.topAnchor.constraint(equalTo: card.topAnchor, constant: 14),
+            nameLabel.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -14),
+            chevron.leadingAnchor.constraint(greaterThanOrEqualTo: nameLabel.trailingAnchor, constant: 8),
+            chevron.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -15),
+            chevron.centerYAnchor.constraint(equalTo: card.centerYAnchor),
+            chevron.widthAnchor.constraint(equalToConstant: 14),
+            chevron.heightAnchor.constraint(equalToConstant: 14)
+        ])
+
+        card.isUserInteractionEnabled = true
+        card.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(trainingLocationTapped)))
+        return card
+    }
+
+    /// Opens the existing gym list in picker mode, then re-prices this bundle
+    /// against whichever club comes back.
+    @objc func trainingLocationTapped() {
+        let vc: GymWorkoutViewController = GymWorkoutViewController.instantiate(appStoryboard: .booking)
+        vc.inputType = "gym"
+        // The listing sorts by proximity and prints a distance per gym; without
+        // these it would query from 0,0 and show nonsense distances. Same
+        // fallback the SGPT listing screens use.
+        vc.inputLat = GroupClassCardFormatter.fallbackLatitude
+        vc.inputLong = GroupClassCardFormatter.fallbackLongitude
+        vc.flowGymwork = .bookTrainerGymWorkout
+        vc.onStudioPicked = { [weak self] pickedId, pickedName in
+            guard let self = self else { return }
+            self.studioId = pickedId
+            self.studioName = pickedName
+            self.trainingLocationLabel?.text = pickedName
+            self.repriceForSelectedStudio()
+        }
+        navigationController?.pushViewController(vc, animated: true)
+    }
+
+    /// The same bundle costs a different amount per club, and tier ids are
+    /// per-club too, so the pack is re-matched on credits rather than id.
+    private func repriceForSelectedStudio() {
+        SgptVM.sgptPackagesApi(studioId: studioId, isShowLoader: true) { [weak self] packs in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                guard let match = packs?.first(where: { $0.credits == self.credits }) else {
+                    AlertHelper.shared.showCustomeAlert(message: "This package isn't available at that gym.")
+                    return
+                }
+                self.tierId = match.id?.value ?? ""
+                self.price = Int(match.price ?? Double(self.price))
+                self.populateOrderSummary()
+            }
+        }
+    }
 
     func makeSessionCard() -> UIView {
         let card = makePanelCard()
