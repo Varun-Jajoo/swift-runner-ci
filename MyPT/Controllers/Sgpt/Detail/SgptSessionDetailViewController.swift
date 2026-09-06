@@ -108,11 +108,10 @@ final class SgptSessionDetailViewController: CommonViewController {
         static let trainerBio = "Certified trainer with hands-on experience coaching small groups — programming that adapts mid-session to the group's real output, not just the plan."
         static let trainerRatingValue = "4.2"
         static let trainerRatingCount = "12k ratings"
-        static let trainerSkills = ["STRENGTH", "MOBILITY", "+2"]
         static let howItWorksTitle = "How Small Group PT works"
         static let priceFallback = "1 credit"
         static let ctaTitle = "GET CREDIT & RESERVE"
-        static let ctaBookedTitle = "BOOKED"
+        static let ctaBookedTitle = "VIEW BOOKING"
         static let ctaComingSoonTitle = "Coming soon"
         static let ctaComingSoonMessage = "Reserving Small Group PT sessions from the app isn't available yet."
     }
@@ -138,6 +137,15 @@ final class SgptSessionDetailViewController: CommonViewController {
     private let durationValueLabel = UILabel()
     private let venueValueLabel = UILabel()
 
+    private var trainerDetail: SgptSessionDetailModel?
+    private let trainerRowExperienceLabel = UILabel()
+    private let trainerCardNameLabel = UILabel()
+    private let trainerRatingLabel = UILabel()
+    private let trainerRatingCountLabel = UILabel()
+    private let trainerSkillsRow = UIStackView()
+    private let trainerRatingStatLabel = UILabel()
+    private let trainerExperienceStatLabel = UILabel()
+
     // MARK: - Lifecycle
 
     override var preferredStatusBarStyle: UIStatusBarStyle { return .lightContent }
@@ -153,6 +161,111 @@ final class SgptSessionDetailViewController: CommonViewController {
         populate()
         isAlreadyBooked = session.isBooked ?? false
         applyBookedState()
+        loadTrainerDetail()
+    }
+
+    private func loadTrainerDetail() {
+        let sessionId = session.id?.value ?? ""
+        guard !sessionId.isEmpty else { return }
+
+        SgptVM.sgptDetailApi(sessionId: sessionId) { [weak self] detail in
+            guard let self = self, let detail = detail else { return }
+            DispatchQueue.main.async {
+                self.trainerDetail = detail
+                if let name = detail.trainerName?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty {
+                    self.session.trainerName = name
+                    self.trainerRowNameLabel.text = name
+                    self.trainerCardNameLabel.text = name
+                }
+                self.applyTrainerDetail()
+            }
+        }
+    }
+
+    private func applyTrainerDetail() {
+        let experience = SgptSessionDetailViewController.experienceText(trainerDetail?.trainerExperience?.value)
+        trainerRowExperienceLabel.text = experience
+        trainerRowExperienceLabel.isHidden = experience.isEmpty
+
+        let rating = (trainerDetail?.trainerRating?.value).flatMap { $0.isEmpty || $0 == "0" ? nil : $0 }
+        trainerRatingLabel.text = rating ?? "—"
+        trainerRatingStatLabel.text = rating ?? "—"
+
+        let ratingCount = trainerDetail?.trainerRatingCount ?? 0
+        trainerRatingCountLabel.text = ratingCount > 0 ? "· \(ratingCount) ratings" : "· No ratings yet"
+
+        trainerExperienceStatLabel.text = SgptSessionDetailViewController.experienceStatText(trainerDetail?.trainerExperience?.value)
+
+        layoutSkillChips(trainerDetail?.trainerSpecialities ?? [])
+    }
+
+    private static func experienceText(_ raw: String?) -> String {
+        let years = experienceYears(raw)
+        guard !years.isEmpty else {
+            return raw?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        }
+        return years == "1" ? "1 yr experience" : "\(years) yrs experience"
+    }
+
+    private static func experienceStatText(_ raw: String?) -> String {
+        let years = experienceYears(raw)
+        return years.isEmpty ? "—" : "\(years)yrs"
+    }
+
+    /// Backend stores free text ("5", "5 +", "10 years"), so read the leading count.
+    private static func experienceYears(_ raw: String?) -> String {
+        guard let raw = raw else { return "" }
+        var digits = ""
+        var index = raw.startIndex
+        while index < raw.endIndex, raw[index] == " " { index = raw.index(after: index) }
+        while index < raw.endIndex, raw[index].isNumber {
+            digits.append(raw[index])
+            index = raw.index(after: index)
+        }
+        guard !digits.isEmpty else { return "" }
+        while index < raw.endIndex, raw[index] == " " { index = raw.index(after: index) }
+        if index < raw.endIndex, raw[index] == "+" { digits.append("+") }
+        return digits
+    }
+
+    /// Chips fill up to 80% of the card's inner width; the rest collapse into
+    /// a trailing "+N".
+    private func layoutSkillChips(_ specialities: [String]) {
+        trainerSkillsRow.arrangedSubviews.forEach {
+            trainerSkillsRow.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
+        guard !specialities.isEmpty else {
+            trainerSkillsRow.isHidden = true
+            return
+        }
+        trainerSkillsRow.isHidden = false
+
+        let cardWidth = trainerCardContainer.bounds.width > 0 ? trainerCardContainer.bounds.width : view.bounds.width - 40
+        let budget = (cardWidth - 32) * 0.8
+        let spacing = trainerSkillsRow.spacing
+
+        var used: CGFloat = 0
+        var shown = 0
+        for name in specialities {
+            let chip = makeSkillChip(name.uppercased())
+            let chipWidth = chip.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).width
+            let overflowReserve: CGFloat = (shown + 1 < specialities.count) ? 46 : 0
+            let advance = chipWidth + (shown > 0 ? spacing : 0)
+            if used + advance + overflowReserve > budget && shown > 0 { break }
+            trainerSkillsRow.addArrangedSubview(chip)
+            used += advance
+            shown += 1
+        }
+
+        if shown == 0 {
+            trainerSkillsRow.addArrangedSubview(makeSkillChip(specialities[0].uppercased()))
+            shown = 1
+        }
+        let remaining = specialities.count - shown
+        if remaining > 0 {
+            trainerSkillsRow.addArrangedSubview(makeSkillChip("+\(remaining)"))
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -256,6 +369,7 @@ final class SgptSessionDetailViewController: CommonViewController {
         trainerRowNameLabel.text = trainerName
         trainerRowNameLabel.font = AppFont.regular.size(16.0, familyName: familyFunnelSans)
         trainerRowNameLabel.textColor = Palette.bodyText75
+        installTrainerRowExperienceLabel()
 
         let fallback = UIImage(named: "class-card-placeholder")
         if let imageURL = session.image, !imageURL.isEmpty, let url = URL(string: imageURL) {
@@ -285,6 +399,28 @@ final class SgptSessionDetailViewController: CommonViewController {
         timeValueLabel.text = SgptSessionDetailViewController.formattedTime(session.time)
         durationValueLabel.text = "\(GroupClassCardFormatter.intValue(session.duration, defaultValue: 60)) min"
         venueValueLabel.text = (session.studioName?.trimmingCharacters(in: .whitespacesAndNewlines)).flatMap { $0.isEmpty ? nil : $0 } ?? "MyPT Studio"
+    }
+
+    /// The storyboard row is photo + name; experience stacks under the name,
+    /// so the name is lifted into its own vertical column in that same row.
+    private func installTrainerRowExperienceLabel() {
+        guard trainerRowExperienceLabel.superview == nil,
+              let row = trainerRowNameLabel.superview as? UIStackView,
+              let index = row.arrangedSubviews.firstIndex(of: trainerRowNameLabel) else { return }
+
+        trainerRowExperienceLabel.font = AppFont.regular.size(12.0, familyName: familyFunnelSans)
+        trainerRowExperienceLabel.textColor = Palette.bodyText55
+        trainerRowExperienceLabel.numberOfLines = 1
+        trainerRowExperienceLabel.isHidden = true
+
+        row.removeArrangedSubview(trainerRowNameLabel)
+        trainerRowNameLabel.removeFromSuperview()
+
+        let column = UIStackView(arrangedSubviews: [trainerRowNameLabel, trainerRowExperienceLabel])
+        column.axis = .vertical
+        column.alignment = .leading
+        column.spacing = 2
+        row.insertArrangedSubview(column, at: index)
     }
 
     private func styleChip(_ chip: PillChipView) {
@@ -355,7 +491,10 @@ final class SgptSessionDetailViewController: CommonViewController {
     /// always leads somewhere. Mirrors Android's
     /// SgptSessionDetailActivity.openCheckoutOrPricing().
     @IBAction func reserveTapped() {
-        guard !isAlreadyBooked else { return }
+        guard !isAlreadyBooked else {
+            showBookingConfirmation()
+            return
+        }
         SgptVM.sgptCreditsApi(isShowLoader: true) { [weak self] credits in
             DispatchQueue.main.async {
                 guard let self = self else { return }
@@ -381,7 +520,7 @@ final class SgptSessionDetailViewController: CommonViewController {
                         self?.bookWithCredits(expiresInDays: credits?.expiresInDays,
                                               creditsTotal: total)
                     },
-                    onViewProfile: { [weak self] in self?.showComingSoon() }
+                    onViewProfile: { [weak self] in self?.viewProfileTapped() }
                 )
             }
         }
@@ -468,17 +607,43 @@ final class SgptSessionDetailViewController: CommonViewController {
         showComingSoon()
     }
 
+    @objc private func viewProfileTapped() {
+        let trainerId = trainerDetail?.trainerId?.value ?? ""
+        guard !trainerId.isEmpty else {
+            showComingSoon()
+            return
+        }
+
+        let vc: TrainerDescriptionViewController = .instantiate(appStoryboard: .booking)
+        vc.inputParam = DetailsParam(
+            trainer_id: trainerId,
+            studio_id: trainerDetail?.studioId?.value ?? "",
+            type: "gym",
+            long: String(GroupClassCardFormatter.doubleValue(session.studioLng, defaultValue: 55.2708)),
+            lat: String(GroupClassCardFormatter.doubleValue(session.studioLat, defaultValue: 25.2048))
+        )
+        navigationController?.pushViewController(vc, animated: true)
+    }
+
+    /// Already-booked members reopen the confirmation rather than facing a
+    /// dead disabled button, matching Group Classes' own "VIEW" CTA.
+    private func showBookingConfirmation() {
+        var input = SgptBookingSuccessInput(session: session)
+        input.mode = .bookedWithExistingCredits
+        input.creditsUsed = 1
+        SgptBookingSuccessViewController.start(from: self, input: input)
+    }
+
     private func applyBookedState() {
         guard let button = reserveButton else { return }
         let title = isAlreadyBooked ? Copy.ctaBookedTitle : Copy.ctaTitle
         button.configure(title: title,
                          font: AppFont.medium.size(14.0, familyName: familyFunnelSans),
                          titleColor: Palette.ctaInk)
-        button.setTrailingIcon(isAlreadyBooked ? nil
-                                              : (UIImage(named: "sgpt-ic-chevron-right") ?? icon(system: "chevron.right")),
+        button.setTrailingIcon(UIImage(named: "sgpt-ic-chevron-right") ?? icon(system: "chevron.right"),
                                tint: Palette.ctaInk)
-        button.isEnabled = !isAlreadyBooked
-        button.alpha = isAlreadyBooked ? 0.55 : 1
+        button.isEnabled = true
+        button.alpha = 1
     }
 
     private func showComingSoon() {
@@ -957,10 +1122,7 @@ private extension SgptSessionDetailViewController {
             photoScrim.heightAnchor.constraint(equalToConstant: 90)
         ])
 
-        // Name is its OWN row - Android stacks it above the rating row
-        // (rather than Figma's single row) so a normal-length real trainer
-        // name never truncates behind the rating block.
-        let nameLabel = UILabel()
+        let nameLabel = trainerCardNameLabel
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         nameLabel.font = AppFont.medium.size(24.0, familyName: familyClashDisplay)
         nameLabel.textColor = UIColor(hex: "#F0F0F0")
@@ -968,30 +1130,34 @@ private extension SgptSessionDetailViewController {
         nameLabel.lineBreakMode = .byTruncatingTail
         nameLabel.text = trainerRowNameLabel.text
 
-        // Static placeholder rating — no per-trainer rating API for SGPT.
         let starIcon = UIImageView(image: UIImage(named: "sgpt-ic-star") ?? icon(system: "star.fill"))
         starIcon.tintColor = UIColor(hex: "#FFCC33")
         starIcon.contentMode = .scaleAspectFit
-        let ratingLabel = UILabel()
-        ratingLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
-        ratingLabel.textColor = .white
-        ratingLabel.text = Copy.trainerRatingValue
-        let ratingCountLabel = UILabel()
-        ratingCountLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
-        ratingCountLabel.textColor = UIColor(hex: "#959595")
-        ratingCountLabel.text = Copy.trainerRatingCount
-        let ratingRow = UIStackView(arrangedSubviews: [starIcon, ratingLabel, ratingCountLabel])
-        ratingRow.axis = .horizontal
-        ratingRow.alignment = .center
-        ratingRow.spacing = 4
+        trainerRatingLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
+        trainerRatingLabel.textColor = .white
+        trainerRatingLabel.text = Copy.trainerRatingValue
+        trainerRatingCountLabel.font = AppFont.semibold.size(14.0, familyName: familyFunnelSans)
+        trainerRatingCountLabel.textColor = UIColor(hex: "#959595")
+        trainerRatingCountLabel.text = Copy.trainerRatingCount
+        let ratingBlock = UIStackView(arrangedSubviews: [starIcon, trainerRatingLabel, trainerRatingCountLabel])
+        ratingBlock.axis = .horizontal
+        ratingBlock.alignment = .center
+        ratingBlock.spacing = 4
+        ratingBlock.setContentHuggingPriority(.required, for: .horizontal)
+        ratingBlock.setContentCompressionResistancePriority(.required, for: .horizontal)
         NSLayoutConstraint.activate([starIcon.widthAnchor.constraint(equalToConstant: 16), starIcon.heightAnchor.constraint(equalToConstant: 16)])
 
-        // Static placeholder specialities — no skills/tags API for SGPT trainers.
-        let skillsRow = UIStackView(arrangedSubviews: Copy.trainerSkills.map { self.makeSkillChip($0) })
+        let nameRow = UIStackView(arrangedSubviews: [nameLabel, ratingBlock])
+        nameRow.axis = .horizontal
+        nameRow.alignment = .center
+        nameRow.spacing = 12
+
+        let skillsRow = trainerSkillsRow
         skillsRow.translatesAutoresizingMaskIntoConstraints = false
         skillsRow.axis = .horizontal
         skillsRow.alignment = .center
         skillsRow.spacing = 5
+        skillsRow.isHidden = true
 
         // Same fix as the header chip row (sgd069 shim in the storyboard):
         // every arranged subview here is a required-hugging pill with no
@@ -1017,10 +1183,9 @@ private extension SgptSessionDetailViewController {
         bioLabel.numberOfLines = 0
         bioLabel.text = Copy.trainerBio
 
-        // Static placeholder stats — no per-trainer stats API for SGPT.
         let statsRow = UIStackView(arrangedSubviews: [
-            makeStatCell(value: Copy.trainerRatingValue, caption: "Rating"),
-            makeStatCell(value: "5yrs", caption: "Experience"),
+            makeStatCell(valueLabel: trainerRatingStatLabel, value: Copy.trainerRatingValue, caption: "Rating"),
+            makeStatCell(valueLabel: trainerExperienceStatLabel, value: "—", caption: "Experience"),
             makeStatCell(value: "504", caption: "Session held")
         ])
         statsRow.axis = .horizontal
@@ -1037,19 +1202,18 @@ private extension SgptSessionDetailViewController {
         viewProfileButton.layer.cornerRadius = 8
         viewProfileButton.layer.borderWidth = 1
         viewProfileButton.layer.borderColor = Palette.hairline.cgColor
-        viewProfileButton.addTarget(self, action: #selector(policyRowTapped), for: .touchUpInside)
+        viewProfileButton.addTarget(self, action: #selector(viewProfileTapped), for: .touchUpInside)
         viewProfileButton.heightAnchor.constraint(equalToConstant: 42).isActive = true
         viewProfileButton.semanticContentAttribute = .forceRightToLeft
         viewProfileButton.setImage(UIImage(named: "sgpt-ic-chevron-right") ?? icon(system: "chevron.right"), for: .normal)
         viewProfileButton.tintColor = .white.withAlphaComponent(0.4)
         viewProfileButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
 
-        let column = UIStackView(arrangedSubviews: [nameLabel, ratingRow, skillsRowShim, bioLabel, statsRow, viewProfileButton])
+        let column = UIStackView(arrangedSubviews: [nameRow, skillsRowShim, bioLabel, statsRow, viewProfileButton])
         column.translatesAutoresizingMaskIntoConstraints = false
         column.axis = .vertical
         column.alignment = .fill
         column.spacing = 16
-        column.setCustomSpacing(4, after: nameLabel)
         card.addSubview(column)
 
         NSLayoutConstraint.activate([
@@ -1070,7 +1234,11 @@ private extension SgptSessionDetailViewController {
         return chip
     }
 
-    func makeStatCell(value: String, caption: String) -> UIView {
+    func makeStatCell(valueLabel: UILabel, value: String, caption: String) -> UIView {
+        return makeStatCell(value: value, caption: caption, valueLabel: valueLabel)
+    }
+
+    func makeStatCell(value: String, caption: String, valueLabel providedValueLabel: UILabel? = nil) -> UIView {
         // Same bg_dark_radial_sheen_12 recipe as makeGridCell() - was
         // missing the sheen here too.
         let card = GlassCardView(cornerRadius: 12)
@@ -1082,7 +1250,7 @@ private extension SgptSessionDetailViewController {
         card.sheenOrigin = .topCenter
         card.sheenAlpha = 0.08
 
-        let valueLabel = UILabel()
+        let valueLabel = providedValueLabel ?? UILabel()
         valueLabel.font = AppFont.medium.size(24.0, familyName: familyClashDisplay)
         valueLabel.textColor = UIColor(hex: "#F0F0F0")
         valueLabel.textAlignment = .center

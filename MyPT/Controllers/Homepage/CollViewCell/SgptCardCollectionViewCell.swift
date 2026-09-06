@@ -14,8 +14,8 @@ final class SgptCardCollectionViewCell: UICollectionViewCell {
 
     private static let imageToTitleGap: CGFloat = 15
     private static let titleHeight: CGFloat = 26
-    private static let titleToSubtitleGap: CGFloat = 6
-    private static let subtitleHeight: CGFloat = 36
+    private static let titleToSubtitleGap: CGFloat = 4
+    private static let subtitleHeight: CGFloat = 14
 
     static let cardSize = CGSize(
         width: SgptCardCollectionViewCell.nativeImageSize.width,
@@ -54,7 +54,8 @@ final class SgptCardCollectionViewCell: UICollectionViewCell {
         titleLabel.numberOfLines = 1
 
         subtitleLabel.textAlignment = .center
-        subtitleLabel.numberOfLines = 2
+        subtitleLabel.numberOfLines = 1
+        subtitleLabel.lineBreakMode = .byTruncatingTail
     }
 
     override func layoutSubviews() {
@@ -65,7 +66,7 @@ final class SgptCardCollectionViewCell: UICollectionViewCell {
         // under the card. Re-cut it whenever the geometry changes.
         guard contentView.layer.shadowOpacity > 0 else { return }
         contentView.layer.shadowPath = UIBezierPath(
-            roundedRect: contentView.bounds,
+            roundedRect: cardView.frame,
             cornerRadius: SgptCardCollectionViewCell.cardCornerRadius
         ).cgPath
     }
@@ -116,7 +117,7 @@ final class SgptCardCollectionViewCell: UICollectionViewCell {
     private func applyGlow() {
         let layer = contentView.layer
         layer.shadowColor = UIColor.black.cgColor
-        layer.shadowPath = UIBezierPath(roundedRect: contentView.bounds,
+        layer.shadowPath = UIBezierPath(roundedRect: cardView.frame,
                                         cornerRadius: SgptCardCollectionViewCell.cardCornerRadius).cgPath
         layer.shadowOpacity = 0.28
 
@@ -150,18 +151,18 @@ final class SgptCardCollectionViewCell: UICollectionViewCell {
         return "Small Group PT"
     }
 
-    /// Two-line "<EEE, d MMM • h-h a>\n<studio>" subtitle - the same
-    /// "EEE, d MMM • h-h a" shape `GroupClassCardFormatter.formatTimeForUI`
-    /// already produces for Group Classes, reimplemented locally (rather than
-    /// called directly) because SGPT's `date`/`time`/`duration` arrive as
-    /// three separate fields instead of one pre-formatted combined string
-    /// that formatter expects. `chipLabel` IS reused as-is for the studio
-    /// line since it's already generic over a raw name string.
+    static func scheduleText(for item: SgptSessionModel) -> String {
+        formattedSchedule(dateStr: item.date, timeStr: item.time)
+    }
+
+    /// Single-line "<EEE, d MMM, h:mm a> · <studio>" subtitle, matching what
+    /// Android's `SgptHomeAdapter.formatSubtext` renders on the same card.
+    /// `chipLabel` IS reused as-is for the studio part since it's already
+    /// generic over a raw name string.
     static func subtitleText(for item: SgptSessionModel) -> NSAttributedString {
-        let durationMinutes = GroupClassCardFormatter.intValue(item.duration, defaultValue: 60)
-        let schedule = formattedSchedule(dateStr: item.date, timeStr: item.time, durationMinutes: durationMinutes)
+        let schedule = scheduleText(for: item)
         let studio = GroupClassCardFormatter.chipLabel(item.studioName)
-        let text = studio.isEmpty ? schedule : "\(schedule)\n\(studio)"
+        let text = studio.isEmpty ? schedule : "\(schedule) · \(studio)"
 
         // Design spec calls for a fixed ~12.2pt line height on a 9.5pt face;
         // `minimumLineHeight`/`maximumLineHeight` pin it exactly, same
@@ -182,10 +183,9 @@ final class SgptCardCollectionViewCell: UICollectionViewCell {
         ])
     }
 
-    /// Expects `date` as "yyyy-MM-dd" and `time` as "HH:mm:ss", combines them
-    /// with `duration` (minutes) to produce Group Classes' own
-    /// "EEE, d MMM • h-h a" display shape.
-    private static func formattedSchedule(dateStr: String?, timeStr: String?, durationMinutes: Int) -> String {
+    /// Expects `date` as "yyyy-MM-dd" and `time` as "HH:mm:ss", rendered as
+    /// "EEE, d MMM, h:mm a" - Android's own shape for this card.
+    private static func formattedSchedule(dateStr: String?, timeStr: String?) -> String {
         guard let dateStr = dateStr, !dateStr.isEmpty, let timeStr = timeStr, !timeStr.isEmpty else {
             return GroupClassCardFormatter.defaultTime
         }
@@ -197,18 +197,9 @@ final class SgptCardCollectionViewCell: UICollectionViewCell {
             return GroupClassCardFormatter.defaultTime
         }
 
-        let dayFormatter = DateFormatter()
-        dayFormatter.locale = Locale(identifier: "en_US_POSIX")
-        dayFormatter.dateFormat = "EEE, d MMM"
-        let dayText = dayFormatter.string(from: start)
-
-        let startHour = Calendar.current.component(.hour, from: start)
-        let durationHours = max(1, Int((Double(durationMinutes) / 60.0).rounded()))
-        let endHour = (startHour + durationHours) % 24
-        let start12 = (startHour % 12 == 0) ? 12 : startHour % 12
-        let end12 = (endHour % 12 == 0) ? 12 : endHour % 12
-        let amPm = (endHour >= 12 && endHour != 24) ? "PM" : "AM"
-
-        return "\(dayText) • \(start12)-\(end12) \(amPm)"
+        let displayFormatter = DateFormatter()
+        displayFormatter.locale = Locale(identifier: "en_US_POSIX")
+        displayFormatter.dateFormat = "EEE, d MMM, h:mm a"
+        return displayFormatter.string(from: start)
     }
 }

@@ -432,8 +432,7 @@ final class SgptBookingSuccessViewController: UIViewController {
     /// ("Mixed Gym"), both wrong on a full-width poster - schedule and the whole
     /// venue name, at the poster's own size, like the checkout sheet shows.
     private func metaText(for session: SgptSessionModel) -> NSAttributedString {
-        let base = SgptCardCollectionViewCell.subtitleText(for: session).string
-        let schedule = base.components(separatedBy: "\n").first ?? base
+        let schedule = SgptCardCollectionViewCell.scheduleText(for: session)
         let studio = (session.studioName ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         let text = studio.isEmpty ? schedule : "\(schedule)\n\(studio)"
 

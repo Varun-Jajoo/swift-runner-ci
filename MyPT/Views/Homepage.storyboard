@@ -425,7 +425,7 @@
                                                                         <rect key="frame" x="16" y="187" width="408" height="423.75"/>
                                                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                         <constraints>
-                                                                            <constraint firstAttribute="height" constant="423.75" id="SGh-01-014"/>
+                                                                            <constraint firstAttribute="height" constant="393.75" id="SGh-01-014"/>
                                                                         </constraints>
                                                                         <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="SGh-00-004" customClass="SgptSpotlightFlowLayout" customModule="MyPT_Connect" customModuleProvider="target">
                                                                             <size key="itemSize" width="0.0" height="0.0"/>
@@ -453,7 +453,7 @@
                                                                 </subviews>
                                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                 <constraints>
-                                                                    <constraint firstAttribute="height" constant="697.75" id="SGh-01-001"/>
+                                                                    <constraint firstAttribute="height" constant="671.75" id="SGh-01-001"/>
                                                                     <constraint firstItem="SGh-00-002" firstAttribute="top" secondItem="SGh-00-001" secondAttribute="top" id="SGh-01-002"/>
                                                                     <constraint firstItem="SGh-00-002" firstAttribute="leading" secondItem="SGh-00-001" secondAttribute="leading" id="SGh-01-003"/>
                                                                     <constraint firstAttribute="trailing" secondItem="SGh-00-002" secondAttribute="trailing" id="SGh-01-004"/>
@@ -461,7 +461,7 @@
                                                                     <constraint firstItem="SGh-00-003" firstAttribute="top" secondItem="SGh-00-001" secondAttribute="top" constant="187" id="SGh-01-006"/>
                                                                     <constraint firstItem="SGh-00-003" firstAttribute="leading" secondItem="SGh-00-001" secondAttribute="leading" constant="16" id="SGh-01-007"/>
                                                                     <constraint firstAttribute="trailing" secondItem="SGh-00-003" secondAttribute="trailing" constant="16" id="SGh-01-008"/>
-                                                                    <constraint firstItem="SGh-00-005" firstAttribute="top" secondItem="SGh-00-003" secondAttribute="bottom" constant="12" id="SGh-01-009"/>
+                                                                    <constraint firstItem="SGh-00-005" firstAttribute="top" secondItem="SGh-00-003" secondAttribute="bottom" constant="16" id="SGh-01-009"/>
                                                                     <constraint firstItem="SGh-00-005" firstAttribute="centerX" secondItem="SGh-00-001" secondAttribute="centerX" id="SGh-01-010"/>
                                                                     <constraint firstItem="SGh-00-006" firstAttribute="top" secondItem="SGh-00-005" secondAttribute="bottom" constant="12" id="SGh-01-011"/>
                                                                     <constraint firstItem="SGh-00-006" firstAttribute="leading" secondItem="SGh-00-001" secondAttribute="leading" constant="20" id="SGh-01-012"/>
@@ -1079,7 +1079,7 @@
                                                                         <rect key="frame" x="16" y="187" width="408" height="423.75"/>
                                                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                         <constraints>
-                                                                            <constraint firstAttribute="height" constant="423.75" id="SGa-01-014"/>
+                                                                            <constraint firstAttribute="height" constant="393.75" id="SGa-01-014"/>
                                                                         </constraints>
                                                                         <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="SGa-00-004" customClass="SgptSpotlightFlowLayout" customModule="MyPT_Connect" customModuleProvider="target">
                                                                             <size key="itemSize" width="0.0" height="0.0"/>
@@ -1107,7 +1107,7 @@
                                                                 </subviews>
                                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                 <constraints>
-                                                                    <constraint firstAttribute="height" constant="697.75" id="SGa-01-001"/>
+                                                                    <constraint firstAttribute="height" constant="671.75" id="SGa-01-001"/>
                                                                     <constraint firstItem="SGa-00-002" firstAttribute="top" secondItem="SGa-00-001" secondAttribute="top" id="SGa-01-002"/>
                                                                     <constraint firstItem="SGa-00-002" firstAttribute="leading" secondItem="SGa-00-001" secondAttribute="leading" id="SGa-01-003"/>
                                                                     <constraint firstAttribute="trailing" secondItem="SGa-00-002" secondAttribute="trailing" id="SGa-01-004"/>
@@ -1115,7 +1115,7 @@
                                                                     <constraint firstItem="SGa-00-003" firstAttribute="top" secondItem="SGa-00-001" secondAttribute="top" constant="187" id="SGa-01-006"/>
                                                                     <constraint firstItem="SGa-00-003" firstAttribute="leading" secondItem="SGa-00-001" secondAttribute="leading" constant="16" id="SGa-01-007"/>
                                                                     <constraint firstAttribute="trailing" secondItem="SGa-00-003" secondAttribute="trailing" constant="16" id="SGa-01-008"/>
-                                                                    <constraint firstItem="SGa-00-005" firstAttribute="top" secondItem="SGa-00-003" secondAttribute="bottom" constant="12" id="SGa-01-009"/>
+                                                                    <constraint firstItem="SGa-00-005" firstAttribute="top" secondItem="SGa-00-003" secondAttribute="bottom" constant="16" id="SGa-01-009"/>
                                                                     <constraint firstItem="SGa-00-005" firstAttribute="centerX" secondItem="SGa-00-001" secondAttribute="centerX" id="SGa-01-010"/>
                                                                     <constraint firstItem="SGa-00-006" firstAttribute="top" secondItem="SGa-00-005" secondAttribute="bottom" constant="12" id="SGa-01-011"/>
                                                                     <constraint firstItem="SGa-00-006" firstAttribute="leading" secondItem="SGa-00-001" secondAttribute="leading" constant="20" id="SGa-01-012"/>

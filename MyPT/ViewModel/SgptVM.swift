@@ -67,6 +67,36 @@ struct SgptEligibilityBaseModel: Codable {
     var data: SgptEligibilityModel?
 }
 
+/// Per-session trainer detail from `api/sgpt-detail` - the session detail
+/// screen's own fields come from the listing model, this adds what only the
+/// detail endpoint carries.
+struct SgptSessionDetailModel: Codable {
+    var trainerId: FlexibleValue?
+    var trainerName: String?
+    var trainerImage: String?
+    var trainerExperience: FlexibleValue?
+    var trainerRating: FlexibleValue?
+    var trainerRatingCount: Int?
+    var trainerSpecialities: [String]?
+    var studioId: FlexibleValue?
+
+    enum CodingKeys: String, CodingKey {
+        case trainerId = "trainer_id"
+        case trainerName = "trainer_name"
+        case trainerImage = "trainer_image"
+        case trainerExperience = "trainer_experience"
+        case trainerRating = "trainer_rating"
+        case trainerRatingCount = "trainer_rating_count"
+        case trainerSpecialities = "trainer_specialities"
+        case studioId = "studio_id"
+    }
+}
+
+struct SgptSessionDetailBaseModel: Codable {
+    var status: Bool?
+    var data: SgptSessionDetailModel?
+}
+
 /// One bundle (membership + credits) from `api/sgpt-bundles`.
 struct SgptBundleModel: Codable {
     var id: FlexibleValue?
@@ -266,6 +296,29 @@ class SgptVM {
                     return
                 }
                 let getResult = try JSONDecoder().decode(SgptEligibilityBaseModel.self, from: responceData)
+                completion(getResult.data)
+            } catch {
+                print(error)
+                completion(nil)
+            }
+        })
+    }
+
+    /// Full detail for one session, used for the trainer block the listing
+    /// payload doesn't carry.
+    class func sgptDetailApi(sessionId: String, isShowLoader: Bool = false, completion: @escaping (_ result: SgptSessionDetailModel?) -> Void) {
+        guard !sessionId.isEmpty else {
+            completion(nil)
+            return
+        }
+
+        NetworkManager.shared.genericAPICall(serviceEndPoint: .sgpt_detail, method: .get, queries: ["id": sessionId], parameters: nil, isShowLoading: isShowLoader, completion: { (getResponce, error) in
+            do {
+                guard let responceData = getResponce else {
+                    completion(nil)
+                    return
+                }
+                let getResult = try JSONDecoder().decode(SgptSessionDetailBaseModel.self, from: responceData)
                 completion(getResult.data)
             } catch {
                 print(error)

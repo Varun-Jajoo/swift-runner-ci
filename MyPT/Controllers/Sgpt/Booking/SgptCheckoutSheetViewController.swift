@@ -231,12 +231,10 @@ final class SgptCheckoutSheetViewController: UIViewController {
         let session = input.session
 
         sessionNameLabel.text = SgptCardCollectionViewCell.titleText(for: session)
-        if let when = SgptCardCollectionViewCell.subtitleText(for: session).mutableCopy() as? NSMutableAttributedString {
-            when.addAttribute(.font,
-                              value: AppFont.regular.size(12.0, familyName: familyFunnelSans),
-                              range: NSRange(location: 0, length: when.length))
-            sessionWhenLabel.attributedText = when
-        }
+        sessionWhenLabel.attributedText = NSAttributedString(
+            string: SgptCardCollectionViewCell.scheduleText(for: session),
+            attributes: [.font: AppFont.regular.size(12.0, familyName: familyFunnelSans),
+                         .foregroundColor: sessionWhenLabel.textColor ?? .white])
         sessionWhereLabel.text = session.studioName ?? ""
 
         durationChip.text = "\(GroupClassCardFormatter.intValue(session.duration, defaultValue: 60)) MINS"
