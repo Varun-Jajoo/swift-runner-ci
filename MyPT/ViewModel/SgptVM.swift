@@ -68,6 +68,7 @@ struct SgptEligibilityBaseModel: Codable {
 }
 
 struct SgptSessionDetailModel: Codable {
+    var description: String?
     var trainerId: FlexibleValue?
     var trainerName: String?
     var trainerImage: String?
@@ -78,6 +79,7 @@ struct SgptSessionDetailModel: Codable {
     var studioId: FlexibleValue?
 
     enum CodingKeys: String, CodingKey {
+        case description
         case trainerId = "trainer_id"
         case trainerName = "trainer_name"
         case trainerImage = "trainer_image"

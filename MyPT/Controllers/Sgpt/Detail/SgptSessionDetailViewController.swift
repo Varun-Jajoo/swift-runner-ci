@@ -183,6 +183,13 @@ final class SgptSessionDetailViewController: CommonViewController {
     }
 
     private func applyTrainerDetail() {
+        if let description = trainerDetail?.description?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !description.isEmpty {
+            aboutLabel.text = description
+            view.layoutIfNeeded()
+            updateAboutOverflowState()
+        }
+
         let experience = SgptSessionDetailViewController.experienceText(trainerDetail?.trainerExperience?.value)
         trainerRowExperienceLabel.text = experience
         trainerRowExperienceLabel.isHidden = experience.isEmpty
@@ -239,17 +246,18 @@ final class SgptSessionDetailViewController: CommonViewController {
         trainerSkillsRow.isHidden = false
 
         let cardWidth = trainerCardContainer.bounds.width > 0 ? trainerCardContainer.bounds.width : view.bounds.width - 40
-        let budget = (cardWidth - 32) * 0.8
+        let budget = cardWidth - 32
         let spacing = trainerSkillsRow.spacing
 
         var used: CGFloat = 0
         var shown = 0
-        for name in specialities {
+        for (index, name) in specialities.enumerated() {
             let chip = makeSkillChip(name.uppercased())
             let chipWidth = chip.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).width
-            let overflowReserve: CGFloat = (shown + 1 < specialities.count) ? 46 : 0
+            let leftoverAfter = specialities.count - (index + 1)
+            let reserve: CGFloat = leftoverAfter > 0 ? overflowChipWidth(leftoverAfter) + spacing : 0
             let advance = chipWidth + (shown > 0 ? spacing : 0)
-            if used + advance + overflowReserve > budget && shown > 0 { break }
+            if used + advance + reserve > budget && shown > 0 { break }
             trainerSkillsRow.addArrangedSubview(chip)
             used += advance
             shown += 1
@@ -263,6 +271,10 @@ final class SgptSessionDetailViewController: CommonViewController {
         if remaining > 0 {
             trainerSkillsRow.addArrangedSubview(makeSkillChip("+\(remaining)"))
         }
+    }
+
+    private func overflowChipWidth(_ remaining: Int) -> CGFloat {
+        return makeSkillChip("+\(remaining)").systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).width
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -648,8 +660,12 @@ final class SgptSessionDetailViewController: CommonViewController {
     /// Hides the collapsed-copy scrim/button once the full paragraph already
     /// fits within the collapsed line limit.
     private func updateAboutOverflowState() {
-        guard aboutLabel.bounds.width > 0 else { return }
-        let fullHeight = aboutLabel.sizeThatFits(CGSize(width: aboutLabel.bounds.width, height: .greatestFiniteMagnitude)).height
+        guard aboutLabel.bounds.width > 0, let text = aboutLabel.text, !text.isEmpty else { return }
+        let fullHeight = (text as NSString).boundingRect(
+            with: CGSize(width: aboutLabel.bounds.width, height: .greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            attributes: [.font: aboutLabel.font as Any],
+            context: nil).height
         let lineHeight = aboutLabel.font.lineHeight
         let collapsedHeight = lineHeight * CGFloat(SgptSessionDetailViewController.aboutCollapsedLineLimit)
         let overflows = fullHeight > collapsedHeight + 1
