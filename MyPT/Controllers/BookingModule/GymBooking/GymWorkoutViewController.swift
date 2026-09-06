@@ -51,7 +51,7 @@ class GymWorkoutViewController: CommonViewController {
         self.setUpUI()
         self.categorySelectedIndex = IndexPath(row: 0, section: 0)
         self.getTrainerApi(inputFilter: "0", inpuntTagId: 0)
-        
+        self.getPlansApi()
     }
     
     deinit {
@@ -68,11 +68,6 @@ class GymWorkoutViewController: CommonViewController {
     private func setNavUI(){
 //        self.setLeftMenu(leftImgs: [AppImages.backarrow], setTitle: ["\(gymCountNear ?? 0) Gyms Near You."], setTintColor: .black, setTitleColor: UIColor.appWhite)
         self.setLeftMenu(leftImgs: [AppImages.backArrowWithBg], setTitle: [" Gyms"], setTintColor: .black, setTitleColor: UIColor.appWhite)
-
-        // The grid cell has no select button at all (only VIEW PROFILE), so in
-        // picker mode switching to grid leaves no way to choose a gym. Offer
-        // only the list there.
-        guard onStudioPicked == nil else { return }
 
         self.setRighMenu(rightImgs: [AppImages.grid?.resized(to: CGSize(width: 20.0, height: 20.0)), AppImages.menuNav?.resized(to: CGSize(width: 20.0, height: 20.0))], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
 //        self.setRighMenu(rightImgs: [AppImages.backArrowWithBg], setTitle: [""], setTintColor: .black, setTitleColor: UIColor.appWhite)
@@ -322,15 +317,16 @@ extension GymWorkoutViewController: UITableViewDataSource, UITableViewDelegate{
         let getIndx = self.studiosData?.firstIndex(where: {
             $0.id == Int(sender.accessibilityHint ?? "0")
         })
+        let studio = self.studiosData?[getIndx ?? 0]
+        let studioId = String(studio?.id ?? 0)
+        let studioName = studio?.name ?? ""
 
-        // In picker mode this button is the way OUT of the picker: gym details
-        // pushes the whole gym-purchase stack (PackagesVC / TrainerList / ...)
-        // on top of the SGPT checkout, with inputParam nil so the chosen studio
-        // is dropped. Treat it as a pick instead.
-        if let pick = onStudioPicked {
-            let studio = self.studiosData?[getIndx ?? 0]
-            pick(String(studio?.id ?? 0), studio?.name ?? "")
-            navigationController?.popViewController(animated: true)
+        // In picker mode for members who already hold a gym package, treat view profile as a pick:
+        if let pick = onStudioPicked, (hasGymPackage ?? false) {
+            pick(studioId, studioName)
+            if self.navigationController?.topViewController === self {
+                self.navigationController?.popViewController(animated: true)
+            }
             return
         }
 
@@ -339,10 +335,10 @@ extension GymWorkoutViewController: UITableViewDataSource, UITableViewDelegate{
         vc.inputLat = self.inputLat
         vc.inputLong = self.inputLong
         vc.inputType = self.inputType
-        vc.gymDetailsFlow = flowGymwork
+        vc.gymDetailsFlow = (flowGymwork == .withoutTrainerMembership || !(hasGymPackage ?? false)) ? .withoutTrainerMembership : flowGymwork
         vc.hasGymPackage = hasGymPackage
-        var inputData = self.inputParam
-        inputData?.studio_id = "\(self.studiosData?[getIndx ?? 0].id ?? 0)"
+        var inputData = self.inputParam ?? DetailsParam()
+        inputData?.studio_id = studioId
         vc.inputParam = inputData
         self.navigationController?.pushViewController(vc, animated: true)
     }
@@ -351,28 +347,37 @@ extension GymWorkoutViewController: UITableViewDataSource, UITableViewDelegate{
         let getIndx = self.studiosData?.firstIndex(where: {
             $0.id == Int(sender.accessibilityHint ?? "0")
         })
-        if let pick = onStudioPicked {
-            let studio = self.studiosData?[getIndx ?? 0]
-            pick(String(studio?.id ?? 0), studio?.name ?? "")
-            navigationController?.popViewController(animated: true)
-            return
-        }
-        if flowGymwork == .withoutTrainerMembership {
+        let studio = self.studiosData?[getIndx ?? 0]
+        let studioId = String(studio?.id ?? 0)
+        let studioName = studio?.name ?? ""
+
+        // When user has no membership (non-member) or flowGymwork is withoutTrainerMembership:
+        if flowGymwork == .withoutTrainerMembership || !(hasGymPackage ?? false) {
             Mixpanel.mainInstance().track(
                 event: "Buy_Membership_Tapped",
                 properties: [:]
             )
             let vc: PackagesVC = PackagesVC.instantiate(appStoryboard: .purchase)
-            vc.studioIdStr = self.inputParam?.studio_id
-            vc.flowGymwork = self.flowGymwork
-            vc.inputType = self.inputType
+            vc.studioIdStr = studioId
+            vc.flowGymwork = .withoutTrainerMembership
+            vc.inputType = self.inputType ?? "gym"
             vc.package_type = "4" // -> Gym membership
-            var inputData = self.inputParam
-            inputData?.studio_id = "\(self.studiosData?[getIndx ?? 0].id ?? 0)"
+            var inputData = self.inputParam ?? DetailsParam()
+            inputData?.studio_id = studioId
             inputData?.package_type = "4" 
+            inputData?.type = "gym"
             vc.inputParam = inputData
             self.navigationController?.pushViewController(vc, animated: false)
-        } else {
+            return
+        }
+
+        if let pick = onStudioPicked {
+            pick(studioId, studioName)
+            if self.navigationController?.topViewController === self {
+                self.navigationController?.popViewController(animated: true)
+            }
+            return
+        }
             if inputParam?.isFreeAssessmentSelected ?? false { // Only for Free Assessment flow
                 let vc: TrainerListViewController = TrainerListViewController.instantiate(appStoryboard: .booking)
                 vc.flowSlot = .bookTrainerHomeWorkout
@@ -509,5 +514,16 @@ extension GymWorkoutViewController{
             //            self.gymCountNear = self.studiosData?.count
             
         })
+    }
+    
+    private func getPlansApi() {
+        DashboardVM.getHomePagePlansApi(type: "2", isShowLoader: false) { [weak self] result in
+            guard let self = self else { return }
+            if result?.status == true {
+                let plans = result?.data ?? []
+                let hasGym = plans.contains { $0.type?.value == "gym" && !($0.is_expired ?? false) }
+                self.hasGymPackage = hasGym
+            }
+        }
     }
 }
