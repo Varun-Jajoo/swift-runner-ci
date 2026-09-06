@@ -179,7 +179,7 @@ struct SgptTrainerItem {
 final class SgptTrainerCollectionViewCell: UICollectionViewCell {
 
     static let reuseIdentifier = "SgptTrainerCollectionViewCell"
-    static let cardSize = CGSize(width: SgptListingMetrics.trainerCardWidth, height: 121)
+    static let cardSize = CGSize(width: SgptListingMetrics.trainerCardWidth, height: 126)
 
     private let imageContainer = UIView()
     private let imageView = UIImageView()
@@ -262,7 +262,7 @@ final class SgptTrainerCollectionViewCell: UICollectionViewCell {
             nameLabel.topAnchor.constraint(equalTo: imageContainer.bottomAnchor, constant: 5),
             nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            nameLabel.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor)
+            nameLabel.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -5)
         ])
     }
 

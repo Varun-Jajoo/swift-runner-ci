@@ -136,6 +136,6 @@ final class SgptGridCardCollectionViewCell: UICollectionViewCell {
         displayFormatter.dateFormat = "EEE, d MMM, h:mm a"
         let schedule = displayFormatter.string(from: start)
 
-        return studio.isEmpty ? schedule : "\(schedule) - \(studio)"
+        return studio.isEmpty ? schedule : "\(schedule) · \(studio)"
     }
 }
