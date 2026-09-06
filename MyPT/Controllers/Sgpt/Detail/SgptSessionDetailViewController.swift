@@ -212,7 +212,6 @@ final class SgptSessionDetailViewController: CommonViewController {
         return years.isEmpty ? "—" : "\(years)yrs"
     }
 
-    /// Backend stores free text ("5", "5 +", "10 years"), so read the leading count.
     private static func experienceYears(_ raw: String?) -> String {
         guard let raw = raw else { return "" }
         var digits = ""
@@ -228,8 +227,6 @@ final class SgptSessionDetailViewController: CommonViewController {
         return digits
     }
 
-    /// Chips fill up to 80% of the card's inner width; the rest collapse into
-    /// a trailing "+N".
     private func layoutSkillChips(_ specialities: [String]) {
         trainerSkillsRow.arrangedSubviews.forEach {
             trainerSkillsRow.removeArrangedSubview($0)
@@ -401,8 +398,6 @@ final class SgptSessionDetailViewController: CommonViewController {
         venueValueLabel.text = (session.studioName?.trimmingCharacters(in: .whitespacesAndNewlines)).flatMap { $0.isEmpty ? nil : $0 } ?? "MyPT Studio"
     }
 
-    /// The storyboard row is photo + name; experience stacks under the name,
-    /// so the name is lifted into its own vertical column in that same row.
     private func installTrainerRowExperienceLabel() {
         guard trainerRowExperienceLabel.superview == nil,
               let row = trainerRowNameLabel.superview as? UIStackView,
@@ -625,8 +620,6 @@ final class SgptSessionDetailViewController: CommonViewController {
         navigationController?.pushViewController(vc, animated: true)
     }
 
-    /// Already-booked members reopen the confirmation rather than facing a
-    /// dead disabled button, matching Group Classes' own "VIEW" CTA.
     private func showBookingConfirmation() {
         var input = SgptBookingSuccessInput(session: session)
         input.mode = .bookedWithExistingCredits

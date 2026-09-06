@@ -67,9 +67,6 @@ struct SgptEligibilityBaseModel: Codable {
     var data: SgptEligibilityModel?
 }
 
-/// Per-session trainer detail from `api/sgpt-detail` - the session detail
-/// screen's own fields come from the listing model, this adds what only the
-/// detail endpoint carries.
 struct SgptSessionDetailModel: Codable {
     var trainerId: FlexibleValue?
     var trainerName: String?
@@ -304,8 +301,6 @@ class SgptVM {
         })
     }
 
-    /// Full detail for one session, used for the trainer block the listing
-    /// payload doesn't carry.
     class func sgptDetailApi(sessionId: String, isShowLoader: Bool = false, completion: @escaping (_ result: SgptSessionDetailModel?) -> Void) {
         guard !sessionId.isEmpty else {
             completion(nil)

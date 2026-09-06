@@ -155,10 +155,6 @@ final class SgptCardCollectionViewCell: UICollectionViewCell {
         formattedSchedule(dateStr: item.date, timeStr: item.time)
     }
 
-    /// Single-line "<EEE, d MMM, h:mm a> · <studio>" subtitle, matching what
-    /// Android's `SgptHomeAdapter.formatSubtext` renders on the same card.
-    /// `chipLabel` IS reused as-is for the studio part since it's already
-    /// generic over a raw name string.
     static func subtitleText(for item: SgptSessionModel) -> NSAttributedString {
         let schedule = scheduleText(for: item)
         let studio = GroupClassCardFormatter.chipLabel(item.studioName)
@@ -183,8 +179,6 @@ final class SgptCardCollectionViewCell: UICollectionViewCell {
         ])
     }
 
-    /// Expects `date` as "yyyy-MM-dd" and `time` as "HH:mm:ss", rendered as
-    /// "EEE, d MMM, h:mm a" - Android's own shape for this card.
     private static func formattedSchedule(dateStr: String?, timeStr: String?) -> String {
         guard let dateStr = dateStr, !dateStr.isEmpty, let timeStr = timeStr, !timeStr.isEmpty else {
             return GroupClassCardFormatter.defaultTime
