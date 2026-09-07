@@ -68,6 +68,13 @@ final class SgptPricingViewController: CommonViewController {
         static let sideBadgeWidth: CGFloat = 113
         static let sideBadgeHeight: CGFloat = 31
 
+        /// A bundle is a membership plus credits, so its card carries the
+        /// best-plan feature list and needs the room for it.
+        static let bundleCardWidth: CGFloat = 176
+        static let bundleCardHeight: CGFloat = 258
+        static let bundleScrollHeight: CGFloat = 268
+        static let packScrollHeight: CGFloat = 195
+
         /// Cards are built at the main size and shrunk by transform, never by
         /// mutating constraints - a constraint-only shrink left the card's
         /// fixed-size contents at center size inside a side-size box, which is
@@ -93,6 +100,7 @@ final class SgptPricingViewController: CommonViewController {
         let price: String
         let originalPrice: String?
         let perSession: String
+        var features: [String] = []
     }
 
     /// Placeholder cards shown until api/sgpt-packages returns, so the screen
@@ -274,17 +282,25 @@ final class SgptPricingViewController: CommonViewController {
         plans = bundles.enumerated().map { index, bundle in
             let credits = bundle.credits ?? 0
             let saving = bundle.saving ?? 0
+            let validity = bundle.validity ?? 0
+
+            var features: [String] = []
+            if bundle.includesGymAccess ?? true { features.append("Gym membership included") }
+            features.append(credits == 1 ? "1 SGPT session" : "\(credits) SGPT sessions")
+            if validity > 0 { features.append("Valid for \(validity) days") }
+            if saving > 0 { features.append("You save \(Self.money(saving))") }
 
             return PlanCard(
                 badge: saving > 0 ? "SAVE \(Self.money(saving))" : (bundle.name ?? "Bundle"),
                 isCenter: index == centerIndex,
                 headline: credits == 1 ? "1 credit" : "\(credits) credits",
-                validDays: bundle.validity ?? 0,
+                validDays: validity,
                 price: Self.money(bundle.price ?? 0),
                 originalPrice: (bundle.listPrice ?? 0) > (bundle.price ?? 0)
                     ? Self.money(bundle.listPrice ?? 0)
                     : nil,
-                perSession: "+ gym membership"
+                perSession: bundle.pricePerSession.map { "\(Self.money($0))/session" } ?? "+ gym membership",
+                features: features
             )
         }
 
@@ -673,14 +689,16 @@ private extension SgptPricingViewController {
         title.font = AppFont.medium.size(22.0, familyName: familyClashDisplay)
         title.textColor = .white
         title.textAlignment = .center
-        title.text = "Select your plan"
+        title.text = isShowingBundles ? "Pick the plan that fits your goals" : "Select your plan"
 
         let subtitle = UILabel()
         subtitle.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
         subtitle.textColor = .white.withAlphaComponent(0.55)
         subtitle.textAlignment = .center
         subtitle.numberOfLines = 0
-        subtitle.text = "Create unique audio with your favorite celebrity's voice loerm ispum"
+        subtitle.text = isShowingBundles
+            ? "Gym membership and your Small Group PT sessions in one purchase."
+            : "Pick the credits you need, book instantly, train with the group."
 
         let textColumn = UIStackView(arrangedSubviews: [title, subtitle])
         textColumn.axis = .vertical
@@ -811,7 +829,7 @@ private extension SgptPricingViewController {
             row.leadingAnchor.constraint(equalTo: scroll.contentLayoutGuide.leadingAnchor),
             row.trailingAnchor.constraint(equalTo: scroll.contentLayoutGuide.trailingAnchor),
             row.heightAnchor.constraint(equalTo: scroll.frameLayoutGuide.heightAnchor),
-            scroll.heightAnchor.constraint(equalToConstant: 195)
+            scroll.heightAnchor.constraint(equalToConstant: isShowingBundles ? PricingMetric.bundleScrollHeight : PricingMetric.packScrollHeight)
         ])
         return scroll
     }
@@ -834,8 +852,10 @@ private extension SgptPricingViewController {
         card.isUserInteractionEnabled = true
         card.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(pricingCardTapped(_:))))
         // Main size for every card, centered or not - see PricingMetric.sideScale.
-        card.widthAnchor.constraint(equalToConstant: PricingMetric.mainCardWidth).isActive = true
-        card.heightAnchor.constraint(equalToConstant: PricingMetric.mainCardHeight).isActive = true
+        let cardWidth = isShowingBundles ? PricingMetric.bundleCardWidth : PricingMetric.mainCardWidth
+        let cardHeight = isShowingBundles ? PricingMetric.bundleCardHeight : PricingMetric.mainCardHeight
+        card.widthAnchor.constraint(equalToConstant: cardWidth).isActive = true
+        card.heightAnchor.constraint(equalToConstant: cardHeight).isActive = true
         card.transform = plan.isCenter ? .identity : CGAffineTransform(scaleX: PricingMetric.sideScale, y: PricingMetric.sideScale)
 
         let badge = UILabel()
@@ -879,11 +899,16 @@ private extension SgptPricingViewController {
         perSession.textAlignment = .center
         perSession.text = plan.perSession
 
-        let column = UIStackView(arrangedSubviews: [badge, headline, validRow, divider, priceRow, perSession])
+        var arranged: [UIView] = [badge, headline, validRow, divider, priceRow, perSession]
+        if !plan.features.isEmpty {
+            arranged.append(makeFeatureList(plan.features))
+        }
+
+        let column = UIStackView(arrangedSubviews: arranged)
         column.translatesAutoresizingMaskIntoConstraints = false
         column.axis = .vertical
         column.alignment = .center
-        column.spacing = 10
+        column.spacing = plan.features.isEmpty ? 10 : 8
         column.setCustomSpacing(15, after: badge)
         card.addSubview(column)
 
@@ -1086,6 +1111,37 @@ private extension SgptPricingViewController {
 
     func stopPricingCenterPulse() {
         // No-op: handled by setPricingCardStyle
+    }
+
+    /// Same shape as the best-plan card's feature rows (BestPlanPointsTVCell):
+    /// a checkFill glyph and a 12pt line per point.
+    private func makeFeatureList(_ features: [String]) -> UIView {
+        let column = UIStackView()
+        column.axis = .vertical
+        column.alignment = .leading
+        column.spacing = 5
+
+        for text in features {
+            let icon = UIImageView(image: UIImage(named: "checkFill") ?? UIImage(systemName: "checkmark.circle.fill"))
+            icon.contentMode = .scaleAspectFit
+            icon.translatesAutoresizingMaskIntoConstraints = false
+            icon.widthAnchor.constraint(equalToConstant: 12).isActive = true
+            icon.heightAnchor.constraint(equalToConstant: 12).isActive = true
+
+            let label = UILabel()
+            label.font = AppFont.regular.size(11, familyName: familyFunnelSans)
+            label.textColor = .white.withAlphaComponent(0.75)
+            label.numberOfLines = 1
+            label.lineBreakMode = .byTruncatingTail
+            label.text = text
+
+            let row = UIStackView(arrangedSubviews: [icon, label])
+            row.axis = .horizontal
+            row.alignment = .center
+            row.spacing = 6
+            column.addArrangedSubview(row)
+        }
+        return column
     }
 
     func makeValidForRow(days: Int) -> UIView {
