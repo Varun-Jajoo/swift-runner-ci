@@ -51,6 +51,13 @@ struct SgptEligibilityModel: Codable {
     var remainingCredits: Int?
     var canBuyCredits: Bool?
     var needsBundle: Bool?
+    var creditsExpireOn: String?
+    var membershipExpired: Bool?
+    var membershipEndedOn: String?
+    var membershipStudioName: String?
+    var renewalSubscriptionId: FlexibleValue?
+    var shouldRenew: Bool?
+    var accessEndsOn: String?
 
     enum CodingKeys: String, CodingKey {
         case authenticated
@@ -59,6 +66,13 @@ struct SgptEligibilityModel: Codable {
         case remainingCredits = "remaining_credits"
         case canBuyCredits = "can_buy_credits"
         case needsBundle = "needs_bundle"
+        case creditsExpireOn = "credits_expire_on"
+        case membershipExpired = "membership_expired"
+        case membershipEndedOn = "membership_ended_on"
+        case membershipStudioName = "membership_studio_name"
+        case renewalSubscriptionId = "renewal_subscription_id"
+        case shouldRenew = "should_renew"
+        case accessEndsOn = "access_ends_on"
     }
 }
 
@@ -109,6 +123,12 @@ struct SgptBundleModel: Codable {
     var validity: Int?
     var pricePerSession: Double?
     var includesGymAccess: Bool?
+    var membershipLabel: String?
+    var membershipDays: Int?
+    var studioName: String?
+    var pillText: String?
+    var sgptPlanName: String?
+    var perks: [String]?
 
     enum CodingKeys: String, CodingKey {
         case id, name, description, price, credits, validity, saving
@@ -116,6 +136,12 @@ struct SgptBundleModel: Codable {
         case listPrice = "list_price"
         case pricePerSession = "price_per_session"
         case includesGymAccess = "includes_gym_access"
+        case membershipLabel = "membership_label"
+        case membershipDays = "membership_days"
+        case studioName = "studio_name"
+        case pillText = "pill_text"
+        case sgptPlanName = "sgpt_plan_name"
+        case perks
     }
 }
 

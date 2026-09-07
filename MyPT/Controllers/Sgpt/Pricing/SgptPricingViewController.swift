@@ -70,9 +70,11 @@ final class SgptPricingViewController: CommonViewController {
 
         /// A bundle is a membership plus credits, so its card carries the
         /// best-plan feature list and needs the room for it.
-        static let bundleCardWidth: CGFloat = 176
-        static let bundleCardHeight: CGFloat = 258
-        static let bundleScrollHeight: CGFloat = 268
+        static let bundleCardWidth: CGFloat = 196
+        static let bundleCardHeight: CGFloat = 268
+        static let bundleScrollHeight: CGFloat = 280
+        static let bundleBadgeWidth: CGFloat = 156
+        static let bundleBadgeHeight: CGFloat = 38
         static let packScrollHeight: CGFloat = 195
 
         /// Cards are built at the main size and shrunk by transform, never by
@@ -101,6 +103,9 @@ final class SgptPricingViewController: CommonViewController {
         let originalPrice: String?
         let perSession: String
         var features: [String] = []
+        /// Bundles only: the saving reads as its own pill and the perks sit
+        /// under a labelled divider, so the card is built differently.
+        var savingPill: String? = nil
     }
 
     /// Placeholder cards shown until api/sgpt-packages returns, so the screen
@@ -284,23 +289,30 @@ final class SgptPricingViewController: CommonViewController {
             let saving = bundle.saving ?? 0
             let validity = bundle.validity ?? 0
 
-            var features: [String] = []
-            if bundle.includesGymAccess ?? true { features.append("Gym membership included") }
-            features.append(credits == 1 ? "1 SGPT session" : "\(credits) SGPT sessions")
-            if validity > 0 { features.append("Valid for \(validity) days") }
-            if saving > 0 { features.append("You save \(Self.money(saving))") }
+            var perks = bundle.perks?.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty } ?? []
+            if perks.isEmpty {
+                perks.append(credits == 1 ? "1 SGPT credit" : "\(credits) SGPT credits")
+                if bundle.includesGymAccess ?? true {
+                    perks.append(Self.membershipPerk(studio: bundle.studioName, label: bundle.membershipLabel))
+                }
+            }
+
+            // Pill is the attached SGPT package's own highlight tag and nothing
+            // else - with none set the card simply has no pill.
+            let pill = bundle.pillText?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
             return PlanCard(
-                badge: saving > 0 ? "SAVE \(Self.money(saving))" : (bundle.name ?? "Bundle"),
+                badge: pill,
                 isCenter: index == centerIndex,
-                headline: credits == 1 ? "1 credit" : "\(credits) credits",
+                headline: "",
                 validDays: validity,
                 price: Self.money(bundle.price ?? 0),
                 originalPrice: (bundle.listPrice ?? 0) > (bundle.price ?? 0)
                     ? Self.money(bundle.listPrice ?? 0)
                     : nil,
-                perSession: bundle.pricePerSession.map { "\(Self.money($0))/session" } ?? "+ gym membership",
-                features: features
+                perSession: "",
+                features: perks,
+                savingPill: saving > 0 ? "SAVE \(Self.money(saving))" : nil
             )
         }
 
@@ -340,6 +352,15 @@ final class SgptPricingViewController: CommonViewController {
         let digits = (pack.msg ?? "").filter { $0.isNumber }
         guard let saving = Double(digits), saving > 0, let price = pack.price else { return nil }
         return money(price + saving)
+    }
+
+    /// Names the club whose membership the bundle carries, falling back to the
+    /// admin's own component label when the club is unknown.
+    private static func membershipPerk(studio: String?, label: String?) -> String {
+        let club = (studio ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if !club.isEmpty { return "\(club) membership" }
+        let raw = (label ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        return raw.isEmpty ? "Gym membership" : raw
     }
 
     private static func money(_ value: Double) -> String {
@@ -689,7 +710,7 @@ private extension SgptPricingViewController {
         title.font = AppFont.medium.size(22.0, familyName: familyClashDisplay)
         title.textColor = .white
         title.textAlignment = .center
-        title.text = isShowingBundles ? "Pick the plan that fits your goals" : "Select your plan"
+        title.text = "Select your plan"
 
         let subtitle = UILabel()
         subtitle.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
@@ -697,8 +718,8 @@ private extension SgptPricingViewController {
         subtitle.textAlignment = .center
         subtitle.numberOfLines = 0
         subtitle.text = isShowingBundles
-            ? "Gym membership and your Small Group PT sessions in one purchase."
-            : "Pick the credits you need, book instantly, train with the group."
+            ? "Club access and your Small Group PT sessions, bought once."
+            : "Create unique audio with your favorite celebrity's voice loerm ispum"
 
         let textColumn = UIStackView(arrangedSubviews: [title, subtitle])
         textColumn.axis = .vertical
@@ -863,14 +884,15 @@ private extension SgptPricingViewController {
         badge.textColor = .white
         badge.textAlignment = .center
         badge.text = plan.badge
+        badge.isHidden = isShowingBundles && plan.badge.isEmpty
         // Both badges get a 1pt ~30%-white stroke (bg_pricing_badge_center/
         // side both have one; this had neither).
         badge.layer.masksToBounds = true
         badge.layer.borderWidth = 1
         badge.layer.borderColor = UIColor.white.withAlphaComponent(0.30).cgColor
         badge.translatesAutoresizingMaskIntoConstraints = false
-        badge.widthAnchor.constraint(equalToConstant: PricingMetric.mainBadgeWidth).isActive = true
-        badge.heightAnchor.constraint(equalToConstant: PricingMetric.mainBadgeHeight).isActive = true
+        badge.widthAnchor.constraint(equalToConstant: isShowingBundles ? PricingMetric.bundleBadgeWidth : PricingMetric.mainBadgeWidth).isActive = true
+        badge.heightAnchor.constraint(equalToConstant: isShowingBundles ? PricingMetric.bundleBadgeHeight : PricingMetric.mainBadgeHeight).isActive = true
         applyPricingBadgeStyle(badge, isCenter: plan.isCenter)
 
         pricingCardRefs.append(PricingCardRef(card: card, badge: badge))
@@ -899,17 +921,27 @@ private extension SgptPricingViewController {
         perSession.textAlignment = .center
         perSession.text = plan.perSession
 
-        var arranged: [UIView] = [badge, headline, validRow, divider, priceRow, perSession]
-        if !plan.features.isEmpty {
+        var arranged: [UIView]
+        if isShowingBundles {
+            // name pill -> price (+ struck list price) -> saving pill ->
+            // validity -> "Perks" divider -> perk rows
+            arranged = [badge, priceRow]
+            if let saving = plan.savingPill {
+                arranged.append(makeSavingPill(saving))
+            }
+            arranged.append(validRow)
+            arranged.append(makePerksDivider())
             arranged.append(makeFeatureList(plan.features))
+        } else {
+            arranged = [badge, headline, validRow, divider, priceRow, perSession]
         }
 
         let column = UIStackView(arrangedSubviews: arranged)
         column.translatesAutoresizingMaskIntoConstraints = false
         column.axis = .vertical
         column.alignment = .center
-        column.spacing = plan.features.isEmpty ? 10 : 8
-        column.setCustomSpacing(15, after: badge)
+        column.spacing = isShowingBundles ? 8 : 10
+        column.setCustomSpacing(isShowingBundles ? 12 : 15, after: badge)
         card.addSubview(column)
 
         NSLayoutConstraint.activate([
@@ -926,7 +958,7 @@ private extension SgptPricingViewController {
     /// and a 1pt #C084FC border.
     func applyPricingBadgeStyle(_ badge: UILabel, isCenter: Bool) {
         badge.backgroundColor = isCenter ? UIColor(hex: "#1F0833") : Palette.badgeSideFill
-        badge.layer.cornerRadius = PricingMetric.mainBadgeHeight / 2
+        badge.layer.cornerRadius = (isShowingBundles ? PricingMetric.bundleBadgeHeight : PricingMetric.mainBadgeHeight) / 2
         badge.clipsToBounds = true
 
         guard isCenter else {
@@ -935,7 +967,9 @@ private extension SgptPricingViewController {
             return
         }
 
-        let size = CGSize(width: PricingMetric.mainBadgeWidth, height: PricingMetric.mainBadgeHeight)
+        let size = isShowingBundles
+            ? CGSize(width: PricingMetric.bundleBadgeWidth, height: PricingMetric.bundleBadgeHeight)
+            : CGSize(width: PricingMetric.mainBadgeWidth, height: PricingMetric.mainBadgeHeight)
         if let image = Self.radialBadgeImage(size: size) {
             badge.backgroundColor = UIColor(patternImage: image)
         }
@@ -1113,6 +1147,74 @@ private extension SgptPricingViewController {
         // No-op: handled by setPricingCardStyle
     }
 
+    /// Saving reads as its own glass pill - translucent fill with a green tint
+    /// and hairline, rather than competing with the plan name badge.
+    private func makeSavingPill(_ text: String) -> UIView {
+        let icon = UIImageView(image: UIImage(named: "sgpt-ic-save-badge")?.withRenderingMode(.alwaysTemplate))
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        icon.contentMode = .scaleAspectFit
+        icon.tintColor = UIColor(hex: "#8FB79A")
+
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = AppFont.semibold.size(10.5, familyName: familyFunnelSans)
+        label.textColor = UIColor(hex: "#8FB79A")
+        label.textAlignment = .center
+        label.text = text
+
+        let row = UIStackView(arrangedSubviews: [icon, label])
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.axis = .horizontal
+        row.alignment = .center
+        row.spacing = 5
+
+        let pill = UIView()
+        pill.translatesAutoresizingMaskIntoConstraints = false
+        pill.backgroundColor = UIColor.white.withAlphaComponent(0.08)
+        pill.layer.cornerRadius = 7
+        pill.layer.borderWidth = 1
+        pill.layer.borderColor = UIColor(hex: "#8FB79A").withAlphaComponent(0.28).cgColor
+        pill.layer.masksToBounds = true
+        pill.addSubview(row)
+
+        NSLayoutConstraint.activate([
+            icon.widthAnchor.constraint(equalToConstant: 12),
+            icon.heightAnchor.constraint(equalToConstant: 12),
+            row.topAnchor.constraint(equalTo: pill.topAnchor, constant: 3),
+            row.bottomAnchor.constraint(equalTo: pill.bottomAnchor, constant: -3),
+            row.leadingAnchor.constraint(equalTo: pill.leadingAnchor, constant: 9),
+            row.trailingAnchor.constraint(equalTo: pill.trailingAnchor, constant: -10)
+        ])
+        return pill
+    }
+
+    /// "──── Perks ────" - a hairline either side of a small centred caption.
+    private func makePerksDivider() -> UIView {
+        func line(fadeLeading: Bool) -> UIView {
+            let view = GradientFadeView()
+            view.gradientLayer.startPoint = CGPoint(x: 0.0, y: 0.5)
+            view.gradientLayer.endPoint = CGPoint(x: 1.0, y: 0.5)
+            let solid = Palette.dividerMid
+            let clear = Palette.dividerMid.withAlphaComponent(0)
+            view.setColors(fadeLeading ? [clear, solid] : [solid, clear])
+            view.translatesAutoresizingMaskIntoConstraints = false
+            view.heightAnchor.constraint(equalToConstant: 1).isActive = true
+            view.widthAnchor.constraint(equalToConstant: 46).isActive = true
+            return view
+        }
+
+        let caption = UILabel()
+        caption.font = AppFont.medium.size(10, familyName: familyFunnelSans)
+        caption.textColor = .white.withAlphaComponent(0.5)
+        caption.text = "Perks"
+
+        let row = UIStackView(arrangedSubviews: [line(fadeLeading: true), caption, line(fadeLeading: false)])
+        row.axis = .horizontal
+        row.alignment = .center
+        row.spacing = 8
+        return row
+    }
+
     /// Same shape as the best-plan card's feature rows (BestPlanPointsTVCell):
     /// a checkFill glyph and a 12pt line per point.
     private func makeFeatureList(_ features: [String]) -> UIView {
@@ -1122,11 +1224,11 @@ private extension SgptPricingViewController {
         column.spacing = 5
 
         for text in features {
-            let icon = UIImageView(image: UIImage(named: "checkFill") ?? UIImage(systemName: "checkmark.circle.fill"))
-            icon.contentMode = .scaleAspectFit
+            // Same 4pt diamond the "Valid for N days" row uses, not a tick.
+            let icon = SgptDiamondView()
             icon.translatesAutoresizingMaskIntoConstraints = false
-            icon.widthAnchor.constraint(equalToConstant: 12).isActive = true
-            icon.heightAnchor.constraint(equalToConstant: 12).isActive = true
+            icon.widthAnchor.constraint(equalToConstant: 4).isActive = true
+            icon.heightAnchor.constraint(equalToConstant: 4).isActive = true
 
             let label = UILabel()
             label.font = AppFont.regular.size(11, familyName: familyFunnelSans)

@@ -112,6 +112,7 @@ final class SgptSessionDetailViewController: CommonViewController {
         static let priceFallback = "1 credit"
         static let ctaTitle = "GET CREDIT & RESERVE"
         static let ctaBookedTitle = "VIEW BOOKING"
+        static let ctaRenewTitle = "RENEW NOW"
         static let ctaComingSoonTitle = "Coming soon"
         static let ctaComingSoonMessage = "Reserving Small Group PT sessions from the app isn't available yet."
     }
@@ -131,6 +132,11 @@ final class SgptSessionDetailViewController: CommonViewController {
     /// locally the moment a booking succeeds.
     private var isAlreadyBooked = false
     private weak var reserveButton: GradientCTAButton?
+    private let barCaptionLabel = UILabel()
+    private let barValueLabel = UILabel()
+    /// Membership lapsed while credits are still good: a renewal, not a sale.
+    private var eligibility: SgptEligibilityModel?
+    private var shouldRenew: Bool { eligibility?.shouldRenew == true }
     private let readMoreButton = UIButton(type: .system)
     private let dateValueLabel = UILabel()
     private let timeValueLabel = UILabel()
@@ -162,6 +168,37 @@ final class SgptSessionDetailViewController: CommonViewController {
         isAlreadyBooked = session.isBooked ?? false
         applyBookedState()
         loadTrainerDetail()
+        loadRenewalState()
+    }
+
+    private func loadRenewalState() {
+        let studioId = (session.studioId?.value).flatMap { $0.isEmpty ? nil : $0 } ?? ""
+        SgptVM.sgptEligibilityApi(studioId: studioId) { [weak self] result in
+            guard let self = self, let result = result else { return }
+            DispatchQueue.main.async {
+                self.eligibility = result
+                self.applyBookedState()
+            }
+        }
+    }
+
+    /// Sends a lapsed member to the renewal list they already have, rather than
+    /// to pricing, which would sell them credits they still hold.
+    private func openRenewal() {
+        DashboardVM.getPlansApi { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                let plans = result?.data ?? []
+                guard !plans.isEmpty else {
+                    self.showComingSoon()
+                    return
+                }
+                let vc: RenewPlanVC = .instantiate(appStoryboard: .newBookingModule)
+                vc.userPlans = plans
+                vc.modalPresentationStyle = .automatic
+                self.present(vc, animated: true)
+            }
+        }
     }
 
     private func loadTrainerDetail() {
@@ -507,6 +544,10 @@ final class SgptSessionDetailViewController: CommonViewController {
             showBookingConfirmation()
             return
         }
+        if shouldRenew {
+            openRenewal()
+            return
+        }
         SgptVM.sgptCreditsApi(isShowLoader: true) { [weak self] credits in
             DispatchQueue.main.async {
                 guard let self = self else { return }
@@ -542,10 +583,11 @@ final class SgptSessionDetailViewController: CommonViewController {
         let vc: SgptPricingViewController = .instantiate(appStoryboard: .sgpt)
         vc.sessionId = session.id?.value ?? ""
         vc.session = session
-        // studioId is deliberately left blank: api/sgpt-upcoming returns
-        // studio_name/lat/lng but no studio_id, so there is no club id to
-        // forward. Blank makes the pricing screen fetch every club's packs,
-        // which is what this screen did before it passed anything at all.
+        // Without a club id, eligibility and bundles answer for no club in
+        // particular. api/sgpt-upcoming carries one now, and api/sgpt-detail
+        // fills it in for sessions opened before that call landed.
+        vc.studioId = (session.studioId?.value).flatMap { $0.isEmpty ? nil : $0 }
+            ?? (trainerDetail?.studioId?.value ?? "")
         vc.sessionName = session.sessionName ?? ""
         vc.sessionTrainerName = session.trainerName ?? ""
         // Formatted here rather than downstream: these helpers live on this
@@ -646,7 +688,18 @@ final class SgptSessionDetailViewController: CommonViewController {
 
     private func applyBookedState() {
         guard let button = reserveButton else { return }
-        let title = isAlreadyBooked ? Copy.ctaBookedTitle : Copy.ctaTitle
+        let title: String
+        if isAlreadyBooked {
+            title = Copy.ctaBookedTitle
+        } else if shouldRenew {
+            title = Copy.ctaRenewTitle
+            applyRenewalBarCopy()
+        } else {
+            title = Copy.ctaTitle
+            barCaptionLabel.text = "PER SESSION FEE"
+            barValueLabel.font = AppFont.medium.size(24.0, familyName: familyClashDisplay)
+            barValueLabel.text = Copy.priceFallback
+        }
         button.configure(title: title,
                          font: AppFont.medium.size(14.0, familyName: familyFunnelSans),
                          titleColor: Palette.ctaInk)
@@ -654,6 +707,21 @@ final class SgptSessionDetailViewController: CommonViewController {
                                tint: Palette.ctaInk)
         button.isEnabled = true
         button.alpha = 1
+    }
+
+    private func applyRenewalBarCopy() {
+        let club = (eligibility?.membershipStudioName ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        barCaptionLabel.text = club.isEmpty
+            ? "GYM MEMBERSHIP EXPIRED"
+            : "MEMBERSHIP EXPIRED · \(club)".uppercased()
+
+        let credits = eligibility?.remainingCredits ?? 0
+        var line = credits == 1 ? "1 credit still valid" : "\(credits) credits still valid"
+        if let until = eligibility?.creditsExpireOn, !until.isEmpty {
+            line += " until \(Self.formattedDate(until))"
+        }
+        barValueLabel.font = AppFont.medium.size(15.0, familyName: familyClashDisplay)
+        barValueLabel.text = line
     }
 
     private func showComingSoon() {
@@ -1513,14 +1581,15 @@ private extension SgptSessionDetailViewController {
     /// this used to be a single edge-to-edge GradientCTAButton with no price
     /// shown at all.
     func makeBottomBar() -> UIView {
-        let feeLabel = UILabel()
+        let feeLabel = barCaptionLabel
         feeLabel.font = AppFont.regular.size(10.0, familyName: familyFunnelSans)
         feeLabel.textColor = .white.withAlphaComponent(0.4)
         feeLabel.text = "PER SESSION FEE"
 
-        let priceLabel = UILabel()
+        let priceLabel = barValueLabel
         priceLabel.font = AppFont.medium.size(24.0, familyName: familyClashDisplay)
         priceLabel.textColor = .white
+        priceLabel.numberOfLines = 2
         priceLabel.text = Copy.priceFallback
 
         let priceStack = UIStackView(arrangedSubviews: [feeLabel, priceLabel])

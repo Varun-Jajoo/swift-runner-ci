@@ -59,6 +59,7 @@ struct SgptSessionModel: Codable {
     var sessionName: String?
     var trainerName: String?
     var studioName: String?
+    var studioId: FlexibleValue?
     /// `yyyy-MM-dd`.
     var date: String?
     /// `HH:mm:ss`.
@@ -83,6 +84,7 @@ struct SgptSessionModel: Codable {
         case sessionName = "session_name"
         case trainerName = "trainer_name"
         case studioName = "studio_name"
+        case studioId = "studio_id"
         case date, time, image, duration
         case maxSize = "max_size"
         case bookedCount = "booked_count"
