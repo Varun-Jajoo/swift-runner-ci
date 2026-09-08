@@ -58,6 +58,9 @@ struct SgptEligibilityModel: Codable {
     var renewalSubscriptionId: FlexibleValue?
     var shouldRenew: Bool?
     var accessEndsOn: String?
+    /// Days of club access left, so the pricing screen can compare it against
+    /// the validity of the pack being bought without doing date maths.
+    var accessDaysLeft: Int?
 
     enum CodingKeys: String, CodingKey {
         case authenticated
@@ -73,6 +76,7 @@ struct SgptEligibilityModel: Codable {
         case renewalSubscriptionId = "renewal_subscription_id"
         case shouldRenew = "should_renew"
         case accessEndsOn = "access_ends_on"
+        case accessDaysLeft = "access_days_left"
     }
 }
 
@@ -129,10 +133,6 @@ struct SgptBundleModel: Codable {
     var pillText: String?
     var sgptPlanName: String?
     var perks: [String]?
-    /// Assembled for a lapsed member, so it is bought by tier ids not bundle id.
-    var isRenewal: Bool?
-    var recommended: Bool?
-    var renewalTierIds: String?
 
     enum CodingKeys: String, CodingKey {
         case id, name, description, price, credits, validity, saving
@@ -145,9 +145,7 @@ struct SgptBundleModel: Codable {
         case studioName = "studio_name"
         case pillText = "pill_text"
         case sgptPlanName = "sgpt_plan_name"
-        case perks, recommended
-        case isRenewal = "is_renewal"
-        case renewalTierIds = "renewal_tier_ids"
+        case perks
     }
 }
 

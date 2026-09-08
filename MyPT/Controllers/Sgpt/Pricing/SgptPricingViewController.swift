@@ -53,6 +53,10 @@ final class SgptPricingViewController: CommonViewController {
         static let dividerMid = UIColor(hex: "#384751")
         static let ctaInk = UIColor(hex: "#141514")
         static let lime = UIColor(hex: "#E0FE08")
+        static let warnFill = UIColor(hex: "#F38D1B").withAlphaComponent(0.12)
+        static let warnStroke = UIColor(hex: "#F38D1B").withAlphaComponent(0.30)
+        static let warnInk = UIColor(hex: "#F5C98A")
+        static let warnAction = UIColor(hex: "#F3B15B")
     }
 
     /// Matches the fixed pt values in makePlanCard() exactly - those are
@@ -146,6 +150,11 @@ final class SgptPricingViewController: CommonViewController {
     private let pricingDots = GroupClassCarouselDotsView()
     private var pricingCardRefs: [PricingCardRef] = []
     private var selectedPricingCardIndex: Int?
+    /// Access still runs but ends soon, so credits bought now can outlive it.
+    private var eligibility: SgptEligibilityModel?
+    private var expiryNoticeDismissed = false
+    private let expiryNoticeLabel = UILabel()
+    private var expiryNoticeBox: UIView?
     private var purchaseButton: GradientCTAButton?
     /// Which card to scroll to on first layout - not the same as
     /// `centeredPricingCard` below, which must start nil (see
@@ -237,12 +246,11 @@ final class SgptPricingViewController: CommonViewController {
     private func loadPacks() {
         SgptVM.sgptEligibilityApi(studioId: studioId) { [weak self] eligibility in
             guard let self = self else { return }
+            self.eligibility = eligibility
 
             // Nil means the check failed, not that access was denied - fall back
             // to credits rather than hiding the normal product behind an outage.
-            // A lapsed member is served renewal offers from the same endpoint;
-            // plain credit packs are unusable without the gym.
-            if eligibility?.needsBundle == true || eligibility?.shouldRenew == true {
+            if eligibility?.needsBundle == true {
                 self.loadBundles()
             } else {
                 self.loadCreditPacks()
@@ -280,25 +288,10 @@ final class SgptPricingViewController: CommonViewController {
 
     /// Bundles reuse the credit-pack card layout - same shape, different
     /// product - so only the card copy differs.
-    /// The middle card is the featured one, so whatever the server recommends -
-    /// the renewal offer for a lapsed member - is moved into that slot.
-    private static func orderedForCards(_ loaded: [SgptBundleModel]) -> [SgptBundleModel] {
-        guard loaded.count > 1,
-              let featuredIndex = loaded.firstIndex(where: { $0.recommended == true }),
-              featuredIndex != 1 else { return loaded }
-
-        var rest = loaded
-        let featured = rest.remove(at: featuredIndex)
-        rest.insert(featured, at: 1)
-        return rest
-    }
-
-    private func applyBundles(_ loaded: [SgptBundleModel]) {
-        let bundles = Self.orderedForCards(loaded)
+    private func applyBundles(_ bundles: [SgptBundleModel]) {
         self.bundles = bundles
 
-        let recommended = bundles.firstIndex { $0.recommended == true }
-        let centerIndex = recommended ?? (bundles.count > 1 ? 1 : 0)
+        let centerIndex = bundles.count > 1 ? 1 : 0
         selectedPricingCardIndex = centerIndex
 
         plans = bundles.enumerated().map { index, bundle in
@@ -360,6 +353,7 @@ final class SgptPricingViewController: CommonViewController {
         }
 
         rebuildContent()
+        updateMembershipExpiryNotice()
         startDealCountdown()
     }
 
@@ -543,19 +537,14 @@ final class SgptPricingViewController: CommonViewController {
             return bundles.first
         }()
 
-        let renewalTierIds = chosen?.renewalTierIds?.trimmingCharacters(in: .whitespaces) ?? ""
-        let isRenewal = chosen?.isRenewal == true && !renewalTierIds.isEmpty
-        let bundleId = chosen?.id?.value ?? ""
-
-        guard let bundle = chosen, isRenewal || !bundleId.isEmpty else {
+        guard let bundle = chosen, let bundleId = bundle.id?.value, !bundleId.isEmpty else {
             showComingSoon(message: "This bundle can't be purchased right now.")
             return
         }
 
         let vc: CCAvenuePaymentViewController = .instantiate(appStoryboard: .booking)
         vc.modalPresentationStyle = .overFullScreen
-        vc.bundleId = isRenewal ? nil : bundleId
-        vc.renewalTierIds = isRenewal ? renewalTierIds : nil
+        vc.bundleId = bundleId
         vc.bundleAmount = bundle.price
         vc.bundleStudioId = bundle.studioId?.isEmpty == false ? bundle.studioId : studioId
         vc.costAmt = bundle.price
@@ -739,17 +728,9 @@ private extension SgptPricingViewController {
         subtitle.textColor = .white.withAlphaComponent(0.55)
         subtitle.textAlignment = .center
         subtitle.numberOfLines = 0
-        let renewal = bundles.first { $0.isRenewal == true }
-        if let renewal = renewal {
-            let club = renewal.studioName?.trimmingCharacters(in: .whitespaces) ?? ""
-            subtitle.text = club.isEmpty
-                ? "Your membership has ended. Pick up where you left off."
-                : "Your \(club) membership has ended. Pick up where you left off."
-        } else {
-            subtitle.text = isShowingBundles
-                ? "Club access and your Small Group PT sessions, bought once."
-                : "Create unique audio with your favorite celebrity's voice loerm ispum"
-        }
+        subtitle.text = isShowingBundles
+            ? "Club access and your Small Group PT sessions, bought once."
+            : "Create unique audio with your favorite celebrity's voice loerm ispum"
 
         let textColumn = UIStackView(arrangedSubviews: [title, subtitle])
         textColumn.axis = .vertical
@@ -759,6 +740,11 @@ private extension SgptPricingViewController {
         textColumn.layoutMargins = UIEdgeInsets(top: 0, left: 24, bottom: 0, right: 24)
         column.addArrangedSubview(textColumn)
         column.setCustomSpacing(18, after: textColumn)
+
+        let expiryBox = makeExpiryNotice()
+        column.addArrangedSubview(expiryBox)
+        column.setCustomSpacing(18, after: expiryBox)
+        updateMembershipExpiryNotice()
 
         column.addArrangedSubview(makeStarDivider())
         column.setCustomSpacing(22, after: column.arrangedSubviews.last!)
@@ -800,6 +786,136 @@ private extension SgptPricingViewController {
     }
 
     // MARK: Star divider
+
+    /// Credits outliving the membership that lets you spend them is the one
+    /// purchase this screen can see going wrong, so it says so before taking
+    /// the money - renewing first is also what earns the early-renewal
+    /// discount, which is gone the day the membership lapses.
+    func makeExpiryNotice() -> UIView {
+        let box = UIView()
+        box.backgroundColor = Palette.warnFill
+        box.layer.cornerRadius = 12
+        box.layer.borderWidth = 1
+        box.layer.borderColor = Palette.warnStroke.cgColor
+        box.isHidden = true
+
+        let icon = UIImageView(image: UIImage(systemName: "exclamationmark.triangle.fill"))
+        icon.tintColor = Palette.warnAction
+        icon.contentMode = .scaleAspectFit
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        icon.widthAnchor.constraint(equalToConstant: 16).isActive = true
+        icon.heightAnchor.constraint(equalToConstant: 16).isActive = true
+
+        expiryNoticeLabel.font = AppFont.medium.size(12.0, familyName: familyFunnelSans)
+        expiryNoticeLabel.textColor = Palette.warnInk
+        expiryNoticeLabel.numberOfLines = 0
+
+        let topRow = UIStackView(arrangedSubviews: [icon, expiryNoticeLabel])
+        topRow.axis = .horizontal
+        topRow.alignment = .top
+        topRow.spacing = 8
+
+        let renew = UIButton(type: .system)
+        renew.setTitle("RENEW NOW", for: .normal)
+        renew.setTitleColor(Palette.warnAction, for: .normal)
+        renew.titleLabel?.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
+        renew.backgroundColor = Palette.warnFill
+        renew.layer.cornerRadius = 8
+        renew.addTarget(self, action: #selector(expiryRenewTapped), for: .touchUpInside)
+        renew.heightAnchor.constraint(equalToConstant: 36).isActive = true
+
+        let buyAnyway = UIButton(type: .system)
+        buyAnyway.setTitle("BUY ANYWAY", for: .normal)
+        buyAnyway.setTitleColor(.white.withAlphaComponent(0.55), for: .normal)
+        buyAnyway.titleLabel?.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
+        buyAnyway.addTarget(self, action: #selector(expiryDismissTapped), for: .touchUpInside)
+        buyAnyway.heightAnchor.constraint(equalToConstant: 36).isActive = true
+
+        let actions = UIStackView(arrangedSubviews: [renew, buyAnyway])
+        actions.axis = .horizontal
+        actions.distribution = .fillEqually
+        actions.spacing = 10
+
+        let column = UIStackView(arrangedSubviews: [topRow, actions])
+        column.axis = .vertical
+        column.spacing = 12
+        column.translatesAutoresizingMaskIntoConstraints = false
+        box.addSubview(column)
+        NSLayoutConstraint.activate([
+            column.topAnchor.constraint(equalTo: box.topAnchor, constant: 12),
+            column.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -12),
+            column.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 14),
+            column.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -14)
+        ])
+
+        let wrapper = UIView()
+        box.translatesAutoresizingMaskIntoConstraints = false
+        wrapper.addSubview(box)
+        NSLayoutConstraint.activate([
+            box.topAnchor.constraint(equalTo: wrapper.topAnchor),
+            box.bottomAnchor.constraint(equalTo: wrapper.bottomAnchor),
+            box.leadingAnchor.constraint(equalTo: wrapper.leadingAnchor, constant: 20),
+            box.trailingAnchor.constraint(equalTo: wrapper.trailingAnchor, constant: -20)
+        ])
+        expiryNoticeBox = box
+
+        return wrapper
+    }
+
+    private func updateMembershipExpiryNotice() {
+        guard let box = expiryNoticeBox else { return }
+
+        let daysLeft = eligibility?.accessDaysLeft ?? -1
+        let validity = selectedPricingCardIndex.flatMap { $0 < packs.count ? packs[$0].validity : nil } ?? 0
+
+        guard !isShowingBundles, !expiryNoticeDismissed, daysLeft >= 0, daysLeft <= 365, validity > daysLeft else {
+            box.isHidden = true
+            box.superview?.isHidden = true
+            return
+        }
+
+        box.isHidden = false
+        box.superview?.isHidden = false
+
+        let endsOn = eligibility?.accessEndsOn ?? ""
+        let when = endsOn.isEmpty ? "soon" : Self.formattedDate(endsOn)
+        let howLong = daysLeft == 0 ? "today" : "\(daysLeft) days"
+        expiryNoticeLabel.text = "Your gym membership ends \(when) (\(howLong)). These credits stay valid for \(validity) days, but you cannot book club sessions once the membership ends. Renew now and keep the early-renewal discount."
+    }
+
+    @objc private func expiryRenewTapped() {
+        DashboardVM.getPlansApi { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                let plans = result?.data ?? []
+                guard !plans.isEmpty else {
+                    self.showComingSoon(message: "We could not find your membership to renew.")
+                    return
+                }
+                let vc: RenewPlanVC = .instantiate(appStoryboard: .newBookingModule)
+                vc.userPlans = plans
+                vc.modalPresentationStyle = .automatic
+                self.present(vc, animated: true)
+            }
+        }
+    }
+
+    @objc private func expiryDismissTapped() {
+        expiryNoticeDismissed = true
+        updateMembershipExpiryNotice()
+    }
+
+    private static func formattedDate(_ raw: String) -> String {
+        let parser = DateFormatter()
+        parser.dateFormat = "yyyy-MM-dd"
+        parser.locale = Locale(identifier: "en_US_POSIX")
+        guard let date = parser.date(from: raw) else { return raw }
+
+        let out = DateFormatter()
+        out.dateFormat = "d MMM"
+        out.locale = Locale(identifier: "en_US_POSIX")
+        return out.string(from: date)
+    }
 
     func makeStarDivider() -> UIView {
         let leftLine = GradientFadeView()
@@ -1073,6 +1189,7 @@ private extension SgptPricingViewController {
             selectedPricingCardIndex = index
             pricingDots.setSelectedPage(index)
             updatePurchaseButtonLabel()
+            updateMembershipExpiryNotice()
         }
         startPricingCenterPulse(on: ref.card)
     }
@@ -1081,12 +1198,9 @@ private extension SgptPricingViewController {
         if isShowingBundles {
             let bundle = selectedPricingCardIndex.flatMap { $0 < bundles.count ? bundles[$0] : nil } ?? bundles.first
             let bundleCredits = bundle?.credits ?? 0
-            let bundleTitle: String
-            if bundle?.isRenewal == true {
-                bundleTitle = bundleCredits > 0 ? "RENEW + \(bundleCredits) CREDITS" : "RENEW MEMBERSHIP"
-            } else {
-                bundleTitle = bundleCredits > 0 ? "GET \(bundleCredits) CREDITS + MEMBERSHIP" : "GET THIS BUNDLE"
-            }
+            let bundleTitle = bundleCredits > 0
+                ? "GET \(bundleCredits) CREDITS + MEMBERSHIP"
+                : "GET THIS BUNDLE"
             purchaseButton?.configure(title: bundleTitle, font: AppFont.medium.size(14.0, familyName: familyFunnelSans), titleColor: Palette.ctaInk)
             return
         }

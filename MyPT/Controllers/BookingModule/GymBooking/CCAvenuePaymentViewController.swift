@@ -27,9 +27,6 @@ class CCAvenuePaymentViewController: CommonViewController, WKNavigationDelegate{
     /// so it carries its own id rather than a package tier. Nil for every other
     /// caller, which leaves the normal request untouched.
     var bundleId: String?
-    /// Renewal offer: assembled per member from existing packages, so it is
-    /// bought by its tier ids and has no bundle row to point at.
-    var renewalTierIds: String?
     var bundleAmount: Double?
     var bundleStudioId: String?
     /// Session to auto-book once payment grants the access booking needs.
@@ -153,10 +150,9 @@ class CCAvenuePaymentViewController: CommonViewController, WKNavigationDelegate{
         // A bundle overrides the package-tier shaped request above: package_type
         // 5 tells the server to snapshot the bundle's components and grant them
         // all on the gateway callback.
-        if bundleId != nil || renewalTierIds != nil {
+        if let bundleId = bundleId {
             requestData.package_type = 5
             requestData.bundle_id = bundleId
-            requestData.renewal_tier_ids = renewalTierIds
             requestData.session_id = bundleSessionId
             requestData.studio_id = bundleStudioId
             requestData.type = "gym"
@@ -370,7 +366,6 @@ struct PaymentModel {
     /// Bundle purchase (package_type 5): the bundle being bought, and the
     /// session to book once payment grants the access booking requires.
     var bundle_id: String?
-    var renewal_tier_ids: String?
     var session_id: String?
     
     func getParams() -> [String: Any] {
@@ -391,7 +386,6 @@ struct PaymentModel {
         if let studio_id = studio_id { dict["studio_id"] = studio_id }
         if let trainer_id = trainer_id { dict["trainer_id"] = trainer_id }
         if let bundle_id = bundle_id { dict["bundle_id"] = bundle_id }
-        if let renewal_tier_ids = renewal_tier_ids { dict["renewal_tier_ids"] = renewal_tier_ids }
         if let session_id = session_id { dict["session_id"] = session_id }
         
         return dict

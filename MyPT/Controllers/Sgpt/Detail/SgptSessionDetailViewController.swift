@@ -716,9 +716,12 @@ final class SgptSessionDetailViewController: CommonViewController {
             : "MEMBERSHIP EXPIRED · \(club)".uppercased()
 
         let credits = eligibility?.remainingCredits ?? 0
-        var line = credits == 1 ? "1 credit still valid" : "\(credits) credits still valid"
-        if let until = eligibility?.creditsExpireOn, !until.isEmpty {
-            line += " until \(Self.formattedDate(until))"
+        var line = "Renew to book this session"
+        if credits > 0 {
+            line = credits == 1 ? "1 credit still valid" : "\(credits) credits still valid"
+            if let until = eligibility?.creditsExpireOn, !until.isEmpty {
+                line += " until \(Self.formattedDate(until))"
+            }
         }
         barValueLabel.font = AppFont.medium.size(15.0, familyName: familyClashDisplay)
         barValueLabel.text = line
