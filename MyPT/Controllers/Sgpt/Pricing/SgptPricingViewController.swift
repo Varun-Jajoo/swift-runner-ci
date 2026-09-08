@@ -153,6 +153,7 @@ final class SgptPricingViewController: CommonViewController {
     /// Access still runs but ends soon, so credits bought now can outlive it.
     private var eligibility: SgptEligibilityModel?
     private var expiryNoticeDismissed = false
+    private var isShowingEmptyState = false
     private let expiryNoticeLabel = UILabel()
     private var expiryNoticeBox: UIView?
     private var purchaseButton: GradientCTAButton?
@@ -260,7 +261,11 @@ final class SgptPricingViewController: CommonViewController {
 
     private func loadCreditPacks() {
         SgptVM.sgptPackagesApi(studioId: studioId) { [weak self] result in
-            guard let self = self, let packs = result, !packs.isEmpty else { return }
+            guard let self = self else { return }
+            guard let packs = result, !packs.isEmpty else {
+                DispatchQueue.main.async { self.showEmptyState() }
+                return
+            }
             DispatchQueue.main.async {
                 self.isShowingBundles = false
                 self.applyPacks(packs)
@@ -272,10 +277,10 @@ final class SgptPricingViewController: CommonViewController {
         SgptVM.sgptBundlesApi(studioId: studioId) { [weak self] result in
             guard let self = self else { return }
 
-            // A club with no bundle configured would otherwise show nothing at
-            // all; credit packs at least let a member who does have access buy.
+            // Falling back to credit packs here would offer a member without
+            // gym access the one thing they cannot use.
             guard let bundles = result, !bundles.isEmpty else {
-                self.loadCreditPacks()
+                DispatchQueue.main.async { self.showEmptyState() }
                 return
             }
 
@@ -284,6 +289,63 @@ final class SgptPricingViewController: CommonViewController {
                 self.applyBundles(bundles)
             }
         }
+    }
+
+    /// A club with nothing configured is the common case here, not an outage,
+    /// so the screen says which it is rather than leaving an empty rail.
+    private func showEmptyState() {
+        plans = []
+        packs = []
+        bundles = []
+        isShowingEmptyState = true
+        rebuildContent()
+    }
+
+    private func makeEmptyState() -> UIView {
+        let icon = UIImageView(image: UIImage(systemName: "info.circle"))
+        icon.tintColor = .white.withAlphaComponent(0.5)
+        icon.contentMode = .scaleAspectFit
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        icon.widthAnchor.constraint(equalToConstant: 34).isActive = true
+        icon.heightAnchor.constraint(equalToConstant: 34).isActive = true
+
+        let title = UILabel()
+        title.font = AppFont.medium.size(17.0, familyName: familyClashDisplay)
+        title.textColor = .white
+        title.textAlignment = .center
+        title.numberOfLines = 0
+        title.text = "No plans on sale yet"
+
+        let body = UILabel()
+        body.font = AppFont.medium.size(13.0, familyName: familyFunnelSans)
+        body.textColor = .white.withAlphaComponent(0.55)
+        body.textAlignment = .center
+        body.numberOfLines = 0
+        body.text = "This gym has not put its Small Group PT plans on sale yet. Try another gym, or check back soon."
+
+        let back = UIButton(type: .system)
+        back.setTitle("GO BACK", for: .normal)
+        back.setTitleColor(Palette.warnAction, for: .normal)
+        back.titleLabel?.font = AppFont.semibold.size(12.0, familyName: familyFunnelSans)
+        back.backgroundColor = Palette.warnFill
+        back.layer.cornerRadius = 8
+        back.contentEdgeInsets = UIEdgeInsets(top: 0, left: 22, bottom: 0, right: 22)
+        back.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
+        back.heightAnchor.constraint(equalToConstant: 40).isActive = true
+
+        let backRow = UIStackView(arrangedSubviews: [back])
+        backRow.axis = .horizontal
+        backRow.alignment = .center
+        backRow.distribution = .equalCentering
+
+        let column = UIStackView(arrangedSubviews: [icon, title, body, backRow])
+        column.axis = .vertical
+        column.alignment = .center
+        column.spacing = 12
+        column.isLayoutMarginsRelativeArrangement = true
+        column.layoutMargins = UIEdgeInsets(top: 28, left: 28, bottom: 0, right: 28)
+
+        return column
     }
 
     /// Bundles reuse the credit-pack card layout - same shape, different
@@ -728,9 +790,11 @@ private extension SgptPricingViewController {
         subtitle.textColor = .white.withAlphaComponent(0.55)
         subtitle.textAlignment = .center
         subtitle.numberOfLines = 0
-        subtitle.text = isShowingBundles
-            ? "Club access and your Small Group PT sessions, bought once."
-            : "Create unique audio with your favorite celebrity's voice loerm ispum"
+        subtitle.text = isShowingEmptyState
+            ? ""
+            : (isShowingBundles
+                ? "Club access and your Small Group PT sessions, bought once."
+                : "Create unique audio with your favorite celebrity's voice loerm ispum")
 
         let textColumn = UIStackView(arrangedSubviews: [title, subtitle])
         textColumn.axis = .vertical
@@ -740,6 +804,11 @@ private extension SgptPricingViewController {
         textColumn.layoutMargins = UIEdgeInsets(top: 0, left: 24, bottom: 0, right: 24)
         column.addArrangedSubview(textColumn)
         column.setCustomSpacing(18, after: textColumn)
+
+        if isShowingEmptyState {
+            column.addArrangedSubview(makeEmptyState())
+            return
+        }
 
         let expiryBox = makeExpiryNotice()
         column.addArrangedSubview(expiryBox)
