@@ -129,6 +129,10 @@ struct SgptBundleModel: Codable {
     var pillText: String?
     var sgptPlanName: String?
     var perks: [String]?
+    /// Assembled for a lapsed member, so it is bought by tier ids not bundle id.
+    var isRenewal: Bool?
+    var recommended: Bool?
+    var renewalTierIds: String?
 
     enum CodingKeys: String, CodingKey {
         case id, name, description, price, credits, validity, saving
@@ -141,7 +145,9 @@ struct SgptBundleModel: Codable {
         case studioName = "studio_name"
         case pillText = "pill_text"
         case sgptPlanName = "sgpt_plan_name"
-        case perks
+        case perks, recommended
+        case isRenewal = "is_renewal"
+        case renewalTierIds = "renewal_tier_ids"
     }
 }
 

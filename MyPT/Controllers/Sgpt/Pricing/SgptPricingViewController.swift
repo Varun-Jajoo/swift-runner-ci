@@ -240,7 +240,9 @@ final class SgptPricingViewController: CommonViewController {
 
             // Nil means the check failed, not that access was denied - fall back
             // to credits rather than hiding the normal product behind an outage.
-            if eligibility?.needsBundle == true {
+            // A lapsed member is served renewal offers from the same endpoint;
+            // plain credit packs are unusable without the gym.
+            if eligibility?.needsBundle == true || eligibility?.shouldRenew == true {
                 self.loadBundles()
             } else {
                 self.loadCreditPacks()
@@ -278,10 +280,25 @@ final class SgptPricingViewController: CommonViewController {
 
     /// Bundles reuse the credit-pack card layout - same shape, different
     /// product - so only the card copy differs.
-    private func applyBundles(_ bundles: [SgptBundleModel]) {
+    /// The middle card is the featured one, so whatever the server recommends -
+    /// the renewal offer for a lapsed member - is moved into that slot.
+    private static func orderedForCards(_ loaded: [SgptBundleModel]) -> [SgptBundleModel] {
+        guard loaded.count > 1,
+              let featuredIndex = loaded.firstIndex(where: { $0.recommended == true }),
+              featuredIndex != 1 else { return loaded }
+
+        var rest = loaded
+        let featured = rest.remove(at: featuredIndex)
+        rest.insert(featured, at: 1)
+        return rest
+    }
+
+    private func applyBundles(_ loaded: [SgptBundleModel]) {
+        let bundles = Self.orderedForCards(loaded)
         self.bundles = bundles
 
-        let centerIndex = bundles.count > 1 ? 1 : 0
+        let recommended = bundles.firstIndex { $0.recommended == true }
+        let centerIndex = recommended ?? (bundles.count > 1 ? 1 : 0)
         selectedPricingCardIndex = centerIndex
 
         plans = bundles.enumerated().map { index, bundle in
@@ -526,14 +543,19 @@ final class SgptPricingViewController: CommonViewController {
             return bundles.first
         }()
 
-        guard let bundle = chosen, let bundleId = bundle.id?.value, !bundleId.isEmpty else {
+        let renewalTierIds = chosen?.renewalTierIds?.trimmingCharacters(in: .whitespaces) ?? ""
+        let isRenewal = chosen?.isRenewal == true && !renewalTierIds.isEmpty
+        let bundleId = chosen?.id?.value ?? ""
+
+        guard let bundle = chosen, isRenewal || !bundleId.isEmpty else {
             showComingSoon(message: "This bundle can't be purchased right now.")
             return
         }
 
         let vc: CCAvenuePaymentViewController = .instantiate(appStoryboard: .booking)
         vc.modalPresentationStyle = .overFullScreen
-        vc.bundleId = bundleId
+        vc.bundleId = isRenewal ? nil : bundleId
+        vc.renewalTierIds = isRenewal ? renewalTierIds : nil
         vc.bundleAmount = bundle.price
         vc.bundleStudioId = bundle.studioId?.isEmpty == false ? bundle.studioId : studioId
         vc.costAmt = bundle.price
@@ -717,9 +739,17 @@ private extension SgptPricingViewController {
         subtitle.textColor = .white.withAlphaComponent(0.55)
         subtitle.textAlignment = .center
         subtitle.numberOfLines = 0
-        subtitle.text = isShowingBundles
-            ? "Club access and your Small Group PT sessions, bought once."
-            : "Create unique audio with your favorite celebrity's voice loerm ispum"
+        let renewal = bundles.first { $0.isRenewal == true }
+        if let renewal = renewal {
+            let club = renewal.studioName?.trimmingCharacters(in: .whitespaces) ?? ""
+            subtitle.text = club.isEmpty
+                ? "Your membership has ended. Pick up where you left off."
+                : "Your \(club) membership has ended. Pick up where you left off."
+        } else {
+            subtitle.text = isShowingBundles
+                ? "Club access and your Small Group PT sessions, bought once."
+                : "Create unique audio with your favorite celebrity's voice loerm ispum"
+        }
 
         let textColumn = UIStackView(arrangedSubviews: [title, subtitle])
         textColumn.axis = .vertical
@@ -1048,6 +1078,19 @@ private extension SgptPricingViewController {
     }
 
     private func updatePurchaseButtonLabel() {
+        if isShowingBundles {
+            let bundle = selectedPricingCardIndex.flatMap { $0 < bundles.count ? bundles[$0] : nil } ?? bundles.first
+            let bundleCredits = bundle?.credits ?? 0
+            let bundleTitle: String
+            if bundle?.isRenewal == true {
+                bundleTitle = bundleCredits > 0 ? "RENEW + \(bundleCredits) CREDITS" : "RENEW MEMBERSHIP"
+            } else {
+                bundleTitle = bundleCredits > 0 ? "GET \(bundleCredits) CREDITS + MEMBERSHIP" : "GET THIS BUNDLE"
+            }
+            purchaseButton?.configure(title: bundleTitle, font: AppFont.medium.size(14.0, familyName: familyFunnelSans), titleColor: Palette.ctaInk)
+            return
+        }
+
         let credits: Int
         if let index = selectedPricingCardIndex, index < packs.count, let c = packs[index].credits {
             credits = c
